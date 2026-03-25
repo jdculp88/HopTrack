@@ -1,9 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { AnimatePresence } from "framer-motion";
 import { AppNav } from "@/components/layout/AppNav";
 import { CheckinModal } from "@/components/checkin/CheckinModal";
 import { ToastProvider } from "@/components/ui/Toast";
+import ActiveSessionBanner from "@/components/checkin/ActiveSessionBanner";
 import type { Session } from "@/types/database";
 
 interface AppShellProps {
@@ -53,8 +55,6 @@ export function AppShell({ children, username, unreadNotifications = 0 }: AppShe
           username={username}
           unreadNotifications={unreadNotifications}
           onCheckin={handleCheckin}
-          activeSession={activeSession}
-          onOpenTapWall={handleOpenTapWall}
         />
 
         <main className="flex-1 min-w-0 pb-20 lg:pb-0" style={{ background: 'var(--bg)' }}>
@@ -67,6 +67,17 @@ export function AppShell({ children, username, unreadNotifications = 0 }: AppShe
           onClose={() => setCheckinOpen(false)}
         />
       </div>
+
+      {/* Active session banner — rendered here so it's outside AppNav's fragment */}
+      <AnimatePresence>
+        {activeSession && (
+          <ActiveSessionBanner
+            session={activeSession}
+            breweryName={sessionBreweryName}
+            onTap={handleOpenTapWall}
+          />
+        )}
+      </AnimatePresence>
     </ToastProvider>
   );
 }
