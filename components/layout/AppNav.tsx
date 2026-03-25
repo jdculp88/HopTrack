@@ -193,7 +193,7 @@ export function AppNav({ username, unreadNotifications = 0, onCheckin }: AppNavP
         className="lg:hidden fixed bottom-0 left-0 right-0 z-40 backdrop-blur-md border-t"
         style={{ background: "color-mix(in srgb, var(--surface) 95%, transparent)", borderColor: "var(--border)" }}
       >
-        <div className="flex items-center justify-around px-2 py-2 pb-safe">
+        <div className="flex items-center justify-around px-2 py-2 pb-safe-nav">
           {NAV_ITEMS.slice(0, 2).map(({ href, label, icon: Icon }) => {
             const isActive = pathname.startsWith(href);
             return (
