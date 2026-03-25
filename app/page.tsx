@@ -19,6 +19,9 @@ export default async function LandingPage() {
           <span className="font-display text-xl font-bold">HopTrack</span>
         </div>
         <div className="flex items-center gap-3">
+          <Link href="/for-breweries" className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-sm transition-colors hidden sm:block">
+            For Breweries
+          </Link>
           <Link href="/login" className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-sm transition-colors hidden sm:block">
             Sign in
           </Link>

@@ -74,6 +74,7 @@ export function AnalyticsClient({ checkins }: AnalyticsClientProps) {
   const rated = checkins.filter(c => c.rating > 0);
   const avgRating = rated.length > 0 ? (rated.reduce((a, c) => a + c.rating, 0) / rated.length).toFixed(2) : null;
   const thisWeek = checkins.filter(c => new Date(c.created_at) > new Date(Date.now() - 7 * 86400000)).length;
+  const uniqueVisitors = useMemo(() => new Set(checkins.map(c => c.user_id).filter(Boolean)).size, [checkins]);
 
   const tooltipStyle = { background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12, color: "var(--text-primary)" };
 
@@ -81,13 +82,14 @@ export function AnalyticsClient({ checkins }: AnalyticsClientProps) {
     <div className="p-6 lg:p-8 max-w-5xl mx-auto pt-16 lg:pt-8">
       <div className="mb-8">
         <h1 className="font-display text-3xl font-bold" style={{ color: "var(--text-primary)" }}>Analytics</h1>
-        <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>Last 90 days of check-in data</p>
+        <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>Last 90 days · {totalCheckins} check-in{totalCheckins !== 1 ? "s" : ""} from {uniqueVisitors} visitor{uniqueVisitors !== 1 ? "s" : ""}</p>
       </div>
 
       {/* Summary stats */}
-      <div className="grid grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
         {[
-          { label: "Total Check-ins", value: totalCheckins },
+          { label: "Check-ins (90d)", value: totalCheckins },
+          { label: "Unique Visitors", value: uniqueVisitors },
           { label: "This Week", value: thisWeek },
           { label: "Avg Rating", value: avgRating ? `${avgRating} ★` : "—" },
         ].map(({ label, value }) => (

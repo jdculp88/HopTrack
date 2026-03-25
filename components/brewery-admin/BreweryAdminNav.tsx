@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Hop, LayoutDashboard, List, BarChart2, Gift, Settings, ChevronDown, ExternalLink } from "lucide-react";
+import { Hop, LayoutDashboard, List, BarChart2, Gift, Settings, ChevronDown, ExternalLink, Rewind } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 
@@ -10,8 +10,9 @@ const NAV_ITEMS = [
   { href: "",           label: "Overview",   icon: LayoutDashboard },
   { href: "/tap-list",  label: "Tap List",   icon: List },
   { href: "/analytics", label: "Analytics",  icon: BarChart2 },
-  { href: "/loyalty",   label: "Loyalty",    icon: Gift },
-  { href: "/settings",  label: "Settings",   icon: Settings },
+  { href: "/loyalty",       label: "Loyalty",      icon: Gift },
+  { href: "/pint-rewind",   label: "Pint Rewind",  icon: Rewind },
+  { href: "/settings",      label: "Settings",     icon: Settings },
 ];
 
 export function BreweryAdminNav({ accounts }: { accounts: any[] }) {
