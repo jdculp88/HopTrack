@@ -322,6 +322,56 @@ export interface Reaction {
 export type ReactionInsert = Omit<Reaction, "id" | "created_at"> & { id?: string };
 export type ReactionUpdate = Partial<Reaction>;
 
+// ─── Sessions ─────────────────────────────────────────────────────────────────
+export interface Session {
+  id: string
+  user_id: string
+  brewery_id: string
+  started_at: string
+  ended_at: string | null
+  is_active: boolean
+  share_to_feed: boolean
+  note: string | null
+  xp_awarded: number
+  created_at: string
+  // joined fields
+  brewery?: {
+    id: string
+    name: string
+    city: string
+    state: string
+  }
+  beer_logs?: BeerLog[]
+  profile?: {
+    id: string
+    username: string
+    display_name: string | null
+    avatar_url: string | null
+  }
+}
+
+export interface BeerLog {
+  id: string
+  session_id: string
+  user_id: string
+  beer_id: string | null
+  brewery_id: string
+  rating: number | null
+  flavor_tags: string[] | null
+  serving_style: string | null
+  comment: string | null
+  photo_url: string | null
+  logged_at: string
+  // joined fields
+  beer?: {
+    id: string
+    name: string
+    style: string | null
+    abv: number | null
+    avg_rating: number | null
+  }
+}
+
 // ─── Enriched / Joined Types ──────────────────────────────────────────────────
 export interface CheckinWithDetails extends Checkin {
   profile: Profile;
