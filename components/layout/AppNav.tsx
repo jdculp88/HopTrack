@@ -103,8 +103,7 @@ export function AppNav({ username, unreadNotifications = 0, onCheckin, activeSes
                   <Icon size={18} />
                   <span className="font-sans text-sm font-medium">{label}</span>
                   {isActive && (
-                    <motion.div
-                      layoutId="sidebar-active"
+                    <div
                       className="ml-auto w-1.5 h-1.5 rounded-full"
                       style={{ background: "var(--accent-gold)" }}
                     />

@@ -57,7 +57,7 @@ export function AppShell({ children, username, unreadNotifications = 0 }: AppShe
           onOpenTapWall={handleOpenTapWall}
         />
 
-        <main className="flex-1 min-w-0 pb-20 lg:pb-0">
+        <main className="flex-1 min-w-0 pb-20 lg:pb-0" style={{ background: 'var(--bg)' }}>
           {children}
         </main>
 

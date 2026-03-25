@@ -138,7 +138,7 @@ export function HomeFeed({ profile, checkins, weekStats, currentUserId }: HomeFe
               <UserAvatar profile={profile} size="lg" showLevel />
               <div className="flex-1 min-w-0">
                 <h1 className="font-display text-xl font-bold text-[var(--text-primary)] leading-tight">
-                  Hey, {profile.display_name.split(" ")[0]}!
+                  Hey, {(profile.display_name ?? profile.username).split(" ")[0]}!
                 </h1>
                 <p className="text-sm text-[var(--text-secondary)]">
                   {levelInfo?.current.name} · Level {profile.level}
