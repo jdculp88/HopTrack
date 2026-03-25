@@ -47,14 +47,6 @@ export const metadata: Metadata = {
   },
   icons: {
     apple: [
-      { url: "/icons/apple-touch-icon-57.png", sizes: "57x57" },
-      { url: "/icons/apple-touch-icon-60.png", sizes: "60x60" },
-      { url: "/icons/apple-touch-icon-72.png", sizes: "72x72" },
-      { url: "/icons/apple-touch-icon-76.png", sizes: "76x76" },
-      { url: "/icons/apple-touch-icon-114.png", sizes: "114x114" },
-      { url: "/icons/apple-touch-icon-120.png", sizes: "120x120" },
-      { url: "/icons/apple-touch-icon-144.png", sizes: "144x144" },
-      { url: "/icons/apple-touch-icon-152.png", sizes: "152x152" },
       { url: "/icons/apple-touch-icon-180.png", sizes: "180x180" },
     ],
   },
