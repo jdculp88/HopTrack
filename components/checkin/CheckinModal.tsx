@@ -468,17 +468,17 @@ function StepBeer({
         </div>
       )}
 
-      {/* Continue */}
-      {(selectedBeers.length > 0 || beers.length === 0) && (
-        <div className="sticky bottom-0 bg-[var(--bg)]/90 backdrop-blur-sm pt-3 pb-2">
-          <button
-            onClick={onNext}
-            className="w-full bg-[#D4A843] hover:bg-[#E8841A] text-[#0F0E0C] font-semibold py-4 rounded-2xl transition-all active:scale-98"
-          >
-            {selectedBeers.length > 0 ? `Continue with ${selectedBeers.length} beer${selectedBeers.length > 1 ? "s" : ""}` : "Skip (log brewery visit only)"}
-          </button>
-        </div>
-      )}
+      {/* Continue / Skip */}
+      <div className="sticky bottom-0 bg-[var(--bg)]/90 backdrop-blur-sm pt-3 pb-2">
+        <button
+          onClick={onNext}
+          className="w-full bg-[#D4A843] hover:bg-[#E8841A] text-[#0F0E0C] font-semibold py-4 rounded-2xl transition-all active:scale-98"
+        >
+          {selectedBeers.length > 0
+            ? `Continue with ${selectedBeers.length} beer${selectedBeers.length > 1 ? "s" : ""}`
+            : "Skip — just check in to this brewery"}
+        </button>
+      </div>
     </motion.div>
   );
 }
@@ -493,7 +493,7 @@ function StepReview({
   onChange: (updates: Partial<CheckinState>) => void;
   onNext: () => void;
 }) {
-  const beerName = state.beers[0]?.name ?? "your drink";
+  const beerName = state.beers[0]?.name ?? null;
 
   return (
     <motion.div
@@ -506,7 +506,7 @@ function StepReview({
       <div>
         <p className="text-[#D4A843] text-sm font-mono uppercase tracking-wide">{state.brewery?.name}</p>
         <h2 className="font-display text-2xl font-bold text-[var(--text-primary)] mt-1">
-          How was <span className="italic">{beerName}</span>?
+          {beerName ? <>How was <span className="italic">{beerName}</span>?</> : "How was your visit?"}
         </h2>
       </div>
 
