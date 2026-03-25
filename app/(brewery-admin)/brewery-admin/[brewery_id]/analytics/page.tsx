@@ -19,7 +19,7 @@ export default async function AnalyticsPage({ params }: { params: Promise<{ brew
   const since = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
   const { data: checkins } = await supabase
     .from("checkins")
-    .select("id, created_at, rating, beer_id, beer:beers(name, style)")
+    .select("id, created_at, rating, beer_id, user_id, beer:beers(name, style)")
     .eq("brewery_id", brewery_id)
     .gte("created_at", since)
     .order("created_at") as any;

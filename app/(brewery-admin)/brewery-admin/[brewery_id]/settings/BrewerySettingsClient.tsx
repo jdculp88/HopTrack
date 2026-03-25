@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { Save, Loader2 } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
 import { useToast } from "@/components/ui/Toast";
 
 interface BrewerySettingsClientProps {
@@ -21,22 +20,17 @@ export function BrewerySettingsClient({ brewery, role }: BrewerySettingsClientPr
     description: brewery?.description ?? "",
   });
   const [saving, setSaving] = useState(false);
-  const supabase = createClient();
   const { success, error: toastError } = useToast();
 
   async function handleSave() {
     setSaving(true);
-    const { error } = await (supabase as any).from("breweries").update({
-      name: form.name,
-      street: form.street || null,
-      city: form.city,
-      state: form.state,
-      website_url: form.website_url || null,
-      phone: form.phone || null,
-      description: form.description || null,
-    }).eq("id", brewery.id);
+    const res = await fetch(`/api/brewery/${brewery.id}/settings`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(form),
+    });
     setSaving(false);
-    if (error) {
+    if (!res.ok) {
       toastError("Failed to save changes. Please try again.");
     } else {
       success("Brewery profile updated!");

@@ -234,25 +234,25 @@
 
 | ID | Task | Owner | Status | Notes |
 |----|------|-------|--------|-------|
-| S8-007 | PWA: `manifest.json` + service worker | Alex | 🔲 Todo | `name`, `short_name`, `display: standalone`, `theme_color`, `start_url` |
-| S8-008 | PWA: Apple touch icons (9 sizes) | Alex | 🔲 Todo | 57×57 → 180×180; `apple-mobile-web-app-capable` meta tags |
+| S8-007 | PWA: `manifest.json` + service worker | Alex | ✅ Done | `manifest.json` + `sw.js` + Next.js `Viewport` export + SW registration |
+| S8-008 | PWA: Apple touch icons (9 sizes) | Alex | 🔄 In Progress | Meta tags wired; PNG icon files need generating from design (57–180px) |
 | S8-009 | PWA: iOS safe area insets | Alex | 🔲 Todo | `env(safe-area-inset-*)` for notch/home indicator clearance |
 | S8-010 | PWA: 44pt touch target audit | Alex | 🔲 Todo | All interactive elements ≥ 44×44pt; 16px font floor |
 | S8-011 | Photo uploads to Supabase Storage | Jordan | 🔲 Blocked on S8-006 | Check-in photos + brewery cover photos |
-| S8-012 | BrewerySettingsClient RLS review | Casey + Jordan | 🔲 Todo | Direct client Supabase call needs server-side brewery ownership validation |
-| S8-013 | Loyalty: loading skeleton | Jordan | 🔲 Todo | `loading.tsx` for loyalty/promotions page |
-| S8-014 | TapList: loading skeleton | Jordan | 🔲 Todo | `loading.tsx` for tap list page |
-| S8-015 | Analytics page content audit | Sam + Jordan | 🔲 Todo | Review what's accurate, what's missing; fill gaps or flag |
+| S8-012 | BrewerySettingsClient RLS review | Casey + Jordan | ✅ Done | Moved update to `/api/brewery/[brewery_id]/settings` — server verifies ownership |
+| S8-013 | Loyalty: loading skeleton | Jordan | ✅ Done | `loading.tsx` shipped |
+| S8-014 | TapList: loading skeleton | Jordan | ✅ Done | `loading.tsx` shipped |
+| S8-015 | Analytics page content audit | Sam + Jordan | ✅ Done | Added unique visitors stat; fixed 30d/90d label confusion; `user_id` added to query |
 
 ### 🟢 P2 — Nice to Have
 
 | ID | Task | Owner | Status | Notes |
 |----|------|-------|--------|-------|
 | S8-016 | REQ-013: Check-in / Beer Review separation | Alex + Jordan | 🔲 Todo | Alex spec first, then Jordan builds |
-| S8-017 | Pint Rewind recap page | Jordan | 🔲 Todo | Brewery admin monthly/yearly recap |
+| S8-017 | Pint Rewind recap page | Jordan | ✅ Done | `/brewery-admin/[id]/pint-rewind` — 30d/all-time toggle, top beers, busiest hour, loyal visitor |
 | S8-018 | Domestic beer achievement | Jordan | 🔲 Todo | "How American Are You" unlock |
 | S8-019 | Explore page map view | Jordan + Riley | 🔲 Todo | Mapbox — requires API key from user |
-| S8-020 | Sales Prep Sprint planning | Taylor + Jamie | 🔲 Todo | Three tiers (Tap $49, Cask $149, Barrel custom), `/for-breweries` page brief |
+| S8-020 | `/for-breweries` pricing page | Taylor + Jamie | ✅ Done | Live at `/for-breweries` — Tap $49, Cask $149, Barrel custom; linked from landing page nav |
 
 ### Drew's Brewery Ops P0 List (S8 Anchor)
 Per Drew's ops review, these are the items brewery owners will hit on day one:
