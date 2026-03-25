@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
-import { Users, ShieldAlert, Search } from "lucide-react";
+import { Users, ShieldAlert, Search, ExternalLink } from "lucide-react";
 
 export const metadata = { title: "Users" };
 
@@ -90,7 +90,7 @@ export default async function UsersPage({
       >
         {/* Header row */}
         <div
-          className="grid grid-cols-[auto_1fr_auto_auto_auto_auto] gap-4 px-5 py-3 text-xs font-mono uppercase tracking-wider border-b"
+          className="grid grid-cols-[auto_1fr_auto_auto_auto_auto_auto] gap-4 px-5 py-3 text-xs font-mono uppercase tracking-wider border-b"
           style={{
             color: "var(--text-muted)",
             borderColor: "var(--border)",
@@ -103,6 +103,7 @@ export default async function UsersPage({
           <span className="w-16 text-right">Level</span>
           <span className="w-16 text-right hidden sm:block">XP</span>
           <span className="w-24 text-right hidden md:block">Joined</span>
+          <span className="w-8" />
         </div>
 
         {userList.length === 0 ? (
@@ -113,7 +114,7 @@ export default async function UsersPage({
           userList.map((user: any, i: number) => (
             <div
               key={user.id}
-              className="grid grid-cols-[auto_1fr_auto_auto_auto_auto] gap-4 px-5 py-3.5 items-center"
+              className="grid grid-cols-[auto_1fr_auto_auto_auto_auto_auto] gap-4 px-5 py-3.5 items-center"
               style={{
                 borderTop: i > 0 ? "1px solid var(--border)" : undefined,
               }}
@@ -195,6 +196,17 @@ export default async function UsersPage({
                   year: "numeric",
                 })}
               </span>
+
+              {/* View profile */}
+              <Link
+                href={`/profile/${user.username}`}
+                target="_blank"
+                className="w-8 flex items-center justify-center transition-opacity hover:opacity-70"
+                style={{ color: "var(--text-muted)" }}
+                title="View profile"
+              >
+                <ExternalLink size={13} />
+              </Link>
             </div>
           ))
         )}
