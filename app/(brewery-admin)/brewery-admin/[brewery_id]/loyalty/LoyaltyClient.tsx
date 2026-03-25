@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Award, Tag, ToggleLeft, ToggleRight, X, Save, Loader2, Trash2, Edit2, AlertTriangle } from "lucide-react";
+import { Plus, Award, Tag, ToggleLeft, ToggleRight, X, Save, Loader2, Trash2, Edit2, AlertTriangle, QrCode } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
+import { LoyaltyQRModal } from "@/components/loyalty/LoyaltyQRModal";
 
 interface LoyaltyClientProps {
   breweryId: string;
@@ -28,6 +29,7 @@ export function LoyaltyClient({ breweryId, initialPrograms, initialPromotions, b
   const [savingPromo, setSavingPromo] = useState(false);
   const [confirmDeletePromoId, setConfirmDeletePromoId] = useState<string | null>(null);
   const [deletingPromoId, setDeletingPromoId] = useState<string | null>(null);
+  const [qrProgram, setQrProgram] = useState<any | null>(null);
   const supabase = createClient();
 
   function openAddProgram() {
@@ -174,6 +176,12 @@ export function LoyaltyClient({ breweryId, initialPrograms, initialPromotions, b
                   ))}
                 </div>
                 <div className="flex items-center gap-1 flex-shrink-0">
+                  <button onClick={() => setQrProgram(prog)}
+                    className="p-2 rounded-lg transition-colors hover:opacity-70"
+                    style={{ color: "var(--accent-gold)" }}
+                    title="Show QR code">
+                    <QrCode size={15} />
+                  </button>
                   <button onClick={() => openEditProgram(prog)}
                     className="p-2 rounded-lg transition-colors hover:opacity-70"
                     style={{ color: "var(--text-secondary)" }}>
@@ -358,6 +366,18 @@ export function LoyaltyClient({ breweryId, initialPrograms, initialPromotions, b
           </FormModal>
         )}
       </AnimatePresence>
+
+      {/* QR Code Modal */}
+      {qrProgram && (
+        <LoyaltyQRModal
+          open={!!qrProgram}
+          onClose={() => setQrProgram(null)}
+          breweryId={breweryId}
+          programName={qrProgram.name}
+          stampsRequired={qrProgram.stamps_required}
+          reward={qrProgram.reward_description}
+        />
+      )}
     </div>
   );
 }
