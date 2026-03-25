@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   Users,
@@ -10,8 +10,10 @@ import {
   FileText,
   BarChart2,
   ShieldAlert,
+  LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { createClient } from "@/lib/supabase/client";
 
 interface NavItem {
   href: string;
@@ -26,6 +28,13 @@ interface SuperadminNavProps {
 
 export function SuperadminNav({ pendingClaimsCount }: SuperadminNavProps) {
   const pathname = usePathname();
+  const router = useRouter();
+
+  async function handleLogout() {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push("/login");
+  }
 
   const NAV_ITEMS: NavItem[] = [
     { href: "/superadmin",           label: "Overview",       icon: LayoutDashboard },
@@ -103,17 +112,24 @@ export function SuperadminNav({ pendingClaimsCount }: SuperadminNavProps) {
         </nav>
 
         {/* Footer */}
-        <div
-          className="px-4 py-3 border-t"
-          style={{ borderColor: "var(--border)" }}
-        >
+        <div className="px-4 py-3 border-t space-y-2" style={{ borderColor: "var(--border)" }}>
           <Link
             href="/home"
-            className="text-xs transition-opacity hover:opacity-70"
+            className="block text-xs transition-opacity hover:opacity-70"
             style={{ color: "var(--text-muted)" }}
           >
             ← Back to app
           </Link>
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-2 text-xs transition-colors w-full"
+            style={{ color: "var(--text-muted)" }}
+            onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = "var(--danger)"}
+            onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = "var(--text-muted)"}
+          >
+            <LogOut size={12} />
+            Log out
+          </button>
         </div>
       </aside>
 

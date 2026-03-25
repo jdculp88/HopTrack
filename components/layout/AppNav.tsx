@@ -1,14 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import {
   Home, Compass, User, Trophy, Users, Bell, Settings, Hop,
-  PlusCircle,
+  PlusCircle, LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
+import { createClient } from "@/lib/supabase/client";
 
 const NAV_ITEMS = [
   { href: "/home",         label: "Feed",         icon: Home },
@@ -25,6 +26,13 @@ interface AppNavProps {
 
 export function AppNav({ username, unreadNotifications = 0, onCheckin }: AppNavProps) {
   const pathname = usePathname();
+  const router = useRouter();
+
+  async function handleLogout() {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push("/login");
+  }
 
   return (
     <>
@@ -159,6 +167,24 @@ export function AppNav({ username, unreadNotifications = 0, onCheckin }: AppNavP
           <div className="px-3 pt-1">
             <ThemeToggle variant="full" />
           </div>
+
+          {/* Logout */}
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-150 text-left"
+            style={{ color: "var(--text-muted)" }}
+            onMouseEnter={e => {
+              (e.currentTarget as HTMLElement).style.background = "var(--surface-2)";
+              (e.currentTarget as HTMLElement).style.color = "var(--danger)";
+            }}
+            onMouseLeave={e => {
+              (e.currentTarget as HTMLElement).style.background = "transparent";
+              (e.currentTarget as HTMLElement).style.color = "var(--text-muted)";
+            }}
+          >
+            <LogOut size={18} />
+            <span className="font-sans text-sm font-medium">Log out</span>
+          </button>
         </div>
       </aside>
 

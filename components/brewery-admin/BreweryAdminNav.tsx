@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Hop, LayoutDashboard, List, BarChart2, Gift, Settings, ChevronDown, ExternalLink, Rewind } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { Hop, LayoutDashboard, List, BarChart2, Gift, Settings, ChevronDown, ExternalLink, Rewind, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
+import { createClient } from "@/lib/supabase/client";
 
 const NAV_ITEMS = [
   { href: "",           label: "Overview",   icon: LayoutDashboard },
@@ -17,7 +18,14 @@ const NAV_ITEMS = [
 
 export function BreweryAdminNav({ accounts }: { accounts: any[] }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [open, setOpen] = useState(false);
+
+  async function handleLogout() {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push("/login");
+  }
 
   // Find active brewery from URL
   const activeBreweryId = pathname.split("/brewery-admin/")[1]?.split("/")[0];
@@ -131,6 +139,16 @@ export function BreweryAdminNav({ accounts }: { accounts: any[] }) {
               {activeAccount?.verified ? "Verified" : "Pending Verification"}
             </span>
           </div>
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-2 text-xs transition-colors w-full"
+            style={{ color: "var(--text-muted)" }}
+            onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = "var(--danger)"}
+            onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = "var(--text-muted)"}
+          >
+            <LogOut size={12} />
+            Log out
+          </button>
         </div>
       </aside>
 
