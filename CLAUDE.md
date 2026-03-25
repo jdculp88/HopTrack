@@ -171,19 +171,36 @@ scripts/supabase-setup.mjs    — One-time setup script
 
 ## 🗺️ Where We Are
 
-**Current Sprint:** Sprint 8 — Hardening & Mobile
-**Last completed:** Sprint 7 — The Feel-Good Sprint ✅
+**Current Sprint:** Sprint 9 — Polish, Reactions & Flow
+**Last completed:** Sprint 8 — Hardening & Mobile ✅
 
-### Sprint 8 Priorities (in order)
-1. ✅ TapList `is_on_tap` overwrite bug — FIXED
-2. ✅ Replace all `confirm()` dialogs — FIXED
-3. ✅ Loyalty program editing (name, stamps, reward) — FIXED
-4. ✅ Loading skeletons for tap list + loyalty — DONE
-5. 🔄 Staging Supabase project (Riley)
-6. 🔲 Supabase Storage buckets (Riley — blocked on staging)
-7. 🔲 PWA: manifest, service worker, Apple icons (Alex leading)
-8. 🔲 Photo uploads (blocked on Storage)
-9. 🔲 BrewerySettingsClient RLS review (Casey)
+### Sprint 8 — COMPLETE ✅
+All items shipped. PWA icons live, logout added everywhere, How It Works redesigned,
+RLS fixed, iOS safe area + touch targets added, loading skeletons everywhere.
+Git now uses feature branch + PR workflow (no more push to main).
+
+### Sprint 9 Progress
+**Shipped (PRs merged):**
+- ✅ S9-003: Loyalty QR code modal (react-qr-code, download PNG)
+- ✅ S9-004: iOS safe area + touch targets in globals.css
+- ✅ S9-008: `lib/dates.ts` — timezone-aware date utilities
+- ✅ S9-009: Superadmin user list — view profile links
+
+**PRs open (merge when ready):**
+- 🔄 S9-006: Pint Rewind shareable card (PR #8) — screenshot modal for Instagram
+- 🔄 S9-007: Reactions on check-ins (PR #9) — API + optimistic update + null beer guard
+- 🔄 REQ-013: Decouple check-in from beer logging (PR #10) — beer now optional, skip button
+
+**Still to do:**
+- 🔲 S9-001: Riley — staging migrations (base schema ordering; run supabase-setup.mjs against staging first)
+- 🔲 S9-002: Photo uploads — blocked on S9-001/Storage buckets
+- 🔲 S9-005: Push notifications (Supabase Edge Functions + Resend)
+- 🔲 Apply `lib/dates.ts` across app — replace raw `.toLocaleDateString()` calls
+
+### Migration state
+- 001–003: Core schema + seed
+- 004: Brewery RLS fix (brewery_accounts OR created_by for UPDATE)
+- 005: `checkins.beer_id` made nullable (REQ-013)
 
 ### Revenue Targets
 - Tap tier: $49/mo
