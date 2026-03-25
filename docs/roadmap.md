@@ -1,7 +1,7 @@
 # HopTrack Product Roadmap
-**Last updated:** 2026-03-24
+**Last updated:** 2026-03-25
 **PM:** Morgan
-**Current Sprint:** Sprint 8 — Hardening & Mobile
+**Current Sprint:** Sprint 10 — Sessions & Tap Wall
 
 > 💬 **Team note from Morgan:** This is a living document — updated every sprint. If you're touching a ticket, update its status here. If you discover something not on the list, add it. The roadmap is the source of truth for what we're building and why.
 
@@ -212,7 +212,7 @@
 
 ---
 
-## 🚀 Sprint 8 — Hardening & Mobile (CURRENT)
+## ✅ Sprint 8 — Hardening & Mobile (Complete)
 **Theme:** Brewery owner trust, data integrity, PWA foundation, multi-environment infra
 **Start:** 2026-03-24
 **Sprint leads:** Jordan (brewery ops), Alex (mobile), Riley (infra)
@@ -264,38 +264,96 @@ Per Drew's ops review, these are the items brewery owners will hit on day one:
 
 ---
 
-## 📋 Sprint 9 — Gamification & Social (Planning)
+## ✅ Sprint 9 — Polish, Reactions & Flow (Complete)
 **Theme:** Make the social loop addictive
-**Estimated start:** 2026-03-31
+**Completed:** 2026-03-25
 
-- [ ] Friends activity feed improvements
-- [ ] Push notifications (Supabase Edge Functions + Resend)
-- [ ] Brewery QR code for loyalty redemption
-- [ ] Slow seller promotion push
-- [ ] User Pint Rewind shareable card
-- [ ] Brewery Wrapped monthly recap (brewery admin)
-- [ ] Timezone-aware date displays throughout
-- [ ] User management — "view profile" action in superadmin
+| Item | Status |
+|------|--------|
+| S9-003: Loyalty QR code modal | ✅ Shipped |
+| S9-004: iOS safe area + touch targets | ✅ Shipped |
+| S9-006: Pint Rewind shareable card (PR #8) | ✅ Shipped |
+| S9-007: Reactions on check-ins (PR #9) | ✅ Shipped |
+| S9-008: `lib/dates.ts` timezone utils | ✅ Shipped |
+| S9-009: Superadmin user list view profile | ✅ Shipped |
+| REQ-013: Decouple check-in from beer (PR #10) | ✅ Shipped |
+| S9-001: Staging migrations | 🔲 Carry → S10-019 |
+| S9-002: Photo uploads | 🔲 Carry → S10-020 |
+| S9-005: Push notifications | 🔲 Carry → S10-023 |
+| Date utils cleanup across app | 🔲 Carry → S10-021 |
 
 ---
 
-## 📋 Sprint 10 — Premium & Launch Prep (Planning)
-**Theme:** Premium B2B tier + App Store preparation
-**Estimated start:** 2026-04-07
+## 🚀 Sprint 10 — Sessions & Tap Wall (CURRENT)
+**Theme:** Rebuild the core check-in and beer rating experience
+**Start:** 2026-03-25
+**Sprint leads:** Jordan (dev), Alex (design), Riley (infra), Morgan (PM)
+**Spec:** `docs/requirements/REQ-025-sessions-tap-wall.md`
+**Planning notes:** `docs/meetings/2026-03-25-sprint-10-planning.md`
 
-- [ ] TV display app (`/display/[brewery_id]`) — Supabase Realtime board ("The Board")
-- [ ] Location-based brewery insights
-- [ ] Weekly analytics email digest (Resend)
-- [ ] Brewery API access (Cask tier)
+> **Sprint goal:** A user opens HopTrack, taps +, checks in to a brewery in under 3 seconds, sees the full tap list, logs beers as they have them, and ends their session with a recap. The experience feels native, instant, and addictive.
+
+### 🔴 P0 — Sessions & Tap Wall (REQ-025 Phase 1)
+
+| ID | Title | Owner | Status |
+|----|-------|-------|--------|
+| S10-001 | Migration 006: `sessions` + `beer_logs` tables + RLS | Riley | 🔲 |
+| S10-002 | `POST /api/sessions` — start session | Jordan | 🔲 |
+| S10-003 | `GET /api/sessions/active` — get active session | Jordan | 🔲 |
+| S10-004 | `POST /api/sessions/[id]/beers` — log beer | Jordan | 🔲 |
+| S10-005 | `PATCH /api/sessions/[id]/end` — end session, XP + achievements | Jordan | 🔲 |
+| S10-006 | `PATCH /api/beer-logs/[id]` — update beer log | Jordan | 🔲 |
+| S10-007 | `useSession` hook | Jordan | 🔲 |
+| S10-008 | `CheckinEntryDrawer` — lean brewery selection, instant check-in | Jordan + Alex | 🔲 |
+| S10-009 | `TapWallSheet` — tap list with log actions + session tray | Jordan + Alex | 🔲 |
+| S10-010 | `ActiveSessionBanner` — persistent gold pill above bottom nav | Alex + Jordan | 🔲 |
+| S10-011 | `QuickRatingSheet` — stars + optional note | Alex + Jordan | 🔲 |
+| S10-012 | `SessionRecapSheet` — celebration, XP, achievements, share | Alex + Jordan | 🔲 |
+| S10-013 | Wire `AppNav` to show banner when session active | Jordan | 🔲 |
+
+### 🟡 P1 — Feed + Profile Integration
+
+| ID | Title | Owner | Status |
+|----|-------|-------|--------|
+| S10-014 | `HomeFeed` — render sessions alongside legacy check-ins | Jordan | 🔲 |
+| S10-015 | `CheckinCard` — handle "3 beers at Brewery" session format | Alex + Jordan | 🔲 |
+| S10-016 | `BreweryPage` — "Continue your session →" CTA | Jordan | 🔲 |
+| S10-017 | XP remap — award on session end, per beer, per rating | Jordan | 🔲 |
+| S10-018 | Achievement eval moved to session end | Jordan | 🔲 |
+
+### 🟡 P1 — Carry-Forward
+
+| ID | Title | Owner | Status |
+|----|-------|-------|--------|
+| S10-019 | Staging migrations (S9-001 carry) | Riley | 🔲 |
+| S10-020 | Photo uploads — beer + brewery (unblocked by S10-019) | Jordan | 🔲 |
+| S10-021 | Date utils cleanup — `lib/dates.ts` across app | Jordan | 🔲 |
+
+### 🟢 P2
+
+| ID | Title | Owner | Status |
+|----|-------|-------|--------|
+| S10-022 | Session auto-close Edge Function (6h inactivity) | Riley | 🔲 |
+| S10-023 | Push notifications MVP | Riley + Jordan | 🔲 |
+| S10-025 | Domestic beer achievement (REQ-016) | Jordan | 🔲 |
+
+---
+
+## 📋 Sprint 11 — Dashboard Migration & Launch Prep (Planning)
+**Theme:** Complete the sessions migration; App Store preparation
+**Estimated start:** 2026-04-01
+
+- [ ] Brewery dashboard + analytics migrated to `sessions`/`beer_logs`
+- [ ] `checkins` table deprecated (backfill migration)
+- [ ] Pint Rewind updated to use session data
+- [ ] TV display app (`/display/[brewery_id]`) — "The Board" (Supabase Realtime)
 - [ ] Map view — Mapbox integration on Explore page
 - [ ] Performance audit + optimization
 - [ ] Accessibility review (WCAG 2.1 AA)
 - [ ] SEO — OG images, metadata, sitemap
 - [ ] Error monitoring (Sentry)
-- [ ] Analytics (PostHog or Mixpanel)
-- [ ] Capacitor wrapper → App Store + TestFlight (Alex leading; PWA ships first in S8)
+- [ ] Capacitor wrapper → App Store + TestFlight (Alex leading)
 - [ ] Beta user onboarding flow
-- [ ] Pricing page (`/for-breweries`) + Stripe integration
 
 ---
 
@@ -402,7 +460,8 @@ Per Drew's ops review, these are the items brewery owners will hit on day one:
 | REQ-021 | PWA / Mobile App | 🔲 In Progress | S8 (Alex leading) |
 | REQ-022 | Multi-environment Infrastructure | 🔲 In Progress | S8 (Riley leading) |
 | REQ-023 | Loyalty Program Editing | ✅ Shipped | S8 |
-| REQ-024 | Sales / Pricing Presence | 🔲 Planned | S10 (Sales Prep Sprint) |
+| REQ-024 | Sales / Pricing Presence | 🔲 Planned | S11 |
+| REQ-025 | Sessions & Tap Wall | 🔲 In Progress | S10 |
 
 ---
 
