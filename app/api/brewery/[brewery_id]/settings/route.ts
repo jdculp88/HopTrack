@@ -13,12 +13,13 @@ export async function PATCH(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // Verify the user actually belongs to this brewery before updating
+  // Verify the user belongs to this brewery (owner or manager only)
   const { data: account } = await (supabase as any)
     .from("brewery_accounts")
     .select("role")
     .eq("user_id", user.id)
     .eq("brewery_id", brewery_id)
+    .in("role", ["owner", "manager"])
     .single();
 
   if (!account) {
