@@ -3,7 +3,8 @@
 import { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
-import { TrendingUp, Users, Beer, Star, Trophy, Calendar } from "lucide-react";
+import { TrendingUp, Users, Beer, Star, Trophy, Calendar, Share2 } from "lucide-react";
+import { PintRewindShareCard } from "@/components/brewery-admin/PintRewindShareCard";
 
 interface PintRewindClientProps {
   breweryName: string;
@@ -16,6 +17,7 @@ type Scope = "30d" | "all";
 
 export function PintRewindClient({ breweryName, checkins30, checkinsAll, topVisitor }: PintRewindClientProps) {
   const [scope, setScope] = useState<Scope>("30d");
+  const [shareOpen, setShareOpen] = useState(false);
   const checkins = scope === "30d" ? checkins30 : checkinsAll;
 
   const stats = useMemo(() => {
@@ -73,8 +75,20 @@ export function PintRewindClient({ breweryName, checkins30, checkinsAll, topVisi
           <h1 className="font-display text-3xl font-bold" style={{ color: "var(--text-primary)" }}>{breweryName}</h1>
           <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>Your story, told in pints.</p>
         </div>
+        {/* Actions */}
+        <div className="flex items-center gap-2 self-start sm:self-auto">
+          {stats.totalCheckins > 0 && (
+            <button
+              onClick={() => setShareOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium border transition-all hover:opacity-80"
+              style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--text-secondary)" }}
+            >
+              <Share2 size={14} />
+              Share
+            </button>
+          )}
         {/* Scope toggle */}
-        <div className="flex rounded-xl overflow-hidden border self-start sm:self-auto" style={{ borderColor: "var(--border)" }}>
+        <div className="flex rounded-xl overflow-hidden border" style={{ borderColor: "var(--border)" }}>
           {(["30d", "all"] as Scope[]).map((s) => (
             <button
               key={s}
@@ -88,6 +102,7 @@ export function PintRewindClient({ breweryName, checkins30, checkinsAll, topVisi
               {s === "30d" ? "30 Days" : "All Time"}
             </button>
           ))}
+        </div>
         </div>
       </div>
 
@@ -207,6 +222,14 @@ export function PintRewindClient({ breweryName, checkins30, checkinsAll, topVisi
           )}
         </motion.div>
       </AnimatePresence>
+
+      <PintRewindShareCard
+        open={shareOpen}
+        onClose={() => setShareOpen(false)}
+        breweryName={breweryName}
+        scopeLabel={scopeLabel}
+        stats={stats}
+      />
     </div>
   );
 }
