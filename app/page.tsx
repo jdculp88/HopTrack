@@ -251,40 +251,52 @@ export default async function LandingPage() {
       {/* ── How It Works ───────────────────────────────────────────────────── */}
       <section id="how-it-works" className="py-24 px-6 bg-[var(--surface)] border-y border-[var(--border)]">
         <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-16">
+          <div className="text-center mb-16 space-y-4">
+            <div className="inline-flex items-center gap-2 bg-[#D4A843]/10 border border-[#D4A843]/20 text-[#D4A843] text-xs font-mono uppercase tracking-widest px-4 py-2 rounded-full">
+              How it works
+            </div>
             <h2 className="font-display text-4xl lg:text-5xl font-bold text-[var(--text-primary)]">
               Simple as<span className="italic text-[#D4A843]"> one, two, three.</span>
             </h2>
           </div>
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-3 gap-6 relative">
+            {/* Connecting line desktop */}
+            <div className="hidden md:block absolute top-10 left-[calc(16.67%+1rem)] right-[calc(16.67%+1rem)] h-px bg-gradient-to-r from-[#D4A843]/30 via-[#D4A843]/60 to-[#D4A843]/30" />
             {[
               {
                 step: "01",
-                title: "Check in",
-                desc: "Walk into a brewery. Open HopTrack. Select what you're having.",
-                icon: "📍",
+                title: "Arrive & check in",
+                desc: "Walk into a brewery. Open HopTrack. We detect it automatically — tap to check in.",
+                icon: MapPin,
               },
               {
                 step: "02",
-                title: "Rate & review",
-                desc: "Star rating, flavor tags, a quick note. Takes 20 seconds.",
-                icon: "⭐",
+                title: "Log beers as you go",
+                desc: "Order a pint, log it. Stars, flavor tags, a quick note. Repeat all session.",
+                icon: Star,
               },
               {
                 step: "03",
                 title: "Level up",
-                desc: "Earn XP, unlock achievements, climb the leaderboards.",
-                icon: "🏆",
+                desc: "Earn XP, unlock achievements, climb the leaderboards. Every pour counts.",
+                icon: Trophy,
               },
             ].map((item) => (
-              <div key={item.step} className="relative">
-                <div className="text-[#D4A843]/20 font-display text-8xl font-bold absolute -top-4 -left-2 leading-none select-none">
-                  {item.step}
+              <div key={item.step} className="relative flex flex-col items-center text-center group">
+                {/* Icon circle */}
+                <div className="relative z-10 w-20 h-20 rounded-2xl bg-[var(--bg)] border-2 border-[#D4A843]/40 flex items-center justify-center mb-6 group-hover:border-[#D4A843] transition-colors duration-300"
+                  style={{ boxShadow: "0 0 0 6px var(--surface)" }}>
+                  <div className="w-12 h-12 rounded-xl bg-[#D4A843]/10 flex items-center justify-center">
+                    <item.icon size={22} className="text-[#D4A843]" />
+                  </div>
+                  {/* Step badge */}
+                  <div className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-[#D4A843] flex items-center justify-center">
+                    <span className="text-[#0F0E0C] text-[10px] font-mono font-bold">{item.step}</span>
+                  </div>
                 </div>
-                <div className="relative pt-8 space-y-4">
-                  <span className="text-4xl">{item.icon}</span>
+                <div className="space-y-2 px-2">
                   <h3 className="font-display text-xl font-bold text-[var(--text-primary)]">{item.title}</h3>
-                  <p className="text-[var(--text-secondary)] leading-relaxed">{item.desc}</p>
+                  <p className="text-[var(--text-secondary)] text-sm leading-relaxed">{item.desc}</p>
                 </div>
               </div>
             ))}
