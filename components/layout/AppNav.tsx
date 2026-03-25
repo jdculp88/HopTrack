@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Home, Compass, User, Trophy, Users, Bell, Settings, Hop,
   PlusCircle, LogOut,
@@ -10,6 +10,8 @@ import {
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { createClient } from "@/lib/supabase/client";
+import ActiveSessionBanner from "@/components/checkin/ActiveSessionBanner";
+import type { Session } from "@/types/database";
 
 const NAV_ITEMS = [
   { href: "/home",         label: "Feed",         icon: Home },
@@ -22,9 +24,11 @@ interface AppNavProps {
   username: string;
   unreadNotifications?: number;
   onCheckin: () => void;
+  activeSession?: Session | null;
+  onOpenTapWall?: () => void;
 }
 
-export function AppNav({ username, unreadNotifications = 0, onCheckin }: AppNavProps) {
+export function AppNav({ username, unreadNotifications = 0, onCheckin, activeSession, onOpenTapWall }: AppNavProps) {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -187,6 +191,17 @@ export function AppNav({ username, unreadNotifications = 0, onCheckin }: AppNavP
           </button>
         </div>
       </aside>
+
+      {/* ── Active session banner (mobile only) ─────────────────────────────── */}
+      <AnimatePresence>
+        {activeSession && (
+          <ActiveSessionBanner
+            session={activeSession}
+            breweryName={activeSession.brewery?.name ?? "Brewery"}
+            onTap={onOpenTapWall ?? (() => {})}
+          />
+        )}
+      </AnimatePresence>
 
       {/* ── Mobile bottom nav ───────────────────────────────────────────────── */}
       <div
