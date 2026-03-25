@@ -167,7 +167,7 @@ export async function GET(request: Request) {
 
   let query = supabase
     .from("checkins")
-    .select("*, profile:profiles(*), brewery:breweries(*), beer:beers(*)")
+    .select("*, profile:profiles(*), brewery:breweries(*), beer:beers(*), reactions(*)")
     .eq("user_id", userId)
     .order("created_at", { ascending: false })
     .limit(limit);

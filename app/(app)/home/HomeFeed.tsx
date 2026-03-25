@@ -8,7 +8,7 @@ import { CheckinCard } from "@/components/social/CheckinCard";
 import { SkeletonCheckinCard } from "@/components/ui/SkeletonLoader";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import { getLevelProgress } from "@/lib/xp";
-import type { Profile, CheckinWithDetails } from "@/types/database";
+import type { Profile, CheckinWithDetails, ReactionType } from "@/types/database";
 
 interface HomeFeedProps {
   profile: Profile | null;
@@ -20,6 +20,42 @@ interface HomeFeedProps {
 export function HomeFeed({ profile, checkins, weekStats, currentUserId }: HomeFeedProps) {
   const [localCheckins, setLocalCheckins] = useState(checkins);
   const levelInfo = profile ? getLevelProgress(profile.xp) : null;
+
+  async function handleReact(checkinId: string, type: ReactionType) {
+    // Optimistic update
+    setLocalCheckins((prev) =>
+      prev.map((c) => {
+        if (c.id !== checkinId) return c;
+        const reactions = (c.reactions as any[]) ?? [];
+        const existing = reactions.find(
+          (r: any) => r.user_id === currentUserId && r.type === type
+        );
+        return {
+          ...c,
+          reactions: existing
+            ? reactions.filter(
+                (r: any) => !(r.user_id === currentUserId && r.type === type)
+              )
+            : [
+                ...reactions,
+                {
+                  id: "temp",
+                  user_id: currentUserId,
+                  checkin_id: checkinId,
+                  type,
+                  created_at: new Date().toISOString(),
+                },
+              ],
+        };
+      })
+    );
+
+    await fetch("/api/reactions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ checkin_id: checkinId, type }),
+    });
+  }
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
@@ -96,12 +132,7 @@ export function HomeFeed({ profile, checkins, weekStats, currentUserId }: HomeFe
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.05, duration: 0.3 }}
             >
-              <CheckinCard
-                checkin={checkin}
-                onReact={(id, type) => {
-                  // TODO: optimistic update
-                }}
-              />
+              <CheckinCard checkin={checkin} onReact={handleReact} />
             </motion.div>
           ))}
         </div>
