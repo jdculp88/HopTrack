@@ -1,26 +1,169 @@
 @import "tailwindcss";
 
+/* ── Semantic color tokens — dark theme (default) ─────────────────────────── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg:              #0F0E0C;
+  --surface:         #1C1A16;
+  --surface-2:       #252219;
+  --border:          #3A3628;
+  --text-primary:    #F5F0E8;
+  --text-secondary:  #A89F8C;
+  --text-muted:      #6B6456;
+  --accent-gold:     #D4A843;
+  --accent-amber:    #E8841A;
+  --accent-green:    #4A7C59;
+  --danger:          #C44B3A;
+  --success:         #3D7A52;
+  --skeleton-base:   #1C1A16;
+  --skeleton-shine:  #252219;
+  --scrollbar-track: #1C1A16;
+  --scrollbar-thumb: #3A3628;
 }
 
+/* ── Light theme overrides ────────────────────────────────────────────────── */
+[data-theme="light"] {
+  --bg:              #FAF7F2;
+  --surface:         #FFFFFF;
+  --surface-2:       #F0EAE0;
+  --border:          #E2D9CC;
+  --text-primary:    #1A1814;
+  --text-secondary:  #6B5F4E;
+  --text-muted:      #9E8E7A;
+  --accent-gold:     #C49A35;
+  --accent-amber:    #D4730E;
+  --accent-green:    #3D6B49;
+  --danger:          #B03A2B;
+  --success:         #2E6642;
+  --skeleton-base:   #EDE5D8;
+  --skeleton-shine:  #F5EEE4;
+  --scrollbar-track: #F0EAE0;
+  --scrollbar-thumb: #D4C4B0;
+}
+
+/* ── Tailwind v4 design tokens (reference semantic vars) ──────────────────── */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --color-bg:             var(--bg);
+  --color-bg-card:        var(--surface);
+  --color-bg-elevated:    var(--surface-2);
+  --color-border:         var(--border);
+  --color-text-primary:   var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-tertiary:  var(--text-muted);
+  --color-accent-gold:    var(--accent-gold);
+  --color-accent-amber:   var(--accent-amber);
+  --color-accent-green:   var(--accent-green);
+  --color-danger:         var(--danger);
+  --color-success:        var(--success);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  /* Fonts */
+  --font-display: var(--font-playfair), serif;
+  --font-sans:    var(--font-dm-sans), system-ui, sans-serif;
+  --font-mono:    var(--font-jetbrains), monospace;
+
+  /* Animations */
+  --animate-fade-in:  fadeIn 0.3s ease-out;
+  --animate-slide-up: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-shimmer:  shimmer 2s linear infinite;
+  --animate-glow:     glow 2s ease-in-out infinite alternate;
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  @keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+  @keyframes slideDown {
+    from { transform: translateY(-20px); opacity: 0; }
+    to   { transform: translateY(0);     opacity: 1; }
+  }
+  @keyframes scaleIn {
+    from { transform: scale(0.95); opacity: 0; }
+    to   { transform: scale(1);    opacity: 1; }
+  }
+  @keyframes shimmer {
+    from { background-position: -200% 0; }
+    to   { background-position:  200% 0; }
+  }
+  @keyframes glow {
+    from { box-shadow: 0 0 10px rgba(212,168,67,0.3); }
+    to   { box-shadow: 0 0 25px rgba(212,168,67,0.6); }
+  }
+  @keyframes skeletonShimmer {
+    from { background-position: -200% 0; }
+    to   { background-position:  200% 0; }
   }
 }
 
+/* ── Base ─────────────────────────────────────────────────────────────────── */
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--bg);
+  color: var(--text-primary);
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
+
+/* ── Scrollbar ────────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--scrollbar-track); }
+::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent-gold); }
+
+/* ── Selection ────────────────────────────────────────────────────────────── */
+::selection { background: rgba(212,168,67,0.25); color: var(--text-primary); }
+
+/* ── Focus ────────────────────────────────────────────────────────────────── */
+:focus-visible { outline: 2px solid var(--accent-gold); outline-offset: 2px; border-radius: 4px; }
+
+/* ── Tap highlight ────────────────────────────────────────────────────────── */
+* { -webkit-tap-highlight-color: transparent; }
+
+/* ── Skeleton loader ──────────────────────────────────────────────────────── */
+.skeleton {
+  background: linear-gradient(90deg, var(--skeleton-base) 0%, var(--skeleton-shine) 50%, var(--skeleton-base) 100%);
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.5s linear infinite;
+  border-radius: 4px;
+}
+
+/* ── Utilities ────────────────────────────────────────────────────────────── */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+.text-gradient-gold {
+  background: linear-gradient(135deg, var(--accent-gold) 0%, var(--accent-amber) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gold-glow {
+  box-shadow: 0 0 20px rgba(212,168,67,0.3), 0 0 40px rgba(212,168,67,0.1);
+}
+
+.card-hover {
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
+}
+.card-hover:hover {
+  transform: translateY(-3px) scale(1.01);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+}
+
+.grain-overlay { position: relative; }
+.grain-overlay::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 1;
+}
+
+.full-bleed { width: 100%; height: 100%; object-fit: cover; }

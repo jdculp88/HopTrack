@@ -4,14 +4,47 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:staging": "NEXT_PUBLIC_SUPABASE_URL=$STAGING_SUPABASE_URL NEXT_PUBLIC_SUPABASE_ANON_KEY=$STAGING_SUPABASE_ANON_KEY next dev",
     "build": "next build",
+    "build:staging": "NEXT_PUBLIC_SUPABASE_URL=$STAGING_SUPABASE_URL NEXT_PUBLIC_SUPABASE_ANON_KEY=$STAGING_SUPABASE_ANON_KEY next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "dev:check": "sleep 3 && curl -sf http://localhost:3000 > /dev/null && echo \"✅ Server healthy at localhost:3000\" || echo \"❌ Server not responding\"",
+    "dev:fresh": "rm -rf .next && next dev",
+    "db:migrate": "supabase db push",
+    "db:migrate:staging": "supabase db push --project-ref $STAGING_SUPABASE_PROJECT_REF",
+    "db:migrate:production": "supabase db push --project-ref $PRODUCTION_SUPABASE_PROJECT_REF",
+    "db:reset": "supabase db reset",
+    "db:diff": "supabase db diff",
+    "db:types": "supabase gen types typescript --project-ref $NEXT_PUBLIC_SUPABASE_REF --schema public > types/database.ts",
+    "functions:serve": "supabase functions serve",
+    "functions:deploy": "supabase functions deploy",
+    "functions:deploy:achievement-eval": "supabase functions deploy achievement-eval",
+    "setup": "node scripts/supabase-setup.mjs"
   },
   "dependencies": {
+    "@mapbox/mapbox-gl-geocoder": "^5.1.2",
+    "@supabase/ssr": "^0.9.0",
+    "@supabase/supabase-js": "^2.100.0",
+    "@types/canvas-confetti": "^1.9.0",
+    "@types/leaflet": "^1.9.21",
+    "@types/mapbox-gl": "^3.4.1",
+    "bad-words": "^4.0.0",
+    "canvas-confetti": "^1.9.4",
+    "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
+    "framer-motion": "^12.38.0",
+    "fuse.js": "^7.1.0",
+    "idb": "^8.0.3",
+    "leaflet": "^1.9.4",
+    "lucide-react": "^1.0.1",
+    "mapbox-gl": "^3.20.0",
     "next": "16.2.1",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "react-leaflet": "^5.0.0",
+    "recharts": "^3.8.0",
+    "tailwind-merge": "^3.5.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -20,6 +53,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.1",
+    "supabase": "^2.84.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

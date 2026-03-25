@@ -1,0 +1,196 @@
+"use client";
+
+import Link from "next/link";
+import Image from "next/image";
+import { motion } from "framer-motion";
+import { MapPin, ExternalLink, Star, Users } from "lucide-react";
+import { cn, formatCount, generateGradientFromString } from "@/lib/utils";
+import { BeerStyleBadge } from "@/components/ui/BeerStyleBadge";
+import type { BreweryWithStats } from "@/types/database";
+
+const BREWERY_TYPE_LABELS: Record<string, string> = {
+  micro: "Microbrewery",
+  nano: "Nanobrewery",
+  regional: "Regional",
+  brewpub: "Brewpub",
+  large: "Large",
+  taproom: "Taproom",
+  bar: "Bar",
+  contract: "Contract",
+  proprietor: "Proprietor",
+  planning: "Planning",
+  closed: "Closed",
+};
+
+interface BreweryCardProps {
+  brewery: BreweryWithStats;
+  distance?: string;
+  variant?: "default" | "featured" | "compact";
+  className?: string;
+}
+
+export function BreweryCard({ brewery, distance, variant = "default", className }: BreweryCardProps) {
+  const gradient = generateGradientFromString(brewery.name);
+  const typeLabel = brewery.brewery_type ? BREWERY_TYPE_LABELS[brewery.brewery_type] ?? brewery.brewery_type : null;
+
+  if (variant === "compact") {
+    return (
+      <Link href={`/brewery/${brewery.id}`}>
+        <motion.div
+          whileHover={{ y: -2, scale: 1.01 }}
+          transition={{ type: "spring", stiffness: 400, damping: 20 }}
+          className={cn(
+            "flex items-center gap-3 p-3 rounded-2xl",
+            "bg-[var(--surface)] border border-[var(--border)] hover:border-[#D4A843]/30",
+            "transition-colors duration-150 group",
+            className
+          )}
+        >
+          <div
+            className="w-12 h-12 rounded-xl flex-shrink-0 overflow-hidden"
+            style={!brewery.cover_image_url ? { background: gradient } : undefined}
+          >
+            {brewery.cover_image_url && (
+              <Image src={brewery.cover_image_url} alt={brewery.name} fill className="object-cover" />
+            )}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="font-display font-semibold text-[var(--text-primary)] truncate text-sm group-hover:text-[#D4A843] transition-colors">
+              {brewery.name}
+            </p>
+            <p className="text-xs text-[var(--text-muted)] truncate">
+              {brewery.city}{brewery.state ? `, ${brewery.state}` : ""}
+              {distance && ` · ${distance}`}
+            </p>
+          </div>
+          {typeLabel && (
+            <span className="text-xs text-[var(--text-secondary)] bg-[var(--surface-2)] px-2 py-0.5 rounded-full flex-shrink-0">
+              {typeLabel}
+            </span>
+          )}
+        </motion.div>
+      </Link>
+    );
+  }
+
+  if (variant === "featured") {
+    return (
+      <Link href={`/brewery/${brewery.id}`}>
+        <motion.div
+          whileHover={{ y: -4 }}
+          transition={{ type: "spring", stiffness: 300, damping: 20 }}
+          className={cn(
+            "relative rounded-3xl overflow-hidden h-64",
+            "border border-[var(--border)] group cursor-pointer",
+            className
+          )}
+        >
+          {/* Background */}
+          <div
+            className="absolute inset-0"
+            style={!brewery.cover_image_url ? { background: gradient } : undefined}
+          >
+            {brewery.cover_image_url && (
+              <Image
+                src={brewery.cover_image_url}
+                alt={brewery.name}
+                fill
+                className="object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+            )}
+          </div>
+          {/* Gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0F0E0C] via-[#0F0E0C]/40 to-transparent" />
+
+          {/* Content */}
+          <div className="absolute bottom-0 left-0 right-0 p-5">
+            {typeLabel && (
+              <span className="text-xs text-[#D4A843] font-mono uppercase tracking-wider mb-1 block">
+                {typeLabel}
+              </span>
+            )}
+            <h3 className="font-display text-2xl font-bold text-[var(--text-primary)] mb-1">
+              {brewery.name}
+            </h3>
+            <div className="flex items-center gap-3 text-sm text-[var(--text-secondary)]">
+              <span className="flex items-center gap-1">
+                <MapPin size={12} />
+                {brewery.city}{brewery.state ? `, ${brewery.state}` : ""}
+              </span>
+              {distance && <span>{distance} away</span>}
+              {brewery.visit_count !== undefined && brewery.visit_count > 0 && (
+                <span className="flex items-center gap-1">
+                  <Users size={12} />
+                  {formatCount(brewery.visit_count)} visits
+                </span>
+              )}
+            </div>
+          </div>
+        </motion.div>
+      </Link>
+    );
+  }
+
+  // Default card
+  return (
+    <Link href={`/brewery/${brewery.id}`}>
+      <motion.div
+        whileHover={{ y: -3, scale: 1.01 }}
+        transition={{ type: "spring", stiffness: 300, damping: 20 }}
+        className={cn(
+          "bg-[var(--surface)] rounded-2xl overflow-hidden",
+          "border border-[var(--border)] hover:border-[#D4A843]/30",
+          "transition-colors duration-150 group",
+          className
+        )}
+      >
+        {/* Cover */}
+        <div
+          className="h-36 w-full relative overflow-hidden"
+          style={!brewery.cover_image_url ? { background: gradient } : undefined}
+        >
+          {brewery.cover_image_url && (
+            <Image
+              src={brewery.cover_image_url}
+              alt={brewery.name}
+              fill
+              className="object-cover group-hover:scale-105 transition-transform duration-500"
+            />
+          )}
+          {brewery.user_visit && (
+            <div className="absolute top-3 right-3 bg-[#3D7A52]/90 text-white text-xs font-mono px-2 py-0.5 rounded-full">
+              ✓ Visited
+            </div>
+          )}
+        </div>
+
+        <div className="p-4 space-y-2">
+          <div className="flex items-start justify-between gap-2">
+            <h3 className="font-display font-semibold text-[var(--text-primary)] leading-tight group-hover:text-[#D4A843] transition-colors">
+              {brewery.name}
+            </h3>
+            {typeLabel && (
+              <span className="text-xs text-[var(--text-secondary)] bg-[var(--surface-2)] px-2 py-0.5 rounded-full flex-shrink-0">
+                {typeLabel}
+              </span>
+            )}
+          </div>
+
+          <div className="flex items-center gap-1 text-sm text-[var(--text-muted)]">
+            <MapPin size={12} />
+            <span className="truncate">
+              {brewery.city}{brewery.state ? `, ${brewery.state}` : ""}
+            </span>
+            {distance && <span className="ml-auto text-[#D4A843] text-xs flex-shrink-0">{distance}</span>}
+          </div>
+
+          {brewery.beer_count !== undefined && brewery.beer_count > 0 && (
+            <p className="text-xs text-[var(--text-muted)]">
+              {brewery.beer_count} beer{brewery.beer_count !== 1 ? "s" : ""} on tap
+            </p>
+          )}
+        </div>
+      </motion.div>
+    </Link>
+  );
+}

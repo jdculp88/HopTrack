@@ -1,0 +1,138 @@
+"use client";
+
+import Link from "next/link";
+import Image from "next/image";
+import { motion } from "framer-motion";
+import { Check, Plus } from "lucide-react";
+import { cn, formatABV, generateGradientFromString } from "@/lib/utils";
+import { BeerStyleBadge } from "@/components/ui/BeerStyleBadge";
+import { StarRating } from "@/components/ui/StarRating";
+import type { BeerWithBrewery } from "@/types/database";
+
+interface BeerCardProps {
+  beer: BeerWithBrewery;
+  onCheckin?: (beer: BeerWithBrewery) => void;
+  variant?: "default" | "compact" | "grid";
+  className?: string;
+}
+
+export function BeerCard({ beer, onCheckin, variant = "default", className }: BeerCardProps) {
+  const gradient = generateGradientFromString(beer.name + beer.brewery_id);
+  const hasCheckin = !!beer.user_checkin;
+
+  if (variant === "compact") {
+    return (
+      <Link href={`/beer/${beer.id}`}>
+        <motion.div
+          whileHover={{ x: 4 }}
+          transition={{ type: "spring", stiffness: 400, damping: 20 }}
+          className={cn(
+            "flex items-center gap-3 py-3 px-1",
+            "border-b border-[var(--border)] last:border-0",
+            "group cursor-pointer",
+            className
+          )}
+        >
+          <div
+            className="w-10 h-10 rounded-xl flex-shrink-0 overflow-hidden"
+            style={!beer.cover_image_url ? { background: gradient } : undefined}
+          >
+            {beer.cover_image_url && (
+              <Image src={beer.cover_image_url} alt={beer.name} fill className="object-cover" />
+            )}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="font-display font-medium text-[var(--text-primary)] truncate text-sm group-hover:text-[#D4A843] transition-colors">
+              {beer.name}
+            </p>
+            <div className="flex items-center gap-2 mt-0.5">
+              <BeerStyleBadge style={beer.style} size="xs" />
+              <span className="text-xs font-mono text-[var(--text-muted)]">{formatABV(beer.abv)}</span>
+            </div>
+          </div>
+          {beer.avg_rating && (
+            <div className="flex-shrink-0 flex items-center gap-1">
+              <span className="text-sm font-mono text-[#D4A843]">★</span>
+              <span className="text-sm font-mono text-[#D4A843]">{beer.avg_rating.toFixed(1)}</span>
+            </div>
+          )}
+          {hasCheckin && (
+            <Check size={16} className="text-[#3D7A52] flex-shrink-0" />
+          )}
+        </motion.div>
+      </Link>
+    );
+  }
+
+  // Grid card
+  return (
+    <motion.div
+      whileHover={{ y: -3, scale: 1.01 }}
+      transition={{ type: "spring", stiffness: 300, damping: 20 }}
+      className={cn(
+        "bg-[var(--surface)] rounded-2xl overflow-hidden",
+        "border border-[var(--border)] hover:border-[#D4A843]/30",
+        "transition-colors duration-150 group",
+        className
+      )}
+    >
+      <Link href={`/beer/${beer.id}`}>
+        {/* Cover */}
+        <div
+          className="h-24 w-full relative overflow-hidden"
+          style={!beer.cover_image_url ? { background: gradient } : undefined}
+        >
+          {beer.cover_image_url && (
+            <Image src={beer.cover_image_url} alt={beer.name} fill className="object-cover" />
+          )}
+          {beer.seasonal && (
+            <div className="absolute top-2 left-2 bg-[#E8841A]/90 text-white text-[10px] font-mono px-1.5 py-0.5 rounded-full">
+              Seasonal
+            </div>
+          )}
+          {hasCheckin && (
+            <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-[#3D7A52] flex items-center justify-center">
+              <Check size={12} className="text-white" />
+            </div>
+          )}
+        </div>
+
+        <div className="p-3 space-y-2">
+          <h3 className="font-display font-semibold text-[var(--text-primary)] text-sm leading-tight group-hover:text-[#D4A843] transition-colors line-clamp-2">
+            {beer.name}
+          </h3>
+
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <BeerStyleBadge style={beer.style} size="xs" />
+            <span className="text-xs font-mono text-[var(--text-muted)]">{formatABV(beer.abv)}</span>
+          </div>
+
+          {beer.avg_rating ? (
+            <div className="flex items-center gap-1">
+              <StarRating value={beer.avg_rating} readonly size="sm" />
+              <span className="text-xs font-mono text-[#D4A843]">{beer.avg_rating.toFixed(1)}</span>
+            </div>
+          ) : (
+            <p className="text-xs text-[var(--text-muted)]">No ratings yet</p>
+          )}
+        </div>
+      </Link>
+
+      {onCheckin && (
+        <div className="px-3 pb-3">
+          <button
+            onClick={(e) => { e.preventDefault(); onCheckin(beer); }}
+            className={cn(
+              "w-full py-1.5 rounded-xl text-xs font-medium transition-all",
+              hasCheckin
+                ? "bg-[#3D7A52]/20 text-[#3D7A52] border border-[#3D7A52]/30"
+                : "bg-[#D4A843]/10 text-[#D4A843] border border-[#D4A843]/30 hover:bg-[#D4A843]/20"
+            )}
+          >
+            {hasCheckin ? "✓ Had it" : "+ Check in"}
+          </button>
+        </div>
+      )}
+    </motion.div>
+  );
+}

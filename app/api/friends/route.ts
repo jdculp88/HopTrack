@@ -1,0 +1,81 @@
+import { NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
+
+export async function GET(request: Request) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const { data } = await supabase
+    .from("friendships")
+    .select(`
+      *,
+      requester:profiles!requester_id(id, username, display_name, avatar_url, level, xp, total_checkins),
+      addressee:profiles!addressee_id(id, username, display_name, avatar_url, level, xp, total_checkins)
+    `)
+    .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`);
+
+  return NextResponse.json({ friendships: data ?? [] });
+}
+
+export async function POST(request: Request) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const { addressee_id } = await request.json();
+  if (!addressee_id) return NextResponse.json({ error: "addressee_id required" }, { status: 400 });
+  if (addressee_id === user.id) return NextResponse.json({ error: "Cannot friend yourself" }, { status: 400 });
+
+  // Check existing
+  const { data: existing } = await supabase
+    .from("friendships")
+    .select("id, status")
+    .or(`requester_id.eq.${user.id}.and.addressee_id.eq.${addressee_id},requester_id.eq.${addressee_id}.and.addressee_id.eq.${user.id}`)
+    .single();
+
+  if (existing) {
+    return NextResponse.json({ error: "Friendship already exists", existing }, { status: 409 });
+  }
+
+  const { data, error } = await supabase
+    .from("friendships")
+    .insert({ requester_id: user.id, addressee_id, status: "pending" })
+    .select()
+    .single();
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  return NextResponse.json({ friendship: data }, { status: 201 });
+}
+
+export async function PATCH(request: Request) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const { id, status } = await request.json();
+  if (!id || !status) return NextResponse.json({ error: "id and status required" }, { status: 400 });
+  if (!["accepted", "blocked"].includes(status)) return NextResponse.json({ error: "Invalid status" }, { status: 400 });
+
+  const { data, error } = await supabase
+    .from("friendships")
+    .update({ status })
+    .eq("id", id)
+    .eq("addressee_id", user.id) // only addressee can accept
+    .select()
+    .single();
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  return NextResponse.json({ friendship: data });
+}
+
+export async function DELETE(request: Request) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const { id } = await request.json();
+  const { error } = await supabase.from("friendships").delete().eq("id", id);
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  return NextResponse.json({ success: true });
+}
