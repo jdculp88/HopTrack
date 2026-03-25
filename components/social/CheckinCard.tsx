@@ -25,7 +25,7 @@ interface CheckinCardProps {
 
 export function CheckinCard({ checkin, onReact, className }: CheckinCardProps) {
   const [expanded, setExpanded] = useState(false);
-  const { profile, brewery, beer } = checkin;
+  const { profile, brewery, beer } = checkin as any;
 
   return (
     <motion.div
@@ -64,33 +64,44 @@ export function CheckinCard({ checkin, onReact, className }: CheckinCardProps) {
       </div>
 
       {/* Beer info */}
-      <div className="px-4 pb-3">
-        <Link href={`/beer/${beer.id}`}>
-          <div className="bg-[var(--surface-2)] rounded-xl p-3 hover:bg-[#2a2720] transition-colors group">
-            <div className="flex items-start justify-between gap-2">
-              <div className="flex-1 min-w-0">
-                <h3 className="font-display font-semibold text-[var(--text-primary)] group-hover:text-[#D4A843] transition-colors leading-tight">
-                  {beer.name}
-                </h3>
-                <div className="flex items-center gap-2 mt-1">
-                  <BeerStyleBadge style={beer.style} size="xs" />
-                  {beer.abv && (
-                    <span className="text-xs font-mono text-[var(--text-muted)]">{beer.abv}% ABV</span>
-                  )}
-                  {checkin.serving_style && (
-                    <span className="text-xs text-[var(--text-muted)] capitalize">{checkin.serving_style}</span>
-                  )}
+      {beer ? (
+        <div className="px-4 pb-3">
+          <Link href={`/beer/${beer.id}`}>
+            <div className="bg-[var(--surface-2)] rounded-xl p-3 hover:bg-[#2a2720] transition-colors group">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-display font-semibold text-[var(--text-primary)] group-hover:text-[#D4A843] transition-colors leading-tight">
+                    {beer.name}
+                  </h3>
+                  <div className="flex items-center gap-2 mt-1">
+                    <BeerStyleBadge style={beer.style} size="xs" />
+                    {beer.abv && (
+                      <span className="text-xs font-mono text-[var(--text-muted)]">{beer.abv}% ABV</span>
+                    )}
+                    {checkin.serving_style && (
+                      <span className="text-xs text-[var(--text-muted)] capitalize">{checkin.serving_style}</span>
+                    )}
+                  </div>
                 </div>
+                {checkin.rating && (
+                  <div className="flex-shrink-0">
+                    <StarRating value={checkin.rating} readonly size="sm" />
+                  </div>
+                )}
               </div>
-              {checkin.rating && (
-                <div className="flex-shrink-0">
-                  <StarRating value={checkin.rating} readonly size="sm" />
-                </div>
-              )}
+            </div>
+          </Link>
+        </div>
+      ) : checkin.rating ? (
+        <div className="px-4 pb-3">
+          <div className="bg-[var(--surface-2)] rounded-xl p-3">
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-[var(--text-muted)]">Brewery visit</span>
+              <StarRating value={checkin.rating} readonly size="sm" />
             </div>
           </div>
-        </Link>
-      </div>
+        </div>
+      ) : null}
 
       {/* Comment */}
       {checkin.comment && (
