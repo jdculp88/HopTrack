@@ -1,7 +1,7 @@
 # HopTrack Product Roadmap
-**Last updated:** 2026-03-25
+**Last updated:** 2026-03-26
 **PM:** Morgan
-**Current Sprint:** Sprint 10 — Sessions & Tap Wall
+**Current Sprint:** Sprint 11 — Dashboard Migration & Launch Prep
 
 > 💬 **Team note from Morgan:** This is a living document — updated every sprint. If you're touching a ticket, update its status here. If you discover something not on the list, add it. The roadmap is the source of truth for what we're building and why.
 
@@ -284,76 +284,81 @@ Per Drew's ops review, these are the items brewery owners will hit on day one:
 
 ---
 
-## 🚀 Sprint 10 — Sessions & Tap Wall (CURRENT)
+## ✅ Sprint 10 — Sessions & Tap Wall (Complete)
 **Theme:** Rebuild the core check-in and beer rating experience
 **Start:** 2026-03-25
+**Completed:** 2026-03-26
 **Sprint leads:** Jordan (dev), Alex (design), Riley (infra), Morgan (PM)
-**Spec:** `docs/requirements/REQ-025-sessions-tap-wall.md`
-**Planning notes:** `docs/meetings/2026-03-25-sprint-10-planning.md`
+**Retro:** `docs/retros/sprint-10-retro.md`
 
-> **Sprint goal:** A user opens HopTrack, taps +, checks in to a brewery in under 3 seconds, sees the full tap list, logs beers as they have them, and ends their session with a recap. The experience feels native, instant, and addictive.
-
-### 🔴 P0 — Sessions & Tap Wall (REQ-025 Phase 1)
+> **Sprint goal:** A user opens HopTrack, taps +, checks in to a brewery in under 3 seconds, sees the full tap list, logs beers as they have them, and ends their session with a recap. The experience feels native, instant, and addictive. ✅ **ACHIEVED**
 
 | ID | Title | Owner | Status |
 |----|-------|-------|--------|
-| S10-001 | Migration 006: `sessions` + `beer_logs` tables + RLS | Riley | 🔲 |
-| S10-002 | `POST /api/sessions` — start session | Jordan | 🔲 |
-| S10-003 | `GET /api/sessions/active` — get active session | Jordan | 🔲 |
-| S10-004 | `POST /api/sessions/[id]/beers` — log beer | Jordan | 🔲 |
-| S10-005 | `PATCH /api/sessions/[id]/end` — end session, XP + achievements | Jordan | 🔲 |
-| S10-006 | `PATCH /api/beer-logs/[id]` — update beer log | Jordan | 🔲 |
-| S10-007 | `useSession` hook | Jordan | 🔲 |
-| S10-008 | `CheckinEntryDrawer` — lean brewery selection, instant check-in | Jordan + Alex | 🔲 |
-| S10-009 | `TapWallSheet` — tap list with log actions + session tray | Jordan + Alex | 🔲 |
-| S10-010 | `ActiveSessionBanner` — persistent gold pill above bottom nav | Alex + Jordan | 🔲 |
-| S10-011 | `QuickRatingSheet` — stars + optional note | Alex + Jordan | 🔲 |
-| S10-012 | `SessionRecapSheet` — celebration, XP, achievements, share | Alex + Jordan | 🔲 |
-| S10-013 | Wire `AppNav` to show banner when session active | Jordan | 🔲 |
+| S10-001 | Migration 006: `sessions` + `beer_logs` tables + RLS | Riley | ✅ |
+| S10-002–007 | Full sessions API (`POST`, `GET active`, `log beer`, `end`, `update log`) + `useSession` | Jordan | ✅ |
+| S10-008 | `CheckinEntryDrawer` — lean brewery selection, `preselectedBrewery` prop, `/api/breweries` routing | Jordan + Alex | ✅ |
+| S10-009 | `TapWallSheet` — tap list with beer logging + session tray | Jordan + Alex | ✅ |
+| S10-010 | `ActiveSessionBanner` — persistent gold pill | Alex + Jordan | ✅ |
+| S10-011 | `QuickRatingSheet` — stars + optional note | Alex + Jordan | ✅ |
+| S10-012 | `SessionRecapSheet` — celebration, XP, achievements, share | Alex + Jordan | ✅ |
+| S10-013 | AppNav wired to session state | Jordan | ✅ |
+| S10-014 | HomeFeed unified feed — sessions + checkins merged by time | Jordan | ✅ |
+| S10-015 | `SessionCard` — "visited Brewery X, had Y beers" card | Alex + Jordan | ✅ |
+| S10-016 | BreweryPage "Check In Here" CTA + `BreweryCheckinButton` | Jordan | ✅ |
+| S10-017 | XP remap verified — session end only, no double-award | Jordan | ✅ |
+| S10-021 | Date utils sweep — `lib/dates.ts` across 8 files | Jordan | ✅ |
+| —— | Global check-in flow moved to AppShell (available on all pages) | Jordan | ✅ |
 
-### 🟡 P1 — Feed + Profile Integration
+**Carried to Sprint 11:**
+- S10-019: Staging migrations (Riley)
+- S10-020: Photo uploads (Jordan — blocked on Storage)
+- S10-022: Session auto-close Edge Function (Riley)
+- S10-023: Push notifications (Riley + Jordan)
+- S10-025: Domestic beer achievement (Jordan)
+
+---
+
+## 🚀 Sprint 11 — Dashboard Migration & Launch Prep (CURRENT)
+**Theme:** Complete the sessions migration; ship to App Store
+**Start:** 2026-03-26
+**Sprint leads:** Jordan (dev), Alex (mobile), Riley (infra), Taylor (first brewery close), Morgan (PM)
+
+> **Sprint goal:** Brewery dashboard runs on real session data. HopTrack is on TestFlight. Taylor closes the first paid brewery. We celebrate.
+
+### 🔴 P0
 
 | ID | Title | Owner | Status |
 |----|-------|-------|--------|
-| S10-014 | `HomeFeed` — render sessions alongside legacy check-ins | Jordan | 🔲 |
-| S10-015 | `CheckinCard` — handle "3 beers at Brewery" session format | Alex + Jordan | 🔲 |
-| S10-016 | `BreweryPage` — "Continue your session →" CTA | Jordan | 🔲 |
-| S10-017 | XP remap — award on session end, per beer, per rating | Jordan | 🔲 |
-| S10-018 | Achievement eval moved to session end | Jordan | 🔲 |
+| S11-001 | Brewery dashboard + analytics migrated to `sessions`/`beer_logs` | Jordan | 🔲 |
+| S11-002 | Pint Rewind updated to use session data | Jordan | 🔲 |
+| S11-003 | Supabase Storage buckets + RLS (carry S10-019/020) | Riley | 🔲 |
+| S11-004 | Photo uploads — beer + brewery covers (unblocked by S11-003) | Jordan | 🔲 |
+| S11-005 | Capacitor wrapper → TestFlight beta (Alex leading) | Alex | 🔲 |
+| S11-006 | Fix `POST /api/sessions` `rpc('increment')` no-op | Riley | 🔲 |
 
-### 🟡 P1 — Carry-Forward
+### 🟡 P1
 
 | ID | Title | Owner | Status |
 |----|-------|-------|--------|
-| S10-019 | Staging migrations (S9-001 carry) | Riley | 🔲 |
-| S10-020 | Photo uploads — beer + brewery (unblocked by S10-019) | Jordan | 🔲 |
-| S10-021 | Date utils cleanup — `lib/dates.ts` across app | Jordan | 🔲 |
+| S11-007 | `checkins` table deprecation plan + backfill migration | Riley + Jordan | 🔲 |
+| S11-008 | TV display app (`/display/[brewery_id]`) — "The Board" | Jordan + Riley | 🔲 |
+| S11-009 | SEO — OG images, metadata, sitemap | Jamie + Jordan | 🔲 |
+| S11-010 | Performance audit + query optimization | Riley + Jordan | 🔲 |
+| S11-011 | REQ backfill (REQ-012 through REQ-024) — 1-2 per sprint | Sam | 🔲 |
+| S11-012 | Casey QA kickoff at sprint start (not end) | Casey + Morgan | 🔲 |
+| S11-013 | First paid brewery close | Taylor | 🔲 |
 
 ### 🟢 P2
 
 | ID | Title | Owner | Status |
 |----|-------|-------|--------|
-| S10-022 | Session auto-close Edge Function (6h inactivity) | Riley | 🔲 |
-| S10-023 | Push notifications MVP | Riley + Jordan | 🔲 |
-| S10-025 | Domestic beer achievement (REQ-016) | Jordan | 🔲 |
-
----
-
-## 📋 Sprint 11 — Dashboard Migration & Launch Prep (Planning)
-**Theme:** Complete the sessions migration; App Store preparation
-**Estimated start:** 2026-04-01
-
-- [ ] Brewery dashboard + analytics migrated to `sessions`/`beer_logs`
-- [ ] `checkins` table deprecated (backfill migration)
-- [ ] Pint Rewind updated to use session data
-- [ ] TV display app (`/display/[brewery_id]`) — "The Board" (Supabase Realtime)
-- [ ] Map view — Mapbox integration on Explore page
-- [ ] Performance audit + optimization
-- [ ] Accessibility review (WCAG 2.1 AA)
-- [ ] SEO — OG images, metadata, sitemap
-- [ ] Error monitoring (Sentry)
-- [ ] Capacitor wrapper → App Store + TestFlight (Alex leading)
-- [ ] Beta user onboarding flow
+| S11-014 | Map view — Mapbox on Explore page | Jordan + Riley | 🔲 |
+| S11-015 | Accessibility review (WCAG 2.1 AA) | Sam + Alex | 🔲 |
+| S11-016 | Error monitoring (Sentry) | Riley | 🔲 |
+| S11-017 | Push notifications MVP (carry S10-023) | Riley + Jordan | 🔲 |
+| S11-018 | Domestic beer achievement (carry S10-025) | Jordan | 🔲 |
+| S11-019 | App Store submission prep (screenshots, description) | Jamie + Alex | 🔲 |
 
 ---
 
@@ -478,6 +483,20 @@ Per Drew's ops review, these are the items brewery owners will hit on day one:
 | Taylor | Sales & Revenue | Sprint 4 |
 | Drew | Industry Expert (Brewery Ops) | Sprint 5 |
 | Jamie | Marketing & Brand | Sprint 5 |
+
+---
+
+## 👥 Team Expansion Plan
+**Discussed:** 2026-03-26 (Sprint 10 closeout)
+**Decision:** Current 9-person team is right-sized for now. Don't hire ahead of the curve.
+
+| Priority | Role | Hire Trigger | Rationale |
+|----------|------|-------------|-----------|
+| 🥇 1st | Customer Success / Onboarding Lead | First paid brewery closes | Owns the brewery relationship post-sale. Drew covers ops knowledge; someone needs to own the Friday-night support calls. |
+| 🥈 2nd | Growth / SEO Lead | Pre-scale push (500 brewery target) | Different skill set from brand. App Store optimization, local SEO, content that drives consumer downloads. |
+| 🥉 3rd | Analytics / Data Engineer | ~20-50 active paying breweries | Supabase queries need optimization at volume. Riley can't split infra and analytics focus. |
+
+**Note from Morgan:** "Current team is built for where we are. All 3 hires are revenue-triggered, not wishlist. Customer Success first — it's revenue protection."
 
 ---
 

@@ -171,43 +171,56 @@ scripts/supabase-setup.mjs    — One-time setup script
 
 ## 🗺️ Where We Are
 
-**Current Sprint:** Sprint 9 — Polish, Reactions & Flow
-**Last completed:** Sprint 8 — Hardening & Mobile ✅
+**Current Sprint:** Sprint 11 — Dashboard Migration & Launch Prep
+**Last completed:** Sprint 10 — Sessions & Tap Wall ✅ (2026-03-26)
 
-### Sprint 8 — COMPLETE ✅
-All items shipped. PWA icons live, logout added everywhere, How It Works redesigned,
-RLS fixed, iOS safe area + touch targets added, loading skeletons everywhere.
-Git now uses feature branch + PR workflow (no more push to main).
+### Sprint 10 — COMPLETE ✅
+The core check-in experience is rebuilt from the ground up. Sessions system live.
+Global check-in flow lives in AppShell (available on every page).
+Pint & Pixel is fully demo-ready end-to-end. Unified activity feed.
+Retro: `docs/retros/sprint-10-retro.md`
 
-### Sprint 9 Progress
-**Shipped (PRs merged):**
-- ✅ S9-003: Loyalty QR code modal (react-qr-code, download PNG)
-- ✅ S9-004: iOS safe area + touch targets in globals.css
-- ✅ S9-008: `lib/dates.ts` — timezone-aware date utilities
-- ✅ S9-009: Superadmin user list — view profile links
+**Key architectural changes from Sprint 10:**
+- `AppShell` now owns the entire check-in drawer stack (CheckinEntryDrawer, TapWallSheet, SessionRecapSheet)
+- `HomeFeed` no longer manages check-in state — it only relays session state on mount via `hoptrack:session-changed` event
+- `CheckinEntryDrawer` accepts `preselectedBrewery` prop — skips search when arriving from brewery page
+- All brewery search now routes through `/api/breweries` (Supabase-first, not OpenBreweryDB direct)
+- `lib/dates.ts` is now used for ALL date display — no raw `toLocaleDateString()` anywhere
 
-**PRs open (merge when ready):**
-- 🔄 S9-006: Pint Rewind shareable card (PR #8) — screenshot modal for Instagram
-- 🔄 S9-007: Reactions on check-ins (PR #9) — API + optimistic update + null beer guard
-- 🔄 REQ-013: Decouple check-in from beer logging (PR #10) — beer now optional, skip button
+### Sprint 11 — In Progress
+**Focus:** Brewery dashboard on real session data · App Store / TestFlight · First paid brewery
 
-**Still to do:**
-- 🔲 S9-001: Riley — staging migrations (base schema ordering; run supabase-setup.mjs against staging first)
-- 🔲 S9-002: Photo uploads — blocked on S9-001/Storage buckets
-- 🔲 S9-005: Push notifications (Supabase Edge Functions + Resend)
-- 🔲 Apply `lib/dates.ts` across app — replace raw `.toLocaleDateString()` calls
+**P0 this sprint:**
+- 🔲 S11-001: Brewery dashboard + analytics → `sessions`/`beer_logs`
+- 🔲 S11-002: Pint Rewind → session data
+- 🔲 S11-003: Supabase Storage buckets (carry) — Riley
+- 🔲 S11-004: Photo uploads — Jordan (unblocked by S11-003)
+- 🔲 S11-005: Capacitor wrapper → TestFlight — Alex
+- 🔲 S11-006: Fix `POST /api/sessions` `rpc('increment')` no-op — Riley
+
+**Standing commitments:**
+- Sam: 1-2 REQ backfill docs per sprint (REQ-012 through REQ-024)
+- Casey: QA starts at sprint kickoff, not at the end
+- Taylor: First paid brewery close this sprint
 
 ### Migration state
 - 001–003: Core schema + seed
 - 004: Brewery RLS fix (brewery_accounts OR created_by for UPDATE)
 - 005: `checkins.beer_id` made nullable (REQ-013)
+- 006: `sessions` + `beer_logs` tables + full RLS ✅ APPLIED
 
 ### Revenue Targets
 - Tap tier: $49/mo
 - Cask tier: $149/mo
 - Barrel tier: custom
-- First paid brewery: before end of quarter
+- First paid brewery: THIS SPRINT (Taylor)
 - 500 paid breweries: 6 months post-launch ($75K MRR)
+
+### Team Expansion Plan (discussed 2026-03-26)
+1. 🥇 Customer Success / Onboarding — hire when first brewery closes
+2. 🥈 Growth / SEO Lead — hire before 500 brewery push
+3. 🥉 Analytics Engineer — hire at ~20-50 active breweries
+Full notes: `docs/retros/sprint-10-retro.md` → Team Hiring Discussion section
 
 ---
 
