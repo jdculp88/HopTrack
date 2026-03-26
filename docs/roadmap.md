@@ -24,9 +24,9 @@
 
 | ID | Title | Owner | Status |
 |----|-------|-------|--------|
+| S14-001 | Migrate all `checkins` reads to `sessions`/`beer_logs` | Jordan | ✅ |
+| S14-002 | Disable `checkins` writes + remove legacy components | Jordan | ✅ |
 | S14-D01 | Capacitor → TestFlight (SHIPPING) | Alex | 🔲 |
-| S14-001 | Migrate all `checkins` reads to `sessions`/`beer_logs` | Jordan | 🔲 |
-| S14-002 | Disable `checkins` writes + remove legacy components | Jordan | 🔲 |
 | S14-004 | Full Web Push with VAPID keys | Riley + Jordan | 🔲 |
 | S14-010 | First paid brewery close | Taylor | 🔲 |
 
@@ -34,11 +34,11 @@
 
 | ID | Title | Owner | Status |
 |----|-------|-------|--------|
+| S14-006 | Lower-tier style badges (ipa_lover, sour_head, stout_season) | Jordan | ✅ |
+| S14-007 | Profile empty states + polish | Jordan + Alex | ✅ |
+| S14-008 | Feed polish — session duration + context badges | Jordan | ✅ |
 | S14-003 | Plan reactions FK migration (prep for S15) | Jordan + Riley | 🔲 |
 | S14-005 | Notification preferences — wire up settings toggles | Jordan | 🔲 |
-| S14-006 | Lower-tier style badges (ipa_lover, sour_head, stout_season) | Jordan | 🔲 |
-| S14-007 | Profile empty states + polish | Jordan + Alex | 🔲 |
-| S14-008 | Feed polish — session duration + context badges | Jordan | 🔲 |
 | S14-009a | Share card improvements — OG tags, save-as-image | Jamie + Jordan | 🔲 |
 | S14-011 | App Store prep — screenshots, description, icon | Jamie + Alex | 🔲 |
 
