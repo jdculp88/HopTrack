@@ -4,7 +4,6 @@ import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Search, MapPin, Loader2, ChevronRight } from 'lucide-react'
 import { FullScreenDrawer } from '@/components/ui/Modal'
-import { searchBreweries, getBreweriesByLocation, mapOpenBreweryToDb } from '@/lib/openbrewerydb'
 import { generateGradientFromString } from '@/lib/utils'
 import { useSession } from '@/hooks/useSession'
 import type { Session, Brewery } from '@/types/database'
@@ -55,11 +54,14 @@ export default function CheckinEntryDrawer({ isOpen, onClose, onSessionStarted }
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         const { latitude, longitude } = pos.coords
-        const results = await getBreweriesByLocation(latitude, longitude, 5)
-        const mapped = results.map((r) => ({ ...mapOpenBreweryToDb(r), id: r.id, created_at: new Date().toISOString() } as Brewery))
-        setNearbyBreweries(mapped)
-        if (mapped.length === 1) {
-          setAutoDetected(mapped[0])
+        try {
+          const res = await fetch(`/api/breweries?lat=${latitude}&lng=${longitude}&limit=5`)
+          const data = await res.json()
+          const results: Brewery[] = data.breweries ?? []
+          setNearbyBreweries(results)
+          if (results.length === 1) setAutoDetected(results[0])
+        } catch {
+          setLocationError(true)
         }
       },
       () => {
@@ -73,8 +75,13 @@ export default function CheckinEntryDrawer({ isOpen, onClose, onSessionStarted }
     if (!query.trim()) { setResults([]); return }
     const timer = setTimeout(async () => {
       setSearching(true)
-      const raw = await searchBreweries(query)
-      setResults(raw.map((r) => ({ ...mapOpenBreweryToDb(r), id: r.id, created_at: new Date().toISOString() } as Brewery)))
+      try {
+        const res = await fetch(`/api/breweries?q=${encodeURIComponent(query)}&limit=10`)
+        const data = await res.json()
+        setResults(data.breweries ?? [])
+      } catch {
+        setResults([])
+      }
       setSearching(false)
     }, 300)
     return () => clearTimeout(timer)
