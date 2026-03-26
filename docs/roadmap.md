@@ -1,7 +1,7 @@
 # HopTrack Product Roadmap
 **Last updated:** 2026-03-26
 **PM:** Morgan
-**Current Sprint:** Sprint 14 — Clean House, Open Doors
+**Current Sprint:** Sprint 15 — Walk the Floor
 
 > This is a living document — updated every sprint. For completed sprints 1–12, see `docs/roadmap-archive.md`.
 
@@ -16,37 +16,54 @@
 
 ---
 
-## Sprint 14 — Clean House, Open Doors (CURRENT)
+## Sprint 14 — Clean House, Open Doors (COMPLETE)
 **Theme:** Kill the legacy, ship real push notifications, close the first deal
 **Plan:** `docs/sprint-14-plan.md`
+**Retro:** `docs/retros/sprint-14-retro.md`
+
+15 deliverables shipped: checkins table reads migrated (9 files), writes disabled (410 Gone), CheckinModal removed, Web Push notifications, notification preferences, lower-tier style badges (50 total), profile empty states, feed polish, share card upgrades (save-as-image, QR, OG tags), explore filters, Capacitor installed, claim flow trial badge, privacy policy, App Store prep, migrations 012-013. TestFlight deferred to S15.
+
+---
+
+## Sprint 15 — Walk the Floor (CURRENT)
+**Theme:** Validation — design, QA, and BA audit every flow, then fix what they find
+**Plan:** `docs/sprint-15-plan.md`
 
 ### P0
 
 | ID | Title | Owner | Status |
 |----|-------|-------|--------|
-| S14-001 | Migrate all `checkins` reads to `sessions`/`beer_logs` | Jordan | ✅ |
-| S14-002 | Disable `checkins` writes + remove legacy components | Jordan | ✅ |
-| S14-D01 | Capacitor → TestFlight (SHIPPING) | Alex | 🔲 |
-| S14-004 | Full Web Push with VAPID keys | Riley + Jordan | 🔲 |
-| S14-010 | First paid brewery close | Taylor | 🔲 |
+| S15-001 | Generate VAPID keys | Riley | 🔲 |
+| S15-002 | Apply migration 014 (reactions FK) | Riley + Jordan | 🔲 |
+| S15-003 | Design audit — every page, every state | Alex | 🔲 |
+| S15-004 | BA/UX audit — every user journey | Sam | 🔲 |
+| S15-005 | QA regression — full pass | Casey | 🔲 |
+| S15-006 | Wire friend Accept/Decline buttons | Jordan | 🔲 |
+| S15-007 | Wire friend search + Add Friend | Jordan | 🔲 |
+| S15-008 | Delete dead code (CheckinCard + CheckinModal) | Jordan | 🔲 |
+| S15-021 | Close first brewery | Taylor | 🔲 |
 
 ### P1
 
 | ID | Title | Owner | Status |
 |----|-------|-------|--------|
-| S14-006 | Lower-tier style badges (ipa_lover, sour_head, stout_season) | Jordan | ✅ |
-| S14-007 | Profile empty states + polish | Jordan + Alex | ✅ |
-| S14-008 | Feed polish — session duration + context badges | Jordan | ✅ |
-| S14-003 | Plan reactions FK migration (prep for S15) | Jordan + Riley | 🔲 |
-| S14-005 | Notification preferences — wire up settings toggles | Jordan | 🔲 |
-| S14-009a | Share card improvements — OG tags, save-as-image | Jamie + Jordan | 🔲 |
-| S14-011 | App Store prep — screenshots, description, icon | Jamie + Alex | 🔲 |
+| S15-009 | Loading.tsx — auth routes (2) | Jordan | 🔲 |
+| S15-010 | Loading.tsx — superadmin routes (6) | Jordan | 🔲 |
+| S15-011 | Loading.tsx — remaining routes (5) | Jordan | 🔲 |
+| S15-012 | Error.tsx — 3 route groups | Jordan | 🔲 |
+| S15-013 | Replace "check-in" copy → session/visit (14 locations) | Jordan | 🔲 |
+| S15-014 | Fix /session/[id] share page for social crawlers | Jordan | 🔲 |
+| S15-015 | Wire profile photo change | Jordan | 🔲 |
+| S15-016 | Add Friend button on profiles | Jordan | 🔲 |
+| S15-019 | Write migration 015 (checkins drop) — WRITE ONLY | Jordan + Riley | 🔲 |
+| S15-020 | TestFlight submission (5th carry) | Alex | 🔲 |
 
 ### P2
 
 | ID | Title | Owner | Status |
 |----|-------|-------|--------|
-| S14-009b | Explore page filters | Jordan + Alex | 🔲 |
+| S15-017 | Post-signup onboarding card | Jordan + Alex | 🔲 |
+| S15-018 | Claim flow trial badge on pending view | Jordan | 🔲 |
 
 ---
 

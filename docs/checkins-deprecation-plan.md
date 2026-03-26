@@ -2,7 +2,7 @@
 
 **Authors:** Riley + Jordan
 **Date:** 2026-03-26
-**Status:** Phase 1 (Dual-Read) — in progress
+**Status:** Phase 4-5 (Ready to Drop) — migration 015 written, apply in Sprint 16
 
 ---
 
@@ -79,9 +79,12 @@ Replace all `checkins` queries with `sessions` + `beer_logs` queries.
 
 | Sprint | Phase | Deliverable |
 |--------|-------|-------------|
-| S13 | Phase 1 | This plan + dual-read (DONE) |
-| S14 | Phase 2-3 | Migrate all reads, disable writes |
-| S15 | Phase 4-5 | Clean up FKs, archive, drop table |
+| S13 | Phase 1 | This plan + dual-read ✅ |
+| S14 | Phase 2-3 | Migrate all reads, disable writes ✅ |
+| S14 | Phase 3b | Migration 014 written (reactions FK) ✅ |
+| S15 | Phase 4-5 | Migration 015 written (archive + drop) ✅ — APPLY IN S16 |
+| S15 | Cleanup | Dead code deleted (CheckinCard, CheckinModal) ✅ |
+| S16 | Final | Apply migrations 014 + 015, remove /api/checkins route |
 
 ## Risks
 

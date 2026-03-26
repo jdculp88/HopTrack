@@ -7,6 +7,7 @@ import { AchievementBadge } from "@/components/achievements/AchievementBadge";
 import { ProfileBanner } from "@/components/profile/ProfileBanner";
 import { BeerStyleBadge } from "@/components/ui/BeerStyleBadge";
 import { AchievementsGrid } from "./AchievementsGrid";
+import { FriendButton } from "@/components/social/FriendButton";
 import { getLevelProgress } from "@/lib/xp";
 import { generateGradientFromString, formatABV } from "@/lib/utils";
 
@@ -118,6 +119,11 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
             <h1 className="font-display text-2xl font-bold text-[var(--text-primary)] leading-tight">{profile.display_name}</h1>
             <p className="text-sm text-[var(--text-muted)]">@{profile.username}</p>
           </div>
+          {!isOwnProfile && (
+            <div className="pb-1">
+              <FriendButton profileId={profile.id} currentUserId={user.id} />
+            </div>
+          )}
         </div>
 
         {/* Level + XP */}
@@ -178,7 +184,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
         <div className="grid grid-cols-3 gap-4 mb-8">
           <div className="text-center bg-[var(--surface)] border border-[var(--border)] rounded-2xl py-5">
             <p className="font-display text-3xl font-bold text-[#D4A843]">{profile.total_checkins}</p>
-            <p className="text-xs text-[var(--text-muted)] mt-1">Check-ins</p>
+            <p className="text-xs text-[var(--text-muted)] mt-1">Sessions</p>
           </div>
           <div className="text-center bg-[var(--surface)] border border-[var(--border)] rounded-2xl py-5">
             <p className="font-display text-3xl font-bold text-[#D4A843]">{profile.unique_beers}</p>

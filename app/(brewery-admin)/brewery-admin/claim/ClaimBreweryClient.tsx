@@ -201,6 +201,20 @@ export function ClaimBreweryClient({ userEmail, pendingClaim }: ClaimBreweryClie
               </div>
             </div>
 
+            {/* 14-day free trial badge */}
+            <div
+              className="flex items-center gap-2 rounded-xl p-3"
+              style={{ background: "rgba(61,122,82,0.1)", border: "1px solid rgba(61,122,82,0.2)" }}
+            >
+              <span className="text-lg">🎉</span>
+              <div>
+                <p className="text-sm font-medium" style={{ color: "#3D7A52" }}>14-day free trial included</p>
+                <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
+                  Once approved, you&rsquo;ll get full access to the Tap tier — no payment required for 14 days.
+                </p>
+              </div>
+            </div>
+
             <p className="text-xs" style={{ color: "var(--text-muted)" }}>
               Questions? Reach out to{" "}
               <a href="mailto:support@hoptrack.beer" className="underline" style={{ color: "var(--accent-gold)" }}>

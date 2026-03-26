@@ -56,7 +56,7 @@ export default async function SuperadminOverviewPage() {
       href: "/superadmin/breweries",
     },
     {
-      label: "Total Check-ins",
+      label: "Total Sessions",
       value: (totalCheckins ?? 0).toLocaleString(),
       icon: TrendingUp,
       note: "all time",

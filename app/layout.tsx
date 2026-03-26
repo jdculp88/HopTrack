@@ -37,8 +37,8 @@ export const metadata: Metadata = {
     template: "%s | HopTrack",
   },
   description:
-    "The social brewery and beer tracking app. Check in, rate, compete, and discover the world's best craft beers.",
-  keywords: ["beer", "brewery", "craft beer", "tracking", "check-in", "social"],
+    "The social brewery and beer tracking app. Track sessions, rate, compete, and discover the world's best craft beers.",
+  keywords: ["beer", "brewery", "craft beer", "tracking", "session", "social"],
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,

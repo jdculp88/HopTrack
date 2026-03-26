@@ -244,6 +244,45 @@ Retro: `docs/retros/sprint-13-retro.md`
 - Riley: generate VAPID keys (`npx web-push generate-vapid-keys` → `.env.local`)
 - Taylor: close first paid brewery
 
+### Sprint 15 — IN PROGRESS
+**Theme:** Walk the Floor — validation, QA, and fixes
+**Plan:** `docs/sprint-15-plan.md`
+
+**Session 1 (2026-03-26):**
+- ✅ S15-008: Deleted dead code — `CheckinCard.tsx` (189 lines) + `CheckinModal.tsx` (750 lines)
+- ✅ S15-006: Wired friend Accept/Decline buttons with optimistic UI + toast
+- ✅ S15-007: Wired friend search + Add Friend — new `/api/users/search` endpoint, debounced search, Add Friend from results
+- ✅ S15-009/010/011: Added 13 `loading.tsx` skeletons (auth 2, superadmin 6, root 5)
+- ✅ S15-012: Added `error.tsx` to 3 route groups — `(app)`, `(brewery-admin)`, `(superadmin)` with Sentry reporting
+- ✅ S15-013: Replaced all "check-in" UI copy → "session"/"visit"/"pour" across 10+ files
+- ✅ S15-014: Fixed `/session/[id]` — renders real landing page with session summary (no more redirect), OG tags work for social crawlers
+- ✅ S15-015: Wired profile photo change — file input, Supabase Storage upload, avatar_url update
+- ✅ S15-016: Added `FriendButton` component on other users' profiles (Add/Pending/Friends states)
+- ✅ S15-017: Post-signup onboarding card on home feed — 3-step welcome for new users, dismissible
+- ✅ S15-018: Added 14-day trial badge to claim pending view
+- ✅ S15-019: Wrote migration 015 (checkins table archive + drop) — WRITE ONLY, apply in S16
+
+**Key architectural changes from Sprint 15:**
+- `FriendButton` component at `components/social/FriendButton.tsx`
+- `/api/users/search` endpoint for finding users by username/display_name
+- Friends page: Accept/Decline wired, search filters existing friends AND finds new users
+- All route groups have `error.tsx` boundaries with Sentry reporting
+- 13 new `loading.tsx` skeletons — total coverage now ~95%
+- `/session/[id]` is a real page (dark card with session summary, "Open in HopTrack" CTA)
+- Profile page shows "Add Friend" button for non-self profiles
+- Settings: avatar upload via Supabase Storage `avatars` bucket
+- Home feed: onboarding card for zero-session users (dismissible, localStorage)
+- Claim pending view shows 14-day trial badge + timeline info
+- Zero "check-in" in user-visible UI copy — all replaced with session/visit/pour
+- Migration 015 archives checkins to `_archive_checkins` table, drops FK columns, drops table
+
+**Still needed (Riley/Alex/Taylor):**
+- Riley: Generate VAPID keys Day 1 (push broken until then)
+- Riley: Apply migration 014 (reactions FK backfill)
+- Alex: TestFlight submission (5th carry)
+- Taylor: Close first brewery
+- Alex/Sam/Casey: Deliver audit docs (design, BA, QA)
+
 ### Migration state
 - 001–003: Core schema + seed
 - 004: Brewery RLS fix (brewery_accounts OR created_by for UPDATE)
@@ -257,6 +296,7 @@ Retro: `docs/retros/sprint-13-retro.md`
 - 012: Notification preferences (JSONB on profiles) ✅ APPLIED
 - 013: Push subscriptions table (Web Push endpoints) ✅ APPLIED
 - 014: Reactions FK migration (session_id + beer_log_id on reactions) ⏳ WRITTEN, NOT APPLIED — apply in S15
+- 015: Drop checkins table (archive + drop FK + drop table) ⏳ WRITTEN, NOT APPLIED — apply in S16
 
 ### Revenue Targets
 - Tap tier: $49/mo

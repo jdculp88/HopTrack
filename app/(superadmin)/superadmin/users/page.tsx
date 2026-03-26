@@ -100,7 +100,7 @@ export default async function UsersPage({
         >
           <span className="w-8" />
           <span>User</span>
-          <span className="w-20 text-right">Check-ins</span>
+          <span className="w-20 text-right">Sessions</span>
           <span className="w-16 text-right">Level</span>
           <span className="w-16 text-right hidden sm:block">XP</span>
           <span className="w-24 text-right hidden md:block">Joined</span>

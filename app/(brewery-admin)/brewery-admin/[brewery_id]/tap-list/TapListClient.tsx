@@ -201,7 +201,7 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
                     {beer.abv && <span className="text-xs font-mono" style={{ color: "var(--text-muted)" }}>{beer.abv}% ABV</span>}
                     {beer.ibu && <span className="text-xs font-mono" style={{ color: "var(--text-muted)" }}>{beer.ibu} IBU</span>}
                     {beer.avg_rating && <span className="text-xs font-mono" style={{ color: "var(--accent-gold)" }}>★ {beer.avg_rating.toFixed(1)}</span>}
-                    {beer.total_checkins > 0 && <span className="text-xs" style={{ color: "var(--text-muted)" }}>{beer.total_checkins} check-ins</span>}
+                    {beer.total_checkins > 0 && <span className="text-xs" style={{ color: "var(--text-muted)" }}>{beer.total_checkins} pours</span>}
                   </div>
                 </div>
 

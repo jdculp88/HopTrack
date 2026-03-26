@@ -17,14 +17,14 @@ export default async function ContentPage() {
   const UPCOMING = [
     {
       icon: Flag,
-      title: "Reported Check-ins",
-      desc: "Users can flag check-ins that violate community guidelines. Review queue coming in Sprint 8.",
+      title: "Reported Sessions",
+      desc: "Users can flag sessions that violate community guidelines. Review queue coming in Sprint 8.",
       status: "Sprint 8",
     },
     {
       icon: MessageSquare,
       title: "Comment Moderation",
-      desc: "Review and remove comments on check-ins. Planned once comment threads ship.",
+      desc: "Review and remove comments on sessions. Planned once comment threads ship.",
       status: "Sprint 9",
     },
     {
@@ -68,7 +68,7 @@ export default async function ContentPage() {
       {/* Current content stats */}
       <div className="grid grid-cols-3 gap-4 mb-8">
         {[
-          { label: "Total Check-ins", value: (totalCheckins ?? 0).toLocaleString() },
+          { label: "Total Sessions", value: (totalCheckins ?? 0).toLocaleString() },
           { label: "Beers in DB", value: (totalBeers ?? 0).toLocaleString() },
           { label: "Breweries", value: (totalBreweries ?? 0).toLocaleString() },
         ].map((stat) => (

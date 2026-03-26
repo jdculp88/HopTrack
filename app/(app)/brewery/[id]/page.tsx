@@ -210,7 +210,7 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
           <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-4 flex flex-col gap-1">
             <div className="flex items-center gap-1.5 text-[var(--text-muted)]">
               <CheckCheck size={13} />
-              <span className="text-xs font-mono uppercase tracking-wider">Check-ins</span>
+              <span className="text-xs font-mono uppercase tracking-wider">Visits</span>
             </div>
             <p className="font-display text-2xl font-bold text-[var(--text-primary)] leading-none">
               {totalCheckins.toLocaleString()}

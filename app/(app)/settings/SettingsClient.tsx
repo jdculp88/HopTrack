@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { User, MapPin, Lock, Palette, Trash2, ChevronRight, Bell } from "lucide-react";
+import { User, MapPin, Lock, Palette, Trash2, ChevronRight, Bell, Camera, Loader2 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { createClient } from "@/lib/supabase/client";
+import { useToast } from "@/components/ui/Toast";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import type { Profile } from "@/types/database";
 
@@ -26,6 +27,8 @@ export function SettingsClient({ profile, userEmail }: SettingsClientProps) {
   const [isPublic, setIsPublic] = useState(profile?.is_public ?? true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const { success: toastSuccess, error: toastError } = useToast();
   const [notifPrefs, setNotifPrefs] = useState<Record<string, boolean>>(
     () => ({ ...DEFAULT_PREFS, ...((profile as any)?.notification_preferences ?? {}) })
   );
@@ -56,6 +59,40 @@ export function SettingsClient({ profile, userEmail }: SettingsClientProps) {
     });
   }
 
+  async function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      toastError("Image must be under 5MB");
+      return;
+    }
+    setUploadingPhoto(true);
+    try {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+      const ext = file.name.split(".").pop() || "jpg";
+      const path = `${user.id}/avatar.${ext}`;
+      const { error: uploadError } = await supabase.storage
+        .from("avatars")
+        .upload(path, file, { upsert: true });
+      if (uploadError) throw uploadError;
+      const { data: { publicUrl } } = supabase.storage.from("avatars").getPublicUrl(path);
+      const avatarUrl = `${publicUrl}?t=${Date.now()}`;
+      await fetch("/api/profiles", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ avatar_url: avatarUrl }),
+      });
+      toastSuccess("Photo updated!");
+      router.refresh();
+    } catch {
+      toastError("Failed to upload photo");
+    } finally {
+      setUploadingPhoto(false);
+    }
+  }
+
   async function handleSignOut() {
     const supabase = createClient();
     await supabase.auth.signOut();
@@ -74,7 +111,11 @@ export function SettingsClient({ profile, userEmail }: SettingsClientProps) {
               <UserAvatar profile={{ ...profile, display_name: displayName }} size="lg" />
               <div>
                 <p className="text-sm font-medium text-[var(--text-primary)]">{displayName || "Your name"}</p>
-                <button type="button" className="text-xs text-[#D4A843] hover:underline mt-1">Change photo</button>
+                <label className="text-xs text-[#D4A843] hover:underline mt-1 cursor-pointer inline-flex items-center gap-1">
+                  {uploadingPhoto ? <Loader2 size={10} className="animate-spin" /> : <Camera size={10} />}
+                  {uploadingPhoto ? "Uploading..." : "Change photo"}
+                  <input type="file" accept="image/*" onChange={handlePhotoChange} className="hidden" />
+                </label>
               </div>
             </div>
           )}
@@ -145,7 +186,7 @@ export function SettingsClient({ profile, userEmail }: SettingsClientProps) {
           <div className="flex items-center justify-between py-2">
             <div>
               <p className="font-medium text-[var(--text-primary)] text-sm">Friend Activity</p>
-              <p className="text-xs text-[var(--text-muted)] mt-0.5">Get notified when friends check in at a brewery</p>
+              <p className="text-xs text-[var(--text-muted)] mt-0.5">Get notified when friends start a session</p>
             </div>
             <Toggle value={notifPrefs.friend_activity} onChange={(v) => handleNotifToggle("friend_activity", v)} />
           </div>

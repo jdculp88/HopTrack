@@ -26,7 +26,7 @@ export default function PrivacyPage() {
             <p>When you use HopTrack, we collect:</p>
             <ul className="list-disc pl-5 space-y-1 mt-2">
               <li>Account info (email, display name, username)</li>
-              <li>Beer check-in data (beers, ratings, breweries visited)</li>
+              <li>Beer session data (beers, ratings, breweries visited)</li>
               <li>Optional profile info (bio, home city, avatar)</li>
               <li>Push notification subscription data (if you opt in)</li>
               <li>Device info for app analytics (anonymous, via Sentry)</li>

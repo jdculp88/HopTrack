@@ -95,7 +95,7 @@ export function PintRewindShareCard({
                       className="text-xs font-mono uppercase tracking-wider mt-1"
                       style={{ color: "#6B6456" }}
                     >
-                      Check-ins
+                      Visits
                     </p>
                   </div>
                   <div
@@ -133,7 +133,7 @@ export function PintRewindShareCard({
                       {stats.topBeers[0].name}
                     </p>
                     <p className="text-sm mt-0.5" style={{ color: "#A89F8C" }}>
-                      {stats.topBeers[0].count} check-in{stats.topBeers[0].count !== 1 ? "s" : ""}
+                      {stats.topBeers[0].count} pour{stats.topBeers[0].count !== 1 ? "s" : ""}
                     </p>
                   </div>
                 )}
