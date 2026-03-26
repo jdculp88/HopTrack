@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Search, Check, Loader2, Beer } from 'lucide-react'
+import { X, Search, Check, Loader2, Beer, Plus } from 'lucide-react'
 import { FullScreenDrawer } from '@/components/ui/Modal'
 import { Skeleton } from '@/components/ui/SkeletonLoader'
 import { useSession } from '@/hooks/useSession'
@@ -23,7 +23,8 @@ interface TapWallSheetProps {
   onClose: () => void
   session: Session
   breweryName: string
-  breweryId: string
+  breweryId: string | null
+  homeMode?: boolean
   onSessionEnd: (result: { xpGained: number; newAchievements: any[] }) => void
 }
 
@@ -71,6 +72,7 @@ export default function TapWallSheet({
   session,
   breweryName,
   breweryId,
+  homeMode = false,
   onSessionEnd,
 }: TapWallSheetProps) {
   const [beers, setBeers] = useState<TapWallBeer[]>([])
@@ -78,22 +80,52 @@ export default function TapWallSheet({
   const [query, setQuery] = useState('')
   const [localLogs, setLocalLogs] = useState<BeerLog[]>(session.beer_logs ?? [])
   const [loggingBeer, setLoggingBeer] = useState<string | null>(null)
+  const [incrementingLog, setIncrementingLog] = useState<string | null>(null)
   const [ratingSheet, setRatingSheet] = useState<{ log: BeerLog; beerName: string } | null>(null)
   const [showEndConfirm, setShowEndConfirm] = useState(false)
   const [ending, setEnding] = useState(false)
-  const { logBeer, updateBeerLog, endSession } = useSession()
+  // Map of beer_id → previous rating (from any past session)
+  const [previousRatings, setPreviousRatings] = useState<Map<string, number>>(new Map())
+  const { logBeer, updateBeerLog, incrementBeerQuantity, endSession } = useSession()
   const elapsed = useElapsedTime(session.started_at)
 
-  // Fetch beers when opened
+  // Fetch beers on open
   useEffect(() => {
     if (!isOpen) return
     setBeerLoading(true)
-    fetch(`/api/beers?brewery_id=${breweryId}`)
+
+    const url = homeMode
+      ? (query.trim() ? `/api/beers?q=${encodeURIComponent(query)}&limit=20` : null)
+      : (breweryId ? `/api/beers?brewery_id=${breweryId}` : null)
+
+    if (!url) {
+      setBeers([])
+      setBeerLoading(false)
+      return
+    }
+
+    fetch(url)
       .then((r) => r.json())
       .then((d) => setBeers((d.beers as TapWallBeer[]) ?? []))
       .catch(() => setBeers([]))
       .finally(() => setBeerLoading(false))
-  }, [isOpen, breweryId])
+  }, [isOpen, breweryId, homeMode])
+
+  // In home mode, re-fetch on query change (debounced)
+  useEffect(() => {
+    if (!isOpen || !homeMode) return
+    if (!query.trim()) { setBeers([]); return }
+
+    setBeerLoading(true)
+    const timer = setTimeout(() => {
+      fetch(`/api/beers?q=${encodeURIComponent(query)}&limit=20`)
+        .then((r) => r.json())
+        .then((d) => setBeers((d.beers as TapWallBeer[]) ?? []))
+        .catch(() => setBeers([]))
+        .finally(() => setBeerLoading(false))
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [query, isOpen, homeMode])
 
   // Sync logs from session prop on open
   useEffect(() => {
@@ -102,26 +134,45 @@ export default function TapWallSheet({
     }
   }, [isOpen, session.beer_logs])
 
-  const loggedBeerIds = new Set(localLogs.map((l) => l.beer_id).filter(Boolean))
+  // Fetch previously-rated beer IDs on open (for smart re-review skip)
+  useEffect(() => {
+    if (!isOpen) return
+    fetch('/api/beer-logs/rated')
+      .then((r) => r.json())
+      .then((d) => {
+        const map = new Map<string, number>()
+        for (const entry of d.rated ?? []) {
+          map.set(entry.beer_id, entry.rating)
+        }
+        setPreviousRatings(map)
+      })
+      .catch(() => {})
+  }, [isOpen])
+
+  // beer_id → log in this session
+  const loggedBeerMap = new Map<string, BeerLog>()
+  for (const log of localLogs) {
+    if (log.beer_id) loggedBeerMap.set(log.beer_id, log)
+  }
 
   const filtered = query.trim()
     ? beers.filter((b) => b.name.toLowerCase().includes(query.toLowerCase()))
     : beers
 
-  const loggedBeers = filtered.filter((b) => loggedBeerIds.has(b.id))
-  const unloggedBeers = filtered.filter((b) => !loggedBeerIds.has(b.id))
+  const loggedBeers = filtered.filter((b) => loggedBeerMap.has(b.id))
+  const unloggedBeers = filtered.filter((b) => !loggedBeerMap.has(b.id))
 
   async function handleLogBeer(beer: TapWallBeer) {
-    if (loggedBeerIds.has(beer.id)) return
+    if (loggedBeerMap.has(beer.id)) return
     setLoggingBeer(beer.id)
 
-    // Optimistic: add a placeholder log
     const tempLog: BeerLog = {
       id: `temp-${beer.id}`,
       session_id: session.id,
       user_id: session.user_id,
       beer_id: beer.id,
       brewery_id: breweryId,
+      quantity: 1,
       rating: null,
       flavor_tags: null,
       serving_style: null,
@@ -133,16 +184,29 @@ export default function TapWallSheet({
     setLocalLogs((prev) => [...prev, tempLog])
     setLoggingBeer(null)
 
-    const result = await logBeer(session.id, { beer_id: beer.id, brewery_id: breweryId })
+    const result = await logBeer(session.id, {
+      beer_id: beer.id,
+      brewery_id: breweryId ?? undefined,
+    })
+
     if (result) {
-      // Replace temp log with real one
       setLocalLogs((prev) => prev.map((l) => l.id === tempLog.id ? { ...result, beer: tempLog.beer } : l))
-      // Show rating sheet
-      setRatingSheet({ log: result, beerName: beer.name })
+      // Skip rating sheet if user has already rated this beer in a past session
+      if (!previousRatings.has(beer.id)) {
+        setRatingSheet({ log: result, beerName: beer.name })
+      }
     } else {
-      // Rollback
       setLocalLogs((prev) => prev.filter((l) => l.id !== tempLog.id))
     }
+  }
+
+  async function handleIncrement(log: BeerLog) {
+    setIncrementingLog(log.id)
+    const updated = await incrementBeerQuantity(log.id, log.quantity ?? 1)
+    if (updated) {
+      setLocalLogs((prev) => prev.map((l) => l.id === log.id ? { ...l, quantity: updated.quantity } : l))
+    }
+    setIncrementingLog(null)
   }
 
   async function handleSaveRating(logId: string, rating: number, comment?: string) {
@@ -160,6 +224,9 @@ export default function TapWallSheet({
       onSessionEnd({ xpGained: result.xpGained, newAchievements: result.newAchievements })
     }
   }
+
+  // Total pours (sum of quantities)
+  const totalPours = localLogs.reduce((sum, l) => sum + (l.quantity ?? 1), 0)
 
   return (
     <>
@@ -184,12 +251,11 @@ export default function TapWallSheet({
               {elapsed}
             </p>
           </div>
-          {/* Session timer badge */}
           <div
             className="px-2.5 py-1 rounded-xl text-xs font-mono font-semibold"
             style={{ background: 'var(--surface-2)', color: 'var(--accent-gold)', border: '1px solid var(--border)' }}
           >
-            {localLogs.length} {localLogs.length === 1 ? 'beer' : 'beers'}
+            {totalPours} {totalPours === 1 ? 'beer' : 'beers'}
           </div>
         </div>
 
@@ -202,7 +268,7 @@ export default function TapWallSheet({
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search the tap list..."
+              placeholder={homeMode ? 'Search all beers...' : 'Search the tap list...'}
               className="w-full rounded-xl pl-10 pr-4 py-2.5 text-sm outline-none transition-colors"
               style={{
                 background: 'var(--surface-2)',
@@ -219,7 +285,17 @@ export default function TapWallSheet({
             <>
               {[...Array(5)].map((_, i) => <BeerSkeletonRow key={i} />)}
             </>
-          ) : beers.length === 0 ? (
+          ) : homeMode && !query.trim() ? (
+            <div className="flex flex-col items-center justify-center py-16 text-center space-y-3">
+              <span className="text-5xl">🍺</span>
+              <p className="font-display text-xl font-bold" style={{ color: 'var(--text-primary)' }}>
+                What are you having?
+              </p>
+              <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                Search for a beer to log it.
+              </p>
+            </div>
+          ) : beers.length === 0 && !homeMode ? (
             <div className="flex flex-col items-center justify-center py-16 text-center space-y-3">
               <span className="text-5xl">🍺</span>
               <p className="font-display text-xl font-bold" style={{ color: 'var(--text-primary)' }}>
@@ -231,24 +307,30 @@ export default function TapWallSheet({
             </div>
           ) : (
             <>
-              {/* Logged beers at top */}
+              {/* Already had this session */}
               {loggedBeers.length > 0 && (
                 <>
                   <p className="text-xs font-mono uppercase tracking-widest pt-2 pb-1" style={{ color: 'var(--accent-gold)' }}>
                     Already had
                   </p>
-                  {loggedBeers.map((beer) => (
-                    <BeerRow
-                      key={beer.id}
-                      beer={beer}
-                      logged
-                      loading={false}
-                      onLog={() => {}}
-                    />
-                  ))}
+                  {loggedBeers.map((beer) => {
+                    const log = loggedBeerMap.get(beer.id)!
+                    return (
+                      <BeerRow
+                        key={beer.id}
+                        beer={beer}
+                        logged
+                        quantity={log.quantity ?? 1}
+                        incrementing={incrementingLog === log.id}
+                        onIncrement={() => handleIncrement(log)}
+                        loading={false}
+                        onLog={() => {}}
+                      />
+                    )
+                  })}
                   {unloggedBeers.length > 0 && (
                     <p className="text-xs font-mono uppercase tracking-widest pt-3 pb-1" style={{ color: 'var(--text-muted)' }}>
-                      On tap
+                      {homeMode ? 'More results' : 'On tap'}
                     </p>
                   )}
                 </>
@@ -260,6 +342,9 @@ export default function TapWallSheet({
                   key={beer.id}
                   beer={beer}
                   logged={false}
+                  quantity={1}
+                  incrementing={false}
+                  onIncrement={() => {}}
                   loading={loggingBeer === beer.id}
                   onLog={() => handleLogBeer(beer)}
                 />
@@ -274,12 +359,11 @@ export default function TapWallSheet({
           )}
         </div>
 
-        {/* Session tray pinned at bottom */}
+        {/* Session tray */}
         <div
           className="absolute bottom-0 left-0 right-0 px-4 pb-safe pt-3"
           style={{ background: 'var(--surface)', borderTop: '1px solid var(--border)' }}
         >
-          {/* Inline end confirmation */}
           <AnimatePresence>
             {showEndConfirm && (
               <motion.div
@@ -290,7 +374,7 @@ export default function TapWallSheet({
               >
                 <div className="pb-3">
                   <p className="text-sm font-medium text-center mb-3" style={{ color: 'var(--text-primary)' }}>
-                    End your session at {breweryName}?
+                    {homeMode ? 'Finish your home session?' : `End your session at ${breweryName}?`}
                   </p>
                   <div className="flex gap-2">
                     <button
@@ -321,7 +405,7 @@ export default function TapWallSheet({
           <div className="flex items-center justify-between gap-3 py-2">
             <div>
               <p className="text-xs font-mono" style={{ color: 'var(--text-muted)' }}>
-                {localLogs.length} {localLogs.length === 1 ? 'beer' : 'beers'} · {elapsed}
+                {totalPours} {totalPours === 1 ? 'beer' : 'beers'} · {elapsed}
               </p>
             </div>
             <button
@@ -339,7 +423,6 @@ export default function TapWallSheet({
         </div>
       </FullScreenDrawer>
 
-      {/* Quick rating sheet rendered outside the main drawer so it can stack on top */}
       {ratingSheet && (
         <QuickRatingSheet
           beerLog={ratingSheet.log}
@@ -357,11 +440,17 @@ export default function TapWallSheet({
 function BeerRow({
   beer,
   logged,
+  quantity,
+  incrementing,
+  onIncrement,
   loading,
   onLog,
 }: {
   beer: TapWallBeer
   logged: boolean
+  quantity: number
+  incrementing: boolean
+  onIncrement: () => void
   loading: boolean
   onLog: () => void
 }) {
@@ -410,9 +499,30 @@ function BeerRow({
 
       {/* Action */}
       {logged ? (
-        <span className="text-xs font-mono font-semibold flex-shrink-0" style={{ color: 'var(--accent-gold)' }}>
-          Logged ✓
-        </span>
+        <div className="flex items-center gap-2 flex-shrink-0">
+          {quantity > 1 && (
+            <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-lg" style={{ background: 'var(--surface-2)', color: 'var(--accent-gold)' }}>
+              ×{quantity}
+            </span>
+          )}
+          <button
+            onClick={onIncrement}
+            disabled={incrementing}
+            className="w-9 h-9 rounded-xl flex items-center justify-center transition-all disabled:opacity-60"
+            style={{
+              background: 'var(--surface-2)',
+              border: '1px solid var(--border)',
+              color: 'var(--text-secondary)',
+            }}
+            title="Had another one"
+          >
+            {incrementing ? (
+              <Loader2 size={13} className="animate-spin" />
+            ) : (
+              <Plus size={14} />
+            )}
+          </button>
+        </div>
       ) : (
         <button
           onClick={onLog}

@@ -40,14 +40,10 @@ export async function POST(
   const body = await request.json()
   const { beer_id, brewery_id, rating, flavor_tags, serving_style, comment, photo_url } = body
 
-  if (!brewery_id) {
-    return NextResponse.json({ error: 'brewery_id is required' }, { status: 400 })
-  }
-
   // Verify the session belongs to this user and is active
   const { data: session } = await (supabase as any)
     .from('sessions')
-    .select('id, is_active, brewery_id')
+    .select('id, is_active, brewery_id, context')
     .eq('id', sessionId)
     .eq('user_id', user.id)
     .single()
@@ -65,7 +61,7 @@ export async function POST(
       session_id: sessionId,
       user_id: user.id,
       beer_id: beer_id || null,
-      brewery_id,
+      brewery_id: brewery_id || session.brewery_id || null,
       rating: rating || null,
       flavor_tags: flavor_tags || null,
       serving_style: serving_style || null,

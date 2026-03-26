@@ -1,17 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
-// POST /api/sessions — start a new session (check-in)
+// POST /api/sessions — start a new session (check-in at brewery or home)
 export async function POST(request: NextRequest) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const body = await request.json()
-  const { brewery_id, share_to_feed = true, note } = body
+  const { brewery_id, share_to_feed = true, note, context = 'brewery' } = body
 
-  if (!brewery_id) {
-    return NextResponse.json({ error: 'brewery_id is required' }, { status: 400 })
+  if (context === 'brewery' && !brewery_id) {
+    return NextResponse.json({ error: 'brewery_id is required for brewery sessions' }, { status: 400 })
   }
 
   // Close any existing active session for this user before starting a new one
@@ -25,9 +25,10 @@ export async function POST(request: NextRequest) {
     .from('sessions')
     .insert({
       user_id: user.id,
-      brewery_id,
+      brewery_id: brewery_id || null,
       share_to_feed,
       note: note || null,
+      context,
     })
     .select()
     .single()
@@ -37,11 +38,19 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to create session' }, { status: 500 })
   }
 
-  // Increment profile total_checkins (1 session = 1 check-in for stat purposes)
-  await (supabase as any)
+  // Increment profile total_checkins — fetch current value then update
+  const { data: profile } = await (supabase as any)
     .from('profiles')
-    .update({ total_checkins: (supabase as any).rpc('increment', { x: 1 }) })
+    .select('total_checkins')
     .eq('id', user.id)
+    .single()
+
+  if (profile) {
+    await (supabase as any)
+      .from('profiles')
+      .update({ total_checkins: (profile.total_checkins || 0) + 1 })
+      .eq('id', user.id)
+  }
 
   return NextResponse.json({ session }, { status: 201 })
 }
@@ -63,7 +72,7 @@ export async function GET(request: NextRequest) {
       *,
       profile:profiles!sessions_user_id_fkey(id, username, display_name, avatar_url),
       beer_logs(
-        id, beer_id, rating, flavor_tags, serving_style, comment, photo_url, logged_at
+        id, beer_id, rating, flavor_tags, serving_style, comment, photo_url, logged_at, quantity
       )
     `)
     .eq('user_id', userId)

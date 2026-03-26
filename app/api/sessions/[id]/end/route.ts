@@ -26,7 +26,7 @@ export async function PATCH(
     .from('sessions')
     .select(`
       *,
-      beer_logs(id, beer_id, rating)
+      beer_logs(id, beer_id, rating, quantity)
     `)
     .eq('id', sessionId)
     .eq('user_id', user.id)
@@ -40,8 +40,10 @@ export async function PATCH(
   }
 
   const beerLogs: any[] = session.beer_logs || []
-  const beerCount = beerLogs.length
+  // beerCount = total pours (respects quantity field)
+  const beerCount = beerLogs.reduce((sum: number, b: any) => sum + (b.quantity || 1), 0)
   const ratedCount = beerLogs.filter((b: any) => b.rating != null).length
+  const isHomeSession = session.context === 'home'
 
   // Calculate XP
   let xpGained = SESSION_XP.session_start
@@ -49,17 +51,20 @@ export async function PATCH(
   xpGained += ratedCount * SESSION_XP.per_rating
   if (beerCount >= 3) xpGained += SESSION_XP.three_plus_beers_bonus
 
-  // Check if this is a first visit to this brewery
-  const { data: existingSessions } = await (supabase as any)
-    .from('sessions')
-    .select('id')
-    .eq('user_id', user.id)
-    .eq('brewery_id', session.brewery_id)
-    .neq('id', sessionId)
-    .limit(1)
+  // First visit bonus only applies to brewery sessions
+  let isFirstVisit = false
+  if (!isHomeSession && session.brewery_id) {
+    const { data: existingSessions } = await (supabase as any)
+      .from('sessions')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('brewery_id', session.brewery_id)
+      .neq('id', sessionId)
+      .limit(1)
 
-  const isFirstVisit = !existingSessions || existingSessions.length === 0
-  if (isFirstVisit) xpGained += SESSION_XP.first_visit_bonus
+    isFirstVisit = !existingSessions || existingSessions.length === 0
+    if (isFirstVisit) xpGained += SESSION_XP.first_visit_bonus
+  }
 
   // End the session
   const { error: endError } = await (supabase as any)
@@ -88,7 +93,7 @@ export async function PATCH(
     const newLevel = levelData.level
 
     const updates: any = { xp: newXp, level: newLevel }
-    if (isFirstVisit) {
+    if (isFirstVisit && !isHomeSession) {
       updates.unique_breweries = (profile.unique_breweries || 0) + 1
     }
 

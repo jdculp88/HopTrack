@@ -82,9 +82,19 @@ export function AppShell({ children, username, unreadNotifications = 0 }: AppShe
     setCheckinOpen(false);
     setPreselectedBrewery(null);
     setTapWallOpen(true);
-    // Broadcast so HomeFeed / any page knows about the session
     window.dispatchEvent(new CustomEvent('hoptrack:session-changed', {
       detail: { session, breweryName },
+    }));
+  }, []);
+
+  const handleHomeSessionStarted = useCallback((session: Session) => {
+    setActiveSession(session);
+    setSessionBreweryName('At Home');
+    setCheckinOpen(false);
+    setPreselectedBrewery(null);
+    setTapWallOpen(true);
+    window.dispatchEvent(new CustomEvent('hoptrack:session-changed', {
+      detail: { session, breweryName: 'At Home' },
     }));
   }, []);
 
@@ -132,6 +142,7 @@ export function AppShell({ children, username, unreadNotifications = 0 }: AppShe
         isOpen={checkinOpen}
         onClose={() => { setCheckinOpen(false); setPreselectedBrewery(null); }}
         onSessionStarted={handleSessionStarted}
+        onHomeSessionStarted={handleHomeSessionStarted}
         preselectedBrewery={preselectedBrewery}
       />
 
@@ -142,6 +153,7 @@ export function AppShell({ children, username, unreadNotifications = 0 }: AppShe
           session={activeSession}
           breweryName={sessionBreweryName}
           breweryId={activeSession.brewery_id}
+          homeMode={activeSession.context === 'home'}
           onSessionEnd={handleSessionEnd}
         />
       )}

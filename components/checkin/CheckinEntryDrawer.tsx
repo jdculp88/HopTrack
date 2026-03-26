@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Search, MapPin, Loader2, ChevronRight } from 'lucide-react'
+import { X, Search, MapPin, Loader2, ChevronRight, Home } from 'lucide-react'
 import { FullScreenDrawer } from '@/components/ui/Modal'
 import { generateGradientFromString } from '@/lib/utils'
 import { useSession } from '@/hooks/useSession'
@@ -12,10 +12,11 @@ interface CheckinEntryDrawerProps {
   isOpen: boolean
   onClose: () => void
   onSessionStarted: (session: Session, breweryName: string) => void
+  onHomeSessionStarted?: (session: Session) => void
   preselectedBrewery?: Brewery | null
 }
 
-export default function CheckinEntryDrawer({ isOpen, onClose, onSessionStarted, preselectedBrewery }: CheckinEntryDrawerProps) {
+export default function CheckinEntryDrawer({ isOpen, onClose, onSessionStarted, onHomeSessionStarted, preselectedBrewery }: CheckinEntryDrawerProps) {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<Brewery[]>([])
   const [searching, setSearching] = useState(false)
@@ -23,10 +24,11 @@ export default function CheckinEntryDrawer({ isOpen, onClose, onSessionStarted, 
   const [autoDetected, setAutoDetected] = useState<Brewery | null>(null)
   const [locationError, setLocationError] = useState(false)
   const [startingFor, setStartingFor] = useState<string | null>(null)
+  const [startingHome, setStartingHome] = useState(false)
   const [startError, setStartError] = useState<string | null>(null)
   const [showSearch, setShowSearch] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
-  const { startSession } = useSession()
+  const { startSession, startHomeSession } = useSession()
 
   // Reset + detect on open
   useEffect(() => {
@@ -101,6 +103,19 @@ export default function CheckinEntryDrawer({ isOpen, onClose, onSessionStarted, 
       return
     }
     onSessionStarted(session, brewery.name)
+    onClose()
+  }
+
+  async function handleStartHomeSession() {
+    setStartingHome(true)
+    setStartError(null)
+    const session = await startHomeSession()
+    if (!session) {
+      setStartingHome(false)
+      setStartError('Could not start session. Please try again.')
+      return
+    }
+    onHomeSessionStarted?.(session)
     onClose()
   }
 
@@ -366,6 +381,40 @@ export default function CheckinEntryDrawer({ isOpen, onClose, onSessionStarted, 
                 </p>
               )}
             </div>
+          </div>
+        )}
+        {/* Home drinking option */}
+        {!preselectedBrewery && (
+          <div className="pt-4 border-t" style={{ borderColor: 'var(--border)' }}>
+            <button
+              onClick={handleStartHomeSession}
+              disabled={startingHome}
+              className="w-full flex items-center gap-3 p-4 rounded-2xl text-left transition-all disabled:opacity-60"
+              style={{
+                background: 'var(--surface)',
+                border: '1px solid var(--border)',
+              }}
+            >
+              <div
+                className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                style={{ background: 'var(--surface-2)' }}
+              >
+                {startingHome ? (
+                  <Loader2 size={16} className="animate-spin" style={{ color: 'var(--text-muted)' }} />
+                ) : (
+                  <Home size={16} style={{ color: 'var(--text-muted)' }} />
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-display font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
+                  Drinking at home
+                </p>
+                <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                  Log beers without a brewery check-in
+                </p>
+              </div>
+              <ChevronRight size={16} style={{ color: 'var(--text-muted)' }} />
+            </button>
           </div>
         )}
       </div>

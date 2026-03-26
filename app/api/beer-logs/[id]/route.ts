@@ -20,6 +20,7 @@ export async function PATCH(
   if (body.flavor_tags !== undefined) allowedUpdates.flavor_tags = body.flavor_tags
   if (body.serving_style !== undefined) allowedUpdates.serving_style = body.serving_style
   if (body.photo_url !== undefined) allowedUpdates.photo_url = body.photo_url
+  if (body.quantity !== undefined) allowedUpdates.quantity = Math.max(1, parseInt(body.quantity))
 
   if (Object.keys(allowedUpdates).length === 0) {
     return NextResponse.json({ error: 'No valid fields to update' }, { status: 400 })

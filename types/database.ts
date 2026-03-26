@@ -326,7 +326,8 @@ export type ReactionUpdate = Partial<Reaction>;
 export interface Session {
   id: string
   user_id: string
-  brewery_id: string
+  brewery_id: string | null
+  context: 'brewery' | 'home'
   started_at: string
   ended_at: string | null
   is_active: boolean
@@ -355,7 +356,8 @@ export interface BeerLog {
   session_id: string
   user_id: string
   beer_id: string | null
-  brewery_id: string
+  brewery_id: string | null
+  quantity: number
   rating: number | null
   flavor_tags: string[] | null
   serving_style: string | null

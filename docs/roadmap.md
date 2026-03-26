@@ -362,6 +362,69 @@ Per Drew's ops review, these are the items brewery owners will hit on day one:
 
 ---
 
+## 🚀 Sprint 12 — Consumer Delight & Pint Rewind (PLANNED)
+**Theme:** Make the consumer app feel magic. Engagement, personality, and retention.
+**Start:** After Sprint 11 closes
+**Sprint leads:** Jordan (dev), Alex (UX), Morgan (PM), Jamie (brand), Taylor (retention angle)
+
+> **Sprint goal:** Users open HopTrack for fun, not just logging. Pint Rewind goes consumer — funny, personal, shareable. The app feels like a place you want to live in.
+
+### 🔴 P0
+
+| ID | Title | Owner | Status |
+|----|-------|-------|--------|
+| S12-001 | **Customer Pint Rewind** — personalized, funny, shareable year/month-in-review for consumers | Jordan + Alex + Jamie | 🔲 |
+| S12-002 | Beer quantity increment in session ("+1 this one") — already shipped in Sprint 11 | Jordan | ✅ |
+| S12-003 | Smart re-review skip (don't re-rate a beer you've already reviewed) | Jordan | ✅ |
+| S12-004 | "Drinking at home" session path (no brewery required) | Jordan | ✅ |
+
+### 🟡 P1
+
+| ID | Title | Owner | Status |
+|----|-------|-------|--------|
+| S12-005 | Beer wishlist on consumer profile | Jordan | 🔲 |
+| S12-006 | "Beer passport" view — visual grid of every unique beer tried | Alex + Jordan | 🔲 |
+| S12-007 | Friends activity on home feed — see what friends are drinking | Jordan | 🔲 |
+| S12-008 | Session share card — beautiful share image for Instagram/stories | Jamie + Jordan | 🔲 |
+| S12-009 | Push notification: "Your friend just checked in at [brewery]" | Riley + Jordan | 🔲 |
+
+### 🟢 P2
+
+| ID | Title | Owner | Status |
+|----|-------|-------|--------|
+| S12-010 | "Beer of the Week" editorial from brewery | Taylor + Jordan | 🔲 |
+| S12-011 | Streak system — consecutive days with a check-in | Jordan | 🔲 |
+| S12-012 | Beer style badge — earn style-specific achievements (IPA Lover, Sour Head, etc.) | Jordan | 🔲 |
+
+---
+
+### 🍺 Customer Pint Rewind — Design Brief (S12-001)
+
+**The vibe:** Spotify Wrapped meets your drinking diary. Funny. Brutally honest. Shareable.
+
+**Not like the brewery version** (formal, data-forward, analytics). This is your personal story.
+
+**Sections / cards to include:**
+
+| Card | Content | Tone |
+|------|---------|------|
+| **Your Beer Personality** | Most common style → assign a fun archetype ("You are The IPA Evangelist") | Playful |
+| **Your Signature Beer** | Most logged beer, how many times | Affectionate roast |
+| **Your Brewery Loyalty** | Most visited brewery + visit count | Warm |
+| **Legendary Session** | Longest session by time or most beers | Impressed / chaotic energy |
+| **Rating Habits** | Avg rating — harsh critic vs. easy grader | Teasing |
+| **Home Couch Researcher** | Home sessions count (if any) | Approving nod |
+| **The Scroll** | Total beers, total pours, total XP | Big number energy |
+| **Your Level** | Current level + what that says about you | Hype |
+
+**Delivery:** Full-screen animated card stack (Framer Motion). Swipe or tap through.
+Each card gets a full-bleed background, large type, and a punchy one-liner.
+Shareable as an image. Optional "Share to feed" CTA at the end.
+
+**Jamie note:** Dark theme, gold accents, big Playfair Display numbers. Chef's kiss is the minimum bar. 🤌
+
+---
+
 ## 🏗️ Infrastructure Roadmap (Riley)
 
 | Item | Sprint | Status |
