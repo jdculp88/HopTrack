@@ -15,10 +15,7 @@ export async function GET(
   // Fetch all beer logs for this session
   const { data: beerLogs, error } = await (supabase as any)
     .from('beer_logs')
-    .select(`
-      *,
-      beer:beers(id, name, style, abv, avg_rating)
-    `)
+    .select('*')
     .eq('session_id', sessionId)
     .eq('user_id', user.id)
     .order('logged_at', { ascending: true })
@@ -75,10 +72,7 @@ export async function POST(
       comment: comment || null,
       photo_url: photo_url || null,
     })
-    .select(`
-      *,
-      beer:beers(id, name, style, abv, avg_rating)
-    `)
+    .select('*')
     .single()
 
   if (error) {

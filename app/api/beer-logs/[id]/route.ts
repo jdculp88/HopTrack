@@ -30,10 +30,7 @@ export async function PATCH(
     .update(allowedUpdates)
     .eq('id', id)
     .eq('user_id', user.id)  // Ensure user owns this log
-    .select(`
-      *,
-      beer:beers(id, name, style, abv, avg_rating)
-    `)
+    .select('*')
     .single()
 
   if (error) {

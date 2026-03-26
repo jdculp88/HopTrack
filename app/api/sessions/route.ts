@@ -63,8 +63,7 @@ export async function GET(request: NextRequest) {
       *,
       profile:profiles!sessions_user_id_fkey(id, username, display_name, avatar_url),
       beer_logs(
-        id, beer_id, rating, flavor_tags, serving_style, comment, photo_url, logged_at,
-        beer:beers(id, name, style, abv, avg_rating)
+        id, beer_id, rating, flavor_tags, serving_style, comment, photo_url, logged_at
       )
     `)
     .eq('user_id', userId)

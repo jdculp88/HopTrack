@@ -12,8 +12,7 @@ export async function GET(request: NextRequest) {
     .select(`
       *,
       beer_logs(
-        id, beer_id, rating, flavor_tags, serving_style, comment, photo_url, logged_at,
-        beer:beers(id, name, style, abv, avg_rating)
+        id, beer_id, rating, flavor_tags, serving_style, comment, photo_url, logged_at
       )
     `)
     .eq('user_id', user.id)
