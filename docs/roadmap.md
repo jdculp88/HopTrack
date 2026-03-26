@@ -1,7 +1,7 @@
 # HopTrack Product Roadmap
 **Last updated:** 2026-03-26
 **PM:** Morgan
-**Current Sprint:** Sprint 11 — Dashboard Migration & Launch Prep
+**Current Sprint:** Sprint 12 — Dashboard Migration & Consumer Delight
 
 > 💬 **Team note from Morgan:** This is a living document — updated every sprint. If you're touching a ticket, update its status here. If you discover something not on the list, add it. The roadmap is the source of truth for what we're building and why.
 
@@ -319,82 +319,96 @@ Per Drew's ops review, these are the items brewery owners will hit on day one:
 
 ---
 
-## 🚀 Sprint 11 — Dashboard Migration & Launch Prep (CURRENT)
-**Theme:** Complete the sessions migration; ship to App Store
+## ✅ Sprint 11 — Redesign Pivot + Launch Prep (Complete)
+**Theme:** Full "Gold on Cream" redesign pivot; sessions v2 fixes
 **Start:** 2026-03-26
-**Sprint leads:** Jordan (dev), Alex (mobile), Riley (infra), Taylor (first brewery close), Morgan (PM)
+**Completed:** 2026-03-26
+**Sprint leads:** Jordan (dev), Alex (UX), Jamie (brand), Morgan (PM)
+**Retro:** `docs/retros/sprint-11-retro.md`
 
-> **Sprint goal:** Brewery dashboard runs on real session data. HopTrack is on TestFlight. Taylor closes the first paid brewery. We celebrate.
+> **Sprint goal (original):** Dashboard on session data + TestFlight. **Pivoted** to full site redesign after "AI slop" concern. Redesign shipped; dashboard migration carried to S12.
 
-### 🔴 P0
+| ID | Title | Status | Notes |
+|----|-------|--------|-------|
+| S11-006 | Fix `rpc('increment')` no-op | ✅ | fetch+update replacement shipped |
+| — | Full "Gold on Cream" site redesign | ✅ | LandingContent + BreweriesContent + Auth rewrite |
+| — | Beer quantity increment in sessions | ✅ | `beer_logs.quantity` column |
+| — | Re-review skip (smart rating skip) | ✅ | Skip rating for previously-rated beers |
+| — | "Drinking at home" session path | ✅ | `sessions.context`, nullable brewery_id |
+| — | Seed 007: Josh's test universe | ✅ | Level 9, 47 checkins, 4 breweries |
 
-| ID | Title | Owner | Status |
-|----|-------|-------|--------|
-| S11-001 | Brewery dashboard + analytics migrated to `sessions`/`beer_logs` | Jordan | 🔲 |
-| S11-002 | Pint Rewind updated to use session data | Jordan | 🔲 |
-| S11-003 | Supabase Storage buckets + RLS (carry S10-019/020) | Riley | 🔲 |
-| S11-004 | Photo uploads — beer + brewery covers (unblocked by S11-003) | Jordan | 🔲 |
-| S11-005 | Capacitor wrapper → TestFlight beta (Alex leading) | Alex | 🔲 |
-| S11-006 | Fix `POST /api/sessions` `rpc('increment')` no-op | Riley | 🔲 |
-
-### 🟡 P1
-
-| ID | Title | Owner | Status |
-|----|-------|-------|--------|
-| S11-007 | `checkins` table deprecation plan + backfill migration | Riley + Jordan | 🔲 |
-| S11-008 | TV display app (`/display/[brewery_id]`) — "The Board" | Jordan + Riley | 🔲 |
-| S11-009 | SEO — OG images, metadata, sitemap | Jamie + Jordan | 🔲 |
-| S11-010 | Performance audit + query optimization | Riley + Jordan | 🔲 |
-| S11-011 | REQ backfill (REQ-012 through REQ-024) — 1-2 per sprint | Sam | 🔲 |
-| S11-012 | Casey QA kickoff at sprint start (not end) | Casey + Morgan | 🔲 |
-| S11-013 | First paid brewery close | Taylor | 🔲 |
-
-### 🟢 P2
-
-| ID | Title | Owner | Status |
-|----|-------|-------|--------|
-| S11-014 | Map view — Mapbox on Explore page | Jordan + Riley | 🔲 |
-| S11-015 | Accessibility review (WCAG 2.1 AA) | Sam + Alex | 🔲 |
-| S11-016 | Error monitoring (Sentry) | Riley | 🔲 |
-| S11-017 | Push notifications MVP (carry S10-023) | Riley + Jordan | 🔲 |
-| S11-018 | Domestic beer achievement (carry S10-025) | Jordan | 🔲 |
-| S11-019 | App Store submission prep (screenshots, description) | Jamie + Alex | 🔲 |
+**Carried to Sprint 12:** S11-001 through S11-005, S11-007 through S11-019
 
 ---
 
-## 🚀 Sprint 12 — Consumer Delight & Pint Rewind (PLANNED)
-**Theme:** Make the consumer app feel magic. Engagement, personality, and retention.
-**Start:** After Sprint 11 closes
-**Sprint leads:** Jordan (dev), Alex (UX), Morgan (PM), Jamie (brand), Taylor (retention angle)
+## 🚀 Sprint 12 — Dashboard Migration & Consumer Delight (CURRENT)
+**Theme:** Brewery dashboard on real sessions, photo uploads, Customer Pint Rewind, mobile polish
+**Start:** 2026-03-26
+**Sprint leads:** Jordan (dev), Alex (UX), Riley (infra), Taylor (first brewery close), Morgan (PM)
+**Plan:** `docs/sprint-12-plan.md`
 
-> **Sprint goal:** Users open HopTrack for fun, not just logging. Pint Rewind goes consumer — funny, personal, shareable. The app feels like a place you want to live in.
+> **Sprint goal:** Brewery dashboard runs on session data. Photo uploads work. Customer Pint Rewind ships. Taylor closes first paid brewery. Mobile doesn't embarrass us.
 
 ### 🔴 P0
 
 | ID | Title | Owner | Status |
 |----|-------|-------|--------|
-| S12-001 | **Customer Pint Rewind** — personalized, funny, shareable year/month-in-review for consumers | Jordan + Alex + Jamie | 🔲 |
-| S12-002 | Beer quantity increment in session ("+1 this one") — already shipped in Sprint 11 | Jordan | ✅ |
-| S12-003 | Smart re-review skip (don't re-rate a beer you've already reviewed) | Jordan | ✅ |
-| S12-004 | "Drinking at home" session path (no brewery required) | Jordan | ✅ |
+| S12-M02 | Migration 008: brewery admin RLS for sessions/beer_logs | Riley + Jordan | ✅ Written |
+| S12-001 | Brewery dashboard → `sessions`/`beer_logs` | Jordan | ✅ |
+| S12-002 | Analytics → `sessions`/`beer_logs` | Jordan | ✅ |
+| S12-003 | Pint Rewind → session data | Jordan | ✅ |
+| S12-004 | Photo upload component + brewery cover upload | Jordan | ✅ |
+| S12-005 | Customer Pint Rewind — animated card stack | Alex + Jordan + Jamie | ✅ |
+| S12-006 | Mobile responsive polish (landing pages) | Alex + Jamie | ✅ |
 
 ### 🟡 P1
 
 | ID | Title | Owner | Status |
 |----|-------|-------|--------|
-| S12-005 | Beer wishlist on consumer profile | Jordan | 🔲 |
-| S12-006 | "Beer passport" view — visual grid of every unique beer tried | Alex + Jordan | 🔲 |
-| S12-007 | Friends activity on home feed — see what friends are drinking | Jordan | 🔲 |
-| S12-008 | Session share card — beautiful share image for Instagram/stories | Jamie + Jordan | 🔲 |
-| S12-009 | Push notification: "Your friend just checked in at [brewery]" | Riley + Jordan | 🔲 |
+| S12-007 | Apply migration 007 (home sessions + quantity) | Riley | 🔲 Run in SQL Editor |
+| S12-008 | Apply migration 008 (brewery admin RLS) | Riley | 🔲 Run in SQL Editor |
+| S12-009 | REQ backfill (2 docs minimum) | Sam | 🔲 |
+| S12-010 | First paid brewery close | Taylor | 🔲 |
+| S12-011 | Capacitor → TestFlight (carry S11-005) | Alex | 🔲 |
+| S12-012 | `checkins` table deprecation plan | Riley + Jordan | 🔲 |
 
 ### 🟢 P2
 
 | ID | Title | Owner | Status |
 |----|-------|-------|--------|
-| S12-010 | "Beer of the Week" editorial from brewery | Taylor + Jordan | 🔲 |
-| S12-011 | Streak system — consecutive days with a check-in | Jordan | 🔲 |
-| S12-012 | Beer style badge — earn style-specific achievements (IPA Lover, Sour Head, etc.) | Jordan | 🔲 |
+| S12-013 | Beer wishlist on consumer profile | Jordan | 🔲 |
+| S12-014 | "Beer passport" visual grid | Alex + Jordan | 🔲 |
+| S12-015 | Friends activity on home feed | Jordan | 🔲 |
+| S12-016 | Map view — Mapbox on Explore page | Jordan + Riley | 🔲 |
+| S12-017 | Push notifications MVP | Riley + Jordan | 🔲 |
+| S12-018 | Error monitoring (Sentry) | Riley | 🔲 |
+| S12-019 | App Store submission prep | Jamie + Alex | 🔲 |
+
+---
+
+## 🚀 Sprint 13 — Consumer Delight & Social (PLANNED)
+**Theme:** Make the consumer app feel magic. Engagement, personality, and retention.
+**Start:** After Sprint 12 closes
+
+> **Sprint goal:** Users open HopTrack for fun, not just logging. Social features, wishlists, and streaks make it sticky.
+
+### P0
+
+| ID | Title | Owner | Status |
+|----|-------|-------|--------|
+| S13-001 | Beer wishlist on consumer profile | Jordan | 🔲 |
+| S13-002 | "Beer passport" view — visual grid of every unique beer tried | Alex + Jordan | 🔲 |
+| S13-003 | Friends activity on home feed — see what friends are drinking | Jordan | 🔲 |
+| S13-004 | Session share card — beautiful share image for Instagram/stories | Jamie + Jordan | 🔲 |
+
+### P1
+
+| ID | Title | Owner | Status |
+|----|-------|-------|--------|
+| S13-005 | Push notification: "Your friend just checked in at [brewery]" | Riley + Jordan | 🔲 |
+| S13-006 | "Beer of the Week" editorial from brewery | Taylor + Jordan | 🔲 |
+| S13-007 | Streak system — consecutive days with a check-in | Jordan | 🔲 |
+| S13-008 | Beer style badge — earn style-specific achievements (IPA Lover, Sour Head, etc.) | Jordan | 🔲 |
 
 ---
 

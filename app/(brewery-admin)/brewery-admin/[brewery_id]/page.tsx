@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
-import { Beer, Users, Star, TrendingUp, Award, Calendar, ArrowUpRight, List } from "lucide-react";
+import { Beer, Users, Star, TrendingUp, Award, Calendar, ArrowUpRight, List, Clock } from "lucide-react";
 import { formatDateShort } from "@/lib/dates";
 
 export async function generateMetadata({ params }: { params: Promise<{ brewery_id: string }> }) {
@@ -30,22 +30,23 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
   const [
     { data: brewery },
     { data: beers },
-    { data: recentCheckins },
+    { data: recentSessions },
     { data: loyaltyProgram },
     { data: promotions },
-    { data: allCheckinStats },
-    { data: topBeers },
+    { data: allSessions },
+    { data: allBeerLogs },
   ] = await Promise.all([
     supabase.from("breweries").select("*").eq("id", brewery_id).single() as any,
 
     supabase.from("beers").select("*").eq("brewery_id", brewery_id) as any,
 
-    // Recent 10 for feed display
+    // Recent 10 sessions with beer logs for feed display
     supabase
-      .from("checkins")
-      .select("*, profile:profiles(display_name, username, avatar_url), beer:beers(name, style)")
+      .from("sessions")
+      .select("*, profile:profiles(display_name, username, avatar_url), beer_logs(id, beer_id, rating, quantity, beer:beers(name, style))")
       .eq("brewery_id", brewery_id)
-      .order("created_at", { ascending: false })
+      .eq("is_active", false)
+      .order("started_at", { ascending: false })
       .limit(10) as any,
 
     supabase
@@ -61,56 +62,59 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
       .eq("brewery_id", brewery_id)
       .eq("is_active", true) as any,
 
-    // All checkins for aggregate stats (no limit)
+    // All sessions for aggregate stats
     supabase
-      .from("checkins")
-      .select("id, user_id, rating, created_at")
-      .eq("brewery_id", brewery_id) as any,
-
-    // Top beers by check-in count
-    supabase
-      .from("checkins")
-      .select("beer_id, beer:beers(name, style), rating")
+      .from("sessions")
+      .select("id, user_id, started_at, ended_at, is_active")
       .eq("brewery_id", brewery_id)
-      .not("beer_id", "is", null) as any,
+      .eq("is_active", false) as any,
+
+    // All beer logs for rating + top beer stats
+    supabase
+      .from("beer_logs")
+      .select("id, beer_id, rating, quantity, logged_at, beer:beers(name, style)")
+      .eq("brewery_id", brewery_id) as any,
   ]);
 
-  // ── Compute stats from full dataset ─────────────────────────────────────────
-  const allCheckins = (allCheckinStats as any[]) ?? [];
-  const totalCheckins = allCheckins.length;
-  const uniqueVisitors = new Set(allCheckins.map((c: any) => c.user_id)).size;
-  const ratings = allCheckins.filter((c: any) => c.rating > 0).map((c: any) => c.rating);
+  // ── Compute stats from sessions + beer_logs ────────────────────────────────
+  const sessions = (allSessions as any[]) ?? [];
+  const beerLogs = (allBeerLogs as any[]) ?? [];
+
+  const totalVisits = sessions.length;
+  const totalBeersLogged = beerLogs.reduce((sum: number, l: any) => sum + (l.quantity ?? 1), 0);
+  const uniqueVisitors = new Set(sessions.map((s: any) => s.user_id)).size;
+  const ratings = beerLogs.filter((l: any) => l.rating > 0).map((l: any) => l.rating);
   const avgRating = ratings.length > 0
     ? (ratings.reduce((a: number, b: number) => a + b, 0) / ratings.length).toFixed(1)
     : null;
 
-  // This month vs last month
+  // This month vs last month (by session visits)
   const now = new Date();
   const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
   const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-  const thisMonthCheckins = allCheckins.filter((c: any) => new Date(c.created_at) >= thisMonthStart).length;
-  const lastMonthCheckins = allCheckins.filter((c: any) => {
-    const d = new Date(c.created_at);
+  const thisMonthVisits = sessions.filter((s: any) => new Date(s.started_at) >= thisMonthStart).length;
+  const lastMonthVisits = sessions.filter((s: any) => {
+    const d = new Date(s.started_at);
     return d >= lastMonthStart && d < thisMonthStart;
   }).length;
-  const monthTrend = lastMonthCheckins > 0
-    ? Math.round(((thisMonthCheckins - lastMonthCheckins) / lastMonthCheckins) * 100)
+  const monthTrend = lastMonthVisits > 0
+    ? Math.round(((thisMonthVisits - lastMonthVisits) / lastMonthVisits) * 100)
     : null;
 
-  // Top 3 beers
+  // Top 3 beers from beer_logs
   const beerMap: Record<string, { name: string; style: string; count: number; totalRating: number }> = {};
-  ((topBeers as any[]) ?? []).forEach((c: any) => {
-    if (!c.beer_id) return;
-    if (!beerMap[c.beer_id]) beerMap[c.beer_id] = { name: c.beer?.name ?? "Unknown", style: c.beer?.style ?? "", count: 0, totalRating: 0 };
-    beerMap[c.beer_id].count++;
-    if (c.rating > 0) beerMap[c.beer_id].totalRating += c.rating;
+  beerLogs.forEach((l: any) => {
+    if (!l.beer_id) return;
+    if (!beerMap[l.beer_id]) beerMap[l.beer_id] = { name: l.beer?.name ?? "Unknown", style: l.beer?.style ?? "", count: 0, totalRating: 0 };
+    beerMap[l.beer_id].count += l.quantity ?? 1;
+    if (l.rating > 0) beerMap[l.beer_id].totalRating += l.rating;
   });
   const topBeersList = Object.values(beerMap)
     .sort((a, b) => b.count - a.count)
     .slice(0, 3);
 
   const onTapCount = ((beers as any[]) ?? []).filter((b: any) => b.is_on_tap).length;
-  const totalBeers = ((beers as any[]) ?? []).length;
+  const totalBeerCount = ((beers as any[]) ?? []).length;
 
   return (
     <div className="p-6 lg:p-8 max-w-5xl mx-auto pt-16 lg:pt-8">
@@ -132,33 +136,33 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {[
           {
-            label: "Total Check-ins",
-            value: totalCheckins.toLocaleString(),
-            icon: Beer,
+            label: "Total Visits",
+            value: totalVisits.toLocaleString(),
+            icon: Users,
             note: monthTrend !== null
               ? `${monthTrend >= 0 ? "+" : ""}${monthTrend}% vs last month`
-              : "all time",
-            positive: monthTrend !== null && monthTrend >= 0,
+              : `${thisMonthVisits} this month`,
+            positive: monthTrend === null || monthTrend >= 0,
           },
           {
-            label: "Unique Visitors",
-            value: uniqueVisitors.toLocaleString(),
-            icon: Users,
-            note: `${thisMonthCheckins} visits this month`,
+            label: "Beers Logged",
+            value: totalBeersLogged.toLocaleString(),
+            icon: Beer,
+            note: `across ${totalVisits} visits`,
             positive: true,
           },
           {
             label: "Beers on Tap",
-            value: `${onTapCount}/${totalBeers}`,
+            value: `${onTapCount}/${totalBeerCount}`,
             icon: List,
-            note: `${totalBeers - onTapCount} inactive`,
+            note: `${totalBeerCount - onTapCount} inactive`,
             positive: true,
           },
           {
             label: "Avg Rating",
             value: avgRating ? `${avgRating} ★` : "—",
             icon: Star,
-            note: `from ${ratings.length} rated check-ins`,
+            note: `from ${ratings.length} reviews`,
             positive: true,
           },
         ].map(({ label, value, icon: Icon, note, positive }) => (
@@ -175,11 +179,11 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
 
       <div className="grid lg:grid-cols-3 gap-6">
 
-        {/* Recent Check-ins */}
+        {/* Recent Sessions */}
         <div className="lg:col-span-2 space-y-6">
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="font-display text-lg font-bold" style={{ color: "var(--color-text-primary)" }}>Recent Check-ins</h2>
+              <h2 className="font-display text-lg font-bold" style={{ color: "var(--color-text-primary)" }}>Recent Visits</h2>
               <Link href={`/brewery-admin/${brewery_id}/analytics`}
                 className="text-xs flex items-center gap-1 transition-opacity hover:opacity-70"
                 style={{ color: "var(--color-accent-gold)" }}>
@@ -187,38 +191,54 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
               </Link>
             </div>
             <div className="space-y-3">
-              {((recentCheckins as any[]) ?? []).length === 0 ? (
+              {((recentSessions as any[]) ?? []).length === 0 ? (
                 <div className="rounded-2xl p-8 text-center border" style={{ background: "var(--color-surface)", borderColor: "var(--color-border)" }}>
                   <p className="text-3xl mb-2">🍺</p>
-                  <p className="font-display" style={{ color: "var(--color-text-primary)" }}>No check-ins yet</p>
+                  <p className="font-display" style={{ color: "var(--color-text-primary)" }}>No visits yet</p>
                   <p className="text-sm mt-1" style={{ color: "var(--color-text-muted)" }}>Share your HopTrack page to get started!</p>
                 </div>
               ) : (
-                ((recentCheckins as any[]) ?? []).map((c: any) => (
-                  <div key={c.id} className="flex items-center gap-3 p-4 rounded-2xl border"
-                    style={{ background: "var(--color-surface)", borderColor: "var(--color-border)" }}>
-                    <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0"
-                      style={{ background: "var(--color-surface-2)", color: "var(--color-text-secondary)" }}>
-                      {(c.profile?.display_name ?? c.user_id?.slice(0, 1) ?? "?")[0].toUpperCase()}
+                ((recentSessions as any[]) ?? []).map((s: any) => {
+                  const sessionBeerLogs = (s.beer_logs as any[]) ?? [];
+                  const beerCount = sessionBeerLogs.reduce((sum: number, l: any) => sum + (l.quantity ?? 1), 0);
+                  const sessionRatings = sessionBeerLogs.filter((l: any) => l.rating > 0);
+                  const sessionAvg = sessionRatings.length > 0
+                    ? (sessionRatings.reduce((a: number, l: any) => a + l.rating, 0) / sessionRatings.length).toFixed(1)
+                    : null;
+                  const topBeerName = sessionBeerLogs.length > 0
+                    ? (sessionBeerLogs[0]?.beer?.name ?? "Unnamed Beer")
+                    : null;
+
+                  return (
+                    <div key={s.id} className="flex items-center gap-3 p-4 rounded-2xl border"
+                      style={{ background: "var(--color-surface)", borderColor: "var(--color-border)" }}>
+                      <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0"
+                        style={{ background: "var(--color-surface-2)", color: "var(--color-text-secondary)" }}>
+                        {(s.profile?.display_name ?? s.user_id?.slice(0, 1) ?? "?")[0].toUpperCase()}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate" style={{ color: "var(--color-text-primary)" }}>
+                          {s.profile?.display_name ?? "Guest"}
+                        </p>
+                        <p className="text-xs truncate" style={{ color: "var(--color-text-muted)" }}>
+                          {beerCount > 0
+                            ? `${beerCount} beer${beerCount !== 1 ? "s" : ""}${topBeerName ? ` · ${topBeerName}` : ""}`
+                            : "Brewery visit"
+                          }
+                          {sessionBeerLogs.length > 1 && ` +${sessionBeerLogs.length - 1} more`}
+                        </p>
+                      </div>
+                      <div className="text-right flex-shrink-0">
+                        {sessionAvg && (
+                          <p className="text-sm font-mono" style={{ color: "var(--color-accent-gold)" }}>★ {sessionAvg}</p>
+                        )}
+                        <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>
+                          {formatDateShort(s.started_at)}
+                        </p>
+                      </div>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate" style={{ color: "var(--color-text-primary)" }}>
-                        {c.profile?.display_name ?? "Guest"}
-                      </p>
-                      <p className="text-xs truncate" style={{ color: "var(--color-text-muted)" }}>
-                        {c.beer?.name ?? "Brewery visit"}{c.beer?.style ? ` · ${c.beer.style}` : ""}
-                      </p>
-                    </div>
-                    <div className="text-right flex-shrink-0">
-                      {c.rating > 0 && (
-                        <p className="text-sm font-mono" style={{ color: "var(--color-accent-gold)" }}>★ {c.rating}</p>
-                      )}
-                      <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>
-                        {formatDateShort(c.created_at)}
-                      </p>
-                    </div>
-                  </div>
-                ))
+                  );
+                })
               )}
             </div>
           </div>
@@ -226,31 +246,34 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
           {/* Top Beers */}
           {topBeersList.length > 0 && (
             <div>
-              <h2 className="font-display text-lg font-bold mb-4" style={{ color: "var(--color-text-primary)" }}>Top Beers This Period</h2>
+              <h2 className="font-display text-lg font-bold mb-4" style={{ color: "var(--color-text-primary)" }}>Top Beers</h2>
               <div className="space-y-3">
-                {topBeersList.map((beer, i) => (
-                  <div key={beer.name} className="flex items-center gap-4 p-4 rounded-2xl border"
-                    style={{ background: "var(--color-surface)", borderColor: "var(--color-border)" }}>
-                    <span className="font-display text-2xl font-bold w-8 flex-shrink-0"
-                      style={{ color: i === 0 ? "#FFD700" : i === 1 ? "#C0C0C0" : "#CD7F32" }}>
-                      {i + 1}
-                    </span>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm truncate" style={{ color: "var(--color-text-primary)" }}>{beer.name}</p>
-                      <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>{beer.style}</p>
-                    </div>
-                    <div className="text-right flex-shrink-0">
-                      <p className="text-sm font-mono font-bold" style={{ color: "var(--color-text-primary)" }}>
-                        {beer.count} check-in{beer.count !== 1 ? "s" : ""}
-                      </p>
-                      {beer.totalRating > 0 && (
-                        <p className="text-xs" style={{ color: "var(--color-accent-gold)" }}>
-                          ★ {(beer.totalRating / beer.count).toFixed(1)} avg
+                {topBeersList.map((beer, i) => {
+                  const ratedCount = beerLogs.filter((l: any) => l.beer_id && beerMap[l.beer_id]?.name === beer.name && l.rating > 0).length;
+                  return (
+                    <div key={beer.name} className="flex items-center gap-4 p-4 rounded-2xl border"
+                      style={{ background: "var(--color-surface)", borderColor: "var(--color-border)" }}>
+                      <span className="font-display text-2xl font-bold w-8 flex-shrink-0"
+                        style={{ color: i === 0 ? "#FFD700" : i === 1 ? "#C0C0C0" : "#CD7F32" }}>
+                        {i + 1}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm truncate" style={{ color: "var(--color-text-primary)" }}>{beer.name}</p>
+                        <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>{beer.style}</p>
+                      </div>
+                      <div className="text-right flex-shrink-0">
+                        <p className="text-sm font-mono font-bold" style={{ color: "var(--color-text-primary)" }}>
+                          {beer.count} pour{beer.count !== 1 ? "s" : ""}
                         </p>
-                      )}
+                        {beer.totalRating > 0 && ratedCount > 0 && (
+                          <p className="text-xs" style={{ color: "var(--color-accent-gold)" }}>
+                            ★ {(beer.totalRating / ratedCount).toFixed(1)} avg
+                          </p>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}
@@ -324,6 +347,7 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
                 { href: `/brewery-admin/${brewery_id}/tap-list`, label: "Manage tap list" },
                 { href: `/brewery-admin/${brewery_id}/analytics`, label: "View analytics" },
                 { href: `/brewery-admin/${brewery_id}/loyalty`, label: "Loyalty & promotions" },
+                { href: `/brewery-admin/${brewery_id}/pint-rewind`, label: "Pint Rewind" },
                 { href: `/brewery-admin/${brewery_id}/settings`, label: "Edit brewery profile" },
                 { href: `/brewery/${brewery_id}`, label: "View public page ↗", external: true },
               ].map(({ href, label, external }) => (

@@ -19,26 +19,43 @@ export default async function PintRewindPage({ params }: { params: Promise<{ bre
   const { data: brewery } = await (supabase as any)
     .from("breweries").select("name").eq("id", brewery_id).single();
 
-  // Last 30 days
+  // Last 30 days — sessions
   const since30 = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-  const { data: checkins30 } = await (supabase as any)
-    .from("checkins")
-    .select("id, created_at, rating, user_id, beer_id, beer:beers(name, style)")
+  const { data: sessions30 } = await (supabase as any)
+    .from("sessions")
+    .select("id, user_id, started_at, ended_at")
     .eq("brewery_id", brewery_id)
-    .gte("created_at", since30)
-    .order("created_at") as any;
+    .eq("is_active", false)
+    .gte("started_at", since30)
+    .order("started_at") as any;
 
-  // All-time
-  const { data: checkinsAll } = await (supabase as any)
-    .from("checkins")
-    .select("id, created_at, rating, user_id, beer_id, beer:beers(name, style)")
+  // Last 30 days — beer logs
+  const { data: beerLogs30 } = await (supabase as any)
+    .from("beer_logs")
+    .select("id, beer_id, rating, quantity, logged_at, user_id, beer:beers(name, style)")
     .eq("brewery_id", brewery_id)
-    .order("created_at") as any;
+    .gte("logged_at", since30)
+    .order("logged_at") as any;
 
-  // Most loyal visitor (all-time) — user with most check-ins
+  // All-time — sessions
+  const { data: sessionsAll } = await (supabase as any)
+    .from("sessions")
+    .select("id, user_id, started_at, ended_at")
+    .eq("brewery_id", brewery_id)
+    .eq("is_active", false)
+    .order("started_at") as any;
+
+  // All-time — beer logs
+  const { data: beerLogsAll } = await (supabase as any)
+    .from("beer_logs")
+    .select("id, beer_id, rating, quantity, logged_at, user_id, beer:beers(name, style)")
+    .eq("brewery_id", brewery_id)
+    .order("logged_at") as any;
+
+  // Most loyal visitor (all-time) — user with most sessions
   const visitorCounts: Record<string, number> = {};
-  (checkinsAll ?? []).forEach((c: any) => {
-    if (c.user_id) visitorCounts[c.user_id] = (visitorCounts[c.user_id] ?? 0) + 1;
+  ((sessionsAll as any[]) ?? []).forEach((s: any) => {
+    if (s.user_id) visitorCounts[s.user_id] = (visitorCounts[s.user_id] ?? 0) + 1;
   });
   const topVisitorId = Object.entries(visitorCounts).sort((a, b) => b[1] - a[1])[0]?.[0];
   let topVisitor = null;
@@ -51,8 +68,10 @@ export default async function PintRewindPage({ params }: { params: Promise<{ bre
   return (
     <PintRewindClient
       breweryName={brewery?.name ?? "Your Brewery"}
-      checkins30={(checkins30 as any[]) ?? []}
-      checkinsAll={(checkinsAll as any[]) ?? []}
+      sessions30={(sessions30 as any[]) ?? []}
+      beerLogs30={(beerLogs30 as any[]) ?? []}
+      sessionsAll={(sessionsAll as any[]) ?? []}
+      beerLogsAll={(beerLogsAll as any[]) ?? []}
       topVisitor={topVisitor}
     />
   );

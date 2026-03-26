@@ -171,51 +171,48 @@ scripts/supabase-setup.mjs    — One-time setup script
 
 ## 🗺️ Where We Are
 
-**Current Sprint:** Sprint 11 — Dashboard Migration & Launch Prep
-**Last completed:** Sprint 10 — Sessions & Tap Wall ✅ (2026-03-26)
+**Current Sprint:** Sprint 12 — Dashboard Migration & Consumer Delight
+**Last completed:** Sprint 11 — "Gold on Cream" Redesign ✅ (2026-03-26)
 
-### Sprint 10 — COMPLETE ✅
-The core check-in experience is rebuilt from the ground up. Sessions system live.
-Global check-in flow lives in AppShell (available on every page).
-Pint & Pixel is fully demo-ready end-to-end. Unified activity feed.
-Retro: `docs/retros/sprint-10-retro.md`
-
-**Key architectural changes from Sprint 10:**
-- `AppShell` now owns the entire check-in drawer stack (CheckinEntryDrawer, TapWallSheet, SessionRecapSheet)
-- `HomeFeed` no longer manages check-in state — it only relays session state on mount via `hoptrack:session-changed` event
-- `CheckinEntryDrawer` accepts `preselectedBrewery` prop — skips search when arriving from brewery page
-- All brewery search now routes through `/api/breweries` (Supabase-first, not OpenBreweryDB direct)
-- `lib/dates.ts` is now used for ALL date display — no raw `toLocaleDateString()` anywhere
-
-### Sprint 11 — PIVOTED to Full Site Redesign ✅
-**Original focus replaced** after founder identified "AI slop" concern. Full "Gold on Cream" redesign shipped.
+### Sprint 11 — COMPLETE ✅
+Full "Gold on Cream" redesign shipped. Pivoted from original dashboard migration plan.
 **Identity:** "Gold on cream, like a perfect pilsner" — WisprFlow-inspired
+Retro: `docs/retros/sprint-11-retro.md`
 
-**Completed (2 sessions, 2026-03-26):**
-- ✅ Full "Gold on Cream" redesign — cream canvas (#FBF7F0) + dark floating sections
-- ✅ LandingContent.tsx — complete rewrite with pour connectors, centered How It Works, real beer names
-- ✅ BreweriesContent.tsx — complete rewrite with tap handle SVG pricing, dark feature sections
-- ✅ Auth layout — cream bg + DarkCardWrapper for dark form card
-- ✅ S11-006 FIXED — `POST /api/sessions` `rpc('increment')` no-op replaced with fetch+update
-- ✅ Beer quantity increment, re-review skip, "Drinking at home" path
-- ✅ Seed 007: Josh's full test universe (level 9, 47 checkins, 4 breweries)
-
-**Key design decisions:**
+**Key design decisions (still active):**
 - Marketing pages use hardcoded `C` color constants (not CSS vars)
 - App interior uses CSS vars, defaults dark, user-toggleable to cream/light
 - `DarkCardWrapper` client component forces dark vars via `style.setProperty()` (Tailwind v4 CSS var override workaround)
 - Pour connectors (gold vertical gradient lines) between sections = brand identity element
-- Tap handle SVGs on pricing tiers
 
-**Deferred to Sprint 12:**
-- S11-001: Brewery dashboard → sessions/beer_logs
-- S11-002: Pint Rewind → session data
-- S11-003: Supabase Storage buckets — Riley
-- S11-004: Photo uploads — Jordan
-- S11-005: Capacitor → TestFlight — Alex
-- Customer Pint Rewind (S12-001) — shareable animated card stack
-- Mobile responsive polish on landing pages
-- Button green variant, modal border-radius bump
+### Sprint 12 — IN PROGRESS (CURRENT)
+**Theme:** Dashboard migration, photo uploads, Customer Pint Rewind, mobile polish
+**Plan:** `docs/sprint-12-plan.md`
+
+**Completed (Session 1, 2026-03-26):**
+- ✅ Migration 008: brewery admin RLS for sessions/beer_logs (WRITTEN, needs applying)
+- ✅ Brewery dashboard → `sessions` + `beer_logs` (3 pages rewritten)
+- ✅ Analytics → `sessions` + `beer_logs` (page + client component)
+- ✅ Pint Rewind → session data (page + client component)
+- ✅ `ImageUpload` component + brewery cover photo upload in settings
+- ✅ Customer Pint Rewind — `/pint-rewind` animated 9-card stack + `/api/pint-rewind`
+- ✅ Mobile responsive polish on landing pages (LandingContent + BreweriesContent)
+- ✅ Retro, sprint plan, roadmap updated
+
+**Key architectural changes from Sprint 12:**
+- `AppShell` still owns the check-in drawer stack (unchanged from Sprint 10)
+- Brewery dashboard/analytics/pint-rewind now query `sessions` + `beer_logs` (NOT `checkins`)
+- `ImageUpload` component at `components/ui/ImageUpload.tsx` — reusable for beer-photos and brewery-covers
+- Customer Pint Rewind at `app/(app)/pint-rewind/` — API route computes personality archetypes from user data
+- Beer counts in dashboard/analytics are **quantity-aware** (`beer_logs.quantity` sum, not row count)
+
+**Still TODO in Sprint 12:**
+- Apply migrations 007 + 008 in Supabase SQL Editor
+- Commit and push all changes
+- Capacitor → TestFlight (Alex)
+- `checkins` table deprecation plan (Riley + Jordan)
+- REQ backfill 2 docs (Sam)
+- First paid brewery close (Taylor)
 
 **Standing commitments:**
 - Sam: 1-2 REQ backfill docs per sprint (REQ-012 through REQ-024)
@@ -228,6 +225,7 @@ Retro: `docs/retros/sprint-10-retro.md`
 - 005: `checkins.beer_id` made nullable (REQ-013)
 - 006: `sessions` + `beer_logs` tables + full RLS ✅ APPLIED
 - 007: Home sessions + quantity — **WRITTEN, NOT YET APPLIED** (run in Supabase SQL Editor)
+- 008: Brewery admin RLS for sessions/beer_logs — **WRITTEN, NOT YET APPLIED** (run in Supabase SQL Editor)
 
 ### Revenue Targets
 - Tap tier: $49/mo

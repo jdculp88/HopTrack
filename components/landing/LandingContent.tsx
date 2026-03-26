@@ -250,15 +250,15 @@ export default function LandingContent() {
           className="absolute top-0 left-1/2 -translate-x-1/2 w-[1200px] h-[600px] pointer-events-none"
           style={{ background: `radial-gradient(ellipse at 50% 0%, rgba(212,168,67,0.06) 0%, transparent 60%)` }}
         />
-        <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-10 pt-32 pb-20 w-full">
+        <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-10 pt-20 sm:pt-24 lg:pt-32 pb-12 sm:pb-20 w-full">
           <div className="grid lg:grid-cols-[1fr_420px] xl:grid-cols-[1fr_480px] gap-16 lg:gap-20 items-center">
             <motion.div variants={stagger} initial="hidden" animate="show" className="space-y-8 lg:space-y-10">
               <motion.div variants={reveal}>
                 <span className="text-[11px] font-mono uppercase tracking-[0.22em]" style={{ color: C.gold }}>Track Every Pour</span>
               </motion.div>
               <motion.div variants={reveal} className="space-y-0">
-                <h1 className="font-display font-bold leading-[0.88] tracking-tight" style={{ fontSize: "clamp(64px, 9vw, 108px)", color: C.text }}>Check in.</h1>
-                <h1 className="font-display font-bold leading-[0.88] tracking-tight italic" style={{ fontSize: "clamp(64px, 9vw, 108px)", color: C.gold }}>Level up.</h1>
+                <h1 className="font-display font-bold leading-[0.88] tracking-tight" style={{ fontSize: "clamp(42px, 9vw, 108px)", color: C.text }}>Check in.</h1>
+                <h1 className="font-display font-bold leading-[0.88] tracking-tight italic" style={{ fontSize: "clamp(42px, 9vw, 108px)", color: C.gold }}>Level up.</h1>
               </motion.div>
               <motion.p variants={reveal} className="text-lg leading-relaxed max-w-[380px] font-sans" style={{ color: C.textMuted }}>
                 Track your craft beer journey. Discover breweries, log every pour, and earn your way to Grand Cicerone.
@@ -287,7 +287,7 @@ export default function LandingContent() {
       <ScrollReveal>
         <section className="py-12 px-6 lg:px-10">
           <div className="max-w-7xl mx-auto">
-            <div className="flex flex-wrap items-baseline gap-x-10 gap-y-5">
+            <div className="flex flex-wrap items-baseline gap-x-6 sm:gap-x-10 gap-y-4 sm:gap-y-5">
               {[
                 { value: "Rate", label: "every pour" },
                 { value: "Earn", label: "XP & achievements" },
@@ -312,7 +312,7 @@ export default function LandingContent() {
         <ScrollReveal>
           <div className="max-w-7xl mx-auto dark-section" style={{ background: C.dark }}>
             <div className="absolute top-0 right-0 w-[500px] h-[400px] pointer-events-none z-0" style={{ background: `radial-gradient(circle at 80% 10%, rgba(212,168,67,0.07) 0%, transparent 55%)` }} />
-            <div className="relative z-10 grid lg:grid-cols-2 gap-10 lg:gap-16 items-center p-10 lg:p-16 xl:p-20">
+            <div className="relative z-10 grid lg:grid-cols-2 gap-8 lg:gap-16 items-center p-6 sm:p-10 lg:p-16 xl:p-20">
               <div className="space-y-6 lg:pr-8">
                 <span className="text-[11px] font-mono uppercase tracking-[0.2em]" style={{ color: C.gold }}>Sessions</span>
                 <h2 className="font-display font-bold leading-[0.95] tracking-tight" style={{ fontSize: "clamp(38px, 4vw, 54px)", color: C.creamText }}>

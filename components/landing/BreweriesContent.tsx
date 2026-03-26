@@ -222,7 +222,7 @@ export default function BreweriesContent() {
       {/* ── Hero ───────────────────────────────────────────────────────────── */}
       <section className="relative min-h-[85vh] flex items-center overflow-hidden">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1200px] h-[600px] pointer-events-none" style={{ background: `radial-gradient(ellipse at 50% 0%, rgba(212,168,67,0.06) 0%, transparent 60%)` }} />
-        <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-10 pt-28 pb-20 w-full">
+        <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-10 pt-20 sm:pt-24 lg:pt-28 pb-12 sm:pb-20 w-full">
           <div className="grid lg:grid-cols-[1fr_420px] xl:grid-cols-[1fr_480px] gap-16 lg:gap-20 items-center">
             <motion.div
               initial="hidden" animate="show"
@@ -233,7 +233,7 @@ export default function BreweriesContent() {
                 <span className="text-[11px] font-mono uppercase tracking-[0.22em]" style={{ color: C.gold }}>For Brewery Owners</span>
               </motion.div>
               <motion.div variants={{ hidden: { opacity: 0, y: 28 }, show: { opacity: 1, y: 0, transition: { duration: 0.65, ease: EASE } } }}>
-                <h1 className="font-display font-bold leading-[0.9] tracking-tight" style={{ fontSize: "clamp(54px, 8vw, 96px)", color: C.text }}>
+                <h1 className="font-display font-bold leading-[0.9] tracking-tight" style={{ fontSize: "clamp(36px, 8vw, 96px)", color: C.text }}>
                   Your regulars<br /><span className="italic" style={{ color: C.gold }}>deserve better</span><br />than a punch card.
                 </h1>
               </motion.div>
@@ -260,7 +260,7 @@ export default function BreweriesContent() {
       {/* ── Proof strip ────────────────────────────────────────────────────── */}
       <ScrollReveal>
         <section className="py-12 px-6 lg:px-10">
-          <div className="max-w-7xl mx-auto flex flex-wrap items-baseline gap-x-10 gap-y-5">
+          <div className="max-w-7xl mx-auto flex flex-wrap items-baseline gap-x-6 sm:gap-x-10 gap-y-4 sm:gap-y-5">
             {[
               { value: "20 min", label: "average setup time" },
               { value: "$49", label: "starting per month" },
@@ -281,7 +281,7 @@ export default function BreweriesContent() {
       {/* ── Features — DARK floating section (with breathing room) ──────── */}
       <section className="px-6 lg:px-10 py-10">
         <div className="max-w-7xl mx-auto dark-section" style={{ background: C.dark }}>
-          <div className="relative z-10 p-10 lg:p-16 xl:p-20">
+          <div className="relative z-10 p-6 sm:p-10 lg:p-16 xl:p-20">
             <ScrollReveal className="mb-14">
               <span className="text-[11px] font-mono uppercase tracking-[0.22em]" style={{ color: C.gold }}>What&apos;s included</span>
               <h2 className="font-display font-bold leading-[0.95] tracking-tight mt-3" style={{ fontSize: "clamp(36px, 4.5vw, 56px)", color: C.creamText }}>
@@ -308,7 +308,7 @@ export default function BreweriesContent() {
               <div className="h-px" style={{ background: C.darkBorder, opacity: 0.5 }} />
 
               <ScrollReveal>
-                <div className="rounded-2xl p-8 lg:p-12" style={{ background: C.darkSurface, border: `1px solid ${C.darkBorder}` }}>
+                <div className="rounded-2xl p-5 sm:p-8 lg:p-12" style={{ background: C.darkSurface, border: `1px solid ${C.darkBorder}` }}>
                   <div className="grid lg:grid-cols-2 gap-8 items-center">
                     <div>
                       <div className="w-10 h-10 rounded-2xl flex items-center justify-center mb-5" style={{ background: "rgba(212,168,67,0.1)", border: "1px solid rgba(212,168,67,0.2)" }}>
@@ -354,7 +354,7 @@ export default function BreweriesContent() {
       {/* ── Pricing — DARK floating section with tap handles ─────────────── */}
       <section className="px-6 lg:px-10 py-10" id="pricing">
         <div className="max-w-7xl mx-auto dark-section" style={{ background: C.dark }}>
-          <div className="relative z-10 p-10 lg:p-16 xl:p-20">
+          <div className="relative z-10 p-6 sm:p-10 lg:p-16 xl:p-20">
             <ScrollReveal className="mb-14">
               <span className="text-[11px] font-mono uppercase tracking-[0.22em]" style={{ color: C.gold }}>Pricing</span>
               <h2 className="font-display font-bold leading-[0.95] tracking-tight mt-3" style={{ fontSize: "clamp(36px, 4.5vw, 56px)", color: C.creamText }}>
@@ -363,7 +363,7 @@ export default function BreweriesContent() {
             </ScrollReveal>
 
             <ScrollReveal>
-              <div className="grid md:grid-cols-3 gap-5 items-start">
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 items-start">
                 {TIERS.map((tier) => (
                   <div
                     key={tier.name}

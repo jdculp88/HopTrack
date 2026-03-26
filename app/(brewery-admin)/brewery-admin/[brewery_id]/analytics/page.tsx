@@ -15,14 +15,29 @@ export default async function AnalyticsPage({ params }: { params: Promise<{ brew
     .eq("user_id", user.id).eq("brewery_id", brewery_id).single() as any;
   if (!account) notFound();
 
-  // Get all check-ins for this brewery (last 90 days)
+  // Fetch sessions (last 90 days) for visit-level stats
   const since = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
-  const { data: checkins } = await supabase
-    .from("checkins")
-    .select("id, created_at, rating, beer_id, user_id, beer:beers(name, style)")
+  const { data: sessions } = await supabase
+    .from("sessions")
+    .select("id, user_id, started_at, ended_at, is_active")
     .eq("brewery_id", brewery_id)
-    .gte("created_at", since)
-    .order("created_at") as any;
+    .eq("is_active", false)
+    .gte("started_at", since)
+    .order("started_at") as any;
 
-  return <AnalyticsClient breweryId={brewery_id} checkins={(checkins as any[]) ?? []} />;
+  // Fetch beer_logs (last 90 days) for beer-level stats
+  const { data: beerLogs } = await supabase
+    .from("beer_logs")
+    .select("id, beer_id, rating, quantity, logged_at, user_id, beer:beers(name, style)")
+    .eq("brewery_id", brewery_id)
+    .gte("logged_at", since)
+    .order("logged_at") as any;
+
+  return (
+    <AnalyticsClient
+      breweryId={brewery_id}
+      sessions={(sessions as any[]) ?? []}
+      beerLogs={(beerLogs as any[]) ?? []}
+    />
+  );
 }

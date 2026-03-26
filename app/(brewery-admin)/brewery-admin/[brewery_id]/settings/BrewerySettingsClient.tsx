@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Save, Loader2 } from "lucide-react";
 import { useToast } from "@/components/ui/Toast";
+import { ImageUpload } from "@/components/ui/ImageUpload";
 
 interface BrewerySettingsClientProps {
   brewery: any;
@@ -18,6 +19,7 @@ export function BrewerySettingsClient({ brewery, role }: BrewerySettingsClientPr
     website_url: brewery?.website_url ?? "",
     phone: brewery?.phone ?? "",
     description: brewery?.description ?? "",
+    cover_image_url: brewery?.cover_image_url ?? "",
   });
   const [saving, setSaving] = useState(false);
   const { success, error: toastError } = useToast();
@@ -83,6 +85,26 @@ export function BrewerySettingsClient({ brewery, role }: BrewerySettingsClientPr
             />
           </div>
         ))}
+
+        {/* Cover Photo */}
+        <div>
+          <label className="text-xs font-mono uppercase tracking-wider block mb-1.5" style={{ color: "var(--text-muted)" }}>
+            Cover Photo
+          </label>
+          <ImageUpload
+            bucket="brewery-covers"
+            folder={brewery.id}
+            currentUrl={form.cover_image_url || null}
+            onUpload={(url) => setForm(f => ({ ...f, cover_image_url: url }))}
+            onRemove={() => setForm(f => ({ ...f, cover_image_url: "" }))}
+            aspect="cover"
+            maxSizeMb={10}
+            label="Upload cover photo"
+          />
+          <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>
+            Shown as the banner on your public brewery page. Recommended: 1200×400px.
+          </p>
+        </div>
 
         {/* Description */}
         <div>

@@ -8,50 +8,54 @@ import { PintRewindShareCard } from "@/components/brewery-admin/PintRewindShareC
 
 interface PintRewindClientProps {
   breweryName: string;
-  checkins30: any[];
-  checkinsAll: any[];
+  sessions30: any[];
+  beerLogs30: any[];
+  sessionsAll: any[];
+  beerLogsAll: any[];
   topVisitor: { username: string; avatar_url: string | null; count: number } | null;
 }
 
 type Scope = "30d" | "all";
 
-export function PintRewindClient({ breweryName, checkins30, checkinsAll, topVisitor }: PintRewindClientProps) {
+export function PintRewindClient({ breweryName, sessions30, beerLogs30, sessionsAll, beerLogsAll, topVisitor }: PintRewindClientProps) {
   const [scope, setScope] = useState<Scope>("30d");
   const [shareOpen, setShareOpen] = useState(false);
-  const checkins = scope === "30d" ? checkins30 : checkinsAll;
+  const sessions = scope === "30d" ? sessions30 : sessionsAll;
+  const beerLogs = scope === "30d" ? beerLogs30 : beerLogsAll;
 
   const stats = useMemo(() => {
-    const totalCheckins = checkins.length;
-    const uniqueVisitors = new Set(checkins.map((c: any) => c.user_id).filter(Boolean)).size;
-    const rated = checkins.filter((c: any) => c.rating > 0);
+    const totalVisits = sessions.length;
+    const totalBeersLogged = beerLogs.reduce((sum: number, l: any) => sum + (l.quantity ?? 1), 0);
+    const uniqueVisitors = new Set(sessions.map((s: any) => s.user_id).filter(Boolean)).size;
+    const rated = beerLogs.filter((l: any) => l.rating > 0);
     const avgRating = rated.length > 0
-      ? (rated.reduce((a: number, c: any) => a + c.rating, 0) / rated.length).toFixed(1)
+      ? (rated.reduce((a: number, l: any) => a + l.rating, 0) / rated.length).toFixed(1)
       : null;
 
-    // Top beer
+    // Top beers from beer_logs
     const beerCounts: Record<string, { name: string; count: number; totalRating: number; ratingCount: number }> = {};
-    checkins.forEach((c: any) => {
-      if (!c.beer_id || !c.beer?.name) return;
-      if (!beerCounts[c.beer_id]) beerCounts[c.beer_id] = { name: c.beer.name, count: 0, totalRating: 0, ratingCount: 0 };
-      beerCounts[c.beer_id].count++;
-      if (c.rating > 0) { beerCounts[c.beer_id].totalRating += c.rating; beerCounts[c.beer_id].ratingCount++; }
+    beerLogs.forEach((l: any) => {
+      if (!l.beer_id || !l.beer?.name) return;
+      if (!beerCounts[l.beer_id]) beerCounts[l.beer_id] = { name: l.beer.name, count: 0, totalRating: 0, ratingCount: 0 };
+      beerCounts[l.beer_id].count += l.quantity ?? 1;
+      if (l.rating > 0) { beerCounts[l.beer_id].totalRating += l.rating; beerCounts[l.beer_id].ratingCount++; }
     });
     const topBeers = Object.values(beerCounts).sort((a, b) => b.count - a.count).slice(0, 5).map(b => ({
       ...b,
       avgRating: b.ratingCount > 0 ? (b.totalRating / b.ratingCount).toFixed(1) : null,
     }));
 
-    // Busiest day of week
+    // Busiest day of week (by visits/sessions)
     const dowCounts = Array(7).fill(0);
-    checkins.forEach((c: any) => { dowCounts[new Date(c.created_at).getDay()]++; });
+    sessions.forEach((s: any) => { dowCounts[new Date(s.started_at).getDay()]++; });
     const dowLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     const busiestDowIdx = dowCounts.indexOf(Math.max(...dowCounts));
     const dowData = dowLabels.map((day, i) => ({ day, count: dowCounts[i] }));
 
-    // Busiest hour
+    // Busiest hour (by session start time)
     const hourCounts: Record<number, number> = {};
-    checkins.forEach((c: any) => {
-      const h = new Date(c.created_at).getHours();
+    sessions.forEach((s: any) => {
+      const h = new Date(s.started_at).getHours();
       hourCounts[h] = (hourCounts[h] ?? 0) + 1;
     });
     const busiestHour = Object.entries(hourCounts).sort((a, b) => b[1] - a[1])[0]?.[0];
@@ -60,8 +64,17 @@ export function PintRewindClient({ breweryName, checkins30, checkinsAll, topVisi
       return n === 0 ? "12am" : n < 12 ? `${n}am` : n === 12 ? "12pm" : `${n - 12}pm`;
     };
 
-    return { totalCheckins, uniqueVisitors, avgRating, topBeers, dowData, busiestDay: dowLabels[busiestDowIdx], busiestHour: busiestHour ? formatHour(busiestHour) : null };
-  }, [checkins]);
+    return {
+      totalCheckins: totalVisits,
+      totalBeersLogged,
+      uniqueVisitors,
+      avgRating,
+      topBeers,
+      dowData,
+      busiestDay: dowLabels[busiestDowIdx],
+      busiestHour: busiestHour ? formatHour(busiestHour) : null,
+    };
+  }, [sessions, beerLogs]);
 
   const tooltipStyle = { background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12, color: "var(--text-primary)" };
   const scopeLabel = scope === "30d" ? "Last 30 Days" : "All Time";
@@ -117,9 +130,9 @@ export function PintRewindClient({ breweryName, checkins30, checkinsAll, topVisi
           {stats.totalCheckins === 0 ? (
             <div className="rounded-2xl border p-16 text-center" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
               <p className="text-4xl mb-3">🍺</p>
-              <p className="font-display text-xl" style={{ color: "var(--text-primary)" }}>No check-ins yet</p>
+              <p className="font-display text-xl" style={{ color: "var(--text-primary)" }}>No visits yet</p>
               <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
-                {scope === "30d" ? "No check-ins in the last 30 days." : "No check-ins recorded yet."}
+                {scope === "30d" ? "No visits in the last 30 days." : "No visits recorded yet."}
               </p>
             </div>
           ) : (
@@ -127,7 +140,7 @@ export function PintRewindClient({ breweryName, checkins30, checkinsAll, topVisi
               {/* Hero stats */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 {[
-                  { icon: TrendingUp, label: "Check-ins", value: stats.totalCheckins },
+                  { icon: TrendingUp, label: "Visits", value: stats.totalCheckins },
                   { icon: Users, label: "Visitors", value: stats.uniqueVisitors },
                   { icon: Star, label: "Avg Rating", value: stats.avgRating ? `${stats.avgRating} ★` : "—" },
                   { icon: Calendar, label: "Busiest Day", value: stats.busiestDay ?? "—" },
@@ -138,6 +151,19 @@ export function PintRewindClient({ breweryName, checkins30, checkinsAll, topVisi
                     <p className="text-xs mt-1 font-mono uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>{label}</p>
                   </div>
                 ))}
+              </div>
+
+              {/* Beers logged callout */}
+              <div className="rounded-2xl p-5 border flex items-center gap-4" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
+                <span className="text-3xl">🍺</span>
+                <div>
+                  <p className="font-display font-bold" style={{ color: "var(--text-primary)" }}>
+                    <span style={{ color: "var(--accent-gold)" }}>{stats.totalBeersLogged}</span> beer{stats.totalBeersLogged !== 1 ? "s" : ""} logged
+                  </p>
+                  <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+                    Across {stats.totalCheckins} visit{stats.totalCheckins !== 1 ? "s" : ""} {scopeLabel.toLowerCase()}.
+                  </p>
+                </div>
               </div>
 
               {/* Busiest hour callout */}
@@ -157,13 +183,13 @@ export function PintRewindClient({ breweryName, checkins30, checkinsAll, topVisi
 
               {/* Day of week chart */}
               <div className="rounded-2xl p-6 border" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
-                <h2 className="font-display font-bold mb-4" style={{ color: "var(--text-primary)" }}>Check-ins by Day</h2>
+                <h2 className="font-display font-bold mb-4" style={{ color: "var(--text-primary)" }}>Visits by Day</h2>
                 <ResponsiveContainer width="100%" height={180}>
                   <BarChart data={stats.dowData}>
                     <XAxis dataKey="day" tick={{ fontSize: 11, fill: "var(--text-muted)" }} />
                     <YAxis tick={{ fontSize: 11, fill: "var(--text-muted)" }} allowDecimals={false} />
                     <Tooltip contentStyle={tooltipStyle} />
-                    <Bar dataKey="count" fill="#D4A843" radius={[4, 4, 0, 0]} name="Check-ins" />
+                    <Bar dataKey="count" fill="#D4A843" radius={[4, 4, 0, 0]} name="Visits" />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -184,7 +210,7 @@ export function PintRewindClient({ breweryName, checkins30, checkinsAll, topVisi
                           <p className="text-sm font-medium truncate" style={{ color: "var(--text-primary)" }}>{beer.name}</p>
                         </div>
                         <div className="text-right shrink-0">
-                          <span className="text-sm font-mono" style={{ color: "var(--text-muted)" }}>{beer.count} check-in{beer.count !== 1 ? "s" : ""}</span>
+                          <span className="text-sm font-mono" style={{ color: "var(--text-muted)" }}>{beer.count} pour{beer.count !== 1 ? "s" : ""}</span>
                           {beer.avgRating && (
                             <span className="text-xs ml-2" style={{ color: "var(--accent-gold)" }}>{beer.avgRating} ★</span>
                           )}
@@ -212,7 +238,7 @@ export function PintRewindClient({ breweryName, checkins30, checkinsAll, topVisi
                     )}
                     <div>
                       <p className="font-semibold" style={{ color: "var(--text-primary)" }}>@{topVisitor.username}</p>
-                      <p className="text-sm" style={{ color: "var(--text-muted)" }}>{topVisitor.count} check-in{topVisitor.count !== 1 ? "s" : ""} all time</p>
+                      <p className="text-sm" style={{ color: "var(--text-muted)" }}>{topVisitor.count} visit{topVisitor.count !== 1 ? "s" : ""} all time</p>
                     </div>
                     <span className="ml-auto text-2xl">🍺</span>
                   </div>
