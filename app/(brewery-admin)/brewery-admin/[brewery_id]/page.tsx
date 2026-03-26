@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { Beer, Users, Star, TrendingUp, Award, Calendar, ArrowUpRight, List } from "lucide-react";
+import { formatDateShort } from "@/lib/dates";
 
 export async function generateMetadata({ params }: { params: Promise<{ brewery_id: string }> }) {
   const { brewery_id } = await params;
@@ -213,7 +214,7 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
                         <p className="text-sm font-mono" style={{ color: "var(--color-accent-gold)" }}>★ {c.rating}</p>
                       )}
                       <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>
-                        {new Date(c.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                        {formatDateShort(c.created_at)}
                       </p>
                     </div>
                   </div>
@@ -300,7 +301,7 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
                     {p.ends_at && (
                       <p className="text-xs mt-0.5 flex items-center gap-1" style={{ color: "var(--color-text-muted)" }}>
                         <Calendar size={10} />
-                        Ends {new Date(p.ends_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                        Ends {formatDateShort(p.ends_at)}
                       </p>
                     )}
                   </div>

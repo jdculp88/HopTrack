@@ -6,6 +6,7 @@ import { Plus, Award, Tag, ToggleLeft, ToggleRight, X, Save, Loader2, Trash2, Ed
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { LoyaltyQRModal } from "@/components/loyalty/LoyaltyQRModal";
+import { formatDate } from "@/lib/dates";
 
 interface LoyaltyClientProps {
   breweryId: string;
@@ -239,7 +240,7 @@ export function LoyaltyClient({ breweryId, initialPrograms, initialPromotions, b
                       {promo.discount_type === "fixed" && promo.discount_value && `$${promo.discount_value} off`}
                       {promo.discount_type === "bogo" && "Buy one get one"}
                       {promo.discount_type === "free_item" && "Free item"}
-                      {promo.ends_at && ` · Ends ${new Date(promo.ends_at).toLocaleDateString()}`}
+                      {promo.ends_at && ` · Ends ${formatDate(promo.ends_at)}`}
                     </p>
                   </div>
                   <div className="flex items-center gap-2">

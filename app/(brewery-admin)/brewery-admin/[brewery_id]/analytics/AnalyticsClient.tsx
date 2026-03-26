@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, CartesianGrid, PieChart, Pie, Cell } from "recharts";
+import { formatDateShort } from "@/lib/dates";
 
 interface AnalyticsClientProps {
   breweryId: string;
@@ -18,11 +19,11 @@ export function AnalyticsClient({ checkins }: AnalyticsClientProps) {
     for (let i = 29; i >= 0; i--) {
       const d = new Date(now);
       d.setDate(d.getDate() - i);
-      const key = d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+      const key = formatDateShort(d);
       days[key] = 0;
     }
     checkins.forEach(c => {
-      const key = new Date(c.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+      const key = formatDateShort(c.created_at);
       if (key in days) days[key]++;
     });
     return Object.entries(days).map(([date, count]) => ({ date, count }));

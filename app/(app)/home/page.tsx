@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { HomeFeed } from "./HomeFeed";
+import type { Session } from "@/types/database";
 
 export const metadata = { title: "Feed" };
 
@@ -27,8 +28,9 @@ export default async function HomePage() {
     f.requester_id === user.id ? f.addressee_id : f.requester_id
   );
 
-  // Fetch activity feed (own + friends)
   const feedUserIds = [user.id, ...friendIds];
+
+  // Fetch legacy checkins (activity feed)
   const { data: checkins } = await supabase
     .from("checkins")
     .select(`
@@ -40,6 +42,21 @@ export default async function HomePage() {
     .in("user_id", feedUserIds)
     .eq("share_to_feed", true)
     .order("created_at", { ascending: false })
+    .limit(20);
+
+  // Fetch sessions for feed (new check-in system)
+  const { data: sessions } = await (supabase as any)
+    .from("sessions")
+    .select(`
+      *,
+      profile:profiles!sessions_user_id_fkey(id, username, display_name, avatar_url),
+      brewery:breweries(id, name, city, state),
+      beer_logs(id, beer_id, rating, flavor_tags, serving_style, comment, photo_url, logged_at)
+    `)
+    .in("user_id", feedUserIds)
+    .eq("share_to_feed", true)
+    .eq("is_active", false)
+    .order("started_at", { ascending: false })
     .limit(20);
 
   // Fetch weekly stats for current user
@@ -54,6 +71,7 @@ export default async function HomePage() {
     <HomeFeed
       profile={profile}
       checkins={(checkins as any[]) ?? []}
+      sessions={(sessions as Session[]) ?? []}
       weekStats={{
         checkins: weekCheckins?.length ?? 0,
         uniqueBreweries: new Set((weekCheckins as any[] ?? []).map((c: any) => c.brewery_id)).size,

@@ -3,9 +3,11 @@ import { notFound, redirect } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { MapPin, Globe, Phone, Star, Users, ArrowLeft, TrendingUp, Beer, CheckCheck } from "lucide-react";
+import type { Brewery } from "@/types/database";
 import { BeerCard } from "@/components/beer/BeerCard";
 import { LeaderboardRow } from "@/components/social/LeaderboardRow";
 import { generateGradientFromString } from "@/lib/utils";
+import BreweryCheckinButton from "@/components/checkin/BreweryCheckinButton";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -135,6 +137,9 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
                 ✓ {userVisit.total_visits} visit{userVisit.total_visits > 1 ? "s" : ""}
               </span>
             )}
+          </div>
+          <div className="mt-4">
+            <BreweryCheckinButton brewery={brewery as Brewery} />
           </div>
         </div>
       </div>

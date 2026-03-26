@@ -12,9 +12,10 @@ interface CheckinEntryDrawerProps {
   isOpen: boolean
   onClose: () => void
   onSessionStarted: (session: Session, breweryName: string) => void
+  preselectedBrewery?: Brewery | null
 }
 
-export default function CheckinEntryDrawer({ isOpen, onClose, onSessionStarted }: CheckinEntryDrawerProps) {
+export default function CheckinEntryDrawer({ isOpen, onClose, onSessionStarted, preselectedBrewery }: CheckinEntryDrawerProps) {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<Brewery[]>([])
   const [searching, setSearching] = useState(false)
@@ -35,9 +36,12 @@ export default function CheckinEntryDrawer({ isOpen, onClose, onSessionStarted }
       setStartingFor(null)
       setStartError(null)
       setShowSearch(false)
-      detectNearbyBreweries()
+      // If a brewery was pre-selected (e.g. from brewery page CTA), skip location detection
+      if (!preselectedBrewery) {
+        detectNearbyBreweries()
+      }
     }
-  }, [isOpen])
+  }, [isOpen, preselectedBrewery])
 
   // Focus input when search is shown
   useEffect(() => {
@@ -142,9 +146,61 @@ export default function CheckinEntryDrawer({ isOpen, onClose, onSessionStarted }
           )}
         </AnimatePresence>
 
+        {/* Pre-selected brewery — arrived from brewery page CTA */}
+        {preselectedBrewery && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="space-y-3"
+          >
+            <div className="flex items-center gap-2">
+              <MapPin size={14} style={{ color: 'var(--accent-gold)' }} />
+              <p className="text-xs font-mono uppercase tracking-widest" style={{ color: 'var(--accent-gold)' }}>
+                You&rsquo;re checking in here
+              </p>
+            </div>
+
+            <div
+              className="rounded-2xl p-5 space-y-4"
+              style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
+            >
+              <div className="flex items-center gap-4">
+                <div
+                  className="w-14 h-14 rounded-2xl flex-shrink-0"
+                  style={{ background: generateGradientFromString(preselectedBrewery.name) }}
+                />
+                <div className="flex-1 min-w-0">
+                  <h2 className="font-display text-xl font-bold leading-tight" style={{ color: 'var(--text-primary)' }}>
+                    {preselectedBrewery.name}
+                  </h2>
+                  <p className="text-sm mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                    {preselectedBrewery.city}{preselectedBrewery.state ? `, ${preselectedBrewery.state}` : ''}
+                  </p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => handleSelectBrewery(preselectedBrewery)}
+                disabled={startingFor === preselectedBrewery.id}
+                className="w-full py-4 rounded-xl font-bold text-base flex items-center justify-center gap-2 transition-all disabled:opacity-70"
+                style={{
+                  background: 'linear-gradient(135deg, #D4A843 0%, #E8841A 100%)',
+                  color: '#0F0E0C',
+                }}
+              >
+                {startingFor === preselectedBrewery.id ? (
+                  <><Loader2 size={18} className="animate-spin" /> Starting...</>
+                ) : (
+                  <>Start your visit <ChevronRight size={18} /></>
+                )}
+              </button>
+            </div>
+          </motion.div>
+        )}
+
         {/* Single auto-detected brewery — big confirm card */}
         <AnimatePresence>
-          {autoDetected && !showSearch && (
+          {!preselectedBrewery && autoDetected && !showSearch && (
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -205,8 +261,8 @@ export default function CheckinEntryDrawer({ isOpen, onClose, onSessionStarted }
           )}
         </AnimatePresence>
 
-        {/* Search mode — show when: no auto-detected, showSearch forced, or 2+ nearby */}
-        {(!autoDetected || showSearch) && (
+        {/* Search mode — show when: no preselected, no auto-detected, showSearch forced, or 2+ nearby */}
+        {!preselectedBrewery && (!autoDetected || showSearch) && (
           <div className="space-y-5">
             {!autoDetected && !showSearch && (
               <div>
@@ -267,38 +323,42 @@ export default function CheckinEntryDrawer({ isOpen, onClose, onSessionStarted }
                 </p>
               )}
               {displayList.map((brewery) => (
-                <motion.button
+                <button
                   key={brewery.id}
                   type="button"
                   onClick={() => handleSelectBrewery(brewery)}
                   disabled={startingFor === brewery.id}
-                  whileTap={{ scale: 0.98 }}
-                  transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                  className="w-full flex items-center gap-4 p-4 rounded-2xl transition-all text-left disabled:opacity-60"
-                  style={{
-                    background: 'var(--surface)',
-                    border: '1px solid var(--border)',
-                  }}
+                  className="w-full text-left disabled:opacity-60"
                 >
-                  <div
-                    className="w-12 h-12 rounded-xl flex-shrink-0"
-                    style={{ background: generateGradientFromString(brewery.name) }}
-                  />
-                  <div className="flex-1 min-w-0">
-                    <p className="font-display font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
-                      {brewery.name}
-                    </p>
-                    <p className="text-sm truncate" style={{ color: 'var(--text-muted)' }}>
-                      {brewery.city}{brewery.state ? `, ${brewery.state}` : ''}
-                      {brewery.brewery_type && ` · ${brewery.brewery_type}`}
-                    </p>
-                  </div>
-                  {startingFor === brewery.id ? (
-                    <Loader2 size={16} className="animate-spin flex-shrink-0" style={{ color: 'var(--text-muted)' }} />
-                  ) : (
-                    <ChevronRight size={16} className="flex-shrink-0" style={{ color: 'var(--text-muted)' }} />
-                  )}
-                </motion.button>
+                  <motion.div
+                    whileTap={{ scale: 0.98 }}
+                    transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                    className="flex items-center gap-4 p-4 rounded-2xl transition-all"
+                    style={{
+                      background: 'var(--surface)',
+                      border: '1px solid var(--border)',
+                    }}
+                  >
+                    <div
+                      className="w-12 h-12 rounded-xl flex-shrink-0"
+                      style={{ background: generateGradientFromString(brewery.name) }}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-display font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
+                        {brewery.name}
+                      </p>
+                      <p className="text-sm truncate" style={{ color: 'var(--text-muted)' }}>
+                        {brewery.city}{brewery.state ? `, ${brewery.state}` : ''}
+                        {brewery.brewery_type && ` · ${brewery.brewery_type}`}
+                      </p>
+                    </div>
+                    {startingFor === brewery.id ? (
+                      <Loader2 size={16} className="animate-spin flex-shrink-0" style={{ color: 'var(--text-muted)' }} />
+                    ) : (
+                      <ChevronRight size={16} className="flex-shrink-0" style={{ color: 'var(--text-muted)' }} />
+                    )}
+                  </motion.div>
+                </button>
               ))}
               {query.trim() && results.length === 0 && !searching && (
                 <p className="text-center py-8 text-sm" style={{ color: 'var(--text-muted)' }}>

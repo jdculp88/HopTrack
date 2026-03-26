@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Search, MapPin, Building2, CheckCircle, ChevronRight, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input, Textarea } from "@/components/ui/Input";
+import { formatDate } from "@/lib/dates";
 
 interface OpenBrewery {
   id: string;
@@ -122,9 +123,7 @@ export function ClaimBreweryClient({ userEmail, pendingClaim }: ClaimBreweryClie
 
   // ── Pending claim status view ──────────────────────────────────────────────
   if (pendingClaim && step === "search") {
-    const submittedAt = new Date(pendingClaim.created_at).toLocaleDateString("en-US", {
-      month: "long", day: "numeric", year: "numeric",
-    });
+    const submittedAt = formatDate(pendingClaim.created_at);
     return (
       <div
         className="min-h-screen flex items-start justify-center px-4 py-12"

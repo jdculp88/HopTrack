@@ -9,6 +9,7 @@ import {
   UserPlus,
   ShieldAlert,
 } from "lucide-react";
+import { formatDateTime } from "@/lib/dates";
 
 export const metadata = { title: "Overview" };
 
@@ -226,12 +227,7 @@ export default async function SuperadminOverviewPage() {
                   style={{ color: "var(--text-muted)" }}
                   dateTime={action.created_at}
                 >
-                  {new Date(action.created_at).toLocaleDateString("en-US", {
-                    month: "short",
-                    day: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
+                  {formatDateTime(action.created_at)}
                 </time>
               </div>
             ))}

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle, XCircle, Clock, Building2, Mail, User, Calendar, Search } from "lucide-react";
+import { formatDate } from "@/lib/dates";
 
 type Claim = {
   id: string;
@@ -136,7 +137,7 @@ export function ClaimsClient({ initialClaims }: { initialClaims: Claim[] }) {
                 <div className="flex items-center gap-2 mb-1">
                   <StatusBadge status={claim.status} />
                   <span className="text-xs text-[var(--text-muted)] font-mono">
-                    {new Date(claim.created_at).toLocaleDateString()}
+                    {formatDate(claim.created_at)}
                   </span>
                 </div>
                 <div className="flex items-center gap-1.5 mb-0.5">

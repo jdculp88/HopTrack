@@ -1,92 +1,65 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { MapPin, Zap, Compass, UserPlus } from "lucide-react";
+import { Zap, Compass, UserPlus } from "lucide-react";
 import { CheckinCard } from "@/components/social/CheckinCard";
+import { SessionCard } from "@/components/social/SessionCard";
 import { UserAvatar } from "@/components/ui/UserAvatar";
-import CheckinEntryDrawer from "@/components/checkin/CheckinEntryDrawer";
-import TapWallSheet from "@/components/checkin/TapWallSheet";
-import SessionRecapSheet from "@/components/checkin/SessionRecapSheet";
 import { getLevelProgress } from "@/lib/xp";
 import { useSession } from "@/hooks/useSession";
 import type { Profile, CheckinWithDetails, ReactionType, Session } from "@/types/database";
 
+// Discriminated union for unified feed items
+type FeedItem =
+  | { kind: 'checkin'; time: string; data: CheckinWithDetails }
+  | { kind: 'session'; time: string; data: Session };
+
 interface HomeFeedProps {
   profile: Profile | null;
   checkins: CheckinWithDetails[];
+  sessions: Session[];
   weekStats: { checkins: number; uniqueBreweries: number };
   currentUserId: string;
 }
 
-export function HomeFeed({ profile, checkins, weekStats, currentUserId }: HomeFeedProps) {
+export function HomeFeed({ profile, checkins, sessions, weekStats, currentUserId }: HomeFeedProps) {
   const [localCheckins, setLocalCheckins] = useState(checkins);
   const levelInfo = profile ? getLevelProgress(profile.xp) : null;
 
-  // Session & drawer state
-  const [checkinDrawerOpen, setCheckinDrawerOpen] = useState(false);
-  const [tapWallOpen, setTapWallOpen] = useState(false);
-  const [activeSession, setActiveSession] = useState<Session | null>(null);
-  const [sessionBreweryName, setSessionBreweryName] = useState('');
-  const [sessionRecapOpen, setSessionRecapOpen] = useState(false);
-  const [sessionResult, setSessionResult] = useState<{ xpGained: number; newAchievements: any[] } | null>(null);
-
   const { getActiveSession } = useSession();
 
-  // Fetch active session on mount
+  // On mount: fetch active session and broadcast to AppShell so the
+  // ActiveSessionBanner and global tap wall state are in sync.
   useEffect(() => {
     getActiveSession().then((session) => {
-      if (session) {
-        setActiveSession(session);
-        setSessionBreweryName(session.brewery?.name ?? 'Brewery');
-      }
+      window.dispatchEvent(
+        new CustomEvent('hoptrack:session-changed', {
+          detail: session
+            ? { session, breweryName: (session as any).brewery?.name ?? 'Brewery' }
+            : null,
+        })
+      );
     });
   }, [getActiveSession]);
 
-  // Expose checkin opener to AppShell via CustomEvent
-  useEffect(() => {
-    function handleOpenCheckin() {
-      setCheckinDrawerOpen(true);
-    }
-    window.addEventListener('hoptrack:open-checkin', handleOpenCheckin);
-    return () => window.removeEventListener('hoptrack:open-checkin', handleOpenCheckin);
-  }, []);
-
-  // Expose tap wall opener to AppShell via CustomEvent
-  useEffect(() => {
-    function handleOpenTapWall() {
-      if (activeSession) setTapWallOpen(true);
-    }
-    window.addEventListener('hoptrack:open-tapwall', handleOpenTapWall);
-    return () => window.removeEventListener('hoptrack:open-tapwall', handleOpenTapWall);
-  }, [activeSession]);
-
-  // Broadcast active session state changes so AppShell can pick them up
-  useEffect(() => {
-    const event = new CustomEvent('hoptrack:session-changed', {
-      detail: activeSession
-        ? { session: activeSession, breweryName: sessionBreweryName }
-        : null,
-    });
-    window.dispatchEvent(event);
-  }, [activeSession, sessionBreweryName]);
-
-  // Called from CheckinEntryDrawer when session starts
-  function handleSessionStarted(session: Session, breweryName: string) {
-    setActiveSession(session);
-    setSessionBreweryName(breweryName);
-    setCheckinDrawerOpen(false);
-    setTapWallOpen(true);
-  }
-
-  // Called from TapWallSheet when session ends
-  function handleSessionEnd(result: { xpGained: number; newAchievements: any[] }) {
-    setActiveSession(null);
-    setTapWallOpen(false);
-    setSessionResult(result);
-    setSessionRecapOpen(true);
-  }
+  // Merge checkins + sessions into a single sorted feed
+  const feedItems = useMemo<FeedItem[]>(() => {
+    const items: FeedItem[] = [
+      ...localCheckins.map((c) => ({
+        kind: 'checkin' as const,
+        time: c.created_at,
+        data: c,
+      })),
+      ...sessions.map((s) => ({
+        kind: 'session' as const,
+        time: s.started_at,
+        data: s,
+      })),
+    ];
+    return items.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
+  }, [localCheckins, sessions]);
 
   async function handleReact(checkinId: string, type: ReactionType) {
     // Optimistic update
@@ -125,121 +98,90 @@ export function HomeFeed({ profile, checkins, weekStats, currentUserId }: HomeFe
   }
 
   return (
-    <>
-      <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
-        {/* Welcome / Stats Header */}
-        {profile && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-[var(--surface)] border border-[var(--border)] rounded-3xl p-5"
-          >
-            <div className="flex items-center gap-4 mb-4">
-              <UserAvatar profile={profile} size="lg" showLevel />
-              <div className="flex-1 min-w-0">
-                <h1 className="font-display text-xl font-bold text-[var(--text-primary)] leading-tight">
-                  Hey, {(profile.display_name ?? profile.username).split(" ")[0]}!
-                </h1>
-                <p className="text-sm text-[var(--text-secondary)]">
-                  {levelInfo?.current.name} · Level {profile.level}
-                </p>
-              </div>
+    <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
+      {/* Welcome / Stats Header */}
+      {profile && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-[var(--surface)] border border-[var(--border)] rounded-3xl p-5"
+        >
+          <div className="flex items-center gap-4 mb-4">
+            <UserAvatar profile={profile} size="lg" showLevel />
+            <div className="flex-1 min-w-0">
+              <h1 className="font-display text-xl font-bold text-[var(--text-primary)] leading-tight">
+                Hey, {(profile.display_name ?? profile.username).split(" ")[0]}!
+              </h1>
+              <p className="text-sm text-[var(--text-secondary)]">
+                {levelInfo?.current.name} · Level {profile.level}
+              </p>
             </div>
-
-            {/* XP Progress */}
-            {levelInfo && levelInfo.next && (
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between text-xs text-[var(--text-muted)]">
-                  <span>{profile.xp.toLocaleString()} XP</span>
-                  <span>{levelInfo.xpToNext} XP to Level {levelInfo.next.level}</span>
-                </div>
-                <div className="h-1.5 bg-[var(--surface-2)] rounded-full overflow-hidden">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${levelInfo.progress}%` }}
-                    transition={{ duration: 1, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
-                    className="h-full bg-gradient-to-r from-[#D4A843] to-[#E8841A] rounded-full"
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Weekly Stats */}
-            <div className="grid grid-cols-3 gap-3 mt-4 pt-4 border-t border-[var(--border)]">
-              <div className="text-center">
-                <p className="font-mono font-bold text-[#D4A843] text-xl">{profile.total_checkins}</p>
-                <p className="text-xs text-[var(--text-muted)]">Total</p>
-              </div>
-              <div className="text-center">
-                <p className="font-mono font-bold text-[#D4A843] text-xl">{weekStats.checkins}</p>
-                <p className="text-xs text-[var(--text-muted)]">This Week</p>
-              </div>
-              <div className="text-center">
-                <p className="font-mono font-bold text-[#D4A843] text-xl">{profile.unique_breweries}</p>
-                <p className="text-xs text-[var(--text-muted)]">Breweries</p>
-              </div>
-            </div>
-          </motion.div>
-        )}
-
-        {/* Feed Header */}
-        <div className="flex items-center gap-2 pt-2">
-          <Zap size={16} className="text-[#D4A843]" />
-          <h2 className="font-display font-semibold text-[var(--text-primary)]">Activity Feed</h2>
-        </div>
-
-        {/* Checkins */}
-        {localCheckins.length === 0 ? (
-          <EmptyFeed />
-        ) : (
-          <div className="space-y-4">
-            {localCheckins.map((checkin, i) => (
-              <motion.div
-                key={checkin.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.05, duration: 0.3 }}
-              >
-                <CheckinCard checkin={checkin} onReact={handleReact} />
-              </motion.div>
-            ))}
           </div>
-        )}
-      </div>
 
-      {/* Check-in entry drawer (brewery selection + session start) */}
-      <CheckinEntryDrawer
-        isOpen={checkinDrawerOpen}
-        onClose={() => setCheckinDrawerOpen(false)}
-        onSessionStarted={handleSessionStarted}
-      />
+          {/* XP Progress */}
+          {levelInfo && levelInfo.next && (
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between text-xs text-[var(--text-muted)]">
+                <span>{profile.xp.toLocaleString()} XP</span>
+                <span>{levelInfo.xpToNext} XP to Level {levelInfo.next.level}</span>
+              </div>
+              <div className="h-1.5 bg-[var(--surface-2)] rounded-full overflow-hidden">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${levelInfo.progress}%` }}
+                  transition={{ duration: 1, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
+                  className="h-full bg-gradient-to-r from-[#D4A843] to-[#E8841A] rounded-full"
+                />
+              </div>
+            </div>
+          )}
 
-      {/* Tap wall — only when we have an active session */}
-      {activeSession && (
-        <TapWallSheet
-          isOpen={tapWallOpen}
-          onClose={() => setTapWallOpen(false)}
-          session={activeSession}
-          breweryName={sessionBreweryName}
-          breweryId={activeSession.brewery_id}
-          onSessionEnd={handleSessionEnd}
-        />
+          {/* Weekly Stats */}
+          <div className="grid grid-cols-3 gap-3 mt-4 pt-4 border-t border-[var(--border)]">
+            <div className="text-center">
+              <p className="font-mono font-bold text-[#D4A843] text-xl">{profile.total_checkins}</p>
+              <p className="text-xs text-[var(--text-muted)]">Total</p>
+            </div>
+            <div className="text-center">
+              <p className="font-mono font-bold text-[#D4A843] text-xl">{weekStats.checkins}</p>
+              <p className="text-xs text-[var(--text-muted)]">This Week</p>
+            </div>
+            <div className="text-center">
+              <p className="font-mono font-bold text-[#D4A843] text-xl">{profile.unique_breweries}</p>
+              <p className="text-xs text-[var(--text-muted)]">Breweries</p>
+            </div>
+          </div>
+        </motion.div>
       )}
 
-      {/* Session recap */}
-      <SessionRecapSheet
-        isOpen={sessionRecapOpen}
-        session={null}
-        breweryName={sessionBreweryName}
-        beerLogs={[]}
-        xpGained={sessionResult?.xpGained ?? 0}
-        newAchievements={sessionResult?.newAchievements ?? []}
-        onClose={() => {
-          setSessionRecapOpen(false);
-          setSessionResult(null);
-        }}
-      />
-    </>
+      {/* Feed Header */}
+      <div className="flex items-center gap-2 pt-2">
+        <Zap size={16} className="text-[#D4A843]" />
+        <h2 className="font-display font-semibold text-[var(--text-primary)]">Activity Feed</h2>
+      </div>
+
+      {/* Unified feed */}
+      {feedItems.length === 0 ? (
+        <EmptyFeed />
+      ) : (
+        <div className="space-y-4">
+          {feedItems.map((item, i) => (
+            <motion.div
+              key={item.kind === 'checkin' ? `c-${item.data.id}` : `s-${item.data.id}`}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.04, duration: 0.3 }}
+            >
+              {item.kind === 'checkin' ? (
+                <CheckinCard checkin={item.data} onReact={handleReact} />
+              ) : (
+                <SessionCard session={item.data as any} />
+              )}
+            </motion.div>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 

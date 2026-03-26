@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { Beer, Search, CheckCircle, Clock } from "lucide-react";
+import { formatDate } from "@/lib/dates";
 
 export const metadata = { title: "Breweries" };
 
@@ -191,11 +192,7 @@ export default async function BreweriesPage({
                   className="text-xs text-right w-24 hidden md:block"
                   style={{ color: "var(--text-muted)" }}
                 >
-                  {new Date(brewery.created_at).toLocaleDateString("en-US", {
-                    month: "short",
-                    day: "numeric",
-                    year: "numeric",
-                  })}
+                  {formatDate(brewery.created_at)}
                 </span>
 
                 {/* View claims link */}

@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { Users, ShieldAlert, Search, ExternalLink } from "lucide-react";
+import { formatDate } from "@/lib/dates";
 
 export const metadata = { title: "Users" };
 
@@ -190,11 +191,7 @@ export default async function UsersPage({
                 className="text-xs text-right w-24 hidden md:block"
                 style={{ color: "var(--text-muted)" }}
               >
-                {new Date(user.created_at).toLocaleDateString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                  year: "numeric",
-                })}
+                {formatDate(user.created_at)}
               </span>
 
               {/* View profile */}
