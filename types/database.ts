@@ -82,6 +82,9 @@ export interface Profile {
   level: number;
   xp: number;
   is_public: boolean;
+  current_streak: number;
+  longest_streak: number;
+  last_session_date: string | null;
   created_at: string;
 }
 export type ProfileInsert = Partial<Profile> & { id: string; username: string; display_name: string };
@@ -175,6 +178,7 @@ export interface Beer {
   description: string | null;
   seasonal: boolean;
   is_active: boolean;
+  is_featured: boolean;
   cover_image_url: string | null;
   avg_rating: number | null;
   total_ratings: number;

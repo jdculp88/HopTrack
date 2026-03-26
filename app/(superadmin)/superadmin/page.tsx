@@ -29,7 +29,7 @@ export default async function SuperadminOverviewPage() {
   ] = await Promise.all([
     supabase.from("profiles").select("id", { count: "exact", head: true }) as any,
     supabase.from("breweries").select("id", { count: "exact", head: true }) as any,
-    supabase.from("checkins").select("id", { count: "exact", head: true }) as any,
+    (supabase as any).from("sessions").select("id", { count: "exact", head: true }).eq("is_active", false) as any,
     supabase.from("brewery_claims").select("id", { count: "exact", head: true }).eq("status", "pending") as any,
     supabase.from("brewery_accounts").select("id", { count: "exact", head: true }).eq("verified", true) as any,
     supabase.from("profiles").select("id", { count: "exact", head: true }).gte("created_at", oneWeekAgo) as any,

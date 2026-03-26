@@ -76,5 +76,14 @@ export async function POST(
     return NextResponse.json({ error: 'Failed to log beer' }, { status: 500 })
   }
 
+  // Auto-remove from wishlist if this beer was wishlisted
+  if (beer_id) {
+    await (supabase as any)
+      .from('wishlist')
+      .delete()
+      .eq('user_id', user.id)
+      .eq('beer_id', beer_id);
+  }
+
   return NextResponse.json({ beerLog }, { status: 201 })
 }

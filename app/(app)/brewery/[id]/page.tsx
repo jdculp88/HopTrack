@@ -2,9 +2,10 @@ import { createClient } from "@/lib/supabase/server";
 import { notFound, redirect } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { MapPin, Globe, Phone, Star, Users, ArrowLeft, TrendingUp, Beer, CheckCheck } from "lucide-react";
+import { MapPin, Globe, Phone, Star, Users, ArrowLeft, TrendingUp, Beer, CheckCheck, Award } from "lucide-react";
 import type { Brewery } from "@/types/database";
 import { BeerCard } from "@/components/beer/BeerCard";
+import { BeerStyleBadge } from "@/components/ui/BeerStyleBadge";
 import { LeaderboardRow } from "@/components/social/LeaderboardRow";
 import { generateGradientFromString } from "@/lib/utils";
 import BreweryCheckinButton from "@/components/checkin/BreweryCheckinButton";
@@ -58,42 +59,47 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
     .limit(10);
   const topVisitors = topVisitorsRaw as any[];
 
-  // REQ-015: Enhanced brewery stats
-  // 1. Total check-ins + unique visitors + avg rating (single query with aggregates)
-  const { data: checkinStatsRaw } = await supabase
-    .from("checkins")
-    .select("user_id, rating")
-    .eq("brewery_id", id) as any;
-  const checkinStats = (checkinStatsRaw ?? []) as any[];
+  // REQ-015: Enhanced brewery stats from sessions + beer_logs
+  // 1. Total sessions + unique visitors
+  const { data: brewerySessionsRaw } = await (supabase as any)
+    .from("sessions")
+    .select("user_id")
+    .eq("brewery_id", id)
+    .eq("is_active", false) as any;
+  const brewerySessions = (brewerySessionsRaw ?? []) as any[];
+  const totalCheckins = brewerySessions.length;
+  const uniqueVisitors = new Set(brewerySessions.map((s: any) => s.user_id)).size;
 
-  const totalCheckins = checkinStats.length;
-  const uniqueVisitors = new Set(checkinStats.map((c: any) => c.user_id)).size;
-  const ratingsWithValue = checkinStats.filter((c: any) => c.rating != null && c.rating > 0);
+  // Avg rating from beer_logs
+  const { data: breweryLogsRaw } = await (supabase as any)
+    .from("beer_logs")
+    .select("beer_id, rating, quantity, beer:beers(name)")
+    .eq("brewery_id", id) as any;
+  const breweryLogs = (breweryLogsRaw ?? []) as any[];
+  const ratingsWithValue = breweryLogs.filter((l: any) => l.rating != null && l.rating > 0);
   const avgRating =
     ratingsWithValue.length > 0
-      ? ratingsWithValue.reduce((sum: number, c: any) => sum + Number(c.rating), 0) /
+      ? ratingsWithValue.reduce((sum: number, l: any) => sum + Number(l.rating), 0) /
         ratingsWithValue.length
       : null;
 
-  // 2. Most popular beer (beer with most check-ins)
-  const { data: popularBeerRaw } = await supabase
-    .from("checkins")
-    .select("beer_id, beer:beers(name)")
-    .eq("brewery_id", id) as any;
-  const popularBeerCheckins = (popularBeerRaw ?? []) as any[];
+  // 2. Most popular beer (beer with most logged quantity)
   const beerCountMap: Record<string, { name: string; count: number }> = {};
-  for (const c of popularBeerCheckins) {
-    if (!c.beer_id) continue;
-    if (!beerCountMap[c.beer_id]) {
-      beerCountMap[c.beer_id] = { name: c.beer?.name ?? "Unknown", count: 0 };
+  for (const l of breweryLogs) {
+    if (!l.beer_id) continue;
+    if (!beerCountMap[l.beer_id]) {
+      beerCountMap[l.beer_id] = { name: l.beer?.name ?? "Unknown", count: 0 };
     }
-    beerCountMap[c.beer_id].count++;
+    beerCountMap[l.beer_id].count += l.quantity ?? 1;
   }
   const mostPopularBeer =
     Object.values(beerCountMap).sort((a, b) => b.count - a.count)[0] ?? null;
 
   // 3. Beers on tap (active beers)
   const beersOnTap = beers?.length ?? 0;
+
+  // Beer of the Week
+  const featuredBeer = (beers as any[] ?? []).find((b: any) => b.is_featured) ?? null;
 
   const gradient = generateGradientFromString(brewery.name);
 
@@ -164,6 +170,34 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
 
         {brewery.description && (
           <p className="text-[var(--text-secondary)] leading-relaxed">{brewery.description}</p>
+        )}
+
+        {/* Beer of the Week */}
+        {featuredBeer && (
+          <Link href={`/beer/${featuredBeer.id}`}>
+            <div className="flex items-center gap-4 p-4 bg-[var(--surface)] border border-[#D4A843]/30 rounded-2xl transition-all hover:border-[#D4A843]/60 group">
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
+                style={{ background: "linear-gradient(135deg, #D4A843 0%, #E8841A 100%)" }}>
+                <Award size={22} className="text-[#0F0E0C]" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-mono uppercase tracking-wider text-[#D4A843] mb-0.5">Beer of the Week</p>
+                <p className="font-display font-bold text-[var(--text-primary)] group-hover:text-[#D4A843] transition-colors truncate">
+                  {featuredBeer.name}
+                </p>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <BeerStyleBadge style={featuredBeer.style} size="xs" />
+                  {featuredBeer.abv && <span className="text-xs font-mono text-[var(--text-muted)]">{featuredBeer.abv}% ABV</span>}
+                </div>
+              </div>
+              {featuredBeer.avg_rating && (
+                <div className="flex items-center gap-1 flex-shrink-0">
+                  <Star size={14} className="text-[#D4A843] fill-[#D4A843]" />
+                  <span className="font-mono font-bold text-[#D4A843]">{featuredBeer.avg_rating.toFixed(1)}</span>
+                </div>
+              )}
+            </div>
+          </Link>
         )}
 
         {/* REQ-015: Brewery Stats Bar */}

@@ -13,63 +13,64 @@ export default async function PlatformStatsPage() {
     { count: totalUsers },
     { count: totalBreweries },
     { count: totalBeers },
-    { count: totalCheckins },
-    { count: checkinsLast30 },
-    { count: checkinsLast7 },
+    { count: totalSessions },
+    { count: sessionsLast30 },
+    { count: sessionsLast7 },
     { count: newUsersLast30 },
     { count: verifiedBreweries },
   ] = await Promise.all([
     supabase.from("profiles").select("id", { count: "exact", head: true }) as any,
     supabase.from("breweries").select("id", { count: "exact", head: true }) as any,
     supabase.from("beers").select("id", { count: "exact", head: true }) as any,
-    supabase.from("checkins").select("id", { count: "exact", head: true }) as any,
-    supabase.from("checkins").select("id", { count: "exact", head: true }).gte("created_at", thirtyDaysAgo) as any,
-    supabase.from("checkins").select("id", { count: "exact", head: true }).gte("created_at", sevenDaysAgo) as any,
+    (supabase as any).from("sessions").select("id", { count: "exact", head: true }).eq("is_active", false) as any,
+    (supabase as any).from("sessions").select("id", { count: "exact", head: true }).eq("is_active", false).gte("started_at", thirtyDaysAgo) as any,
+    (supabase as any).from("sessions").select("id", { count: "exact", head: true }).eq("is_active", false).gte("started_at", sevenDaysAgo) as any,
     supabase.from("profiles").select("id", { count: "exact", head: true }).gte("created_at", thirtyDaysAgo) as any,
     supabase.from("brewery_accounts").select("id", { count: "exact", head: true }).eq("verified", true) as any,
   ]);
 
-  // Top breweries by check-ins
-  const { data: topBreweriesRaw } = await supabase
-    .from("checkins")
+  // Top breweries by sessions
+  const { data: topBreweriesRaw } = await (supabase as any)
+    .from("sessions")
     .select("brewery_id, brewery:breweries(name, city, state)")
-    .order("created_at", { ascending: false })
+    .eq("is_active", false)
+    .not("brewery_id", "is", null)
+    .order("started_at", { ascending: false })
     .limit(500) as any;
 
   const breweryCheckMap: Record<string, { name: string; city: string; count: number }> = {};
-  for (const c of (topBreweriesRaw ?? []) as any[]) {
-    if (!c.brewery_id) continue;
-    if (!breweryCheckMap[c.brewery_id]) {
-      breweryCheckMap[c.brewery_id] = {
-        name: c.brewery?.name ?? "Unknown",
-        city: [c.brewery?.city, c.brewery?.state].filter(Boolean).join(", "),
+  for (const s of (topBreweriesRaw ?? []) as any[]) {
+    if (!s.brewery_id) continue;
+    if (!breweryCheckMap[s.brewery_id]) {
+      breweryCheckMap[s.brewery_id] = {
+        name: s.brewery?.name ?? "Unknown",
+        city: [s.brewery?.city, s.brewery?.state].filter(Boolean).join(", "),
         count: 0,
       };
     }
-    breweryCheckMap[c.brewery_id].count++;
+    breweryCheckMap[s.brewery_id].count++;
   }
   const topBreweries = Object.entries(breweryCheckMap)
     .sort((a, b) => b[1].count - a[1].count)
     .slice(0, 10);
 
-  // Top beers by check-ins
-  const { data: topBeersRaw } = await supabase
-    .from("checkins")
-    .select("beer_id, beer:beers(name, style)")
-    .not("beer_id", "is", null)
+  // Top beers by beer_logs
+  const { data: topBeersRaw } = await (supabase as any)
+    .from("beer_logs")
+    .select("beer_id, quantity, beer:beers(name, style)")
     .limit(500) as any;
 
   const beerCheckMap: Record<string, { name: string; style: string; count: number }> = {};
-  for (const c of (topBeersRaw ?? []) as any[]) {
-    if (!c.beer_id) continue;
-    if (!beerCheckMap[c.beer_id]) {
-      beerCheckMap[c.beer_id] = {
-        name: c.beer?.name ?? "Unknown",
-        style: c.beer?.style ?? "",
+  for (const l of (topBeersRaw ?? []) as any[]) {
+    if (!l.beer_id) continue;
+    if (!beerCheckMap[l.beer_id]) {
+      beerCheckMap[l.beer_id] = {
+        name: l.beer?.name ?? "Unknown",
+        style: l.beer?.style ?? "",
         count: 0,
       };
     }
-    beerCheckMap[c.beer_id].count++;
+    beerCheckMap[l.beer_id].count += l.quantity ?? 1;
   }
   const topBeers = Object.entries(beerCheckMap)
     .sort((a, b) => b[1].count - a[1].count)
@@ -79,8 +80,8 @@ export default async function PlatformStatsPage() {
     { label: "Total Users", value: (totalUsers ?? 0).toLocaleString(), icon: Users, sub: `+${newUsersLast30 ?? 0} last 30 days` },
     { label: "Total Breweries", value: (totalBreweries ?? 0).toLocaleString(), icon: Building2, sub: `${verifiedBreweries ?? 0} verified` },
     { label: "Total Beers", value: (totalBeers ?? 0).toLocaleString(), icon: Beer, sub: "in database" },
-    { label: "Total Check-ins", value: (totalCheckins ?? 0).toLocaleString(), icon: CheckCheck, sub: `${checkinsLast30 ?? 0} last 30 days` },
-    { label: "Check-ins (7d)", value: (checkinsLast7 ?? 0).toLocaleString(), icon: TrendingUp, sub: "last 7 days" },
+    { label: "Total Sessions", value: (totalSessions ?? 0).toLocaleString(), icon: CheckCheck, sub: `${sessionsLast30 ?? 0} last 30 days` },
+    { label: "Sessions (7d)", value: (sessionsLast7 ?? 0).toLocaleString(), icon: TrendingUp, sub: "last 7 days" },
     { label: "Verified Breweries", value: (verifiedBreweries ?? 0).toLocaleString(), icon: Building2, sub: `of ${totalBreweries ?? 0} total` },
   ];
 
@@ -123,7 +124,7 @@ export default async function PlatformStatsPage() {
         {/* Top Breweries */}
         <div>
           <h2 className="text-xs font-mono uppercase tracking-wider mb-3" style={{ color: "var(--text-muted)" }}>
-            Top Breweries by Check-ins
+            Top Breweries by Sessions
           </h2>
           <div
             className="rounded-xl border overflow-hidden"
@@ -157,7 +158,7 @@ export default async function PlatformStatsPage() {
         {/* Top Beers */}
         <div>
           <h2 className="text-xs font-mono uppercase tracking-wider mb-3" style={{ color: "var(--text-muted)" }}>
-            Top Beers by Check-ins
+            Top Beers by Pours
           </h2>
           <div
             className="rounded-xl border overflow-hidden"

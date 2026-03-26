@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Edit2, Trash2, GlassWater, ToggleLeft, ToggleRight, X, Save, Loader2, AlertTriangle } from "lucide-react";
+import { Plus, Edit2, Trash2, GlassWater, ToggleLeft, ToggleRight, X, Save, Loader2, AlertTriangle, Award } from "lucide-react";
+import { useToast } from "@/components/ui/Toast";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import { BeerStyleBadge } from "@/components/ui/BeerStyleBadge";
@@ -23,6 +24,7 @@ interface Beer {
   ibu: number | null;
   description: string | null;
   is_on_tap: boolean;
+  is_featured: boolean;
   avg_rating: number | null;
   total_checkins: number;
 }
@@ -45,6 +47,7 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
   const [filter, setFilter] = useState<"all" | "on_tap" | "off_tap">("all");
   const [saveError, setSaveError] = useState<string | null>(null);
   const supabase = createClient();
+  const { success: toastSuccess } = useToast();
 
   const filtered = beers.filter(b =>
     filter === "on_tap" ? b.is_on_tap :
@@ -97,6 +100,28 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
     const { error } = await (supabase as any).from("beers").update({ is_on_tap: newVal }).eq("id", beer.id);
     // Roll back optimistic update on failure
     if (error) setBeers(prev => prev.map(b => b.id === beer.id ? { ...b, is_on_tap: beer.is_on_tap } : b));
+  }
+
+  async function toggleFeatured(beer: Beer) {
+    const wasFeatured = beer.is_featured;
+    // Optimistic: clear all featured, set this one (or just clear)
+    setBeers(prev => prev.map(b => ({
+      ...b,
+      is_featured: b.id === beer.id ? !wasFeatured : false,
+    })));
+
+    const res = await fetch(`/api/brewery/${breweryId}/featured-beer`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ beer_id: wasFeatured ? null : beer.id }),
+    });
+
+    if (!res.ok) {
+      // Rollback
+      setBeers(prev => prev.map(b => ({ ...b, is_featured: b.id === beer.id ? wasFeatured : b.is_featured })));
+    } else {
+      toastSuccess(wasFeatured ? "Featured beer cleared" : `${beer.name} is now Beer of the Week!`);
+    }
   }
 
   async function handleDelete(beer: Beer) {
@@ -168,6 +193,7 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <p className="font-display font-semibold" style={{ color: "var(--text-primary)" }}>{beer.name}</p>
+                    {beer.is_featured && <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: "rgba(212,168,67,0.15)", color: "var(--accent-gold)" }}>Beer of the Week</span>}
                     {!beer.is_on_tap && <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: "var(--surface-2)", color: "var(--text-muted)" }}>Off tap</span>}
                   </div>
                   <div className="flex items-center gap-2 mt-0.5 flex-wrap">
@@ -181,6 +207,12 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
 
                 {/* Actions */}
                 <div className="flex items-center gap-1 flex-shrink-0">
+                  <button onClick={() => toggleFeatured(beer)}
+                    title={beer.is_featured ? "Remove featured" : "Set as Beer of the Week"}
+                    className="p-2 rounded-lg transition-colors hover:opacity-70"
+                    style={{ color: beer.is_featured ? "var(--accent-gold)" : "var(--text-muted)" }}>
+                    <Award size={15} />
+                  </button>
                   <button onClick={() => openEdit(beer)}
                     className="p-2 rounded-lg transition-colors hover:opacity-70"
                     style={{ color: "var(--text-secondary)" }}>

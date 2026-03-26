@@ -3,12 +3,12 @@
 import { useState, useEffect, useCallback } from "react";
 import { AnimatePresence } from "framer-motion";
 import { AppNav } from "@/components/layout/AppNav";
-import { CheckinModal } from "@/components/checkin/CheckinModal";
 import { ToastProvider } from "@/components/ui/Toast";
 import ActiveSessionBanner from "@/components/checkin/ActiveSessionBanner";
 import CheckinEntryDrawer from "@/components/checkin/CheckinEntryDrawer";
 import TapWallSheet from "@/components/checkin/TapWallSheet";
 import SessionRecapSheet from "@/components/checkin/SessionRecapSheet";
+import { SessionShareCard } from "@/components/checkin/SessionShareCard";
 import type { Session, Brewery } from "@/types/database";
 
 interface AppShellProps {
@@ -25,7 +25,8 @@ export function AppShell({ children, username, unreadNotifications = 0 }: AppShe
   const [activeSession, setActiveSession] = useState<Session | null>(null);
   const [sessionBreweryName, setSessionBreweryName] = useState('');
   const [preselectedBrewery, setPreselectedBrewery] = useState<Brewery | null>(null);
-  const [sessionResult, setSessionResult] = useState<{ xpGained: number; newAchievements: any[] } | null>(null);
+  const [sessionResult, setSessionResult] = useState<{ xpGained: number; newAchievements: any[]; session?: any; beerLogs?: any[] } | null>(null);
+  const [shareOpen, setShareOpen] = useState(false);
 
   // Listen for session state broadcast from any page
   useEffect(() => {
@@ -98,7 +99,7 @@ export function AppShell({ children, username, unreadNotifications = 0 }: AppShe
     }));
   }, []);
 
-  const handleSessionEnd = useCallback((result: { xpGained: number; newAchievements: any[] }) => {
+  const handleSessionEnd = useCallback((result: { xpGained: number; newAchievements: any[]; session?: any; beerLogs?: any[] }) => {
     setActiveSession(null);
     setTapWallOpen(false);
     setSessionResult(result);
@@ -118,12 +119,6 @@ export function AppShell({ children, username, unreadNotifications = 0 }: AppShe
         <main className="flex-1 min-w-0 pb-20 lg:pb-0" style={{ background: 'var(--bg)' }}>
           {children}
         </main>
-
-        {/* Legacy CheckinModal — keep for non-session pages until fully migrated */}
-        <CheckinModal
-          open={checkinOpen && !preselectedBrewery && false}
-          onClose={() => setCheckinOpen(false)}
-        />
 
         {/* Active session banner — fixed position, last child so RSC hydration cursor stays aligned */}
         <AnimatePresence>
@@ -160,12 +155,22 @@ export function AppShell({ children, username, unreadNotifications = 0 }: AppShe
 
       <SessionRecapSheet
         isOpen={recapOpen}
-        session={null}
+        session={sessionResult?.session ?? null}
         breweryName={sessionBreweryName}
-        beerLogs={[]}
+        beerLogs={sessionResult?.beerLogs ?? []}
         xpGained={sessionResult?.xpGained ?? 0}
         newAchievements={sessionResult?.newAchievements ?? []}
-        onClose={() => { setRecapOpen(false); setSessionResult(null); }}
+        onClose={() => { setRecapOpen(false); setSessionResult(null); setShareOpen(false); }}
+        onShare={() => setShareOpen(true)}
+      />
+
+      <SessionShareCard
+        open={shareOpen}
+        onClose={() => setShareOpen(false)}
+        breweryName={sessionBreweryName}
+        beerLogs={sessionResult?.beerLogs ?? []}
+        session={sessionResult?.session ?? null}
+        xpGained={sessionResult?.xpGained ?? 0}
       />
     </ToastProvider>
   );

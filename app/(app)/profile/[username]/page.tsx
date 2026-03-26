@@ -1,10 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
-import { MapPin, Settings, Star } from "lucide-react";
+import { MapPin, Settings, Star, Bookmark, Stamp, Flame } from "lucide-react";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import { AchievementBadge } from "@/components/achievements/AchievementBadge";
-import { CheckinCard } from "@/components/social/CheckinCard";
 import { ProfileBanner } from "@/components/profile/ProfileBanner";
 import { BeerStyleBadge } from "@/components/ui/BeerStyleBadge";
 import { AchievementsGrid } from "./AchievementsGrid";
@@ -43,14 +42,13 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
     .eq("user_id", profile.id)
     .order("earned_at", { ascending: false });
 
-  // Recent check-ins
-  const { data: checkins } = await supabase
-    .from("checkins")
-    .select("*, profile:profiles(*), brewery:breweries(*), beer:beers(*)")
+  // Recent beer logs (Beer Journal)
+  const { data: recentLogs } = await (supabase as any)
+    .from("beer_logs")
+    .select("id, beer_id, rating, quantity, flavor_tags, serving_style, comment, logged_at, beer:beers(id, name, style, abv, cover_image_url, brewery_id, brewery:breweries(name)), session:sessions(brewery_id, brewery:breweries(name, city, state))")
     .eq("user_id", profile.id)
-    .eq("share_to_feed", true)
-    .order("created_at", { ascending: false })
-    .limit(10);
+    .order("logged_at", { ascending: false })
+    .limit(10) as any;
 
   // Top breweries
   const { data: topBreweries } = await supabase
@@ -60,12 +58,21 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
     .order("total_visits", { ascending: false })
     .limit(3);
 
-  // Favorite beer — most checked-in beer for this user
-  const { data: favBeerRows } = await supabase
-    .from("checkins")
-    .select("beer_id, beer:beers(*)")
-    .eq("user_id", profile.id)
-    .not("beer_id", "is", null);
+  // Wishlist (own profile only)
+  const wishlist = isOwnProfile
+    ? (await (supabase as any)
+        .from("wishlist")
+        .select("*, beer:beers(id, name, style, abv, brewery_id, brewery:breweries(name))")
+        .eq("user_id", profile.id)
+        .order("created_at", { ascending: false })
+        .limit(6)).data ?? []
+    : [];
+
+  // Favorite beer — most logged beer for this user
+  const { data: favBeerRows } = await (supabase as any)
+    .from("beer_logs")
+    .select("beer_id, quantity, beer:beers(*)")
+    .eq("user_id", profile.id) as any;
 
   const favBeer = (() => {
     if (!favBeerRows || favBeerRows.length === 0) return null;
@@ -74,7 +81,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
       if (!row.beer_id) continue;
       counts[row.beer_id] = {
         beer: row.beer,
-        count: (counts[row.beer_id]?.count ?? 0) + 1,
+        count: (counts[row.beer_id]?.count ?? 0) + (row.quantity ?? 1),
       };
     }
     return Object.values(counts).sort((a, b) => b.count - a.count)[0] ?? null;
@@ -133,6 +140,27 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
               style={{ width: `${levelInfo.progress}%` }}
             />
           </div>
+          {((profile as any).current_streak > 0 || (profile as any).longest_streak > 0) && (
+            <div className="flex items-center gap-3 mt-3 pt-3 border-t border-[var(--border)]">
+              {(profile as any).current_streak > 0 && (
+                <div className="flex items-center gap-1.5">
+                  <Flame
+                    size={14}
+                    className={(profile as any).current_streak >= 30 ? "text-[#E8841A]" : (profile as any).current_streak >= 7 ? "text-[#D4A843]" : "text-[var(--text-muted)]"}
+                  />
+                  <span className="text-sm font-mono font-bold" style={{ color: (profile as any).current_streak >= 7 ? '#D4A843' : 'var(--text-secondary)' }}>
+                    {(profile as any).current_streak}
+                  </span>
+                  <span className="text-xs text-[var(--text-muted)]">day streak</span>
+                </div>
+              )}
+              {(profile as any).longest_streak > (profile as any).current_streak && (
+                <div className="flex items-center gap-1 ml-auto">
+                  <span className="text-xs text-[var(--text-muted)]">Best: {(profile as any).longest_streak}d</span>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Bio */}
@@ -161,6 +189,66 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
             <p className="text-xs text-[var(--text-muted)] mt-1">Breweries</p>
           </div>
         </div>
+
+        {/* Beer Passport Link */}
+        <Link
+          href={`/profile/${username}/passport`}
+          className="flex items-center gap-3 p-4 mb-8 bg-[var(--surface)] border border-[var(--border)] hover:border-[#D4A843]/40 rounded-2xl transition-all group"
+        >
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#D4A843] to-[#E8841A] flex items-center justify-center flex-shrink-0">
+            <Stamp size={18} className="text-[#0F0E0C]" />
+          </div>
+          <div className="flex-1">
+            <p className="font-display font-bold text-[var(--text-primary)] group-hover:text-[#D4A843] transition-colors">Beer Passport</p>
+            <p className="text-xs text-[var(--text-muted)]">{profile.unique_beers} unique beers collected</p>
+          </div>
+          <span className="text-[var(--text-muted)] text-sm">→</span>
+        </Link>
+
+        {/* Want to Try (Wishlist) */}
+        {isOwnProfile && (
+          <div className="mb-8">
+            <div className="flex items-center gap-2 mb-4">
+              <Bookmark size={16} className="text-[#D4A843]" />
+              <h2 className="font-display text-xl font-bold text-[var(--text-primary)]">Want to Try</h2>
+            </div>
+            {(wishlist as any[]).length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {(wishlist as any[]).map((item: any) => (
+                  <Link key={item.id} href={`/beer/${item.beer?.id}`}>
+                    <div className="flex items-center gap-3 p-3 bg-[var(--surface)] border border-[var(--border)] hover:border-[#D4A843]/30 rounded-2xl transition-colors">
+                      <div
+                        className="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center text-lg"
+                        style={{ background: generateGradientFromString(item.beer?.name ?? "") }}
+                      >
+                        🍺
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-display font-semibold text-sm text-[var(--text-primary)] truncate">{item.beer?.name}</p>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          {item.beer?.style && <BeerStyleBadge style={item.beer.style} size="xs" />}
+                          <span className="text-xs text-[var(--text-muted)] truncate">{item.beer?.brewery?.name}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <Link href="/explore">
+                <div className="flex items-center gap-4 p-4 bg-[var(--surface)] border border-dashed border-[var(--border)] hover:border-[#D4A843]/30 rounded-2xl transition-colors">
+                  <div className="w-10 h-10 rounded-xl bg-[var(--surface-2)] flex items-center justify-center text-lg opacity-40">
+                    🍺
+                  </div>
+                  <div>
+                    <p className="text-[var(--text-secondary)] text-sm font-medium">Save beers you want to try</p>
+                    <p className="text-[var(--text-muted)] text-xs mt-0.5">Tap the heart on any beer to add it to your list</p>
+                  </div>
+                </div>
+              </Link>
+            )}
+          </div>
+        )}
 
         {/* Favorite Beer */}
         <div className="mb-8">
@@ -212,16 +300,31 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
         </div>
 
         {/* Achievements */}
-        {userAchievements && userAchievements.length > 0 && (
-          <div className="mb-8">
+        <div className="mb-8">
+          {userAchievements && userAchievements.length > 0 ? (
             <AchievementsGrid achievements={userAchievements as any[]} />
-          </div>
-        )}
+          ) : (
+            <div>
+              <h2 className="font-display text-xl font-bold text-[var(--text-primary)] mb-4">Achievements</h2>
+              <Link href="/achievements">
+                <div className="flex items-center gap-4 p-4 bg-[var(--surface)] border border-dashed border-[var(--border)] hover:border-[#D4A843]/30 rounded-2xl transition-colors">
+                  <div className="w-10 h-10 rounded-xl bg-[var(--surface-2)] flex items-center justify-center text-lg opacity-40">
+                    🏆
+                  </div>
+                  <div>
+                    <p className="text-[var(--text-secondary)] text-sm font-medium">Start earning badges</p>
+                    <p className="text-[var(--text-muted)] text-xs mt-0.5">Log beers, visit breweries, and unlock achievements</p>
+                  </div>
+                </div>
+              </Link>
+            </div>
+          )}
+        </div>
 
         {/* Top Breweries */}
-        {topBreweries && topBreweries.length > 0 && (
-          <div className="mb-8">
-            <h2 className="font-display text-xl font-bold text-[var(--text-primary)] mb-4">Favorite Breweries</h2>
+        <div className="mb-8">
+          <h2 className="font-display text-xl font-bold text-[var(--text-primary)] mb-4">Favorite Breweries</h2>
+          {topBreweries && topBreweries.length > 0 ? (
             <div className="space-y-3">
               {(topBreweries as any[]).map((visit) => (
                 <Link key={visit.id} href={`/brewery/${visit.brewery_id}`}>
@@ -242,21 +345,62 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
                 </Link>
               ))}
             </div>
-          </div>
-        )}
+          ) : (
+            <Link href="/explore">
+              <div className="flex items-center gap-4 p-4 bg-[var(--surface)] border border-dashed border-[var(--border)] hover:border-[#D4A843]/30 rounded-2xl transition-colors">
+                <div className="w-10 h-10 rounded-xl bg-[var(--surface-2)] flex items-center justify-center text-lg opacity-40">
+                  🏠
+                </div>
+                <div>
+                  <p className="text-[var(--text-secondary)] text-sm font-medium">Visit breweries to see your favorites</p>
+                  <p className="text-[var(--text-muted)] text-xs mt-0.5">Your most-visited spots will appear here</p>
+                </div>
+              </div>
+            </Link>
+          )}
+        </div>
 
-        {/* Recent Check-ins */}
+        {/* Beer Journal */}
         <div className="pb-8">
           <h2 className="font-display text-xl font-bold text-[var(--text-primary)] mb-4">Beer Journal</h2>
-          {checkins && checkins.length > 0 ? (
-            <div className="space-y-4">
-              {(checkins as any[]).map((c) => (
-                <CheckinCard key={c.id} checkin={c} />
+          {recentLogs && recentLogs.length > 0 ? (
+            <div className="space-y-3">
+              {(recentLogs as any[]).map((log: any) => (
+                <Link key={log.id} href={`/beer/${log.beer?.id}`}>
+                  <div className="flex items-center gap-3 p-3 bg-[var(--surface)] border border-[var(--border)] hover:border-[#D4A843]/30 rounded-2xl transition-colors">
+                    <div
+                      className="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center text-lg"
+                      style={{ background: generateGradientFromString(log.beer?.name ?? "") }}
+                    >
+                      🍺
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-display font-semibold text-sm text-[var(--text-primary)] truncate">{log.beer?.name}</p>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        {log.beer?.style && <BeerStyleBadge style={log.beer.style} size="xs" />}
+                        <span className="text-xs text-[var(--text-muted)]">
+                          {log.session?.brewery?.name ?? "At home"}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                      {log.rating > 0 && (
+                        <div className="flex items-center gap-1 justify-end mb-0.5">
+                          <Star size={11} className="text-[#D4A843] fill-[#D4A843]" />
+                          <span className="text-sm font-mono font-bold text-[#D4A843]">{log.rating}</span>
+                        </div>
+                      )}
+                      <p className="text-xs text-[var(--text-muted)]">
+                        {new Date(log.logged_at).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+                      </p>
+                    </div>
+                  </div>
+                </Link>
               ))}
             </div>
           ) : (
             <div className="text-center py-10 bg-[var(--surface)] rounded-2xl border border-[var(--border)]">
-              <p className="text-[var(--text-secondary)]">No check-ins yet.</p>
+              <p className="text-[var(--text-secondary)]">No beers logged yet.</p>
             </div>
           )}
         </div>

@@ -24,7 +24,7 @@ export async function GET() {
   // Fetch user profile for level/xp
   const { data: profile } = await supabase
     .from("profiles")
-    .select("level, total_xp, total_checkins, display_name, username")
+    .select("level, xp, total_checkins, display_name, username")
     .eq("id", user.id)
     .single() as any;
 
@@ -131,7 +131,7 @@ export async function GET() {
   // ─── The Scroll (totals) ──────────────────────────────────────
   const totalBeers = allLogs.reduce((sum: number, l: any) => sum + (l.quantity ?? 1), 0);
   const totalSessions = allSessions.length;
-  const totalXp = profile?.total_xp ?? 0;
+  const totalXp = profile?.xp ?? 0;
   const uniqueBeers = new Set(allLogs.filter((l: any) => l.beer_id).map((l: any) => l.beer_id)).size;
   const uniqueBreweries = new Set(allSessions.filter((s: any) => s.brewery_id).map((s: any) => s.brewery_id)).size;
 

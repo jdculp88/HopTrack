@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { MapPin, Beer, Star, Zap } from "lucide-react";
+import { MapPin, Beer, Star, Zap, Clock, Home } from "lucide-react";
 import { cn, formatRelativeTime } from "@/lib/utils";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import { generateGradientFromString } from "@/lib/utils";
@@ -36,11 +36,25 @@ export function SessionCard({ session, className }: SessionCardProps) {
           beer_logs!.filter((l) => l.rating != null).length) || null
       : null;
 
+  // Session duration
+  const duration = session.ended_at
+    ? (() => {
+        const ms = new Date(session.ended_at).getTime() - new Date(session.started_at).getTime();
+        const mins = Math.round(ms / 60000);
+        if (mins < 60) return `${mins}m`;
+        const hrs = Math.floor(mins / 60);
+        const rem = mins % 60;
+        return rem > 0 ? `${hrs}h ${rem}m` : `${hrs}h`;
+      })()
+    : null;
+
+  const isAtHome = (session as any).context === "home" || !brewery;
+
   // Show up to 3 beer log pills
   const visibleLogs = (beer_logs ?? []).slice(0, 3);
   const extraCount = beerCount - visibleLogs.length;
 
-  if (!profile || !brewery) return null;
+  if (!profile) return null;
 
   return (
     <motion.div
@@ -71,39 +85,52 @@ export function SessionCard({ session, className }: SessionCardProps) {
 
           {/* Visited brewery line */}
           <p className="text-sm text-[var(--text-secondary)] mt-0.5">
-            visited{" "}
-            <Link
-              href={`/brewery/${brewery.id}`}
-              className="text-[#D4A843] hover:underline font-medium"
-            >
-              {brewery.name}
-            </Link>
+            {isAtHome ? (
+              <span className="flex items-center gap-1">
+                <Home size={11} />
+                drinking at home
+              </span>
+            ) : (
+              <>
+                visited{" "}
+                <Link
+                  href={`/brewery/${brewery!.id}`}
+                  className="text-[#D4A843] hover:underline font-medium"
+                >
+                  {brewery!.name}
+                </Link>
+              </>
+            )}
           </p>
         </div>
       </div>
 
       {/* Brewery banner */}
-      <div
-        className="mx-4 rounded-xl p-3 flex items-center gap-3"
-        style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }}
-      >
-        <div
-          className="w-10 h-10 rounded-xl flex-shrink-0"
-          style={{ background: generateGradientFromString(brewery.name) }}
-        />
-        <div className="flex-1 min-w-0">
-          <p className="font-display font-bold text-sm text-[var(--text-primary)] truncate">
-            {brewery.name}
-          </p>
-          <p className="text-xs text-[var(--text-muted)]">
-            {brewery.city}{brewery.state ? `, ${brewery.state}` : ""}
-          </p>
-        </div>
-        <div className="flex items-center gap-1 text-xs text-[var(--text-muted)]">
-          <MapPin size={11} />
-          <span>Brewery</span>
-        </div>
-      </div>
+      {brewery && !isAtHome && (
+        <Link href={`/brewery/${brewery.id}`}>
+          <div
+            className="mx-4 rounded-xl p-3 flex items-center gap-3 hover:border-[#D4A843]/30 transition-colors"
+            style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }}
+          >
+            <div
+              className="w-10 h-10 rounded-xl flex-shrink-0"
+              style={{ background: generateGradientFromString(brewery.name) }}
+            />
+            <div className="flex-1 min-w-0">
+              <p className="font-display font-bold text-sm text-[var(--text-primary)] truncate">
+                {brewery.name}
+              </p>
+              <p className="text-xs text-[var(--text-muted)]">
+                {brewery.city}{brewery.state ? `, ${brewery.state}` : ""}
+              </p>
+            </div>
+            <div className="flex items-center gap-1 text-xs text-[var(--text-muted)]">
+              <MapPin size={11} />
+              <span>Brewery</span>
+            </div>
+          </div>
+        </Link>
+      )}
 
       {/* Beer log pills */}
       {beerCount > 0 && (
@@ -120,7 +147,7 @@ export function SessionCard({ session, className }: SessionCardProps) {
               >
                 <Beer size={10} style={{ color: 'var(--accent-gold)' }} />
                 <span style={{ color: 'var(--text-secondary)' }}>
-                  {log.beer_id ? `Beer #${log.beer_id.slice(0, 4)}` : "Unnamed"}
+                  {(log as any).beer?.name ?? (log.beer_id ? `Beer #${log.beer_id.slice(0, 4)}` : "Unnamed")}
                 </span>
                 {log.rating != null && (
                   <span style={{ color: 'var(--accent-gold)' }}>
@@ -151,6 +178,12 @@ export function SessionCard({ session, className }: SessionCardProps) {
           <div className="flex items-center gap-1 text-xs text-[var(--text-muted)]">
             <Star size={12} />
             <span>{avgRating.toFixed(1)} avg</span>
+          </div>
+        )}
+        {duration && (
+          <div className="flex items-center gap-1 text-xs text-[var(--text-muted)]">
+            <Clock size={12} />
+            <span>{duration}</span>
           </div>
         )}
         {session.xp_awarded > 0 && (

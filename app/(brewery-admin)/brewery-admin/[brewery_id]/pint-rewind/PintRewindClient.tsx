@@ -20,8 +20,8 @@ type Scope = "30d" | "all";
 export function PintRewindClient({ breweryName, sessions30, beerLogs30, sessionsAll, beerLogsAll, topVisitor }: PintRewindClientProps) {
   const [scope, setScope] = useState<Scope>("30d");
   const [shareOpen, setShareOpen] = useState(false);
-  const sessions = scope === "30d" ? sessions30 : sessionsAll;
-  const beerLogs = scope === "30d" ? beerLogs30 : beerLogsAll;
+  const sessions = (scope === "30d" ? sessions30 : sessionsAll) ?? [];
+  const beerLogs = (scope === "30d" ? beerLogs30 : beerLogsAll) ?? [];
 
   const stats = useMemo(() => {
     const totalVisits = sessions.length;

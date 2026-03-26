@@ -3,29 +3,25 @@
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Zap, Compass, UserPlus } from "lucide-react";
-import { CheckinCard } from "@/components/social/CheckinCard";
+import { Zap, Compass, UserPlus, Users } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { SessionCard } from "@/components/social/SessionCard";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import { getLevelProgress } from "@/lib/xp";
 import { useSession } from "@/hooks/useSession";
-import type { Profile, CheckinWithDetails, ReactionType, Session } from "@/types/database";
-
-// Discriminated union for unified feed items
-type FeedItem =
-  | { kind: 'checkin'; time: string; data: CheckinWithDetails }
-  | { kind: 'session'; time: string; data: Session };
+import type { Profile, Session } from "@/types/database";
 
 interface HomeFeedProps {
   profile: Profile | null;
-  checkins: CheckinWithDetails[];
   sessions: Session[];
-  weekStats: { checkins: number; uniqueBreweries: number };
+  weekStats: { sessions: number; beers: number; uniqueBreweries: number };
   currentUserId: string;
 }
 
-export function HomeFeed({ profile, checkins, sessions, weekStats, currentUserId }: HomeFeedProps) {
-  const [localCheckins, setLocalCheckins] = useState(checkins);
+type FeedFilter = 'all' | 'friends' | 'you';
+
+export function HomeFeed({ profile, sessions, weekStats, currentUserId }: HomeFeedProps) {
+  const [feedFilter, setFeedFilter] = useState<FeedFilter>('all');
   const levelInfo = profile ? getLevelProgress(profile.xp) : null;
 
   const { getActiveSession } = useSession();
@@ -44,58 +40,11 @@ export function HomeFeed({ profile, checkins, sessions, weekStats, currentUserId
     });
   }, [getActiveSession]);
 
-  // Merge checkins + sessions into a single sorted feed
-  const feedItems = useMemo<FeedItem[]>(() => {
-    const items: FeedItem[] = [
-      ...localCheckins.map((c) => ({
-        kind: 'checkin' as const,
-        time: c.created_at,
-        data: c,
-      })),
-      ...sessions.map((s) => ({
-        kind: 'session' as const,
-        time: s.started_at,
-        data: s,
-      })),
-    ];
-    return items.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
-  }, [localCheckins, sessions]);
-
-  async function handleReact(checkinId: string, type: ReactionType) {
-    // Optimistic update
-    setLocalCheckins((prev) =>
-      prev.map((c) => {
-        if (c.id !== checkinId) return c;
-        const reactions = (c.reactions as any[]) ?? [];
-        const existing = reactions.find(
-          (r: any) => r.user_id === currentUserId && r.type === type
-        );
-        return {
-          ...c,
-          reactions: existing
-            ? reactions.filter(
-                (r: any) => !(r.user_id === currentUserId && r.type === type)
-              )
-            : [
-                ...reactions,
-                {
-                  id: "temp",
-                  user_id: currentUserId,
-                  checkin_id: checkinId,
-                  type,
-                  created_at: new Date().toISOString(),
-                },
-              ],
-        };
-      })
-    );
-
-    await fetch("/api/reactions", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ checkin_id: checkinId, type }),
-    });
-  }
+  const feedItems = useMemo(() => {
+    if (feedFilter === 'all') return sessions;
+    if (feedFilter === 'you') return sessions.filter((s) => s.user_id === currentUserId);
+    return sessions.filter((s) => s.user_id !== currentUserId);
+  }, [sessions, feedFilter, currentUserId]);
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
@@ -143,7 +92,7 @@ export function HomeFeed({ profile, checkins, sessions, weekStats, currentUserId
               <p className="text-xs text-[var(--text-muted)]">Total</p>
             </div>
             <div className="text-center">
-              <p className="font-mono font-bold text-[#D4A843] text-xl">{weekStats.checkins}</p>
+              <p className="font-mono font-bold text-[#D4A843] text-xl">{weekStats.beers}</p>
               <p className="text-xs text-[var(--text-muted)]">This Week</p>
             </div>
             <div className="text-center">
@@ -154,29 +103,48 @@ export function HomeFeed({ profile, checkins, sessions, weekStats, currentUserId
         </motion.div>
       )}
 
-      {/* Feed Header */}
-      <div className="flex items-center gap-2 pt-2">
-        <Zap size={16} className="text-[#D4A843]" />
-        <h2 className="font-display font-semibold text-[var(--text-primary)]">Activity Feed</h2>
+      {/* Feed Header + Filter */}
+      <div className="flex items-center justify-between pt-2">
+        <div className="flex items-center gap-2">
+          <Zap size={16} className="text-[#D4A843]" />
+          <h2 className="font-display font-semibold text-[var(--text-primary)]">Activity Feed</h2>
+        </div>
+        <div className="flex items-center gap-1 bg-[var(--surface)] border border-[var(--border)] rounded-xl p-0.5">
+          {([
+            { key: 'all' as FeedFilter, label: 'All' },
+            { key: 'friends' as FeedFilter, label: 'Friends', icon: Users },
+            { key: 'you' as FeedFilter, label: 'You' },
+          ]).map(({ key, label, icon: Icon }) => (
+            <button
+              key={key}
+              onClick={() => setFeedFilter(key)}
+              className={cn(
+                "flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-medium transition-all",
+                feedFilter === key
+                  ? "bg-[#D4A843] text-[#0F0E0C]"
+                  : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
+              )}
+            >
+              {Icon && <Icon size={11} />}
+              {label}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* Unified feed */}
+      {/* Feed */}
       {feedItems.length === 0 ? (
         <EmptyFeed />
       ) : (
         <div className="space-y-4">
-          {feedItems.map((item, i) => (
+          {feedItems.map((session, i) => (
             <motion.div
-              key={item.kind === 'checkin' ? `c-${item.data.id}` : `s-${item.data.id}`}
+              key={`s-${session.id}`}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.04, duration: 0.3 }}
             >
-              {item.kind === 'checkin' ? (
-                <CheckinCard checkin={item.data} onReact={handleReact} />
-              ) : (
-                <SessionCard session={item.data as any} />
-              )}
+              <SessionCard session={session as any} />
             </motion.div>
           ))}
         </div>

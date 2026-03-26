@@ -18,6 +18,8 @@ interface SessionResult {
   isFirstVisit: boolean
   beerCount: number
   newAchievements: any[]
+  session?: Session | null
+  beerLogs?: BeerLog[]
 }
 
 export function useSession() {

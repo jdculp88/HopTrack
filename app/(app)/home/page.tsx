@@ -30,28 +30,14 @@ export default async function HomePage() {
 
   const feedUserIds = [user.id, ...friendIds];
 
-  // Fetch legacy checkins (activity feed)
-  const { data: checkins } = await supabase
-    .from("checkins")
-    .select(`
-      *,
-      profile:profiles(*),
-      brewery:breweries(*),
-      beer:beers(*)
-    `)
-    .in("user_id", feedUserIds)
-    .eq("share_to_feed", true)
-    .order("created_at", { ascending: false })
-    .limit(20);
-
-  // Fetch sessions for feed (new check-in system)
+  // Fetch sessions for feed
   const { data: sessions } = await (supabase as any)
     .from("sessions")
     .select(`
       *,
       profile:profiles!sessions_user_id_fkey(id, username, display_name, avatar_url),
       brewery:breweries(id, name, city, state),
-      beer_logs(id, beer_id, rating, flavor_tags, serving_style, comment, photo_url, logged_at)
+      beer_logs(id, beer_id, rating, flavor_tags, serving_style, comment, photo_url, logged_at, quantity, beer:beers(id, name, style))
     `)
     .in("user_id", feedUserIds)
     .eq("share_to_feed", true)
@@ -59,22 +45,33 @@ export default async function HomePage() {
     .order("started_at", { ascending: false })
     .limit(20);
 
-  // Fetch weekly stats for current user
+  // Weekly stats from sessions + beer_logs
   const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-  const { data: weekCheckins } = await supabase
-    .from("checkins")
-    .select("id, created_at, brewery_id")
+  const { data: weekSessions } = await (supabase as any)
+    .from("sessions")
+    .select("id, brewery_id")
     .eq("user_id", user.id)
-    .gte("created_at", weekAgo);
+    .eq("is_active", false)
+    .gte("started_at", weekAgo) as any;
+
+  const { data: weekLogs } = await (supabase as any)
+    .from("beer_logs")
+    .select("id, quantity")
+    .eq("user_id", user.id)
+    .gte("logged_at", weekAgo) as any;
+
+  const weekSessionList = (weekSessions as any[]) ?? [];
+  const weekLogList = (weekLogs as any[]) ?? [];
+  const weekBeerCount = weekLogList.reduce((sum: number, l: any) => sum + (l.quantity ?? 1), 0);
 
   return (
     <HomeFeed
       profile={profile}
-      checkins={(checkins as any[]) ?? []}
       sessions={(sessions as Session[]) ?? []}
       weekStats={{
-        checkins: weekCheckins?.length ?? 0,
-        uniqueBreweries: new Set((weekCheckins as any[] ?? []).map((c: any) => c.brewery_id)).size,
+        sessions: weekSessionList.length,
+        beers: weekBeerCount,
+        uniqueBreweries: new Set(weekSessionList.map((s: any) => s.brewery_id).filter(Boolean)).size,
       }}
       currentUserId={user.id}
     />

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { User, MapPin, Lock, Palette, Trash2, ChevronRight } from "lucide-react";
+import { User, MapPin, Lock, Palette, Trash2, ChevronRight, Bell } from "lucide-react";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { createClient } from "@/lib/supabase/client";
 import { UserAvatar } from "@/components/ui/UserAvatar";
@@ -122,6 +122,36 @@ export function SettingsClient({ profile, userEmail }: SettingsClientProps) {
       {/* Appearance section */}
       <Section title="Appearance" icon={<Palette size={16} />}>
         <ThemeToggle variant="full" />
+      </Section>
+
+      {/* Notifications section */}
+      <Section title="Notifications" icon={<Bell size={16} />}>
+        <div className="space-y-4">
+          <div className="flex items-center justify-between py-2">
+            <div>
+              <p className="font-medium text-[var(--text-primary)] text-sm">Friend Activity</p>
+              <p className="text-xs text-[var(--text-muted)] mt-0.5">Get notified when friends check in at a brewery</p>
+            </div>
+            <Toggle value={true} onChange={() => {}} />
+          </div>
+          <div className="flex items-center justify-between py-2">
+            <div>
+              <p className="font-medium text-[var(--text-primary)] text-sm">Achievements</p>
+              <p className="text-xs text-[var(--text-muted)] mt-0.5">Get notified when you unlock achievements</p>
+            </div>
+            <Toggle value={true} onChange={() => {}} />
+          </div>
+          <div className="flex items-center justify-between py-2">
+            <div>
+              <p className="font-medium text-[var(--text-primary)] text-sm">Weekly Stats</p>
+              <p className="text-xs text-[var(--text-muted)] mt-0.5">Receive your weekly beer stats summary</p>
+            </div>
+            <Toggle value={true} onChange={() => {}} />
+          </div>
+          <p className="text-xs text-[var(--text-muted)] pt-2 border-t border-[var(--border)]">
+            Push notifications coming soon. In-app notifications are always on.
+          </p>
+        </div>
       </Section>
 
       {/* Privacy section */}

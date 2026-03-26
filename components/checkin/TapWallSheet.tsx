@@ -25,7 +25,7 @@ interface TapWallSheetProps {
   breweryName: string
   breweryId: string | null
   homeMode?: boolean
-  onSessionEnd: (result: { xpGained: number; newAchievements: any[] }) => void
+  onSessionEnd: (result: { xpGained: number; newAchievements: any[]; session?: any; beerLogs?: any[] }) => void
 }
 
 function useElapsedTime(startedAt: string) {
@@ -221,7 +221,7 @@ export default function TapWallSheet({
     setEnding(false)
     setShowEndConfirm(false)
     if (result) {
-      onSessionEnd({ xpGained: result.xpGained, newAchievements: result.newAchievements })
+      onSessionEnd({ xpGained: result.xpGained, newAchievements: result.newAchievements, session: result.session, beerLogs: result.beerLogs })
     }
   }
 

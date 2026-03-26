@@ -30,7 +30,7 @@ export async function GET(_request: NextRequest) {
     const [
       { count: totalUsers },
       { count: totalBreweries },
-      { count: totalCheckins },
+      { count: totalSessions },
       { count: totalBeers },
       { count: pendingClaims },
       { count: approvedClaims },
@@ -38,12 +38,12 @@ export async function GET(_request: NextRequest) {
       { count: verifiedBreweries },
       { count: newUsersThisWeek },
       { count: newUsersThisMonth },
-      { count: checkinsThisWeek },
-      { count: checkinsThisMonth },
+      { count: sessionsThisWeek },
+      { count: sessionsThisMonth },
     ] = await Promise.all([
       supabase.from("profiles").select("id", { count: "exact", head: true }) as any,
       supabase.from("breweries").select("id", { count: "exact", head: true }) as any,
-      supabase.from("checkins").select("id", { count: "exact", head: true }) as any,
+      (supabase as any).from("sessions").select("id", { count: "exact", head: true }).eq("is_active", false) as any,
       supabase.from("beers").select("id", { count: "exact", head: true }) as any,
       supabase.from("brewery_claims").select("id", { count: "exact", head: true }).eq("status", "pending") as any,
       supabase.from("brewery_claims").select("id", { count: "exact", head: true }).eq("status", "approved") as any,
@@ -51,8 +51,8 @@ export async function GET(_request: NextRequest) {
       supabase.from("brewery_accounts").select("id", { count: "exact", head: true }).eq("verified", true) as any,
       supabase.from("profiles").select("id", { count: "exact", head: true }).gte("created_at", oneWeekAgo) as any,
       supabase.from("profiles").select("id", { count: "exact", head: true }).gte("created_at", oneMonthAgo) as any,
-      supabase.from("checkins").select("id", { count: "exact", head: true }).gte("created_at", oneWeekAgo) as any,
-      supabase.from("checkins").select("id", { count: "exact", head: true }).gte("created_at", oneMonthAgo) as any,
+      (supabase as any).from("sessions").select("id", { count: "exact", head: true }).eq("is_active", false).gte("started_at", oneWeekAgo) as any,
+      (supabase as any).from("sessions").select("id", { count: "exact", head: true }).eq("is_active", false).gte("started_at", oneMonthAgo) as any,
     ]);
 
     return NextResponse.json({
@@ -65,10 +65,10 @@ export async function GET(_request: NextRequest) {
         total: totalBreweries ?? 0,
         verified: verifiedBreweries ?? 0,
       },
-      checkins: {
-        total: totalCheckins ?? 0,
-        thisWeek: checkinsThisWeek ?? 0,
-        thisMonth: checkinsThisMonth ?? 0,
+      sessions: {
+        total: totalSessions ?? 0,
+        thisWeek: sessionsThisWeek ?? 0,
+        thisMonth: sessionsThisMonth ?? 0,
       },
       beers: {
         total: totalBeers ?? 0,

@@ -171,61 +171,71 @@ scripts/supabase-setup.mjs    — One-time setup script
 
 ## 🗺️ Where We Are
 
-**Current Sprint:** Sprint 12 — Dashboard Migration & Consumer Delight
-**Last completed:** Sprint 11 — "Gold on Cream" Redesign ✅ (2026-03-26)
+**Current Sprint:** Sprint 14 — Clean House, Open Doors
+**Last completed:** Sprint 13 — Consumer Delight & Social ✅ (2026-03-26)
 
-### Sprint 11 — COMPLETE ✅
-Full "Gold on Cream" redesign shipped. Pivoted from original dashboard migration plan.
-**Identity:** "Gold on cream, like a perfect pilsner" — WisprFlow-inspired
-Retro: `docs/retros/sprint-11-retro.md`
-
-**Key design decisions (still active):**
+### Key design decisions (still active from Sprint 11):
 - Marketing pages use hardcoded `C` color constants (not CSS vars)
 - App interior uses CSS vars, defaults dark, user-toggleable to cream/light
 - `DarkCardWrapper` client component forces dark vars via `style.setProperty()` (Tailwind v4 CSS var override workaround)
 - Pour connectors (gold vertical gradient lines) between sections = brand identity element
 
-### Sprint 12 — IN PROGRESS (CURRENT)
-**Theme:** Dashboard migration, photo uploads, Customer Pint Rewind, mobile polish
-**Plan:** `docs/sprint-12-plan.md`
+### Sprint 13 — COMPLETE ✅
+12 features shipped: beer wishlist, passport, friends feed, session share cards, streaks, style badges, Beer of the Week, push notifications MVP, Sentry, checkins deprecation plan.
+Retro: `docs/retros/sprint-13-retro.md`
 
-**Completed (Session 1, 2026-03-26):**
-- ✅ Migration 008: brewery admin RLS for sessions/beer_logs (WRITTEN, needs applying)
-- ✅ Brewery dashboard → `sessions` + `beer_logs` (3 pages rewritten)
-- ✅ Analytics → `sessions` + `beer_logs` (page + client component)
-- ✅ Pint Rewind → session data (page + client component)
-- ✅ `ImageUpload` component + brewery cover photo upload in settings
-- ✅ Customer Pint Rewind — `/pint-rewind` animated 9-card stack + `/api/pint-rewind`
-- ✅ Mobile responsive polish on landing pages (LandingContent + BreweriesContent)
-- ✅ Retro, sprint plan, roadmap updated
+**Key architectural changes from Sprint 12+13:**
+- Brewery dashboard/analytics/pint-rewind query `sessions` + `beer_logs` (NOT `checkins`)
+- `ImageUpload` component at `components/ui/ImageUpload.tsx`
+- Customer Pint Rewind at `app/(app)/pint-rewind/`
+- Beer counts are **quantity-aware** (`beer_logs.quantity` sum, not row count)
+- `WishlistButton` at `components/ui/WishlistButton.tsx`
+- Beer passport at `app/(app)/profile/[username]/passport/`
+- `SessionShareCard` at `components/checkin/SessionShareCard.tsx`
+- Session-end API: streaks, friend notifications, achievement checks, beer log persistence
+- Feed filter tabs in `HomeFeed.tsx` (All/Friends/You)
+- `is_featured` on beers table — Beer of the Week
+- Sentry config: `sentry.client.config.ts`, `sentry.server.config.ts`, `sentry.edge.config.ts`
+- Service worker has push + notification click handlers
 
-**Key architectural changes from Sprint 12:**
-- `AppShell` still owns the check-in drawer stack (unchanged from Sprint 10)
-- Brewery dashboard/analytics/pint-rewind now query `sessions` + `beer_logs` (NOT `checkins`)
-- `ImageUpload` component at `components/ui/ImageUpload.tsx` — reusable for beer-photos and brewery-covers
-- Customer Pint Rewind at `app/(app)/pint-rewind/` — API route computes personality archetypes from user data
-- Beer counts in dashboard/analytics are **quantity-aware** (`beer_logs.quantity` sum, not row count)
+### Sprint 14 — IN PROGRESS (CURRENT)
+**Theme:** Kill the legacy, ship real push, close the first deal, consumer polish
+**Plan:** `docs/sprint-14-plan.md`
 
-**Still TODO in Sprint 12:**
-- Apply migrations 007 + 008 in Supabase SQL Editor
-- Commit and push all changes
-- Capacitor → TestFlight (Alex)
-- `checkins` table deprecation plan (Riley + Jordan)
-- REQ backfill 2 docs (Sam)
-- First paid brewery close (Taylor)
+**P0 — Must Ship:**
+- S14-D01: Capacitor → TestFlight (Alex — SHIPPING, no more carries)
+- S14-001: Migrate all `checkins` reads to `sessions`/`beer_logs`
+- S14-002: Disable `checkins` writes + remove `CheckinModal`
+- S14-004: Full Web Push with VAPID keys
+- S14-010: First paid brewery close (Taylor — hard deadline)
+
+**P1 — Should Ship:**
+- S14-003: Plan reactions FK migration (prep for S15 table drop)
+- S14-005: Notification preferences — wire settings toggles to DB
+- S14-006: Lower-tier style badges (ipa_lover, sour_head, stout_season)
+- S14-007: Profile empty states + polish
+- S14-008: Feed polish — session duration + context badges
+- S14-009a: Share card improvements — OG tags, save-as-image
+- S14-011: App Store prep (screenshots, description, icon)
+
+**P2:**
+- S14-009b: Explore page filters
 
 **Standing commitments:**
-- Sam: 1-2 REQ backfill docs per sprint (REQ-012 through REQ-024)
-- Casey: QA starts at sprint kickoff, not at the end
-- Taylor: First paid brewery close this sprint
+- Sam: 2 REQ backfill docs per sprint
+- Casey: QA regression on checkins migration + all S14 features
+- Taylor: Close the brewery or reassess timeline
 
 ### Migration state
 - 001–003: Core schema + seed
 - 004: Brewery RLS fix (brewery_accounts OR created_by for UPDATE)
 - 005: `checkins.beer_id` made nullable (REQ-013)
 - 006: `sessions` + `beer_logs` tables + full RLS ✅ APPLIED
-- 007: Home sessions + quantity — **WRITTEN, NOT YET APPLIED** (run in Supabase SQL Editor)
-- 008: Brewery admin RLS for sessions/beer_logs — **WRITTEN, NOT YET APPLIED** (run in Supabase SQL Editor)
+- 007: Home sessions + quantity ✅ APPLIED
+- 008: Brewery admin RLS for sessions/beer_logs ✅ APPLIED
+- 009: Streak system (`current_streak`, `longest_streak`, `last_session_date` on profiles) ✅ APPLIED
+- 010: Style + streak achievements (wheat_king, lager_legend, seven_day_streak, thirty_day_streak) ✅ APPLIED
+- 011: Beer of the Week (`is_featured` on beers) ✅ APPLIED
 
 ### Revenue Targets
 - Tap tier: $49/mo

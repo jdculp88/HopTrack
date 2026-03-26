@@ -2,10 +2,11 @@ import { createClient } from "@/lib/supabase/server";
 import { notFound, redirect } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, Bookmark, BookmarkCheck } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import { WishlistButton } from "@/components/ui/WishlistButton";
 import { BeerStyleBadge } from "@/components/ui/BeerStyleBadge";
 import { StarRating, RatingDisplay } from "@/components/ui/StarRating";
-import { CheckinCard } from "@/components/social/CheckinCard";
+import { UserAvatar } from "@/components/ui/UserAvatar";
 import { generateGradientFromString, formatABV } from "@/lib/utils";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
@@ -31,13 +32,13 @@ export default async function BeerPage({ params }: { params: Promise<{ id: strin
   if (!beerRaw) notFound();
   const beer = beerRaw as any;
 
-  // Recent check-ins for this beer
-  const { data: checkins } = await supabase
-    .from("checkins")
-    .select("*, profile:profiles(*), brewery:breweries(*), beer:beers(*)")
+  // Recent beer logs for this beer
+  const { data: beerLogs } = await (supabase as any)
+    .from("beer_logs")
+    .select("id, rating, quantity, flavor_tags, serving_style, comment, logged_at, user_id, profile:profiles(id, username, display_name, avatar_url)")
     .eq("beer_id", id)
-    .order("created_at", { ascending: false })
-    .limit(20);
+    .order("logged_at", { ascending: false })
+    .limit(20) as any;
 
   // On wishlist?
   const { data: wishlistItem } = await supabase
@@ -47,8 +48,8 @@ export default async function BeerPage({ params }: { params: Promise<{ id: strin
     .eq("beer_id", id)
     .single();
 
-  // Flavor tag frequencies
-  const allTags = (checkins ?? []).flatMap((c: any) => c.flavor_tags ?? []);
+  // Flavor tag frequencies from beer_logs
+  const allTags = ((beerLogs as any[]) ?? []).flatMap((l: any) => l.flavor_tags ?? []);
   const tagFreq: Record<string, number> = {};
   allTags.forEach((t: string) => { tagFreq[t] = (tagFreq[t] ?? 0) + 1; });
   const sortedTags = Object.entries(tagFreq).sort((a, b) => b[1] - a[1]).slice(0, 10);
@@ -80,9 +81,7 @@ export default async function BeerPage({ params }: { params: Promise<{ id: strin
                 <p className="text-[#D4A843] hover:underline text-sm mt-1">{brewery?.name}</p>
               </Link>
             </div>
-            <button className="p-2 rounded-xl bg-[var(--surface-2)] text-[var(--text-secondary)] hover:text-[#D4A843] transition-colors flex-shrink-0">
-              {wishlistItem ? <BookmarkCheck size={18} className="text-[#D4A843]" /> : <Bookmark size={18} />}
-            </button>
+            <WishlistButton beerId={id} initialWishlisted={!!wishlistItem} />
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
@@ -125,15 +124,42 @@ export default async function BeerPage({ params }: { params: Promise<{ id: strin
         </div>
       )}
 
-      {/* Recent Check-ins */}
+      {/* Recent Reviews */}
       <div>
         <h2 className="font-display text-xl font-bold text-[var(--text-primary)] mb-4">
-          Recent Reviews <span className="text-[var(--text-muted)] font-sans text-sm font-normal">({checkins?.length ?? 0})</span>
+          Recent Reviews <span className="text-[var(--text-muted)] font-sans text-sm font-normal">({beerLogs?.length ?? 0})</span>
         </h2>
-        {checkins && checkins.length > 0 ? (
-          <div className="space-y-4">
-            {(checkins as any[]).map((c) => (
-              <CheckinCard key={c.id} checkin={c} />
+        {beerLogs && beerLogs.length > 0 ? (
+          <div className="space-y-3">
+            {((beerLogs as any[]) ?? []).map((log: any) => (
+              <div key={log.id} className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-4">
+                <div className="flex items-center gap-3 mb-2">
+                  <UserAvatar profile={log.profile} size="sm" />
+                  <div className="flex-1 min-w-0">
+                    <Link href={`/profile/${log.profile?.username}`} className="font-display font-semibold text-sm text-[var(--text-primary)] hover:text-[#D4A843] transition-colors">
+                      {log.profile?.display_name ?? log.profile?.username}
+                    </Link>
+                    <p className="text-xs text-[var(--text-muted)]">
+                      {new Date(log.logged_at).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
+                    </p>
+                  </div>
+                  {log.rating > 0 && (
+                    <RatingDisplay rating={log.rating} size="sm" />
+                  )}
+                </div>
+                {log.comment && (
+                  <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{log.comment}</p>
+                )}
+                {log.flavor_tags?.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mt-2">
+                    {log.flavor_tags.map((tag: string) => (
+                      <span key={tag} className="px-2 py-0.5 rounded-full text-xs border border-[var(--border)] bg-[var(--surface-2)] text-[var(--text-muted)]">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
             ))}
           </div>
         ) : (
