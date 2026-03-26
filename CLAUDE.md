@@ -198,11 +198,11 @@ Retro: `docs/retros/sprint-13-retro.md`
 - Sentry config: `sentry.client.config.ts`, `sentry.server.config.ts`, `sentry.edge.config.ts`
 - Service worker has push + notification click handlers
 
-### Sprint 14 — IN PROGRESS (CURRENT)
+### Sprint 14 — COMPLETE ✅
 **Theme:** Kill the legacy, ship real push, close the first deal, consumer polish
 **Plan:** `docs/sprint-14-plan.md`
 
-**Completed (Session 1, 2026-03-26):**
+**Session 1 (2026-03-26):**
 - ✅ S14-001: Migrated all `checkins` reads to `sessions`/`beer_logs` (9 files)
 - ✅ S14-002: Disabled `checkins` writes (410 Gone) + removed `CheckinModal` from AppShell
 - ✅ S14-006: Lower-tier style badges (ipa_lover, sour_head, stout_season) + session-end checks
@@ -211,28 +211,38 @@ Retro: `docs/retros/sprint-13-retro.md`
 - ✅ Migrations 012 (notification_preferences) + 013 (push_subscriptions) applied
 - ✅ Bug fixes: Pint Rewind XP field (total_xp → xp), brewery Pint Rewind null safety
 
-**Key architectural changes from Sprint 14 Session 1:**
+**Session 2 (2026-03-26):**
+- ✅ S14-003: Reactions FK migration SQL (014) + API dual-support for sessions/checkins
+- ✅ S14-004: Full Web Push — `web-push` lib, `PushOptIn` component, `/api/push/subscribe`, session-end sends push to friends
+- ✅ S14-005: Notification preference toggles wired to DB via profiles API
+- ✅ S14-009a: Share card — save-as-image (`html2canvas`), QR code, OG meta tags via `/session/[id]`
+- ✅ S14-009b: Explore page — brewery type filters, Beer of the Week filter, search UX
+- ✅ S14-D01: Capacitor installed + configured (`capacitor.config.ts`), npm scripts for iOS
+- ✅ S14-010: Claim flow enhanced with 14-day trial badge
+- ✅ S14-011: Privacy policy page, App Store metadata doc, TestFlight seed script (008)
+
+**Key architectural changes from Sprint 14:**
 - Zero app code queries `checkins` table — only `/api/checkins` (returns 410)
 - `CheckinModal` removed from AppShell (dead code, not imported)
 - `HomeFeed` is sessions-only — no more dual-table merge
 - `SessionCard` handles at-home sessions + shows duration
 - Profile page always shows all sections (empty states instead of hiding)
 - 50 total achievements (3 new lower-tier style badges)
+- `lib/push.ts` — server-side Web Push via `web-push` package
+- `PushOptIn` component in AppShell — opt-in prompt after 5s delay
+- Session-end API sends Web Push to friends, respects `notification_preferences`
+- Reactions API supports both `checkin_id` (legacy) and `session_id` (new)
+- `SessionShareCard` — save-as-image, QR code toggle, OG-tagged share URLs
+- Explore page has brewery type + Beer of the Week filters
+- Capacitor configured for iOS (`beer.hoptrack.app`)
+- Privacy policy at `/privacy` (required for App Store)
+- TestFlight test account: `testflight@hoptrack.beer` / `HopTrack2026!` (seed 008)
 
-**Still TODO in Sprint 14:**
-- S14-D01: Capacitor → TestFlight (Alex)
-- S14-003: Plan reactions FK migration (prep for S15 table drop)
-- S14-004: Full Web Push with VAPID keys (tables ready, need VAPID generation + subscription logic)
-- S14-005: Wire notification preferences settings toggles to DB
-- S14-009a: Share card improvements — OG tags, save-as-image
-- S14-009b: Explore page filters
-- S14-010: First paid brewery close (Taylor)
-- S14-011: App Store prep (screenshots, description, icon)
-
-**Standing commitments:**
-- Sam: 2 REQ backfill docs per sprint
-- Casey: QA regression on checkins migration + all S14 features
-- Taylor: Close the brewery or reassess timeline
+**Deferred to Sprint 15:**
+- TestFlight submission (needs Apple Developer account + Xcode signing)
+- Apply migration 014 (reactions FK backfill)
+- Riley: generate VAPID keys (`npx web-push generate-vapid-keys` → `.env.local`)
+- Taylor: close first paid brewery
 
 ### Migration state
 - 001–003: Core schema + seed
@@ -246,6 +256,7 @@ Retro: `docs/retros/sprint-13-retro.md`
 - 011: Beer of the Week (`is_featured` on beers) ✅ APPLIED
 - 012: Notification preferences (JSONB on profiles) ✅ APPLIED
 - 013: Push subscriptions table (Web Push endpoints) ✅ APPLIED
+- 014: Reactions FK migration (session_id + beer_log_id on reactions) ⏳ WRITTEN, NOT APPLIED — apply in S15
 
 ### Revenue Targets
 - Tap tier: $49/mo
