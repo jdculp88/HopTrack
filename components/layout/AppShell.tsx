@@ -66,18 +66,18 @@ export function AppShell({ children, username, unreadNotifications = 0 }: AppShe
           open={checkinOpen}
           onClose={() => setCheckinOpen(false)}
         />
-      </div>
 
-      {/* Active session banner — rendered here so it's outside AppNav's fragment */}
-      <AnimatePresence>
-        {activeSession && (
-          <ActiveSessionBanner
-            session={activeSession}
-            breweryName={sessionBreweryName}
-            onTap={handleOpenTapWall}
-          />
-        )}
-      </AnimatePresence>
+        {/* Active session banner — fixed position, last child so it doesn't shift RSC hydration cursor */}
+        <AnimatePresence>
+          {activeSession && (
+            <ActiveSessionBanner
+              session={activeSession}
+              breweryName={sessionBreweryName}
+              onTap={handleOpenTapWall}
+            />
+          )}
+        </AnimatePresence>
+      </div>
     </ToastProvider>
   );
 }
