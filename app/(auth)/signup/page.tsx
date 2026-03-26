@@ -63,7 +63,7 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="bg-[var(--surface)] border border-[var(--border)] rounded-3xl p-8 shadow-2xl shadow-black/40">
+    <div>
       {step === "profile" && (
         <button
           onClick={() => setStep("account")}
@@ -176,7 +176,7 @@ export default function SignupPage() {
           </div>
           {error && <p className="text-sm text-[#C44B3A] bg-[#C44B3A]/10 border border-[#C44B3A]/20 rounded-xl px-4 py-3">{error}</p>}
           <button type="submit" disabled={loading} className="w-full bg-[#D4A843] hover:bg-[#E8841A] text-[#0F0E0C] font-bold py-3.5 rounded-xl transition-all disabled:opacity-60 text-sm">
-            {loading ? "Creating account..." : "🍺 Create Account"}
+            {loading ? "Creating account..." : "Create Account"}
           </button>
           <p className="text-xs text-center text-[var(--text-muted)]">
             By signing up, you agree to our terms and privacy policy.

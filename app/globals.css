@@ -1,6 +1,29 @@
 @import "tailwindcss";
 
-/* ── Semantic color tokens — dark theme (default) ─────────────────────────── */
+/*
+ * ─── HOPTRACK DESIGN SYSTEM — "Gold on Cream" ──────────────────────────────
+ *
+ * Direction: WisprFlow-inspired warm cream canvas with dark floating sections
+ * Identity: "Gold on cream, like a perfect pilsner"
+ *
+ * PALETTE PHILOSOPHY
+ *   Cream canvas  = craft paper, brewery menu, warm and inviting
+ *   Dark sections  = chalkboard specials, floating on cream with rounded corners
+ *   Gold accent    = the pour, the brand, THE light source
+ *
+ * TYPOGRAPHY
+ *   Display:  Playfair Display — editorial serif, italic contrast, 80-108px heroes
+ *   Body:     Instrument Sans  — humanist, refined
+ *   Mono:     JetBrains Mono   — labels, stats, data
+ *
+ * LAYOUT
+ *   Marketing pages: cream canvas, dark floating sections with rounded-[2rem]
+ *   App interior:    dark by default (brewery-friendly), user-toggleable to cream
+ *   Section rhythm:  cream → dark card → cream → dark card (the "flow")
+ * ────────────────────────────────────────────────────────────────────────────
+ */
+
+/* ── Semantic color tokens — dark theme (default for app interior) ─────────── */
 :root {
   --bg:              #0F0E0C;
   --surface:         #1C1A16;
@@ -11,7 +34,7 @@
   --text-muted:      #6B6456;
   --accent-gold:     #D4A843;
   --accent-amber:    #E8841A;
-  --accent-green:    #4A7C59;
+  --accent-green:    #2D5A3D;
   --danger:          #C44B3A;
   --success:         #3D7A52;
   --skeleton-base:   #1C1A16;
@@ -20,24 +43,34 @@
   --scrollbar-thumb: #3A3628;
 }
 
-/* ── Light theme overrides ────────────────────────────────────────────────── */
+/* ── Light / Cream theme (user toggle + forced on marketing pages) ─────────── */
 [data-theme="light"] {
-  --bg:              #FAF7F2;
+  --bg:              #FBF7F0;
   --surface:         #FFFFFF;
-  --surface-2:       #F0EAE0;
-  --border:          #E2D9CC;
-  --text-primary:    #1A1814;
-  --text-secondary:  #6B5F4E;
+  --surface-2:       #F3EDE3;
+  --border:          #E5DDD0;
+  --text-primary:    #1A1714;
+  --text-secondary:  #6B5E4E;
   --text-muted:      #9E8E7A;
   --accent-gold:     #C49A35;
   --accent-amber:    #D4730E;
-  --accent-green:    #3D6B49;
+  --accent-green:    #2D5A3D;
   --danger:          #B03A2B;
   --success:         #2E6642;
   --skeleton-base:   #EDE5D8;
   --skeleton-shine:  #F5EEE4;
-  --scrollbar-track: #F0EAE0;
+  --scrollbar-track: #F3EDE3;
   --scrollbar-thumb: #D4C4B0;
+}
+
+/* ── Dark floating section tokens (used on cream pages) ────────────────────── */
+:root {
+  --dark-bg:         #0F0E0C;
+  --dark-surface:    #1C1A16;
+  --dark-border:     #3A3628;
+  --dark-text:       #F5F0E8;
+  --dark-text-secondary: #A89F8C;
+  --dark-text-muted: #8B7E6A;
 }
 
 /* ── Tailwind v4 design tokens (reference semantic vars) ──────────────────── */
@@ -55,16 +88,23 @@
   --color-danger:         var(--danger);
   --color-success:        var(--success);
 
+  /* Dark section tokens for Tailwind */
+  --color-dark-bg:        var(--dark-bg);
+  --color-dark-surface:   var(--dark-surface);
+  --color-dark-border:    var(--dark-border);
+  --color-dark-text:      var(--dark-text);
+
   /* Fonts */
   --font-display: var(--font-playfair), serif;
-  --font-sans:    var(--font-dm-sans), system-ui, sans-serif;
+  --font-sans:    var(--font-instrument), system-ui, sans-serif;
   --font-mono:    var(--font-jetbrains), monospace;
 
   /* Animations */
-  --animate-fade-in:  fadeIn 0.3s ease-out;
-  --animate-slide-up: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  --animate-shimmer:  shimmer 2s linear infinite;
-  --animate-glow:     glow 2s ease-in-out infinite alternate;
+  --animate-fade-in:    fadeIn 0.3s ease-out;
+  --animate-slide-up:   slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-shimmer:    shimmer 2s linear infinite;
+  --animate-glow:       glow 2s ease-in-out infinite alternate;
+  --animate-pour-reveal: pourReveal 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 
   @keyframes fadeIn {
     from { opacity: 0; }
@@ -94,6 +134,10 @@
     from { background-position: -200% 0; }
     to   { background-position:  200% 0; }
   }
+  @keyframes pourReveal {
+    from { clip-path: inset(100% 0 0 0); opacity: 0; }
+    to   { clip-path: inset(0 0 0 0);    opacity: 1; }
+  }
 }
 
 /* ── Base ─────────────────────────────────────────────────────────────────── */
@@ -104,7 +148,7 @@ html { scroll-behavior: smooth; }
 body {
   background-color: var(--bg);
   color: var(--text-primary);
-  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-family: var(--font-instrument), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   transition: background-color 0.15s ease, color 0.15s ease;
@@ -154,6 +198,47 @@ body {
 .card-hover:hover {
   transform: translateY(-3px) scale(1.01);
   box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+}
+
+/* ── Dark floating section — chalkboard cards on cream canvas ─────────────── */
+.dark-section {
+  background-color: var(--dark-bg);
+  color: var(--dark-text);
+  border-radius: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.dark-section .grain-overlay::after {
+  opacity: 0.03;
+}
+
+/* ── Force dark theme inside a container (e.g. dark form card on cream page) */
+/* Uses [data-theme] .force-dark for specificity over [data-theme="light"] */
+[data-theme] .force-dark,
+.force-dark {
+  --bg:              #0F0E0C !important;
+  --surface:         #1C1A16 !important;
+  --surface-2:       #252219 !important;
+  --border:          #3A3628 !important;
+  --text-primary:    #F5F0E8 !important;
+  --text-secondary:  #A89F8C !important;
+  --text-muted:      #6B6456 !important;
+  --accent-gold:     #D4A843 !important;
+  --accent-amber:    #E8841A !important;
+  --accent-green:    #2D5A3D !important;
+  --danger:          #C44B3A !important;
+  --success:         #3D7A52 !important;
+  --skeleton-base:   #1C1A16 !important;
+  --skeleton-shine:  #252219 !important;
+}
+
+/* ── Section divider — subtle horizontal fade rule ───────────────────────── */
+.section-divider {
+  height: 1px;
+  max-width: 200px;
+  margin: 0 auto;
+  background: linear-gradient(90deg, transparent, #E5DDD0, transparent);
 }
 
 .grain-overlay { position: relative; }

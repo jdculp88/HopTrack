@@ -37,7 +37,7 @@ export function AppNav({ username, unreadNotifications = 0, onCheckin }: AppNavP
       {/* ── Desktop sidebar ─────────────────────────────────────────────────── */}
       <aside
         className="hidden lg:flex flex-col w-64 h-screen sticky top-0 flex-shrink-0 border-r"
-        style={{ background: "var(--surface)", borderColor: "var(--border)" }}
+        style={{ background: "var(--bg)", borderColor: "var(--border)" }}
       >
         {/* Logo */}
         <div className="px-6 py-6 border-b" style={{ borderColor: "var(--border)" }}>

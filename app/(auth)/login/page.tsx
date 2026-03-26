@@ -38,7 +38,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="bg-[var(--surface)] border border-[var(--border)] rounded-3xl p-8 shadow-2xl shadow-black/40">
+    <div>
       <div className="mb-8">
         <h1 className="font-display text-3xl font-bold text-[var(--text-primary)]">Welcome back</h1>
         <p className="text-[var(--text-secondary)] text-sm mt-1.5">Sign in to your HopTrack account.</p>
