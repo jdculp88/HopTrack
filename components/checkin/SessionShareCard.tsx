@@ -1,8 +1,9 @@
 "use client";
 
-import { useRef, useCallback } from "react";
+import { useRef, useCallback, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Share2, Copy, Star, Beer, Zap } from "lucide-react";
+import { X, Share2, Copy, Star, Beer, Zap, Download, QrCode } from "lucide-react";
+import QRCode from "react-qr-code";
 import { useToast } from "@/components/ui/Toast";
 import type { Session, BeerLog } from "@/types/database";
 
@@ -28,6 +29,8 @@ function formatDuration(startedAt: string, endedAt?: string | null) {
 export function SessionShareCard({ open, onClose, breweryName, beerLogs, session, xpGained }: SessionShareCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
   const { success, error: showError } = useToast();
+  const [showQR, setShowQR] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   const ratedLogs = beerLogs.filter((b) => b.rating != null);
   const avgRating = ratedLogs.length > 0
@@ -36,30 +39,32 @@ export function SessionShareCard({ open, onClose, breweryName, beerLogs, session
   const beerCount = beerLogs.reduce((sum: number, b: any) => sum + (b.quantity || 1), 0);
   const duration = session ? formatDuration(session.started_at, session.ended_at) : "";
 
+  const sessionUrl = session ? `${typeof window !== "undefined" ? window.location.origin : ""}/session/${session.id}` : "";
+
   const shareText = useCallback(() => {
     const lines = [
-      `🍺 Just wrapped a session at ${breweryName}!`,
-      `${beerCount} beer${beerCount !== 1 ? "s" : ""}${duration ? ` · ${duration}` : ""}${avgRating ? ` · avg ★ ${avgRating}` : ""}`,
+      `\u{1F37A} Just wrapped a session at ${breweryName}!`,
+      `${beerCount} beer${beerCount !== 1 ? "s" : ""}${duration ? ` \u00B7 ${duration}` : ""}${avgRating ? ` \u00B7 avg \u2605 ${avgRating}` : ""}`,
       "",
       ...beerLogs.slice(0, 5).map((log: any) => {
         const name = log.beer?.name || "Unknown beer";
-        const stars = log.rating ? ` ${"★".repeat(Math.round(log.rating))}` : "";
-        return `  🍺 ${name}${stars}`;
+        const stars = log.rating ? ` ${"\u2605".repeat(Math.round(log.rating))}` : "";
+        return `  \u{1F37A} ${name}${stars}`;
       }),
       beerLogs.length > 5 ? `  ...and ${beerLogs.length - 5} more` : "",
       "",
-      `+${xpGained} XP earned ✨`,
+      `+${xpGained} XP earned \u2728`,
       "",
-      "Tracked on HopTrack · hoptrack.app",
+      sessionUrl || "Tracked on HopTrack \u00B7 hoptrack.app",
     ].filter(Boolean);
     return lines.join("\n");
-  }, [breweryName, beerCount, duration, avgRating, beerLogs, xpGained]);
+  }, [breweryName, beerCount, duration, avgRating, beerLogs, xpGained, sessionUrl]);
 
   async function handleShare() {
     const text = shareText();
     if (navigator.share) {
       try {
-        await navigator.share({ text });
+        await navigator.share({ text, url: sessionUrl || undefined });
         success("Shared!");
       } catch {
         // User cancelled
@@ -78,6 +83,29 @@ export function SessionShareCard({ open, onClose, breweryName, beerLogs, session
     }
   }
 
+  async function handleSaveImage() {
+    if (!cardRef.current) return;
+    setSaving(true);
+    try {
+      const html2canvas = (await import("html2canvas")).default;
+      const canvas = await html2canvas(cardRef.current, {
+        backgroundColor: "#1C1A16",
+        scale: 2,
+        useCORS: true,
+      });
+
+      const link = document.createElement("a");
+      link.download = `hoptrack-session-${session?.id?.slice(0, 8) || "recap"}.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+      success("Image saved!");
+    } catch {
+      showError("Failed to save image");
+    } finally {
+      setSaving(false);
+    }
+  }
+
   return (
     <AnimatePresence>
       {open && (
@@ -93,7 +121,7 @@ export function SessionShareCard({ open, onClose, breweryName, beerLogs, session
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
             transition={{ type: "spring", stiffness: 400, damping: 30 }}
-            className="w-full max-w-sm"
+            className="w-full max-w-sm max-h-[90vh] overflow-y-auto"
           >
             {/* Close */}
             <div className="flex justify-end mb-3">
@@ -188,6 +216,27 @@ export function SessionShareCard({ open, onClose, breweryName, beerLogs, session
                 </div>
               </div>
 
+              {/* QR Code (toggleable) */}
+              <AnimatePresence>
+                {showQR && session && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="flex flex-col items-center gap-2 px-4 pb-4">
+                      <div className="bg-white p-3 rounded-xl">
+                        <QRCode value={sessionUrl} size={100} />
+                      </div>
+                      <p className="text-[10px] font-mono" style={{ color: "rgba(255,255,255,0.3)" }}>
+                        Scan to view on HopTrack
+                      </p>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
               {/* Footer branding */}
               <div className="px-4 pb-4 flex items-center justify-center gap-2">
                 <Beer size={12} style={{ color: "#D4A843" }} />
@@ -207,14 +256,37 @@ export function SessionShareCard({ open, onClose, breweryName, beerLogs, session
                 <Share2 size={16} />
                 Share
               </button>
-              <button
-                onClick={handleCopy}
-                className="w-full py-3.5 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all"
-                style={{ background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.7)", border: "1px solid rgba(255,255,255,0.1)" }}
-              >
-                <Copy size={16} />
-                Copy to clipboard
-              </button>
+              <div className="grid grid-cols-3 gap-2">
+                <button
+                  onClick={handleCopy}
+                  className="py-3 rounded-xl font-medium flex items-center justify-center gap-1.5 text-sm transition-all"
+                  style={{ background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.7)", border: "1px solid rgba(255,255,255,0.1)" }}
+                >
+                  <Copy size={14} />
+                  Copy
+                </button>
+                <button
+                  onClick={handleSaveImage}
+                  disabled={saving}
+                  className="py-3 rounded-xl font-medium flex items-center justify-center gap-1.5 text-sm transition-all disabled:opacity-60"
+                  style={{ background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.7)", border: "1px solid rgba(255,255,255,0.1)" }}
+                >
+                  <Download size={14} />
+                  {saving ? "..." : "Save"}
+                </button>
+                <button
+                  onClick={() => setShowQR((v) => !v)}
+                  className="py-3 rounded-xl font-medium flex items-center justify-center gap-1.5 text-sm transition-all"
+                  style={{
+                    background: showQR ? "rgba(212,168,67,0.1)" : "rgba(255,255,255,0.06)",
+                    color: showQR ? "#D4A843" : "rgba(255,255,255,0.7)",
+                    border: `1px solid ${showQR ? "rgba(212,168,67,0.3)" : "rgba(255,255,255,0.1)"}`,
+                  }}
+                >
+                  <QrCode size={14} />
+                  QR
+                </button>
+              </div>
             </div>
           </motion.div>
         </motion.div>

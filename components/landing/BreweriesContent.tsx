@@ -456,6 +456,7 @@ export default function BreweriesContent() {
           <div className="flex gap-7 text-sm font-sans" style={{ color: C.creamSubtle }}>
             <Link href="/" className="hover:text-white transition-colors">Consumer app</Link>
             <Link href="/login" className="hover:text-white transition-colors">Sign in</Link>
+            <Link href="/privacy" className="hover:text-white transition-colors">Privacy</Link>
             <a href="mailto:sales@hoptrack.beer" className="hover:text-white transition-colors">Contact</a>
           </div>
           <p className="text-xs font-mono" style={{ color: C.creamSubtle }}>© 2026 HopTrack</p>

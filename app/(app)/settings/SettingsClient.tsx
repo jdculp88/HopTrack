@@ -15,6 +15,8 @@ interface SettingsClientProps {
 
 const inputCls = "w-full bg-[var(--surface-2)] border border-[var(--border)] rounded-xl px-4 py-3 text-[var(--text-primary)] text-sm outline-none transition-colors focus:border-[#D4A843] placeholder:text-[var(--text-muted)]";
 
+const DEFAULT_PREFS = { friend_activity: true, achievements: true, weekly_stats: true };
+
 export function SettingsClient({ profile, userEmail }: SettingsClientProps) {
   const router = useRouter();
   const [displayName, setDisplayName] = useState(profile?.display_name ?? "");
@@ -24,6 +26,9 @@ export function SettingsClient({ profile, userEmail }: SettingsClientProps) {
   const [isPublic, setIsPublic] = useState(profile?.is_public ?? true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [notifPrefs, setNotifPrefs] = useState<Record<string, boolean>>(
+    () => ({ ...DEFAULT_PREFS, ...((profile as any)?.notification_preferences ?? {}) })
+  );
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
@@ -39,6 +44,16 @@ export function SettingsClient({ profile, userEmail }: SettingsClientProps) {
       setTimeout(() => setSaved(false), 2000);
       router.refresh();
     }
+  }
+
+  async function handleNotifToggle(key: string, value: boolean) {
+    const updated = { ...notifPrefs, [key]: value };
+    setNotifPrefs(updated);
+    await fetch("/api/profiles", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ notification_preferences: updated }),
+    });
   }
 
   async function handleSignOut() {
@@ -132,24 +147,24 @@ export function SettingsClient({ profile, userEmail }: SettingsClientProps) {
               <p className="font-medium text-[var(--text-primary)] text-sm">Friend Activity</p>
               <p className="text-xs text-[var(--text-muted)] mt-0.5">Get notified when friends check in at a brewery</p>
             </div>
-            <Toggle value={true} onChange={() => {}} />
+            <Toggle value={notifPrefs.friend_activity} onChange={(v) => handleNotifToggle("friend_activity", v)} />
           </div>
           <div className="flex items-center justify-between py-2">
             <div>
               <p className="font-medium text-[var(--text-primary)] text-sm">Achievements</p>
               <p className="text-xs text-[var(--text-muted)] mt-0.5">Get notified when you unlock achievements</p>
             </div>
-            <Toggle value={true} onChange={() => {}} />
+            <Toggle value={notifPrefs.achievements} onChange={(v) => handleNotifToggle("achievements", v)} />
           </div>
           <div className="flex items-center justify-between py-2">
             <div>
               <p className="font-medium text-[var(--text-primary)] text-sm">Weekly Stats</p>
               <p className="text-xs text-[var(--text-muted)] mt-0.5">Receive your weekly beer stats summary</p>
             </div>
-            <Toggle value={true} onChange={() => {}} />
+            <Toggle value={notifPrefs.weekly_stats} onChange={(v) => handleNotifToggle("weekly_stats", v)} />
           </div>
           <p className="text-xs text-[var(--text-muted)] pt-2 border-t border-[var(--border)]">
-            Push notifications coming soon. In-app notifications are always on.
+            Push notifications are delivered when the app is closed. In-app notifications are always on.
           </p>
         </div>
       </Section>

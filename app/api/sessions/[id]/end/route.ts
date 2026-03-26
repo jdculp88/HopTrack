@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getLevelFromXP } from '@/lib/xp'
+import { sendPushToUser } from '@/lib/push'
 
 // New XP values for sessions
 const SESSION_XP = {
@@ -276,6 +277,30 @@ export async function PATCH(
 
       // Insert all notifications (fire and forget)
       (supabase as any).from('notifications').insert(notifications).then(() => {})
+
+      // Send Web Push to friends who have push enabled for friend_activity
+      for (const friendId of friendIds) {
+        // Check notification preference
+        const { data: friendProfile } = await (supabase as any)
+          .from('profiles')
+          .select('notification_preferences')
+          .eq('id', friendId)
+          .single()
+
+        const prefs = friendProfile?.notification_preferences || { friend_activity: true }
+        if (prefs.friend_activity === false) continue
+
+        const pushBody = breweryName
+          ? `${displayName} visited ${breweryName} and had ${beerCount} beer${beerCount !== 1 ? 's' : ''}`
+          : `${displayName} logged ${beerCount} beer${beerCount !== 1 ? 's' : ''} at home`
+
+        sendPushToUser(supabase, friendId, {
+          title: `${displayName} just checked in!`,
+          body: pushBody,
+          tag: `friend-checkin-${sessionId}`,
+          data: { url: '/home', session_id: sessionId },
+        }).catch(() => {}) // fire and forget
+      }
     }
   }
 

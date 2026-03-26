@@ -319,7 +319,10 @@ export type ReactionType = "thumbs_up" | "flame" | "beer";
 export interface Reaction {
   id: string;
   user_id: string;
+  /** @deprecated — will be removed in Sprint 15 when checkins table is dropped */
   checkin_id: string;
+  session_id: string | null;
+  beer_log_id: string | null;
   type: ReactionType;
   created_at: string;
 }

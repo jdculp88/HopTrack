@@ -545,10 +545,24 @@ export function ClaimBreweryClient({ userEmail, pendingClaim }: ClaimBreweryClie
               We'll verify your ownership within{" "}
               <strong style={{ color: "var(--text-primary)" }}>24 hours</strong>.
             </p>
-            <p className="text-sm leading-relaxed mb-8" style={{ color: "var(--text-secondary)" }}>
+            <p className="text-sm leading-relaxed mb-4" style={{ color: "var(--text-secondary)" }}>
               In the meantime, you can explore your dashboard — it's waiting for
               you.
             </p>
+
+            {/* Free trial badge */}
+            <div
+              className="rounded-xl p-4 mb-8 text-left space-y-2"
+              style={{ background: "rgba(212,168,67,0.05)", border: "1px solid rgba(212,168,67,0.2)" }}
+            >
+              <p className="text-xs font-mono uppercase tracking-wider" style={{ color: "var(--accent-gold)" }}>
+                Your 14-day free trial starts now
+              </p>
+              <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+                Full access to tap list management, loyalty programs, and analytics.
+                No credit card required. Upgrade anytime starting at $49/mo.
+              </p>
+            </div>
 
             {/* Pending badge */}
             <div

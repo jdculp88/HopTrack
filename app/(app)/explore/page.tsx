@@ -25,12 +25,22 @@ export default async function ExplorePage() {
 
   const visitedIds = new Set((visits as any[] ?? []).map((v: any) => v.brewery_id));
 
+  // Brewery IDs that have a Beer of the Week (is_featured = true)
+  const { data: featuredBeers } = await (supabase as any)
+    .from("beers")
+    .select("brewery_id")
+    .eq("is_featured", true)
+    .eq("is_active", true);
+
+  const botwBreweryIds = [...new Set((featuredBeers ?? []).map((b: any) => b.brewery_id))] as string[];
+
   return (
     <ExploreClient
       breweries={(breweries ?? []).map((b) => ({
         ...b,
         user_visit: visitedIds.has(b.id) ? { brewery_id: b.id } : undefined,
       }))}
+      hasBeerOfTheWeek={botwBreweryIds}
     />
   );
 }

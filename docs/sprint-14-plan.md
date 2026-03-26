@@ -219,8 +219,8 @@ Ongoing:
 - [ ] `CheckinModal` removed from codebase
 - [ ] Web Push notifications deliver when app is closed (Chrome + Safari)
 - [ ] Notification toggles in settings actually save and are respected
-- [ ] TestFlight build submitted to Apple
-- [ ] App Store screenshots + description ready
+- [ ] ~~TestFlight build submitted to Apple~~ → deferred to S15
+- [x] App Store metadata + privacy policy ready
 - [ ] 3 new lower-tier style badges live (ipa_lover, sour_head, stout_season)
 - [ ] Profile empty states show CTAs instead of hiding
 - [ ] SessionCard shows duration + context

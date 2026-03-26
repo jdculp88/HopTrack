@@ -9,6 +9,7 @@ import CheckinEntryDrawer from "@/components/checkin/CheckinEntryDrawer";
 import TapWallSheet from "@/components/checkin/TapWallSheet";
 import SessionRecapSheet from "@/components/checkin/SessionRecapSheet";
 import { SessionShareCard } from "@/components/checkin/SessionShareCard";
+import { PushOptIn } from "@/components/push/PushOptIn";
 import type { Session, Brewery } from "@/types/database";
 
 interface AppShellProps {
@@ -172,6 +173,8 @@ export function AppShell({ children, username, unreadNotifications = 0 }: AppShe
         session={sessionResult?.session ?? null}
         xpGained={sessionResult?.xpGained ?? 0}
       />
+
+      <PushOptIn />
     </ToastProvider>
   );
 }

@@ -1,4 +1,4 @@
-const CACHE_NAME = "hoptrack-v1";
+const CACHE_NAME = "hoptrack-v2";
 const STATIC_ASSETS = [
   "/",
   "/home",

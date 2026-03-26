@@ -20,9 +20,17 @@
     "functions:serve": "supabase functions serve",
     "functions:deploy": "supabase functions deploy",
     "functions:deploy:achievement-eval": "supabase functions deploy achievement-eval",
-    "setup": "node scripts/supabase-setup.mjs"
+    "setup": "node scripts/supabase-setup.mjs",
+    "cap:init": "npx cap init HopTrack beer.hoptrack.app --web-dir out",
+    "cap:add:ios": "npx cap add ios",
+    "cap:sync": "npx cap sync",
+    "cap:open:ios": "npx cap open ios",
+    "cap:build": "next build && npx cap sync"
   },
   "dependencies": {
+    "@capacitor/cli": "^8.3.0",
+    "@capacitor/core": "^8.3.0",
+    "@capacitor/ios": "^8.3.0",
     "@mapbox/mapbox-gl-geocoder": "^5.1.2",
     "@sentry/nextjs": "^10.46.0",
     "@supabase/ssr": "^0.9.0",
@@ -36,6 +44,7 @@
     "date-fns": "^4.1.0",
     "framer-motion": "^12.38.0",
     "fuse.js": "^7.1.0",
+    "html2canvas": "^1.4.1",
     "idb": "^8.0.3",
     "leaflet": "^1.9.4",
     "lucide-react": "^1.0.1",
@@ -46,13 +55,15 @@
     "react-leaflet": "^5.0.0",
     "react-qr-code": "^2.0.18",
     "recharts": "^3.8.0",
-    "tailwind-merge": "^3.5.0"
+    "tailwind-merge": "^3.5.0",
+    "web-push": "^3.6.7"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/web-push": "^3.6.4",
     "eslint": "^9",
     "eslint-config-next": "16.2.1",
     "supabase": "^2.84.0",
