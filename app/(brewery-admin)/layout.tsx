@@ -11,10 +11,11 @@ export default async function BreweryAdminLayout({ children }: { children: React
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  // Let the claim page render without nav or redirect loop
+  // Let the claim page and board render without nav or redirect loop
   const headersList = await headers();
   const pathname = headersList.get("x-pathname") ?? headersList.get("next-url") ?? "";
   const isClaiming = pathname.includes("/brewery-admin/claim");
+  const isBoard = pathname.includes("/board");
 
   // Fetch all breweries this user manages (verified or pending)
   const { data: accounts } = await supabase
@@ -22,13 +23,13 @@ export default async function BreweryAdminLayout({ children }: { children: React
     .select("*, brewery:breweries(*)")
     .eq("user_id", user.id) as any;
 
-  if (!isClaiming && (!accounts || accounts.length === 0)) redirect("/brewery-admin/claim");
+  if (!isClaiming && !isBoard && (!accounts || accounts.length === 0)) redirect("/brewery-admin/claim");
 
-  // On the claim page: render without the sidebar nav
-  if (isClaiming || !accounts || accounts.length === 0) {
+  // On the claim page or board: render without the sidebar nav
+  if (isClaiming || isBoard || !accounts || accounts.length === 0) {
     return (
       <ToastProvider>
-        <div className="min-h-screen" style={{ background: "var(--bg)" }}>
+        <div style={{ background: "var(--bg)" }}>
           {children}
         </div>
       </ToastProvider>
