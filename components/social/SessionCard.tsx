@@ -6,6 +6,7 @@ import { MapPin, Beer, Star, Zap, Clock, Home } from "lucide-react";
 import { cn, formatRelativeTime } from "@/lib/utils";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import { generateGradientFromString } from "@/lib/utils";
+import { SessionComments } from "@/components/social/SessionComments";
 import type { Session, BeerLog } from "@/types/database";
 
 interface SessionCardProps {
@@ -24,10 +25,11 @@ interface SessionCardProps {
     };
     beer_logs?: BeerLog[];
   };
+  currentUserId?: string;
   className?: string;
 }
 
-export function SessionCard({ session, className }: SessionCardProps) {
+export function SessionCard({ session, currentUserId, className }: SessionCardProps) {
   const { profile, brewery, beer_logs } = session;
   const beerCount = beer_logs?.length ?? 0;
   const avgRating =
@@ -193,6 +195,15 @@ export function SessionCard({ session, className }: SessionCardProps) {
           </div>
         )}
       </div>
+
+      {/* Comments */}
+      {currentUserId && (
+        <SessionComments
+          sessionId={session.id}
+          currentUserId={currentUserId}
+          sessionOwnerId={session.user_id}
+        />
+      )}
     </motion.div>
   );
 }

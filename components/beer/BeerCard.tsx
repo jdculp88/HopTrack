@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { Check, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { cn, formatABV, generateGradientFromString } from "@/lib/utils";
 import { BeerStyleBadge } from "@/components/ui/BeerStyleBadge";
 import { StarRating } from "@/components/ui/StarRating";
@@ -11,14 +11,12 @@ import type { BeerWithBrewery } from "@/types/database";
 
 interface BeerCardProps {
   beer: BeerWithBrewery;
-  onCheckin?: (beer: BeerWithBrewery) => void;
   variant?: "default" | "compact" | "grid";
   className?: string;
 }
 
-export function BeerCard({ beer, onCheckin, variant = "default", className }: BeerCardProps) {
+export function BeerCard({ beer, variant = "default", className }: BeerCardProps) {
   const gradient = generateGradientFromString(beer.name + beer.brewery_id);
-  const hasCheckin = !!beer.user_checkin;
 
   if (variant === "compact") {
     return (
@@ -56,9 +54,6 @@ export function BeerCard({ beer, onCheckin, variant = "default", className }: Be
               <span className="text-sm font-mono text-[#D4A843]">{beer.avg_rating.toFixed(1)}</span>
             </div>
           )}
-          {hasCheckin && (
-            <Check size={16} className="text-[#3D7A52] flex-shrink-0" />
-          )}
         </motion.div>
       </Link>
     );
@@ -90,11 +85,6 @@ export function BeerCard({ beer, onCheckin, variant = "default", className }: Be
               Seasonal
             </div>
           )}
-          {hasCheckin && (
-            <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-[#3D7A52] flex items-center justify-center">
-              <Check size={12} className="text-white" />
-            </div>
-          )}
         </div>
 
         <div className="p-3 space-y-2">
@@ -118,21 +108,6 @@ export function BeerCard({ beer, onCheckin, variant = "default", className }: Be
         </div>
       </Link>
 
-      {onCheckin && (
-        <div className="px-3 pb-3">
-          <button
-            onClick={(e) => { e.preventDefault(); onCheckin(beer); }}
-            className={cn(
-              "w-full py-1.5 rounded-xl text-xs font-medium transition-all",
-              hasCheckin
-                ? "bg-[#3D7A52]/20 text-[#3D7A52] border border-[#3D7A52]/30"
-                : "bg-[#D4A843]/10 text-[#D4A843] border border-[#D4A843]/30 hover:bg-[#D4A843]/20"
-            )}
-          >
-            {hasCheckin ? "✓ Had it" : "+ Check in"}
-          </button>
-        </div>
-      )}
     </motion.div>
   );
 }

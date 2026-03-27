@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { BreweryAdminNav } from "@/components/brewery-admin/BreweryAdminNav";
+import { ToastProvider } from "@/components/ui/Toast";
 
 export const metadata = { title: { default: "Brewery Dashboard | HopTrack", template: "%s | HopTrack Brewery" } };
 
@@ -26,18 +27,22 @@ export default async function BreweryAdminLayout({ children }: { children: React
   // On the claim page: render without the sidebar nav
   if (isClaiming || !accounts || accounts.length === 0) {
     return (
-      <div className="min-h-screen" style={{ background: "var(--bg)" }}>
-        {children}
-      </div>
+      <ToastProvider>
+        <div className="min-h-screen" style={{ background: "var(--bg)" }}>
+          {children}
+        </div>
+      </ToastProvider>
     );
   }
 
   return (
-    <div className="min-h-screen flex" style={{ background: "var(--bg)" }}>
-      <BreweryAdminNav accounts={accounts} />
-      <main className="flex-1 overflow-auto">
-        {children}
-      </main>
-    </div>
+    <ToastProvider>
+      <div className="min-h-screen flex" style={{ background: "var(--bg)" }}>
+        <BreweryAdminNav accounts={accounts} />
+        <main className="flex-1 overflow-auto">
+          {children}
+        </main>
+      </div>
+    </ToastProvider>
   );
 }

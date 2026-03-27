@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { MapPin, ExternalLink, Star, Users } from "lucide-react";
+import { MapPin, ExternalLink, Star, Users, Calendar } from "lucide-react";
 import { cn, formatCount, generateGradientFromString } from "@/lib/utils";
 import { BeerStyleBadge } from "@/components/ui/BeerStyleBadge";
 import type { BreweryWithStats } from "@/types/database";
@@ -160,6 +160,11 @@ export function BreweryCard({ brewery, distance, variant = "default", className 
           {brewery.user_visit && (
             <div className="absolute top-3 right-3 bg-[#3D7A52]/90 text-white text-xs font-mono px-2 py-0.5 rounded-full">
               ✓ Visited
+            </div>
+          )}
+          {(brewery as any).has_upcoming_events && !brewery.user_visit && (
+            <div className="absolute top-3 right-3 flex items-center gap-1 bg-[#5B8DEF]/90 text-white text-xs font-mono px-2 py-0.5 rounded-full">
+              <Calendar size={10} /> Event
             </div>
           )}
         </div>

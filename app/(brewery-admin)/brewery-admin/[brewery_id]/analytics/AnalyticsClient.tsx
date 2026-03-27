@@ -72,12 +72,49 @@ export function AnalyticsClient({ sessions, beerLogs }: AnalyticsClientProps) {
     return dist;
   }, [beerLogs]);
 
+  // Top beers by avg rating (min 3 ratings)
+  const topBeersByRating = useMemo(() => {
+    const stats: Record<string, { name: string; totalRating: number; ratingCount: number }> = {};
+    beerLogs.forEach(l => {
+      if (!l.beer_id || !l.beer?.name || !(l.rating > 0)) return;
+      if (!stats[l.beer_id]) stats[l.beer_id] = { name: l.beer.name, totalRating: 0, ratingCount: 0 };
+      stats[l.beer_id].totalRating += l.rating;
+      stats[l.beer_id].ratingCount++;
+    });
+    return Object.values(stats)
+      .filter(b => b.ratingCount >= 3)
+      .map(b => ({ name: b.name, avgRating: parseFloat((b.totalRating / b.ratingCount).toFixed(2)), ratingCount: b.ratingCount }))
+      .sort((a, b) => b.avgRating - a.avgRating)
+      .slice(0, 8);
+  }, [beerLogs]);
+
+  // Peak session times by hour-of-day
+  const hourlyData = useMemo(() => {
+    const counts = Array.from({ length: 24 }, (_, h) => ({
+      hour: h,
+      label: h === 0 ? "12a" : h < 12 ? `${h}a` : h === 12 ? "12p" : `${h - 12}p`,
+      count: 0,
+    }));
+    sessions.forEach(s => { counts[new Date(s.started_at).getHours()].count++; });
+    return counts;
+  }, [sessions]);
+
   const totalVisits = sessions.length;
   const totalBeersLogged = beerLogs.reduce((sum, l) => sum + (l.quantity ?? 1), 0);
   const rated = beerLogs.filter(l => l.rating > 0);
   const avgRating = rated.length > 0 ? (rated.reduce((a, l) => a + l.rating, 0) / rated.length).toFixed(2) : null;
   const thisWeek = sessions.filter(s => new Date(s.started_at) > new Date(Date.now() - 7 * 86400000)).length;
   const uniqueVisitors = useMemo(() => new Set(sessions.map(s => s.user_id).filter(Boolean)).size, [sessions]);
+
+  // Repeat visitor %
+  const repeatVisitorPct = useMemo(() => {
+    const counts: Record<string, number> = {};
+    sessions.forEach(s => { if (s.user_id) counts[s.user_id] = (counts[s.user_id] ?? 0) + 1; });
+    const total = Object.keys(counts).length;
+    if (total === 0) return null;
+    const repeats = Object.values(counts).filter(c => c >= 2).length;
+    return Math.round((repeats / total) * 100);
+  }, [sessions]);
 
   const tooltipStyle = { background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12, color: "var(--text-primary)" };
 
@@ -89,12 +126,13 @@ export function AnalyticsClient({ sessions, beerLogs }: AnalyticsClientProps) {
       </div>
 
       {/* Summary stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
         {[
           { label: "Visits (90d)", value: totalVisits },
           { label: "Unique Visitors", value: uniqueVisitors },
           { label: "This Week", value: thisWeek },
           { label: "Avg Rating", value: avgRating ? `${avgRating} ★` : "—" },
+          { label: "Repeat Visitors", value: repeatVisitorPct != null ? `${repeatVisitorPct}%` : "—" },
         ].map(({ label, value }) => (
           <div key={label} className="rounded-2xl p-5 border text-center" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
             <p className="font-display text-3xl font-bold" style={{ color: "var(--accent-gold)" }}>{value}</p>
@@ -184,6 +222,36 @@ export function AnalyticsClient({ sessions, beerLogs }: AnalyticsClientProps) {
               </ResponsiveContainer>
             </div>
           )}
+
+          {/* Top beers by rating */}
+          {topBeersByRating.length > 0 && (
+            <div className="rounded-2xl p-6 border" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
+              <h2 className="font-display font-bold mb-1" style={{ color: "var(--text-primary)" }}>Top Beers by Rating</h2>
+              <p className="text-xs mb-4 font-mono" style={{ color: "var(--text-muted)" }}>Minimum 3 ratings</p>
+              <ResponsiveContainer width="100%" height={Math.max(200, topBeersByRating.length * 40)}>
+                <BarChart data={topBeersByRating} layout="vertical">
+                  <XAxis type="number" domain={[0, 5]} tick={{ fontSize: 11, fill: "var(--text-muted)" }} />
+                  <YAxis type="category" dataKey="name" width={160} tick={{ fontSize: 11, fill: "var(--text-muted)" }} />
+                  <Tooltip contentStyle={tooltipStyle} formatter={(v: any, _: any, p: any) => [`${v} ★ (${p.payload.ratingCount} ratings)`, ""]} />
+                  <Bar dataKey="avgRating" fill="#4A7C59" radius={[0,4,4,0]} name="Avg Rating" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+
+          {/* Peak session times */}
+          <div className="rounded-2xl p-6 border" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
+            <h2 className="font-display font-bold mb-1" style={{ color: "var(--text-primary)" }}>Peak Visit Times</h2>
+            <p className="text-xs mb-4 font-mono" style={{ color: "var(--text-muted)" }}>Sessions by hour of day (local time)</p>
+            <ResponsiveContainer width="100%" height={180}>
+              <BarChart data={hourlyData}>
+                <XAxis dataKey="label" tick={{ fontSize: 10, fill: "var(--text-muted)" }} interval={2} />
+                <YAxis tick={{ fontSize: 11, fill: "var(--text-muted)" }} allowDecimals={false} />
+                <Tooltip contentStyle={tooltipStyle} formatter={(v: any) => [v, "Visits"]} labelFormatter={(label: any) => `${label}`} />
+                <Bar dataKey="count" fill="#5B8DEF" radius={[4,4,0,0]} name="Visits" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
       )}
     </div>

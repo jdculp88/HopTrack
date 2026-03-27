@@ -1,10 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
 import { notFound, redirect } from "next/navigation";
-import { TapListClient } from "./TapListClient";
+import { EventsClient } from "./EventsClient";
 
-export const metadata = { title: "Tap List" };
+export const metadata = { title: "Events" };
 
-export default async function TapListPage({ params }: { params: Promise<{ brewery_id: string }> }) {
+export default async function EventsPage({ params }: { params: Promise<{ brewery_id: string }> }) {
   const { brewery_id } = await params;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -15,11 +15,10 @@ export default async function TapListPage({ params }: { params: Promise<{ brewer
     .eq("user_id", user.id).eq("brewery_id", brewery_id).single() as any;
   if (!account) notFound();
 
-  const { data: beers } = await supabase
-    .from("beers").select("*")
+  const { data: events } = await supabase
+    .from("brewery_events").select("*")
     .eq("brewery_id", brewery_id)
-    .order("display_order", { ascending: true })
-    .order("name") as any;
+    .order("event_date", { ascending: true }) as any;
 
-  return <TapListClient breweryId={brewery_id} initialBeers={(beers as any[]) ?? []} />;
+  return <EventsClient breweryId={brewery_id} initialEvents={(events as any[]) ?? []} />;
 }

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Award, Tag, ToggleLeft, ToggleRight, X, Save, Loader2, Trash2, Edit2, AlertTriangle, QrCode } from "lucide-react";
+import { Plus, Award, Tag, ToggleLeft, ToggleRight, X, Save, Loader2, Trash2, Edit2, AlertTriangle, QrCode, Users, Stamp, Gift, TrendingUp } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { LoyaltyQRModal } from "@/components/loyalty/LoyaltyQRModal";
@@ -13,12 +13,14 @@ interface LoyaltyClientProps {
   initialPrograms: any[];
   initialPromotions: any[];
   beers: any[];
+  loyaltyCards: any[];
+  recentRedemptions: any[];
 }
 
 const emptyProgram = { name: "The Hop Club", description: "", stamps_required: "10", reward_description: "One free pint — any size, any beer." };
 const emptyPromo = { title: "", description: "", discount_type: "percent" as const, discount_value: "", ends_at: "", beer_id: "" };
 
-export function LoyaltyClient({ breweryId, initialPrograms, initialPromotions, beers }: LoyaltyClientProps) {
+export function LoyaltyClient({ breweryId, initialPrograms, initialPromotions, beers, loyaltyCards, recentRedemptions }: LoyaltyClientProps) {
   const [programs, setPrograms] = useState(initialPrograms);
   const [promotions, setPromotions] = useState(initialPromotions);
   const [showProgramForm, setShowProgramForm] = useState(false);
@@ -124,6 +126,99 @@ export function LoyaltyClient({ breweryId, initialPrograms, initialPromotions, b
         <h1 className="font-display text-3xl font-bold" style={{ color: "var(--text-primary)" }}>Loyalty & Promotions</h1>
         <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>Reward your regulars and drive traffic with targeted offers.</p>
       </div>
+
+      {/* Dashboard — summary stats + cards close to reward + recent redemptions */}
+      {loyaltyCards.length > 0 && (
+        <section className="mb-10">
+          {/* Summary stats */}
+          <div className="grid grid-cols-3 gap-4 mb-6">
+            {[
+              { label: "Active Cards", value: loyaltyCards.length, icon: <Users size={16} /> },
+              { label: "Total Stamps", value: loyaltyCards.reduce((s: number, c: any) => s + (c.stamps ?? 0), 0), icon: <Stamp size={16} /> },
+              { label: "Redemptions", value: recentRedemptions.length, icon: <Gift size={16} /> },
+            ].map(({ label, value, icon }) => (
+              <div key={label} className="rounded-2xl p-5 border text-center" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
+                <div className="flex items-center justify-center gap-1.5 mb-1" style={{ color: "var(--accent-gold)" }}>
+                  {icon}
+                  <p className="font-display text-2xl font-bold">{value}</p>
+                </div>
+                <p className="text-xs font-mono uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>{label}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Cards close to reward */}
+          {initialPrograms.length > 0 && (() => {
+            const program = initialPrograms.find((p: any) => p.is_active) ?? initialPrograms[0];
+            const threshold = program?.stamps_required ?? 10;
+            const closeCards = loyaltyCards
+              .filter((c: any) => c.stamps > 0)
+              .slice(0, 10);
+            if (closeCards.length === 0) return null;
+            return (
+              <div className="rounded-2xl border mb-4" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
+                <div className="flex items-center gap-2 px-5 py-4 border-b" style={{ borderColor: "var(--border)" }}>
+                  <TrendingUp size={16} style={{ color: "var(--accent-gold)" }} />
+                  <h3 className="font-display font-bold text-sm" style={{ color: "var(--text-primary)" }}>Top Stamp Cards</h3>
+                  <span className="text-xs font-mono ml-auto" style={{ color: "var(--text-muted)" }}>{threshold} stamps = reward</span>
+                </div>
+                <div className="divide-y" style={{ borderColor: "var(--border)" }}>
+                  {closeCards.map((card: any) => {
+                    const pct = Math.min((card.stamps / threshold) * 100, 100);
+                    const name = card.profile?.display_name || card.profile?.username || "Anonymous";
+                    return (
+                      <div key={card.id} className="flex items-center gap-4 px-5 py-3">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate" style={{ color: "var(--text-primary)" }}>{name}</p>
+                          <div className="flex items-center gap-2 mt-1.5">
+                            <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: "var(--surface-2)" }}>
+                              <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: pct >= 100 ? "#4A7C59" : "var(--accent-gold)" }} />
+                            </div>
+                            <span className="text-xs font-mono flex-shrink-0" style={{ color: pct >= 100 ? "#4A7C59" : "var(--text-muted)" }}>
+                              {card.stamps}/{threshold}
+                            </span>
+                          </div>
+                        </div>
+                        {pct >= 100 && (
+                          <span className="text-xs px-2 py-0.5 rounded-full font-mono flex-shrink-0" style={{ background: "rgba(74,124,89,0.15)", color: "#4A7C59" }}>
+                            Ready!
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* Recent redemptions */}
+          {recentRedemptions.length > 0 && (
+            <div className="rounded-2xl border" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
+              <div className="flex items-center gap-2 px-5 py-4 border-b" style={{ borderColor: "var(--border)" }}>
+                <Gift size={16} style={{ color: "var(--accent-gold)" }} />
+                <h3 className="font-display font-bold text-sm" style={{ color: "var(--text-primary)" }}>Recent Redemptions</h3>
+              </div>
+              <div className="divide-y" style={{ borderColor: "var(--border)" }}>
+                {recentRedemptions.map((r: any) => {
+                  const name = r.profile?.display_name || r.profile?.username || "Anonymous";
+                  return (
+                    <div key={r.id} className="flex items-center gap-3 px-5 py-3">
+                      <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs flex-shrink-0" style={{ background: "rgba(212,168,67,0.15)", color: "var(--accent-gold)" }}>
+                        🎉
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{name}</p>
+                      </div>
+                      <p className="text-xs font-mono" style={{ color: "var(--text-muted)" }}>{formatDate(r.redeemed_at)}</p>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </section>
+      )}
 
       {/* Loyalty Programs */}
       <section className="mb-10">

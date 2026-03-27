@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { notFound, redirect } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { MapPin, Globe, Phone, Star, Users, ArrowLeft, TrendingUp, Beer, CheckCheck, Award } from "lucide-react";
+import { MapPin, Globe, Phone, Star, Users, ArrowLeft, TrendingUp, Beer, CheckCheck, Award, Calendar, Clock } from "lucide-react";
 import type { Brewery } from "@/types/database";
 import { BeerCard } from "@/components/beer/BeerCard";
 import { BeerStyleBadge } from "@/components/ui/BeerStyleBadge";
@@ -101,6 +101,18 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
   // Beer of the Week
   const featuredBeer = (beers as any[] ?? []).find((b: any) => b.is_featured) ?? null;
 
+  // Upcoming events
+  const today = new Date().toISOString().split("T")[0];
+  const { data: upcomingEventsRaw } = await (supabase as any)
+    .from("brewery_events")
+    .select("id, title, event_date, start_time, end_time, event_type, description")
+    .eq("brewery_id", id)
+    .eq("is_active", true)
+    .gte("event_date", today)
+    .order("event_date", { ascending: true })
+    .limit(5);
+  const upcomingEvents = (upcomingEventsRaw ?? []) as any[];
+
   const gradient = generateGradientFromString(brewery.name);
 
   return (
@@ -198,6 +210,39 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
               )}
             </div>
           </Link>
+        )}
+
+        {/* Upcoming Events */}
+        {upcomingEvents.length > 0 && (
+          <div>
+            <h2 className="font-display text-2xl font-bold text-[var(--text-primary)] mb-3">Upcoming Events</h2>
+            <div className="space-y-2">
+              {upcomingEvents.map((event: any) => {
+                const EVENT_EMOJIS: Record<string, string> = {
+                  tap_takeover: "🍺", release_party: "🎉", trivia: "🧠",
+                  live_music: "🎵", food_pairing: "🍽️", other: "📅",
+                };
+                const emoji = EVENT_EMOJIS[event.event_type] ?? "📅";
+                const dateStr = new Date(event.event_date).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+                const timeStr = event.start_time ? `${event.start_time}${event.end_time ? ` – ${event.end_time}` : ""}` : null;
+                return (
+                  <div key={event.id} className="flex items-center gap-4 p-4 rounded-2xl border bg-[var(--surface)] border-[var(--border)]">
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center text-lg flex-shrink-0"
+                      style={{ background: "rgba(212,168,67,0.1)" }}>
+                      {emoji}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-display font-bold text-[var(--text-primary)] truncate">{event.title}</p>
+                      <div className="flex items-center gap-3 text-xs text-[var(--text-muted)] mt-0.5">
+                        <span className="flex items-center gap-1"><Calendar size={11} />{dateStr}</span>
+                        {timeStr && <span className="flex items-center gap-1"><Clock size={11} />{timeStr}</span>}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         )}
 
         {/* REQ-015: Brewery Stats Bar */}

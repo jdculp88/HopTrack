@@ -28,12 +28,28 @@ export default async function LoyaltyPage({ params }: { params: Promise<{ brewer
   const { data: beers } = await supabase
     .from("beers").select("id, name").eq("brewery_id", brewery_id).eq("is_on_tap", true) as any;
 
+  // Dashboard data: loyalty cards + redemptions
+  const { data: loyaltyCards } = await supabase
+    .from("loyalty_cards")
+    .select("id, user_id, stamps, lifetime_stamps, program_id, updated_at, profile:profiles(username, display_name)")
+    .eq("brewery_id", brewery_id)
+    .order("stamps", { ascending: false }) as any;
+
+  const { data: redemptions } = await supabase
+    .from("loyalty_redemptions")
+    .select("id, redeemed_at, card_id, program_id, profile:profiles!user_id(username, display_name)")
+    .eq("brewery_id", brewery_id)
+    .order("redeemed_at", { ascending: false })
+    .limit(10) as any;
+
   return (
     <LoyaltyClient
       breweryId={brewery_id}
       initialPrograms={(programs as any[]) ?? []}
       initialPromotions={(promotions as any[]) ?? []}
       beers={(beers as any[]) ?? []}
+      loyaltyCards={(loyaltyCards as any[]) ?? []}
+      recentRedemptions={(redemptions as any[]) ?? []}
     />
   );
 }

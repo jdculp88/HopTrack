@@ -18,7 +18,7 @@ export default async function AchievementsPage() {
   // User's earned achievements
   const { data: earned } = await supabase
     .from("user_achievements")
-    .select("achievement_id, earned_at, checkin_id")
+    .select("achievement_id, earned_at")
     .eq("user_id", user.id);
 
   const earnedMap = new Map(

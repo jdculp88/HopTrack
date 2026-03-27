@@ -210,6 +210,8 @@ export async function PATCH(
         { key: 'dark_side', styles: ['Stout', 'Imperial Stout', 'Porter', 'Milk Stout', 'Oatmeal Stout'], threshold: 10 },
         { key: 'wheat_king', styles: ['Wheat', 'Hefeweizen', 'Witbier', 'Wheat Ale', 'American Wheat'], threshold: 10 },
         { key: 'lager_legend', styles: ['Lager', 'Pilsner', 'Kolsch', 'Helles', 'Munich Lager', 'Vienna Lager'], threshold: 10 },
+        { key: 'domestic_drinker', styles: ['Lager', 'Pilsner', 'Cream Ale', 'Blonde Ale', 'American Lager', 'American Blonde Ale'], threshold: 5 },
+        { key: 'domestic_devotee', styles: ['Lager', 'Pilsner', 'Cream Ale', 'Blonde Ale', 'American Lager', 'American Blonde Ale'], threshold: 20 },
       ]
 
       for (const sa of styleAchievements) {

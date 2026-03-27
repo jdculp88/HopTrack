@@ -6,14 +6,10 @@ export async function POST(request: Request) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { session_id, beer_log_id, type, checkin_id } = await request.json();
+  const { session_id, beer_log_id, type } = await request.json();
 
-  // Support both old (checkin_id) and new (session_id) patterns
-  const targetId = session_id || checkin_id;
-  const targetColumn = session_id ? "session_id" : "checkin_id";
-
-  if (!targetId || !type) {
-    return NextResponse.json({ error: "session_id (or checkin_id) and type required" }, { status: 400 });
+  if (!session_id || !type) {
+    return NextResponse.json({ error: "session_id and type required" }, { status: 400 });
   }
 
   // Toggle: remove if already exists, add if not
@@ -21,7 +17,7 @@ export async function POST(request: Request) {
     .from("reactions")
     .select("id")
     .eq("user_id", user.id)
-    .eq(targetColumn, targetId)
+    .eq("session_id", session_id)
     .eq("type", type)
     .single();
 
@@ -30,13 +26,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ action: "removed" });
   }
 
-  const insertData: Record<string, any> = { user_id: user.id, type };
-  if (session_id) {
-    insertData.session_id = session_id;
-    if (beer_log_id) insertData.beer_log_id = beer_log_id;
-  } else {
-    insertData.checkin_id = checkin_id;
-  }
+  const insertData: Record<string, any> = { user_id: user.id, session_id, type };
+  if (beer_log_id) insertData.beer_log_id = beer_log_id;
 
   const { data, error } = await (supabase as any)
     .from("reactions")

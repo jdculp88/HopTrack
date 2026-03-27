@@ -12,10 +12,10 @@
 --   4. Make session_id NOT NULL
 -- ============================================================================
 
--- Step 1: Add new FK columns
+-- Step 1: Add new FK columns (IF NOT EXISTS for idempotency on retry)
 ALTER TABLE reactions
-  ADD COLUMN session_id UUID REFERENCES sessions(id) ON DELETE CASCADE,
-  ADD COLUMN beer_log_id UUID REFERENCES beer_logs(id) ON DELETE CASCADE;
+  ADD COLUMN IF NOT EXISTS session_id UUID REFERENCES sessions(id) ON DELETE CASCADE,
+  ADD COLUMN IF NOT EXISTS beer_log_id UUID REFERENCES beer_logs(id) ON DELETE CASCADE;
 
 -- Step 2: Backfill — map checkin reactions to their equivalent session
 -- Each checkin maps to a session via user_id + brewery_id + time proximity.
@@ -26,11 +26,11 @@ SET session_id = s.id,
     beer_log_id = bl.id
 FROM checkins c
 JOIN sessions s ON s.user_id = c.user_id
-  AND s.brewery_id = c.brewery_id
+  AND s.brewery_id = c.brewery_id::text
   AND s.started_at <= c.created_at
   AND (s.ended_at IS NULL OR s.ended_at >= c.created_at)
 JOIN beer_logs bl ON bl.session_id = s.id
-  AND bl.beer_id = c.beer_id
+  AND bl.beer_id = c.beer_id::text
 WHERE r.checkin_id = c.id;
 
 -- Step 2b: For any reactions that couldn't be mapped (orphaned), assign to
@@ -40,7 +40,7 @@ SET session_id = (
   SELECT s.id FROM sessions s
   JOIN checkins c ON c.id = r.checkin_id
   WHERE s.user_id = c.user_id
-    AND s.brewery_id = c.brewery_id
+    AND s.brewery_id = c.brewery_id::text
   ORDER BY s.started_at DESC
   LIMIT 1
 )

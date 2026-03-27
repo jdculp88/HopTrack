@@ -208,7 +208,7 @@ export function HomeFeed({ profile, sessions, weekStats, currentUserId }: HomeFe
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.04, duration: 0.3 }}
             >
-              <SessionCard session={session as any} />
+              <SessionCard session={session as any} currentUserId={currentUserId} />
             </motion.div>
           ))}
         </div>

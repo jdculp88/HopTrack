@@ -45,6 +45,19 @@ export async function POST(request: Request) {
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  // Notify the addressee
+  const { data: requesterProfile } = await supabase
+    .from("profiles").select("display_name, username").eq("id", user.id).single() as any;
+  const name = requesterProfile?.display_name || requesterProfile?.username || "Someone";
+  await (supabase as any).from("notifications").insert({
+    user_id: addressee_id,
+    type: "friend_request",
+    title: "Friend request",
+    body: `${name} sent you a friend request`,
+    data: { friendship_id: data.id, requester_id: user.id },
+  });
+
   return NextResponse.json({ friendship: data }, { status: 201 });
 }
 

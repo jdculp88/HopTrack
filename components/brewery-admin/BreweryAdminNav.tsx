@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Hop, LayoutDashboard, List, BarChart2, Gift, Settings, ChevronDown, ExternalLink, Rewind, LogOut } from "lucide-react";
+import { Hop, LayoutDashboard, List, BarChart2, Gift, Settings, ChevronDown, ExternalLink, Rewind, LogOut, Calendar } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -12,6 +12,7 @@ const NAV_ITEMS = [
   { href: "/tap-list",  label: "Tap List",   icon: List },
   { href: "/analytics", label: "Analytics",  icon: BarChart2 },
   { href: "/loyalty",       label: "Loyalty",      icon: Gift },
+  { href: "/events",        label: "Events",       icon: Calendar },
   { href: "/pint-rewind",   label: "Pint Rewind",  icon: Rewind },
   { href: "/settings",      label: "Settings",     icon: Settings },
 ];
