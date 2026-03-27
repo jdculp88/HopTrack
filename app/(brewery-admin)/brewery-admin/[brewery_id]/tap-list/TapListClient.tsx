@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Edit2, Trash2, GlassWater, ToggleLeft, ToggleRight, X, Save, Loader2, AlertTriangle, Award, Tv, GripVertical, Ban } from "lucide-react";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
@@ -74,7 +74,28 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | "on_tap" | "off_tap">("all");
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [confirmDiscard, setConfirmDiscard] = useState(false);
+  const initialFormRef = useRef(emptyBeer);
   const supabase = createClient();
+
+  function isDirty() {
+    const f = form;
+    const i = initialFormRef.current;
+    return f.name !== i.name || f.style !== i.style || f.abv !== i.abv ||
+      f.ibu !== i.ibu || f.description !== i.description || f.price !== i.price ||
+      pourSizes.length > 0;
+  }
+
+  function closeForm() {
+    if (isDirty()) { setConfirmDiscard(true); return; }
+    setShowForm(false);
+    setConfirmDiscard(false);
+  }
+
+  function forceCloseForm() {
+    setShowForm(false);
+    setConfirmDiscard(false);
+  }
   const { success: toastSuccess } = useToast();
 
   const filtered = beers.filter(b =>
@@ -84,20 +105,25 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
   const onTapCount = beers.filter(b => b.is_on_tap).length;
 
   function openAdd() {
+    initialFormRef.current = emptyBeer;
     setForm(emptyBeer);
     setEditingBeer(null);
     setGlassType(null);
     setPourSizes([]);
     setSaveError(null);
+    setConfirmDiscard(false);
     setShowForm(true);
   }
 
   async function openEdit(beer: Beer) {
-    setForm({ name: beer.name, style: (beer.style as BeerStyle) ?? "IPA", abv: beer.abv?.toString() ?? "", ibu: beer.ibu?.toString() ?? "", description: beer.description ?? "", price: beer.price_per_pint?.toString() ?? "" });
+    const f = { name: beer.name, style: (beer.style as BeerStyle) ?? "IPA", abv: beer.abv?.toString() ?? "", ibu: beer.ibu?.toString() ?? "", description: beer.description ?? "", price: beer.price_per_pint?.toString() ?? "" };
+    initialFormRef.current = f;
+    setForm(f);
     setGlassType(beer.glass_type ?? null);
     setPourSizes([]);
     setEditingBeer(beer);
     setSaveError(null);
+    setConfirmDiscard(false);
     setShowForm(true);
 
     // Fetch existing pour sizes
@@ -169,6 +195,7 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
 
     setSaving(false);
     setShowForm(false);
+    setConfirmDiscard(false);
   }
 
   async function toggleTap(beer: Beer) {
@@ -306,10 +333,11 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
           <div className="text-center py-16 rounded-2xl border" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
             <GlassWater size={40} className="mx-auto mb-3 opacity-30" style={{ color: "var(--text-muted)" }} />
             <p className="font-display text-lg" style={{ color: "var(--text-primary)" }}>
-              {filter === "on_tap" ? "Nothing on tap right now" : filter === "off_tap" ? "All beers are on tap!" : "No beers yet"}
+              {filter === "on_tap" ? "The taps are dry" : filter === "off_tap" ? "Everything's flowing — nothing off tap!" : "The menu is empty"}
             </p>
             <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
-              {filter === "all" && "Add your first beer to get started."}
+              {filter === "all" && "Add your first beer and let the pours begin."}
+              {filter === "on_tap" && "Toggle a beer on tap to see it here."}
             </p>
           </div>
         )}
@@ -323,7 +351,7 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4"
             style={{ background: "rgba(0,0,0,0.7)" }}
-            onClick={e => e.target === e.currentTarget && setShowForm(false)}>
+            onClick={e => e.target === e.currentTarget && closeForm()}>
             <motion.div
               initial={{ y: 60, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
@@ -336,10 +364,38 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
                 <h2 className="font-display text-xl font-bold" style={{ color: "var(--text-primary)" }}>
                   {editingBeer ? "Edit Beer" : "Add Beer"}
                 </h2>
-                <button onClick={() => setShowForm(false)} style={{ color: "var(--text-muted)" }}>
+                <button onClick={closeForm} style={{ color: "var(--text-muted)" }}>
                   <X size={20} />
                 </button>
               </div>
+
+              {/* Discard confirmation */}
+              <AnimatePresence>
+                {confirmDiscard && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                    className="overflow-hidden mb-4"
+                  >
+                    <div className="flex items-center justify-between px-4 py-3 rounded-xl border"
+                      style={{ background: "rgba(196,75,58,0.1)", borderColor: "rgba(196,75,58,0.3)" }}>
+                      <p className="text-sm font-medium" style={{ color: "#C44B3A" }}>Discard unsaved changes?</p>
+                      <div className="flex items-center gap-2">
+                        <button onClick={() => setConfirmDiscard(false)} className="text-xs px-3 py-1.5 rounded-lg border"
+                          style={{ color: "var(--text-secondary)", borderColor: "var(--border)" }}>
+                          Keep editing
+                        </button>
+                        <button onClick={forceCloseForm} className="text-xs px-3 py-1.5 rounded-lg font-medium"
+                          style={{ background: "#C44B3A", color: "#fff" }}>
+                          Discard
+                        </button>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
               <div className="space-y-4">
                 <div>

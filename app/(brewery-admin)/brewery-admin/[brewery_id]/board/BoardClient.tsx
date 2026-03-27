@@ -228,15 +228,31 @@ export function BoardClient({
   const [beers, setBeers] = useState<BoardBeer[]>(initialBeers);
   const [localPourSizes, setLocalPourSizes] = useState<Record<string, PourSize[]>>(pourSizesMap);
   const [settings, setSettings] = useState<BoardSettings>(() => loadSettings(breweryId));
+  const [draftSettings, setDraftSettings] = useState<BoardSettings>(() => loadSettings(breweryId));
   const [settingsOpen, setSettingsOpen] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
 
-  const { fontSize, showABV, showPrice, showRating, showStyle, showStats, showGlass } = settings;
+  // While settings panel is open, preview uses draftSettings. Board uses settings.
+  const activeSettings = settingsOpen ? draftSettings : settings;
+  const { fontSize, showABV, showPrice, showRating, showStyle, showStats, showGlass } = activeSettings;
   const fs = FS[fontSize];
 
   useEffect(() => { saveSettings(breweryId, settings); }, [breweryId, settings]);
-  const set = <K extends keyof BoardSettings>(k: K, v: BoardSettings[K]) =>
-    setSettings(p => ({ ...p, [k]: v }));
+  const setDraft = <K extends keyof BoardSettings>(k: K, v: BoardSettings[K]) =>
+    setDraftSettings(p => ({ ...p, [k]: v }));
+
+  function openSettings() {
+    setDraftSettings(settings); // start draft from current saved state
+    setSettingsOpen(true);
+  }
+  function applySettings() {
+    setSettings(draftSettings);
+    setSettingsOpen(false);
+  }
+  function cancelSettings() {
+    setDraftSettings(settings); // discard draft
+    setSettingsOpen(false);
+  }
 
   const featuredBeer = beers.find(b => b.is_featured && !b.is_86d);
   const activeTapBeers = beers.filter(b => !b.is_featured && !b.is_86d);
@@ -557,7 +573,7 @@ export function BoardClient({
 
         {/* Settings gear */}
         <button
-          onClick={() => setSettingsOpen(v => !v)}
+          onClick={settingsOpen ? cancelSettings : openSettings}
           style={{
             position: "absolute", top: 16, right: 40,
             padding: 8, borderRadius: 10, border: "none",
@@ -585,42 +601,62 @@ export function BoardClient({
           >
             <div style={{
               padding: "12px 20px",
-              display: "flex", flexWrap: "wrap", alignItems: "center", gap: 18,
-              background: "rgba(251,247,240,0.95)", backdropFilter: "blur(12px)",
+              background: "rgba(251,247,240,0.97)", backdropFilter: "blur(12px)",
             }}>
-              {/* Font size */}
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <span className="font-mono" style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: "0.1em", color: C.textSubtle }}>Size</span>
-                {(["medium", "large", "xl"] as FontSize[]).map(s => (
-                  <button key={s} onClick={() => set("fontSize", s)} style={{
-                    padding: "4px 12px", borderRadius: 99, border: "none", cursor: "pointer",
-                    fontSize: 11, fontFamily: "var(--font-mono), 'JetBrains Mono', monospace",
-                    background: fontSize === s ? "#0F0E0C" : C.border,
-                    color: fontSize === s ? "#F5F0E8" : C.textMuted,
-                    fontWeight: 600,
-                  }}>
-                    {s.toUpperCase()}
-                  </button>
+              <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 18, marginBottom: 10 }}>
+                {/* Font size */}
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span className="font-mono" style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: "0.1em", color: C.textSubtle }}>Size</span>
+                  {(["medium", "large", "xl"] as FontSize[]).map(s => (
+                    <button key={s} onClick={() => setDraft("fontSize", s)} style={{
+                      padding: "4px 12px", borderRadius: 99, border: "none", cursor: "pointer",
+                      fontSize: 11, fontFamily: "var(--font-mono), 'JetBrains Mono', monospace",
+                      background: draftSettings.fontSize === s ? "#0F0E0C" : C.border,
+                      color: draftSettings.fontSize === s ? "#F5F0E8" : C.textMuted,
+                      fontWeight: 600,
+                    }}>
+                      {s.toUpperCase()}
+                    </button>
+                  ))}
+                </div>
+                {/* Toggles */}
+                {([
+                  { label: "Glass", key: "showGlass" as const, val: draftSettings.showGlass },
+                  { label: "Style", key: "showStyle" as const, val: draftSettings.showStyle },
+                  { label: "ABV", key: "showABV" as const, val: draftSettings.showABV },
+                  { label: "Desc", key: "showDesc" as const, val: draftSettings.showDesc },
+                  { label: "Price", key: "showPrice" as const, val: draftSettings.showPrice },
+                  { label: "Rating", key: "showRating" as const, val: draftSettings.showRating },
+                  { label: "Stats", key: "showStats" as const, val: draftSettings.showStats },
+                ]).map(({ label, key, val }) => (
+                  <label key={label} style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer" }}>
+                    <input type="checkbox" checked={val} onChange={e => setDraft(key, e.target.checked)} style={{ accentColor: C.gold }} />
+                    <span className="font-mono" style={{ fontSize: 12, color: C.textMuted }}>{label}</span>
+                  </label>
                 ))}
               </div>
-              {/* Toggles */}
-              {([
-                { label: "Glass", key: "showGlass" as const, val: showGlass },
-                { label: "Style", key: "showStyle" as const, val: showStyle },
-                { label: "ABV", key: "showABV" as const, val: showABV },
-                { label: "Desc", key: "showDesc" as const, val: settings.showDesc },
-                { label: "Price", key: "showPrice" as const, val: showPrice },
-                { label: "Rating", key: "showRating" as const, val: showRating },
-                { label: "Stats", key: "showStats" as const, val: showStats },
-              ]).map(({ label, key, val }) => (
-                <label key={label} style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer" }}>
-                  <input type="checkbox" checked={val} onChange={e => set(key, e.target.checked)} style={{ accentColor: C.gold }} />
-                  <span className="font-mono" style={{ fontSize: 12, color: C.textMuted }}>{label}</span>
-                </label>
-              ))}
-              <button onClick={() => setSettingsOpen(false)} style={{ marginLeft: "auto", padding: 4, background: "none", border: "none", cursor: "pointer", color: C.textSubtle }}>
-                <X size={16} />
-              </button>
+              {/* Preview indicator + apply/cancel */}
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: 8, borderTop: `1px solid ${C.border}` }}>
+                <span className="font-mono" style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.15em", color: C.textSubtle }}>
+                  Previewing below ↓
+                </span>
+                <div style={{ display: "flex", gap: 8 }}>
+                  <button onClick={cancelSettings} style={{
+                    padding: "5px 14px", borderRadius: 8, border: `1px solid ${C.border}`,
+                    fontSize: 12, cursor: "pointer", background: "transparent", color: C.textMuted,
+                    fontFamily: "var(--font-mono), 'JetBrains Mono', monospace",
+                  }}>
+                    Cancel
+                  </button>
+                  <button onClick={applySettings} style={{
+                    padding: "5px 14px", borderRadius: 8, border: "none",
+                    fontSize: 12, cursor: "pointer", background: "#0F0E0C", color: C.gold,
+                    fontWeight: 700, fontFamily: "var(--font-mono), 'JetBrains Mono', monospace",
+                  }}>
+                    Apply to Display
+                  </button>
+                </div>
+              </div>
             </div>
           </motion.div>
         )}

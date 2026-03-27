@@ -341,10 +341,10 @@ export function PintRewindCards() {
       <div className="fixed inset-0 flex items-center justify-center" style={{ background: "#0F0E0C" }}>
         <div className="text-center px-8">
           <p className="text-5xl mb-4">🍺</p>
-          <h2 className="font-display text-2xl font-bold mb-2" style={{ color: "#D4A843" }}>No data yet</h2>
-          <p className="text-sm mb-6" style={{ color: "rgba(255,255,255,0.6)" }}>Check in at a brewery to unlock your Pint Rewind!</p>
-          <Link href="/home" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm" style={{ background: "#D4A843", color: "#0F0E0C" }}>
-            <Home size={16} /> Go explore
+          <h2 className="font-display text-2xl font-bold mb-2" style={{ color: "#D4A843" }}>Your rewind is empty</h2>
+          <p className="text-sm mb-6" style={{ color: "rgba(255,255,255,0.6)" }}>Start a session at a brewery to unlock your Pint Rewind — your personal beer highlight reel.</p>
+          <Link href="/explore" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm" style={{ background: "#D4A843", color: "#0F0E0C" }}>
+            <Home size={16} /> Find a brewery
           </Link>
         </div>
       </div>

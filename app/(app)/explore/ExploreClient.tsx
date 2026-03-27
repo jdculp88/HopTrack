@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Map, List, Loader2, SlidersHorizontal, X, Sparkles } from "lucide-react";
@@ -43,20 +44,43 @@ const BREWERY_TYPE_OPTIONS: { value: BreweryType; label: string }[] = [
 ];
 
 export function ExploreClient({ breweries: initialBreweries, hasBeerOfTheWeek = [], hasUpcomingEvents = [] }: ExploreClientProps) {
-  const [view, setView] = useState<ViewMode>("list");
-  const [query, setQuery] = useState("");
-  const [visitFilter, setVisitFilter] = useState<VisitFilter>("all");
-  const [typeFilter, setTypeFilter] = useState<BreweryType | "all">("all");
-  const [botwFilter, setBotwFilter] = useState(false);
-  const [showFilters, setShowFilters] = useState(false);
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const [view, setView] = useState<ViewMode>((searchParams.get("view") as ViewMode) ?? "list");
+  const [query, setQuery] = useState(searchParams.get("q") ?? "");
+  const [visitFilter, setVisitFilter] = useState<VisitFilter>((searchParams.get("visit") as VisitFilter) ?? "all");
+  const [typeFilter, setTypeFilter] = useState<BreweryType | "all">((searchParams.get("type") as BreweryType) ?? "all");
+  const [botwFilter, setBotwFilter] = useState(searchParams.get("botw") === "1");
+  const [showFilters, setShowFilters] = useState(typeFilter !== "all" || botwFilter);
   const enriched = initialBreweries.map(b => ({ ...b, has_upcoming_events: hasUpcomingEvents.includes(b.id) }));
   const [breweries, setBreweries] = useState<BreweryWithStats[]>(enriched);
   const [searching, setSearching] = useState(false);
 
   const activeFilterCount = (typeFilter !== "all" ? 1 : 0) + (botwFilter ? 1 : 0);
 
+  // Sync state → URL without re-rendering the page
+  const pushParams = useCallback((updates: Record<string, string>) => {
+    const params = new URLSearchParams(searchParams.toString());
+    for (const [k, v] of Object.entries(updates)) {
+      if (v) params.set(k, v); else params.delete(k);
+    }
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+  }, [searchParams, router, pathname]);
+
+  function setViewAndSync(v: ViewMode) { setView(v); pushParams({ view: v === "list" ? "" : v }); }
+  function setVisitFilterAndSync(f: VisitFilter) { setVisitFilter(f); pushParams({ visit: f === "all" ? "" : f }); }
+  function setTypeFilterAndSync(t: BreweryType | "all") { setTypeFilter(t); pushParams({ type: t === "all" ? "" : t }); }
+  function setBotwFilterAndSync(v: boolean) { setBotwFilter(v); pushParams({ botw: v ? "1" : "" }); }
+  function clearFiltersAndSync() {
+    setTypeFilter("all"); setBotwFilter(false);
+    pushParams({ type: "", botw: "" });
+  }
+
   useEffect(() => {
-    if (!query.trim()) { setBreweries(initialBreweries); return; }
+    if (!query.trim()) { setBreweries(enriched); pushParams({ q: "" }); return; }
+    pushParams({ q: query });
     const t = setTimeout(async () => {
       setSearching(true);
       const raw = await searchBreweries(query, 20);
@@ -64,7 +88,7 @@ export function ExploreClient({ breweries: initialBreweries, hasBeerOfTheWeek = 
       setSearching(false);
     }, 300);
     return () => clearTimeout(t);
-  }, [query, initialBreweries]);
+  }, [query]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Apply all filters
   const filteredBreweries = (query.trim() ? breweries : breweries)
@@ -93,6 +117,7 @@ export function ExploreClient({ breweries: initialBreweries, hasBeerOfTheWeek = 
           {/* Filter toggle */}
           <button
             onClick={() => setShowFilters((v) => !v)}
+
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm transition-all border relative"
             style={
               showFilters || activeFilterCount > 0
@@ -111,13 +136,13 @@ export function ExploreClient({ breweries: initialBreweries, hasBeerOfTheWeek = 
           {/* View toggle */}
           <div className="flex items-center gap-2 bg-[var(--surface)] border border-[var(--border)] rounded-xl p-1">
             <button
-              onClick={() => setView("list")}
+              onClick={() => setViewAndSync("list")}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-all ${view === "list" ? "bg-[#D4A843]/10 text-[#D4A843]" : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"}`}
             >
               <List size={14} /> List
             </button>
             <button
-              onClick={() => setView("map")}
+              onClick={() => setViewAndSync("map")}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-all ${view === "map" ? "bg-[#D4A843]/10 text-[#D4A843]" : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"}`}
             >
               <Map size={14} /> Map
@@ -166,14 +191,14 @@ export function ExploreClient({ breweries: initialBreweries, hasBeerOfTheWeek = 
                   <FilterChip
                     label="All Types"
                     active={typeFilter === "all"}
-                    onClick={() => setTypeFilter("all")}
+                    onClick={() => setTypeFilterAndSync("all")}
                   />
                   {BREWERY_TYPE_OPTIONS.map((opt) => (
                     <FilterChip
                       key={opt.value}
                       label={opt.label}
                       active={typeFilter === opt.value}
-                      onClick={() => setTypeFilter(typeFilter === opt.value ? "all" : opt.value)}
+                      onClick={() => setTypeFilterAndSync(typeFilter === opt.value ? "all" : opt.value)}
                     />
                   ))}
                 </div>
@@ -186,7 +211,7 @@ export function ExploreClient({ breweries: initialBreweries, hasBeerOfTheWeek = 
                   <FilterChip
                     label="Beer of the Week"
                     active={botwFilter}
-                    onClick={() => setBotwFilter((v) => !v)}
+                    onClick={() => setBotwFilterAndSync(!botwFilter)}
                     icon={<Sparkles size={12} />}
                   />
                 </div>
@@ -194,7 +219,7 @@ export function ExploreClient({ breweries: initialBreweries, hasBeerOfTheWeek = 
 
               {activeFilterCount > 0 && (
                 <button
-                  onClick={() => { setTypeFilter("all"); setBotwFilter(false); }}
+                  onClick={clearFiltersAndSync}
                   className="text-xs text-[#D4A843] hover:underline"
                 >
                   Clear all filters
@@ -217,7 +242,7 @@ export function ExploreClient({ breweries: initialBreweries, hasBeerOfTheWeek = 
             return (
               <button
                 key={f}
-                onClick={() => setVisitFilter(f)}
+                onClick={() => setVisitFilterAndSync(f)}
                 className="px-3 py-1.5 rounded-xl text-sm transition-all border"
                 style={
                   visitFilter === f

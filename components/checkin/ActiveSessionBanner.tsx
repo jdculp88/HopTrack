@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Beer, ChevronRight } from 'lucide-react'
 import { Session } from '@/types/database'
@@ -10,19 +11,23 @@ interface ActiveSessionBannerProps {
   onTap: () => void
 }
 
-export default function ActiveSessionBanner({ session, breweryName, onTap }: ActiveSessionBannerProps) {
-  const beerCount = session.beer_logs?.length || 0
-
-  // Calculate elapsed time
-  const startedAt = new Date(session.started_at)
-  const now = new Date()
-  const elapsedMs = now.getTime() - startedAt.getTime()
+function getTimeLabel(startedAt: Date): string {
+  const elapsedMs = Date.now() - startedAt.getTime()
   const elapsedMins = Math.floor(elapsedMs / 60000)
   const elapsedHours = Math.floor(elapsedMins / 60)
   const remainingMins = elapsedMins % 60
-  const timeLabel = elapsedHours > 0
-    ? `${elapsedHours}h ${remainingMins}m`
-    : `${elapsedMins}m`
+  return elapsedHours > 0 ? `${elapsedHours}h ${remainingMins}m` : `${elapsedMins}m`
+}
+
+export default function ActiveSessionBanner({ session, breweryName, onTap }: ActiveSessionBannerProps) {
+  const beerCount = session.beer_logs?.length || 0
+  const startedAt = new Date(session.started_at)
+  const [timeLabel, setTimeLabel] = useState(() => getTimeLabel(startedAt))
+
+  useEffect(() => {
+    const interval = setInterval(() => setTimeLabel(getTimeLabel(startedAt)), 60000)
+    return () => clearInterval(interval)
+  }, [startedAt])
 
   return (
     <motion.div

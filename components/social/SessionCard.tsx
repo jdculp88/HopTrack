@@ -76,7 +76,10 @@ export function SessionCard({ session, currentUserId, className }: SessionCardPr
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between gap-2">
             <Link href={`/profile/${profile.username}`}>
-              <span className="font-sans font-semibold text-[var(--text-primary)] hover:text-[#D4A843] transition-colors text-sm">
+              <span
+                className="font-sans font-semibold text-[var(--text-primary)] hover:text-[#D4A843] transition-colors text-sm truncate max-w-[160px] inline-block align-bottom"
+                title={profile.display_name ?? profile.username}
+              >
                 {profile.display_name ?? profile.username}
               </span>
             </Link>
@@ -119,7 +122,7 @@ export function SessionCard({ session, currentUserId, className }: SessionCardPr
               style={{ background: generateGradientFromString(brewery.name) }}
             />
             <div className="flex-1 min-w-0">
-              <p className="font-display font-bold text-sm text-[var(--text-primary)] truncate">
+              <p className="font-display font-bold text-sm text-[var(--text-primary)] truncate" title={brewery.name}>
                 {brewery.name}
               </p>
               <p className="text-xs text-[var(--text-muted)]">
@@ -148,7 +151,11 @@ export function SessionCard({ session, currentUserId, className }: SessionCardPr
                 style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }}
               >
                 <Beer size={10} style={{ color: 'var(--accent-gold)' }} />
-                <span style={{ color: 'var(--text-secondary)' }}>
+                <span
+                  style={{ color: 'var(--text-secondary)' }}
+                  className="max-w-[120px] truncate inline-block align-bottom"
+                  title={(log as any).beer?.name ?? undefined}
+                >
                   {(log as any).beer?.name ?? (log.beer_id ? `Beer #${log.beer_id.slice(0, 4)}` : "Unnamed")}
                 </span>
                 {log.rating != null && (

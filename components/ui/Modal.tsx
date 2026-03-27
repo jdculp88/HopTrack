@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+const FOCUSABLE = 'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
 
 interface ModalProps {
   open: boolean;
@@ -23,16 +25,33 @@ const SIZES = {
 };
 
 export function Modal({ open, onClose, title, children, size = "md", className }: ModalProps) {
+  const panelRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     if (open) {
       document.body.style.overflow = "hidden";
+      // Focus first focusable element on open
+      setTimeout(() => {
+        const el = panelRef.current?.querySelector<HTMLElement>(FOCUSABLE);
+        el?.focus();
+      }, 50);
     }
     return () => { document.body.style.overflow = ""; };
   }, [open]);
 
   useEffect(() => {
     function handleKey(e: KeyboardEvent) {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") { onClose(); return; }
+      if (e.key !== "Tab" || !panelRef.current) return;
+      const focusable = Array.from(panelRef.current.querySelectorAll<HTMLElement>(FOCUSABLE));
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey) {
+        if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+      } else {
+        if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
     }
     if (open) document.addEventListener("keydown", handleKey);
     return () => document.removeEventListener("keydown", handleKey);
@@ -53,6 +72,7 @@ export function Modal({ open, onClose, title, children, size = "md", className }
 
           {/* Panel */}
           <motion.div
+            ref={panelRef}
             initial={{ opacity: 0, y: 40, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.97 }}
@@ -64,6 +84,8 @@ export function Modal({ open, onClose, title, children, size = "md", className }
               SIZES[size],
               className
             )}
+            role="dialog"
+            aria-modal="true"
           >
             {title && (
               <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border)] flex-shrink-0">

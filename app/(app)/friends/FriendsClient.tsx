@@ -386,9 +386,9 @@ export function FriendsClient({
           {/* Friends list */}
           {filteredFriends.length === 0 && searchQuery.length < 2 && pendingRequests.length === 0 && sentRequests.length === 0 ? (
             <div className="text-center py-16 space-y-3">
-              <p className="text-5xl">&#x1F465;</p>
-              <p className="font-display text-xl text-[var(--text-primary)]">No friends yet</p>
-              <p className="text-sm text-[var(--text-secondary)]">Search by username above to find and add friends.</p>
+              <p className="text-5xl">🍻</p>
+              <p className="font-display text-xl text-[var(--text-primary)]">Drinking solo?</p>
+              <p className="text-sm text-[var(--text-secondary)]">Search by username above to find friends and share the round.</p>
             </div>
           ) : filteredFriends.length > 0 && (
             <div className="space-y-2">

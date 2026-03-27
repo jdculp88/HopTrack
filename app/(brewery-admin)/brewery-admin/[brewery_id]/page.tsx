@@ -184,7 +184,7 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
           <div>
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-display text-lg font-bold" style={{ color: "var(--color-text-primary)" }}>Recent Visits</h2>
-              <Link href={`/brewery-admin/${brewery_id}/analytics`}
+              <Link href={`/brewery-admin/${brewery_id}/sessions`}
                 className="text-xs flex items-center gap-1 transition-opacity hover:opacity-70"
                 style={{ color: "var(--color-accent-gold)" }}>
                 View all <ArrowUpRight size={12} />
@@ -194,8 +194,8 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
               {((recentSessions as any[]) ?? []).length === 0 ? (
                 <div className="rounded-2xl p-8 text-center border" style={{ background: "var(--color-surface)", borderColor: "var(--color-border)" }}>
                   <p className="text-3xl mb-2">🍺</p>
-                  <p className="font-display" style={{ color: "var(--color-text-primary)" }}>No visits yet</p>
-                  <p className="text-sm mt-1" style={{ color: "var(--color-text-muted)" }}>Share your HopTrack page to get started!</p>
+                  <p className="font-display" style={{ color: "var(--color-text-primary)" }}>No sessions yet</p>
+                  <p className="text-sm mt-1" style={{ color: "var(--color-text-muted)" }}>Share your HopTrack brewery page to get the first pour tracked.</p>
                 </div>
               ) : (
                 ((recentSessions as any[]) ?? []).map((s: any) => {
@@ -347,6 +347,7 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
                 { href: `/brewery-admin/${brewery_id}/tap-list`, label: "Manage tap list" },
                 { href: `/brewery-admin/${brewery_id}/analytics`, label: "View analytics" },
                 { href: `/brewery-admin/${brewery_id}/loyalty`, label: "Loyalty & promotions" },
+                { href: `/brewery-admin/${brewery_id}/qr`, label: "QR Table Tent 🆕" },
                 { href: `/brewery-admin/${brewery_id}/pint-rewind`, label: "Pint Rewind" },
                 { href: `/brewery-admin/${brewery_id}/settings`, label: "Edit brewery profile" },
                 { href: `/brewery/${brewery_id}`, label: "View public page ↗", external: true },

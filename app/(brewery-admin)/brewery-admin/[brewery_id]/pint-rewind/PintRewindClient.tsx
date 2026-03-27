@@ -130,9 +130,9 @@ export function PintRewindClient({ breweryName, sessions30, beerLogs30, sessions
           {stats.totalCheckins === 0 ? (
             <div className="rounded-2xl border p-16 text-center" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
               <p className="text-4xl mb-3">🍺</p>
-              <p className="font-display text-xl" style={{ color: "var(--text-primary)" }}>No visits yet</p>
+              <p className="font-display text-xl" style={{ color: "var(--text-primary)" }}>No pours to rewind yet</p>
               <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
-                {scope === "30d" ? "No visits in the last 30 days." : "No visits recorded yet."}
+                {scope === "30d" ? "No sessions in the last 30 days — try switching to All Time." : "Once guests start sessions, their Pint Rewind appears here."}
               </p>
             </div>
           ) : (

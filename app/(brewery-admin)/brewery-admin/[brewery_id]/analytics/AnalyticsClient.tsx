@@ -144,8 +144,8 @@ export function AnalyticsClient({ sessions, beerLogs }: AnalyticsClientProps) {
       {totalVisits === 0 && totalBeersLogged === 0 ? (
         <div className="rounded-2xl border p-16 text-center" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
           <p className="text-4xl mb-3">📊</p>
-          <p className="font-display text-xl" style={{ color: "var(--text-primary)" }}>No data yet</p>
-          <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>Analytics will appear as customers check in at your brewery.</p>
+          <p className="font-display text-xl" style={{ color: "var(--text-primary)" }}>The charts are thirsty</p>
+          <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>Analytics fill up as guests start sessions at your brewery. Share your HopTrack page to get the first pour flowing.</p>
         </div>
       ) : (
         <div className="space-y-6">

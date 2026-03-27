@@ -332,8 +332,8 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
           ) : (
             <div className="text-center py-12 bg-[var(--surface)] rounded-2xl border border-[var(--border)]">
               <p className="text-4xl mb-3">🍺</p>
-              <p className="font-display text-lg text-[var(--text-primary)]">No beers yet</p>
-              <p className="text-sm text-[var(--text-secondary)] mt-1">No beers on the menu yet.</p>
+              <p className="font-display text-lg text-[var(--text-primary)]">Taps are quiet</p>
+              <p className="text-sm text-[var(--text-secondary)] mt-1">This brewery hasn't added beers yet — check back soon.</p>
             </div>
           )}
         </div>

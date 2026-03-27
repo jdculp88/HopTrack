@@ -1,6 +1,8 @@
+import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { ExploreClient } from "./ExploreClient";
+import { SkeletonCard } from "@/components/ui/SkeletonLoader";
 
 export const metadata = { title: "Explore" };
 
@@ -45,13 +47,15 @@ export default async function ExplorePage() {
   const eventBreweryIds = [...new Set((upcomingEventBreweries ?? []).map((e: any) => e.brewery_id))] as string[];
 
   return (
-    <ExploreClient
-      breweries={(breweries ?? []).map((b) => ({
-        ...b,
-        user_visit: visitedIds.has(b.id) ? { brewery_id: b.id } : undefined,
-      }))}
-      hasBeerOfTheWeek={botwBreweryIds}
-      hasUpcomingEvents={eventBreweryIds}
-    />
+    <Suspense fallback={<div className="max-w-5xl mx-auto px-4 py-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">{Array.from({length:6}).map((_,i)=><SkeletonCard key={i}/>)}</div>}>
+      <ExploreClient
+        breweries={(breweries ?? []).map((b) => ({
+          ...b,
+          user_visit: visitedIds.has(b.id) ? { brewery_id: b.id } : undefined,
+        }))}
+        hasBeerOfTheWeek={botwBreweryIds}
+        hasUpcomingEvents={eventBreweryIds}
+      />
+    </Suspense>
   );
 }
