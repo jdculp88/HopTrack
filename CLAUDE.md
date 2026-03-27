@@ -175,8 +175,8 @@ scripts/supabase-setup.mjs    — One-time setup script
 
 ## 🗺️ Where We Are
 
-**Current Sprint:** Sprint 20 — Close It (2026-03-27)
-**Last completed:** Sprint 19 — The Pour ✅ (2026-03-27)
+**Current Sprint:** Sprint 21 — All of It (2026-03-27)
+**Last completed:** Sprint 20 — Close It ✅ (2026-03-27)
 
 ### Key design decisions (still active from Sprint 11):
 - Marketing pages use hardcoded `C` color constants (not CSS vars)
@@ -446,19 +446,43 @@ Retro: `docs/retros/sprint-13-retro.md`
 - 028: `glass_type` on beers + `beer_pour_sizes` table + index + RLS ✅ APPLIED (S19)
 - 029: Demo glass types + pour sizes (74 rows, 20 beers) ✅ APPLIED (S19)
 
-### Sprint 20 — Close It (CURRENT)
+### Sprint 20 — Close It ✅ (2026-03-27)
 **Theme:** Ship quality gates, close first brewery, polish The Board for Asheville demo
+- S20-001: Playwright E2E — carried to S21
+- S20-002/004/005/006: Carried and shipped in Sprint 21
 
-| Ticket | Owner | Description |
-|--------|-------|-------------|
-| S20-001 | Casey + Jordan | Playwright E2E test suite — happy path + sad path |
-| S20-002 | Drew | TV Mode toggle: hide/show stats panel on Board |
-| S20-003 | Taylor + Drew | Asheville demo + close first paid brewery (Tuesday meeting) |
-| S20-004 | Alex | Glass picker polish — hover tooltips (glass name + best-for styles) |
-| S20-005 | Riley | Migration consolidation proposal (028 + 029 merge for clean deploys) |
-| S20-006 | Jamie | Board → app interior visual bridge (cream/gold palette continuity) |
+### Sprint 21 — All of It ✅ (2026-03-27)
+**Theme:** QoL sweep + QR Table Tents + Board → App visual bridge
+**Plan:** `docs/sprint-21-plan.md`
 
-**P0:** Stable demo URL confirmed for Taylor before Tuesday Asheville meeting.
+- ✅ S21-002: ActiveSessionBanner timer updates every 60s (was frozen on mount)
+- ✅ S21-003: Explore filters persist to URL search params — shareable + back-button safe
+- ✅ S21-004: Beer-themed empty state copy everywhere ("The taps are dry", "Drinking solo?", etc.)
+- ✅ S21-005: SessionCard truncation — `title` tooltips on long beer/brewery names
+- ✅ S21-006: Modal focus trap — keyboard focus stays inside modal, ARIA `role="dialog"` + auto-focus
+- ✅ S21-007: Board settings preview — draft/apply pattern, "Previewing below ↓"
+- ✅ S21-008: Tap List unsaved changes guard — AnimatePresence discard confirmation on close
+- ✅ S21-009: `/brewery-admin/[id]/sessions` — paginated all-sessions view, 25/page
+- ✅ S21-010: QR Table Tents — branded QR generator (3 formats: Table Tent / Coaster / Poster), PNG download + print, links to visual bridge
+- ✅ S21-011: `/brewery-welcome/[id]` — cream/gold public landing page matching The Board, on-tap preview, "Track Your Pours" CTA
+- S21-001: Playwright E2E — 6th carry. Casey is holding a sit-in.
+
+**Key architectural changes from Sprint 21:**
+- `components/checkin/ActiveSessionBanner.tsx` — `useState` + `setInterval` for live timer
+- `app/(app)/explore/ExploreClient.tsx` — `useSearchParams` + `useRouter` for URL-synced filters; wrapped in `Suspense` in page.tsx
+- `components/ui/Modal.tsx` — focus trap via `querySelectorAll(FOCUSABLE)`, `useRef` on panel, `role="dialog" aria-modal="true"`
+- `app/(brewery-admin)/brewery-admin/[brewery_id]/board/BoardClient.tsx` — `draftSettings` + `applySettings()` / `cancelSettings()` pattern for settings preview
+- `app/(brewery-admin)/brewery-admin/[brewery_id]/tap-list/TapListClient.tsx` — `isDirty()` + `closeForm()` + `confirmDiscard` state with AnimatePresence slide-down
+- `app/(brewery-admin)/brewery-admin/[brewery_id]/sessions/` — new paginated sessions page
+- `app/(brewery-admin)/brewery-admin/[brewery_id]/qr/` — QR Table Tent generator (uses `qrcode` npm package)
+- `app/brewery-welcome/[id]/page.tsx` — public cream/gold bridge page; QR tents link here
+- `components/brewery-admin/BreweryAdminNav.tsx` — "Table Tent" nav item added
+- `qrcode` + `@types/qrcode` added to dependencies
+
+**Deferred to Sprint 22:**
+- S21-001: Playwright E2E (Casey is serious this time)
+- Taylor: Close first paid brewery (Asheville Tuesday meeting pending)
+- Riley: Migration consolidation proposal (028+029)
 
 ### Revenue Targets
 - Tap tier: $49/mo
