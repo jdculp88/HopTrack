@@ -161,10 +161,12 @@ app/(superadmin)/             — Platform admin
 app/api/                      — API routes
 components/                   — Shared components
 lib/                          — Utils, Supabase clients, XP logic
+lib/glassware.ts              — 20 glass SVGs, PourSize interface, getGlassSvgContent()
 supabase/migrations/          — DB migrations (run in order)
 supabase/functions/           — Edge Functions
 docs/roadmap.md               — SOURCE OF TRUTH for what we're building
 docs/retros/                  — Sprint retros and roasts 🍺
+docs/sales/                   — GTM, pitch guide, pricing, target breweries (Taylor owns)
 scripts/supabase-setup.mjs    — One-time setup script
 .env.local.example            — Env template (copy to .env.local)
 ```
@@ -173,8 +175,8 @@ scripts/supabase-setup.mjs    — One-time setup script
 
 ## 🗺️ Where We Are
 
-**Current Sprint:** Sprint 17 — Polish & Prove It (2026-03-27)
-**Last completed:** Sprint 16 — Turn It Up ✅ (2026-03-27)
+**Current Sprint:** Sprint 20 — Close It (2026-03-27)
+**Last completed:** Sprint 19 — The Pour ✅ (2026-03-27)
 
 ### Key design decisions (still active from Sprint 11):
 - Marketing pages use hardcoded `C` color constants (not CSS vars)
@@ -369,6 +371,52 @@ Retro: `docs/retros/sprint-13-retro.md`
 
 **Sales docs:** `docs/sales/` created this sprint — go-to-market, pitch guide, pricing, target breweries, deck outline. Taylor owns this. No cold outreach yet — warm intros through Drew's Asheville network first.
 
+### Sprint 18 — The Board: Cream Menu Redesign ✅ (2026-03-27)
+**Theme:** Complete visual redesign of The Board (brewery TV display)
+**Retro:** `docs/retros/sprint-17-18-retro.md`
+
+- ✅ Complete typographic paradigm: cards-in-a-grid → pure type on cream canvas
+- ✅ Brewery name in Instrument Serif italic at `clamp(64px, 7vw, 100px)`
+- ✅ Beer entries: Playfair Display bold + gold dotted leaders to gold prices
+- ✅ BOTW hero section, per-beer HopTrack stats, brewery stats footer, events footer
+- ✅ Font size map: medium/large/xl — 2x previous sizes for TV legibility
+- ✅ Auto-scroll for overflow beer lists
+- ✅ Board layout strips BreweryAdminNav (`isBoard` check)
+- ✅ Migration 027: Demo board stats (8 sessions, ~23 beer_logs, real biggest fans)
+
+**Key architectural changes from Sprint 18:**
+- Migrations 025, 026, 027 applied to remote
+- `BoardClient` redesigned: cream background (#FBF7F0), no cards, pure typography
+- Instrument Serif loaded via `<link>` in board/page.tsx
+- Board layout: `position: fixed; inset: 0; overflow: hidden` — beer list scrolls internally
+- All Board styles are inline (not Tailwind) to avoid JIT caching issues
+- `BreweryAdminLayout`: `isBoard` path detection strips sidebar nav
+
+### Sprint 19 — The Pour ✅ (2026-03-27)
+**Theme:** Glass art SVG illustrations + multi-tier pour pricing on The Board and tap list admin
+**Retro:** `docs/retros/sprint-19-retro.md`
+
+- ✅ 20 glass type SVGs in `lib/glassware.ts` (shaker_pint → sam_adams_pint)
+- ✅ Breweries select glass type per beer in tap list admin
+- ✅ Glass SVG appears LEFT of beer name on The Board
+- ✅ Horizontal size chips on The Board: `Taster $3 · Half Pint $5 · Pint $8` (never stack)
+- ✅ Flights supported as pour type (null oz)
+- ✅ Backwards compatible: beers without pour sizes fall back to `price_per_pint` dotted leader
+- ✅ Tap list admin modal: 20-glass SVG picker grid + pour size rows with quick-add presets
+- ✅ Pour sizes API: GET + replace-all POST (DELETE + INSERT)
+- ✅ Realtime subscription extended to cover `beer_pour_sizes` table
+- ✅ Migration 028: `glass_type` on beers + `beer_pour_sizes` table + RLS
+- ✅ Migration 029: Demo glass types + 74 pour size rows across 20 demo beers
+
+**Key architectural changes from Sprint 19:**
+- `lib/glassware.ts` — source of truth for all glass types + `PourSize` interface
+- **SVG gradient ID namespacing**: `getGlassSvgContent(glass, instanceId)` does regex replacement for unique IDs per instance — CRITICAL when rendering multiple SVGs on one page
+- `app/api/brewery/[brewery_id]/beers/[beer_id]/pour-sizes/route.ts` — GET + replace-all POST
+- `BoardClient`: new `pourSizesMap` prop, `GlassIllustration` sub-component, `SizeChips` sub-component, extended `FS` map with chip/glass dimensions
+- `TapListClient`: edit modal expanded to `max-w-2xl`, glass picker grid, pour size rows
+- Migrations 028, 029 applied to remote
+- Bug fix: `uuid_generate_v4()` → `gen_random_uuid()` (extension not enabled on Supabase)
+
 ### Migration state
 - 001–003: Core schema + seed
 - 004: Brewery RLS fix (brewery_accounts OR created_by for UPDATE)
@@ -392,6 +440,25 @@ Retro: `docs/retros/sprint-13-retro.md`
 - 022: Beer `price_per_pint` decimal field ✅ APPLIED (S17)
 - 023: `loyalty_redemptions` table + RLS ✅ APPLIED (S17)
 - 024: Demo seed data — 3 Asheville breweries, 20 beers w/ prices, 7 events ✅ APPLIED (S17)
+- 025: (reserved — not used)
+- 026: `promo_text` on beers table ✅ APPLIED (S18)
+- 027: Demo board stats (sessions + beer_logs for Mountain Ridge) ✅ APPLIED (S18)
+- 028: `glass_type` on beers + `beer_pour_sizes` table + index + RLS ✅ APPLIED (S19)
+- 029: Demo glass types + pour sizes (74 rows, 20 beers) ✅ APPLIED (S19)
+
+### Sprint 20 — Close It (CURRENT)
+**Theme:** Ship quality gates, close first brewery, polish The Board for Asheville demo
+
+| Ticket | Owner | Description |
+|--------|-------|-------------|
+| S20-001 | Casey + Jordan | Playwright E2E test suite — happy path + sad path |
+| S20-002 | Drew | TV Mode toggle: hide/show stats panel on Board |
+| S20-003 | Taylor + Drew | Asheville demo + close first paid brewery (Tuesday meeting) |
+| S20-004 | Alex | Glass picker polish — hover tooltips (glass name + best-for styles) |
+| S20-005 | Riley | Migration consolidation proposal (028 + 029 merge for clean deploys) |
+| S20-006 | Jamie | Board → app interior visual bridge (cream/gold palette continuity) |
+
+**P0:** Stable demo URL confirmed for Taylor before Tuesday Asheville meeting.
 
 ### Revenue Targets
 - Tap tier: $49/mo
