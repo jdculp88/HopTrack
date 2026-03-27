@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Settings, X, Calendar, Hop } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { GLASS_TYPES, getGlass, getGlassSvgContent } from "@/lib/glassware";
+import type { PourSize } from "@/lib/glassware";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -20,6 +22,7 @@ interface BoardBeer {
   avg_rating: number | null;
   price_per_pint?: number | null;
   promo_text?: string | null;
+  glass_type?: string | null;
 }
 
 interface BoardEvent {
@@ -51,6 +54,7 @@ interface BoardClientProps {
   events?: BoardEvent[];
   breweryStats?: BreweryStats;
   beerStats?: Record<string, BeerStats>;
+  pourSizesMap?: Record<string, PourSize[]>;
 }
 
 type FontSize = "medium" | "large" | "xl";
@@ -64,6 +68,8 @@ const C = {
   textMuted: "#6B5E4E",
   textSubtle: "#9E8E7A",
   border: "#E5DDD0",
+  chipBg: "rgba(251,247,240,0.85)",
+  chipBorder: "#DDD5C5",
   danger: "#C44B3A",
 } as const;
 
@@ -79,6 +85,7 @@ interface BoardSettings {
   showRating: boolean;
   showStyle: boolean;
   showStats: boolean;
+  showGlass: boolean;
 }
 
 const DEFAULT: BoardSettings = {
@@ -89,6 +96,7 @@ const DEFAULT: BoardSettings = {
   showRating: true,
   showStyle: true,
   showStats: true,
+  showGlass: true,
 };
 
 function loadSettings(id: string): BoardSettings {
@@ -103,11 +111,15 @@ function saveSettings(id: string, s: BoardSettings) {
   try { localStorage.setItem(`hoptrack-board-${id}`, JSON.stringify(s)); } catch {}
 }
 
-// Font size maps — TV readable sizes
-const FS: Record<FontSize, { name: number; style: number; meta: number; price: number; stat: number }> = {
-  medium: { name: 34, style: 14, meta: 13, price: 28, stat: 12 },
-  large:  { name: 42, style: 16, meta: 15, price: 36, stat: 14 },
-  xl:     { name: 54, style: 19, meta: 17, price: 46, stat: 16 },
+// Font size maps — TV readable sizes + chip/glass dimensions
+const FS: Record<FontSize, {
+  name: number; style: number; meta: number; price: number; stat: number;
+  chipLabel: number; chipOz: number; chipPrice: number; chipPadV: number; chipPadH: number;
+  glasslabel: number; glassW: number; glassH: number;
+}> = {
+  medium: { name: 34, style: 14, meta: 13, price: 28, stat: 12, chipLabel: 10, chipOz: 9, chipPrice: 18, chipPadV: 5, chipPadH: 10, glasslabel: 9, glassW: 44, glassH: 63 },
+  large:  { name: 42, style: 16, meta: 15, price: 36, stat: 14, chipLabel: 11, chipOz: 10, chipPrice: 20, chipPadV: 6, chipPadH: 12, glasslabel: 10, glassW: 56, glassH: 80 },
+  xl:     { name: 54, style: 19, meta: 17, price: 46, stat: 16, chipLabel: 13, chipOz: 11, chipPrice: 24, chipPadV: 8, chipPadH: 14, glasslabel: 11, glassW: 70, glassH: 100 },
 };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -134,17 +146,92 @@ function formatPrice(price: number): string {
   return price % 1 === 0 ? `$${price.toFixed(0)}` : `$${price.toFixed(2)}`;
 }
 
+// ─── Glass SVG Component ──────────────────────────────────────────────────────
+
+function GlassIllustration({
+  glassKey, instanceId, width, height, label,
+}: {
+  glassKey: string; instanceId: string; width: number; height: number; label: string;
+}) {
+  const glass = getGlass(glassKey);
+  if (!glass) return null;
+  const svgHtml = getGlassSvgContent(glass, instanceId);
+  return (
+    <div style={{ flexShrink: 0, display: "flex", flexDirection: "column", alignItems: "center", gap: 5 }}>
+      <svg
+        viewBox="0 0 80 120"
+        width={width}
+        height={height}
+        style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}
+        dangerouslySetInnerHTML={{ __html: svgHtml }}
+      />
+      <span className="font-mono" style={{
+        fontSize: label.length > 8 ? 8 : 9,
+        textTransform: "uppercase",
+        letterSpacing: "0.1em",
+        color: C.textSubtle,
+        textAlign: "center",
+        lineHeight: 1.2,
+        maxWidth: width + 8,
+      }}>
+        {glass.name}
+      </span>
+    </div>
+  );
+}
+
+// ─── Size Chips ───────────────────────────────────────────────────────────────
+
+function SizeChips({ sizes, fs }: { sizes: PourSize[]; fs: typeof FS[FontSize] }) {
+  return (
+    <div style={{ display: "flex", gap: 8, flexShrink: 0, flexWrap: "nowrap", alignItems: "center" }}>
+      {sizes.map((size, idx) => (
+        <div
+          key={idx}
+          style={{
+            display: "flex", alignItems: "center", gap: 8,
+            background: C.chipBg,
+            border: `1px solid ${C.chipBorder}`,
+            borderRadius: 8,
+            padding: `${fs.chipPadV}px ${fs.chipPadH}px`,
+          }}
+        >
+          <div>
+            <div className="font-mono" style={{
+              fontSize: fs.chipLabel, letterSpacing: "0.08em",
+              textTransform: "uppercase", color: C.textMuted, lineHeight: 1.2,
+            }}>
+              {size.label}
+            </div>
+            {size.oz != null && (
+              <div className="font-mono" style={{ fontSize: fs.chipOz, color: C.textSubtle, opacity: 0.7 }}>
+                {size.oz} oz
+              </div>
+            )}
+          </div>
+          <div style={{ width: 1, height: 26, background: C.chipBorder, flexShrink: 0 }} />
+          <div className="font-mono" style={{ fontWeight: 700, fontSize: fs.chipPrice, color: C.gold, lineHeight: 1, flexShrink: 0 }}>
+            {formatPrice(size.price)}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export function BoardClient({
   breweryId, breweryName, initialBeers, events = [], breweryStats, beerStats = {},
+  pourSizesMap = {},
 }: BoardClientProps) {
   const [beers, setBeers] = useState<BoardBeer[]>(initialBeers);
+  const [localPourSizes, setLocalPourSizes] = useState<Record<string, PourSize[]>>(pourSizesMap);
   const [settings, setSettings] = useState<BoardSettings>(() => loadSettings(breweryId));
   const [settingsOpen, setSettingsOpen] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
 
-  const { fontSize, showABV, showPrice, showRating, showStyle, showStats } = settings;
+  const { fontSize, showABV, showPrice, showRating, showStyle, showStats, showGlass } = settings;
   const fs = FS[fontSize];
 
   useEffect(() => { saveSettings(breweryId, settings); }, [breweryId, settings]);
@@ -157,31 +244,50 @@ export function BoardClient({
   const activeBeerCount = (featuredBeer ? 1 : 0) + activeTapBeers.length;
   const initials = getInitials(breweryName);
 
-  // Realtime updates
-  useEffect(() => {
-    const supabase = createClient();
-    const ch = supabase
-      .channel(`board-${breweryId}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: "beers", filter: `brewery_id=eq.${breweryId}` }, refetchBeers)
-      .subscribe();
-    return () => { supabase.removeChannel(ch); };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [breweryId]);
-
+  // Realtime updates — refetch beers AND pour sizes
   const refetchBeers = useCallback(async () => {
     const s = createClient();
     const { data } = await (s as any)
       .from("beers").select("*")
       .eq("brewery_id", breweryId).eq("is_on_tap", true)
       .order("display_order", { ascending: true }).order("name");
-    if (data) setBeers(data);
+    if (data) {
+      setBeers(data);
+      // Also refresh pour sizes for new beer set
+      const ids = (data as BoardBeer[]).map(b => b.id);
+      if (ids.length > 0) {
+        const { data: ps } = await (s as any)
+          .from("beer_pour_sizes").select("*")
+          .in("beer_id", ids).order("display_order", { ascending: true });
+        if (ps) {
+          const map: Record<string, PourSize[]> = {};
+          for (const row of ps as PourSize[]) {
+            if (!row.beer_id) continue;
+            if (!map[row.beer_id]) map[row.beer_id] = [];
+            map[row.beer_id].push(row);
+          }
+          setLocalPourSizes(map);
+        }
+      }
+    }
   }, [breweryId]);
 
-  // Auto-scroll for overflow — 5s pause at top before starting
+  useEffect(() => {
+    const supabase = createClient();
+    const ch = supabase
+      .channel(`board-${breweryId}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "beers", filter: `brewery_id=eq.${breweryId}` }, refetchBeers)
+      .on("postgres_changes", { event: "*", schema: "public", table: "beer_pour_sizes" }, refetchBeers)
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [breweryId]);
+
+  // Auto-scroll — 5s pause at top
   useEffect(() => {
     const el = listRef.current;
     if (!el) return;
-    let id: number, pos = 0, pause = 300; // Start with 5s pause (300 frames at 60fps)
+    let id: number, pos = 0, pause = 300;
     const tick = () => {
       if (!el || el.scrollHeight <= el.clientHeight) { id = requestAnimationFrame(tick); return; }
       if (pause > 0) { pause--; id = requestAnimationFrame(tick); return; }
@@ -194,7 +300,7 @@ export function BoardClient({
     return () => cancelAnimationFrame(id);
   }, [beers, fontSize]);
 
-  // Build stats line for footer
+  // Footer stats
   const statsLine = (() => {
     if (!breweryStats || breweryStats.totalPours === 0) return null;
     const parts: string[] = [];
@@ -206,74 +312,250 @@ export function BoardClient({
     return parts.join(" · ");
   })();
 
+  // ── Beer row renderer ───────────────────────────────────────────────────────
+
+  function renderBeerRow(
+    beer: BoardBeer,
+    opts: { featured?: boolean; eightySixed?: boolean; animDelay?: number }
+  ) {
+    const { featured = false, eightySixed = false, animDelay = 0 } = opts;
+    const stats = beerStats[beer.id];
+    const rating = stats?.avgRating ?? beer.avg_rating;
+    const hasStats = showStats && (
+      (showRating && rating != null) ||
+      (stats && stats.pourCount > 0) ||
+      stats?.biggestFan
+    );
+    const pourSizes = localPourSizes[beer.id] ?? [];
+    const glassKey = beer.glass_type ?? null;
+    const glassObj = glassKey ? getGlass(glassKey) : null;
+    const showGlassCol = showGlass && !!glassObj;
+
+    // Font sizes — featured is larger (uses clamp on BOTW)
+    const nameSize = featured ? "clamp(40px, 4.5vw, 56px)" : fs.name;
+    const priceSize = featured ? "clamp(40px, 4.5vw, 56px)" : fs.price;
+
+    if (eightySixed) {
+      return (
+        <motion.div
+          key={beer.id} layout
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 0.5, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.5, delay: animDelay, ease: EASE }}
+          style={{ marginBottom: `clamp(14px, 2vh, 28px)` }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <span className="font-display" style={{
+              fontWeight: 700, fontSize: fs.name, lineHeight: 1.15,
+              color: C.danger, textDecoration: "line-through",
+              textDecorationColor: C.danger, flexShrink: 0,
+            }}>
+              {beer.name}
+            </span>
+            <span className="font-mono" style={{
+              fontSize: fs.style, fontWeight: 800, textTransform: "uppercase",
+              letterSpacing: "0.1em", color: C.danger,
+            }}>
+              86&apos;D
+            </span>
+          </div>
+        </motion.div>
+      );
+    }
+
+    return (
+      <motion.div
+        key={beer.id} layout
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -8 }}
+        transition={{ duration: featured ? 0.6 : 0.5, delay: animDelay, ease: EASE }}
+        style={{ marginBottom: featured ? 0 : `clamp(14px, 2vh, 28px)` }}
+      >
+        {/* Glass + info row */}
+        <div style={{ display: "flex", alignItems: "flex-start", gap: showGlassCol ? (fs.glassW > 50 ? 20 : 14) : 0 }}>
+
+          {/* Glass illustration — left column */}
+          {showGlassCol && glassObj && (
+            <GlassIllustration
+              glassKey={glassKey!}
+              instanceId={beer.id}
+              width={fs.glassW}
+              height={fs.glassH}
+              label={glassObj.name}
+            />
+          )}
+
+          {/* Beer info — right */}
+          <div style={{ flex: 1, minWidth: 0 }}>
+
+            {/* Name row: name + dotted leader + size chips (or single price) */}
+            <div style={{ display: "flex", alignItems: "center", gap: 0, flexWrap: "nowrap" }}>
+              <span
+                className="font-display"
+                style={{
+                  fontWeight: 700,
+                  fontSize: nameSize,
+                  lineHeight: 1.15,
+                  color: C.text,
+                  flexShrink: 0,
+                }}
+              >
+                {beer.name}
+              </span>
+
+              {showPrice && pourSizes.length > 0 ? (
+                <>
+                  {/* Dotted leader to chips */}
+                  <span style={{
+                    flex: 1,
+                    borderBottom: "1.5px dotted rgba(212,168,67,0.35)",
+                    marginBottom: 6,
+                    marginLeft: 10,
+                    marginRight: 10,
+                    minWidth: 16,
+                    alignSelf: "flex-end",
+                  }} />
+                  <SizeChips sizes={pourSizes} fs={fs} />
+                </>
+              ) : showPrice && beer.price_per_pint != null ? (
+                // Fallback: single price with dotted leader
+                <>
+                  <span style={{
+                    flex: 1,
+                    borderBottom: "1.5px dotted rgba(212,168,67,0.35)",
+                    marginBottom: 8,
+                    marginLeft: 10,
+                    marginRight: 10,
+                    minWidth: 16,
+                    alignSelf: "flex-end",
+                  }} />
+                  <span className="font-mono" style={{
+                    fontWeight: 700,
+                    fontSize: priceSize,
+                    lineHeight: 1.15,
+                    color: C.gold,
+                    flexShrink: 0,
+                  }}>
+                    {formatPrice(beer.price_per_pint)}
+                  </span>
+                </>
+              ) : null}
+            </div>
+
+            {/* Meta row: style · ABV · IBU · promo */}
+            <div className="font-mono" style={{
+              display: "flex", alignItems: "center", gap: 0, marginTop: 4,
+            }}>
+              {showStyle && beer.style && (
+                <span style={{
+                  fontSize: featured ? 16 : fs.style,
+                  textTransform: "uppercase", letterSpacing: "0.15em", color: C.textMuted,
+                }}>
+                  {beer.style}
+                </span>
+              )}
+              {showStyle && beer.style && showABV && beer.abv != null && (
+                <span style={{ margin: "0 8px", fontSize: featured ? 15 : fs.meta, color: C.textSubtle }}>·</span>
+              )}
+              {showABV && beer.abv != null && (
+                <span style={{ fontSize: featured ? 15 : fs.meta, color: C.textSubtle }}>
+                  {beer.abv.toFixed(1)}% ABV
+                </span>
+              )}
+              {showABV && beer.ibu != null && beer.abv != null && (
+                <span style={{ margin: "0 8px", fontSize: featured ? 15 : fs.meta, color: C.textSubtle }}>·</span>
+              )}
+              {showABV && beer.ibu != null && (
+                <span style={{ fontSize: featured ? 15 : fs.meta, color: C.textSubtle }}>
+                  {beer.ibu} IBU
+                </span>
+              )}
+              {beer.promo_text && (
+                <>
+                  <span style={{ margin: "0 8px", fontSize: featured ? 15 : fs.meta, color: C.textSubtle }}>·</span>
+                  <span style={{ fontSize: featured ? 14 : 14, color: C.gold }}>
+                    ✦ {beer.promo_text}
+                  </span>
+                </>
+              )}
+            </div>
+
+            {/* Stats row */}
+            {hasStats && (() => {
+              const hasRating = showRating && rating != null;
+              const hasPours = stats && stats.pourCount > 0;
+              return (
+                <div className="font-mono" style={{
+                  fontSize: featured ? 15 : fs.stat, color: C.textSubtle, marginTop: 6,
+                  display: "flex", alignItems: "center", gap: 0,
+                }}>
+                  {hasRating && (
+                    <span style={{ color: C.gold, fontWeight: 700 }}>⭐ {rating!.toFixed(1)}</span>
+                  )}
+                  {hasRating && hasPours && <span style={{ margin: "0 8px" }}>·</span>}
+                  {hasPours && (
+                    <span>{stats.pourCount.toLocaleString()} {stats.pourCount === 1 ? "pour" : "pours"}</span>
+                  )}
+                  {stats?.biggestFan && (
+                    <>
+                      <span style={{ margin: "0 8px" }}>·</span>
+                      <span>Biggest fan: {stats.biggestFan}</span>
+                    </>
+                  )}
+                </div>
+              );
+            })()}
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
+
   return (
     <div
       className="font-sans"
       style={{
-        position: "fixed", inset: 0,
-        overflow: "hidden",
-        background: `
-          radial-gradient(ellipse at 50% 0%, rgba(212,168,67,0.07) 0%, transparent 55%),
-          ${C.cream}
-        `,
-        color: C.text,
-        display: "flex",
-        flexDirection: "column",
+        position: "fixed", inset: 0, overflow: "hidden",
+        background: `radial-gradient(ellipse at 50% 0%, rgba(212,168,67,0.07) 0%, transparent 55%), ${C.cream}`,
+        color: C.text, display: "flex", flexDirection: "column",
       }}
     >
       {/* ── Header ──────────────────────────────────────────────────────── */}
       <header style={{ padding: "28px 40px 20px", flexShrink: 0, position: "relative" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          {/* Left: Monogram + Brewery Name */}
           <div style={{ display: "flex", alignItems: "center", gap: 16, flex: 1, minWidth: 0 }}>
-            {/* Monogram badge */}
             <div style={{
               width: 56, height: 56, borderRadius: 14, flexShrink: 0,
               display: "flex", alignItems: "center", justifyContent: "center",
               background: "#0F0E0C",
             }}>
-              <span className="font-mono" style={{
-                fontWeight: 800, fontSize: 18,
-                color: C.gold, letterSpacing: 1,
-              }}>
+              <span className="font-mono" style={{ fontWeight: 800, fontSize: 18, color: C.gold, letterSpacing: 1 }}>
                 {initials}
               </span>
             </div>
-
-            {/* Brewery name — Instrument Serif italic */}
             <h1 style={{
               fontFamily: "'Instrument Serif', serif",
-              fontWeight: 400,
-              fontStyle: "italic",
+              fontWeight: 400, fontStyle: "italic",
               fontSize: "clamp(64px, 7vw, 100px)",
-              lineHeight: 1,
-              letterSpacing: "-0.01em",
-              color: C.text,
-              flex: 1,
-              minWidth: 0,
+              lineHeight: 1, letterSpacing: "-0.01em",
+              color: C.text, flex: 1, minWidth: 0,
             }}>
               {breweryName}
             </h1>
           </div>
-
-          {/* Right: ON TAP count */}
           <div style={{ flexShrink: 0, display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 2 }}>
-            <span className="font-mono" style={{
-              fontSize: 13, textTransform: "uppercase", letterSpacing: "0.22em",
-              color: C.gold,
-            }}>
+            <span className="font-mono" style={{ fontSize: 13, textTransform: "uppercase", letterSpacing: "0.22em", color: C.gold }}>
               On Tap
             </span>
-            <span className="font-mono" style={{
-              fontSize: 36, fontWeight: 700, lineHeight: 1,
-              color: C.gold,
-            }}>
+            <span className="font-mono" style={{ fontSize: 36, fontWeight: 700, lineHeight: 1, color: C.gold }}>
               {activeBeerCount}
             </span>
           </div>
         </div>
 
-        {/* Settings gear — absolute top-right */}
+        {/* Settings gear */}
         <button
           onClick={() => setSettingsOpen(v => !v)}
           style={{
@@ -288,7 +570,6 @@ export function BoardClient({
           <Settings size={20} />
         </button>
 
-        {/* Separator line */}
         <div style={{ marginTop: 20, height: 1, background: "rgba(26,23,20,0.12)" }} />
       </header>
 
@@ -307,6 +588,7 @@ export function BoardClient({
               display: "flex", flexWrap: "wrap", alignItems: "center", gap: 18,
               background: "rgba(251,247,240,0.95)", backdropFilter: "blur(12px)",
             }}>
+              {/* Font size */}
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <span className="font-mono" style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: "0.1em", color: C.textSubtle }}>Size</span>
                 {(["medium", "large", "xl"] as FontSize[]).map(s => (
@@ -321,7 +603,9 @@ export function BoardClient({
                   </button>
                 ))}
               </div>
+              {/* Toggles */}
               {([
+                { label: "Glass", key: "showGlass" as const, val: showGlass },
                 { label: "Style", key: "showStyle" as const, val: showStyle },
                 { label: "ABV", key: "showABV" as const, val: showABV },
                 { label: "Desc", key: "showDesc" as const, val: settings.showDesc },
@@ -348,9 +632,8 @@ export function BoardClient({
           initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.6, ease: EASE }}
-          style={{ padding: "20px 40px 24px", flexShrink: 0 }}
+          style={{ padding: "20px 40px 0", flexShrink: 0 }}
         >
-          {/* BOTW label */}
           <span className="font-mono" style={{
             fontSize: 14, textTransform: "uppercase", letterSpacing: "0.2em",
             color: C.gold, display: "block", marginBottom: 10,
@@ -358,100 +641,7 @@ export function BoardClient({
             ★ Beer of the Week
           </span>
 
-          {/* Name row: name + dotted leader + price */}
-          <div style={{ display: "flex", alignItems: "baseline", gap: 0 }}>
-            <span className="font-display" style={{
-              fontWeight: 700,
-              fontSize: "clamp(40px, 4.5vw, 56px)",
-              lineHeight: 1.1,
-              color: C.text,
-              flexShrink: 0,
-            }}>
-              {featuredBeer.name}
-            </span>
-            {showPrice && featuredBeer.price_per_pint != null && (
-              <>
-                <span style={{
-                  flex: 1,
-                  borderBottom: "2px dotted rgba(212,168,67,0.4)",
-                  marginBottom: 8,
-                  marginLeft: 12,
-                  marginRight: 12,
-                  minWidth: 20,
-                }} />
-                <span className="font-mono" style={{
-                  fontWeight: 700,
-                  fontSize: "clamp(40px, 4.5vw, 56px)",
-                  lineHeight: 1.1,
-                  color: C.gold,
-                  flexShrink: 0,
-                }}>
-                  {formatPrice(featuredBeer.price_per_pint)}
-                </span>
-              </>
-            )}
-          </div>
-
-          {/* Meta: Style · ABV · IBU */}
-          <div className="font-mono" style={{
-            fontSize: 16, color: C.textMuted,
-            marginTop: 6, display: "flex", alignItems: "center", gap: 0,
-          }}>
-            {showStyle && featuredBeer.style && (
-              <span style={{ textTransform: "uppercase", letterSpacing: "0.15em" }}>{featuredBeer.style}</span>
-            )}
-            {showStyle && featuredBeer.style && showABV && featuredBeer.abv != null && (
-              <span style={{ margin: "0 8px", color: C.textSubtle }}>·</span>
-            )}
-            {showABV && featuredBeer.abv != null && (
-              <span style={{ color: C.textSubtle }}>{featuredBeer.abv.toFixed(1)}% ABV</span>
-            )}
-            {showABV && featuredBeer.ibu != null && featuredBeer.abv != null && (
-              <span style={{ margin: "0 8px", color: C.textSubtle }}>·</span>
-            )}
-            {showABV && featuredBeer.ibu != null && (
-              <span style={{ color: C.textSubtle }}>{featuredBeer.ibu} IBU</span>
-            )}
-          </div>
-
-          {/* Promo badge */}
-          {featuredBeer.promo_text && (
-            <div className="font-mono" style={{ fontSize: 14, color: C.gold, marginTop: 6 }}>
-              ✦ {featuredBeer.promo_text}
-            </div>
-          )}
-
-          {/* Stats row */}
-          {showStats && (() => {
-            const stats = beerStats[featuredBeer.id];
-            const rating = stats?.avgRating ?? featuredBeer.avg_rating;
-            const hasData = rating != null || (stats && stats.pourCount > 0) || stats?.biggestFan;
-            if (!hasData) return null;
-            return (
-              <div className="font-mono" style={{
-                fontSize: 15, color: C.textSubtle, marginTop: 8,
-                display: "flex", alignItems: "center", gap: 0,
-              }}>
-                {showRating && rating != null && (
-                  <>
-                    <span style={{ color: C.gold, fontWeight: 700 }}>⭐ {rating.toFixed(1)}</span>
-                  </>
-                )}
-                {showRating && rating != null && stats && stats.pourCount > 0 && (
-                  <span style={{ margin: "0 8px" }}>·</span>
-                )}
-                {stats && stats.pourCount > 0 && (
-                  <span>{stats.pourCount.toLocaleString()} {stats.pourCount === 1 ? "pour" : "pours"}</span>
-                )}
-                {stats?.biggestFan && (
-                  <>
-                    <span style={{ margin: "0 8px" }}>·</span>
-                    <span>Biggest fan: {stats.biggestFan}</span>
-                  </>
-                )}
-              </div>
-            );
-          })()}
+          {renderBeerRow(featuredBeer, { featured: true })}
 
           {/* Gold underline */}
           <div style={{ marginTop: 16, height: 2, background: "rgba(212,168,67,0.35)" }} />
@@ -462,8 +652,7 @@ export function BoardClient({
       {beers.length === 0 ? (
         <div style={{
           flex: 1, display: "flex", flexDirection: "column",
-          alignItems: "center", justifyContent: "center", textAlign: "center",
-          padding: 40,
+          alignItems: "center", justifyContent: "center", textAlign: "center", padding: 40,
         }}>
           <p className="font-display" style={{ fontSize: 32, color: "rgba(26,23,20,0.25)", fontStyle: "italic" }}>
             No beers on tap
@@ -475,165 +664,20 @@ export function BoardClient({
       ) : (
         <div
           ref={listRef}
-          style={{
-            flex: 1, minHeight: 0,
-            padding: "12px 40px",
-            overflowY: "auto",
-          }}
+          style={{ flex: 1, minHeight: 0, padding: "16px 40px", overflowY: "auto" }}
         >
           <AnimatePresence mode="popLayout">
-            {activeTapBeers.map((beer, i) => {
-              const stats = beerStats[beer.id];
-              const rating = stats?.avgRating ?? beer.avg_rating;
-              const hasStats = showStats && (
-                (showRating && rating != null) ||
-                (stats && stats.pourCount > 0) ||
-                stats?.biggestFan
-              );
-
-              return (
-                <motion.div
-                  key={beer.id}
-                  layout
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -8 }}
-                  transition={{ duration: 0.5, delay: (featuredBeer ? 1 : 0) * 0.04 + i * 0.04, ease: EASE }}
-                  style={{ marginBottom: `clamp(14px, 2vh, 28px)` }}
-                >
-                  {/* Name row: name + dotted leader + price */}
-                  <div style={{ display: "flex", alignItems: "baseline" }}>
-                    <span className="font-display" style={{
-                      fontWeight: 700,
-                      fontSize: fs.name,
-                      lineHeight: 1.15,
-                      color: C.text,
-                      flexShrink: 0,
-                    }}>
-                      {beer.name}
-                    </span>
-                    {showPrice && beer.price_per_pint != null && (
-                      <>
-                        <span style={{
-                          flex: 1,
-                          borderBottom: "1.5px dotted rgba(212,168,67,0.35)",
-                          marginBottom: 8,
-                          marginLeft: 10,
-                          marginRight: 10,
-                          minWidth: 16,
-                        }} />
-                        <span className="font-mono" style={{
-                          fontWeight: 700,
-                          fontSize: fs.price,
-                          lineHeight: 1.15,
-                          color: C.gold,
-                          flexShrink: 0,
-                        }}>
-                          {formatPrice(beer.price_per_pint)}
-                        </span>
-                      </>
-                    )}
-                  </div>
-
-                  {/* Meta row: Style · ABV · IBU · promo */}
-                  <div className="font-mono" style={{
-                    display: "flex", alignItems: "center", gap: 0,
-                    marginTop: 3,
-                  }}>
-                    {showStyle && beer.style && (
-                      <span style={{
-                        fontSize: fs.style, textTransform: "uppercase",
-                        letterSpacing: "0.15em", color: C.textMuted,
-                      }}>
-                        {beer.style}
-                      </span>
-                    )}
-                    {showStyle && beer.style && showABV && beer.abv != null && (
-                      <span style={{ margin: "0 8px", fontSize: fs.meta, color: C.textSubtle }}>·</span>
-                    )}
-                    {showABV && beer.abv != null && (
-                      <span style={{ fontSize: fs.meta, color: C.textSubtle }}>
-                        {beer.abv.toFixed(1)}% ABV
-                      </span>
-                    )}
-                    {showABV && beer.ibu != null && (
-                      <>
-                        <span style={{ margin: "0 8px", fontSize: fs.meta, color: C.textSubtle }}>·</span>
-                        <span style={{ fontSize: fs.meta, color: C.textSubtle }}>
-                          {beer.ibu} IBU
-                        </span>
-                      </>
-                    )}
-                    {beer.promo_text && (
-                      <>
-                        <span style={{ margin: "0 8px", fontSize: fs.meta, color: C.textSubtle }}>·</span>
-                        <span style={{ fontSize: 14, color: C.gold }}>
-                          ✦ {beer.promo_text}
-                        </span>
-                      </>
-                    )}
-                  </div>
-
-                  {/* Stats row */}
-                  {hasStats && (
-                    <div className="font-mono" style={{
-                      fontSize: fs.stat, color: C.textSubtle, marginTop: 4,
-                      display: "flex", alignItems: "center", gap: 0,
-                    }}>
-                      {showRating && rating != null && (
-                        <span style={{ color: C.gold, fontWeight: 700 }}>⭐ {rating.toFixed(1)}</span>
-                      )}
-                      {showRating && rating != null && stats && stats.pourCount > 0 && (
-                        <span style={{ margin: "0 8px" }}>·</span>
-                      )}
-                      {stats && stats.pourCount > 0 && (
-                        <span>{stats.pourCount.toLocaleString()} {stats.pourCount === 1 ? "pour" : "pours"}</span>
-                      )}
-                      {stats?.biggestFan && (
-                        <>
-                          <span style={{ margin: "0 8px" }}>·</span>
-                          <span>Biggest fan: {stats.biggestFan}</span>
-                        </>
-                      )}
-                    </div>
-                  )}
-                </motion.div>
-              );
-            })}
-
-            {/* 86'd beers — sorted to end */}
-            {eightySixedBeers.map((beer, i) => (
-              <motion.div
-                key={beer.id}
-                layout
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 0.5, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.5, delay: ((featuredBeer ? 1 : 0) + activeTapBeers.length + i) * 0.04, ease: EASE }}
-                style={{ marginBottom: `clamp(14px, 2vh, 28px)` }}
-              >
-                <div style={{ display: "flex", alignItems: "baseline", gap: 12 }}>
-                  <span className="font-display" style={{
-                    fontWeight: 700,
-                    fontSize: fs.name,
-                    lineHeight: 1.15,
-                    color: C.danger,
-                    textDecoration: "line-through",
-                    textDecorationColor: C.danger,
-                    flexShrink: 0,
-                  }}>
-                    {beer.name}
-                  </span>
-                  <span className="font-mono" style={{
-                    fontSize: fs.style, fontWeight: 800,
-                    textTransform: "uppercase", letterSpacing: "0.1em",
-                    color: C.danger,
-                  }}>
-                    86&apos;D
-                  </span>
-                </div>
-              </motion.div>
-            ))}
+            {activeTapBeers.map((beer, i) =>
+              renderBeerRow(beer, {
+                animDelay: (featuredBeer ? 1 : 0) * 0.04 + i * 0.04,
+              })
+            )}
+            {eightySixedBeers.map((beer, i) =>
+              renderBeerRow(beer, {
+                eightySixed: true,
+                animDelay: ((featuredBeer ? 1 : 0) + activeTapBeers.length + i) * 0.04,
+              })
+            )}
           </AnimatePresence>
         </div>
       )}
@@ -643,19 +687,14 @@ export function BoardClient({
         flexShrink: 0,
         borderTop: "1px solid rgba(26,23,20,0.1)",
         padding: "16px 40px",
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-        gap: 24,
+        display: "flex", alignItems: "center", justifyContent: "space-between", gap: 24,
       }}>
-        {/* Left: Events */}
+        {/* Events */}
         <div style={{ display: "flex", alignItems: "center", gap: 16, flex: 1, minWidth: 0, overflow: "hidden" }}>
           {events.length > 0 && events.map((ev, i) => (
             <div key={ev.id} style={{ display: "inline-flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
               {i === 0 && <Calendar size={16} style={{ color: C.gold, flexShrink: 0 }} />}
-              <span style={{
-                fontFamily: "'DM Sans', system-ui, sans-serif",
-                fontWeight: 600, fontSize: 16,
-                color: C.text,
-              }}>
+              <span style={{ fontFamily: "'DM Sans', system-ui, sans-serif", fontWeight: 600, fontSize: 16, color: C.text }}>
                 {ev.title}
               </span>
               <span className="font-mono" style={{ fontSize: 14, color: C.gold }}>
@@ -668,42 +707,26 @@ export function BoardClient({
           ))}
         </div>
 
-        {/* Center: Brewery stats */}
+        {/* Brewery stats */}
         {showStats && statsLine && (
-          <div className="font-mono" style={{
-            fontSize: 13, color: C.textMuted,
-            whiteSpace: "nowrap", flexShrink: 0,
-          }}>
+          <div className="font-mono" style={{ fontSize: 13, color: C.textMuted, whiteSpace: "nowrap", flexShrink: 0 }}>
             {statsLine}
           </div>
         )}
 
-        {/* Right: HopTrack badge + Live */}
+        {/* HopTrack badge + Live */}
         <div style={{ display: "flex", alignItems: "center", gap: 16, flexShrink: 0 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-            <div style={{
-              width: 16, height: 16, borderRadius: 4,
-              background: C.gold,
-              display: "flex", alignItems: "center", justifyContent: "center",
-            }}>
+            <div style={{ width: 16, height: 16, borderRadius: 4, background: C.gold, display: "flex", alignItems: "center", justifyContent: "center" }}>
               <Hop size={9} style={{ color: "#0F0E0C" }} />
             </div>
-            <span className="font-mono" style={{
-              fontSize: 10, textTransform: "uppercase", letterSpacing: "0.18em",
-              color: C.textSubtle,
-            }}>
+            <span className="font-mono" style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.18em", color: C.textSubtle }}>
               HopTrack
             </span>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-            <span style={{
-              width: 5, height: 5, borderRadius: "50%",
-              background: "#3D7A52", display: "inline-block",
-            }} />
-            <span className="font-mono" style={{
-              fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em",
-              color: C.textSubtle,
-            }}>
+            <span style={{ width: 5, height: 5, borderRadius: "50%", background: "#3D7A52", display: "inline-block" }} />
+            <span className="font-mono" style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", color: C.textSubtle }}>
               Live
             </span>
           </div>

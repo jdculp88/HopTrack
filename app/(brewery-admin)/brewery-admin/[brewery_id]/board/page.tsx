@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { notFound, redirect } from "next/navigation";
 import { BoardClient } from "./BoardClient";
+import type { PourSize } from "@/lib/glassware";
 
 export const metadata = { title: "The Board — HopTrack" };
 
@@ -25,6 +26,24 @@ export default async function BoardPage({ params }: { params: Promise<{ brewery_
     .eq("is_on_tap", true)
     .order("display_order", { ascending: true })
     .order("name") as any;
+
+  // ── Pour sizes for all on-tap beers ─────────────────────────────────────────
+  const beerIds = ((beers as any[]) ?? []).map((b: any) => b.id as string);
+  const pourSizesMap: Record<string, PourSize[]> = {};
+  if (beerIds.length > 0) {
+    const { data: allPourSizes } = await (supabase as any)
+      .from("beer_pour_sizes")
+      .select("*")
+      .in("beer_id", beerIds)
+      .order("display_order", { ascending: true });
+    if (allPourSizes) {
+      for (const row of allPourSizes as PourSize[]) {
+        if (!row.beer_id) continue;
+        if (!pourSizesMap[row.beer_id]) pourSizesMap[row.beer_id] = [];
+        pourSizesMap[row.beer_id].push(row);
+      }
+    }
+  }
 
   const { data: events } = await (supabase as any)
     .from("brewery_events").select("id, title, event_date, start_time")
@@ -155,6 +174,7 @@ export default async function BoardPage({ params }: { params: Promise<{ brewery_
         events={(events as any[]) ?? []}
         breweryStats={breweryStats}
         beerStats={beerStats}
+        pourSizesMap={pourSizesMap}
       />
     </>
   );

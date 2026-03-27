@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import { BeerStyleBadge } from "@/components/ui/BeerStyleBadge";
 import type { BeerStyle } from "@/types/database";
+import { GLASS_TYPES, getGlassSvgContent } from "@/lib/glassware";
 
 const STYLES: BeerStyle[] = [
   "IPA","Double IPA","Hazy IPA","Session IPA","Pale Ale","Stout","Imperial Stout",
@@ -33,7 +34,25 @@ interface Beer {
   avg_rating: number | null;
   total_checkins: number;
   price_per_pint: number | null;
+  glass_type: string | null;
 }
+
+interface PourSizeRow {
+  id?: string;
+  label: string;
+  oz: string;    // string for input binding, "" if none
+  price: string; // string for input binding
+  display_order: number;
+}
+
+const POUR_QUICK_ADD: Array<{ label: string; oz: string }> = [
+  { label: "Taster", oz: "5" },
+  { label: "Half Pint", oz: "8" },
+  { label: "Pint", oz: "16" },
+  { label: "22oz Pint", oz: "22" },
+  { label: "Growler", oz: "32" },
+  { label: "Flight", oz: "" },
+];
 
 interface TapListClientProps {
   breweryId: string;
@@ -47,6 +66,9 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
   const [showForm, setShowForm] = useState(false);
   const [editingBeer, setEditingBeer] = useState<Beer | null>(null);
   const [form, setForm] = useState(emptyBeer);
+  const [glassType, setGlassType] = useState<string | null>(null);
+  const [pourSizes, setPourSizes] = useState<PourSizeRow[]>([]);
+  const [loadingPourSizes, setLoadingPourSizes] = useState(false);
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
@@ -61,12 +83,40 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
   );
   const onTapCount = beers.filter(b => b.is_on_tap).length;
 
-  function openAdd() { setForm(emptyBeer); setEditingBeer(null); setSaveError(null); setShowForm(true); }
-  function openEdit(beer: Beer) {
+  function openAdd() {
+    setForm(emptyBeer);
+    setEditingBeer(null);
+    setGlassType(null);
+    setPourSizes([]);
+    setSaveError(null);
+    setShowForm(true);
+  }
+
+  async function openEdit(beer: Beer) {
     setForm({ name: beer.name, style: (beer.style as BeerStyle) ?? "IPA", abv: beer.abv?.toString() ?? "", ibu: beer.ibu?.toString() ?? "", description: beer.description ?? "", price: beer.price_per_pint?.toString() ?? "" });
+    setGlassType(beer.glass_type ?? null);
+    setPourSizes([]);
     setEditingBeer(beer);
     setSaveError(null);
     setShowForm(true);
+
+    // Fetch existing pour sizes
+    setLoadingPourSizes(true);
+    const { data } = await (supabase as any)
+      .from("beer_pour_sizes")
+      .select("*")
+      .eq("beer_id", beer.id)
+      .order("display_order", { ascending: true });
+    if (data) {
+      setPourSizes((data as any[]).map((row: any) => ({
+        id: row.id,
+        label: row.label,
+        oz: row.oz != null ? String(row.oz) : "",
+        price: String(row.price),
+        display_order: row.display_order,
+      })));
+    }
+    setLoadingPourSizes(false);
   }
 
   async function handleSave() {
@@ -84,17 +134,37 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
       ibu: form.ibu ? parseInt(form.ibu as string) : null,
       description: (form.description as string).trim() || null,
       price_per_pint: form.price ? parseFloat(form.price as string) : null,
+      glass_type: glassType ?? null,
       ...(editingBeer ? {} : { is_on_tap: true }),
     };
+
+    let savedBeerId: string;
 
     if (editingBeer) {
       const { data, error } = await (supabase as any).from("beers").update(payload).eq("id", editingBeer.id).select().single();
       if (error) { setSaveError("Couldn't save changes. Please try again."); setSaving(false); return; }
       if (data) setBeers(prev => prev.map(b => b.id === editingBeer.id ? { ...b, ...data } : b));
+      savedBeerId = editingBeer.id;
     } else {
       const { data, error } = await (supabase as any).from("beers").insert(payload).select().single();
       if (error) { setSaveError("Couldn't add beer. Please try again."); setSaving(false); return; }
       if (data) setBeers(prev => [...prev, data]);
+      savedBeerId = (data as any).id;
+    }
+
+    // Save pour sizes — delete existing, insert new
+    const validSizes = pourSizes.filter(s => s.label.trim() && s.price && !isNaN(parseFloat(s.price)));
+    await (supabase as any).from("beer_pour_sizes").delete().eq("beer_id", savedBeerId);
+    if (validSizes.length > 0) {
+      await (supabase as any).from("beer_pour_sizes").insert(
+        validSizes.map((s, i) => ({
+          beer_id: savedBeerId,
+          label: s.label.trim(),
+          oz: s.oz ? parseFloat(s.oz) : null,
+          price: parseFloat(s.price),
+          display_order: i,
+        }))
+      );
     }
 
     setSaving(false);
@@ -259,7 +329,7 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: 60, opacity: 0 }}
               transition={{ type: "spring", stiffness: 400, damping: 30 }}
-              className="w-full max-w-lg rounded-2xl p-6 border"
+              className="w-full max-w-2xl rounded-2xl p-6 border max-h-[90vh] overflow-y-auto"
               style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
 
               <div className="flex items-center justify-between mb-5">
@@ -320,6 +390,164 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
                     rows={3}
                     className="w-full px-4 py-2.5 rounded-xl border text-sm focus:outline-none resize-none"
                     style={{ background: "var(--surface-2)", borderColor: "var(--border)", color: "var(--text-primary)" }} />
+                </div>
+
+                {/* ── Glass Type Picker ─────────────────────────────── */}
+                <div>
+                  <label className="text-xs font-mono uppercase tracking-wider block mb-2" style={{ color: "var(--text-muted)" }}>
+                    Glass Type <span style={{ color: "var(--text-muted)", fontWeight: 400, textTransform: "none", letterSpacing: 0 }}>(shows on The Board)</span>
+                  </label>
+                  <div className="grid gap-2" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(72px, 1fr))" }}>
+                    {GLASS_TYPES.map(glass => {
+                      const isSelected = glassType === glass.key;
+                      const svgHtml = getGlassSvgContent(glass, `picker-${glass.key}`);
+                      return (
+                        <button
+                          key={glass.key}
+                          type="button"
+                          onClick={() => setGlassType(isSelected ? null : glass.key)}
+                          className="flex flex-col items-center gap-1 p-2 rounded-xl border transition-all"
+                          style={{
+                            background: isSelected ? "rgba(212,168,67,0.12)" : "var(--surface-2)",
+                            borderColor: isSelected ? "var(--accent-gold)" : "var(--border)",
+                            cursor: "pointer",
+                          }}
+                          title={`${glass.name} — ${glass.ozLabel}`}
+                        >
+                          <svg
+                            viewBox="0 0 80 120"
+                            width={36}
+                            height={54}
+                            style={{ display: "block" }}
+                            dangerouslySetInnerHTML={{ __html: svgHtml }}
+                          />
+                          <span className="font-mono text-center leading-tight" style={{
+                            fontSize: 8,
+                            color: isSelected ? "var(--accent-gold)" : "var(--text-muted)",
+                            textTransform: "uppercase",
+                            letterSpacing: "0.05em",
+                            lineHeight: 1.2,
+                          }}>
+                            {glass.name}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {glassType && (
+                    <button
+                      type="button"
+                      onClick={() => setGlassType(null)}
+                      className="mt-2 text-xs flex items-center gap-1"
+                      style={{ color: "var(--text-muted)" }}
+                    >
+                      <X size={11} /> Clear glass type
+                    </button>
+                  )}
+                </div>
+
+                {/* ── Pour Sizes ───────────────────────────────────── */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-xs font-mono uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
+                      Pour Sizes <span style={{ color: "var(--text-muted)", fontWeight: 400, textTransform: "none", letterSpacing: 0 }}>(replaces single price on Board)</span>
+                    </label>
+                  </div>
+
+                  {/* Quick-add presets */}
+                  <div className="flex flex-wrap gap-1.5 mb-3">
+                    {POUR_QUICK_ADD.map(preset => {
+                      const alreadyAdded = pourSizes.some(s => s.label === preset.label && s.oz === preset.oz);
+                      return (
+                        <button
+                          key={`${preset.label}-${preset.oz}`}
+                          type="button"
+                          disabled={alreadyAdded}
+                          onClick={() => {
+                            if (!alreadyAdded) {
+                              setPourSizes(prev => [...prev, {
+                                label: preset.label,
+                                oz: preset.oz,
+                                price: "",
+                                display_order: prev.length,
+                              }]);
+                            }
+                          }}
+                          className="px-2.5 py-1 rounded-lg text-xs font-mono transition-all"
+                          style={{
+                            background: alreadyAdded ? "var(--surface-2)" : "rgba(212,168,67,0.1)",
+                            border: `1px solid ${alreadyAdded ? "var(--border)" : "rgba(212,168,67,0.3)"}`,
+                            color: alreadyAdded ? "var(--text-muted)" : "var(--accent-gold)",
+                            cursor: alreadyAdded ? "default" : "pointer",
+                            opacity: alreadyAdded ? 0.5 : 1,
+                          }}
+                        >
+                          + {preset.label}{preset.oz ? ` ${preset.oz}oz` : ""}
+                        </button>
+                      );
+                    })}
+                    <button
+                      type="button"
+                      onClick={() => setPourSizes(prev => [...prev, { label: "", oz: "", price: "", display_order: prev.length }])}
+                      className="px-2.5 py-1 rounded-lg text-xs font-mono transition-all"
+                      style={{ background: "var(--surface-2)", border: "1px solid var(--border)", color: "var(--text-secondary)" }}
+                    >
+                      + Custom
+                    </button>
+                  </div>
+
+                  {/* Size rows */}
+                  {loadingPourSizes ? (
+                    <div className="text-xs py-2" style={{ color: "var(--text-muted)" }}>Loading sizes…</div>
+                  ) : pourSizes.length > 0 ? (
+                    <div className="space-y-2">
+                      <div className="grid gap-1.5 text-xs font-mono uppercase tracking-wider mb-1" style={{ gridTemplateColumns: "1fr 80px 100px 32px", color: "var(--text-muted)" }}>
+                        <span>Label</span><span>oz</span><span>Price $</span><span></span>
+                      </div>
+                      {pourSizes.map((size, idx) => (
+                        <div key={idx} className="grid gap-1.5 items-center" style={{ gridTemplateColumns: "1fr 80px 100px 32px" }}>
+                          <input
+                            value={size.label}
+                            onChange={e => setPourSizes(prev => prev.map((s, i) => i === idx ? { ...s, label: e.target.value } : s))}
+                            placeholder="Pint"
+                            className="px-3 py-2 rounded-lg border text-sm focus:outline-none"
+                            style={{ background: "var(--surface-2)", borderColor: "var(--border)", color: "var(--text-primary)" }}
+                          />
+                          <input
+                            type="number"
+                            value={size.oz}
+                            onChange={e => setPourSizes(prev => prev.map((s, i) => i === idx ? { ...s, oz: e.target.value } : s))}
+                            placeholder="16"
+                            min="0"
+                            className="px-3 py-2 rounded-lg border text-sm focus:outline-none"
+                            style={{ background: "var(--surface-2)", borderColor: "var(--border)", color: "var(--text-primary)" }}
+                          />
+                          <input
+                            type="number"
+                            value={size.price}
+                            onChange={e => setPourSizes(prev => prev.map((s, i) => i === idx ? { ...s, price: e.target.value } : s))}
+                            placeholder="8.00"
+                            min="0"
+                            step="0.50"
+                            className="px-3 py-2 rounded-lg border text-sm focus:outline-none"
+                            style={{ background: "var(--surface-2)", borderColor: "var(--border)", color: "var(--text-primary)" }}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setPourSizes(prev => prev.filter((_, i) => i !== idx))}
+                            className="flex items-center justify-center rounded-lg h-9 w-8 transition-colors"
+                            style={{ color: "var(--text-muted)", background: "var(--surface-2)" }}
+                          >
+                            <X size={14} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+                      No sizes added — single price above will show on The Board.
+                    </p>
+                  )}
                 </div>
 
                 {saveError && (
