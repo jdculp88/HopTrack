@@ -25,6 +25,7 @@ const BreweryMap = dynamic(
 interface ExploreClientProps {
   breweries: BreweryWithStats[];
   hasBeerOfTheWeek?: string[]; // brewery IDs that have a Beer of the Week
+  hasUpcomingEvents?: string[]; // brewery IDs with upcoming events
 }
 
 type ViewMode = "list" | "map";
@@ -41,14 +42,15 @@ const BREWERY_TYPE_OPTIONS: { value: BreweryType; label: string }[] = [
   { value: "contract", label: "Contract" },
 ];
 
-export function ExploreClient({ breweries: initialBreweries, hasBeerOfTheWeek = [] }: ExploreClientProps) {
+export function ExploreClient({ breweries: initialBreweries, hasBeerOfTheWeek = [], hasUpcomingEvents = [] }: ExploreClientProps) {
   const [view, setView] = useState<ViewMode>("list");
   const [query, setQuery] = useState("");
   const [visitFilter, setVisitFilter] = useState<VisitFilter>("all");
   const [typeFilter, setTypeFilter] = useState<BreweryType | "all">("all");
   const [botwFilter, setBotwFilter] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
-  const [breweries, setBreweries] = useState(initialBreweries);
+  const enriched = initialBreweries.map(b => ({ ...b, has_upcoming_events: hasUpcomingEvents.includes(b.id) }));
+  const [breweries, setBreweries] = useState<BreweryWithStats[]>(enriched);
   const [searching, setSearching] = useState(false);
 
   const activeFilterCount = (typeFilter !== "all" ? 1 : 0) + (botwFilter ? 1 : 0);

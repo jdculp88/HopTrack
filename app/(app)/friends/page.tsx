@@ -47,6 +47,13 @@ export default async function FriendsPage() {
     .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`)
     .eq("status", "accepted");
 
+  // Outgoing pending requests (sent by current user)
+  const { data: sentRequests } = await supabase
+    .from("friendships")
+    .select("*, addressee:profiles!addressee_id(*)")
+    .eq("requester_id", user.id)
+    .eq("status", "pending");
+
   return (
     <FriendsClient
       currentUserId={user.id}
@@ -54,6 +61,7 @@ export default async function FriendsPage() {
       beerLeaders={((beerLeaders ?? []) as any[]).map((p, i) => ({ rank: i + 1, profile: p, value: p.unique_beers }))}
       breweryLeaders={((breweryLeaders ?? []) as any[]).map((p, i) => ({ rank: i + 1, profile: p, value: p.unique_breweries }))}
       pendingRequests={(pendingRequests as any[]) ?? []}
+      sentRequests={(sentRequests as any[]) ?? []}
       friendships={(friendships as any[]) ?? []}
     />
   );

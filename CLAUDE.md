@@ -59,11 +59,13 @@ Zero tolerance for bugs. Runs full regression suites. Flagged the `confirm()` di
 - Catchphrase: "Zero P0 bugs open right now. ZERO."
 - Would never: sign off on a release without testing the happy path AND the sad path
 
-### Taylor — Sales & Revenue 💰
-Knows the pitch cold: Tap $49 · Cask $149 · Barrel custom. Building toward the first paid brewery. Energetic, optimistic, outcome-focused.
-- Speaks in: MRR, conversion, "we're going to close our first brewery before this quarter is out"
+### Taylor — Sales Strategy & Revenue 💰
+The architect of how HopTrack goes to market. Not pitching cold yet — building the strategy, the docs, and the playbook so that when the product is ready to sell, the sales motion is already dialed in. Tap $49 · Cask $149 · Barrel custom. Energetic, optimistic, methodical.
+- Speaks in: ICP, GTM phases, "here's who we sell to first and why"
+- Owns: `docs/sales/` — go-to-market, pitch guide, target breweries, pricing, deck outline
 - Catchphrase: "We're going to be rich" 📈
 - Would never: let a feature ship without thinking about how to sell it
+- Current focus: Warm intros through Drew's network (Asheville first), building case study infrastructure, getting ready to close — not cold outreach yet
 
 ### Drew — Industry Expert (Brewery Ops) 🍻
 Real brewery operator. Flags anything that would cause chaos on a busy Friday night. His P0 list is gospel. If Drew says it's broken, it's broken.
@@ -171,8 +173,8 @@ scripts/supabase-setup.mjs    — One-time setup script
 
 ## 🗺️ Where We Are
 
-**Current Sprint:** Sprint 14 — Clean House, Open Doors
-**Last completed:** Sprint 13 — Consumer Delight & Social ✅ (2026-03-26)
+**Current Sprint:** Sprint 17 — Polish & Prove It (2026-03-27)
+**Last completed:** Sprint 16 — Turn It Up ✅ (2026-03-27)
 
 ### Key design decisions (still active from Sprint 11):
 - Marketing pages use hardcoded `C` color constants (not CSS vars)
@@ -244,9 +246,10 @@ Retro: `docs/retros/sprint-13-retro.md`
 - Riley: generate VAPID keys (`npx web-push generate-vapid-keys` → `.env.local`)
 - Taylor: close first paid brewery
 
-### Sprint 15 — IN PROGRESS
+### Sprint 15 — COMPLETE ✅
 **Theme:** Walk the Floor — validation, QA, and fixes
 **Plan:** `docs/sprint-15-plan.md`
+**Retro:** `docs/retros/sprint-15-retro.md`
 
 **Session 1 (2026-03-26):**
 - ✅ S15-008: Deleted dead code — `CheckinCard.tsx` (189 lines) + `CheckinModal.tsx` (750 lines)
@@ -276,12 +279,95 @@ Retro: `docs/retros/sprint-13-retro.md`
 - Zero "check-in" in user-visible UI copy — all replaced with session/visit/pour
 - Migration 015 archives checkins to `_archive_checkins` table, drops FK columns, drops table
 
-**Still needed (Riley/Alex/Taylor):**
-- Riley: Generate VAPID keys Day 1 (push broken until then)
+**Deferred to Sprint 16:**
+- Riley + Jordan: Generate VAPID keys Day 1 (paired, three alarms set)
 - Riley: Apply migration 014 (reactions FK backfill)
-- Alex: TestFlight submission (5th carry)
-- Taylor: Close first brewery
+- Jordan + Riley: Apply migration 015 (checkins table drop)
+- Alex: TestFlight submission (6th carry — Joshua checking Apple Dev account)
+- Taylor: Close first brewery or full go-to-market reassessment
 - Alex/Sam/Casey: Deliver audit docs (design, BA, QA)
+- Casey: Automated E2E tests (Playwright/Cypress) target for S17
+
+### Sprint 16 — Turn It Up ✅ (2026-03-27)
+**Theme:** New consumer features + brewery dashboard polish + carry-over infra
+**Plan:** `docs/sprint-16-plan.md`
+
+**Session 1 (2026-03-27):**
+- ✅ S16-001: VAPID keys generated + added to `.env.local`
+- ✅ S16-002: Migration 014 (reactions FK backfill) applied
+- ✅ S16-003: Migration 015 (drop checkins) applied + type cleanup (removed Checkin types, dead hooks, `/api/checkins`)
+- ✅ S16-006: Session comments — migration 016 + API routes (GET/POST/DELETE)
+- ✅ S16-007: Session comments — UI in SessionCard (SessionComments component, optimistic insert, AnimatePresence)
+- ✅ S16-008: Session comments — notifications + push to session owner
+- ✅ S16-011: TV Display "The Board" — full-screen realtime tap list, configurable font/ABV/desc, auto-scroll
+- ✅ S16-012: Tap list QoL — drag-to-reorder (@dnd-kit), 86'd toggle, display_order, "Launch Board" button
+- ✅ S16-013: Analytics upgrades — Top Beers by Rating, Peak Session Times, Repeat Visitor % stat
+- ✅ S16-009: Notification actions — Accept/Decline friend_request, View Session links, View Achievements link, Mark all as read
+- ✅ S16-010: Domestic beer achievement — `domestic_drinker` (bronze) + `domestic_devotee` (silver), migration 017
+- ✅ S16-014: Loyalty dashboard enhancements — summary stats, top stamp cards with progress bars, recent redemptions
+- ✅ S16-020: Brewery events migration 021 — `brewery_events` table, RLS
+- ✅ S16-021: Brewery events admin CRUD — Events tab in nav, create/edit/toggle/delete with inline confirmation
+- ✅ S16-022: Brewery events consumer view — "Upcoming Events" on brewery page, event badge on explore cards
+
+**Key architectural changes from Sprint 16:**
+- Migrations 014, 015, 016, 017, 019, 020, 021 applied to remote
+- `SessionComments` component at `components/social/SessionComments.tsx`
+- `/api/sessions/[id]/comments` GET/POST + `/api/sessions/[id]/comments/[commentId]` DELETE
+- Board route at `brewery-admin/[brewery_id]/board` (custom layout, no nav, Realtime subscription)
+- `@dnd-kit/core` + `@dnd-kit/sortable` installed for drag reorder
+- `display_order` + `is_86d` columns on beers table
+- `session_comment` notification type wired end-to-end
+- `friend_request` notifications now created in `/api/friends` POST
+- Notification actions: inline Accept/Decline, view links, Mark all as read
+- 52 total achievements (+ domestic_drinker, domestic_devotee)
+- Loyalty dashboard shows active cards, stamp progress bars, recent redemptions
+- RLS policy for brewery admins to read loyalty_cards (migration 020)
+- `brewery_events` table with full admin CRUD + consumer views
+- Events tab in BreweryAdminNav (Calendar icon)
+- Explore page shows event badges on breweries with upcoming events
+- Analytics: 5 stat cards (added Repeat Visitors %), 7 total chart sections
+
+**Team meetup:** Unanimous vote for Drew's taproom in Asheville, NC — dates TBD
+
+### Sprint 17 — Polish & Prove It ✅ (2026-03-27)
+**Theme:** Fix what's broken, make it beautiful, get it demo-ready
+**Plan:** `docs/sprint-17-plan.md`
+**Bug log:** `docs/sprint-17-bugs.md`
+
+**Session 1 (2026-03-27):**
+- ✅ S17-001: Replaced all 14 seed avatars (pravatar → DiceBear) across seeds 005/007/008 + updated next.config image domains
+- ✅ S17-002: Fixed avatar square-in-circle — added `relative` to UserAvatar container for `<Image fill>` + `rounded-full` on Image
+- ✅ S17-003: Profile hero padding — `mx-4 mt-4 rounded-2xl overflow-hidden` on hero wrapper
+- ✅ S17-004: Profile name typography — `text-4xl sm:text-5xl font-bold drop-shadow-lg`
+- ✅ S17-005: Beer Passport query verified correct (uses `profile.id` from URL params, not `auth.getUser()`)
+- ✅ S17-006: FriendButton verified correct (renders for `!isOwnProfile`, fetches status from `/api/friends`)
+- ✅ S17-007: Friends management — added unfriend w/ inline AnimatePresence confirmation, outgoing sent requests w/ cancel, section headers (Requests/Sent/Friends)
+- ✅ S17-008: Nav CTA renamed "Check In" → "Start Session" in AppNav.tsx (desktop + mobile FAB)
+- ✅ S17-010: The Board chalk board redesign — dotted leader lines, BOTW gold highlight row, 86'd strikethrough, events bar, CSS grain texture, show/hide price toggle, section headers
+- ✅ S17-011: Demo seed data — 3 Asheville breweries, 20 beers w/ prices, 7 upcoming events (migration 024)
+- ✅ S17-015: Added `has_upcoming_events` to `BreweryWithStats` type, removed `as any[]` cast in ExploreClient
+- ✅ S17-016: Created `loyalty_redemptions` table (migration 023) — was completely missing, loyalty dashboard "Recent Redemptions" was silently returning empty
+
+**Key architectural changes from Sprint 17:**
+- Migrations 022, 023, 024 applied to remote
+- All seed avatars now use DiceBear Avataaars (App Store safe)
+- `next.config.ts` image domains: added `api.dicebear.com`, `ui-avatars.com`, `picsum.photos`; removed `i.pravatar.cc`
+- `UserAvatar` component: container now has `relative` for proper `<Image fill>` clipping
+- `FriendsClient` rebuilt with 3 sections (Requests/Sent/Friends), unfriend w/ inline confirmation, cancel sent requests
+- `BoardClient` fully redesigned: chalk board aesthetic, dotted leaders, BOTW highlight, 86'd strikethrough, events row, grain texture
+- `TapListClient` has price input field (3-column grid: ABV/IBU/Price) + price shown in beer list rows
+- `loyalty_redemptions` table with RLS (user own + brewery admin read)
+- 3 demo breweries: Mountain Ridge (Asheville), River Bend (Asheville), Smoky Barrel (Black Mountain)
+- 20 demo beers with `price_per_pint` set across all 3 breweries
+- `BreweryWithStats.has_upcoming_events` properly typed (no more `as any[]`)
+- Nav CTA: "Start Session" (was "Check In")
+
+**Deferred to Sprint 18:**
+- S17-009: Nav brand/UX review (design task, not build)
+- S17-012: Playwright E2E test suite (Casey)
+- S17-014: TestFlight submission (waiting on Apple Developer account — backlogged)
+
+**Sales docs:** `docs/sales/` created this sprint — go-to-market, pitch guide, pricing, target breweries, deck outline. Taylor owns this. No cold outreach yet — warm intros through Drew's Asheville network first.
 
 ### Migration state
 - 001–003: Core schema + seed
@@ -295,14 +381,23 @@ Retro: `docs/retros/sprint-13-retro.md`
 - 011: Beer of the Week (`is_featured` on beers) ✅ APPLIED
 - 012: Notification preferences (JSONB on profiles) ✅ APPLIED
 - 013: Push subscriptions table (Web Push endpoints) ✅ APPLIED
-- 014: Reactions FK migration (session_id + beer_log_id on reactions) ⏳ WRITTEN, NOT APPLIED — apply in S15
-- 015: Drop checkins table (archive + drop FK + drop table) ⏳ WRITTEN, NOT APPLIED — apply in S16
+- 014: Reactions FK migration (session_id + beer_log_id on reactions) ✅ APPLIED (S16)
+- 015: Drop checkins table (archive + drop FK + drop table) ✅ APPLIED (S16)
+- 016: Session comments table + RLS ✅ APPLIED (S16)
+- 017: Domestic beer achievements (domestic_drinker, domestic_devotee) ✅ APPLIED (S16)
+- 018: (reserved — not used)
+- 019: Tap list display_order + is_86d ✅ APPLIED (S16)
+- 020: Loyalty cards RLS for brewery admins ✅ APPLIED (S16)
+- 021: Brewery events table + RLS ✅ APPLIED (S16)
+- 022: Beer `price_per_pint` decimal field ✅ APPLIED (S17)
+- 023: `loyalty_redemptions` table + RLS ✅ APPLIED (S17)
+- 024: Demo seed data — 3 Asheville breweries, 20 beers w/ prices, 7 events ✅ APPLIED (S17)
 
 ### Revenue Targets
 - Tap tier: $49/mo
 - Cask tier: $149/mo
 - Barrel tier: custom
-- First paid brewery: THIS SPRINT (Taylor)
+- First paid brewery: Sprint 16 hard deadline (Taylor) — close or reassess GTM
 - 500 paid breweries: 6 months post-launch ($75K MRR)
 
 ### Team Expansion Plan (discussed 2026-03-26)

@@ -57,7 +57,7 @@ export function AppNav({ username, unreadNotifications = 0, onCheckin }: AppNavP
           </Link>
         </div>
 
-        {/* Check-in CTA */}
+        {/* Start Session CTA */}
         <div className="px-4 py-4">
           <button
             onClick={onCheckin}
@@ -65,7 +65,7 @@ export function AppNav({ username, unreadNotifications = 0, onCheckin }: AppNavP
             style={{ background: "var(--accent-gold)", color: "var(--bg)" }}
           >
             <PlusCircle size={18} />
-            Check In
+            Start Session
           </button>
         </div>
 

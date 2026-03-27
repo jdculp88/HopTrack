@@ -22,7 +22,17 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
-        hostname: "i.pravatar.cc",
+        hostname: "api.dicebear.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "ui-avatars.com",
+        pathname: "/api/**",
+      },
+      {
+        protocol: "https",
+        hostname: "picsum.photos",
         pathname: "/**",
       },
     ],

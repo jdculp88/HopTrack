@@ -33,7 +33,7 @@ export function UserAvatar({ profile, size = "md", showLevel = false, className 
       <div
         className={cn(
           s.container,
-          "rounded-full overflow-hidden flex items-center justify-center",
+          "relative rounded-full overflow-hidden flex items-center justify-center",
           "border-2 border-[var(--border)]"
         )}
         style={!profile.avatar_url ? { background: gradient } : undefined}
@@ -43,7 +43,7 @@ export function UserAvatar({ profile, size = "md", showLevel = false, className 
             src={profile.avatar_url}
             alt={profile.display_name}
             fill
-            className="object-cover"
+            className="object-cover rounded-full"
             sizes="80px"
           />
         ) : (

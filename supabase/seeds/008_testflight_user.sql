@@ -73,7 +73,7 @@ BEGIN
     'Hop Reviewer',
     'Craft beer enthusiast exploring Austin''s best breweries. Always chasing the next great IPA.',
     'Austin, TX',
-    'https://i.pravatar.cc/150?u=testflight@hoptrack.beer',
+    'https://api.dicebear.com/7.x/avataaars/svg?seed=hopreviewer',
     7,
     2850,
     28,

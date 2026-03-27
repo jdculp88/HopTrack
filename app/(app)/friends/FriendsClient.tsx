@@ -2,7 +2,8 @@
 
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Users, Trophy, Search, UserPlus, Loader2 } from "lucide-react";
+import { Users, Trophy, Search, UserPlus, Loader2, UserX, Clock, X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { LeaderboardRow } from "@/components/social/LeaderboardRow";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import { useToast } from "@/components/ui/Toast";
@@ -18,6 +19,7 @@ interface FriendsClientProps {
   beerLeaders: LeaderboardEntry[];
   breweryLeaders: LeaderboardEntry[];
   pendingRequests: any[];
+  sentRequests: any[];
   friendships: any[];
 }
 
@@ -27,6 +29,7 @@ export function FriendsClient({
   beerLeaders,
   breweryLeaders,
   pendingRequests: initialPending,
+  sentRequests: initialSent,
   friendships,
 }: FriendsClientProps) {
   const router = useRouter();
@@ -35,10 +38,13 @@ export function FriendsClient({
   const [leaderboardType, setLeaderboardType] = useState<LeaderboardType>("sessions");
   const [searchQuery, setSearchQuery] = useState("");
   const [pendingRequests, setPendingRequests] = useState(initialPending);
+  const [sentRequests, setSentRequests] = useState(initialSent);
   const [loadingRequest, setLoadingRequest] = useState<string | null>(null);
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [searching, setSearching] = useState(false);
   const [sendingRequest, setSendingRequest] = useState<string | null>(null);
+  const [confirmUnfriendId, setConfirmUnfriendId] = useState<string | null>(null);
+  const [unfriending, setUnfriending] = useState<string | null>(null);
 
   const leaderboards: Record<LeaderboardType, { data: LeaderboardEntry[]; label: string }> = {
     sessions:  { data: checkinLeaders,  label: "sessions" },
@@ -47,7 +53,7 @@ export function FriendsClient({
   };
 
   const friends = friendships.map((f: any) =>
-    f.requester_id === currentUserId ? f.addressee : f.requester
+    f.requester_id === currentUserId ? { ...f.addressee, friendshipId: f.id ?? f.requester_id + f.addressee_id } : { ...f.requester, friendshipId: f.id ?? f.requester_id + f.addressee_id }
   );
 
   const filteredFriends = searchQuery
@@ -97,6 +103,53 @@ export function FriendsClient({
     }
   }, [router, success, toastError]);
 
+  // Cancel outgoing request
+  const handleCancelSent = useCallback(async (reqId: string) => {
+    setLoadingRequest(reqId);
+    try {
+      const res = await fetch("/api/friends", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: reqId }),
+      });
+      if (!res.ok) throw new Error("Failed to cancel");
+      setSentRequests((prev) => prev.filter((r: any) => r.id !== reqId));
+      success("Friend request cancelled");
+    } catch {
+      toastError("Failed to cancel request");
+    } finally {
+      setLoadingRequest(null);
+    }
+  }, [success, toastError]);
+
+  // Unfriend
+  const handleUnfriend = useCallback(async (friendId: string) => {
+    setUnfriending(friendId);
+    try {
+      // Find the friendship row
+      const friendship = friendships.find(
+        (f: any) =>
+          (f.requester_id === currentUserId && f.addressee_id === friendId) ||
+          (f.requester_id === friendId && f.addressee_id === currentUserId)
+      );
+      if (!friendship) throw new Error("Friendship not found");
+
+      const res = await fetch("/api/friends", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: friendship.id ?? friendship.requester_id }),
+      });
+      if (!res.ok) throw new Error("Failed to unfriend");
+      success("Friend removed");
+      setConfirmUnfriendId(null);
+      router.refresh();
+    } catch {
+      toastError("Failed to remove friend");
+    } finally {
+      setUnfriending(null);
+    }
+  }, [currentUserId, friendships, router, success, toastError]);
+
   // Search users
   const handleSearch = useCallback(async (query: string) => {
     setSearchQuery(query);
@@ -141,7 +194,6 @@ export function FriendsClient({
         throw new Error(data.error || "Failed to send request");
       }
       success("Friend request sent!");
-      // Remove from search results
       setSearchResults((prev) => prev.filter((u: any) => u.id !== addresseeId));
     } catch (err: any) {
       toastError(err.message || "Failed to send friend request");
@@ -150,13 +202,12 @@ export function FriendsClient({
     }
   }, [success, toastError]);
 
-  // Check if a user is already a friend or has a pending request
+  // Filter search results: exclude self, existing friends, pending requests
   const friendIds = new Set(friends.map((f: any) => f.id));
   const pendingIds = new Set([
     ...pendingRequests.map((r: any) => r.requester?.id),
+    ...sentRequests.map((r: any) => r.addressee?.id),
   ]);
-
-  // Filter search results: exclude self, existing friends, pending requests
   const filteredSearchResults = searchResults.filter(
     (u: any) => u.id !== currentUserId && !friendIds.has(u.id) && !pendingIds.has(u.id)
   );
@@ -221,10 +272,12 @@ export function FriendsClient({
 
       {tab === "friends" && (
         <>
-          {/* Pending requests */}
+          {/* Pending incoming requests */}
           {pendingRequests.length > 0 && (
             <div className="bg-[#D4A843]/5 border border-[#D4A843]/20 rounded-2xl p-4 space-y-3">
-              <p className="text-sm font-medium text-[#D4A843]">{pendingRequests.length} pending request{pendingRequests.length > 1 ? "s" : ""}</p>
+              <p className="text-xs font-medium text-[#D4A843] uppercase tracking-wider">
+                Requests ({pendingRequests.length})
+              </p>
               {pendingRequests.map((req: any) => (
                 <div key={req.id} className="flex items-center gap-3">
                   <UserAvatar profile={req.requester} size="sm" />
@@ -246,6 +299,37 @@ export function FriendsClient({
                       className="text-xs bg-[#C44B3A]/10 text-[#C44B3A] border border-[#C44B3A]/20 px-3 py-1.5 rounded-xl hover:bg-[#C44B3A]/20 transition-colors disabled:opacity-50"
                     >
                       Decline
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Outgoing sent requests */}
+          {sentRequests.length > 0 && (
+            <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-4 space-y-3">
+              <p className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">
+                Sent ({sentRequests.length})
+              </p>
+              {sentRequests.map((req: any) => (
+                <div key={req.id} className="flex items-center gap-3">
+                  <UserAvatar profile={req.addressee} size="sm" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-[var(--text-primary)]">{req.addressee.display_name}</p>
+                    <p className="text-xs text-[var(--text-muted)]">@{req.addressee.username}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="flex items-center gap-1 text-xs text-[var(--text-muted)]">
+                      <Clock size={12} />
+                      Pending
+                    </span>
+                    <button
+                      onClick={() => handleCancelSent(req.id)}
+                      disabled={loadingRequest === req.id}
+                      className="text-xs text-[var(--text-muted)] hover:text-[#C44B3A] border border-[var(--border)] hover:border-[#C44B3A]/30 px-2.5 py-1.5 rounded-xl transition-colors disabled:opacity-50"
+                    >
+                      {loadingRequest === req.id ? <Loader2 size={12} className="animate-spin" /> : <X size={12} />}
                     </button>
                   </div>
                 </div>
@@ -300,29 +384,75 @@ export function FriendsClient({
           )}
 
           {/* Friends list */}
-          {filteredFriends.length === 0 && searchQuery.length < 2 ? (
+          {filteredFriends.length === 0 && searchQuery.length < 2 && pendingRequests.length === 0 && sentRequests.length === 0 ? (
             <div className="text-center py-16 space-y-3">
-              <p className="text-5xl">👥</p>
+              <p className="text-5xl">&#x1F465;</p>
               <p className="font-display text-xl text-[var(--text-primary)]">No friends yet</p>
               <p className="text-sm text-[var(--text-secondary)]">Search by username above to find and add friends.</p>
             </div>
           ) : filteredFriends.length > 0 && (
             <div className="space-y-2">
-              {searchQuery.length >= 2 && (
-                <p className="text-xs text-[var(--text-muted)] font-medium uppercase tracking-wider px-1">Your Friends</p>
-              )}
+              <p className="text-xs text-[var(--text-muted)] font-medium uppercase tracking-wider px-1">
+                Friends ({filteredFriends.length})
+              </p>
               {filteredFriends.map((friend: any) => (
-                <Link key={friend.id} href={`/profile/${friend.username}`}>
-                  <div className="flex items-center gap-3 p-3 bg-[var(--surface)] border border-[var(--border)] hover:border-[#D4A843]/30 rounded-2xl transition-colors group">
-                    <UserAvatar profile={friend} size="sm" showLevel />
-                    <div className="flex-1 min-w-0">
-                      <p className="font-sans font-semibold text-[var(--text-primary)] truncate group-hover:text-[#D4A843] transition-colors text-sm">
-                        {friend.display_name}
-                      </p>
-                      <p className="text-xs text-[var(--text-muted)]">@{friend.username} · {friend.total_checkins} sessions</p>
-                    </div>
+                <div key={friend.id} className="overflow-hidden rounded-2xl border border-[var(--border)]">
+                  <div className="flex items-center gap-3 p-3 bg-[var(--surface)] group">
+                    <Link href={`/profile/${friend.username}`} className="flex items-center gap-3 flex-1 min-w-0">
+                      <UserAvatar profile={friend} size="sm" showLevel />
+                      <div className="flex-1 min-w-0">
+                        <p className="font-sans font-semibold text-[var(--text-primary)] truncate group-hover:text-[#D4A843] transition-colors text-sm">
+                          {friend.display_name}
+                        </p>
+                        <p className="text-xs text-[var(--text-muted)]">@{friend.username} · {friend.total_checkins} sessions</p>
+                      </div>
+                    </Link>
+                    <button
+                      onClick={() => setConfirmUnfriendId(confirmUnfriendId === friend.id ? null : friend.id)}
+                      className="p-2 rounded-lg transition-colors flex-shrink-0 hover:bg-[var(--surface-2)]"
+                      style={{ color: confirmUnfriendId === friend.id ? "var(--danger)" : "var(--text-muted)" }}
+                    >
+                      <UserX size={15} />
+                    </button>
                   </div>
-                </Link>
+
+                  {/* Inline unfriend confirmation */}
+                  <AnimatePresence>
+                    {confirmUnfriendId === friend.id && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.15 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="flex items-center justify-between px-4 py-3 border-t"
+                          style={{ background: "rgba(196,75,58,0.06)", borderColor: "var(--border)" }}>
+                          <span className="text-xs text-[var(--text-secondary)]">
+                            Remove <strong className="text-[var(--text-primary)]">{friend.display_name}</strong>?
+                          </span>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => setConfirmUnfriendId(null)}
+                              className="px-3 py-1 rounded-lg text-xs font-medium"
+                              style={{ color: "var(--text-secondary)", background: "var(--surface-2)" }}
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              onClick={() => handleUnfriend(friend.id)}
+                              disabled={unfriending === friend.id}
+                              className="px-3 py-1 rounded-lg text-xs font-semibold disabled:opacity-50"
+                              style={{ background: "var(--danger)", color: "#fff" }}
+                            >
+                              {unfriending === friend.id ? <Loader2 size={12} className="animate-spin" /> : "Unfriend"}
+                            </button>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
               ))}
             </div>
           )}

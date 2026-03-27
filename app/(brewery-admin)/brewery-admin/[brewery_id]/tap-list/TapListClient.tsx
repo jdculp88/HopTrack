@@ -2,7 +2,10 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Edit2, Trash2, GlassWater, ToggleLeft, ToggleRight, X, Save, Loader2, AlertTriangle, Award } from "lucide-react";
+import { Plus, Edit2, Trash2, GlassWater, ToggleLeft, ToggleRight, X, Save, Loader2, AlertTriangle, Award, Tv, GripVertical, Ban } from "lucide-react";
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { useToast } from "@/components/ui/Toast";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
@@ -25,8 +28,11 @@ interface Beer {
   description: string | null;
   is_on_tap: boolean;
   is_featured: boolean;
+  is_86d: boolean;
+  display_order: number;
   avg_rating: number | null;
   total_checkins: number;
+  price_per_pint: number | null;
 }
 
 interface TapListClientProps {
@@ -34,7 +40,7 @@ interface TapListClientProps {
   initialBeers: Beer[];
 }
 
-const emptyBeer = { name: "", style: "IPA" as BeerStyle, abv: "", ibu: "", description: "" };
+const emptyBeer = { name: "", style: "IPA" as BeerStyle, abv: "", ibu: "", description: "", price: "" };
 
 export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
   const [beers, setBeers] = useState<Beer[]>(initialBeers);
@@ -57,7 +63,7 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
 
   function openAdd() { setForm(emptyBeer); setEditingBeer(null); setSaveError(null); setShowForm(true); }
   function openEdit(beer: Beer) {
-    setForm({ name: beer.name, style: (beer.style as BeerStyle) ?? "IPA", abv: beer.abv?.toString() ?? "", ibu: beer.ibu?.toString() ?? "", description: beer.description ?? "" });
+    setForm({ name: beer.name, style: (beer.style as BeerStyle) ?? "IPA", abv: beer.abv?.toString() ?? "", ibu: beer.ibu?.toString() ?? "", description: beer.description ?? "", price: beer.price_per_pint?.toString() ?? "" });
     setEditingBeer(beer);
     setSaveError(null);
     setShowForm(true);
@@ -77,6 +83,7 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
       abv: form.abv ? parseFloat(form.abv as string) : null,
       ibu: form.ibu ? parseInt(form.ibu as string) : null,
       description: (form.description as string).trim() || null,
+      price_per_pint: form.price ? parseFloat(form.price as string) : null,
       ...(editingBeer ? {} : { is_on_tap: true }),
     };
 
@@ -124,6 +131,37 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
     }
   }
 
+  async function toggle86d(beer: Beer) {
+    const newVal = !beer.is_86d;
+    setBeers(prev => prev.map(b => b.id === beer.id ? { ...b, is_86d: newVal } : b));
+    const { error } = await (supabase as any).from("beers").update({ is_86d: newVal }).eq("id", beer.id);
+    if (error) setBeers(prev => prev.map(b => b.id === beer.id ? { ...b, is_86d: beer.is_86d } : b));
+    else toastSuccess(newVal ? `${beer.name} marked as 86'd` : `${beer.name} back in stock`);
+  }
+
+  async function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = beers.findIndex(b => b.id === active.id);
+    const newIndex = beers.findIndex(b => b.id === over.id);
+    const reordered = arrayMove(beers, oldIndex, newIndex);
+
+    // Optimistic update
+    setBeers(reordered);
+
+    // Persist new order
+    const updates = reordered.map((b, i) => ({ id: b.id, display_order: i }));
+    for (const u of updates) {
+      await (supabase as any).from("beers").update({ display_order: u.display_order }).eq("id", u.id);
+    }
+  }
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
   async function handleDelete(beer: Beer) {
     setDeletingId(beer.id);
     setConfirmDeleteId(null);
@@ -142,11 +180,20 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
             {onTapCount} on tap · {beers.length} total beers
           </p>
         </div>
-        <button onClick={openAdd}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all active:scale-95"
-          style={{ background: "var(--accent-gold)", color: "#0F0E0C" }}>
-          <Plus size={16} /> Add Beer
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => window.open(`/brewery-admin/${breweryId}/board`, "_blank")}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all active:scale-95 border"
+            style={{ borderColor: "var(--border)", color: "var(--text-secondary)", background: "var(--surface)" }}
+          >
+            <Tv size={16} /> The Board
+          </button>
+          <button onClick={openAdd}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all active:scale-95"
+            style={{ background: "var(--accent-gold)", color: "#0F0E0C" }}>
+            <Plus size={16} /> Add Beer
+          </button>
+        </div>
       </div>
 
       {/* Filter tabs */}
@@ -164,107 +211,24 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
       </div>
 
       {/* Beer List */}
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+      <SortableContext items={filtered.map(b => b.id)} strategy={verticalListSortingStrategy}>
       <div className="space-y-3">
         <AnimatePresence>
           {filtered.map(beer => (
-            <motion.div key={beer.id}
-              layout
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="rounded-2xl border transition-all overflow-hidden"
-              style={{ background: "var(--surface)", borderColor: confirmDeleteId === beer.id ? "var(--danger)" : "var(--border)", opacity: beer.is_on_tap ? 1 : 0.6 }}>
-
-              <div className="flex items-center gap-4 p-4">
-                {/* Tap indicator */}
-                <button onClick={() => toggleTap(beer)} className="flex-shrink-0 transition-opacity hover:opacity-70">
-                  {beer.is_on_tap
-                    ? <ToggleRight size={24} style={{ color: "var(--accent-gold)" }} />
-                    : <ToggleLeft size={24} style={{ color: "var(--text-muted)" }} />}
-                </button>
-
-                {/* Icon */}
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 text-lg"
-                  style={{ background: beer.is_on_tap ? "rgba(212,168,67,0.15)" : "var(--surface-2)" }}>
-                  🍺
-                </div>
-
-                {/* Info */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <p className="font-display font-semibold" style={{ color: "var(--text-primary)" }}>{beer.name}</p>
-                    {beer.is_featured && <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: "rgba(212,168,67,0.15)", color: "var(--accent-gold)" }}>Beer of the Week</span>}
-                    {!beer.is_on_tap && <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: "var(--surface-2)", color: "var(--text-muted)" }}>Off tap</span>}
-                  </div>
-                  <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                    <BeerStyleBadge style={beer.style as BeerStyle} size="xs" />
-                    {beer.abv && <span className="text-xs font-mono" style={{ color: "var(--text-muted)" }}>{beer.abv}% ABV</span>}
-                    {beer.ibu && <span className="text-xs font-mono" style={{ color: "var(--text-muted)" }}>{beer.ibu} IBU</span>}
-                    {beer.avg_rating && <span className="text-xs font-mono" style={{ color: "var(--accent-gold)" }}>★ {beer.avg_rating.toFixed(1)}</span>}
-                    {beer.total_checkins > 0 && <span className="text-xs" style={{ color: "var(--text-muted)" }}>{beer.total_checkins} pours</span>}
-                  </div>
-                </div>
-
-                {/* Actions */}
-                <div className="flex items-center gap-1 flex-shrink-0">
-                  <button onClick={() => toggleFeatured(beer)}
-                    title={beer.is_featured ? "Remove featured" : "Set as Beer of the Week"}
-                    className="p-2 rounded-lg transition-colors hover:opacity-70"
-                    style={{ color: beer.is_featured ? "var(--accent-gold)" : "var(--text-muted)" }}>
-                    <Award size={15} />
-                  </button>
-                  <button onClick={() => openEdit(beer)}
-                    className="p-2 rounded-lg transition-colors hover:opacity-70"
-                    style={{ color: "var(--text-secondary)" }}>
-                    <Edit2 size={15} />
-                  </button>
-                  <button
-                    onClick={() => setConfirmDeleteId(confirmDeleteId === beer.id ? null : beer.id)}
-                    disabled={deletingId === beer.id}
-                    className="p-2 rounded-lg transition-colors hover:opacity-70 disabled:opacity-40"
-                    style={{ color: confirmDeleteId === beer.id ? "var(--danger)" : "var(--text-secondary)" }}>
-                    {deletingId === beer.id ? <Loader2 size={15} className="animate-spin" /> : <Trash2 size={15} />}
-                  </button>
-                </div>
-              </div>
-
-              {/* Inline delete confirmation — no browser dialogs */}
-              <AnimatePresence>
-                {confirmDeleteId === beer.id && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.15 }}
-                    className="overflow-hidden"
-                  >
-                    <div className="flex items-center justify-between px-4 py-3 border-t"
-                      style={{ background: "rgba(196,75,58,0.06)", borderColor: "var(--danger)" }}>
-                      <div className="flex items-center gap-2">
-                        <AlertTriangle size={13} style={{ color: "var(--danger)" }} />
-                        <span className="text-xs" style={{ color: "var(--text-secondary)" }}>
-                          Remove <strong style={{ color: "var(--text-primary)" }}>{beer.name}</strong> from your beer list?
-                        </span>
-                      </div>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => setConfirmDeleteId(null)}
-                          className="px-3 py-1 rounded-lg text-xs font-medium"
-                          style={{ color: "var(--text-secondary)", background: "var(--surface-2)" }}>
-                          Cancel
-                        </button>
-                        <button
-                          onClick={() => handleDelete(beer)}
-                          className="px-3 py-1 rounded-lg text-xs font-semibold"
-                          style={{ background: "var(--danger)", color: "#fff" }}>
-                          Remove
-                        </button>
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </motion.div>
+            <SortableBeerItem
+              key={beer.id}
+              beer={beer}
+              confirmDeleteId={confirmDeleteId}
+              deletingId={deletingId}
+              onToggleTap={toggleTap}
+              onToggle86d={toggle86d}
+              onToggleFeatured={toggleFeatured}
+              onEdit={openEdit}
+              onConfirmDelete={(id) => setConfirmDeleteId(confirmDeleteId === id ? null : id)}
+              onDelete={handleDelete}
+              onCancelDelete={() => setConfirmDeleteId(null)}
+            />
           ))}
         </AnimatePresence>
 
@@ -280,6 +244,8 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
           </div>
         )}
       </div>
+      </SortableContext>
+      </DndContext>
 
       {/* Add / Edit Modal */}
       <AnimatePresence>
@@ -323,7 +289,7 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
                   </select>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-3 gap-3">
                   <div>
                     <label className="text-xs font-mono uppercase tracking-wider block mb-1.5" style={{ color: "var(--text-muted)" }}>ABV %</label>
                     <input type="number" step="0.1" min="0" max="25" value={form.abv} onChange={e => setForm(f => ({ ...f, abv: e.target.value }))}
@@ -335,6 +301,13 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
                     <label className="text-xs font-mono uppercase tracking-wider block mb-1.5" style={{ color: "var(--text-muted)" }}>IBU</label>
                     <input type="number" min="0" max="200" value={form.ibu} onChange={e => setForm(f => ({ ...f, ibu: e.target.value }))}
                       placeholder="45"
+                      className="w-full px-4 py-2.5 rounded-xl border text-sm focus:outline-none"
+                      style={{ background: "var(--surface-2)", borderColor: "var(--border)", color: "var(--text-primary)" }} />
+                  </div>
+                  <div>
+                    <label className="text-xs font-mono uppercase tracking-wider block mb-1.5" style={{ color: "var(--text-muted)" }}>Price $</label>
+                    <input type="number" step="0.5" min="0" max="50" value={form.price} onChange={e => setForm(f => ({ ...f, price: e.target.value }))}
+                      placeholder="7"
                       className="w-full px-4 py-2.5 rounded-xl border text-sm focus:outline-none"
                       style={{ background: "var(--surface-2)", borderColor: "var(--border)", color: "var(--text-primary)" }} />
                   </div>
@@ -375,5 +348,167 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
         )}
       </AnimatePresence>
     </div>
+  );
+}
+
+// ─── Sortable Beer Item ────────────────────────────────────────────────────────
+
+interface SortableBeerItemProps {
+  beer: Beer;
+  confirmDeleteId: string | null;
+  deletingId: string | null;
+  onToggleTap: (beer: Beer) => void;
+  onToggle86d: (beer: Beer) => void;
+  onToggleFeatured: (beer: Beer) => void;
+  onEdit: (beer: Beer) => void;
+  onConfirmDelete: (id: string) => void;
+  onDelete: (beer: Beer) => void;
+  onCancelDelete: () => void;
+}
+
+function SortableBeerItem({ beer, confirmDeleteId, deletingId, onToggleTap, onToggle86d, onToggleFeatured, onEdit, onConfirmDelete, onDelete, onCancelDelete }: SortableBeerItemProps) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: beer.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : beer.is_on_tap ? 1 : 0.6,
+    zIndex: isDragging ? 10 : undefined,
+  };
+
+  return (
+    <motion.div ref={setNodeRef} style={style}
+      layout
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      className="rounded-2xl border transition-all overflow-hidden"
+      {...attributes}
+    >
+      <div
+        className="flex items-center gap-3 p-4"
+        style={{ background: "var(--surface)", borderColor: confirmDeleteId === beer.id ? "var(--danger)" : "var(--border)" }}
+      >
+        {/* Drag handle */}
+        <button {...listeners} className="flex-shrink-0 cursor-grab active:cursor-grabbing p-1 touch-none"
+          style={{ color: "var(--text-muted)" }}>
+          <GripVertical size={16} />
+        </button>
+
+        {/* Tap indicator */}
+        <button onClick={() => onToggleTap(beer)} className="flex-shrink-0 transition-opacity hover:opacity-70">
+          {beer.is_on_tap
+            ? <ToggleRight size={24} style={{ color: "var(--accent-gold)" }} />
+            : <ToggleLeft size={24} style={{ color: "var(--text-muted)" }} />}
+        </button>
+
+        {/* Icon */}
+        <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 text-lg"
+          style={{ background: beer.is_86d ? "rgba(196,75,58,0.15)" : beer.is_on_tap ? "rgba(212,168,67,0.15)" : "var(--surface-2)" }}>
+          {beer.is_86d ? "❌" : "🍺"}
+        </div>
+
+        {/* Info */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <p className={cn("font-display font-semibold", beer.is_86d && "line-through")}
+              style={{ color: beer.is_86d ? "var(--text-muted)" : "var(--text-primary)" }}>
+              {beer.name}
+            </p>
+            {beer.is_featured && (
+              <span className="text-xs px-2 py-0.5 rounded-full font-semibold"
+                style={{ background: "rgba(212,168,67,0.15)", color: "var(--accent-gold)" }}>
+                Beer of the Week
+              </span>
+            )}
+            {beer.is_86d && (
+              <span className="text-xs px-2 py-0.5 rounded-full font-semibold"
+                style={{ background: "rgba(196,75,58,0.15)", color: "var(--danger)" }}>
+                86&apos;d
+              </span>
+            )}
+            {!beer.is_on_tap && !beer.is_86d && (
+              <span className="text-xs px-2 py-0.5 rounded-full"
+                style={{ background: "var(--surface-2)", color: "var(--text-muted)" }}>
+                Off tap
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+            <BeerStyleBadge style={beer.style as BeerStyle} size="xs" />
+            {beer.abv && <span className="text-xs font-mono" style={{ color: "var(--text-muted)" }}>{beer.abv}% ABV</span>}
+            {beer.ibu && <span className="text-xs font-mono" style={{ color: "var(--text-muted)" }}>{beer.ibu} IBU</span>}
+            {beer.price_per_pint != null && <span className="text-xs font-mono" style={{ color: "var(--accent-gold)" }}>${beer.price_per_pint}</span>}
+            {beer.avg_rating && <span className="text-xs font-mono" style={{ color: "var(--accent-gold)" }}>★ {beer.avg_rating.toFixed(1)}</span>}
+            {beer.total_checkins > 0 && <span className="text-xs" style={{ color: "var(--text-muted)" }}>{beer.total_checkins} pours</span>}
+          </div>
+        </div>
+
+        {/* Actions */}
+        <div className="flex items-center gap-1 flex-shrink-0">
+          {beer.is_on_tap && (
+            <button onClick={() => onToggle86d(beer)}
+              title={beer.is_86d ? "Back in stock" : "Mark as 86'd (out of stock)"}
+              className="p-2 rounded-lg transition-colors hover:opacity-70"
+              style={{ color: beer.is_86d ? "var(--danger)" : "var(--text-muted)" }}>
+              <Ban size={15} />
+            </button>
+          )}
+          <button onClick={() => onToggleFeatured(beer)}
+            title={beer.is_featured ? "Remove featured" : "Set as Beer of the Week"}
+            className="p-2 rounded-lg transition-colors hover:opacity-70"
+            style={{ color: beer.is_featured ? "var(--accent-gold)" : "var(--text-muted)" }}>
+            <Award size={15} />
+          </button>
+          <button onClick={() => onEdit(beer)}
+            className="p-2 rounded-lg transition-colors hover:opacity-70"
+            style={{ color: "var(--text-secondary)" }}>
+            <Edit2 size={15} />
+          </button>
+          <button
+            onClick={() => onConfirmDelete(beer.id)}
+            disabled={deletingId === beer.id}
+            className="p-2 rounded-lg transition-colors hover:opacity-70 disabled:opacity-40"
+            style={{ color: confirmDeleteId === beer.id ? "var(--danger)" : "var(--text-secondary)" }}>
+            {deletingId === beer.id ? <Loader2 size={15} className="animate-spin" /> : <Trash2 size={15} />}
+          </button>
+        </div>
+      </div>
+
+      {/* Inline delete confirmation */}
+      <AnimatePresence>
+        {confirmDeleteId === beer.id && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="overflow-hidden"
+          >
+            <div className="flex items-center justify-between px-4 py-3 border-t"
+              style={{ background: "rgba(196,75,58,0.06)", borderColor: "var(--danger)" }}>
+              <div className="flex items-center gap-2">
+                <AlertTriangle size={13} style={{ color: "var(--danger)" }} />
+                <span className="text-xs" style={{ color: "var(--text-secondary)" }}>
+                  Remove <strong style={{ color: "var(--text-primary)" }}>{beer.name}</strong> from your beer list?
+                </span>
+              </div>
+              <div className="flex gap-2">
+                <button onClick={onCancelDelete}
+                  className="px-3 py-1 rounded-lg text-xs font-medium"
+                  style={{ color: "var(--text-secondary)", background: "var(--surface-2)" }}>
+                  Cancel
+                </button>
+                <button onClick={() => onDelete(beer)}
+                  className="px-3 py-1 rounded-lg text-xs font-semibold"
+                  style={{ background: "var(--danger)", color: "#fff" }}>
+                  Remove
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 }

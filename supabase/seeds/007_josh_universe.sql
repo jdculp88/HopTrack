@@ -86,7 +86,7 @@ BEGIN
     display_name     = 'Josh',
     bio              = 'Founder of HopTrack. I built the app so I could obsessively track every beer I drink. Send help — and also IPAs.',
     home_city        = 'Austin, TX',
-    avatar_url       = 'https://i.pravatar.cc/150?u=josh@hoptrack.io',
+    avatar_url       = 'https://api.dicebear.com/7.x/avataaars/svg?seed=joshfounder',
     level            = 9,
     xp               = 4180,
     total_checkins   = 47,

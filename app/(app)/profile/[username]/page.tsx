@@ -91,7 +91,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
   return (
     <div className="max-w-3xl mx-auto">
       {/* Hero Banner */}
-      <div className="relative h-48 sm:h-64 overflow-hidden">
+      <div className="relative h-48 sm:h-64 mx-4 mt-4 rounded-2xl overflow-hidden">
         <ProfileBanner
           username={username}
           displayName={(profile as any).display_name}
@@ -116,7 +116,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
             <UserAvatar profile={profile} size="xl" />
           </div>
           <div className="pb-1 flex-1 min-w-0">
-            <h1 className="font-display text-2xl font-bold text-[var(--text-primary)] leading-tight">{profile.display_name}</h1>
+            <h1 className="font-display text-4xl sm:text-5xl font-bold text-[var(--text-primary)] leading-tight drop-shadow-lg">{profile.display_name}</h1>
             <p className="text-sm text-[var(--text-muted)]">@{profile.username}</p>
           </div>
           {!isOwnProfile && (

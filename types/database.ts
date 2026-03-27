@@ -29,11 +29,6 @@ export interface Database {
         Insert: BeerInsert;
         Update: BeerUpdate;
       };
-      checkins: {
-        Row: Checkin;
-        Insert: CheckinInsert;
-        Update: CheckinUpdate;
-      };
       achievements: {
         Row: Achievement;
         Insert: AchievementInsert;
@@ -188,7 +183,7 @@ export interface Beer {
 export type BeerInsert = Omit<Beer, "id" | "created_at"> & { id?: string };
 export type BeerUpdate = Partial<Beer>;
 
-// ─── Check-ins ────────────────────────────────────────────────────────────────
+// ─── Serving & Flavor Types ───────────────────────────────────────────────────
 export type ServingStyle = "draft" | "bottle" | "can" | "cask";
 export type FlavorTag =
   | "Hoppy"
@@ -211,25 +206,6 @@ export type FlavorTag =
   | "Floral"
   | "Grassy"
   | "Crisp";
-
-export interface Checkin {
-  id: string;
-  user_id: string;
-  brewery_id: string;
-  beer_id: string;
-  rating: number | null;
-  comment: string | null;
-  flavor_tags: FlavorTag[] | null;
-  serving_style: ServingStyle | null;
-  photo_url: string | null;
-  is_first_time: boolean;
-  checked_in_with: string[] | null;
-  location_verified: boolean;
-  share_to_feed: boolean;
-  created_at: string;
-}
-export type CheckinInsert = Omit<Checkin, "id" | "created_at"> & { id?: string };
-export type CheckinUpdate = Partial<Checkin>;
 
 // ─── Achievements ─────────────────────────────────────────────────────────────
 export type AchievementTier = "bronze" | "silver" | "gold" | "platinum";
@@ -260,7 +236,6 @@ export interface UserAchievement {
   user_id: string;
   achievement_id: string;
   earned_at: string;
-  checkin_id: string | null;
 }
 export type UserAchievementInsert = Omit<UserAchievement, "id" | "earned_at"> & {
   id?: string;
@@ -298,6 +273,7 @@ export type NotificationType =
   | "tagged_checkin"
   | "achievement_unlocked"
   | "reaction"
+  | "session_comment"
   | "weekly_stats"
   | "nudge";
 
@@ -319,15 +295,30 @@ export type ReactionType = "thumbs_up" | "flame" | "beer";
 export interface Reaction {
   id: string;
   user_id: string;
-  /** @deprecated — will be removed in Sprint 15 when checkins table is dropped */
-  checkin_id: string;
-  session_id: string | null;
+  session_id: string;
   beer_log_id: string | null;
   type: ReactionType;
   created_at: string;
 }
 export type ReactionInsert = Omit<Reaction, "id" | "created_at"> & { id?: string };
 export type ReactionUpdate = Partial<Reaction>;
+
+// ─── Session Comments ────────────────────────────────────────────────────────
+export interface SessionComment {
+  id: string;
+  session_id: string;
+  user_id: string;
+  body: string;
+  created_at: string;
+  // joined fields
+  profile?: {
+    id: string;
+    username: string;
+    display_name: string | null;
+    avatar_url: string | null;
+  };
+}
+export type SessionCommentInsert = Omit<SessionComment, "id" | "created_at" | "profile"> & { id?: string };
 
 // ─── Sessions ─────────────────────────────────────────────────────────────────
 export interface Session {
@@ -382,17 +373,8 @@ export interface BeerLog {
 }
 
 // ─── Enriched / Joined Types ──────────────────────────────────────────────────
-export interface CheckinWithDetails extends Checkin {
-  profile: Profile;
-  brewery: Brewery;
-  beer: Beer;
-  reactions?: Reaction[];
-  reaction_count?: number;
-}
-
 export interface BeerWithBrewery extends Beer {
   brewery: Brewery;
-  user_checkin?: Checkin;
   on_wishlist?: boolean;
 }
 
@@ -401,6 +383,7 @@ export interface BreweryWithStats extends Brewery {
   user_visit?: BreweryVisit;
   friend_visits?: number;
   beer_count?: number;
+  has_upcoming_events?: boolean;
 }
 
 export interface ProfileWithAchievements extends Profile {
