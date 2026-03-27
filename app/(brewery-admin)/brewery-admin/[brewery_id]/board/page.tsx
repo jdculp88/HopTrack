@@ -140,12 +140,12 @@ export default async function BoardPage({ params }: { params: Promise<{ brewery_
 
   return (
     <>
-      {/* Load Cormorant Garrigue for the brewery name */}
+      {/* Load Instrument Serif for the brewery name on The Board */}
       <link rel="preconnect" href="https://fonts.googleapis.com" />
       <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       {/* eslint-disable-next-line @next/next/no-page-custom-font */}
       <link
-        href="https://fonts.googleapis.com/css2?family=Cormorant+Garrigue:ital,wght@0,600;0,700;1,600;1,700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap"
         rel="stylesheet"
       />
       <BoardClient
