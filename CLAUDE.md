@@ -175,8 +175,8 @@ scripts/supabase-setup.mjs    — One-time setup script
 
 ## 🗺️ Where We Are
 
-**Current Sprint:** Sprint 21 — All of It (2026-03-27)
-**Last completed:** Sprint 20 — Close It ✅ (2026-03-27)
+**Current Sprint:** Sprint 22 — The Mark (2026-03-28)
+**Last completed:** Sprint 21 — All of It ✅ (2026-03-27)
 
 ### Key design decisions (still active from Sprint 11):
 - Marketing pages use hardcoded `C` color constants (not CSS vars)
@@ -483,6 +483,39 @@ Retro: `docs/retros/sprint-13-retro.md`
 - S21-001: Playwright E2E (Casey is serious this time)
 - Taylor: Close first paid brewery (Asheville Tuesday meeting pending)
 - Riley: Migration consolidation proposal (028+029)
+
+### Sprint 22 — The Mark ✅ (2026-03-28)
+**Theme:** HopMark identity system + Friends Live + logo bug fix
+**Identity source:** Morgan's MP-5 "The One" — team voted Option A "The Pour" unanimously
+
+- ✅ S22-001: `components/ui/HopMark.tsx` — canonical SVG component, 4 variants (mark/horizontal/stacked/wordmark), 5 themes (dark/cream/gold-mono/white/auto)
+- ✅ S22-002: HopMark deployed across app — AppNav, BreweryAdminNav, auth layout, Board footer, QR tents, Brewery Welcome, Session Share Card
+- ✅ S22-003: `app/icon.tsx` + `app/apple-icon.tsx` — Next.js ImageResponse favicons (32×32 + 180×180)
+- ✅ S22-004: `GET /api/friends/active` — friends' active sessions, respects `share_to_feed` + `share_live` prefs
+- ✅ S22-005: `components/social/DrinkingNow.tsx` — horizontal scroll strip in HomeFeed, pulse ring avatars, 60s polling
+- ✅ S22-006: "Friends Here Now" section on brewery detail page
+- ✅ S22-007: Session start notifications — in-app + push to friends when session starts
+- ✅ S22-008: "Show Active Sessions" privacy toggle in Settings → Privacy (`share_live` pref)
+- ✅ S22-009: Logo bug fix — inline styles replace presentation attrs, `auto` theme with CSS vars, size bumps, wider mark↔wordmark gap
+
+**Key architectural changes from Sprint 22:**
+- `HopMark.tsx` — all SVG colors use `style={{ fill/stroke }}` inline styles (not presentation attributes) to win CSS cascade
+- `auto` theme: `var(--accent-gold)` / `var(--text-primary)` — adapts to dark↔cream toggle; use on theme-toggling surfaces
+- Horizontal lockup viewBox `352×72`, text x=72 for mark↔wordmark breathing room
+- `HopMarkIcon` export for favicon/manifest canvas generation
+- `HOPMARK_PATHS` export — raw SVG path data for canvas/export
+- `/api/friends/active` — fire-and-forget pattern; no migration needed (share_live is JSONB key, defaults true when absent)
+- `DrinkingNow` polls every 60s (not Realtime) — upgrade if engagement warrants
+- Session start calls `notifyFriendsSessionStarted()` with `.catch(() => {})` (non-blocking)
+- AppNav: `theme="auto"` height=32, BreweryAdminNav: `theme="auto"` height=24
+- Auth layout: desktop height=30, mobile height=32 (stays `theme="cream"` — hardcoded bg)
+
+**Deferred to Sprint 23:**
+- S21-001: Playwright E2E (7th carry — Casey's sit-in continues)
+- Alex: draw animation on auth logo (SVG path animation)
+- Supabase Realtime upgrade for Friends Live (if engagement data supports it)
+- Riley: Migration consolidation proposal (028+029)
+- Taylor: Close first paid brewery
 
 ### Revenue Targets
 - Tap tier: $49/mo
