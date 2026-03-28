@@ -11,6 +11,7 @@ export async function GET(request: NextRequest) {
     .from('sessions')
     .select(`
       *,
+      brewery:breweries(id, name, city, state),
       beer_logs(
         id, beer_id, rating, flavor_tags, serving_style, comment, photo_url, logged_at
       )

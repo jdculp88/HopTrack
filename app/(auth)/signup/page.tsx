@@ -114,7 +114,7 @@ export default function SignupPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Email"
                 required
-                className="w-full bg-[var(--surface-2)] border border-[var(--border)] rounded-xl pl-11 pr-4 py-3 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] text-sm focus:outline-none focus:border-[#D4A843] transition-colors"
+                className="w-full bg-[var(--surface-2)] border border-[var(--border)] rounded-xl pl-11 pr-4 py-3 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] text-sm focus:outline-none focus:border-[var(--accent-gold)] transition-colors"
               />
             </div>
             <div className="relative">
@@ -126,7 +126,7 @@ export default function SignupPage() {
                 placeholder="Password (8+ characters)"
                 required
                 minLength={8}
-                className="w-full bg-[var(--surface-2)] border border-[var(--border)] rounded-xl pl-11 pr-11 py-3 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] text-sm focus:outline-none focus:border-[#D4A843] transition-colors"
+                className="w-full bg-[var(--surface-2)] border border-[var(--border)] rounded-xl pl-11 pr-11 py-3 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] text-sm focus:outline-none focus:border-[var(--accent-gold)] transition-colors"
               />
               <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-secondary)]">
                 {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -149,7 +149,7 @@ export default function SignupPage() {
               onChange={(e) => setDisplayName(e.target.value)}
               placeholder="Display name"
               required
-              className="w-full bg-[var(--surface-2)] border border-[var(--border)] rounded-xl pl-11 pr-4 py-3 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] text-sm focus:outline-none focus:border-[#D4A843] transition-colors"
+              className="w-full bg-[var(--surface-2)] border border-[var(--border)] rounded-xl pl-11 pr-4 py-3 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] text-sm focus:outline-none focus:border-[var(--accent-gold)] transition-colors"
             />
           </div>
           <div className="relative">
@@ -161,7 +161,7 @@ export default function SignupPage() {
               placeholder="username"
               required
               maxLength={30}
-              className="w-full bg-[var(--surface-2)] border border-[var(--border)] rounded-xl pl-8 pr-4 py-3 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] text-sm focus:outline-none focus:border-[#D4A843] transition-colors font-mono"
+              className="w-full bg-[var(--surface-2)] border border-[var(--border)] rounded-xl pl-8 pr-4 py-3 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] text-sm focus:outline-none focus:border-[var(--accent-gold)] transition-colors font-mono"
             />
           </div>
           <div className="relative">
@@ -171,7 +171,7 @@ export default function SignupPage() {
               value={homeCity}
               onChange={(e) => setHomeCity(e.target.value)}
               placeholder="Home city (optional)"
-              className="w-full bg-[var(--surface-2)] border border-[var(--border)] rounded-xl pl-11 pr-4 py-3 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] text-sm focus:outline-none focus:border-[#D4A843] transition-colors"
+              className="w-full bg-[var(--surface-2)] border border-[var(--border)] rounded-xl pl-11 pr-4 py-3 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] text-sm focus:outline-none focus:border-[var(--accent-gold)] transition-colors"
             />
           </div>
           {error && <p className="text-sm text-[#C44B3A] bg-[#C44B3A]/10 border border-[#C44B3A]/20 rounded-xl px-4 py-3">{error}</p>}

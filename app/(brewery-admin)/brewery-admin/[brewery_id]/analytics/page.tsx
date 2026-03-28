@@ -13,7 +13,7 @@ export default async function AnalyticsPage({ params }: { params: Promise<{ brew
   const { data: account } = await supabase
     .from("brewery_accounts").select("role")
     .eq("user_id", user.id).eq("brewery_id", brewery_id).single() as any;
-  if (!account) notFound();
+  if (!account) redirect("/brewery-admin");
 
   // Fetch sessions (last 90 days) for visit-level stats
   const since = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();

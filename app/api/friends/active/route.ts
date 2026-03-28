@@ -10,11 +10,13 @@ export async function GET() {
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   // Get accepted friend IDs
-  const { data: friendships } = await supabase
+  const { data: friendships, error: friendsError } = await supabase
     .from("friendships")
     .select("requester_id, addressee_id")
     .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`)
     .eq("status", "accepted");
+
+  if (friendsError) return NextResponse.json({ error: friendsError.message }, { status: 500 });
 
   if (!friendships || friendships.length === 0) {
     return NextResponse.json({ activeFriends: [] });

@@ -22,7 +22,8 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { ArrowRight, ArrowUpRight, Hop, Beer, Star, Trophy } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Beer, Star, Trophy } from "lucide-react";
+import { HopMark } from "@/components/ui/HopMark";
 import { useEffect, useState } from "react";
 
 // ─── Colors ────────────────────────────────────────────────────────────────
@@ -109,13 +110,8 @@ function Nav() {
       }}
     >
       <div className="max-w-7xl mx-auto px-6 lg:px-10 py-5 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2.5 group">
-          <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: C.gold }}>
-            <Hop size={14} style={{ color: C.dark }} />
-          </div>
-          <span className="font-display text-base font-bold tracking-tight" style={{ color: C.text }}>
-            HopTrack
-          </span>
+        <Link href="/" className="flex items-center group transition-opacity hover:opacity-80">
+          <HopMark variant="horizontal" theme="cream" height={28} />
         </Link>
 
         <div className="flex items-center gap-7">
@@ -510,11 +506,8 @@ export default function LandingContent() {
       {/* ── Footer ───────────────────────────────────────────────────────── */}
       <footer className="py-16 px-6 lg:px-10" style={{ background: C.dark, borderRadius: "2rem 2rem 0 0" }}>
         <div className="max-w-7xl mx-auto flex flex-col gap-8 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-6 h-6 rounded-md flex items-center justify-center flex-shrink-0" style={{ background: C.gold }}>
-              <Hop size={12} style={{ color: C.dark }} />
-            </div>
-            <span className="font-display font-bold text-sm" style={{ color: C.creamText }}>HopTrack</span>
+          <div className="flex items-center gap-3">
+            <HopMark variant="horizontal" theme="white" height={22} />
             <span className="text-sm select-none" style={{ color: C.darkBorder }}>·</span>
             <span className="text-xs font-mono" style={{ color: C.creamSubtle }}>Track Every Pour</span>
           </div>

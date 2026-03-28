@@ -9,6 +9,8 @@ import { BeerStyleBadge } from "@/components/ui/BeerStyleBadge";
 import { LeaderboardRow } from "@/components/social/LeaderboardRow";
 import { generateGradientFromString } from "@/lib/utils";
 import BreweryCheckinButton from "@/components/checkin/BreweryCheckinButton";
+import { BreweryReview } from "@/components/brewery/BreweryReview";
+import { BreweryRatingHeader } from "@/components/brewery/BreweryRatingHeader";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -167,7 +169,7 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
 
         <div className="absolute bottom-0 left-0 right-0 p-6">
           {brewery.brewery_type && (
-            <span className="text-xs font-mono text-[#D4A843] uppercase tracking-wider block mb-1">
+            <span className="text-xs font-mono text-[var(--accent-gold)] uppercase tracking-wider block mb-1">
               {brewery.brewery_type}
             </span>
           )}
@@ -196,7 +198,7 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
         <div className="flex flex-wrap gap-4 text-sm">
           {brewery.website_url && (
             <a href={brewery.website_url} target="_blank" rel="noopener noreferrer"
-              className="flex items-center gap-1.5 text-[#D4A843] hover:underline">
+              className="flex items-center gap-1.5 text-[var(--accent-gold)] hover:underline">
               <Globe size={14} />
               Website
             </a>
@@ -213,17 +215,20 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
           <p className="text-[var(--text-secondary)] leading-relaxed">{brewery.description}</p>
         )}
 
+        {/* Brewery Rating — prominent position */}
+        <BreweryRatingHeader breweryId={id} currentUserId={user.id} />
+
         {/* Beer of the Week */}
         {featuredBeer && (
           <Link href={`/beer/${featuredBeer.id}`}>
-            <div className="flex items-center gap-4 p-4 bg-[var(--surface)] border border-[#D4A843]/30 rounded-2xl transition-all hover:border-[#D4A843]/60 group">
+            <div className="flex items-center gap-4 p-4 bg-[var(--surface)] border border-[var(--accent-gold)]/30 rounded-2xl transition-all hover:border-[var(--accent-gold)]/60 group">
               <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
-                style={{ background: "linear-gradient(135deg, #D4A843 0%, #E8841A 100%)" }}>
+                style={{ background: "linear-gradient(135deg, var(--accent-gold) 0%, var(--accent-amber) 100%)" }}>
                 <Award size={22} className="text-[#0F0E0C]" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-mono uppercase tracking-wider text-[#D4A843] mb-0.5">Beer of the Week</p>
-                <p className="font-display font-bold text-[var(--text-primary)] group-hover:text-[#D4A843] transition-colors truncate">
+                <p className="text-xs font-mono uppercase tracking-wider text-[var(--accent-gold)] mb-0.5">Beer of the Week</p>
+                <p className="font-display font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-gold)] transition-colors truncate">
                   {featuredBeer.name}
                 </p>
                 <div className="flex items-center gap-2 mt-0.5">
@@ -233,8 +238,8 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
               </div>
               {featuredBeer.avg_rating && (
                 <div className="flex items-center gap-1 flex-shrink-0">
-                  <Star size={14} className="text-[#D4A843] fill-[#D4A843]" />
-                  <span className="font-mono font-bold text-[#D4A843]">{featuredBeer.avg_rating.toFixed(1)}</span>
+                  <Star size={14} className="text-[var(--accent-gold)] fill-[var(--accent-gold)]" />
+                  <span className="font-mono font-bold text-[var(--accent-gold)]">{featuredBeer.avg_rating.toFixed(1)}</span>
                 </div>
               )}
             </div>
@@ -367,6 +372,9 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
           )}
         </div>
 
+        {/* Brewery Reviews — full list */}
+        <BreweryReview breweryId={id} currentUserId={user.id} />
+
         {/* Friends Here Now */}
         {friendsHere.length > 0 && (
           <div>
@@ -384,7 +392,7 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
                   <Link
                     key={s.id}
                     href={`/profile/${s.profile?.username}`}
-                    className="flex flex-col items-center gap-2 p-3 rounded-2xl border flex-shrink-0 w-[100px] hover:border-[#D4A843]/40 transition-colors"
+                    className="flex flex-col items-center gap-2 p-3 rounded-2xl border flex-shrink-0 w-[100px] hover:border-[var(--accent-gold)]/40 transition-colors"
                     style={{ background: "var(--surface)", borderColor: "var(--border)" }}
                   >
                     <div className="relative">
@@ -399,7 +407,7 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
                     <p className="text-xs font-medium text-center truncate w-full" style={{ color: "var(--text-primary)" }}>
                       {(s.profile?.display_name ?? s.profile?.username ?? "Friend").split(" ")[0]}
                     </p>
-                    <p className="text-[10px] font-mono text-center" style={{ color: "#D4A843" }}>
+                    <p className="text-[10px] font-mono text-center" style={{ color: "var(--accent-gold)" }}>
                       {beerCount} 🍺 · {elapsed}
                     </p>
                   </Link>

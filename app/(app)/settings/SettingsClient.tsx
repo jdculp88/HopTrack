@@ -14,7 +14,7 @@ interface SettingsClientProps {
   userEmail: string;
 }
 
-const inputCls = "w-full bg-[var(--surface-2)] border border-[var(--border)] rounded-xl px-4 py-3 text-[var(--text-primary)] text-sm outline-none transition-colors focus:border-[#D4A843] placeholder:text-[var(--text-muted)]";
+const inputCls = "w-full bg-[var(--surface-2)] border border-[var(--border)] rounded-xl px-4 py-3 text-[var(--text-primary)] text-sm outline-none transition-colors focus:border-[var(--accent-gold)] placeholder:text-[var(--text-muted)]";
 
 const DEFAULT_PREFS = { friend_activity: true, achievements: true, weekly_stats: true, share_live: true };
 

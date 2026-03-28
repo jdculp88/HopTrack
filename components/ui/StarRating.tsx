@@ -57,7 +57,7 @@ export function StarRating({
 
   return (
     <div
-      className={cn("flex items-center gap-0.5", className)}
+      className={cn("inline-flex items-center gap-0.5", className)}
       onMouseLeave={() => setHovered(null)}
     >
       {Array.from({ length: 5 }).map((_, i) => {
@@ -92,14 +92,14 @@ export function StarRating({
             onClick={(e) => handleClick(e, i)}
           >
             {/* Background (empty) star */}
-            <StarSVG fill="empty" className="absolute inset-0 text-[#3A3628]" />
+            <StarSVG fill="empty" className="absolute inset-0" style={{ color: 'var(--border)' }} />
             {/* Filled overlay — animates width for half/full fill */}
             <motion.div
               className="absolute inset-0 overflow-hidden"
               animate={{ width: fill === "half" ? "50%" : fill === "full" ? "100%" : "0%" }}
               transition={{ type: "spring", stiffness: 500, damping: 30 }}
             >
-              <StarSVG fill="full" className="text-[#D4A843]" />
+              <StarSVG fill="full" style={{ color: 'var(--accent-gold)' }} />
             </motion.div>
             {/* Tap burst — decorative only, doesn't affect hitbox */}
             {isInteractive && (
@@ -108,7 +108,7 @@ export function StarRating({
                 whileTap={{ scale: 1.4, opacity: 0.6 }}
                 transition={{ type: "spring", stiffness: 600, damping: 20 }}
               >
-                <StarSVG fill="full" className="text-[#D4A843] opacity-0" />
+                <StarSVG fill="full" className="opacity-0" style={{ color: 'var(--accent-gold)' }} />
               </motion.div>
             )}
           </button>
@@ -118,12 +118,13 @@ export function StarRating({
   );
 }
 
-function StarSVG({ fill, className }: { fill: "full" | "half" | "empty"; className?: string }) {
+function StarSVG({ fill, className, style }: { fill: "full" | "half" | "empty"; className?: string; style?: React.CSSProperties }) {
   return (
     <svg
       viewBox="0 0 24 24"
-      fill={fill === "empty" ? "currentColor" : "currentColor"}
+      fill="currentColor"
       className={cn("w-full h-full", className)}
+      style={style}
       aria-hidden="true"
     >
       <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
@@ -147,7 +148,7 @@ export function RatingDisplay({
   return (
     <div className={cn("flex items-center gap-1.5", className)}>
       <StarRating value={rating} readonly size={size} />
-      <span className="font-mono text-[#D4A843] text-sm font-medium">{rating.toFixed(1)}</span>
+      <span className="font-mono text-sm font-medium" style={{ color: 'var(--accent-gold)' }}>{rating.toFixed(1)}</span>
       {count !== undefined && (
         <span className="text-[var(--text-muted)] text-xs">({count})</span>
       )}

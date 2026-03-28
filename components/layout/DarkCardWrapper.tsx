@@ -31,8 +31,8 @@ export function DarkCardWrapper({ children }: { children: React.ReactNode }) {
       ref={ref}
       className="w-full max-w-sm rounded-3xl p-8"
       style={{
-        background: "#0F0E0C",
-        border: "1px solid #3A3628",
+        background: DARK_VARS["--bg"],
+        border: `1px solid ${DARK_VARS["--border"]}`,
       }}
     >
       {children}

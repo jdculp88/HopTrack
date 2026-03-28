@@ -8,6 +8,7 @@ import { BeerStyleBadge } from "@/components/ui/BeerStyleBadge";
 import { StarRating, RatingDisplay } from "@/components/ui/StarRating";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import { generateGradientFromString, formatABV } from "@/lib/utils";
+import { BeerReviewSection } from "@/components/beer/BeerReviewSection";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -78,7 +79,7 @@ export default async function BeerPage({ params }: { params: Promise<{ id: strin
             <div>
               <h1 className="font-display text-3xl font-bold text-[var(--text-primary)] leading-tight">{(beer as any).name}</h1>
               <Link href={`/brewery/${beer.brewery_id}`}>
-                <p className="text-[#D4A843] hover:underline text-sm mt-1">{brewery?.name}</p>
+                <p className="hover:underline text-sm mt-1" style={{ color: "var(--accent-gold)" }}>{brewery?.name}</p>
               </Link>
             </div>
             <WishlistButton beerId={id} initialWishlisted={!!wishlistItem} />
@@ -124,10 +125,13 @@ export default async function BeerPage({ params }: { params: Promise<{ id: strin
         </div>
       )}
 
-      {/* Recent Reviews */}
+      {/* Beer Reviews — dedicated reviews from beer_reviews table */}
+      <BeerReviewSection beerId={id} currentUserId={user.id} />
+
+      {/* Activity Log — from beer_logs (session-based) */}
       <div>
         <h2 className="font-display text-xl font-bold text-[var(--text-primary)] mb-4">
-          Recent Reviews <span className="text-[var(--text-muted)] font-sans text-sm font-normal">({beerLogs?.length ?? 0})</span>
+          Activity <span className="text-[var(--text-muted)] font-sans text-sm font-normal">({beerLogs?.length ?? 0} pours)</span>
         </h2>
         {beerLogs && beerLogs.length > 0 ? (
           <div className="space-y-3">

@@ -1,11 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { MapPin, Beer, Star, Zap, Clock, Home } from "lucide-react";
 import { cn, formatRelativeTime } from "@/lib/utils";
 import { UserAvatar } from "@/components/ui/UserAvatar";
-import { generateGradientFromString } from "@/lib/utils";
 import { SessionComments } from "@/components/social/SessionComments";
 import type { Session, BeerLog } from "@/types/database";
 
@@ -32,10 +33,10 @@ interface SessionCardProps {
 export function SessionCard({ session, currentUserId, className }: SessionCardProps) {
   const { profile, brewery, beer_logs } = session;
   const beerCount = beer_logs?.length ?? 0;
+  const ratedLogs = (beer_logs ?? []).filter((l) => l.rating != null);
   const avgRating =
-    beerCount > 0
-      ? (beer_logs!.reduce((sum, l) => sum + (l.rating ?? 0), 0) /
-          beer_logs!.filter((l) => l.rating != null).length) || null
+    ratedLogs.length > 0
+      ? ratedLogs.reduce((sum, l) => sum + (l.rating ?? 0), 0) / ratedLogs.length
       : null;
 
   // Session duration
@@ -52,9 +53,16 @@ export function SessionCard({ session, currentUserId, className }: SessionCardPr
 
   const isAtHome = (session as any).context === "home" || !brewery;
 
-  // Show up to 3 beer log pills
-  const visibleLogs = (beer_logs ?? []).slice(0, 3);
-  const extraCount = beerCount - visibleLogs.length;
+  // Show 4 beers, expand if more
+  const [expanded, setExpanded] = useState(false);
+  const visibleLogs = expanded ? (beer_logs ?? []) : (beer_logs ?? []).slice(0, 4);
+  const hiddenCount = beerCount - 4;
+
+  // Find first photo from beer logs
+  const firstPhoto = (beer_logs ?? []).find((l) => l.photo_url)?.photo_url;
+
+  // Session note
+  const note = (session as any).note;
 
   if (!profile) return null;
 
@@ -67,143 +75,161 @@ export function SessionCard({ session, currentUserId, className }: SessionCardPr
         className
       )}
     >
-      {/* Header */}
-      <div className="flex items-start gap-3 p-4">
-        <Link href={`/profile/${profile.username}`}>
-          <UserAvatar profile={profile as any} size="md" showLevel />
-        </Link>
+      {/* Header — avatar, name, time, brewery */}
+      <div className="p-4 pb-0">
+        <div className="flex items-start gap-3">
+          <Link href={`/profile/${profile.username}`}>
+            <UserAvatar profile={profile as any} size="md" showLevel />
+          </Link>
 
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between gap-2">
-            <Link href={`/profile/${profile.username}`}>
-              <span
-                className="font-sans font-semibold text-[var(--text-primary)] hover:text-[#D4A843] transition-colors text-sm truncate max-w-[160px] inline-block align-bottom"
-                title={profile.display_name ?? profile.username}
-              >
-                {profile.display_name ?? profile.username}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between gap-2">
+              <Link href={`/profile/${profile.username}`}>
+                <span
+                  className="font-sans font-semibold text-sm hover:underline underline-offset-2 transition-colors"
+                  style={{ color: "var(--text-primary)" }}
+                >
+                  {profile.display_name ?? profile.username}
+                </span>
+              </Link>
+              <span className="text-xs flex-shrink-0" style={{ color: "var(--text-muted)" }}>
+                {formatRelativeTime(session.started_at)}
               </span>
-            </Link>
-            <span className="text-xs text-[var(--text-muted)] flex-shrink-0">
-              {formatRelativeTime(session.started_at)}
-            </span>
-          </div>
+            </div>
 
-          {/* Visited brewery line */}
-          <p className="text-sm text-[var(--text-secondary)] mt-0.5">
+            {/* Brewery name — large, prominent */}
             {isAtHome ? (
-              <span className="flex items-center gap-1">
-                <Home size={11} />
-                drinking at home
-              </span>
+              <p className="text-sm mt-0.5 flex items-center gap-1" style={{ color: "var(--text-secondary)" }}>
+                <Home size={12} />
+                Drinking at home
+              </p>
             ) : (
-              <>
-                visited{" "}
+              <div className="mt-0.5">
                 <Link
                   href={`/brewery/${brewery!.id}`}
-                  className="text-[#D4A843] hover:underline font-medium"
+                  className="font-display font-bold text-base hover:underline underline-offset-2 transition-colors leading-tight"
+                  style={{ color: "var(--accent-gold)" }}
                 >
                   {brewery!.name}
                 </Link>
-              </>
+                <p className="text-xs flex items-center gap-1 mt-0.5" style={{ color: "var(--text-muted)" }}>
+                  <MapPin size={10} />
+                  {brewery!.city}{brewery!.state ? `, ${brewery!.state}` : ""}
+                </p>
+              </div>
             )}
-          </p>
+          </div>
         </div>
+
+        {/* Session note */}
+        {note && (
+          <div className="mt-3 pl-1" style={{ borderLeft: "2px solid var(--accent-gold)" }}>
+            <p
+              className="text-sm italic pl-3 leading-relaxed"
+              style={{ color: "var(--text-secondary)" }}
+            >
+              &ldquo;{note}&rdquo;
+            </p>
+          </div>
+        )}
       </div>
 
-      {/* Brewery banner */}
-      {brewery && !isAtHome && (
-        <Link href={`/brewery/${brewery.id}`}>
-          <div
-            className="mx-4 rounded-xl p-3 flex items-center gap-3 hover:border-[#D4A843]/30 transition-colors"
-            style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }}
-          >
-            <div
-              className="w-10 h-10 rounded-xl flex-shrink-0"
-              style={{ background: generateGradientFromString(brewery.name) }}
-            />
-            <div className="flex-1 min-w-0">
-              <p className="font-display font-bold text-sm text-[var(--text-primary)] truncate" title={brewery.name}>
-                {brewery.name}
-              </p>
-              <p className="text-xs text-[var(--text-muted)]">
-                {brewery.city}{brewery.state ? `, ${brewery.state}` : ""}
-              </p>
-            </div>
-            <div className="flex items-center gap-1 text-xs text-[var(--text-muted)]">
-              <MapPin size={11} />
-              <span>Brewery</span>
-            </div>
-          </div>
-        </Link>
+      {/* Photo — first beer log photo */}
+      {firstPhoto && (
+        <div className="mx-4 mt-3 rounded-xl overflow-hidden relative h-48">
+          <Image
+            src={firstPhoto}
+            alt="Session photo"
+            fill
+            className="object-cover"
+            sizes="(max-width: 672px) 100vw, 640px"
+          />
+        </div>
       )}
 
-      {/* Beer log pills */}
+      {/* Beer list — readable rows, one per line */}
       {beerCount > 0 && (
-        <div className="px-4 pt-3">
-          <p className="text-xs font-mono uppercase tracking-wider text-[var(--text-muted)] mb-2">
-            {beerCount} beer{beerCount !== 1 ? "s" : ""} logged
-          </p>
-          <div className="flex flex-wrap gap-1.5">
-            {visibleLogs.map((log) => (
-              <div
-                key={log.id}
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs"
-                style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }}
-              >
-                <Beer size={10} style={{ color: 'var(--accent-gold)' }} />
-                <span
-                  style={{ color: 'var(--text-secondary)' }}
-                  className="max-w-[120px] truncate inline-block align-bottom"
-                  title={(log as any).beer?.name ?? undefined}
+        <div className="px-4 pt-3 pb-1">
+          <div className="space-y-1">
+            {visibleLogs.map((log) => {
+              const beer = (log as any).beer;
+              return (
+                <div
+                  key={log.id}
+                  className="flex items-center gap-2 py-1.5"
                 >
-                  {(log as any).beer?.name ?? (log.beer_id ? `Beer #${log.beer_id.slice(0, 4)}` : "Unnamed")}
-                </span>
-                {log.rating != null && (
-                  <span style={{ color: 'var(--accent-gold)' }}>
-                    {log.rating.toFixed(1)}★
+                  <Beer size={12} className="flex-shrink-0" style={{ color: "var(--accent-gold)" }} />
+                  <span
+                    className="text-sm font-medium flex-1 min-w-0 truncate"
+                    style={{ color: "var(--text-primary)" }}
+                    title={beer?.name}
+                  >
+                    {beer?.name ?? "Unknown beer"}
                   </span>
-                )}
-              </div>
-            ))}
-            {extraCount > 0 && (
-              <div
-                className="flex items-center px-2.5 py-1 rounded-lg text-xs"
-                style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-muted)' }}
-              >
-                +{extraCount} more
-              </div>
-            )}
+                  {beer?.style && (
+                    <span
+                      className="text-[10px] font-mono uppercase tracking-wide flex-shrink-0 px-1.5 py-0.5 rounded"
+                      style={{ color: "var(--text-muted)", background: "var(--surface-2)" }}
+                    >
+                      {beer.style}
+                    </span>
+                  )}
+                  {log.rating != null && (
+                    <div className="flex items-center gap-0.5 flex-shrink-0">
+                      <Star size={11} style={{ color: "var(--accent-gold)", fill: "var(--accent-gold)" }} />
+                      <span className="text-xs font-mono" style={{ color: "var(--accent-gold)" }}>
+                        {Number(log.rating).toFixed(1)}
+                      </span>
+                    </div>
+                  )}
+                  {log.rating == null && (
+                    <span className="text-[10px] flex-shrink-0" style={{ color: "var(--text-muted)" }}>
+                      —
+                    </span>
+                  )}
+                </div>
+              );
+            })}
           </div>
+          {hiddenCount > 0 && !expanded && (
+            <button
+              onClick={() => setExpanded(true)}
+              className="text-xs font-medium mt-1 mb-1 transition-colors hover:underline underline-offset-2"
+              style={{ color: "var(--accent-gold)" }}
+            >
+              Show {hiddenCount} more
+            </button>
+          )}
         </div>
       )}
 
       {/* Footer stats */}
-      <div className="flex items-center gap-4 px-4 py-3 mt-2 border-t" style={{ borderColor: 'var(--border)' }}>
-        <div className="flex items-center gap-1 text-xs text-[var(--text-muted)]">
+      <div className="flex items-center gap-4 px-4 py-3 mt-1 border-t" style={{ borderColor: "var(--border)" }}>
+        <div className="flex items-center gap-1 text-xs" style={{ color: "var(--text-muted)" }}>
           <Beer size={12} />
-          <span>{beerCount} beer{beerCount !== 1 ? "s" : ""}</span>
+          <span>{beerCount}</span>
         </div>
         {avgRating != null && (
-          <div className="flex items-center gap-1 text-xs text-[var(--text-muted)]">
+          <div className="flex items-center gap-1 text-xs" style={{ color: "var(--text-muted)" }}>
             <Star size={12} />
-            <span>{avgRating.toFixed(1)} avg</span>
+            <span>{avgRating.toFixed(1)}</span>
           </div>
         )}
         {duration && (
-          <div className="flex items-center gap-1 text-xs text-[var(--text-muted)]">
+          <div className="flex items-center gap-1 text-xs" style={{ color: "var(--text-muted)" }}>
             <Clock size={12} />
             <span>{duration}</span>
           </div>
         )}
         {session.xp_awarded > 0 && (
-          <div className="flex items-center gap-1 text-xs ml-auto" style={{ color: 'var(--accent-gold)' }}>
+          <div className="flex items-center gap-1 text-xs ml-auto" style={{ color: "var(--accent-gold)" }}>
             <Zap size={12} />
-            <span>+{session.xp_awarded} XP</span>
+            <span>+{session.xp_awarded}</span>
           </div>
         )}
       </div>
 
-      {/* Comments */}
+      {/* Comments — always visible */}
       {currentUserId && (
         <SessionComments
           sessionId={session.id}

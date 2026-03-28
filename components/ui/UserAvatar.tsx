@@ -39,12 +39,11 @@ export function UserAvatar({ profile, size = "md", showLevel = false, className 
         style={!profile.avatar_url ? { background: gradient } : undefined}
       >
         {profile.avatar_url ? (
-          <Image
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img
             src={profile.avatar_url}
             alt={profile.display_name}
-            fill
-            className="object-cover rounded-full"
-            sizes="80px"
+            className="w-full h-full object-cover rounded-full"
           />
         ) : (
           <span className={cn("font-display font-bold text-white/90", s.text)}>

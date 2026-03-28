@@ -184,12 +184,12 @@ export function AppNav({ username, unreadNotifications = 0, onCheckin }: AppNavP
           {NAV_ITEMS.slice(0, 2).map(({ href, label, icon: Icon }) => {
             const isActive = pathname.startsWith(href);
             return (
-              <Link key={href} href={href} className="flex-1">
+              <Link key={href} href={href} className="flex-1" aria-label={label}>
                 <div
                   className="flex flex-col items-center gap-1 py-1 rounded-xl transition-colors"
                   style={{ color: isActive ? "var(--accent-gold)" : "var(--text-muted)" }}
                 >
-                  <Icon size={20} />
+                  <Icon size={20} aria-hidden="true" />
                   <span className="text-[10px] font-sans">{label}</span>
                 </div>
               </Link>
@@ -197,7 +197,7 @@ export function AppNav({ username, unreadNotifications = 0, onCheckin }: AppNavP
           })}
 
           {/* Center check-in FAB */}
-          <button onClick={onCheckin} className="flex-shrink-0 mx-2">
+          <button onClick={onCheckin} className="flex-shrink-0 mx-2" aria-label="Start Session">
             <div
               className="w-12 h-12 rounded-2xl flex items-center justify-center active:scale-95 transition-transform"
               style={{
@@ -212,12 +212,12 @@ export function AppNav({ username, unreadNotifications = 0, onCheckin }: AppNavP
           {NAV_ITEMS.slice(2).map(({ href, label, icon: Icon }) => {
             const isActive = pathname.startsWith(href);
             return (
-              <Link key={href} href={href} className="flex-1">
+              <Link key={href} href={href} className="flex-1" aria-label={label}>
                 <div
                   className="flex flex-col items-center gap-1 py-1 rounded-xl transition-colors"
                   style={{ color: isActive ? "var(--accent-gold)" : "var(--text-muted)" }}
                 >
-                  <Icon size={20} />
+                  <Icon size={20} aria-hidden="true" />
                   <span className="text-[10px] font-sans">{label}</span>
                 </div>
               </Link>

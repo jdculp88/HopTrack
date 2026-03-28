@@ -92,6 +92,7 @@ export function Modal({ open, onClose, title, children, size = "md", className }
                 <h2 className="font-display text-lg font-semibold text-[var(--text-primary)]">{title}</h2>
                 <button
                   onClick={onClose}
+                  aria-label="Close dialog"
                   className="p-2 rounded-xl hover:bg-[var(--surface-2)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
                 >
                   <X size={18} />

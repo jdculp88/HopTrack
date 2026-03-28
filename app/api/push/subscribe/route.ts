@@ -20,15 +20,16 @@ export async function POST(request: Request) {
     .maybeSingle()
 
   if (existing) {
-    await (supabase as any)
+    const { error } = await (supabase as any)
       .from('push_subscriptions')
       .update({
         p256dh: subscription.keys.p256dh,
         auth: subscription.keys.auth,
       })
       .eq('id', existing.id)
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   } else {
-    await (supabase as any)
+    const { error } = await (supabase as any)
       .from('push_subscriptions')
       .insert({
         user_id: user.id,
@@ -36,6 +37,7 @@ export async function POST(request: Request) {
         p256dh: subscription.keys.p256dh,
         auth: subscription.keys.auth,
       })
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
   return NextResponse.json({ ok: true })

@@ -30,7 +30,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
               "w-full bg-[var(--surface)] border border-[var(--border)] rounded-xl",
               "text-[var(--text-primary)] placeholder:text-[var(--text-muted)] font-sans text-sm",
               "px-4 py-3 transition-all duration-150",
-              "focus:outline-none focus:border-[#D4A843] focus:ring-1 focus:ring-[#D4A843]/30",
+              "focus:outline-none focus:border-[var(--accent-gold)] focus:ring-1 focus:ring-[var(--accent-gold)]/30",
               "hover:border-[#6B6456]",
               icon && "pl-10",
               iconRight && "pr-10",
@@ -72,7 +72,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
             "w-full bg-[var(--surface)] border border-[var(--border)] rounded-xl",
             "text-[var(--text-primary)] placeholder:text-[var(--text-muted)] font-sans text-sm",
             "px-4 py-3 transition-all duration-150 resize-none",
-            "focus:outline-none focus:border-[#D4A843] focus:ring-1 focus:ring-[#D4A843]/30",
+            "focus:outline-none focus:border-[var(--accent-gold)] focus:ring-1 focus:ring-[var(--accent-gold)]/30",
             "hover:border-[#6B6456]",
             error && "border-[#C44B3A]",
             className

@@ -311,7 +311,7 @@ export async function PATCH(
     .from('sessions')
     .select(`
       *,
-      beer_logs(id, beer_id, rating, quantity, comment, serving_style, logged_at, beer:beers(id, name, style))
+      beer_logs(id, beer_id, rating, quantity, comment, serving_style, logged_at, beer:beers(id, name, style, glass_type))
     `)
     .eq('id', sessionId)
     .single()

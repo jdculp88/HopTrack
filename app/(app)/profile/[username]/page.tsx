@@ -98,7 +98,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
           bannerUrl={(profile as any).banner_url}
         />
         {/* gradient overlay — stronger at bottom for readability */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0F0E0C] via-[#0F0E0C]/30 to-transparent" />
+        <div className="absolute inset-0" style={{ background: "linear-gradient(to top, var(--bg), color-mix(in srgb, var(--bg) 30%, transparent), transparent)" }} />
         {isOwnProfile && (
           <Link
             href="/settings"
@@ -130,7 +130,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
         <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-4 mb-6 space-y-2">
           <div className="flex items-center justify-between">
             <div>
-              <span className="text-xs font-mono text-[#D4A843] uppercase tracking-wider">Level {profile.level}</span>
+              <span className="text-xs font-mono text-[var(--accent-gold)] uppercase tracking-wider">Level {profile.level}</span>
               <p className="font-display font-semibold text-[var(--text-primary)]">{levelInfo.current.name}</p>
             </div>
             {levelInfo.next && (
@@ -142,8 +142,8 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
           </div>
           <div className="h-2 bg-[var(--surface-2)] rounded-full overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-[#D4A843] to-[#E8841A] rounded-full transition-all duration-1000"
-              style={{ width: `${levelInfo.progress}%` }}
+              className="h-full rounded-full transition-all duration-1000"
+              style={{ background: "linear-gradient(to right, var(--accent-gold), var(--accent-amber))", width: `${levelInfo.progress}%` }}
             />
           </div>
           {((profile as any).current_streak > 0 || (profile as any).longest_streak > 0) && (
@@ -152,9 +152,9 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
                 <div className="flex items-center gap-1.5">
                   <Flame
                     size={14}
-                    className={(profile as any).current_streak >= 30 ? "text-[#E8841A]" : (profile as any).current_streak >= 7 ? "text-[#D4A843]" : "text-[var(--text-muted)]"}
+                    className={(profile as any).current_streak >= 30 ? "text-[#E8841A]" : (profile as any).current_streak >= 7 ? "text-[var(--accent-gold)]" : "text-[var(--text-muted)]"}
                   />
-                  <span className="text-sm font-mono font-bold" style={{ color: (profile as any).current_streak >= 7 ? '#D4A843' : 'var(--text-secondary)' }}>
+                  <span className="text-sm font-mono font-bold" style={{ color: (profile as any).current_streak >= 7 ? 'var(--accent-gold)' : 'var(--text-secondary)' }}>
                     {(profile as any).current_streak}
                   </span>
                   <span className="text-xs text-[var(--text-muted)]">day streak</span>
@@ -183,15 +183,15 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
         {/* Stats */}
         <div className="grid grid-cols-3 gap-4 mb-8">
           <div className="text-center bg-[var(--surface)] border border-[var(--border)] rounded-2xl py-5">
-            <p className="font-display text-3xl font-bold text-[#D4A843]">{profile.total_checkins}</p>
+            <p className="font-display text-3xl font-bold text-[var(--accent-gold)]">{profile.total_checkins}</p>
             <p className="text-xs text-[var(--text-muted)] mt-1">Sessions</p>
           </div>
           <div className="text-center bg-[var(--surface)] border border-[var(--border)] rounded-2xl py-5">
-            <p className="font-display text-3xl font-bold text-[#D4A843]">{profile.unique_beers}</p>
+            <p className="font-display text-3xl font-bold text-[var(--accent-gold)]">{profile.unique_beers}</p>
             <p className="text-xs text-[var(--text-muted)] mt-1">Unique Beers</p>
           </div>
           <div className="text-center bg-[var(--surface)] border border-[var(--border)] rounded-2xl py-5">
-            <p className="font-display text-3xl font-bold text-[#D4A843]">{profile.unique_breweries}</p>
+            <p className="font-display text-3xl font-bold text-[var(--accent-gold)]">{profile.unique_breweries}</p>
             <p className="text-xs text-[var(--text-muted)] mt-1">Breweries</p>
           </div>
         </div>
@@ -199,13 +199,13 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
         {/* Beer Passport Link */}
         <Link
           href={`/profile/${username}/passport`}
-          className="flex items-center gap-3 p-4 mb-8 bg-[var(--surface)] border border-[var(--border)] hover:border-[#D4A843]/40 rounded-2xl transition-all group"
+          className="flex items-center gap-3 p-4 mb-8 bg-[var(--surface)] border border-[var(--border)] hover:border-[var(--accent-gold)]/40 rounded-2xl transition-all group"
         >
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#D4A843] to-[#E8841A] flex items-center justify-center flex-shrink-0">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "linear-gradient(135deg, var(--accent-gold), var(--accent-amber))" }}>
             <Stamp size={18} className="text-[#0F0E0C]" />
           </div>
           <div className="flex-1">
-            <p className="font-display font-bold text-[var(--text-primary)] group-hover:text-[#D4A843] transition-colors">Beer Passport</p>
+            <p className="font-display font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-gold)] transition-colors">Beer Passport</p>
             <p className="text-xs text-[var(--text-muted)]">{profile.unique_beers} unique beers collected</p>
           </div>
           <span className="text-[var(--text-muted)] text-sm">→</span>
@@ -215,14 +215,14 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
         {isOwnProfile && (
           <div className="mb-8">
             <div className="flex items-center gap-2 mb-4">
-              <Bookmark size={16} className="text-[#D4A843]" />
+              <Bookmark size={16} className="text-[var(--accent-gold)]" />
               <h2 className="font-display text-xl font-bold text-[var(--text-primary)]">Want to Try</h2>
             </div>
             {(wishlist as any[]).length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {(wishlist as any[]).map((item: any) => (
                   <Link key={item.id} href={`/beer/${item.beer?.id}`}>
-                    <div className="flex items-center gap-3 p-3 bg-[var(--surface)] border border-[var(--border)] hover:border-[#D4A843]/30 rounded-2xl transition-colors">
+                    <div className="flex items-center gap-3 p-3 bg-[var(--surface)] border border-[var(--border)] hover:border-[var(--accent-gold)]/30 rounded-2xl transition-colors">
                       <div
                         className="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center text-lg"
                         style={{ background: generateGradientFromString(item.beer?.name ?? "") }}
@@ -242,7 +242,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
               </div>
             ) : (
               <Link href="/explore">
-                <div className="flex items-center gap-4 p-4 bg-[var(--surface)] border border-dashed border-[var(--border)] hover:border-[#D4A843]/30 rounded-2xl transition-colors">
+                <div className="flex items-center gap-4 p-4 bg-[var(--surface)] border border-dashed border-[var(--border)] hover:border-[var(--accent-gold)]/30 rounded-2xl transition-colors">
                   <div className="w-10 h-10 rounded-xl bg-[var(--surface-2)] flex items-center justify-center text-lg opacity-40">
                     🍺
                   </div>
@@ -261,7 +261,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
           <h2 className="font-display text-xl font-bold text-[var(--text-primary)] mb-4">Favorite Beer</h2>
           {favBeer ? (
             <Link href={`/beer/${favBeer.beer.id}`}>
-              <div className="flex items-center gap-4 p-4 bg-[var(--surface)] border border-[var(--border)] hover:border-[#D4A843]/40 rounded-2xl transition-all group">
+              <div className="flex items-center gap-4 p-4 bg-[var(--surface)] border border-[var(--border)] hover:border-[var(--accent-gold)]/40 rounded-2xl transition-all group">
                 <div
                   className="w-14 h-14 rounded-2xl flex-shrink-0 flex items-center justify-center text-2xl"
                   style={{ background: generateGradientFromString(favBeer.beer.name ?? "") }}
@@ -269,7 +269,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
                   🍺
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-display font-bold text-[var(--text-primary)] group-hover:text-[#D4A843] transition-colors truncate">
+                  <p className="font-display font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-gold)] transition-colors truncate">
                     {favBeer.beer.name}
                   </p>
                   <div className="flex items-center gap-2 mt-0.5 flex-wrap">
@@ -282,8 +282,8 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
                 <div className="text-right flex-shrink-0">
                   {favBeer.beer.avg_rating && (
                     <div className="flex items-center gap-1 justify-end mb-0.5">
-                      <Star size={11} className="text-[#D4A843] fill-[#D4A843]" />
-                      <span className="text-sm font-mono font-bold text-[#D4A843]">
+                      <Star size={11} className="text-[var(--accent-gold)] fill-[var(--accent-gold)]" />
+                      <span className="text-sm font-mono font-bold text-[var(--accent-gold)]">
                         {favBeer.beer.avg_rating.toFixed(1)}
                       </span>
                     </div>
@@ -313,7 +313,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
             <div>
               <h2 className="font-display text-xl font-bold text-[var(--text-primary)] mb-4">Achievements</h2>
               <Link href="/achievements">
-                <div className="flex items-center gap-4 p-4 bg-[var(--surface)] border border-dashed border-[var(--border)] hover:border-[#D4A843]/30 rounded-2xl transition-colors">
+                <div className="flex items-center gap-4 p-4 bg-[var(--surface)] border border-dashed border-[var(--border)] hover:border-[var(--accent-gold)]/30 rounded-2xl transition-colors">
                   <div className="w-10 h-10 rounded-xl bg-[var(--surface-2)] flex items-center justify-center text-lg opacity-40">
                     🏆
                   </div>
@@ -334,7 +334,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
             <div className="space-y-3">
               {(topBreweries as any[]).map((visit) => (
                 <Link key={visit.id} href={`/brewery/${visit.brewery_id}`}>
-                  <div className="flex items-center gap-3 p-3 bg-[var(--surface)] border border-[var(--border)] hover:border-[#D4A843]/30 rounded-2xl transition-colors">
+                  <div className="flex items-center gap-3 p-3 bg-[var(--surface)] border border-[var(--border)] hover:border-[var(--accent-gold)]/30 rounded-2xl transition-colors">
                     <div
                       className="w-12 h-12 rounded-xl"
                       style={{ background: generateGradientFromString(visit.brewery?.name ?? "") }}
@@ -344,7 +344,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
                       <p className="text-xs text-[var(--text-muted)]">{visit.brewery?.city}, {visit.brewery?.state}</p>
                     </div>
                     <div className="text-right">
-                      <p className="font-mono font-bold text-[#D4A843]">{visit.total_visits}</p>
+                      <p className="font-mono font-bold text-[var(--accent-gold)]">{visit.total_visits}</p>
                       <p className="text-xs text-[var(--text-muted)]">visits</p>
                     </div>
                   </div>
@@ -353,7 +353,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
             </div>
           ) : (
             <Link href="/explore">
-              <div className="flex items-center gap-4 p-4 bg-[var(--surface)] border border-dashed border-[var(--border)] hover:border-[#D4A843]/30 rounded-2xl transition-colors">
+              <div className="flex items-center gap-4 p-4 bg-[var(--surface)] border border-dashed border-[var(--border)] hover:border-[var(--accent-gold)]/30 rounded-2xl transition-colors">
                 <div className="w-10 h-10 rounded-xl bg-[var(--surface-2)] flex items-center justify-center text-lg opacity-40">
                   🏠
                 </div>
@@ -373,7 +373,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
             <div className="space-y-3">
               {(recentLogs as any[]).map((log: any) => (
                 <Link key={log.id} href={`/beer/${log.beer?.id}`}>
-                  <div className="flex items-center gap-3 p-3 bg-[var(--surface)] border border-[var(--border)] hover:border-[#D4A843]/30 rounded-2xl transition-colors">
+                  <div className="flex items-center gap-3 p-3 bg-[var(--surface)] border border-[var(--border)] hover:border-[var(--accent-gold)]/30 rounded-2xl transition-colors">
                     <div
                       className="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center text-lg"
                       style={{ background: generateGradientFromString(log.beer?.name ?? "") }}
@@ -392,8 +392,8 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
                     <div className="text-right flex-shrink-0">
                       {log.rating > 0 && (
                         <div className="flex items-center gap-1 justify-end mb-0.5">
-                          <Star size={11} className="text-[#D4A843] fill-[#D4A843]" />
-                          <span className="text-sm font-mono font-bold text-[#D4A843]">{log.rating}</span>
+                          <Star size={11} className="text-[var(--accent-gold)] fill-[var(--accent-gold)]" />
+                          <span className="text-sm font-mono font-bold text-[var(--accent-gold)]">{log.rating}</span>
                         </div>
                       )}
                       <p className="text-xs text-[var(--text-muted)]">

@@ -13,7 +13,7 @@ export default async function EventsPage({ params }: { params: Promise<{ brewery
   const { data: account } = await supabase
     .from("brewery_accounts").select("role")
     .eq("user_id", user.id).eq("brewery_id", brewery_id).single() as any;
-  if (!account) notFound();
+  if (!account) redirect("/brewery-admin");
 
   const { data: events } = await supabase
     .from("brewery_events").select("*")

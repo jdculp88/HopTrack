@@ -14,7 +14,7 @@ export default async function PintRewindPage({ params }: { params: Promise<{ bre
   const { data: account } = await (supabase as any)
     .from("brewery_accounts").select("role")
     .eq("user_id", user.id).eq("brewery_id", brewery_id).single();
-  if (!account) notFound();
+  if (!account) redirect("/brewery-admin");
 
   const { data: brewery } = await (supabase as any)
     .from("breweries").select("name").eq("id", brewery_id).single();

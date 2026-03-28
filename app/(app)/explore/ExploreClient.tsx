@@ -121,14 +121,14 @@ export function ExploreClient({ breweries: initialBreweries, hasBeerOfTheWeek = 
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm transition-all border relative"
             style={
               showFilters || activeFilterCount > 0
-                ? { background: "rgba(212,168,67,0.1)", color: "#D4A843", borderColor: "rgba(212,168,67,0.3)" }
+                ? { background: "color-mix(in srgb, var(--accent-gold) 10%, transparent)", color: "var(--accent-gold)", borderColor: "color-mix(in srgb, var(--accent-gold) 30%, transparent)" }
                 : { background: "var(--surface)", color: "var(--text-muted)", borderColor: "var(--border)" }
             }
           >
             <SlidersHorizontal size={14} />
             Filters
             {activeFilterCount > 0 && (
-              <span className="w-4 h-4 rounded-full bg-[#D4A843] text-[#0F0E0C] text-[10px] font-bold flex items-center justify-center">
+              <span className="w-4 h-4 rounded-full text-[10px] font-bold flex items-center justify-center" style={{ background: "var(--accent-gold)", color: "#0F0E0C" }}>
                 {activeFilterCount}
               </span>
             )}
@@ -137,13 +137,21 @@ export function ExploreClient({ breweries: initialBreweries, hasBeerOfTheWeek = 
           <div className="flex items-center gap-2 bg-[var(--surface)] border border-[var(--border)] rounded-xl p-1">
             <button
               onClick={() => setViewAndSync("list")}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-all ${view === "list" ? "bg-[#D4A843]/10 text-[#D4A843]" : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"}`}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-all"
+              style={view === "list"
+                ? { background: "color-mix(in srgb, var(--accent-gold) 10%, transparent)", color: "var(--accent-gold)" }
+                : { color: "var(--text-muted)" }
+              }
             >
               <List size={14} /> List
             </button>
             <button
               onClick={() => setViewAndSync("map")}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-all ${view === "map" ? "bg-[#D4A843]/10 text-[#D4A843]" : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"}`}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-all"
+              style={view === "map"
+                ? { background: "color-mix(in srgb, var(--accent-gold) 10%, transparent)", color: "var(--accent-gold)" }
+                : { color: "var(--text-muted)" }
+              }
             >
               <Map size={14} /> Map
             </button>
@@ -158,10 +166,10 @@ export function ExploreClient({ breweries: initialBreweries, hasBeerOfTheWeek = 
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search breweries by name or city..."
-          className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-2xl pl-11 pr-12 py-3.5 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[#D4A843] transition-colors"
+          className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-2xl pl-11 pr-12 py-3.5 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent-gold)] transition-colors"
         />
         {searching && (
-          <Loader2 size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-[#D4A843] animate-spin" />
+          <Loader2 size={16} className="absolute right-4 top-1/2 -translate-y-1/2 animate-spin" style={{ color: "var(--accent-gold)" }} />
         )}
         {!searching && query.trim() && (
           <button
@@ -220,7 +228,8 @@ export function ExploreClient({ breweries: initialBreweries, hasBeerOfTheWeek = 
               {activeFilterCount > 0 && (
                 <button
                   onClick={clearFiltersAndSync}
-                  className="text-xs text-[#D4A843] hover:underline"
+                  className="text-xs hover:underline"
+                  style={{ color: "var(--accent-gold)" }}
                 >
                   Clear all filters
                 </button>
@@ -246,7 +255,7 @@ export function ExploreClient({ breweries: initialBreweries, hasBeerOfTheWeek = 
                 className="px-3 py-1.5 rounded-xl text-sm transition-all border"
                 style={
                   visitFilter === f
-                    ? { background: "rgba(212,168,67,0.1)", color: "#D4A843", borderColor: "rgba(212,168,67,0.3)" }
+                    ? { background: "color-mix(in srgb, var(--accent-gold) 10%, transparent)", color: "var(--accent-gold)", borderColor: "color-mix(in srgb, var(--accent-gold) 30%, transparent)" }
                     : { background: "var(--surface)", color: "var(--text-muted)", borderColor: "var(--border)" }
                 }
               >
@@ -338,9 +347,10 @@ function FilterChip({ label, active, onClick, icon }: { label: string; active: b
     <button
       onClick={onClick}
       className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm transition-all border"
+      aria-pressed={active}
       style={
         active
-          ? { background: "rgba(212,168,67,0.1)", color: "#D4A843", borderColor: "rgba(212,168,67,0.3)" }
+          ? { background: "color-mix(in srgb, var(--accent-gold) 10%, transparent)", color: "var(--accent-gold)", borderColor: "color-mix(in srgb, var(--accent-gold) 30%, transparent)" }
           : { background: "var(--surface-2)", color: "var(--text-muted)", borderColor: "var(--border)" }
       }
     >

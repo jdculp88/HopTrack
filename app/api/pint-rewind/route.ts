@@ -7,26 +7,29 @@ export async function GET() {
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   // Fetch all user sessions
-  const { data: sessions } = await supabase
+  const { data: sessions, error: sessionsError } = await supabase
     .from("sessions")
     .select("id, brewery_id, context, started_at, ended_at, xp_awarded, brewery:breweries(name)")
     .eq("user_id", user.id)
     .eq("is_active", false)
     .order("started_at", { ascending: false }) as any;
+  if (sessionsError) return NextResponse.json({ error: sessionsError.message }, { status: 500 });
 
   // Fetch all user beer logs
-  const { data: beerLogs } = await supabase
+  const { data: beerLogs, error: logsError } = await supabase
     .from("beer_logs")
     .select("id, beer_id, rating, quantity, logged_at, serving_style, beer:beers(name, style)")
     .eq("user_id", user.id)
     .order("logged_at", { ascending: false }) as any;
+  if (logsError) return NextResponse.json({ error: logsError.message }, { status: 500 });
 
   // Fetch user profile for level/xp
-  const { data: profile } = await supabase
+  const { data: profile, error: profileError } = await supabase
     .from("profiles")
     .select("level, xp, total_checkins, display_name, username")
     .eq("id", user.id)
     .single() as any;
+  if (profileError) return NextResponse.json({ error: profileError.message }, { status: 500 });
 
   const allSessions = (sessions as any[]) ?? [];
   const allLogs = (beerLogs as any[]) ?? [];

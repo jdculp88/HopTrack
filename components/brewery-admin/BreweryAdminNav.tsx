@@ -42,9 +42,9 @@ export function BreweryAdminNav({ accounts }: { accounts: any[] }) {
         style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
 
         {/* Header */}
-        <div className="px-5 py-5 border-b" style={{ borderColor: "var(--border)" }}>
-          <Link href="/home" className="flex items-center mb-4 opacity-60 hover:opacity-100 transition-opacity">
-            <HopMark variant="horizontal" theme="auto" height={24} />
+        <div className="px-6 py-6 border-b" style={{ borderColor: "var(--border)" }}>
+          <Link href="/home" className="flex items-center mb-4 transition-opacity hover:opacity-80">
+            <HopMark variant="horizontal" theme="auto" height={32} />
           </Link>
 
           {/* Brewery selector */}
@@ -121,7 +121,7 @@ export function BreweryAdminNav({ accounts }: { accounts: any[] }) {
         </nav>
 
         {/* Footer */}
-        <div className="px-4 py-4 border-t space-y-2" style={{ borderColor: "var(--border)" }}>
+        <div className="px-6 py-4 border-t space-y-2" style={{ borderColor: "var(--border)" }}>
           <Link
             href={`/brewery/${activeBreweryId}`}
             className="flex items-center gap-2 text-xs transition-colors"

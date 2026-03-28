@@ -13,7 +13,7 @@ export default async function LoyaltyPage({ params }: { params: Promise<{ brewer
   const { data: account } = await supabase
     .from("brewery_accounts").select("role")
     .eq("user_id", user.id).eq("brewery_id", brewery_id).single() as any;
-  if (!account) notFound();
+  if (!account) redirect("/brewery-admin");
 
   const { data: programs } = await supabase
     .from("loyalty_programs").select("*")

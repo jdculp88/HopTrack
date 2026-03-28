@@ -24,7 +24,7 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
     .eq("user_id", user.id)
     .eq("brewery_id", brewery_id)
     .single() as any;
-  if (!account) notFound();
+  if (!account) redirect("/brewery-admin");
 
   // Fetch all data in parallel
   const [

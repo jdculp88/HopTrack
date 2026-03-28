@@ -344,7 +344,7 @@ export function FriendsClient({
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
               placeholder="Search friends or find new ones..."
-              className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-2xl pl-11 pr-4 py-3 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[#D4A843] transition-colors text-sm"
+              className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-2xl pl-11 pr-4 py-3 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent-gold)] transition-colors text-sm"
             />
             {searching && (
               <Loader2 size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] animate-spin" />

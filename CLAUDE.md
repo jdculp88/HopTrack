@@ -175,8 +175,8 @@ scripts/supabase-setup.mjs    — One-time setup script
 
 ## 🗺️ Where We Are
 
-**Current Sprint:** Sprint 22 — The Mark (2026-03-28)
-**Last completed:** Sprint 21 — All of It ✅ (2026-03-27)
+**Current Sprint:** Sprint 25 — Rate & Relate (2026-03-28)
+**Last completed:** Sprint 24 — Avatar Fix + Stability ✅ (2026-03-28)
 
 ### Key design decisions (still active from Sprint 11):
 - Marketing pages use hardcoded `C` color constants (not CSS vars)
@@ -445,6 +445,9 @@ Retro: `docs/retros/sprint-13-retro.md`
 - 027: Demo board stats (sessions + beer_logs for Mountain Ridge) ✅ APPLIED (S18)
 - 028: `glass_type` on beers + `beer_pour_sizes` table + index + RLS ✅ APPLIED (S19)
 - 029: Demo glass types + pour sizes (74 rows, 20 beers) ✅ APPLIED (S19)
+- 030: `avatars` storage bucket + RLS (S23)
+- 031: `brewery_reviews` table + RLS (S23)
+- 032: `beer_reviews` table + RLS (S25)
 
 ### Sprint 20 — Close It ✅ (2026-03-27)
 **Theme:** Ship quality gates, close first brewery, polish The Board for Asheville demo
@@ -516,6 +519,92 @@ Retro: `docs/retros/sprint-13-retro.md`
 - Supabase Realtime upgrade for Friends Live (if engagement data supports it)
 - Riley: Migration consolidation proposal (028+029)
 - Taylor: Close first paid brewery
+
+### Sprint 23 — Bug Bash ✅ (2026-03-28)
+**Theme:** Full team audit + systematic bug fixes across all surfaces
+**Audit team:** Morgan (coordinator), Alex (UI/UX), Jordan (core features), Sam+Casey (QA), Drew+Riley (infra), Jamie+Taylor (brand/sales)
+
+- ✅ S23-001: BreweryAdminNav HopMark — bumped to 32px, removed opacity-60, standardized padding to px-6
+- ✅ S23-002: The Board audit — code verified correct (isBoard strips nav, data flow complete, Realtime working)
+- ✅ S23-003: Brewery reviews — `brewery_reviews` table (migration 031), API routes (GET/POST/DELETE), `BreweryReview` component on brewery detail page
+- ✅ S23-004: Avatars storage bucket — migration 030 creates `avatars` bucket + RLS policies (fixes silent profile photo upload failures)
+- ✅ S23-005: Hardcoded `#D4A843` sweep — replaced across 12+ files with `var(--accent-gold)` using `color-mix()` for alpha variants
+- ✅ S23-006: API error handling — added to `/api/notifications`, `/api/push/subscribe`, `/api/pint-rewind`, `/api/friends/active`
+- ✅ S23-007: Missing loading.tsx — added for `brewery-welcome/[id]`
+- ✅ S23-008: Missing error.tsx — added for `(auth)` route group with Sentry + cream theme
+- ✅ S23-009: Modal accessibility — `aria-label="Close dialog"` on close button
+- ✅ S23-010: ExploreClient accessibility — `aria-pressed` on FilterChip toggle buttons
+- ✅ S23-011: AppNav accessibility — `aria-label` on mobile nav links + FAB, `aria-hidden` on decorative icons
+- ✅ S23-012: Auth layout logo sizes — standardized desktop to 32px (was 30px, mobile was already 32px)
+- ✅ S23-013: DarkCardWrapper — replaced redundant hardcoded colors with refs to `DARK_VARS` object
+- ✅ S23-014: Profile banner gradient — replaced hardcoded `#0F0E0C` gradient with `var(--bg)` + `color-mix()` for theme toggle support
+
+**Key architectural changes from Sprint 23:**
+- `brewery_reviews` table with unique(user_id, brewery_id) constraint — one review per user per brewery
+- `/api/brewery/[brewery_id]/reviews` — GET (list + avg), POST (upsert), DELETE
+- `BreweryReview` component at `components/brewery/BreweryReview.tsx` — star picker, inline form, review list, delete confirmation
+- `avatars` storage bucket with RLS (user-scoped upload/update/delete, public read)
+- `color-mix(in srgb, var(--accent-gold) N%, transparent)` pattern replaces `rgba(212,168,67,N)` throughout
+- All focus states now use `focus:border-[var(--accent-gold)]` instead of hardcoded `#D4A843`
+- Migrations 030, 031 added (apply with `supabase db push`)
+
+**Deferred to Sprint 24:**
+- S21-001: Playwright E2E (8th carry — Casey's sit-in escalates)
+- Alex: draw animation on auth logo (SVG path animation)
+- Supabase Realtime upgrade for Friends Live
+- Riley: Migration consolidation proposal (028+029)
+- Taylor: Close first paid brewery
+
+### Sprint 24 — Avatar Fix + Stability (2026-03-28)
+**Theme:** Fix children photos, investigate full-page error, stability polish
+
+- ✅ S24-001: Avatar seed photo fix — replaced men/22→47, women/28→53, women/17→62, men/11→58 to avoid young-looking portraits
+  - Seeds updated: `supabase/seeds/005_user_avatars.sql`
+  - Re-run seed 005 against remote DB to apply
+
+**Known open issues carried into Sprint 24:**
+- "Something is wrong error on every page" — Joshua reported full-page error boundary triggering; dev server returns correct HTTP codes, root cause not yet identified (check Sentry, browser console, auth state)
+- Re-run seed 005 against remote database after fixing portrait numbers
+- Apply seeds after any DB reset
+
+### Sprint 25 — Rate & Relate ✅ (2026-03-28)
+**Theme:** Fix the rating system, redesign session recap, overhaul the feed
+**Plan:** `docs/sprint-25-plan.md`
+
+- ✅ S25-001: StarRating bug fix — `flex` → `inline-flex` prevents 5th star clipping, all hardcoded colors replaced with CSS vars
+- ✅ S25-002: Migration 032 — `beer_reviews` table (dedicated beer reviews, mirrors brewery_reviews pattern)
+- ✅ S25-003: `BreweryRatingHeader` component — prominent rating display at top of brewery page (after hero), inline star picker with progressive comment disclosure
+- ✅ S25-004: Beer reviews API — `GET/POST/DELETE /api/beer/[beer_id]/reviews` (upsert pattern, public read, auth write own)
+- ✅ S25-005: Beer log PATCH API — `PATCH /api/sessions/[id]/beers/[logId]` for updating ratings from recap screen
+- ✅ S25-006: Session recap v2 — split beers into "Rate These?" (unrated, inline star pickers) + "Already Rated" (compact), brewery quick review section, compact hero, max-w-lg centered
+- ✅ S25-007: Feed card visual refresh — killed redundant brewery banner, brewery name as `font-display` headline, readable beer list (one per line with style tag + rating), session photo support, session note display (blockquote)
+- ✅ S25-008: Welcome card slim-down — full card on first visit of day (localStorage timestamp), slim single-line bar on subsequent visits; removed weekly stats from feed
+- ✅ S25-009: Filter tab redesign — full-width tab bar with counts (`All 24 · Friends 18 · You 6`), equal-width buttons
+- ✅ S25-010: `BeerReviewSection` component on beer page — dedicated reviews from `beer_reviews` table, existing beer_logs section renamed to "Activity"
+- ✅ S25-011: SessionComments redesign — last 2 comments always visible as preview, comment input always visible (not hidden behind expand), expand/collapse for full thread
+
+**Key architectural changes from Sprint 25:**
+- Migration 032 applied to remote
+- `beer_reviews` table — public read, auth write own, UNIQUE(user_id, beer_id)
+- `BreweryRatingHeader` at `components/brewery/BreweryRatingHeader.tsx` — inline rating + CTA at top of brewery page
+- `BeerReviewSection` at `components/beer/BeerReviewSection.tsx` — star picker, comment, review list
+- `/api/beer/[beer_id]/reviews/route.ts` — GET (list + avg + user review), POST (upsert), DELETE
+- `/api/sessions/[id]/beers/[logId]/route.ts` — PATCH (update rating)
+- `StarRating` component: `inline-flex` container, CSS var colors throughout
+- `SessionRecapSheet` v2: beer rating prompts, brewery quick review, checks for existing brewery review, fire-and-forget PATCH for beer ratings
+- `SessionCard` redesigned: no brewery banner, beer list as rows, photo + note support, expandable beer list (4 shown, "Show N more")
+- `HomeFeed` welcome card: first-visit-of-day detection via localStorage, slim bar variant
+- `SessionComments`: eager fetch, 2-comment preview always visible, input always visible
+- Feed filter tabs: full-width bar with counts per filter
+
+**Deferred to Sprint 26:**
+- Cheers/reaction button on feed cards (P1)
+- Feed infinite scroll / pagination (P2)
+- Backfill beer_reviews from beer_logs (decided against — separate signals)
+- `beers.avg_rating` migration to pull from `beer_reviews` instead of `beer_logs`
+
+**Backlogged (no sprint):**
+- Playwright E2E — Casey, someday. We believe in you.
 
 ### Revenue Targets
 - Tap tier: $49/mo

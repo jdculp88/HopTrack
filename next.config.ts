@@ -27,6 +27,11 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
+        hostname: "i.pravatar.cc",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
         hostname: "ui-avatars.com",
         pathname: "/api/**",
       },
@@ -34,6 +39,11 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "picsum.photos",
         pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "randomuser.me",
+        pathname: "/api/portraits/**",
       },
     ],
   },

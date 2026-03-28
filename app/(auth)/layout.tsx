@@ -38,7 +38,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
 
         {/* Top: Logo */}
         <Link href="/" className="relative z-10 w-fit transition-opacity hover:opacity-75">
-          <HopMark variant="horizontal" theme="cream" height={30} />
+          <HopMark variant="horizontal" theme="cream" height={32} />
         </Link>
 
         {/* Middle: Editorial statement */}

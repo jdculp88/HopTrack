@@ -35,7 +35,7 @@ export default async function BrewerySessionsPage({
     .eq("user_id", user.id)
     .eq("brewery_id", brewery_id)
     .single() as any;
-  if (!account) notFound();
+  if (!account) redirect("/brewery-admin");
 
   const { data: brewery } = await supabase
     .from("breweries").select("name").eq("id", brewery_id).single() as any;

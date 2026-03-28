@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { Beer, Home } from "lucide-react";
+import { Beer, Home, MessageCircle } from "lucide-react";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 
 interface ActiveFriend {
@@ -62,19 +62,28 @@ export function DrinkingNow() {
       >
         {/* Header */}
         <div className="flex items-center gap-2 mb-3">
-          <span
-            className="w-2 h-2 rounded-full flex-shrink-0 animate-pulse"
-            style={{ background: "#3D7A52" }}
-          />
-          <h2 className="font-display font-semibold text-sm" style={{ color: "var(--text-primary)" }}>
+          <span className="relative flex-shrink-0">
+            <span
+              className="w-2.5 h-2.5 rounded-full block"
+              style={{ background: "#3D7A52" }}
+            />
+            <span
+              className="absolute inset-0 w-2.5 h-2.5 rounded-full animate-pulse"
+              style={{ background: "#3D7A52", opacity: 0.5 }}
+            />
+          </span>
+          <h2 className="font-display font-bold text-sm" style={{ color: "var(--text-primary)" }}>
             Drinking Now
           </h2>
-          <span className="text-xs font-mono" style={{ color: "var(--text-muted)" }}>
-            {friends.length} friend{friends.length !== 1 ? "s" : ""}
+          <span
+            className="text-[10px] font-mono px-1.5 py-0.5 rounded-full"
+            style={{ background: "color-mix(in srgb, #3D7A52 15%, transparent)", color: "#3D7A52" }}
+          >
+            {friends.length}
           </span>
         </div>
 
-        {/* Horizontal scroll strip */}
+        {/* Horizontal scroll strip — wider cards */}
         <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide -mx-1 px-1">
           {friends.map((f, i) => {
             const href = f.isHome
@@ -92,19 +101,19 @@ export function DrinkingNow() {
               >
                 <Link href={href}>
                   <div
-                    className="flex flex-col items-center gap-2 p-3 rounded-2xl border transition-all hover:border-[#D4A843]/40 flex-shrink-0 w-[110px]"
+                    className="flex flex-col items-center gap-2 p-3 rounded-2xl border transition-all flex-shrink-0 w-[140px]"
                     style={{
                       background: "var(--surface)",
                       borderColor: "var(--border)",
                     }}
                   >
-                    {/* Avatar with live pulse ring */}
+                    {/* Avatar with subtle pulse ring */}
                     <div className="relative">
                       <div
-                        className="absolute inset-0 rounded-full animate-ping"
+                        className="absolute -inset-1 rounded-full animate-pulse"
                         style={{
-                          background: "rgba(61,122,82,0.25)",
-                          animationDuration: "2.5s",
+                          background: "rgba(61,122,82,0.15)",
+                          animationDuration: "3s",
                         }}
                       />
                       <UserAvatar
@@ -128,7 +137,7 @@ export function DrinkingNow() {
 
                     {/* Name */}
                     <p
-                      className="text-xs font-medium text-center truncate w-full"
+                      className="text-xs font-semibold text-center truncate w-full"
                       style={{ color: "var(--text-primary)" }}
                     >
                       {f.displayName.split(" ")[0]}
@@ -150,15 +159,43 @@ export function DrinkingNow() {
                     </p>
 
                     {/* Beer count + elapsed */}
-                    <div className="flex items-center gap-1">
-                      <Beer size={9} style={{ color: "#D4A843" }} />
-                      <span className="text-[10px] font-mono" style={{ color: "#D4A843" }}>
+                    <div className="flex items-center gap-1.5">
+                      <Beer size={10} style={{ color: "var(--accent-gold)" }} />
+                      <span className="text-[10px] font-mono font-semibold" style={{ color: "var(--accent-gold)" }}>
                         {f.beerCount}
                       </span>
                       <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>
                         · {elapsedLabel(f.startedAt)}
                       </span>
                     </div>
+
+                    {/* Send cheers */}
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        // Fire-and-forget cheers notification
+                        fetch('/api/notifications', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({
+                            recipient_id: f.userId,
+                            type: 'session_cheers',
+                            title: 'Cheers! 🍻',
+                            body: 'A friend sent you cheers!',
+                            data: { sessionId: f.sessionId },
+                          }),
+                        }).catch(() => {});
+                      }}
+                      className="flex items-center gap-1 text-[10px] font-medium px-2.5 py-1 rounded-lg transition-colors"
+                      style={{
+                        color: "var(--accent-gold)",
+                        background: "color-mix(in srgb, var(--accent-gold) 10%, transparent)",
+                      }}
+                    >
+                      <MessageCircle size={9} />
+                      Cheers
+                    </button>
                   </div>
                 </Link>
               </motion.div>
