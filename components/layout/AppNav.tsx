@@ -3,11 +3,12 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
-  Home, Compass, User, Trophy, Users, Bell, Settings, Hop,
+  Home, Compass, User, Trophy, Users, Bell, Settings,
   PlusCircle, LogOut,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { createClient } from "@/lib/supabase/client";
+import { HopMark } from "@/components/ui/HopMark";
 
 const NAV_ITEMS = [
   { href: "/home",         label: "Feed",         icon: Home },
@@ -41,19 +42,8 @@ export function AppNav({ username, unreadNotifications = 0, onCheckin }: AppNavP
       >
         {/* Logo */}
         <div className="px-6 py-6 border-b" style={{ borderColor: "var(--border)" }}>
-          <Link href="/home" className="flex items-center gap-2.5 group">
-            <div
-              className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
-              style={{ background: "var(--accent-gold)" }}
-            >
-              <Hop size={18} style={{ color: "var(--bg)" }} />
-            </div>
-            <span
-              className="font-display text-xl font-bold transition-colors group-hover:opacity-80"
-              style={{ color: "var(--text-primary)" }}
-            >
-              HopTrack
-            </span>
+          <Link href="/home" className="flex items-center group transition-opacity hover:opacity-80">
+            <HopMark variant="horizontal" theme="dark" height={28} />
           </Link>
         </div>
 

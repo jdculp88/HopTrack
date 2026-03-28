@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Hop } from "lucide-react";
+import { HopMark } from "@/components/ui/HopMark";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -61,12 +61,7 @@ export default async function BreweryWelcomePage({ params }: Props) {
 
       {/* Header */}
       <header style={{ width: "100%", maxWidth: 480, padding: "20px 24px 0", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <Hop size={18} color="#D4A843" />
-          <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, fontWeight: 700, letterSpacing: "0.2em", color: "#6B5E4E", textTransform: "uppercase" }}>
-            HopTrack
-          </span>
-        </div>
+        <HopMark variant="horizontal" theme="cream" height={22} />
         <a
           href={`/brewery/${brewery.id}`}
           style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: "#D4A843", textDecoration: "none", letterSpacing: "0.1em" }}
@@ -156,7 +151,6 @@ export default async function BreweryWelcomePage({ params }: Props) {
             marginBottom: 12,
           }}
         >
-          <Hop size={16} color="#D4A843" />
           Track Your Pours
         </a>
 
@@ -187,9 +181,9 @@ export default async function BreweryWelcomePage({ params }: Props) {
 
       {/* Footer */}
       <footer style={{ width: "100%", maxWidth: 480, padding: "16px 24px", textAlign: "center" }}>
-        <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: "#9E8E7A", letterSpacing: "0.1em" }}>
-          POWERED BY HOPTRACK · TRACK EVERY POUR
-        </p>
+        <div style={{ display: "flex", justifyContent: "center" }}>
+          <HopMark variant="horizontal" theme="cream" height={16} aria-hidden />
+        </div>
       </footer>
 
       {/* Gold bottom bar */}

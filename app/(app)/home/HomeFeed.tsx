@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { Zap, Compass, UserPlus, Users, X, Beer, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SessionCard } from "@/components/social/SessionCard";
+import { DrinkingNow } from "@/components/social/DrinkingNow";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import { getLevelProgress } from "@/lib/xp";
 import { useSession } from "@/hooks/useSession";
@@ -166,6 +167,9 @@ export function HomeFeed({ profile, sessions, weekStats, currentUserId }: HomeFe
           </div>
         </motion.div>
       )}
+
+      {/* Drinking Now — friends with active sessions */}
+      <DrinkingNow />
 
       {/* Feed Header + Filter */}
       <div className="flex items-center justify-between pt-2">

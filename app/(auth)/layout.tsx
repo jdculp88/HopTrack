@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { Hop } from "lucide-react";
 import { DarkCardWrapper } from "@/components/layout/DarkCardWrapper";
+import { HopMark } from "@/components/ui/HopMark";
 
 /*
  * Auth layout — "Gold on Cream" redesign
@@ -37,16 +37,8 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         />
 
         {/* Top: Logo */}
-        <Link href="/" className="relative z-10 flex items-center gap-2.5 w-fit">
-          <div
-            className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
-            style={{ background: C.gold }}
-          >
-            <Hop size={14} style={{ color: C.dark }} />
-          </div>
-          <span className="font-display text-base font-bold" style={{ color: C.text }}>
-            HopTrack
-          </span>
+        <Link href="/" className="relative z-10 w-fit transition-opacity hover:opacity-75">
+          <HopMark variant="horizontal" theme="cream" height={26} />
         </Link>
 
         {/* Middle: Editorial statement */}
@@ -86,16 +78,8 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       {/* Right: Form area — dark card */}
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-12 relative">
         {/* Mobile logo */}
-        <Link href="/" className="lg:hidden flex items-center gap-2.5 mb-10">
-          <div
-            className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
-            style={{ background: C.gold }}
-          >
-            <Hop size={14} style={{ color: C.dark }} />
-          </div>
-          <span className="font-display text-base font-bold" style={{ color: C.text }}>
-            HopTrack
-          </span>
+        <Link href="/" className="lg:hidden mb-10 transition-opacity hover:opacity-75">
+          <HopMark variant="horizontal" theme="cream" height={28} />
         </Link>
 
         {/* Dark form card — forces dark CSS vars for cream-on-dark */}

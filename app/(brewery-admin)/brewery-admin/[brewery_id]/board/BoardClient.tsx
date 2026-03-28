@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Settings, X, Calendar, Hop } from "lucide-react";
+import { Settings, X, Calendar } from "lucide-react";
+import { HopMark } from "@/components/ui/HopMark";
 import { createClient } from "@/lib/supabase/client";
 import { GLASS_TYPES, getGlass, getGlassSvgContent } from "@/lib/glassware";
 import type { PourSize } from "@/lib/glassware";
@@ -751,15 +752,8 @@ export function BoardClient({
         )}
 
         {/* HopTrack badge + Live */}
-        <div style={{ display: "flex", alignItems: "center", gap: 16, flexShrink: 0 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-            <div style={{ width: 16, height: 16, borderRadius: 4, background: C.gold, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <Hop size={9} style={{ color: "#0F0E0C" }} />
-            </div>
-            <span className="font-mono" style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.18em", color: C.textSubtle }}>
-              HopTrack
-            </span>
-          </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 14, flexShrink: 0 }}>
+          <HopMark variant="horizontal" theme="cream" height={18} aria-hidden />
           <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
             <span style={{ width: 5, height: 5, borderRadius: "50%", background: "#3D7A52", display: "inline-block" }} />
             <span className="font-mono" style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", color: C.textSubtle }}>

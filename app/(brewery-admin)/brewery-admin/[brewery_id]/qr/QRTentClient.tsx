@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { ArrowLeft, Download, Printer, QrCode, Check } from "lucide-react";
 import QRCode from "qrcode";
+import { HopMark } from "@/components/ui/HopMark";
 
 interface QRTentClientProps {
   breweryId: string;
@@ -62,20 +63,24 @@ export function QRTentClient({ breweryId, breweryName, breweryCity, breweryState
     ctx.fillStyle = "#D4A843";
     ctx.fillRect(0, 0, size.w, 6);
 
-    // HopTrack wordmark area
+    // HopTrack wordmark — Playfair Display italic (Option A)
     ctx.fillStyle = "#1A1714";
-    ctx.font = "bold 13px 'JetBrains Mono', monospace";
-    ctx.letterSpacing = "3px";
+    ctx.font = "italic 500 20px 'Playfair Display', Georgia, serif";
+    ctx.letterSpacing = "-0.5px";
     ctx.textAlign = "center";
-    ctx.fillText("HOPTRACK", size.w / 2, 38);
+    ctx.fillText("Hop", size.w / 2 - 14, 40);
+    ctx.font = "italic bold 20px 'Playfair Display', Georgia, serif";
+    ctx.fillText("Track", size.w / 2 + 16, 40);
 
-    // Gold divider
-    ctx.strokeStyle = "#D4A843";
-    ctx.lineWidth = 1;
+    // Gold rule
+    ctx.strokeStyle = "#A67820";
+    ctx.lineWidth = 0.75;
+    ctx.globalAlpha = 0.28;
     ctx.beginPath();
-    ctx.moveTo(size.w / 2 - 40, 50);
-    ctx.lineTo(size.w / 2 + 40, 50);
+    ctx.moveTo(size.w / 2 - 52, 46);
+    ctx.lineTo(size.w / 2 + 52, 46);
     ctx.stroke();
+    ctx.globalAlpha = 1;
 
     // QR code
     const qrImg = new Image();
@@ -166,7 +171,7 @@ export function QRTentClient({ breweryId, breweryName, breweryCity, breweryState
 <head>
 <meta charset="utf-8">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,500;1,700&family=DM+Sans:wght@400;700&display=swap');
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { background: ${forPrint ? "#fff" : "#e5e5e5"}; display: flex; justify-content: center; align-items: center; min-height: 100vh; font-family: 'DM Sans', sans-serif; }
   .tent {
@@ -178,7 +183,7 @@ export function QRTentClient({ breweryId, breweryName, breweryCity, breweryState
   }
   .bar-top { width: 100%; height: 6px; background: #D4A843; flex-shrink: 0; }
   .bar-bottom { width: 100%; height: 6px; background: #D4A843; flex-shrink: 0; margin-top: auto; }
-  .wordmark { font-family: 'JetBrains Mono', 'Courier New', monospace; font-weight: 700; font-size: 13px; letter-spacing: 4px; color: #1A1714; margin-top: 20px; }
+  .wordmark { font-family: 'Playfair Display', Georgia, serif; font-style: italic; font-weight: 500; font-size: 18px; letter-spacing: -0.3px; color: #1A1714; margin-top: 18px; }
   .divider { width: 80px; height: 1px; background: #D4A843; margin: 12px auto; }
   .qr-wrap { padding: 10px; background: #FBF7F0; border-radius: 12px; border: 1.5px solid #E5DDD0; margin: 4px 0; }
   .qr-wrap img { display: block; width: ${qrSz}px; height: ${qrSz}px; }
@@ -195,7 +200,7 @@ export function QRTentClient({ breweryId, breweryName, breweryCity, breweryState
 <body>
   <div class="tent">
     <div class="bar-top"></div>
-    <p class="wordmark">HOPTRACK</p>
+    <p class="wordmark">Hop<strong style="font-weight:700">Track</strong></p>
     <div class="divider"></div>
     <div class="qr-wrap"><img src="${qrDataUrl}" alt="QR Code" /></div>
     <p class="name">${breweryName}</p>
@@ -325,12 +330,12 @@ export function QRTentClient({ breweryId, breweryName, breweryCity, breweryState
               >
                 {/* Gold top bar */}
                 <div style={{ width: "100%", height: 6, background: "#D4A843", flexShrink: 0 }} />
-                {/* Wordmark */}
-                <p style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, fontSize: 13, letterSpacing: 4, color: "#1A1714", marginTop: 20 }}>
-                  HOPTRACK
-                </p>
+                {/* Wordmark — Morgan's MP-5 lockup */}
+                <div style={{ marginTop: 18 }}>
+                  <HopMark variant="horizontal" theme="cream" height={22} />
+                </div>
                 {/* Divider */}
-                <div style={{ width: 80, height: 1, background: "#D4A843", margin: "12px auto" }} />
+                <div style={{ width: 80, height: 1, background: "#D4A843", margin: "10px auto" }} />
                 {/* QR */}
                 <div style={{ padding: 10, background: "#FBF7F0", borderRadius: 12, border: "1.5px solid #E5DDD0", margin: "4px 0" }}>
                   <img src={qrDataUrl} alt="QR Code" style={{ display: "block", width: Math.min(size.w - 80, 160), height: Math.min(size.w - 80, 160) }} />

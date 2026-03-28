@@ -50,6 +50,35 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
     .single();
   const userVisit = userVisitRaw as any;
 
+  // Friends Here Now — friends with active sessions at this brewery
+  const sixHoursAgo = new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString();
+  const { data: friendshipsRaw } = await supabase
+    .from("friendships")
+    .select("requester_id, addressee_id")
+    .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`)
+    .eq("status", "accepted");
+  const friendIds = (friendshipsRaw ?? []).map((f: any) =>
+    f.requester_id === user.id ? f.addressee_id : f.requester_id,
+  );
+  let friendsHere: any[] = [];
+  if (friendIds.length > 0) {
+    const { data: activeSessions } = await (supabase as any)
+      .from("sessions")
+      .select(`
+        id, user_id, started_at,
+        profile:profiles!user_id(id, username, display_name, avatar_url, notification_preferences),
+        beer_logs(id)
+      `)
+      .in("user_id", friendIds)
+      .eq("brewery_id", id)
+      .eq("is_active", true)
+      .gte("started_at", sixHoursAgo);
+    friendsHere = ((activeSessions ?? []) as any[]).filter((s: any) => {
+      const prefs = s.profile?.notification_preferences ?? {};
+      return prefs.share_live !== false;
+    });
+  }
+
   // Top visitors leaderboard
   const { data: topVisitorsRaw } = await supabase
     .from("brewery_visits")
@@ -337,6 +366,48 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
             </div>
           )}
         </div>
+
+        {/* Friends Here Now */}
+        {friendsHere.length > 0 && (
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <span className="w-2 h-2 rounded-full bg-green-600 animate-pulse flex-shrink-0" />
+              <h2 className="font-display text-xl font-bold text-[var(--text-primary)]">Friends Here Now</h2>
+            </div>
+            <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide -mx-1 px-1">
+              {friendsHere.map((s: any) => {
+                const diffMs = Date.now() - new Date(s.started_at).getTime();
+                const mins = Math.floor(diffMs / 60000);
+                const elapsed = mins < 60 ? `${mins}m` : `${Math.floor(mins / 60)}h ${mins % 60}m`;
+                const beerCount = Array.isArray(s.beer_logs) ? s.beer_logs.length : 0;
+                return (
+                  <Link
+                    key={s.id}
+                    href={`/profile/${s.profile?.username}`}
+                    className="flex flex-col items-center gap-2 p-3 rounded-2xl border flex-shrink-0 w-[100px] hover:border-[#D4A843]/40 transition-colors"
+                    style={{ background: "var(--surface)", borderColor: "var(--border)" }}
+                  >
+                    <div className="relative">
+                      <div className="w-10 h-10 rounded-full overflow-hidden bg-[var(--surface-2)] flex items-center justify-center font-bold text-sm" style={{ color: "var(--accent-gold)" }}>
+                        {s.profile?.avatar_url
+                          ? <img src={s.profile.avatar_url} alt="" className="w-full h-full object-cover" />
+                          : (s.profile?.display_name ?? s.profile?.username ?? "?")[0].toUpperCase()
+                        }
+                      </div>
+                      <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 bg-green-600" style={{ borderColor: "var(--surface)" }} />
+                    </div>
+                    <p className="text-xs font-medium text-center truncate w-full" style={{ color: "var(--text-primary)" }}>
+                      {(s.profile?.display_name ?? s.profile?.username ?? "Friend").split(" ")[0]}
+                    </p>
+                    <p className="text-[10px] font-mono text-center" style={{ color: "#D4A843" }}>
+                      {beerCount} 🍺 · {elapsed}
+                    </p>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Leaderboard */}
         {topVisitors && topVisitors.length > 0 && (

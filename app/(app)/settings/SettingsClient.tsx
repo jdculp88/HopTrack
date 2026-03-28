@@ -16,7 +16,7 @@ interface SettingsClientProps {
 
 const inputCls = "w-full bg-[var(--surface-2)] border border-[var(--border)] rounded-xl px-4 py-3 text-[var(--text-primary)] text-sm outline-none transition-colors focus:border-[#D4A843] placeholder:text-[var(--text-muted)]";
 
-const DEFAULT_PREFS = { friend_activity: true, achievements: true, weekly_stats: true };
+const DEFAULT_PREFS = { friend_activity: true, achievements: true, weekly_stats: true, share_live: true };
 
 export function SettingsClient({ profile, userEmail }: SettingsClientProps) {
   const router = useRouter();
@@ -219,6 +219,13 @@ export function SettingsClient({ profile, userEmail }: SettingsClientProps) {
               <p className="text-xs text-[var(--text-muted)] mt-0.5">Appear in leaderboards and friend search</p>
             </div>
             <Toggle value={isPublic} onChange={setIsPublic} />
+          </div>
+          <div className="flex items-center justify-between py-2 border-t border-[var(--border)] pt-4">
+            <div>
+              <p className="font-medium text-[var(--text-primary)] text-sm">Show Active Sessions</p>
+              <p className="text-xs text-[var(--text-muted)] mt-0.5">Let friends see when you&apos;re currently drinking</p>
+            </div>
+            <Toggle value={notifPrefs.share_live} onChange={(v) => handleNotifToggle("share_live", v)} />
           </div>
         </div>
       </Section>

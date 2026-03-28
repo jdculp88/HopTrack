@@ -3,6 +3,7 @@
 import { useRef, useCallback, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Share2, Copy, Star, Beer, Zap, Download, QrCode } from "lucide-react";
+import { HopMark } from "@/components/ui/HopMark";
 import QRCode from "react-qr-code";
 import { useToast } from "@/components/ui/Toast";
 import type { Session, BeerLog } from "@/types/database";
@@ -238,11 +239,8 @@ export function SessionShareCard({ open, onClose, breweryName, beerLogs, session
               </AnimatePresence>
 
               {/* Footer branding */}
-              <div className="px-4 pb-4 flex items-center justify-center gap-2">
-                <Beer size={12} style={{ color: "#D4A843" }} />
-                <span className="text-xs font-mono" style={{ color: "rgba(255,255,255,0.3)" }}>
-                  HopTrack · Track Every Pour
-                </span>
+              <div className="px-4 pb-4 flex items-center justify-center" style={{ opacity: 0.35 }}>
+                <HopMark variant="horizontal" theme="gold-mono" height={16} aria-hidden />
               </div>
             </div>
 

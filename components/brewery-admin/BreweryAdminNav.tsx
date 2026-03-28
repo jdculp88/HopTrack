@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Hop, LayoutDashboard, List, BarChart2, Gift, Settings, ChevronDown, ExternalLink, Rewind, LogOut, Calendar, QrCode } from "lucide-react";
+import { LayoutDashboard, List, BarChart2, Gift, Settings, ChevronDown, ExternalLink, Rewind, LogOut, Calendar, QrCode } from "lucide-react";
+import { HopMark } from "@/components/ui/HopMark";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -42,9 +43,8 @@ export function BreweryAdminNav({ accounts }: { accounts: any[] }) {
 
         {/* Header */}
         <div className="px-5 py-5 border-b" style={{ borderColor: "var(--border)" }}>
-          <Link href="/home" className="flex items-center gap-2 mb-4 opacity-60 hover:opacity-100 transition-opacity">
-            <Hop size={16} style={{ color: "var(--accent-gold)" }} />
-            <span className="text-xs font-mono uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>HopTrack</span>
+          <Link href="/home" className="flex items-center mb-4 opacity-60 hover:opacity-100 transition-opacity">
+            <HopMark variant="horizontal" theme="dark" height={20} />
           </Link>
 
           {/* Brewery selector */}
