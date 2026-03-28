@@ -38,7 +38,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
 
         {/* Top: Logo */}
         <Link href="/" className="relative z-10 w-fit transition-opacity hover:opacity-75">
-          <HopMark variant="horizontal" theme="cream" height={26} />
+          <HopMark variant="horizontal" theme="cream" height={30} />
         </Link>
 
         {/* Middle: Editorial statement */}
@@ -79,7 +79,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-12 relative">
         {/* Mobile logo */}
         <Link href="/" className="lg:hidden mb-10 transition-opacity hover:opacity-75">
-          <HopMark variant="horizontal" theme="cream" height={28} />
+          <HopMark variant="horizontal" theme="cream" height={32} />
         </Link>
 
         {/* Dark form card — forces dark CSS vars for cream-on-dark */}

@@ -44,7 +44,7 @@ export function BreweryAdminNav({ accounts }: { accounts: any[] }) {
         {/* Header */}
         <div className="px-5 py-5 border-b" style={{ borderColor: "var(--border)" }}>
           <Link href="/home" className="flex items-center mb-4 opacity-60 hover:opacity-100 transition-opacity">
-            <HopMark variant="horizontal" theme="dark" height={20} />
+            <HopMark variant="horizontal" theme="auto" height={24} />
           </Link>
 
           {/* Brewery selector */}

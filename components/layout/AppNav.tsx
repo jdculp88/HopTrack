@@ -43,7 +43,7 @@ export function AppNav({ username, unreadNotifications = 0, onCheckin }: AppNavP
         {/* Logo */}
         <div className="px-6 py-6 border-b" style={{ borderColor: "var(--border)" }}>
           <Link href="/home" className="flex items-center group transition-opacity hover:opacity-80">
-            <HopMark variant="horizontal" theme="dark" height={28} />
+            <HopMark variant="horizontal" theme="auto" height={32} />
           </Link>
         </div>
 

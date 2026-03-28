@@ -1,6 +1,11 @@
 // HopMark — Morgan's MP-5 "The One" · HopTrack Identity
 // Single continuous SVG stroke. Never fill. Never rotate. Never stretch.
-// Usage: <HopMark variant="horizontal" theme="dark" height={32} />
+// Usage: <HopMark variant="horizontal" theme="auto" height={34} />
+//
+// theme="auto"  → uses CSS vars (var(--accent-gold) / var(--text-primary))
+//                 use this on surfaces that toggle between dark and cream mode
+// theme="dark"  → gold mark, cream text  (hardcoded dark backgrounds)
+// theme="cream" → dark-gold mark, near-black text (hardcoded cream backgrounds)
 
 import type { CSSProperties } from "react";
 
@@ -12,7 +17,8 @@ const MARK_PATH =
   "C 134 44, 138 66, 128 82 C 118 98, 100 104, 86 98 " +
   "C 74 92, 70 78, 76 68 C 82 58, 94 54, 104 60";
 
-// ── Horizontal lockup paths (340×72 viewBox, from spec) ───────────────────
+// ── Horizontal lockup paths (352×72 viewBox) ──────────────────────────────
+// x=72 text start gives more breathing room between mark and wordmark
 const H_MARK_PATH =
   "M 36 6 C 49.4 6, 57.6 15.5, 57 25.9 C 56.4 35.4, 49.2 43.2, 38.9 46.8 " +
   "C 36 47.8, 36 47.8, 36 47.8 C 36 47.8, 30.2 45.6, 25.9 41.0 " +
@@ -22,7 +28,7 @@ const H_MARK_PATH =
   "C 29.5 20.8, 33.8 19.4, 37.4 21.5";
 
 export type HopMarkVariant = "mark" | "horizontal" | "stacked" | "wordmark";
-export type HopMarkTheme = "dark" | "cream" | "gold-mono" | "white";
+export type HopMarkTheme = "dark" | "cream" | "gold-mono" | "white" | "auto";
 
 interface HopMarkProps {
   variant?: HopMarkVariant;
@@ -34,22 +40,27 @@ interface HopMarkProps {
   "aria-hidden"?: boolean;
 }
 
-const COLORS: Record<HopMarkTheme, { mark: string; text: string; ruleOpacity: number }> = {
+// Hardcoded color palettes — used as inline styles so they always win over
+// any CSS reset or presentation-attribute overrides.
+const COLORS: Record<Exclude<HopMarkTheme, "auto">, { mark: string; text: string; ruleOpacity: number }> = {
   "dark":      { mark: "#C8962E", text: "#F5F0E8", ruleOpacity: 0.22 },
   "cream":     { mark: "#A67820", text: "#1A1A1A", ruleOpacity: 0.28 },
   "gold-mono": { mark: "#C8962E", text: "#C8962E", ruleOpacity: 0.22 },
   "white":     { mark: "#F5F0E8", text: "#F5F0E8", ruleOpacity: 0.22 },
 };
 
+// CSS-var colors — adapts automatically to dark ↔ cream theme toggle
+const AUTO = { mark: "var(--accent-gold)", text: "var(--text-primary)", ruleOpacity: 0.22 };
+
 export function HopMark({
   variant = "horizontal",
-  theme = "dark",
+  theme = "auto",
   height = 32,
   className,
   style,
   "aria-hidden": ariaHidden,
 }: HopMarkProps) {
-  const c = COLORS[theme];
+  const c = theme === "auto" ? AUTO : COLORS[theme];
 
   // ── Mark only ────────────────────────────────────────────────────────────
   if (variant === "mark") {
@@ -67,38 +78,40 @@ export function HopMark({
       >
         <path
           d={MARK_PATH}
-          stroke={c.mark}
+          style={{ stroke: c.mark }}
           strokeWidth={5.5}
           strokeLinecap="round"
           strokeLinejoin="round"
+          fill="none"
         />
-        {/* Stem */}
         <path
           d="M 100 132 L 100 224"
-          stroke={c.mark}
+          style={{ stroke: c.mark }}
           strokeWidth={5}
           strokeLinecap="round"
+          fill="none"
         />
-        {/* Side shoot */}
         <path
           d="M 100 198 C 116 202, 128 194, 134 180"
-          stroke={c.mark}
+          style={{ stroke: c.mark }}
           strokeWidth={3}
           strokeLinecap="round"
           opacity={0.4}
+          fill="none"
         />
       </svg>
     );
   }
 
   // ── Horizontal lockup ────────────────────────────────────────────────────
+  // viewBox 352×72 — text starts at x=72 for comfortable mark↔wordmark gap
   if (variant === "horizontal") {
-    const w = Math.round((340 / 72) * height);
+    const w = Math.round((352 / 72) * height);
     return (
       <svg
         width={w}
         height={height}
-        viewBox="0 0 340 72"
+        viewBox="0 0 352 72"
         fill="none"
         className={className}
         style={style}
@@ -108,50 +121,53 @@ export function HopMark({
         {/* Hop mark */}
         <path
           d={H_MARK_PATH}
-          stroke={c.mark}
+          style={{ stroke: c.mark }}
           strokeWidth={2.2}
           strokeLinecap="round"
           strokeLinejoin="round"
+          fill="none"
         />
         {/* Stem */}
         <path
           d="M 36 47.8 L 36 64"
-          stroke={c.mark}
+          style={{ stroke: c.mark }}
           strokeWidth={2.0}
           strokeLinecap="round"
+          fill="none"
         />
         {/* Side shoot */}
         <path
           d="M 36 58 C 39.6 58.7, 42.5 56.6, 43.9 53.4"
-          stroke={c.mark}
+          style={{ stroke: c.mark }}
           strokeWidth={1.2}
           strokeLinecap="round"
           opacity={0.4}
+          fill="none"
         />
         {/* Wordmark — "Hop" 500 + "Track" 700, italic */}
         <text
-          x={62}
+          x={72}
           y={50}
           fontFamily="'Playfair Display', Georgia, serif"
           fontStyle="italic"
           fontSize={42}
           fontWeight={500}
-          fill={c.text}
+          style={{ fill: c.text }}
           letterSpacing={-0.4}
         >
           Hop<tspan fontWeight={700}>Track</tspan>
         </text>
         {/* Gold rule — the pour */}
         <line
-          x1={62}
+          x1={72}
           y1={58}
-          x2={338}
+          x2={350}
           y2={58}
-          stroke={c.mark}
+          style={{ stroke: c.mark }}
           strokeWidth={0.75}
           opacity={c.ruleOpacity}
         />
-        <circle cx={338} cy={58} r={1.5} fill={c.mark} opacity={c.ruleOpacity * 1.7} />
+        <circle cx={350} cy={58} r={1.5} style={{ fill: c.mark }} opacity={c.ruleOpacity * 1.7} />
       </svg>
     );
   }
@@ -170,22 +186,21 @@ export function HopMark({
         aria-label={ariaHidden ? undefined : "HopTrack"}
         aria-hidden={ariaHidden}
       >
-        {/* Hop mark */}
         <path
           d={MARK_PATH}
-          stroke={c.mark}
+          style={{ stroke: c.mark }}
           strokeWidth={5.5}
           strokeLinecap="round"
           strokeLinejoin="round"
+          fill="none"
         />
-        {/* Stem */}
         <path
           d="M 100 132 L 100 162"
-          stroke={c.mark}
+          style={{ stroke: c.mark }}
           strokeWidth={4.5}
           strokeLinecap="round"
+          fill="none"
         />
-        {/* Wordmark below */}
         <text
           x={100}
           y={186}
@@ -194,22 +209,21 @@ export function HopMark({
           fontStyle="italic"
           fontSize={22}
           fontWeight={500}
-          fill={c.text}
+          style={{ fill: c.text }}
           letterSpacing={-0.2}
         >
           Hop<tspan fontWeight={700}>Track</tspan>
         </text>
-        {/* Rule */}
         <line
           x1={24}
           y1={194}
           x2={176}
           y2={194}
-          stroke={c.mark}
+          style={{ stroke: c.mark }}
           strokeWidth={0.75}
           opacity={c.ruleOpacity}
         />
-        <circle cx={176} cy={194} r={1} fill={c.mark} opacity={c.ruleOpacity * 1.5} />
+        <circle cx={176} cy={194} r={1} style={{ fill: c.mark }} opacity={c.ruleOpacity * 1.5} />
       </svg>
     );
   }
@@ -235,7 +249,7 @@ export function HopMark({
           fontStyle="italic"
           fontSize={44}
           fontWeight={500}
-          fill={c.text}
+          style={{ fill: c.text }}
           letterSpacing={-0.5}
         >
           Hop<tspan fontWeight={700}>Track</tspan>
@@ -245,11 +259,11 @@ export function HopMark({
           y1={51}
           x2={228}
           y2={51}
-          stroke={c.mark}
+          style={{ stroke: c.mark }}
           strokeWidth={0.75}
           opacity={c.ruleOpacity}
         />
-        <circle cx={228} cy={51} r={1.5} fill={c.mark} opacity={c.ruleOpacity * 1.7} />
+        <circle cx={228} cy={51} r={1.5} style={{ fill: c.mark }} opacity={c.ruleOpacity * 1.7} />
       </svg>
     );
   }
@@ -258,42 +272,21 @@ export function HopMark({
 }
 
 // ── App Icon SVG (for favicon/manifest generation) ────────────────────────
-// Dark square with centered mark. Use at 512×512 for best results.
 export function HopMarkIcon({ size = 80 }: { size?: number }) {
-  const r = Math.round(size * 0.225); // border-radius ≈ iOS icon rounding
+  const r = Math.round(size * 0.225);
   return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 80 80"
-      fill="none"
-      aria-label="HopTrack"
-    >
+    <svg width={size} height={size} viewBox="0 0 80 80" fill="none" aria-label="HopTrack">
       <rect width={80} height={80} rx={r} fill="#111109" />
       <g transform="translate(40,38) scale(0.255) translate(-100,-120)">
-        <path
-          d={MARK_PATH}
-          stroke="#C8962E"
-          strokeWidth={18}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <path
-          d="M 100 132 L 100 215"
-          stroke="#C8962E"
-          strokeWidth={17}
-          strokeLinecap="round"
-        />
+        <path d={MARK_PATH} stroke="#C8962E" strokeWidth={18} strokeLinecap="round" strokeLinejoin="round" fill="none" />
+        <path d="M 100 132 L 100 215" stroke="#C8962E" strokeWidth={17} strokeLinecap="round" fill="none" />
       </g>
     </svg>
   );
 }
 
 // ── Raw SVG path data for canvas/export use ───────────────────────────────
-// Use these when drawing the mark on canvas (QR tent PNG, share cards, etc.)
 export const HOPMARK_PATHS = {
-  // Mark body path in 200×260 coordinate space
   mark: MARK_PATH,
-  // Horizontal lockup mark path in 340×72 coordinate space
   markHorizontal: H_MARK_PATH,
 } as const;
