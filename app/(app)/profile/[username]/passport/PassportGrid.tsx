@@ -63,22 +63,22 @@ export function PassportGrid({ stamps, totalBeers, totalStyles, totalBreweries }
         className="bg-[var(--surface)] border border-[var(--border)] rounded-3xl p-5"
       >
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#D4A843] to-[#E8841A] flex items-center justify-center">
-            <Stamp size={20} className="text-[#0F0E0C]" />
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--accent-gold)] to-[var(--accent-amber)] flex items-center justify-center">
+            <Stamp size={20} className="text-[var(--bg)]" />
           </div>
           <h1 className="font-display text-2xl font-bold text-[var(--text-primary)]">Beer Passport</h1>
         </div>
         <div className="grid grid-cols-3 gap-3">
           <div className="text-center">
-            <p className="font-mono font-bold text-[#D4A843] text-2xl">{totalBeers}</p>
+            <p className="font-mono font-bold text-[var(--accent-gold)] text-2xl">{totalBeers}</p>
             <p className="text-xs text-[var(--text-muted)]">Beers</p>
           </div>
           <div className="text-center">
-            <p className="font-mono font-bold text-[#D4A843] text-2xl">{totalStyles}</p>
+            <p className="font-mono font-bold text-[var(--accent-gold)] text-2xl">{totalStyles}</p>
             <p className="text-xs text-[var(--text-muted)]">Styles</p>
           </div>
           <div className="text-center">
-            <p className="font-mono font-bold text-[#D4A843] text-2xl">{totalBreweries}</p>
+            <p className="font-mono font-bold text-[var(--accent-gold)] text-2xl">{totalBreweries}</p>
             <p className="text-xs text-[var(--text-muted)]">Breweries</p>
           </div>
         </div>
@@ -101,7 +101,7 @@ export function PassportGrid({ stamps, totalBeers, totalStyles, totalBreweries }
             onClick={() => setStyleFilter("all")}
             className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${
               styleFilter === "all"
-                ? "bg-[#D4A843] text-[#0F0E0C]"
+                ? "bg-[var(--accent-gold)] text-[var(--bg)]"
                 : "bg-[var(--surface)] border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
             }`}
           >
@@ -113,7 +113,7 @@ export function PassportGrid({ stamps, totalBeers, totalStyles, totalBreweries }
               onClick={() => setStyleFilter(style === styleFilter ? "all" : style)}
               className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${
                 styleFilter === style
-                  ? "bg-[#D4A843] text-[#0F0E0C]"
+                  ? "bg-[var(--accent-gold)] text-[var(--bg)]"
                   : "bg-[var(--surface)] border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
               }`}
             >
@@ -149,9 +149,9 @@ export function PassportGrid({ stamps, totalBeers, totalStyles, totalBreweries }
             >
               <Link href={`/beer/${stamp.beerId}`}>
                 <div
-                  className={`p-3 bg-[var(--surface)] rounded-2xl border transition-all hover:border-[#D4A843]/40 ${
+                  className={`p-3 bg-[var(--surface)] rounded-2xl border transition-all hover:border-[var(--accent-gold)]/40 ${
                     stamp.rating === 5
-                      ? "border-[#D4A843]/60 shadow-[0_0_12px_rgba(212,168,67,0.15)]"
+                      ? "border-[var(--accent-gold)]/60 shadow-[0_0_12px_color-mix(in_srgb,var(--accent-gold)_15%,transparent)]"
                       : "border-[var(--border)]"
                   }`}
                 >
@@ -171,8 +171,8 @@ export function PassportGrid({ stamps, totalBeers, totalStyles, totalBreweries }
                     {stamp.style && <BeerStyleBadge style={stamp.style} size="xs" />}
                     {stamp.rating != null && (
                       <div className="flex items-center gap-0.5">
-                        <Star size={10} className="text-[#D4A843] fill-[#D4A843]" />
-                        <span className="text-xs font-mono text-[#D4A843]">{stamp.rating.toFixed(1)}</span>
+                        <Star size={10} className="text-[var(--accent-gold)] fill-[var(--accent-gold)]" />
+                        <span className="text-xs font-mono text-[var(--accent-gold)]">{stamp.rating.toFixed(1)}</span>
                       </div>
                     )}
                   </div>

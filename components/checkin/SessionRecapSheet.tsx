@@ -175,7 +175,7 @@ export default function SessionRecapSheet({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           className="fixed inset-0 z-[100] overflow-y-auto"
-          style={{ background: '#0F0E0C' }}
+          style={{ background: 'var(--bg)' }}
         >
           {/* Gold top accent line */}
           <div
@@ -406,7 +406,7 @@ export default function SessionRecapSheet({
                                   onClick={() => handleBreweryReview(breweryRating)}
                                   disabled={breweryReviewLoading}
                                   className="px-5 py-2 rounded-xl text-sm font-semibold disabled:opacity-40 transition-all"
-                                  style={{ background: 'var(--accent-gold)', color: '#0F0E0C' }}
+                                  style={{ background: 'var(--accent-gold)', color: 'var(--bg)' }}
                                 >
                                   {breweryReviewLoading ? 'Saving…' : 'Submit'}
                                 </button>
@@ -564,7 +564,7 @@ export default function SessionRecapSheet({
                   className="w-full py-4 rounded-2xl font-semibold flex items-center justify-center gap-2.5 transition-all active:scale-[0.98]"
                   style={{
                     background: 'linear-gradient(135deg, var(--accent-gold) 0%, var(--accent-amber) 100%)',
-                    color: '#0F0E0C',
+                    color: 'var(--bg)',
                   }}
                 >
                   <Share2 size={17} />

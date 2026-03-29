@@ -87,7 +87,7 @@ export function ImageUpload({
             <button
               onClick={() => inputRef.current?.click()}
               className="p-2 rounded-full"
-              style={{ background: "var(--accent-gold)", color: "#0F0E0C" }}
+              style={{ background: "var(--accent-gold)", color: "var(--bg)" }}
             >
               <Camera size={16} />
             </button>

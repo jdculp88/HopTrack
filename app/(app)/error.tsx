@@ -23,7 +23,7 @@ export default function AppError({
       </p>
       <button
         onClick={reset}
-        className="px-6 py-3 bg-[var(--accent-gold)] text-[#0F0E0C] font-semibold rounded-xl hover:opacity-90 transition-opacity"
+        className="px-6 py-3 bg-[var(--accent-gold)] text-[var(--bg)] font-semibold rounded-xl hover:opacity-90 transition-opacity"
       >
         Try again
       </button>

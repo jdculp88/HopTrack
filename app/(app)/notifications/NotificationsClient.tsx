@@ -9,11 +9,11 @@ import type { Notification, NotificationType } from "@/types/database";
 
 const ICONS: Record<NotificationType, { icon: React.ReactNode; color: string }> = {
   friend_request:      { icon: <Users size={16} />,         color: "#4A7C59" },
-  friend_checkin:      { icon: <Beer size={16} />,          color: "#D4A843" },
-  tagged_checkin:      { icon: <Users size={16} />,         color: "#D4A843" },
-  achievement_unlocked:{ icon: <Trophy size={16} />,        color: "#E8841A" },
+  friend_checkin:      { icon: <Beer size={16} />,          color: "var(--accent-gold)" },
+  tagged_checkin:      { icon: <Users size={16} />,         color: "var(--accent-gold)" },
+  achievement_unlocked:{ icon: <Trophy size={16} />,        color: "var(--accent-amber)" },
   reaction:            { icon: <Heart size={16} />,         color: "#C44B3A" },
-  session_cheers:      { icon: <Beer size={16} />,          color: "#D4A843" },
+  session_cheers:      { icon: <Beer size={16} />,          color: "var(--accent-gold)" },
   session_comment:     { icon: <MessageCircle size={16} />, color: "#5B8DEF" },
   weekly_stats:        { icon: <TrendingUp size={16} />,    color: "var(--text-secondary)" },
   nudge:               { icon: <Beer size={16} />,          color: "var(--text-muted)" },
@@ -109,7 +109,7 @@ export function NotificationsClient({ notifications: initial }: NotificationsCli
               transition={{ delay: i * 0.04 }}
               className={`flex items-start gap-4 p-4 rounded-2xl border transition-colors ${
                 !n.read
-                  ? "bg-[var(--surface)] border-[#D4A843]/20"
+                  ? "bg-[var(--surface)] border-[var(--accent-gold)]/20"
                   : "bg-[var(--surface)]/50 border-[var(--border)]"
               }`}
             >
@@ -208,7 +208,7 @@ export function NotificationsClient({ notifications: initial }: NotificationsCli
               </div>
 
               {!n.read && (
-                <div className="w-2 h-2 rounded-full bg-[#D4A843] flex-shrink-0 mt-2" />
+                <div className="w-2 h-2 rounded-full bg-[var(--accent-gold)] flex-shrink-0 mt-2" />
               )}
             </motion.div>
           );

@@ -164,7 +164,7 @@ export default function QuickRatingSheet({
                   className="flex-1 py-3 rounded-xl text-sm font-semibold transition-all disabled:opacity-40"
                   style={{
                     background: rating > 0 ? 'var(--accent-gold)' : 'var(--surface-2)',
-                    color: rating > 0 ? '#0F0E0C' : 'var(--text-muted)',
+                    color: rating > 0 ? 'var(--bg)' : 'var(--text-muted)',
                   }}
                 >
                   {saving ? 'Saving...' : 'Save Rating'}

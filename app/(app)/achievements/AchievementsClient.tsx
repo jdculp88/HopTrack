@@ -69,17 +69,17 @@ export function AchievementsClient({ achievements, totalEarned, total }: Achieve
       <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-5 space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Trophy size={18} className="text-[#D4A843]" />
+            <Trophy size={18} className="text-[var(--accent-gold)]" />
             <span className="font-sans font-semibold text-[var(--text-primary)] text-sm">Overall Progress</span>
           </div>
-          <span className="font-mono text-[#D4A843] font-bold">{progress}%</span>
+          <span className="font-mono text-[var(--accent-gold)] font-bold">{progress}%</span>
         </div>
         <div className="h-2 bg-[var(--surface-2)] rounded-full overflow-hidden">
           <motion.div
             initial={{ width: 0 }}
             animate={{ width: `${progress}%` }}
             transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
-            className="h-full bg-gradient-to-r from-[#D4A843] to-[#E8841A] rounded-full"
+            className="h-full bg-gradient-to-r from-[var(--accent-gold)] to-[var(--accent-amber)] rounded-full"
           />
         </div>
         {/* Tier breakdown */}
@@ -110,7 +110,7 @@ export function AchievementsClient({ achievements, totalEarned, total }: Achieve
             onClick={() => setCategory(key)}
             className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap flex-shrink-0 transition-all border ${
               category === key
-                ? "bg-[#D4A843]/15 text-[#D4A843] border-[#D4A843]/30"
+                ? "bg-[var(--accent-gold)]/15 text-[var(--accent-gold)] border-[var(--accent-gold)]/30"
                 : "bg-[var(--surface)] text-[var(--text-secondary)] border-[var(--border)] hover:border-[#6B6456]"
             }`}
           >
@@ -185,8 +185,8 @@ export function AchievementsClient({ achievements, totalEarned, total }: Achieve
                 <p className="text-[var(--text-secondary)] text-sm mt-2 leading-relaxed">{selected.description}</p>
               </div>
 
-              <div className="flex items-center gap-2 bg-[#D4A843]/10 border border-[#D4A843]/20 px-4 py-2 rounded-full">
-                <span className="text-[#D4A843] font-mono font-bold">+{selected.xp_reward} XP</span>
+              <div className="flex items-center gap-2 bg-[var(--accent-gold)]/10 border border-[var(--accent-gold)]/20 px-4 py-2 rounded-full">
+                <span className="text-[var(--accent-gold)] font-mono font-bold">+{selected.xp_reward} XP</span>
               </div>
 
               {selected.earned ? (

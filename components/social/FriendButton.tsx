@@ -85,7 +85,7 @@ export function FriendButton({ profileId, currentUserId }: FriendButtonProps) {
 
   if (status === "pending_received") {
     return (
-      <div className="flex items-center gap-1.5 px-4 py-2 bg-[#D4A843]/15 border border-[#D4A843]/30 text-[#D4A843] rounded-xl text-sm font-medium">
+      <div className="flex items-center gap-1.5 px-4 py-2 bg-[var(--accent-gold)]/15 border border-[var(--accent-gold)]/30 text-[var(--accent-gold)] rounded-xl text-sm font-medium">
         <Clock size={14} />
         Respond in Friends
       </div>
@@ -96,7 +96,7 @@ export function FriendButton({ profileId, currentUserId }: FriendButtonProps) {
     <button
       onClick={handleAdd}
       disabled={acting}
-      className="flex items-center gap-1.5 px-4 py-2 bg-[#D4A843]/15 border border-[#D4A843]/30 text-[#D4A843] rounded-xl text-sm font-medium hover:bg-[#D4A843]/25 transition-colors disabled:opacity-50"
+      className="flex items-center gap-1.5 px-4 py-2 bg-[var(--accent-gold)]/15 border border-[var(--accent-gold)]/30 text-[var(--accent-gold)] rounded-xl text-sm font-medium hover:bg-[var(--accent-gold)]/25 transition-colors disabled:opacity-50"
     >
       {acting ? <Loader2 size={14} className="animate-spin" /> : <UserPlus size={14} />}
       Add Friend

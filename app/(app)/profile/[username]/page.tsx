@@ -112,7 +112,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
       <div className="px-4 sm:px-6 -mt-12 relative z-10">
         {/* Avatar + Info */}
         <div className="flex items-end gap-4 mb-6">
-          <div className="ring-4 ring-[#0F0E0C] rounded-full">
+          <div className="ring-4 ring-[var(--bg)] rounded-full">
             <UserAvatar profile={profile} size="xl" />
           </div>
           <div className="pb-1 flex-1 min-w-0">
@@ -152,7 +152,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
                 <div className="flex items-center gap-1.5">
                   <Flame
                     size={14}
-                    className={(profile as any).current_streak >= 30 ? "text-[#E8841A]" : (profile as any).current_streak >= 7 ? "text-[var(--accent-gold)]" : "text-[var(--text-muted)]"}
+                    className={(profile as any).current_streak >= 30 ? "text-[var(--accent-amber)]" : (profile as any).current_streak >= 7 ? "text-[var(--accent-gold)]" : "text-[var(--text-muted)]"}
                   />
                   <span className="text-sm font-mono font-bold" style={{ color: (profile as any).current_streak >= 7 ? 'var(--accent-gold)' : 'var(--text-secondary)' }}>
                     {(profile as any).current_streak}
@@ -202,7 +202,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
           className="flex items-center gap-3 p-4 mb-8 bg-[var(--surface)] border border-[var(--border)] hover:border-[var(--accent-gold)]/40 rounded-2xl transition-all group"
         >
           <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "linear-gradient(135deg, var(--accent-gold), var(--accent-amber))" }}>
-            <Stamp size={18} className="text-[#0F0E0C]" />
+            <Stamp size={18} className="text-[var(--bg)]" />
           </div>
           <div className="flex-1">
             <p className="font-display font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-gold)] transition-colors">Beer Passport</p>

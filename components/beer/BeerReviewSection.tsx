@@ -106,7 +106,7 @@ export function BeerReviewSection({ beerId, currentUserId }: BeerReviewSectionPr
           <button
             onClick={() => setShowForm(true)}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-medium transition-all hover:opacity-80"
-            style={{ background: "var(--accent-gold)", color: "#0F0E0C" }}
+            style={{ background: "var(--accent-gold)", color: "var(--bg)" }}
           >
             <Star size={13} />
             {userReview ? "Edit" : "Rate"}
@@ -164,7 +164,7 @@ export function BeerReviewSection({ beerId, currentUserId }: BeerReviewSectionPr
                         onClick={handleSubmit}
                         disabled={submitting}
                         className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold transition-all disabled:opacity-40"
-                        style={{ background: "var(--accent-gold)", color: "#0F0E0C" }}
+                        style={{ background: "var(--accent-gold)", color: "var(--bg)" }}
                       >
                         <Send size={13} />
                         {submitting ? "Saving..." : userReview ? "Update" : "Submit"}

@@ -229,7 +229,7 @@ export function LoyaltyClient({ breweryId, initialPrograms, initialPromotions, b
           {programs.length === 0 && (
             <button onClick={openAddProgram}
               className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-semibold"
-              style={{ background: "var(--accent-gold)", color: "#0F0E0C" }}>
+              style={{ background: "var(--accent-gold)", color: "var(--bg)" }}>
               <Plus size={14} /> Create Program
             </button>
           )}
@@ -242,7 +242,7 @@ export function LoyaltyClient({ breweryId, initialPrograms, initialPromotions, b
             <p className="text-sm mb-4" style={{ color: "var(--text-muted)" }}>Replace your paper punch cards with a digital stamp card your customers will actually use.</p>
             <button onClick={openAddProgram}
               className="px-4 py-2.5 rounded-xl text-sm font-semibold"
-              style={{ background: "var(--accent-gold)", color: "#0F0E0C" }}>
+              style={{ background: "var(--accent-gold)", color: "var(--bg)" }}>
               Create Your First Program
             </button>
           </div>
@@ -303,7 +303,7 @@ export function LoyaltyClient({ breweryId, initialPrograms, initialPromotions, b
           </h2>
           <button onClick={() => setShowPromoForm(true)}
             className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-semibold"
-            style={{ background: "var(--accent-gold)", color: "#0F0E0C" }}>
+            style={{ background: "var(--accent-gold)", color: "var(--bg)" }}>
             <Plus size={14} /> Add Promo
           </button>
         </div>
@@ -516,7 +516,7 @@ function FormModal({ title, onClose, onSave, saving, saveLabel, children }: {
             style={{ borderColor: "var(--border)", color: "var(--text-secondary)", background: "transparent" }}>Cancel</button>
           <button onClick={onSave} disabled={saving}
             className="flex-1 py-3 rounded-xl text-sm font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
-            style={{ background: "var(--accent-gold)", color: "#0F0E0C" }}>
+            style={{ background: "var(--accent-gold)", color: "var(--bg)" }}>
             {saving ? <><Loader2 size={16} className="animate-spin" />Saving...</> : <><Save size={16} />{saveLabel}</>}
           </button>
         </div>

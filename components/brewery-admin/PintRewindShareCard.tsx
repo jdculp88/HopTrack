@@ -53,15 +53,15 @@ export function PintRewindShareCard({
             {/* Share card — screenshot this */}
             <div
               className="rounded-3xl overflow-hidden"
-              style={{ background: "#0F0E0C", border: "1px solid #3A3628" }}
+              style={{ background: "var(--bg)", border: "1px solid #3A3628" }}
             >
               {/* Gold header */}
               <div
                 className="px-6 pt-8 pb-6"
-                style={{ background: "linear-gradient(135deg, #D4A843 0%, #E8841A 100%)" }}
+                style={{ background: "linear-gradient(135deg, var(--accent-gold) 0%, var(--accent-amber) 100%)" }}
               >
                 <div className="flex items-center gap-2 mb-2">
-                  <Hop size={14} style={{ color: "#0F0E0C" }} />
+                  <Hop size={14} style={{ color: "var(--bg)" }} />
                   <span
                     className="text-xs font-mono font-bold uppercase tracking-widest"
                     style={{ color: "rgba(15,14,12,0.7)" }}
@@ -71,7 +71,7 @@ export function PintRewindShareCard({
                 </div>
                 <h2
                   className="font-display text-2xl font-bold leading-tight"
-                  style={{ color: "#0F0E0C" }}
+                  style={{ color: "var(--bg)" }}
                 >
                   {breweryName}
                 </h2>
@@ -88,7 +88,7 @@ export function PintRewindShareCard({
                     className="rounded-2xl p-4"
                     style={{ background: "#1C1A16", border: "1px solid #3A3628" }}
                   >
-                    <p className="font-display text-3xl font-bold" style={{ color: "#D4A843" }}>
+                    <p className="font-display text-3xl font-bold" style={{ color: "var(--accent-gold)" }}>
                       {stats.totalCheckins.toLocaleString()}
                     </p>
                     <p
@@ -102,7 +102,7 @@ export function PintRewindShareCard({
                     className="rounded-2xl p-4"
                     style={{ background: "#1C1A16", border: "1px solid #3A3628" }}
                   >
-                    <p className="font-display text-3xl font-bold" style={{ color: "#D4A843" }}>
+                    <p className="font-display text-3xl font-bold" style={{ color: "var(--accent-gold)" }}>
                       {stats.uniqueVisitors.toLocaleString()}
                     </p>
                     <p
@@ -145,7 +145,7 @@ export function PintRewindShareCard({
                       className="rounded-2xl p-4"
                       style={{ background: "#1C1A16", border: "1px solid #3A3628" }}
                     >
-                      <p className="font-display text-3xl font-bold" style={{ color: "#D4A843" }}>
+                      <p className="font-display text-3xl font-bold" style={{ color: "var(--accent-gold)" }}>
                         {stats.avgRating} ★
                       </p>
                       <p
@@ -160,7 +160,7 @@ export function PintRewindShareCard({
                     className="rounded-2xl p-4"
                     style={{ background: "#1C1A16", border: "1px solid #3A3628" }}
                   >
-                    <p className="font-display text-2xl font-bold" style={{ color: "#D4A843" }}>
+                    <p className="font-display text-2xl font-bold" style={{ color: "var(--accent-gold)" }}>
                       {stats.busiestDay}
                     </p>
                     <p
@@ -179,8 +179,8 @@ export function PintRewindShareCard({
                 style={{ borderTop: "1px solid #1C1A16" }}
               >
                 <div className="flex items-center gap-1.5">
-                  <Hop size={13} style={{ color: "#D4A843" }} />
-                  <span className="font-display font-bold text-sm" style={{ color: "#D4A843" }}>
+                  <Hop size={13} style={{ color: "var(--accent-gold)" }} />
+                  <span className="font-display font-bold text-sm" style={{ color: "var(--accent-gold)" }}>
                     HopTrack
                   </span>
                 </div>

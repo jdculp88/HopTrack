@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion'
 import { UserAvatar } from '@/components/ui/UserAvatar'
 import { ReactionBar } from '@/components/social/ReactionBar'
+import { formatRelativeTime } from '@/lib/dates'
 
 export interface RecommendationItem {
   id: string
@@ -16,16 +17,6 @@ export interface RecommendationItem {
   note: string | null
   createdAt: string
   likes: number
-}
-
-function timeAgo(dateStr: string): string {
-  const diffMs = Date.now() - new Date(dateStr).getTime()
-  const mins = Math.floor(diffMs / 60000)
-  if (mins < 60) return `${mins}m ago`
-  const hrs = Math.floor(mins / 60)
-  if (hrs < 24) return `${hrs}h ago`
-  const days = Math.floor(hrs / 24)
-  return `${days}d ago`
 }
 
 export function RecommendationCard({
@@ -68,7 +59,7 @@ export function RecommendationCard({
             {recommendation.displayName.split(' ')[0]}
           </span>
           <p className="text-[11px]" style={{ color: 'var(--text-muted)' }}>
-            {timeAgo(recommendation.createdAt)}
+            {formatRelativeTime(recommendation.createdAt)}
           </p>
         </div>
       </div>

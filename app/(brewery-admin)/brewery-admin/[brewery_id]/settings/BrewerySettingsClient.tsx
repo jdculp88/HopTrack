@@ -128,7 +128,7 @@ export function BrewerySettingsClient({ brewery, role }: BrewerySettingsClientPr
             onClick={handleSave}
             disabled={saving || !form.name.trim() || !form.city.trim()}
             className="w-full py-3.5 rounded-xl font-semibold text-sm transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-            style={{ background: "var(--accent-gold)", color: "#0F0E0C" }}
+            style={{ background: "var(--accent-gold)", color: "var(--bg)" }}
           >
             {saving ? (
               <><Loader2 size={16} className="animate-spin" /> Saving...</>

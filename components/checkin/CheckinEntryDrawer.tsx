@@ -199,8 +199,8 @@ export default function CheckinEntryDrawer({ isOpen, onClose, onSessionStarted, 
                 disabled={startingFor === preselectedBrewery.id}
                 className="w-full py-4 rounded-xl font-bold text-base flex items-center justify-center gap-2 transition-all disabled:opacity-70"
                 style={{
-                  background: 'linear-gradient(135deg, #D4A843 0%, #E8841A 100%)',
-                  color: '#0F0E0C',
+                  background: 'linear-gradient(135deg, var(--accent-gold) 0%, var(--accent-amber) 100%)',
+                  color: 'var(--bg)',
                 }}
               >
                 {startingFor === preselectedBrewery.id ? (
@@ -253,8 +253,8 @@ export default function CheckinEntryDrawer({ isOpen, onClose, onSessionStarted, 
                   disabled={startingFor === autoDetected.id}
                   className="w-full py-4 rounded-xl font-bold text-base flex items-center justify-center gap-2 transition-all disabled:opacity-70"
                   style={{
-                    background: 'linear-gradient(135deg, #D4A843 0%, #E8841A 100%)',
-                    color: '#0F0E0C',
+                    background: 'linear-gradient(135deg, var(--accent-gold) 0%, var(--accent-amber) 100%)',
+                    color: 'var(--bg)',
                   }}
                 >
                   {startingFor === autoDetected.id ? (
@@ -322,7 +322,7 @@ export default function CheckinEntryDrawer({ isOpen, onClose, onSessionStarted, 
                   color: 'var(--text-primary)',
                 }}
                 onFocus={(e) => {
-                  e.currentTarget.style.borderColor = '#D4A843'
+                  e.currentTarget.style.borderColor = 'var(--accent-gold)'
                 }}
                 onBlur={(e) => {
                   e.currentTarget.style.borderColor = 'var(--border)'

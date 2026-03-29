@@ -18,15 +18,15 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 
 const VARIANTS: Record<ButtonVariant, string> = {
   primary:
-    "bg-[#D4A843] text-[#0F0E0C] hover:bg-[#E8841A] border border-transparent font-semibold",
+    "bg-[var(--accent-gold)] text-[var(--bg)] hover:bg-[var(--accent-amber)] border border-transparent font-semibold",
   secondary:
-    "bg-[var(--surface)] text-[var(--text-primary)] hover:bg-[var(--surface-2)] border border-[var(--border)] hover:border-[#D4A843]/40",
+    "bg-[var(--surface)] text-[var(--text-primary)] hover:bg-[var(--surface-2)] border border-[var(--border)] hover:border-[var(--accent-gold)]/40",
   ghost:
     "bg-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface)] border border-transparent",
   danger:
     "bg-[#C44B3A]/10 text-[#C44B3A] hover:bg-[#C44B3A]/20 border border-[#C44B3A]/30",
   gold:
-    "bg-transparent text-[#D4A843] hover:bg-[#D4A843]/10 border border-[#D4A843]/40 hover:border-[#D4A843]",
+    "bg-transparent text-[var(--accent-gold)] hover:bg-[var(--accent-gold)]/10 border border-[var(--accent-gold)]/40 hover:border-[var(--accent-gold)]",
 };
 
 const SIZES: Record<ButtonSize, string> = {
@@ -57,7 +57,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         className={cn(
           "inline-flex items-center justify-center font-sans transition-all duration-150",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D4A843] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0F0E0C]",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-gold)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)]",
           "disabled:opacity-50 disabled:pointer-events-none",
           VARIANTS[variant],
           SIZES[size],

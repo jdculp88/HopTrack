@@ -120,7 +120,7 @@ export function EventsClient({ breweryId, initialEvents }: EventsClientProps) {
         <button
           onClick={openAdd}
           className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold"
-          style={{ background: "var(--accent-gold)", color: "#0F0E0C" }}
+          style={{ background: "var(--accent-gold)", color: "var(--bg)" }}
         >
           <Plus size={15} /> Add Event
         </button>
@@ -136,7 +136,7 @@ export function EventsClient({ breweryId, initialEvents }: EventsClientProps) {
           <button
             onClick={openAdd}
             className="px-5 py-2.5 rounded-xl text-sm font-semibold"
-            style={{ background: "var(--accent-gold)", color: "#0F0E0C" }}
+            style={{ background: "var(--accent-gold)", color: "var(--bg)" }}
           >
             Post Your First Event
           </button>
@@ -241,7 +241,7 @@ export function EventsClient({ breweryId, initialEvents }: EventsClientProps) {
                 </button>
                 <button onClick={save} disabled={saving || !form.title.trim() || !form.event_date}
                   className="flex-1 py-3 rounded-xl text-sm font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
-                  style={{ background: "var(--accent-gold)", color: "#0F0E0C" }}>
+                  style={{ background: "var(--accent-gold)", color: "var(--bg)" }}>
                   {saving ? <><Loader2 size={16} className="animate-spin" />Saving…</> : <><Save size={16} />{editingEvent ? "Save Changes" : "Post Event"}</>}
                 </button>
               </div>

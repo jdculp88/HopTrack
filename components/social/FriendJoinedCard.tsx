@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { UserAvatar } from '@/components/ui/UserAvatar'
 import { useToast } from '@/components/ui/Toast'
+import { formatRelativeTime } from '@/lib/dates'
 
 export interface FriendJoinedItem {
   id: string
@@ -13,16 +14,6 @@ export interface FriendJoinedItem {
   avatarUrl: string | null
   mutualFriends: number
   joinedAt: string
-}
-
-function timeAgo(dateStr: string): string {
-  const diffMs = Date.now() - new Date(dateStr).getTime()
-  const mins = Math.floor(diffMs / 60000)
-  if (mins < 60) return `${mins}m ago`
-  const hrs = Math.floor(mins / 60)
-  if (hrs < 24) return `${hrs}h ago`
-  const days = Math.floor(hrs / 24)
-  return `${days}d ago`
 }
 
 export function FriendJoinedCard({
@@ -89,7 +80,7 @@ export function FriendJoinedCard({
         </p>
       )}
       <p className="text-[11px] mt-1" style={{ color: 'var(--text-muted)' }}>
-        {timeAgo(friend.joinedAt)}
+        {formatRelativeTime(friend.joinedAt)}
       </p>
       <button
         onClick={handleFollow}

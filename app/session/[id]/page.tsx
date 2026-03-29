@@ -84,24 +84,24 @@ export default async function SessionSharePage({ params }: Props) {
     : `${durationMin}m`;
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: "#0F0E0C" }}>
+    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: "var(--bg)" }}>
       <div className="w-full max-w-md space-y-6">
         {/* Session card */}
         <div className="bg-[#1A1917] border border-[#2A2723] rounded-2xl overflow-hidden">
           {/* Header */}
-          <div className="bg-gradient-to-r from-[#D4A843]/10 to-transparent p-6 border-b border-[#2A2723]">
+          <div className="bg-gradient-to-r from-[var(--accent-gold)]/10 to-transparent p-6 border-b border-[#2A2723]">
             <div className="flex items-center gap-3 mb-3">
               {session.profile?.avatar_url ? (
                 <img src={session.profile.avatar_url} alt="" className="w-10 h-10 rounded-full object-cover" />
               ) : (
-                <div className="w-10 h-10 rounded-full bg-[#D4A843]/20 flex items-center justify-center text-[#D4A843] font-bold text-sm">
+                <div className="w-10 h-10 rounded-full bg-[var(--accent-gold)]/20 flex items-center justify-center text-[var(--accent-gold)] font-bold text-sm">
                   {displayName.charAt(0).toUpperCase()}
                 </div>
               )}
               <div>
                 <p className="font-semibold text-[#F5F0E8] text-sm">{displayName}</p>
                 {session.profile?.level && (
-                  <p className="text-xs text-[#D4A843]">Level {session.profile.level}</p>
+                  <p className="text-xs text-[var(--accent-gold)]">Level {session.profile.level}</p>
                 )}
               </div>
             </div>
@@ -112,15 +112,15 @@ export default async function SessionSharePage({ params }: Props) {
           {/* Stats */}
           <div className="grid grid-cols-3 divide-x divide-[#2A2723] border-b border-[#2A2723]">
             <div className="p-4 text-center">
-              <p className="font-display text-2xl font-bold text-[#D4A843]">{beerCount}</p>
+              <p className="font-display text-2xl font-bold text-[var(--accent-gold)]">{beerCount}</p>
               <p className="text-xs text-[#6B6456] mt-1">Beer{beerCount !== 1 ? "s" : ""}</p>
             </div>
             <div className="p-4 text-center">
-              <p className="font-display text-2xl font-bold text-[#D4A843]">+{xpEarned}</p>
+              <p className="font-display text-2xl font-bold text-[var(--accent-gold)]">+{xpEarned}</p>
               <p className="text-xs text-[#6B6456] mt-1">XP</p>
             </div>
             <div className="p-4 text-center">
-              <p className="font-display text-2xl font-bold text-[#D4A843]">{endedAt ? durationStr : "Live"}</p>
+              <p className="font-display text-2xl font-bold text-[var(--accent-gold)]">{endedAt ? durationStr : "Live"}</p>
               <p className="text-xs text-[#6B6456] mt-1">Duration</p>
             </div>
           </div>
@@ -142,7 +142,7 @@ export default async function SessionSharePage({ params }: Props) {
                       <span className="text-xs text-[#A89F8C]">×{log.quantity}</span>
                     )}
                     {log.rating && (
-                      <span className="text-xs text-[#D4A843]">{"★".repeat(log.rating)}</span>
+                      <span className="text-xs text-[var(--accent-gold)]">{"★".repeat(log.rating)}</span>
                     )}
                   </div>
                 </div>
@@ -168,7 +168,7 @@ export default async function SessionSharePage({ params }: Props) {
         {/* CTA */}
         <Link
           href="/home"
-          className="block w-full text-center py-3.5 bg-[#D4A843] text-[#0F0E0C] font-semibold rounded-xl hover:opacity-90 transition-opacity"
+          className="block w-full text-center py-3.5 bg-[var(--accent-gold)] text-[var(--bg)] font-semibold rounded-xl hover:opacity-90 transition-opacity"
         >
           Open in HopTrack
         </Link>

@@ -46,8 +46,8 @@ export default function ActiveSessionBanner({ session, breweryName, onTap }: Act
           transition={{ type: 'spring', stiffness: 400, damping: 30 }}
           className="flex items-center justify-between px-4 py-2.5 rounded-2xl"
           style={{
-            background: 'linear-gradient(135deg, #D4A843 0%, #E8841A 100%)',
-            boxShadow: '0 4px 20px rgba(212,168,67,0.4)',
+            background: 'linear-gradient(135deg, var(--accent-gold) 0%, var(--accent-amber) 100%)',
+            boxShadow: '0 4px 20px color-mix(in srgb, var(--accent-gold) 40%, transparent)',
           }}
         >
           <div className="flex items-center gap-2.5">

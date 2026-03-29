@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion'
 import { StarRating } from '@/components/ui/StarRating'
 import { UserAvatar } from '@/components/ui/UserAvatar'
+import { formatRelativeTime } from '@/lib/dates'
 
 export interface FriendRating {
   id: string
@@ -11,16 +12,6 @@ export interface FriendRating {
   created_at: string
   beer: { id: string; name: string; style: string | null } | null
   profile: { id: string; username: string; display_name: string; avatar_url: string | null } | null
-}
-
-function timeAgo(dateStr: string): string {
-  const diffMs = Date.now() - new Date(dateStr).getTime()
-  const mins = Math.floor(diffMs / 60000)
-  if (mins < 60) return `${mins}m ago`
-  const hrs = Math.floor(mins / 60)
-  if (hrs < 24) return `${hrs}h ago`
-  const days = Math.floor(hrs / 24)
-  return `${days}d ago`
 }
 
 export function RatingCard({ rating: review, index = 0 }: { rating: FriendRating; index?: number }) {
@@ -58,7 +49,7 @@ export function RatingCard({ rating: review, index = 0 }: { rating: FriendRating
       <div className="flex flex-col items-end gap-1 flex-shrink-0">
         <StarRating value={review.rating} readonly size="sm" />
         <span className="text-[10px] font-mono" style={{ color: 'var(--text-muted)' }}>
-          {timeAgo(review.created_at)}
+          {formatRelativeTime(review.created_at)}
         </span>
       </div>
     </motion.div>

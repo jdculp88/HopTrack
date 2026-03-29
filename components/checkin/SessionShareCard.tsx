@@ -143,12 +143,12 @@ export function SessionShareCard({ open, onClose, breweryName, beerLogs, session
               {/* Gold header */}
               <div
                 className="p-5 text-center"
-                style={{ background: "linear-gradient(135deg, #D4A843 0%, #E8841A 100%)" }}
+                style={{ background: "linear-gradient(135deg, var(--accent-gold) 0%, var(--accent-amber) 100%)" }}
               >
                 <p className="text-xs font-mono uppercase tracking-widest text-black/60 mb-1">
                   Session Recap
                 </p>
-                <h2 className="font-display text-2xl font-bold text-[#0F0E0C]">
+                <h2 className="font-display text-2xl font-bold text-[var(--bg)]">
                   {breweryName}
                 </h2>
                 {duration && (
@@ -167,15 +167,15 @@ export function SessionShareCard({ open, onClose, breweryName, beerLogs, session
                     style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}
                   >
                     <div className="flex items-center gap-2 min-w-0">
-                      <Beer size={12} style={{ color: "#D4A843" }} />
+                      <Beer size={12} style={{ color: "var(--accent-gold)" }} />
                       <span className="text-sm text-white/90 truncate">
                         {log.beer?.name || "Unknown beer"}
                       </span>
                     </div>
                     {log.rating != null && (
                       <div className="flex items-center gap-0.5 flex-shrink-0 ml-2">
-                        <Star size={10} style={{ color: "#D4A843", fill: "#D4A843" }} />
-                        <span className="text-xs font-mono" style={{ color: "#D4A843" }}>
+                        <Star size={10} style={{ color: "var(--accent-gold)", fill: "var(--accent-gold)" }} />
+                        <span className="text-xs font-mono" style={{ color: "var(--accent-gold)" }}>
                           {log.rating.toFixed(1)}
                         </span>
                       </div>
@@ -195,13 +195,13 @@ export function SessionShareCard({ open, onClose, breweryName, beerLogs, session
                 style={{ background: "rgba(255,255,255,0.04)" }}
               >
                 <div className="text-center">
-                  <p className="font-mono font-bold text-lg" style={{ color: "#D4A843" }}>{beerCount}</p>
+                  <p className="font-mono font-bold text-lg" style={{ color: "var(--accent-gold)" }}>{beerCount}</p>
                   <p className="text-[10px]" style={{ color: "rgba(255,255,255,0.4)" }}>Beers</p>
                 </div>
                 <div className="text-center">
                   {avgRating ? (
                     <>
-                      <p className="font-mono font-bold text-lg" style={{ color: "#D4A843" }}>{avgRating}</p>
+                      <p className="font-mono font-bold text-lg" style={{ color: "var(--accent-gold)" }}>{avgRating}</p>
                       <p className="text-[10px]" style={{ color: "rgba(255,255,255,0.4)" }}>Avg Rating</p>
                     </>
                   ) : (
@@ -212,7 +212,7 @@ export function SessionShareCard({ open, onClose, breweryName, beerLogs, session
                   )}
                 </div>
                 <div className="text-center">
-                  <p className="font-mono font-bold text-lg" style={{ color: "#D4A843" }}>+{xpGained}</p>
+                  <p className="font-mono font-bold text-lg" style={{ color: "var(--accent-gold)" }}>+{xpGained}</p>
                   <p className="text-[10px]" style={{ color: "rgba(255,255,255,0.4)" }}>XP</p>
                 </div>
               </div>
@@ -249,7 +249,7 @@ export function SessionShareCard({ open, onClose, breweryName, beerLogs, session
               <button
                 onClick={handleShare}
                 className="w-full py-3.5 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all"
-                style={{ background: "linear-gradient(135deg, #D4A843 0%, #E8841A 100%)", color: "#0F0E0C" }}
+                style={{ background: "linear-gradient(135deg, var(--accent-gold) 0%, var(--accent-amber) 100%)", color: "var(--bg)" }}
               >
                 <Share2 size={16} />
                 Share
@@ -276,9 +276,9 @@ export function SessionShareCard({ open, onClose, breweryName, beerLogs, session
                   onClick={() => setShowQR((v) => !v)}
                   className="py-3 rounded-xl font-medium flex items-center justify-center gap-1.5 text-sm transition-all"
                   style={{
-                    background: showQR ? "rgba(212,168,67,0.1)" : "rgba(255,255,255,0.06)",
-                    color: showQR ? "#D4A843" : "rgba(255,255,255,0.7)",
-                    border: `1px solid ${showQR ? "rgba(212,168,67,0.3)" : "rgba(255,255,255,0.1)"}`,
+                    background: showQR ? "color-mix(in srgb, var(--accent-gold) 10%, transparent)" : "rgba(255,255,255,0.06)",
+                    color: showQR ? "var(--accent-gold)" : "rgba(255,255,255,0.7)",
+                    border: `1px solid ${showQR ? "color-mix(in srgb, var(--accent-gold) 30%, transparent)" : "rgba(255,255,255,0.1)"}`,
                   }}
                 >
                   <QrCode size={14} />

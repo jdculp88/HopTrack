@@ -622,7 +622,7 @@ function FriendsEmptyState() {
         <Link
           href="/friends"
           className="inline-flex items-center justify-center gap-2 font-semibold text-sm px-5 py-3 rounded-xl transition-all"
-          style={{ background: "var(--accent-gold)", color: "#0F0E0C" }}
+          style={{ background: "var(--accent-gold)", color: "var(--bg)" }}
         >
           <UserPlus size={15} />
           Find Friends
@@ -681,7 +681,7 @@ function DiscoverTabContent({
         <Link
           href="/explore"
           className="inline-flex items-center justify-center gap-2 font-semibold text-sm px-5 py-3 rounded-xl transition-all"
-          style={{ background: "var(--accent-gold)", color: "#0F0E0C" }}
+          style={{ background: "var(--accent-gold)", color: "var(--bg)" }}
         >
           <Compass size={15} />
           Explore Breweries
@@ -1178,7 +1178,7 @@ function YouTabContent({
             <button
               onClick={() => window.dispatchEvent(new CustomEvent("hoptrack:open-checkin"))}
               className="inline-flex items-center gap-2 font-semibold text-sm px-5 py-3 rounded-xl transition-all"
-              style={{ background: "var(--accent-gold)", color: "#0F0E0C" }}
+              style={{ background: "var(--accent-gold)", color: "var(--bg)" }}
             >
               <Beer size={15} />
               Start a Session

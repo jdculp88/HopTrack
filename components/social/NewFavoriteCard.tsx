@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion'
 import { UserAvatar } from '@/components/ui/UserAvatar'
 import { ReactionBar } from '@/components/social/ReactionBar'
+import { formatRelativeTime } from '@/lib/dates'
 
 export interface NewFavoriteItem {
   id: string
@@ -15,16 +16,6 @@ export interface NewFavoriteItem {
   breweryName: string
   createdAt: string
   likes: number
-}
-
-function timeAgo(dateStr: string): string {
-  const diffMs = Date.now() - new Date(dateStr).getTime()
-  const mins = Math.floor(diffMs / 60000)
-  if (mins < 60) return `${mins}m ago`
-  const hrs = Math.floor(mins / 60)
-  if (hrs < 24) return `${hrs}h ago`
-  const days = Math.floor(hrs / 24)
-  return `${days}d ago`
 }
 
 export function NewFavoriteCard({
@@ -64,7 +55,7 @@ export function NewFavoriteCard({
               {favorite.displayName.split(' ')[0]}
             </span>
             <span className="text-[11px]" style={{ color: 'var(--text-muted)' }}>
-              {timeAgo(favorite.createdAt)}
+              {formatRelativeTime(favorite.createdAt)}
             </span>
           </div>
           <p className="text-xs mt-0.5" style={{ color: 'var(--text-secondary)' }}>

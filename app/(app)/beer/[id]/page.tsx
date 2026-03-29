@@ -140,7 +140,7 @@ export default async function BeerPage({ params }: { params: Promise<{ id: strin
                 <div className="flex items-center gap-3 mb-2">
                   <UserAvatar profile={log.profile} size="sm" />
                   <div className="flex-1 min-w-0">
-                    <Link href={`/profile/${log.profile?.username}`} className="font-display font-semibold text-sm text-[var(--text-primary)] hover:text-[#D4A843] transition-colors">
+                    <Link href={`/profile/${log.profile?.username}`} className="font-display font-semibold text-sm text-[var(--text-primary)] hover:text-[var(--accent-gold)] transition-colors">
                       {log.profile?.display_name ?? log.profile?.username}
                     </Link>
                     <p className="text-xs text-[var(--text-muted)]">

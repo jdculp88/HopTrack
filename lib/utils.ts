@@ -5,25 +5,8 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function formatRelativeTime(date: string | Date): string {
-  const now = new Date();
-  const then = new Date(date);
-  const diff = (now.getTime() - then.getTime()) / 1000;
-
-  if (diff < 60) return "just now";
-  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-  if (diff < 604800) return `${Math.floor(diff / 86400)}d ago`;
-  return then.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-}
-
-export function formatDate(date: string | Date, opts?: Intl.DateTimeFormatOptions): string {
-  return new Date(date).toLocaleDateString("en-US", opts ?? {
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-  });
-}
+// Re-export from lib/dates.ts — canonical source for date formatting
+export { formatRelativeTime, formatDate } from "@/lib/dates";
 
 export function formatRating(rating: number | null): string {
   if (rating === null) return "—";

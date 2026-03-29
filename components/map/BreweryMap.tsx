@@ -23,11 +23,11 @@ function createHopIcon() {
     className: "",
     html: `<div style="
       width: 28px; height: 28px;
-      background: #D4A843;
-      border: 2px solid #0F0E0C;
+      background: var(--accent-gold);
+      border: 2px solid var(--bg);
       border-radius: 50% 50% 50% 0;
       transform: rotate(-45deg);
-      box-shadow: 0 2px 8px rgba(212,168,67,0.4);
+      box-shadow: 0 2px 8px color-mix(in srgb, var(--accent-gold) 40%, transparent);
     "></div>`,
     iconSize: [28, 28],
     iconAnchor: [14, 28],
@@ -97,7 +97,7 @@ export function BreweryMap({ breweries, className }: BreweryMapProps) {
                   href={`/brewery/${brewery.id}`}
                   style={{
                     display: "inline-block",
-                    background: "#D4A843",
+                    background: "var(--accent-gold)",
                     color: "var(--bg)",
                     fontSize: 12,
                     fontWeight: 600,

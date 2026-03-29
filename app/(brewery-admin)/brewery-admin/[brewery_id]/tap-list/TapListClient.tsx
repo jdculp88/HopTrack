@@ -287,7 +287,7 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
           </button>
           <button onClick={openAdd}
             className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all active:scale-95"
-            style={{ background: "var(--accent-gold)", color: "#0F0E0C" }}>
+            style={{ background: "var(--accent-gold)", color: "var(--bg)" }}>
             <Plus size={16} /> Add Beer
           </button>
         </div>
@@ -299,7 +299,7 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
           <button key={f} onClick={() => setFilter(f)}
             className={cn("px-3 py-1.5 rounded-lg text-xs font-medium transition-all", filter === f ? "font-semibold" : "opacity-60 hover:opacity-80")}
             style={filter === f
-              ? { background: "var(--accent-gold)", color: "#0F0E0C" }
+              ? { background: "var(--accent-gold)", color: "var(--bg)" }
               : { background: "var(--surface)", color: "var(--text-secondary)", border: "1px solid var(--border)" }
             }>
             {f === "all" ? `All (${beers.length})` : f === "on_tap" ? `On Tap (${onTapCount})` : `Off Tap (${beers.length - onTapCount})`}
@@ -623,7 +623,7 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
                 </button>
                 <button onClick={handleSave} disabled={saving || !form.name.trim()}
                   className="flex-1 py-3 rounded-xl text-sm font-semibold transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-                  style={{ background: "var(--accent-gold)", color: "#0F0E0C" }}>
+                  style={{ background: "var(--accent-gold)", color: "var(--bg)" }}>
                   {saving ? <><Loader2 size={16} className="animate-spin" />Saving...</> : <><Save size={16} />{editingBeer ? "Save Changes" : "Add Beer"}</>}
                 </button>
               </div>

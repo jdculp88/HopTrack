@@ -57,14 +57,14 @@ export default async function BreweryWelcomePage({ params }: Props) {
       }}
     >
       {/* Gold top bar */}
-      <div style={{ width: "100%", height: 5, background: "#D4A843", flexShrink: 0 }} />
+      <div style={{ width: "100%", height: 5, background: "var(--accent-gold)", flexShrink: 0 }} />
 
       {/* Header */}
       <header style={{ width: "100%", maxWidth: 480, padding: "20px 24px 0", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <HopMark variant="horizontal" theme="cream" height={22} />
         <a
           href={`/brewery/${brewery.id}`}
-          style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: "#D4A843", textDecoration: "none", letterSpacing: "0.1em" }}
+          style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: "var(--accent-gold)", textDecoration: "none", letterSpacing: "0.1em" }}
         >
           Sign in →
         </a>
@@ -97,7 +97,7 @@ export default async function BreweryWelcomePage({ params }: Props) {
         )}
 
         {/* Gold divider */}
-        <div style={{ width: 60, height: 2, background: "#D4A843", marginBottom: 32 }} />
+        <div style={{ width: 60, height: 2, background: "var(--accent-gold)", marginBottom: 32 }} />
 
         {/* On tap preview */}
         {beerList.length > 0 && (
@@ -140,7 +140,7 @@ export default async function BreweryWelcomePage({ params }: Props) {
             width: "100%",
             padding: "16px 24px",
             background: "#1A1714",
-            color: "#D4A843",
+            color: "var(--accent-gold)",
             borderRadius: 14,
             fontFamily: "'JetBrains Mono', monospace",
             fontWeight: 700,
@@ -163,7 +163,7 @@ export default async function BreweryWelcomePage({ params }: Props) {
 
         {/* HopTrack pitch */}
         <div style={{ marginTop: 40, padding: "20px", background: "rgba(212,168,67,0.08)", borderRadius: 12, border: "1px solid rgba(212,168,67,0.2)", width: "100%" }}>
-          <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, letterSpacing: "0.15em", color: "#D4A843", textTransform: "uppercase", marginBottom: 8 }}>
+          <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, letterSpacing: "0.15em", color: "var(--accent-gold)", textTransform: "uppercase", marginBottom: 8 }}>
             New to HopTrack?
           </p>
           <p style={{ fontSize: 13, color: "#6B5E4E", lineHeight: 1.6 }}>
@@ -171,7 +171,7 @@ export default async function BreweryWelcomePage({ params }: Props) {
           </p>
           <a
             href="/signup"
-            style={{ display: "inline-block", marginTop: 12, fontFamily: "'JetBrains Mono', monospace", fontSize: 11, fontWeight: 700, color: "#D4A843", letterSpacing: "0.1em", textDecoration: "none" }}
+            style={{ display: "inline-block", marginTop: 12, fontFamily: "'JetBrains Mono', monospace", fontSize: 11, fontWeight: 700, color: "var(--accent-gold)", letterSpacing: "0.1em", textDecoration: "none" }}
           >
             Create an account →
           </a>
@@ -187,7 +187,7 @@ export default async function BreweryWelcomePage({ params }: Props) {
       </footer>
 
       {/* Gold bottom bar */}
-      <div style={{ width: "100%", height: 5, background: "#D4A843", flexShrink: 0 }} />
+      <div style={{ width: "100%", height: 5, background: "var(--accent-gold)", flexShrink: 0 }} />
     </div>
   );
 }

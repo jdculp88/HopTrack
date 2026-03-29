@@ -132,7 +132,7 @@ export function ExploreClient({ breweries: initialBreweries, hasBeerOfTheWeek = 
             <SlidersHorizontal size={14} />
             Filters
             {activeFilterCount > 0 && (
-              <span className="w-4 h-4 rounded-full text-[10px] font-bold flex items-center justify-center" style={{ background: "var(--accent-gold)", color: "#0F0E0C" }}>
+              <span className="w-4 h-4 rounded-full text-[10px] font-bold flex items-center justify-center" style={{ background: "var(--accent-gold)", color: "var(--bg)" }}>
                 {activeFilterCount}
               </span>
             )}

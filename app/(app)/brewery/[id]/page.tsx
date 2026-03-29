@@ -158,7 +158,7 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
             <Image src={brewery.cover_image_url} alt={brewery.name} fill className="object-cover" />
           )}
         </div>
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0F0E0C] via-[#0F0E0C]/60 to-[#0F0E0C]/20" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg)] via-[var(--bg)]/60 to-[var(--bg)]/20" />
 
         <div className="absolute top-4 left-4">
           <Link href="/explore" className="flex items-center gap-1.5 text-white/70 hover:text-white bg-black/30 backdrop-blur-sm px-3 py-2 rounded-xl text-sm transition-colors">
@@ -224,7 +224,7 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
             <div className="flex items-center gap-4 p-4 bg-[var(--surface)] border border-[var(--accent-gold)]/30 rounded-2xl transition-all hover:border-[var(--accent-gold)]/60 group">
               <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
                 style={{ background: "linear-gradient(135deg, var(--accent-gold) 0%, var(--accent-amber) 100%)" }}>
-                <Award size={22} className="text-[#0F0E0C]" />
+                <Award size={22} className="text-[var(--bg)]" />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-mono uppercase tracking-wider text-[var(--accent-gold)] mb-0.5">Beer of the Week</p>

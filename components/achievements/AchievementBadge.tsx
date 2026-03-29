@@ -88,7 +88,7 @@ export function AchievementUnlock({ achievement, xpGained }: AchievementUnlockPr
       initial={{ opacity: 0, y: 60, scale: 0.9 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ type: "spring", stiffness: 300, damping: 25, delay: 0.1 }}
-      className="flex items-center gap-4 bg-[var(--surface-2)] border border-[#D4A843]/30 rounded-2xl p-4"
+      className="flex items-center gap-4 bg-[var(--surface-2)] border border-[var(--accent-gold)]/30 rounded-2xl p-4"
     >
       <div
         className="w-14 h-14 rounded-2xl flex items-center justify-center ring-2 flex-shrink-0"
@@ -97,14 +97,14 @@ export function AchievementUnlock({ achievement, xpGained }: AchievementUnlockPr
         <span className={cn("text-3xl", tier.ring)}>{achievement.icon}</span>
       </div>
       <div className="flex-1">
-        <p className="text-xs font-mono text-[#D4A843] uppercase tracking-wider mb-0.5">
+        <p className="text-xs font-mono text-[var(--accent-gold)] uppercase tracking-wider mb-0.5">
           Achievement Unlocked!
         </p>
         <p className="font-display font-semibold text-[var(--text-primary)] leading-tight">{achievement.name}</p>
         <p className="text-xs text-[var(--text-secondary)] mt-0.5">{achievement.description}</p>
       </div>
       <div className="flex flex-col items-end flex-shrink-0">
-        <span className="text-lg font-mono font-bold text-[#D4A843]">+{xpGained}</span>
+        <span className="text-lg font-mono font-bold text-[var(--accent-gold)]">+{xpGained}</span>
         <span className="text-xs text-[var(--text-muted)]">XP</span>
       </div>
     </motion.div>

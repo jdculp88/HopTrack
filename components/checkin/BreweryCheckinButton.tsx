@@ -20,8 +20,8 @@ export default function BreweryCheckinButton({ brewery, className }: BreweryChec
       onClick={handleClick}
       className={`flex items-center gap-2 px-5 py-3 rounded-xl font-bold text-sm transition-all active:scale-95 ${className ?? ''}`}
       style={{
-        background: 'linear-gradient(135deg, #D4A843 0%, #E8841A 100%)',
-        color: '#0F0E0C',
+        background: 'linear-gradient(135deg, var(--accent-gold) 0%, var(--accent-amber) 100%)',
+        color: 'var(--bg)',
       }}
     >
       <Beer size={16} />

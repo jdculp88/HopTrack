@@ -23,9 +23,9 @@ const SIZES = {
 };
 
 const COLORS = {
-  gold:  "text-[#D4A843]",
+  gold:  "text-[var(--accent-gold)]",
   white: "text-[var(--text-primary)]",
-  amber: "text-[#E8841A]",
+  amber: "text-[var(--accent-amber)]",
 };
 
 function useCountUp(target: number, duration = 1200, trigger: boolean) {

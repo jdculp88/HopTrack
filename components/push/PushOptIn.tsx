@@ -93,8 +93,8 @@ export function PushOptIn() {
           <div className="p-4">
             <div className="flex items-start justify-between gap-3 mb-3">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(212,168,67,0.1)", border: "1px solid rgba(212,168,67,0.2)" }}>
-                  <Bell size={16} style={{ color: "#D4A843" }} />
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "color-mix(in srgb, var(--accent-gold) 10%, transparent)", border: "1px solid color-mix(in srgb, var(--accent-gold) 20%, transparent)" }}>
+                  <Bell size={16} style={{ color: "var(--accent-gold)" }} />
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-[var(--text-primary)]">Stay in the loop</p>
@@ -116,7 +116,7 @@ export function PushOptIn() {
                 onClick={handleSubscribe}
                 disabled={subscribing}
                 className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-60"
-                style={{ background: "#D4A843", color: "#0F0E0C" }}
+                style={{ background: "var(--accent-gold)", color: "var(--bg)" }}
               >
                 {subscribing ? "Enabling..." : "Enable"}
               </button>

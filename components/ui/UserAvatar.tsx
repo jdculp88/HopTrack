@@ -56,8 +56,8 @@ export function UserAvatar({ profile, size = "md", showLevel = false, className 
         <div
           className={cn(
             "absolute flex items-center justify-center rounded-full",
-            "bg-[#D4A843] text-[#0F0E0C] font-mono font-bold",
-            "border border-[#0F0E0C] leading-none px-1",
+            "bg-[var(--accent-gold)] text-[var(--bg)] font-mono font-bold",
+            "border border-[var(--bg)] leading-none px-1",
             s.badge
           )}
         >
@@ -88,7 +88,7 @@ export function AvatarStack({
   return (
     <div className={cn("flex", className)}>
       {visible.map((p, i) => (
-        <div key={i} className={cn("border-2 border-[#0F0E0C] rounded-full", i > 0 && OVERLAP[size])}>
+        <div key={i} className={cn("border-2 border-[var(--bg)] rounded-full", i > 0 && OVERLAP[size])}>
           <UserAvatar profile={p} size={size} />
         </div>
       ))}
@@ -96,7 +96,7 @@ export function AvatarStack({
         <div
           className={cn(
             SIZES[size].container,
-            "border-2 border-[#0F0E0C] rounded-full flex items-center justify-center",
+            "border-2 border-[var(--bg)] rounded-full flex items-center justify-center",
             "bg-[var(--surface-2)] text-[var(--text-secondary)] font-mono font-bold",
             OVERLAP[size],
             SIZES[size].text

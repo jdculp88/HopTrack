@@ -40,7 +40,7 @@ export function BeerCard({ beer, variant = "default", className }: BeerCardProps
             )}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="font-display font-medium text-[var(--text-primary)] truncate text-sm group-hover:text-[#D4A843] transition-colors">
+            <p className="font-display font-medium text-[var(--text-primary)] truncate text-sm group-hover:text-[var(--accent-gold)] transition-colors">
               {beer.name}
             </p>
             <div className="flex items-center gap-2 mt-0.5">
@@ -50,8 +50,8 @@ export function BeerCard({ beer, variant = "default", className }: BeerCardProps
           </div>
           {beer.avg_rating && (
             <div className="flex-shrink-0 flex items-center gap-1">
-              <span className="text-sm font-mono text-[#D4A843]">★</span>
-              <span className="text-sm font-mono text-[#D4A843]">{beer.avg_rating.toFixed(1)}</span>
+              <span className="text-sm font-mono text-[var(--accent-gold)]">★</span>
+              <span className="text-sm font-mono text-[var(--accent-gold)]">{beer.avg_rating.toFixed(1)}</span>
             </div>
           )}
         </motion.div>
@@ -66,7 +66,7 @@ export function BeerCard({ beer, variant = "default", className }: BeerCardProps
       transition={{ type: "spring", stiffness: 300, damping: 20 }}
       className={cn(
         "bg-[var(--surface)] rounded-2xl overflow-hidden",
-        "border border-[var(--border)] hover:border-[#D4A843]/30",
+        "border border-[var(--border)] hover:border-[var(--accent-gold)]/30",
         "transition-colors duration-150 group",
         className
       )}
@@ -81,14 +81,14 @@ export function BeerCard({ beer, variant = "default", className }: BeerCardProps
             <Image src={beer.cover_image_url} alt={beer.name} fill className="object-cover" />
           )}
           {beer.seasonal && (
-            <div className="absolute top-2 left-2 bg-[#E8841A]/90 text-white text-[10px] font-mono px-1.5 py-0.5 rounded-full">
+            <div className="absolute top-2 left-2 bg-[var(--accent-amber)]/90 text-white text-[10px] font-mono px-1.5 py-0.5 rounded-full">
               Seasonal
             </div>
           )}
         </div>
 
         <div className="p-3 space-y-2">
-          <h3 className="font-display font-semibold text-[var(--text-primary)] text-sm leading-tight group-hover:text-[#D4A843] transition-colors line-clamp-2">
+          <h3 className="font-display font-semibold text-[var(--text-primary)] text-sm leading-tight group-hover:text-[var(--accent-gold)] transition-colors line-clamp-2">
             {beer.name}
           </h3>
 
@@ -100,7 +100,7 @@ export function BeerCard({ beer, variant = "default", className }: BeerCardProps
           {beer.avg_rating ? (
             <div className="flex items-center gap-1">
               <StarRating value={beer.avg_rating} readonly size="sm" />
-              <span className="text-xs font-mono text-[#D4A843]">{beer.avg_rating.toFixed(1)}</span>
+              <span className="text-xs font-mono text-[var(--accent-gold)]">{beer.avg_rating.toFixed(1)}</span>
             </div>
           ) : (
             <p className="text-xs text-[var(--text-muted)]">No ratings yet</p>

@@ -8,7 +8,7 @@ import { UserAvatar } from "@/components/ui/UserAvatar";
 import type { LeaderboardEntry } from "@/types/database";
 
 const RANK_STYLES: Record<number, { bg: string; text: string; label: string }> = {
-  1: { bg: "bg-[#D4A843]/15", text: "text-[#D4A843]", label: "🥇" },
+  1: { bg: "bg-[var(--accent-gold)]/15", text: "text-[var(--accent-gold)]", label: "🥇" },
   2: { bg: "bg-[#C0C0C0]/10", text: "text-[#C0C0C0]", label: "🥈" },
   3: { bg: "bg-[#CD7F32]/10", text: "text-[#CD7F32]", label: "🥉" },
 };
@@ -36,7 +36,7 @@ export function LeaderboardRow({ entry, label, currentUserId, index = 0, classNa
           className={cn(
             "flex items-center gap-4 px-4 py-3 rounded-2xl transition-colors",
             "hover:bg-[var(--surface-2)] group",
-            isCurrentUser && "bg-[#D4A843]/5 border border-[#D4A843]/20",
+            isCurrentUser && "bg-[var(--accent-gold)]/5 border border-[var(--accent-gold)]/20",
             rankStyle ? rankStyle.bg : "",
             className
           )}
@@ -46,7 +46,7 @@ export function LeaderboardRow({ entry, label, currentUserId, index = 0, classNa
             {rankStyle ? (
               <span className="text-xl">{rankStyle.label}</span>
             ) : (
-              <span className={cn("font-mono font-bold text-sm", isCurrentUser ? "text-[#D4A843]" : "text-[var(--text-muted)]")}>
+              <span className={cn("font-mono font-bold text-sm", isCurrentUser ? "text-[var(--accent-gold)]" : "text-[var(--text-muted)]")}>
                 #{entry.rank}
               </span>
             )}
@@ -58,8 +58,8 @@ export function LeaderboardRow({ entry, label, currentUserId, index = 0, classNa
           {/* Name */}
           <div className="flex-1 min-w-0">
             <p className={cn(
-              "font-sans font-semibold text-sm truncate group-hover:text-[#D4A843] transition-colors",
-              isCurrentUser ? "text-[#D4A843]" : "text-[var(--text-primary)]"
+              "font-sans font-semibold text-sm truncate group-hover:text-[var(--accent-gold)] transition-colors",
+              isCurrentUser ? "text-[var(--accent-gold)]" : "text-[var(--text-primary)]"
             )}>
               {entry.profile.display_name}
               {isCurrentUser && <span className="text-xs font-mono ml-1 opacity-60">(you)</span>}
@@ -75,7 +75,7 @@ export function LeaderboardRow({ entry, label, currentUserId, index = 0, classNa
               </span>
             )}
             <div className="text-right">
-              <p className={cn("font-mono font-bold", isCurrentUser ? "text-[#D4A843]" : "text-[var(--text-primary)]")}>
+              <p className={cn("font-mono font-bold", isCurrentUser ? "text-[var(--accent-gold)]" : "text-[var(--text-primary)]")}>
                 {formatCount(entry.value)}
               </p>
               <p className="text-xs text-[var(--text-muted)]">{label}</p>

@@ -471,7 +471,7 @@ function BeerRow({
         className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
         style={{
           background: logged
-            ? 'linear-gradient(135deg, #D4A843 0%, #E8841A 100%)'
+            ? 'linear-gradient(135deg, var(--accent-gold) 0%, var(--accent-amber) 100%)'
             : 'var(--surface-2)',
         }}
       >
@@ -529,8 +529,8 @@ function BeerRow({
           disabled={loading}
           className="flex-shrink-0 px-3 py-2 rounded-xl text-xs font-semibold transition-all disabled:opacity-60 flex items-center gap-1"
           style={{
-            background: 'linear-gradient(135deg, #D4A843 0%, #E8841A 100%)',
-            color: '#0F0E0C',
+            background: 'linear-gradient(135deg, var(--accent-gold) 0%, var(--accent-amber) 100%)',
+            color: 'var(--bg)',
           }}
         >
           {loading ? (

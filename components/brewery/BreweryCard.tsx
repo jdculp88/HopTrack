@@ -41,7 +41,7 @@ export function BreweryCard({ brewery, distance, variant = "default", className 
           transition={{ type: "spring", stiffness: 400, damping: 20 }}
           className={cn(
             "flex items-center gap-3 p-3 rounded-2xl",
-            "bg-[var(--surface)] border border-[var(--border)] hover:border-[#D4A843]/30",
+            "bg-[var(--surface)] border border-[var(--border)] hover:border-[var(--accent-gold)]/30",
             "transition-colors duration-150 group",
             className
           )}
@@ -55,7 +55,7 @@ export function BreweryCard({ brewery, distance, variant = "default", className 
             )}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="font-display font-semibold text-[var(--text-primary)] truncate text-sm group-hover:text-[#D4A843] transition-colors">
+            <p className="font-display font-semibold text-[var(--text-primary)] truncate text-sm group-hover:text-[var(--accent-gold)] transition-colors">
               {brewery.name}
             </p>
             <p className="text-xs text-[var(--text-muted)] truncate">
@@ -100,12 +100,12 @@ export function BreweryCard({ brewery, distance, variant = "default", className 
             )}
           </div>
           {/* Gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0F0E0C] via-[#0F0E0C]/40 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg)] via-[var(--bg)]/40 to-transparent" />
 
           {/* Content */}
           <div className="absolute bottom-0 left-0 right-0 p-5">
             {typeLabel && (
-              <span className="text-xs text-[#D4A843] font-mono uppercase tracking-wider mb-1 block">
+              <span className="text-xs text-[var(--accent-gold)] font-mono uppercase tracking-wider mb-1 block">
                 {typeLabel}
               </span>
             )}
@@ -139,7 +139,7 @@ export function BreweryCard({ brewery, distance, variant = "default", className 
         transition={{ type: "spring", stiffness: 300, damping: 20 }}
         className={cn(
           "bg-[var(--surface)] rounded-2xl overflow-hidden",
-          "border border-[var(--border)] hover:border-[#D4A843]/30",
+          "border border-[var(--border)] hover:border-[var(--accent-gold)]/30",
           "transition-colors duration-150 group",
           className
         )}
@@ -171,7 +171,7 @@ export function BreweryCard({ brewery, distance, variant = "default", className 
 
         <div className="p-4 space-y-2">
           <div className="flex items-start justify-between gap-2">
-            <h3 className="font-display font-semibold text-[var(--text-primary)] leading-tight group-hover:text-[#D4A843] transition-colors">
+            <h3 className="font-display font-semibold text-[var(--text-primary)] leading-tight group-hover:text-[var(--accent-gold)] transition-colors">
               {brewery.name}
             </h3>
             {typeLabel && (
@@ -186,7 +186,7 @@ export function BreweryCard({ brewery, distance, variant = "default", className 
             <span className="truncate">
               {brewery.city}{brewery.state ? `, ${brewery.state}` : ""}
             </span>
-            {distance && <span className="ml-auto text-[#D4A843] text-xs flex-shrink-0">{distance}</span>}
+            {distance && <span className="ml-auto text-[var(--accent-gold)] text-xs flex-shrink-0">{distance}</span>}
           </div>
 
           {brewery.beer_count !== undefined && brewery.beer_count > 0 && (

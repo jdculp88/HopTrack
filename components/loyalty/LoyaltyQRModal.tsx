@@ -29,7 +29,7 @@ export function LoyaltyQRModal({ open, onClose, breweryId, programName, stampsRe
     if (!ctx) return;
     const img = new Image();
     img.onload = () => {
-      ctx.fillStyle = "#0F0E0C";
+      ctx.fillStyle = "#0F0E0C"; // Canvas context — hardcoded for PNG export
       ctx.fillRect(0, 0, 400, 400);
       ctx.drawImage(img, 40, 40, 320, 320);
       const link = document.createElement("a");
@@ -89,7 +89,7 @@ export function LoyaltyQRModal({ open, onClose, breweryId, programName, stampsRe
               </div>
 
               {/* QR Code */}
-              <div ref={qrRef} className="flex items-center justify-center p-5 rounded-2xl" style={{ background: "#0F0E0C" }}>
+              <div ref={qrRef} className="flex items-center justify-center p-5 rounded-2xl" style={{ background: "var(--bg)" }}>
                 <QRCode
                   value={url}
                   size={200}
@@ -109,7 +109,7 @@ export function LoyaltyQRModal({ open, onClose, breweryId, programName, stampsRe
                 <button
                   onClick={handleDownload}
                   className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-opacity hover:opacity-80"
-                  style={{ background: "var(--accent-gold)", color: "#0F0E0C" }}
+                  style={{ background: "var(--accent-gold)", color: "var(--bg)" }}
                 >
                   <Download size={14} />
                   Download PNG

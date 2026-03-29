@@ -31,7 +31,7 @@ const cards: Card[] = [
     id: "intro",
     title: "Your Pint Rewind",
     emoji: "🍺",
-    gradient: "linear-gradient(135deg, #0F0E0C 0%, #1A1815 50%, #2A2520 100%)",
+    gradient: "linear-gradient(135deg, var(--bg) 0%, #1A1815 50%, #2A2520 100%)",
     render: (data) => (
       <div className="flex flex-col items-center justify-center h-full text-center px-8">
         <motion.p
@@ -47,7 +47,7 @@ const cards: Card[] = [
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
           className="font-display text-4xl font-bold mb-3"
-          style={{ color: "#D4A843" }}
+          style={{ color: "var(--accent-gold)" }}
         >
           Hey, {data.displayName}
         </motion.h1>
@@ -74,12 +74,12 @@ const cards: Card[] = [
         <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="text-sm font-mono uppercase tracking-widest mb-2" style={{ color: "rgba(255,255,255,0.5)" }}>
           You are...
         </motion.p>
-        <motion.h2 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="font-display text-3xl font-bold mb-4" style={{ color: "#D4A843" }}>
+        <motion.h2 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="font-display text-3xl font-bold mb-4" style={{ color: "var(--accent-gold)" }}>
           {data.personality.archetype}
         </motion.h2>
         {data.personality.topStyle && (
           <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }} className="text-base" style={{ color: "rgba(255,255,255,0.6)" }}>
-            You've had <span className="font-bold" style={{ color: "#D4A843" }}>{data.personality.count}</span> {data.personality.topStyle}{data.personality.count !== 1 ? "s" : ""}. It's a lifestyle at this point.
+            You've had <span className="font-bold" style={{ color: "var(--accent-gold)" }}>{data.personality.count}</span> {data.personality.topStyle}{data.personality.count !== 1 ? "s" : ""}. It's a lifestyle at this point.
           </motion.p>
         )}
       </div>
@@ -98,11 +98,11 @@ const cards: Card[] = [
         </motion.p>
         {data.signatureBeer ? (
           <>
-            <motion.h2 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="font-display text-3xl font-bold mb-4" style={{ color: "#D4A843" }}>
+            <motion.h2 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="font-display text-3xl font-bold mb-4" style={{ color: "var(--accent-gold)" }}>
               {data.signatureBeer.name}
             </motion.h2>
             <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }} className="text-base" style={{ color: "rgba(255,255,255,0.6)" }}>
-              You've had it <span className="font-bold" style={{ color: "#D4A843" }}>{data.signatureBeer.count}</span> time{data.signatureBeer.count !== 1 ? "s" : ""}. The bartender knows your order.
+              You've had it <span className="font-bold" style={{ color: "var(--accent-gold)" }}>{data.signatureBeer.count}</span> time{data.signatureBeer.count !== 1 ? "s" : ""}. The bartender knows your order.
             </motion.p>
           </>
         ) : (
@@ -126,11 +126,11 @@ const cards: Card[] = [
         </motion.p>
         {data.breweryLoyalty ? (
           <>
-            <motion.h2 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="font-display text-3xl font-bold mb-4" style={{ color: "#D4A843" }}>
+            <motion.h2 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="font-display text-3xl font-bold mb-4" style={{ color: "var(--accent-gold)" }}>
               {data.breweryLoyalty.name}
             </motion.h2>
             <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }} className="text-base" style={{ color: "rgba(255,255,255,0.6)" }}>
-              <span className="font-bold" style={{ color: "#D4A843" }}>{data.breweryLoyalty.count}</span> visit{data.breweryLoyalty.count !== 1 ? "s" : ""}. They should name a stool after you.
+              <span className="font-bold" style={{ color: "var(--accent-gold)" }}>{data.breweryLoyalty.count}</span> visit{data.breweryLoyalty.count !== 1 ? "s" : ""}. They should name a stool after you.
             </motion.p>
           </>
         ) : (
@@ -154,7 +154,7 @@ const cards: Card[] = [
         </motion.p>
         {data.legendarySession ? (
           <>
-            <motion.h2 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="font-display text-5xl font-bold mb-2" style={{ color: "#D4A843" }}>
+            <motion.h2 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="font-display text-5xl font-bold mb-2" style={{ color: "var(--accent-gold)" }}>
               {data.legendarySession.beerCount} beers
             </motion.h2>
             <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }} className="text-base mb-1" style={{ color: "rgba(255,255,255,0.6)" }}>
@@ -184,13 +184,13 @@ const cards: Card[] = [
         <motion.p initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2 }} className="text-5xl mb-4">⭐</motion.p>
         {data.ratingHabits.avgRating !== null ? (
           <>
-            <motion.h2 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="font-display text-5xl font-bold mb-2" style={{ color: "#D4A843" }}>
+            <motion.h2 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="font-display text-5xl font-bold mb-2" style={{ color: "var(--accent-gold)" }}>
               {data.ratingHabits.avgRating.toFixed(1)} ★
             </motion.h2>
             <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }} className="text-sm font-mono uppercase tracking-widest mb-3" style={{ color: "rgba(255,255,255,0.5)" }}>
               avg across {data.ratingHabits.totalRated} ratings
             </motion.p>
-            <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }} className="font-display text-xl font-bold" style={{ color: "#D4A843" }}>
+            <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }} className="font-display text-xl font-bold" style={{ color: "var(--accent-gold)" }}>
               {data.ratingHabits.personality}
             </motion.p>
           </>
@@ -215,7 +215,7 @@ const cards: Card[] = [
         </motion.p>
         {data.homeSessions > 0 ? (
           <>
-            <motion.h2 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="font-display text-5xl font-bold mb-4" style={{ color: "#D4A843" }}>
+            <motion.h2 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="font-display text-5xl font-bold mb-4" style={{ color: "var(--accent-gold)" }}>
               {data.homeSessions}
             </motion.h2>
             <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }} className="text-base" style={{ color: "rgba(255,255,255,0.6)" }}>
@@ -234,7 +234,7 @@ const cards: Card[] = [
     id: "scroll",
     title: "The Scroll",
     emoji: "📜",
-    gradient: "linear-gradient(135deg, #1a0f00 0%, #0F0E0C 100%)",
+    gradient: "linear-gradient(135deg, #1a0f00 0%, var(--bg) 100%)",
     render: (data) => (
       <div className="flex flex-col items-center justify-center h-full text-center px-8">
         <motion.p initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.1 }} className="text-4xl mb-6">📜</motion.p>
@@ -249,13 +249,13 @@ const cards: Card[] = [
             { value: data.scroll.uniqueBreweries, label: "Breweries" },
           ].map(({ value, label }, i) => (
             <motion.div key={label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 + i * 0.15 }}>
-              <p className="font-display text-4xl font-bold" style={{ color: "#D4A843" }}>{value}</p>
+              <p className="font-display text-4xl font-bold" style={{ color: "var(--accent-gold)" }}>{value}</p>
               <p className="text-xs font-mono uppercase tracking-wider mt-1" style={{ color: "rgba(255,255,255,0.5)" }}>{label}</p>
             </motion.div>
           ))}
         </div>
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1 }} className="mt-8">
-          <p className="font-display text-2xl font-bold" style={{ color: "#D4A843" }}>{data.scroll.totalXp.toLocaleString()} XP</p>
+          <p className="font-display text-2xl font-bold" style={{ color: "var(--accent-gold)" }}>{data.scroll.totalXp.toLocaleString()} XP</p>
           <p className="text-xs mt-1" style={{ color: "rgba(255,255,255,0.4)" }}>earned total</p>
         </motion.div>
       </div>
@@ -265,21 +265,21 @@ const cards: Card[] = [
     id: "level",
     title: "Your Level",
     emoji: "👑",
-    gradient: "linear-gradient(135deg, #2d1a00 0%, #1a0f00 50%, #0F0E0C 100%)",
+    gradient: "linear-gradient(135deg, #2d1a00 0%, #1a0f00 50%, var(--bg) 100%)",
     render: (data) => (
       <div className="flex flex-col items-center justify-center h-full text-center px-8">
         <motion.p initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2 }} className="text-6xl mb-4">👑</motion.p>
         <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="text-sm font-mono uppercase tracking-widest mb-2" style={{ color: "rgba(255,255,255,0.5)" }}>
           Level {data.level.level}
         </motion.p>
-        <motion.h2 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="font-display text-3xl font-bold mb-6" style={{ color: "#D4A843" }}>
+        <motion.h2 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="font-display text-3xl font-bold mb-6" style={{ color: "var(--accent-gold)" }}>
           {data.level.title}
         </motion.h2>
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }}>
           <Link
             href="/home"
             className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm transition-all hover:opacity-90"
-            style={{ background: "#D4A843", color: "#0F0E0C" }}
+            style={{ background: "var(--accent-gold)", color: "var(--bg)" }}
           >
             <Home size={16} />
             Back to HopTrack
@@ -326,7 +326,7 @@ export function PintRewindCards() {
 
   if (loading) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center" style={{ background: "#0F0E0C" }}>
+      <div className="fixed inset-0 flex items-center justify-center" style={{ background: "var(--bg)" }}>
         <div className="text-center">
           <p className="text-5xl mb-4">🍺</p>
           <Skeleton className="h-6 w-48 rounded mx-auto mb-2" />
@@ -338,12 +338,12 @@ export function PintRewindCards() {
 
   if (!data) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center" style={{ background: "#0F0E0C" }}>
+      <div className="fixed inset-0 flex items-center justify-center" style={{ background: "var(--bg)" }}>
         <div className="text-center px-8">
           <p className="text-5xl mb-4">🍺</p>
-          <h2 className="font-display text-2xl font-bold mb-2" style={{ color: "#D4A843" }}>Your rewind is empty</h2>
+          <h2 className="font-display text-2xl font-bold mb-2" style={{ color: "var(--accent-gold)" }}>Your rewind is empty</h2>
           <p className="text-sm mb-6" style={{ color: "rgba(255,255,255,0.6)" }}>Start a session at a brewery to unlock your Pint Rewind — your personal beer highlight reel.</p>
-          <Link href="/explore" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm" style={{ background: "#D4A843", color: "#0F0E0C" }}>
+          <Link href="/explore" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm" style={{ background: "var(--accent-gold)", color: "var(--bg)" }}>
             <Home size={16} /> Find a brewery
           </Link>
         </div>
@@ -356,7 +356,7 @@ export function PintRewindCards() {
   return (
     <div
       className="fixed inset-0 flex flex-col select-none"
-      style={{ background: "#0F0E0C" }}
+      style={{ background: "var(--bg)" }}
     >
       {/* Card area */}
       <div className="flex-1 relative overflow-hidden">
@@ -388,7 +388,7 @@ export function PintRewindCards() {
       </div>
 
       {/* Progress dots + nav */}
-      <div className="flex-shrink-0 pb-safe px-4 py-4" style={{ background: "#0F0E0C" }}>
+      <div className="flex-shrink-0 pb-safe px-4 py-4" style={{ background: "var(--bg)" }}>
         {/* Progress bar */}
         <div className="flex gap-1 mb-4">
           {cards.map((c, i) => (
@@ -396,7 +396,7 @@ export function PintRewindCards() {
               key={c.id}
               className="h-1 flex-1 rounded-full transition-all duration-300"
               style={{
-                background: i <= current ? "#D4A843" : "rgba(255,255,255,0.15)",
+                background: i <= current ? "var(--accent-gold)" : "rgba(255,255,255,0.15)",
               }}
             />
           ))}

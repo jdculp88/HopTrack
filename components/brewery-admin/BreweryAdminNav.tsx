@@ -105,11 +105,11 @@ export function BreweryAdminNav({ accounts }: { accounts: any[] }) {
                 className={cn(
                   "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all",
                   isActive
-                    ? "text-[#0F0E0C] font-semibold"
+                    ? "text-[var(--bg)] font-semibold"
                     : "hover:opacity-80"
                 )}
                 style={isActive
-                  ? { background: "var(--accent-gold)", color: "#0F0E0C" }
+                  ? { background: "var(--accent-gold)", color: "var(--bg)" }
                   : { color: "var(--text-secondary)" }
                 }
               >
@@ -198,7 +198,7 @@ function BreweryAvatar({ name, size = "md" }: { name: string; size?: "sm" | "md"
   const sizeClass = size === "sm" ? "w-7 h-7 text-xs" : "w-10 h-10 text-sm";
   return (
     <div className={cn("rounded-xl flex items-center justify-center font-bold flex-shrink-0", sizeClass)}
-      style={{ background: "var(--accent-gold)", color: "#0F0E0C" }}>
+      style={{ background: "var(--accent-gold)", color: "var(--bg)" }}>
       {initials}
     </div>
   );

@@ -47,7 +47,7 @@ export function WishlistButton({ beerId, initialWishlisted }: WishlistButtonProp
     <button
       onClick={toggle}
       disabled={loading}
-      className="p-2 rounded-xl bg-[var(--surface-2)] text-[var(--text-secondary)] hover:text-[#D4A843] transition-colors flex-shrink-0"
+      className="p-2 rounded-xl bg-[var(--surface-2)] text-[var(--text-secondary)] hover:text-[var(--accent-gold)] transition-colors flex-shrink-0"
     >
       <motion.div
         key={wishlisted ? "on" : "off"}
@@ -56,7 +56,7 @@ export function WishlistButton({ beerId, initialWishlisted }: WishlistButtonProp
         transition={{ type: "spring", stiffness: 400, damping: 20 }}
       >
         {wishlisted ? (
-          <BookmarkCheck size={18} className="text-[#D4A843]" />
+          <BookmarkCheck size={18} className="text-[var(--accent-gold)]" />
         ) : (
           <Bookmark size={18} />
         )}

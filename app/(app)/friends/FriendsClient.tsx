@@ -227,7 +227,7 @@ export function FriendsClient({
             onClick={() => setTab(key)}
             className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium transition-all ${
               tab === key
-                ? "bg-[#D4A843]/10 text-[#D4A843]"
+                ? "bg-[var(--accent-gold)]/10 text-[var(--accent-gold)]"
                 : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
             }`}
           >
@@ -247,7 +247,7 @@ export function FriendsClient({
                 onClick={() => setLeaderboardType(t)}
                 className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all flex-shrink-0 ${
                   leaderboardType === t
-                    ? "bg-[#D4A843]/15 text-[#D4A843] border border-[#D4A843]/30"
+                    ? "bg-[var(--accent-gold)]/15 text-[var(--accent-gold)] border border-[var(--accent-gold)]/30"
                     : "bg-[var(--surface)] text-[var(--text-secondary)] border border-[var(--border)] hover:border-[#6B6456]"
                 }`}
               >
@@ -274,8 +274,8 @@ export function FriendsClient({
         <>
           {/* Pending incoming requests */}
           {pendingRequests.length > 0 && (
-            <div className="bg-[#D4A843]/5 border border-[#D4A843]/20 rounded-2xl p-4 space-y-3">
-              <p className="text-xs font-medium text-[#D4A843] uppercase tracking-wider">
+            <div className="bg-[var(--accent-gold)]/5 border border-[var(--accent-gold)]/20 rounded-2xl p-4 space-y-3">
+              <p className="text-xs font-medium text-[var(--accent-gold)] uppercase tracking-wider">
                 Requests ({pendingRequests.length})
               </p>
               {pendingRequests.map((req: any) => (
@@ -365,7 +365,7 @@ export function FriendsClient({
                   <button
                     onClick={() => handleAddFriend(user.id)}
                     disabled={sendingRequest === user.id}
-                    className="flex items-center gap-1.5 text-xs bg-[#D4A843]/15 text-[#D4A843] border border-[#D4A843]/30 px-3 py-1.5 rounded-xl hover:bg-[#D4A843]/25 transition-colors disabled:opacity-50"
+                    className="flex items-center gap-1.5 text-xs bg-[var(--accent-gold)]/15 text-[var(--accent-gold)] border border-[var(--accent-gold)]/30 px-3 py-1.5 rounded-xl hover:bg-[var(--accent-gold)]/25 transition-colors disabled:opacity-50"
                   >
                     {sendingRequest === user.id ? (
                       <Loader2 size={12} className="animate-spin" />
@@ -401,7 +401,7 @@ export function FriendsClient({
                     <Link href={`/profile/${friend.username}`} className="flex items-center gap-3 flex-1 min-w-0">
                       <UserAvatar profile={friend} size="sm" showLevel />
                       <div className="flex-1 min-w-0">
-                        <p className="font-sans font-semibold text-[var(--text-primary)] truncate group-hover:text-[#D4A843] transition-colors text-sm">
+                        <p className="font-sans font-semibold text-[var(--text-primary)] truncate group-hover:text-[var(--accent-gold)] transition-colors text-sm">
                           {friend.display_name}
                         </p>
                         <p className="text-xs text-[var(--text-muted)]">@{friend.username} · {friend.total_checkins} sessions</p>

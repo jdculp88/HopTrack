@@ -247,12 +247,12 @@ export function QRTentClient({ breweryId, breweryName, breweryCity, breweryState
                   className="w-full flex items-start gap-3 p-3 rounded-xl border text-left transition-all"
                   style={
                     selectedSize === s.id
-                      ? { background: "rgba(212,168,67,0.08)", borderColor: "rgba(212,168,67,0.4)", color: "var(--text-primary)" }
+                      ? { background: "color-mix(in srgb, var(--accent-gold) 8%, transparent)", borderColor: "color-mix(in srgb, var(--accent-gold) 40%, transparent)", color: "var(--text-primary)" }
                       : { background: "var(--surface-2)", borderColor: "var(--border)", color: "var(--text-secondary)" }
                   }
                 >
-                  <div className={`w-4 h-4 rounded-full border-2 flex-shrink-0 mt-0.5 flex items-center justify-center ${selectedSize === s.id ? "border-[#D4A843]" : "border-current opacity-40"}`}>
-                    {selectedSize === s.id && <div className="w-2 h-2 rounded-full bg-[#D4A843]" />}
+                  <div className={`w-4 h-4 rounded-full border-2 flex-shrink-0 mt-0.5 flex items-center justify-center ${selectedSize === s.id ? "border-[var(--accent-gold)]" : "border-current opacity-40"}`}>
+                    {selectedSize === s.id && <div className="w-2 h-2 rounded-full bg-[var(--accent-gold)]" />}
                   </div>
                   <div>
                     <p className="font-semibold text-sm">{s.label}</p>
@@ -295,7 +295,7 @@ export function QRTentClient({ breweryId, breweryName, breweryCity, breweryState
               onClick={downloadPNG}
               disabled={!qrDataUrl}
               className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-all disabled:opacity-40"
-              style={{ background: "#D4A843", color: "#0F0E0C" }}
+              style={{ background: "var(--accent-gold)", color: "var(--bg)" }}
             >
               <Download size={16} />
               Download PNG

@@ -7,10 +7,10 @@ export const metadata: Metadata = {
 
 export default function PrivacyPage() {
   return (
-    <div className="min-h-screen" style={{ background: "#0F0E0C" }}>
+    <div className="min-h-screen" style={{ background: "var(--bg)" }}>
       <div className="max-w-3xl mx-auto px-6 py-16 space-y-8">
         <div>
-          <p className="text-xs font-mono uppercase tracking-[0.2em] mb-3" style={{ color: "#D4A843" }}>
+          <p className="text-xs font-mono uppercase tracking-[0.2em] mb-3" style={{ color: "var(--accent-gold)" }}>
             Legal
           </p>
           <h1 className="font-display text-4xl font-bold" style={{ color: "#F5F0E8" }}>
@@ -71,7 +71,7 @@ export default function PrivacyPage() {
           <Section title="Contact">
             <p>
               Questions? Email us at{" "}
-              <a href="mailto:privacy@hoptrack.beer" className="underline" style={{ color: "#D4A843" }}>
+              <a href="mailto:privacy@hoptrack.beer" className="underline" style={{ color: "var(--accent-gold)" }}>
                 privacy@hoptrack.beer
               </a>
             </p>

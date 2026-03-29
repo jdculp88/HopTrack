@@ -109,7 +109,7 @@ export function PintRewindClient({ breweryName, sessions30, beerLogs30, sessions
               className="px-4 py-2 text-sm font-medium transition-all"
               style={{
                 background: scope === s ? "var(--accent-gold)" : "var(--surface)",
-                color: scope === s ? "#0F0E0C" : "var(--text-muted)",
+                color: scope === s ? "var(--bg)" : "var(--text-muted)",
               }}
             >
               {s === "30d" ? "30 Days" : "All Time"}

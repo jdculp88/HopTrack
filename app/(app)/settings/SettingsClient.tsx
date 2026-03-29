@@ -111,7 +111,7 @@ export function SettingsClient({ profile, userEmail }: SettingsClientProps) {
               <UserAvatar profile={{ ...profile, display_name: displayName }} size="lg" />
               <div>
                 <p className="text-sm font-medium text-[var(--text-primary)]">{displayName || "Your name"}</p>
-                <label className="text-xs text-[#D4A843] hover:underline mt-1 cursor-pointer inline-flex items-center gap-1">
+                <label className="text-xs text-[var(--accent-gold)] hover:underline mt-1 cursor-pointer inline-flex items-center gap-1">
                   {uploadingPhoto ? <Loader2 size={10} className="animate-spin" /> : <Camera size={10} />}
                   {uploadingPhoto ? "Uploading..." : "Change photo"}
                   <input type="file" accept="image/*" onChange={handlePhotoChange} className="hidden" />
@@ -168,7 +168,7 @@ export function SettingsClient({ profile, userEmail }: SettingsClientProps) {
           <button
             type="submit"
             disabled={saving}
-            className="bg-[#D4A843] hover:bg-[#E8841A] text-[#0F0E0C] font-bold px-6 py-3 rounded-xl transition-all disabled:opacity-60 text-sm"
+            className="bg-[var(--accent-gold)] hover:bg-[var(--accent-amber)] text-[var(--bg)] font-bold px-6 py-3 rounded-xl transition-all disabled:opacity-60 text-sm"
           >
             {saved ? "✓ Saved!" : saving ? "Saving..." : "Save Changes"}
           </button>
@@ -268,7 +268,7 @@ function Section({ title, icon, children }: { title: string; icon: React.ReactNo
   return (
     <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl overflow-hidden">
       <div className="flex items-center gap-2 px-5 py-4 border-b border-[var(--border)]">
-        <span className="text-[#D4A843]">{icon}</span>
+        <span className="text-[var(--accent-gold)]">{icon}</span>
         <h2 className="font-sans font-semibold text-[var(--text-primary)] text-sm">{title}</h2>
       </div>
       <div className="p-5">{children}</div>
@@ -290,7 +290,7 @@ function Toggle({ value, onChange }: { value: boolean; onChange: (v: boolean) =>
     <button
       type="button"
       onClick={() => onChange(!value)}
-      className={`w-12 h-6 rounded-full transition-all duration-200 relative flex-shrink-0 ${value ? "bg-[#D4A843]" : "bg-[#3A3628]"}`}
+      className={`w-12 h-6 rounded-full transition-all duration-200 relative flex-shrink-0 ${value ? "bg-[var(--accent-gold)]" : "bg-[#3A3628]"}`}
     >
       <div
         className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-all duration-200 ${value ? "left-6" : "left-0.5"}`}

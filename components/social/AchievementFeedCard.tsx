@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Zap } from "lucide-react";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import { ReactionBar } from "@/components/social/ReactionBar";
+import { formatRelativeTime } from "@/lib/dates";
 
 export interface FriendAchievement {
   id: string;
@@ -25,21 +26,10 @@ export interface FriendAchievement {
   };
 }
 
-function timeAgo(date: string): string {
-  const diff = Date.now() - new Date(date).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 60) return `${mins}m ago`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
-  const days = Math.floor(hrs / 24);
-  if (days === 1) return "Yesterday";
-  return `${days}d ago`;
-}
-
 const TIER_COLORS: Record<string, string> = {
   bronze: "#CD7F32",
   silver: "#A8A8A8",
-  gold: "#D4A843",
+  gold: "var(--accent-gold)",
   platinum: "#B0C4DE",
 };
 
@@ -83,7 +73,7 @@ export function AchievementFeedCard({
             {achievement.profile.display_name || achievement.profile.username}
           </Link>
           <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-            {timeAgo(achievement.earned_at)}
+            {formatRelativeTime(achievement.earned_at)}
           </p>
         </div>
       </div>
