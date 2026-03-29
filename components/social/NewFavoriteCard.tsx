@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { UserAvatar } from '@/components/ui/UserAvatar'
+import { ReactionBar } from '@/components/social/ReactionBar'
 
 export interface NewFavoriteItem {
   id: string
@@ -30,11 +30,14 @@ function timeAgo(dateStr: string): string {
 export function NewFavoriteCard({
   favorite,
   index = 0,
+  reactionCounts,
+  userReactions,
 }: {
   favorite: NewFavoriteItem
   index?: number
+  reactionCounts?: Record<string, number>
+  userReactions?: string[]
 }) {
-  const [liked, setLiked] = useState(false)
 
   return (
     <motion.div
@@ -74,31 +77,13 @@ export function NewFavoriteCard({
         </div>
       </div>
 
-      {/* Footer */}
-      <div
-        className="flex items-center gap-3 mt-2.5 pt-2.5"
-        style={{ borderTop: '1px solid var(--border)' }}
-      >
-        <button
-          onClick={() => setLiked(!liked)}
-          className="flex items-center gap-1.5 text-[13px] transition-all"
-          style={{
-            color: liked ? 'var(--accent-gold)' : 'var(--text-muted)',
-            fontWeight: liked ? 600 : 400,
-          }}
-        >
-          🍺 {favorite.likes + (liked ? 1 : 0)}
-        </button>
-        <button
-          className="text-[11px] font-semibold px-3 py-1 rounded-full"
-          style={{
-            background: 'color-mix(in srgb, var(--accent-gold) 10%, transparent)',
-            color: 'var(--accent-gold)',
-          }}
-        >
-          Try it too
-        </button>
-      </div>
+      {/* Reaction footer */}
+      <ReactionBar
+        sessionId={favorite.id}
+        reactionCounts={reactionCounts}
+        userReactions={userReactions}
+        showShare={false}
+      />
     </motion.div>
   )
 }

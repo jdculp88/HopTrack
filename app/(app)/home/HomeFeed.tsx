@@ -127,6 +127,8 @@ interface HomeFeedProps {
   friendCount: number;
   newFavorites?: NewFavoriteItem[];
   friendsJoined?: FriendJoinedItem[];
+  reactionCounts?: Record<string, Record<string, number>>;
+  userReactions?: Record<string, string[]>;
 }
 
 type FeedItem =
@@ -154,6 +156,8 @@ export function HomeFeed({
   friendCount,
   newFavorites,
   friendsJoined,
+  reactionCounts,
+  userReactions,
 }: HomeFeedProps) {
   const [activeTab, setActiveTab] = useState<FeedTab>("friends");
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -351,6 +355,8 @@ export function HomeFeed({
               communityContent={communityContent}
               friendCount={friendCount}
               activeFriendCount={activeFriendSessions.length}
+              reactionCounts={reactionCounts}
+              userReactions={userReactions}
             />
           </motion.div>
         )}
@@ -389,6 +395,8 @@ export function HomeFeed({
               userAchievements={userAchievements}
               wishlist={wishlist}
               styleDNA={styleDNA}
+              reactionCounts={reactionCounts}
+              userReactions={userReactions}
             />
           </motion.div>
         )}
@@ -406,6 +414,8 @@ function FriendsTabContent({
   communityContent,
   friendCount,
   activeFriendCount,
+  reactionCounts,
+  userReactions,
 }: {
   profile: Profile | null;
   feedItems: FeedItem[];
@@ -413,6 +423,8 @@ function FriendsTabContent({
   communityContent?: CommunityContent;
   friendCount: number;
   activeFriendCount: number;
+  reactionCounts?: Record<string, Record<string, number>>;
+  userReactions?: Record<string, string[]>;
 }) {
   const liveCountLabel =
     activeFriendCount > 0
@@ -496,6 +508,8 @@ function FriendsTabContent({
                 item={item}
                 index={i}
                 currentUserId={currentUserId}
+                reactionCounts={reactionCounts}
+                userReactions={userReactions}
               />
             </div>
           ))}
@@ -511,10 +525,14 @@ function FeedItemCard({
   item,
   index,
   currentUserId,
+  reactionCounts,
+  userReactions,
 }: {
   item: FeedItem;
   index: number;
   currentUserId: string;
+  reactionCounts?: Record<string, Record<string, number>>;
+  userReactions?: Record<string, string[]>;
 }) {
   if (item.type === "session") {
     return (
@@ -537,6 +555,8 @@ function FeedItemCard({
         <SessionCard
           session={item.data as any}
           currentUserId={currentUserId}
+          reactionCounts={reactionCounts?.[(item.data as any).id]}
+          userReactions={userReactions?.[(item.data as any).id]}
         />
       </motion.div>
     );
@@ -796,6 +816,8 @@ function YouTabContent({
   userAchievements,
   wishlist,
   styleDNA,
+  reactionCounts,
+  userReactions,
 }: {
   profile: Profile | null;
   sessions: Session[];
@@ -804,6 +826,8 @@ function YouTabContent({
   userAchievements?: UserAchievement[];
   wishlist?: WishlistItem[];
   styleDNA?: StyleDNAEntry[];
+  reactionCounts?: Record<string, Record<string, number>>;
+  userReactions?: Record<string, string[]>;
 }) {
   const levelInfo = profile ? getLevelProgress(profile.xp) : null;
 
@@ -1120,7 +1144,12 @@ function YouTabContent({
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.03, duration: 0.28 }}
               >
-                <SessionCard session={s as any} currentUserId={currentUserId} />
+                <SessionCard
+                  session={s as any}
+                  currentUserId={currentUserId}
+                  reactionCounts={reactionCounts?.[(s as any).id]}
+                  userReactions={userReactions?.[(s as any).id]}
+                />
               </motion.div>
             ))}
           </div>

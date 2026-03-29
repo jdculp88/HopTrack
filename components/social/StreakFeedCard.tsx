@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { ReactionBar } from "@/components/social/ReactionBar";
 
 export interface StreakData {
   profileId: string;
@@ -82,6 +83,13 @@ export function StreakFeedCard({
       >
         {streak.currentStreak}-day check-in streak
       </p>
+
+      {/* Reaction footer */}
+      <ReactionBar
+        sessionId={streak.profileId}
+        showShare={false}
+        centered
+      />
     </motion.div>
   );
 }

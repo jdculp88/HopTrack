@@ -8,6 +8,7 @@ import { MapPin, Beer, Star, Zap, Clock, Home } from "lucide-react";
 import { cn, formatRelativeTime } from "@/lib/utils";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import { SessionComments } from "@/components/social/SessionComments";
+import { ReactionBar } from "@/components/social/ReactionBar";
 import type { Session, BeerLog } from "@/types/database";
 
 interface SessionCardProps {
@@ -28,9 +29,12 @@ interface SessionCardProps {
   };
   currentUserId?: string;
   className?: string;
+  reactionCounts?: Record<string, number>;
+  userReactions?: string[];
+  commentCount?: number;
 }
 
-export function SessionCard({ session, currentUserId, className }: SessionCardProps) {
+export function SessionCard({ session, currentUserId, className, reactionCounts, userReactions, commentCount }: SessionCardProps) {
   const { profile, brewery, beer_logs } = session;
   const beerCount = beer_logs?.length ?? 0;
   const ratedLogs = (beer_logs ?? []).filter((l) => l.rating != null);
@@ -203,31 +207,13 @@ export function SessionCard({ session, currentUserId, className }: SessionCardPr
         </div>
       )}
 
-      {/* Footer stats */}
-      <div className="flex items-center gap-4 px-4 py-3 mt-1 border-t" style={{ borderColor: "var(--border)" }}>
-        <div className="flex items-center gap-1 text-xs" style={{ color: "var(--text-muted)" }}>
-          <Beer size={12} />
-          <span>{beerCount}</span>
-        </div>
-        {avgRating != null && (
-          <div className="flex items-center gap-1 text-xs" style={{ color: "var(--text-muted)" }}>
-            <Star size={12} />
-            <span>{avgRating.toFixed(1)}</span>
-          </div>
-        )}
-        {duration && (
-          <div className="flex items-center gap-1 text-xs" style={{ color: "var(--text-muted)" }}>
-            <Clock size={12} />
-            <span>{duration}</span>
-          </div>
-        )}
-        {session.xp_awarded > 0 && (
-          <div className="flex items-center gap-1 text-xs ml-auto" style={{ color: "var(--accent-gold)" }}>
-            <Zap size={12} />
-            <span>+{session.xp_awarded}</span>
-          </div>
-        )}
-      </div>
+      {/* Reaction footer */}
+      <ReactionBar
+        sessionId={session.id}
+        reactionCounts={reactionCounts}
+        userReactions={userReactions}
+        commentCount={commentCount}
+      />
 
       {/* Comments — always visible */}
       {currentUserId && (

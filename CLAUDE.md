@@ -175,7 +175,7 @@ scripts/supabase-setup.mjs    — One-time setup script
 
 ## 🗺️ Where We Are
 
-**Current Sprint:** Sprint 29 (next session)
+**Current Sprint:** Sprint 29 — Your Round (in progress)
 **Last completed:** Sprint 28 — Feed Spec Implementation ✅ (2026-03-29)
 
 ### Key design decisions (still active from Sprint 11):
@@ -685,6 +685,34 @@ Retro: `docs/retros/sprint-13-retro.md`
 - Feed infinite scroll / pagination (P2 — carried from Sprint 25)
 - PGRST schema cache refresh (`NOTIFY pgrst, 'reload schema';`) to restore session data in feed
 - E2E tests (Casey, eternal vigil)
+
+### Sprint 29 — Your Round (in progress, 2026-03-29)
+**Theme:** Fix the empty feed, ship Cheers reactions, real-feeling demo data
+**Retro:** `docs/retros/sprint-28-retro.md` (compliments edition)
+
+- ✅ S29-001: PGRST schema reload + seed verification — fixed empty Friends feed
+- ✅ S29-001b: Removed dead `INSERT INTO checkins` from seeds 003, 006, 007 (table dropped in S16)
+- ✅ S29-002: Seed 011 "Your Round" — 6 sessions, 38 reactions, 6 comments, Belgian Explorer achievement, Drew 7-day streak, BOTW: Smokehouse Porter
+- ✅ S29-003: `ReactionBar` component — 🍺 cheers toggle + 💬 count + ↗ share, optimistic UI, calls existing `/api/reactions`
+- ✅ S29-004: Reaction counts API — batch query in page.tsx (counts + user's own), passed as props through HomeFeed → FriendsTabContent/YouTabContent → FeedItemCard → SessionCard
+- ✅ S29-005: "Your Round" header already existed from prior sprint
+- ✅ S29-006: Card footer polish — old stats footer replaced with ReactionBar across SessionCard, AchievementFeedCard, StreakFeedCard, RecommendationCard, NewFavoriteCard
+- ✅ S29-007: Team weekend testing doc at `docs/sprint-29-testing-weekend.md`
+
+**Key architectural changes from Sprint 29:**
+- `ReactionBar` at `components/social/ReactionBar.tsx` — reusable cheers/comment/share footer
+- `SessionCard` footer: was stats (beer count, rating, duration, XP) → now ReactionBar (🍺 cheers, 💬 comments, ↗ share)
+- `page.tsx` fetches reaction counts + user reactions in batch after session queries, passes as `reactionCounts` and `userReactions` props
+- Props threading: `HomeFeed` → `FriendsTabContent` / `YouTabContent` → `FeedItemCard` → `SessionCard` / `AchievementFeedCard` etc.
+- Seeds 003, 006, 007 cleaned of dead `checkins` references (wrapped in block comments or removed)
+- Seed 011 creates mockup-aligned demo data matching the HTML feed mockups
+- Display names updated to match mockup characters (Drew, Mika, Cole, Tara, Lena, Marcus)
+- `belgian_explorer` achievement added to achievements table
+- PGRST schema cache reloaded after migration 033
+
+**Deferred to Sprint 30:**
+- Feed infinite scroll / pagination (P2 — carried from Sprint 25)
+- E2E tests (Casey, we still see you)
 
 ### Revenue Targets
 - Tap tier: $49/mo

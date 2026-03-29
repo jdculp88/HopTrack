@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { UserAvatar } from '@/components/ui/UserAvatar'
+import { ReactionBar } from '@/components/social/ReactionBar'
 
 export interface RecommendationItem {
   id: string
@@ -31,11 +31,14 @@ function timeAgo(dateStr: string): string {
 export function RecommendationCard({
   recommendation,
   index = 0,
+  reactionCounts,
+  userReactions,
 }: {
   recommendation: RecommendationItem
   index?: number
+  reactionCounts?: Record<string, number>
+  userReactions?: string[]
 }) {
-  const [liked, setLiked] = useState(false)
 
   return (
     <motion.div
@@ -100,33 +103,12 @@ export function RecommendationCard({
         </p>
       )}
 
-      {/* Footer */}
-      <div
-        className="flex items-center gap-4 mt-3 pt-3"
-        style={{ borderTop: '1px solid var(--border)' }}
-      >
-        <button
-          onClick={() => setLiked(!liked)}
-          className="flex items-center gap-1.5 text-sm transition-all"
-          style={{
-            color: liked ? 'var(--accent-gold)' : 'var(--text-muted)',
-            fontWeight: liked ? 600 : 400,
-            transform: liked ? 'scale(1.05)' : 'scale(1)',
-          }}
-        >
-          🍺 {recommendation.likes + (liked ? 1 : 0)}
-        </button>
-        <button
-          className="text-xs font-semibold px-3 py-1.5 rounded-full transition-colors"
-          style={{
-            background: 'color-mix(in srgb, var(--accent-gold) 10%, transparent)',
-            color: 'var(--accent-gold)',
-            border: '1px solid color-mix(in srgb, var(--accent-gold) 20%, transparent)',
-          }}
-        >
-          + Add to My List
-        </button>
-      </div>
+      {/* Reaction footer */}
+      <ReactionBar
+        sessionId={recommendation.id}
+        reactionCounts={reactionCounts}
+        userReactions={userReactions}
+      />
     </motion.div>
   )
 }

@@ -44,12 +44,12 @@ BEGIN
   SELECT id INTO b_dipa   FROM beers WHERE brewery_id = demo_brewery_id AND name = 'Deploy Friday DIPA';
   SELECT id INTO b_lager  FROM beers WHERE brewery_id = demo_brewery_id AND name = 'Legacy Code Lager';
 
-  -- ── 2. Insert February check-ins (~80 total, Feb 1–28) ───────────────────
-  -- Dates: now() - interval '54 days' (Feb 1) through now() - interval '24 days' (Feb 28)
-  -- Heavier on Fri/Sat/Sun evenings; some Tue/Wed visits mid-month.
-  -- Comments feel like earlier visits — first impressions, still exploring.
-  -- ~60% have comments; ratings range 3.5–5.0, averaging ~4.1–4.3.
+  -- ── 2. (REMOVED — checkins table dropped in Sprint 16, migration 015) ────
+  -- Legacy checkins INSERT removed (~80 rows). Activity now tracked via sessions + beer_logs.
+  -- See seeds 009/010 for current feed activity data.
+  RAISE NOTICE 'Seed 006: Skipped — all content referenced checkins table (dropped S16).';
 
+  /*  ── DEAD CODE BELOW — kept for reference, will not execute ──────────────
   INSERT INTO checkins (user_id, brewery_id, beer_id, rating, serving_style, comment, share_to_feed, created_at) VALUES
 
   -- ── Week 1: Feb 1–7 (Fri Feb 1, Sat Feb 2, Sun Feb 3 are the weekend) ───
@@ -171,77 +171,9 @@ BEGIN
   (u03, demo_brewery_id, b_sour,   4.5, 'draft', NULL,                                                                        true,  now() - interval '24 days' + interval '18 hours'),
   (u11, demo_brewery_id, b_marzen, 4.0, 'draft', 'Last stop before heading back to Dallas. Worth every mile.',                true,  now() - interval '24 days' + interval '19 hours'),
   (u12, demo_brewery_id, b_pale,   3.5, 'draft', 'Wanted to try everything before March. Pale is good, Märzen is still king.',true,  now() - interval '24 days' + interval '20 hours');
-
-  -- ── 3. Update beer average ratings and total_ratings (across ALL check-ins) ─
-  UPDATE beers SET
-    avg_rating    = sub.avg_r,
-    total_ratings = sub.cnt
-  FROM (
-    SELECT beer_id, ROUND(AVG(rating)::numeric, 2) as avg_r, COUNT(*) as cnt
-    FROM checkins
-    WHERE brewery_id = demo_brewery_id AND beer_id IS NOT NULL AND rating > 0
-    GROUP BY beer_id
-  ) sub
-  WHERE beers.id = sub.beer_id;
-
-  -- ── 4. Update brewery_visits totals (cumulative across both months) ────────
-  INSERT INTO brewery_visits (user_id, brewery_id, total_visits, last_visit_at)
-  SELECT
-    user_id,
-    brewery_id,
-    COUNT(*) as total_visits,
-    MAX(created_at) as last_visit_at
-  FROM checkins
-  WHERE brewery_id = demo_brewery_id
-  GROUP BY user_id, brewery_id
-  ON CONFLICT (user_id, brewery_id) DO UPDATE SET
-    total_visits  = EXCLUDED.total_visits,
-    last_visit_at = EXCLUDED.last_visit_at;
-
-  -- ── 5. Update loyalty_cards stamps (cumulative across both months) ─────────
-  INSERT INTO loyalty_cards (user_id, brewery_id, stamps, lifetime_stamps, last_stamp_at)
-  SELECT
-    user_id,
-    brewery_id,
-    LEAST(COUNT(*) % 10, 10) as stamps,   -- current card progress (mod 10)
-    COUNT(*) as lifetime_stamps,
-    MAX(created_at) as last_stamp_at
-  FROM checkins
-  WHERE brewery_id = demo_brewery_id
-  GROUP BY user_id, brewery_id
-  ON CONFLICT (user_id, brewery_id) DO UPDATE SET
-    stamps          = EXCLUDED.stamps,
-    lifetime_stamps = EXCLUDED.lifetime_stamps,
-    last_stamp_at   = EXCLUDED.last_stamp_at;
+  ── END DEAD CODE ────────────────────────────────────────────────────────── */
 
 END $$;
 
--- ── Confirm: totals across both Month 1 (March) and Month 2 (February) ───────
-SELECT
-  'Total check-ins (both months): ' || COUNT(*)::text AS result
-FROM checkins
-WHERE brewery_id = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'
-UNION ALL
-SELECT 'February check-ins only: ' || COUNT(*)::text
-FROM checkins
-WHERE brewery_id = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'
-  AND created_at < now() - interval '23 days'
-UNION ALL
-SELECT 'March check-ins only: ' || COUNT(*)::text
-FROM checkins
-WHERE brewery_id = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'
-  AND created_at >= now() - interval '23 days'
-UNION ALL
-SELECT 'Unique visitors: ' || COUNT(DISTINCT user_id)::text
-FROM checkins
-WHERE brewery_id = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'
-UNION ALL
-SELECT 'Avg rating (Feb only): ' || ROUND(AVG(rating)::numeric, 2)::text || ' ★'
-FROM checkins
-WHERE brewery_id = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'
-  AND rating > 0
-  AND created_at < now() - interval '23 days'
-UNION ALL
-SELECT 'Avg rating (combined): ' || ROUND(AVG(rating)::numeric, 2)::text || ' ★'
-FROM checkins
-WHERE brewery_id = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890' AND rating > 0;
+-- ── Confirm ───────────────────────────────────────────────────────────────────
+SELECT 'Seed 006: Skipped — all content referenced checkins table (dropped S16).' AS result;

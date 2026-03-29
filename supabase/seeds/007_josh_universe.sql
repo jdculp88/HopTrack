@@ -281,20 +281,7 @@ BEGIN
     lifetime_stamps = 9,
     last_stamp_at   = now() - interval '2 days';
 
-  -- ── 10. Legacy checkins (for backwards compat + feed) ────────────────────
-  -- A handful of checkins so the legacy feed / analytics have Josh data too
-  INSERT INTO checkins (user_id, brewery_id, beer_id, rating, serving_style, comment, share_to_feed, created_at)
-  VALUES
-    (josh_id, pp_id, b_ipa,    5.0, 'draft', 'Ok this is why I built this app. Debug IPA is exactly the beer I wanted to exist.',        true, now() - interval '58 days' + interval '18 hours' + interval '10 min'),
-    (josh_id, pp_id, b_stout,  4.5, 'draft', 'Dark Mode Stout. Silky and deep.',                                                         true, now() - interval '58 days' + interval '19 hours'),
-    (josh_id, pp_id, b_sour,   4.5, 'draft', 'Stack Overflow Sour is the error I never want to fix.',                                    true, now() - interval '51 days' + interval '18 hours'),
-    (josh_id, pp_id, b_dipa,   4.5, 'draft', 'Deploy Friday DIPA on an actual Friday. The poetry is not lost on me.',                    true, now() - interval '44 days' + interval '19 hours'),
-    (josh_id, pp_id, b_porter, 4.5, 'draft', 'Kernel Panic Porter — the name, the taste, the whole deal. Obsessed.',                    true, now() - interval '44 days' + interval '20 hours'),
-    (josh_id, bs_id, bs_amber, 4.5, 'draft', 'Barrel & Stone is the real deal. Stave Amber is everything.',                             true, now() - interval '49 days' + interval '14 hours'),
-    (josh_id, hf_id, hf_hazy,  5.0, 'draft', 'Hazy Daze is stupid good. Mango and passionfruit in a pint glass.',                      true, now() - interval '42 days' + interval '12 hours'),
-    (josh_id, lc_id, lc_sour,  5.0, 'draft', 'Greenbelt Gose with lime and cucumber — this is summer in a glass.',                     true, now() - interval '21 days' + interval '15 hours'),
-    (josh_id, pp_id, b_ipa,    5.0, 'draft', 'Came in to use the wifi. Stayed for two hours.',                                          true, now() - interval '2 days'  + interval '16 hours')
-  ON CONFLICT DO NOTHING;
+  -- ── 10. (removed — checkins table dropped in Sprint 16, migration 015) ────
 
   -- ── 11. Achievements ──────────────────────────────────────────────────────
   -- Ensure base achievement records exist (safe to run even if they're already there)

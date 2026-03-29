@@ -4,6 +4,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { Zap } from "lucide-react";
 import { UserAvatar } from "@/components/ui/UserAvatar";
+import { ReactionBar } from "@/components/social/ReactionBar";
 
 export interface FriendAchievement {
   id: string;
@@ -45,9 +46,13 @@ const TIER_COLORS: Record<string, string> = {
 export function AchievementFeedCard({
   achievement,
   index = 0,
+  reactionCounts,
+  userReactions,
 }: {
   achievement: FriendAchievement;
   index?: number;
+  reactionCounts?: Record<string, number>;
+  userReactions?: string[];
 }) {
   const tierColor = TIER_COLORS[achievement.achievement.tier] ?? "var(--accent-gold)";
 
@@ -121,6 +126,14 @@ export function AchievementFeedCard({
           </div>
         </div>
       </div>
+
+      {/* Reaction footer */}
+      <ReactionBar
+        sessionId={achievement.id}
+        reactionCounts={reactionCounts}
+        userReactions={userReactions}
+        showShare={false}
+      />
     </motion.div>
   );
 }

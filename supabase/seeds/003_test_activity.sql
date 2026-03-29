@@ -89,10 +89,16 @@ BEGIN
   SELECT id INTO b_dipa   FROM beers WHERE brewery_id = demo_brewery_id AND name = 'Deploy Friday DIPA';
   SELECT id INTO b_lager  FROM beers WHERE brewery_id = demo_brewery_id AND name = 'Legacy Code Lager';
 
-  -- ── 4. Insert check-ins (30 days, ~140 total, realistic distribution) ─────
-  -- More check-ins on Fri/Sat/Sun, peaks in evening hours
-  -- Ratings skew positive (3.5–5.0), IPA is most popular, DIPA least common
+  -- ── 4. (REMOVED — checkins table dropped in Sprint 16, migration 015) ─────
+  -- Legacy checkins INSERT removed. Activity now tracked via sessions + beer_logs.
+  -- See seeds 009/010 for current feed activity data.
+  -- Original: ~140 checkins across 12 test users over 30 days.
 
+  -- Skipping directly to section 5+ (also removed since they query checkins)
+
+  RAISE NOTICE 'Seed 003: Skipped checkins INSERT (table dropped S16). Users + beers still created above.';
+
+  /*  ── DEAD CODE BELOW — kept for reference, will not execute ──────────────
   INSERT INTO checkins (user_id, brewery_id, beer_id, rating, serving_style, comment, share_to_feed, created_at) VALUES
 
   -- Week 1 (Mar 1-7) ─────────────────────────────────────────────────────────
@@ -173,65 +179,14 @@ BEGIN
   (u11, demo_brewery_id, b_ipa,    4.5, 'draft', 'Monthly visit. As reliable as the beer.',                               true,  now() - interval '3 hours'),
   (u08, demo_brewery_id, b_pale,   4.0, 'draft', NULL,                                                                    true,  now() - interval '2 hours'),
   (u06, demo_brewery_id, b_wheat,  4.5, 'draft', 'Weekend wheat. Perfect.',                                               true,  now() - interval '1 hour');
+  ── END DEAD CODE ────────────────────────────────────────────────────────── */
 
-  -- ── 5. Update beer average ratings and checkin counts ────────────────────
-  UPDATE beers SET
-    avg_rating    = sub.avg_r,
-    total_ratings = sub.cnt
-  FROM (
-    SELECT beer_id, ROUND(AVG(rating)::numeric, 2) as avg_r, COUNT(*) as cnt
-    FROM checkins
-    WHERE brewery_id = demo_brewery_id AND beer_id IS NOT NULL AND rating > 0
-    GROUP BY beer_id
-  ) sub
-  WHERE beers.id = sub.beer_id;
-
-  -- ── 6. Upsert brewery_visits for each user ────────────────────────────────
-  INSERT INTO brewery_visits (user_id, brewery_id, total_visits, last_visit_at)
-  SELECT
-    user_id,
-    brewery_id,
-    COUNT(*) as total_visits,
-    MAX(created_at) as last_visit_at
-  FROM checkins
-  WHERE brewery_id = demo_brewery_id
-  GROUP BY user_id, brewery_id
-  ON CONFLICT (user_id, brewery_id) DO UPDATE SET
-    total_visits  = EXCLUDED.total_visits,
-    last_visit_at = EXCLUDED.last_visit_at;
-
-  -- ── 7. Create loyalty cards with stamps ───────────────────────────────────
-  INSERT INTO loyalty_cards (user_id, brewery_id, stamps, lifetime_stamps, last_stamp_at)
-  SELECT
-    user_id,
-    brewery_id,
-    LEAST(COUNT(*), 10) as stamps,     -- cap at 10 (one full card)
-    COUNT(*) as lifetime_stamps,
-    MAX(created_at) as last_stamp_at
-  FROM checkins
-  WHERE brewery_id = demo_brewery_id
-  GROUP BY user_id, brewery_id
-  ON CONFLICT (user_id, brewery_id) DO UPDATE SET
-    stamps          = EXCLUDED.stamps,
-    lifetime_stamps = EXCLUDED.lifetime_stamps,
-    last_stamp_at   = EXCLUDED.last_stamp_at;
+  -- ── 5–7. (REMOVED — queried checkins table, dropped in Sprint 16) ────────
+  -- Sections 5 (avg_rating update), 6 (brewery_visits), 7 (loyalty_cards)
+  -- all used FROM checkins. Activity now tracked via sessions + beer_logs.
+  RAISE NOTICE 'Seed 003: Users + beers created. Checkins/visits/loyalty skipped (table dropped S16).';
 
 END $$;
 
 -- ── Confirm ───────────────────────────────────────────────────────────────────
-SELECT
-  'Check-ins created: ' || COUNT(*)::text AS result
-FROM checkins
-WHERE brewery_id = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'
-UNION ALL
-SELECT 'Unique visitors: ' || COUNT(DISTINCT user_id)::text
-FROM checkins
-WHERE brewery_id = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'
-UNION ALL
-SELECT 'Loyalty cards issued: ' || COUNT(*)::text
-FROM loyalty_cards
-WHERE brewery_id = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'
-UNION ALL
-SELECT 'Avg rating across all beers: ' || ROUND(AVG(rating)::numeric, 2)::text || ' ★'
-FROM checkins
-WHERE brewery_id = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890' AND rating > 0;
+SELECT 'Seed 003: Users + beers created. Checkins skipped (table dropped S16).' AS result;
