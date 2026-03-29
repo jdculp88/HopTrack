@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Mail, Lock, User, MapPin, Eye, EyeOff, ArrowRight, ChevronLeft } from "lucide-react";
+import { Mail, Lock, User, MapPin, Eye, EyeOff, ArrowRight, ChevronLeft, Check, X, Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 type SignupStep = "account" | "profile";
+type UsernameStatus = "idle" | "checking" | "available" | "taken" | "invalid";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -19,6 +20,37 @@ export default function SignupPage() {
   const [homeCity, setHomeCity] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [usernameStatus, setUsernameStatus] = useState<UsernameStatus>("idle");
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const checkUsername = useCallback(async (value: string) => {
+    if (value.length < 3) {
+      setUsernameStatus("idle");
+      return;
+    }
+    if (!/^[a-z0-9_]+$/i.test(value)) {
+      setUsernameStatus("invalid");
+      return;
+    }
+    setUsernameStatus("checking");
+    try {
+      const res = await fetch(`/api/users/check-username?username=${encodeURIComponent(value)}`);
+      const data = await res.json();
+      setUsernameStatus(data.available ? "available" : "taken");
+    } catch {
+      setUsernameStatus("idle");
+    }
+  }, []);
+
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (username.length < 3) {
+      setUsernameStatus("idle");
+      return;
+    }
+    debounceRef.current = setTimeout(() => checkUsername(username), 500);
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+  }, [username, checkUsername]);
 
   async function handleGoogleSignup() {
     const supabase = createClient();
@@ -40,6 +72,7 @@ export default function SignupPage() {
     e.preventDefault();
     if (!username.trim() || !displayName.trim()) { setError("Username and display name are required."); return; }
     if (!/^[a-z0-9_]+$/i.test(username)) { setError("Username can only contain letters, numbers, and underscores."); return; }
+    if (usernameStatus === "taken") { setError("That username is already taken."); return; }
     setLoading(true);
     setError(null);
 
@@ -152,17 +185,43 @@ export default function SignupPage() {
               className="w-full bg-[var(--surface-2)] border border-[var(--border)] rounded-xl pl-11 pr-4 py-3 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] text-sm focus:outline-none focus:border-[var(--accent-gold)] transition-colors"
             />
           </div>
-          <div className="relative">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] text-sm pointer-events-none">@</span>
-            <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""))}
-              placeholder="username"
-              required
-              maxLength={30}
-              className="w-full bg-[var(--surface-2)] border border-[var(--border)] rounded-xl pl-8 pr-4 py-3 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] text-sm focus:outline-none focus:border-[var(--accent-gold)] transition-colors font-mono"
-            />
+          <div>
+            <div className="relative">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] text-sm pointer-events-none">@</span>
+              <input
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""))}
+                placeholder="username"
+                required
+                maxLength={30}
+                className={`w-full bg-[var(--surface-2)] border rounded-xl pl-8 pr-10 py-3 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] text-sm focus:outline-none transition-colors font-mono ${
+                  usernameStatus === "available"
+                    ? "border-[#4ADE80] focus:border-[#4ADE80]"
+                    : usernameStatus === "taken"
+                    ? "border-[#C44B3A] focus:border-[#C44B3A]"
+                    : "border-[var(--border)] focus:border-[var(--accent-gold)]"
+                }`}
+              />
+              {usernameStatus === "checking" && (
+                <Loader2 size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] animate-spin" />
+              )}
+              {usernameStatus === "available" && (
+                <Check size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-[#4ADE80]" />
+              )}
+              {usernameStatus === "taken" && (
+                <X size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-[#C44B3A]" />
+              )}
+            </div>
+            {usernameStatus === "checking" && (
+              <p className="text-xs text-[var(--text-muted)] mt-1.5 ml-1">Checking...</p>
+            )}
+            {usernameStatus === "available" && (
+              <p className="text-xs text-[#4ADE80] mt-1.5 ml-1">Username available</p>
+            )}
+            {usernameStatus === "taken" && (
+              <p className="text-xs text-[#C44B3A] mt-1.5 ml-1">Username taken</p>
+            )}
           </div>
           <div className="relative">
             <MapPin size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none" />
@@ -175,7 +234,7 @@ export default function SignupPage() {
             />
           </div>
           {error && <p className="text-sm text-[#C44B3A] bg-[#C44B3A]/10 border border-[#C44B3A]/20 rounded-xl px-4 py-3">{error}</p>}
-          <button type="submit" disabled={loading} className="w-full bg-[#D4A843] hover:bg-[#E8841A] text-[#0F0E0C] font-bold py-3.5 rounded-xl transition-all disabled:opacity-60 text-sm">
+          <button type="submit" disabled={loading || usernameStatus === "taken" || usernameStatus === "checking"} className="w-full bg-[#D4A843] hover:bg-[#E8841A] text-[#0F0E0C] font-bold py-3.5 rounded-xl transition-all disabled:opacity-60 text-sm">
             {loading ? "Creating account..." : "Create Account"}
           </button>
           <p className="text-xs text-center text-[var(--text-muted)]">

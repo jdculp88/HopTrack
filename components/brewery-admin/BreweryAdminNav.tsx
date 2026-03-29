@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, List, BarChart2, Gift, Settings, ChevronDown, ExternalLink, Rewind, LogOut, Calendar, QrCode } from "lucide-react";
+import { LayoutDashboard, List, BarChart2, Gift, Settings, ChevronDown, ExternalLink, Rewind, LogOut, Calendar, QrCode, CreditCard } from "lucide-react";
 import { HopMark } from "@/components/ui/HopMark";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
@@ -17,6 +17,7 @@ const NAV_ITEMS = [
   { href: "/qr",            label: "Table Tent",   icon: QrCode },
   { href: "/pint-rewind",   label: "Pint Rewind",  icon: Rewind },
   { href: "/settings",      label: "Settings",     icon: Settings },
+  { href: "/billing",       label: "Billing",      icon: CreditCard },
 ];
 
 export function BreweryAdminNav({ accounts }: { accounts: any[] }) {
@@ -121,7 +122,8 @@ export function BreweryAdminNav({ accounts }: { accounts: any[] }) {
         </nav>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t space-y-2" style={{ borderColor: "var(--border)" }}>
+        <div className="px-6 py-4 border-t space-y-3" style={{ borderColor: "var(--border)" }}>
+          <TrialBadge brewery={brewery} breweryId={activeBreweryId} />
           <Link
             href={`/brewery/${activeBreweryId}`}
             className="flex items-center gap-2 text-xs transition-colors"
@@ -190,6 +192,40 @@ export function BreweryAdminNav({ accounts }: { accounts: any[] }) {
         </div>
       </div>
     </>
+  );
+}
+
+function TrialBadge({ brewery, breweryId }: { brewery: any; breweryId: string }) {
+  if (!brewery?.created_at) return null;
+  const createdAt = new Date(brewery.created_at);
+  const now = new Date();
+  const daysSinceCreation = Math.floor((now.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24));
+  const daysRemaining = Math.max(0, 14 - daysSinceCreation);
+  if (daysRemaining <= 0) return null;
+
+  return (
+    <div className="space-y-2">
+      <div
+        className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold"
+        style={{
+          color: "var(--accent-gold)",
+          background: "color-mix(in srgb, var(--accent-gold) 10%, transparent)",
+        }}
+      >
+        <CreditCard size={13} />
+        {daysRemaining} {daysRemaining === 1 ? "day" : "days"} left on trial
+      </div>
+      <Link
+        href={`/brewery-admin/${breweryId}/billing`}
+        className="flex items-center justify-center gap-2 w-full py-2 rounded-xl text-xs font-bold transition-opacity hover:opacity-90"
+        style={{
+          background: "var(--accent-gold)",
+          color: "var(--bg)",
+        }}
+      >
+        Upgrade Plan
+      </Link>
+    </div>
   );
 }
 

@@ -96,6 +96,12 @@ export default function LoginPage() {
           </button>
         </div>
 
+        <div className="flex justify-end -mt-1">
+          <Link href="/forgot-password" className="text-xs text-[var(--accent-gold)] hover:underline">
+            Forgot password?
+          </Link>
+        </div>
+
         {error && (
           <p className="text-sm text-[#C44B3A] bg-[#C44B3A]/10 border border-[#C44B3A]/20 rounded-xl px-4 py-3">
             {error}

@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { Beer, Users, Star, TrendingUp, Award, Calendar, ArrowUpRight, List, Clock } from "lucide-react";
 import { formatDateShort } from "@/lib/dates";
+import BreweryOnboardingCard from "@/components/brewery-admin/BreweryOnboardingCard";
 
 export async function generateMetadata({ params }: { params: Promise<{ brewery_id: string }> }) {
   const { brewery_id } = await params;
@@ -116,6 +117,10 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
   const onTapCount = ((beers as any[]) ?? []).filter((b: any) => b.is_on_tap).length;
   const totalBeerCount = ((beers as any[]) ?? []).length;
 
+  // Onboarding completion checks
+  const hasBeers = totalBeerCount > 0;
+  const hasLoyalty = !!loyaltyProgram;
+
   return (
     <div className="p-6 lg:p-8 max-w-5xl mx-auto pt-16 lg:pt-8">
 
@@ -131,6 +136,13 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
           {(brewery as any)?.city}, {(brewery as any)?.state} · {(brewery as any)?.brewery_type?.replace(/_/g, " ")}
         </p>
       </div>
+
+      {/* Onboarding Card */}
+      <BreweryOnboardingCard
+        breweryId={brewery_id}
+        hasBeers={hasBeers}
+        hasLoyalty={hasLoyalty}
+      />
 
       {/* Stat Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">

@@ -1,0 +1,202 @@
+"use client";
+
+import Link from "next/link";
+import { motion } from "framer-motion";
+import { Compass } from "lucide-react";
+import {
+  BeerOfTheWeekCard,
+  type FeaturedBeer,
+} from "@/components/social/BeerOfTheWeekCard";
+import {
+  TrendingCard,
+  BreweryReviewCard,
+  EventCard,
+  SeasonalBeersScroll,
+  CuratedCollectionsList,
+  type TrendingReview,
+  type BreweryReviewItem,
+  type EventItem,
+  type SeasonalBeer,
+  type CuratedCollection,
+} from "@/components/social/DiscoveryCard";
+import type { NewBrewery } from "./HomeFeed";
+
+export interface CommunityContent {
+  featuredBeers: FeaturedBeer[];
+  topReviews: TrendingReview[];
+  breweryReviews: BreweryReviewItem[];
+  upcomingEvents: EventItem[];
+  newBreweries: NewBrewery[];
+  seasonalBeers?: SeasonalBeer[];
+  curatedCollections?: CuratedCollection[];
+}
+
+export function DiscoverTabContent({
+  communityContent,
+  hasCommunityContent,
+}: {
+  communityContent?: CommunityContent;
+  hasCommunityContent: boolean;
+}) {
+  const hasNewBreweries = (communityContent?.newBreweries?.length ?? 0) > 0;
+  const effectivelyEmpty = !hasCommunityContent && !hasNewBreweries;
+
+  if (effectivelyEmpty || !communityContent) {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="text-center py-16 space-y-5"
+      >
+        <span className="text-6xl block">🌍</span>
+        <div className="space-y-2">
+          <h3
+            className="font-display text-2xl font-bold"
+            style={{ color: "var(--text-primary)" }}
+          >
+            Nothing brewing yet
+          </h3>
+          <p
+            className="max-w-xs mx-auto text-sm leading-relaxed"
+            style={{ color: "var(--text-secondary)" }}
+          >
+            Check back soon for trending beers, events, and community reviews.
+          </p>
+        </div>
+        <Link
+          href="/explore"
+          className="inline-flex items-center justify-center gap-2 font-semibold text-sm px-5 py-3 rounded-xl transition-all"
+          style={{ background: "var(--accent-gold)", color: "var(--bg)" }}
+        >
+          <Compass size={15} />
+          Explore Breweries
+        </Link>
+      </motion.div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Beer of the Week */}
+      {communityContent.featuredBeers.length > 0 && (
+        <div className="space-y-2">
+          <p
+            className="text-[10px] font-mono uppercase tracking-widest px-1"
+            style={{ color: "var(--accent-gold)" }}
+          >
+            Beer of the Week
+          </p>
+          <BeerOfTheWeekCard beer={communityContent.featuredBeers[0]} index={0} />
+        </div>
+      )}
+
+      {/* Trending beer reviews */}
+      {communityContent.topReviews.length > 0 && (
+        <div className="space-y-2">
+          <TrendingCard reviews={communityContent.topReviews} />
+        </div>
+      )}
+
+      {/* Upcoming events */}
+      {communityContent.upcomingEvents.length > 0 && (
+        <div className="space-y-2">
+          <p
+            className="text-[10px] font-mono uppercase tracking-widest px-1"
+            style={{ color: "var(--text-muted)" }}
+          >
+            Happening Soon
+          </p>
+          {communityContent.upcomingEvents.slice(0, 3).map((event, i) => (
+            <EventCard key={event.id} event={event} index={i} />
+          ))}
+        </div>
+      )}
+
+      {/* Community brewery reviews */}
+      {communityContent.breweryReviews.length > 0 && (
+        <div className="space-y-2">
+          <p
+            className="text-[10px] font-mono uppercase tracking-widest px-1"
+            style={{ color: "var(--text-muted)" }}
+          >
+            Community Reviews
+          </p>
+          {communityContent.breweryReviews.slice(0, 4).map((review, i) => (
+            <BreweryReviewCard key={review.id} review={review} index={i} />
+          ))}
+        </div>
+      )}
+
+      {/* New Breweries */}
+      {communityContent.newBreweries && communityContent.newBreweries.length > 0 && (
+        <div className="space-y-2">
+          <p
+            className="text-[10px] font-mono uppercase tracking-widest px-1"
+            style={{ color: "var(--text-muted)" }}
+          >
+            New on HopTrack
+          </p>
+          <div className="grid grid-cols-2 gap-2">
+            {communityContent.newBreweries.slice(0, 6).map((brewery, i) => (
+              <motion.div
+                key={brewery.id}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.04, duration: 0.28 }}
+              >
+                <Link href={`/brewery/${brewery.id}`}>
+                  <div
+                    className="p-3 rounded-xl h-full"
+                    style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
+                  >
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-base">🍻</span>
+                      <p className="text-xs font-semibold truncate" style={{ color: "var(--text-primary)" }}>
+                        {brewery.name}
+                      </p>
+                    </div>
+                    {(brewery.city || brewery.state) && (
+                      <p className="text-[10px] truncate" style={{ color: "var(--text-muted)" }}>
+                        {[brewery.city, brewery.state].filter(Boolean).join(", ")}
+                      </p>
+                    )}
+                    {brewery.type && (
+                      <span
+                        className="inline-block mt-1.5 text-[10px] font-mono px-2 py-0.5 rounded-full"
+                        style={{
+                          background: "color-mix(in srgb, var(--accent-gold) 10%, transparent)",
+                          color: "var(--accent-gold)",
+                        }}
+                      >
+                        {brewery.type}
+                      </span>
+                    )}
+                  </div>
+                </Link>
+              </motion.div>
+            ))}
+          </div>
+          <div className="text-center pt-1">
+            <Link
+              href="/explore"
+              className="text-xs font-medium"
+              style={{ color: "var(--accent-gold)" }}
+            >
+              Explore all breweries →
+            </Link>
+          </div>
+        </div>
+      )}
+
+      {/* Seasonal & Limited */}
+      {communityContent.seasonalBeers && communityContent.seasonalBeers.length > 0 && (
+        <SeasonalBeersScroll beers={communityContent.seasonalBeers} />
+      )}
+
+      {/* Curated Collections */}
+      {communityContent.curatedCollections && communityContent.curatedCollections.length > 0 && (
+        <CuratedCollectionsList collections={communityContent.curatedCollections} />
+      )}
+    </div>
+  );
+}
