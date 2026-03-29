@@ -56,24 +56,24 @@ export default async function BrewerySessionsPage({
         <Link
           href={`/brewery-admin/${brewery_id}`}
           className="inline-flex items-center gap-1.5 text-sm mb-4 transition-opacity hover:opacity-70"
-          style={{ color: "var(--color-accent-gold)" }}
+          style={{ color: "var(--accent-gold)" }}
         >
           <ArrowLeft size={14} /> Back to Dashboard
         </Link>
-        <h1 className="font-display text-3xl font-bold" style={{ color: "var(--color-text-primary)" }}>
+        <h1 className="font-display text-3xl font-bold" style={{ color: "var(--text-primary)" }}>
           All Sessions
         </h1>
-        <p className="text-sm mt-1" style={{ color: "var(--color-text-muted)" }}>
+        <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
           {(brewery as any)?.name} · {count ?? 0} total session{count !== 1 ? "s" : ""}
         </p>
       </div>
 
       <div className="space-y-3">
         {((sessions as any[]) ?? []).length === 0 ? (
-          <div className="rounded-2xl p-12 text-center border" style={{ background: "var(--color-surface)", borderColor: "var(--color-border)" }}>
+          <div className="rounded-2xl p-12 text-center border" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
             <p className="text-3xl mb-2">🍺</p>
-            <p className="font-display text-lg" style={{ color: "var(--color-text-primary)" }}>No sessions yet</p>
-            <p className="text-sm mt-1" style={{ color: "var(--color-text-muted)" }}>
+            <p className="font-display text-lg" style={{ color: "var(--text-primary)" }}>No sessions yet</p>
+            <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
               Share your HopTrack brewery page to get the first pour tracked.
             </p>
           </div>
@@ -97,16 +97,16 @@ export default async function BrewerySessionsPage({
 
             return (
               <div key={s.id} className="flex items-center gap-3 p-4 rounded-2xl border"
-                style={{ background: "var(--color-surface)", borderColor: "var(--color-border)" }}>
+                style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
                 <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0"
-                  style={{ background: "var(--color-surface-2)", color: "var(--color-text-secondary)" }}>
+                  style={{ background: "var(--surface-2)", color: "var(--text-secondary)" }}>
                   {(s.profile?.display_name ?? s.user_id?.slice(0, 1) ?? "?")[0].toUpperCase()}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate" style={{ color: "var(--color-text-primary)" }}>
+                  <p className="text-sm font-medium truncate" style={{ color: "var(--text-primary)" }}>
                     {s.profile?.display_name ?? "Guest"}
                   </p>
-                  <p className="text-xs truncate" style={{ color: "var(--color-text-muted)" }}>
+                  <p className="text-xs truncate" style={{ color: "var(--text-muted)" }}>
                     {beerCount > 0
                       ? `${beerCount} beer${beerCount !== 1 ? "s" : ""}${logs[0]?.beer?.name ? ` · ${logs[0].beer.name}` : ""}${logs.length > 1 ? ` +${logs.length - 1} more` : ""}`
                       : "Brewery visit"
@@ -115,18 +115,18 @@ export default async function BrewerySessionsPage({
                 </div>
                 <div className="flex items-center gap-3 flex-shrink-0 text-right">
                   {avg && (
-                    <span className="flex items-center gap-0.5 text-sm font-mono" style={{ color: "var(--color-accent-gold)" }}>
+                    <span className="flex items-center gap-0.5 text-sm font-mono" style={{ color: "var(--accent-gold)" }}>
                       <Star size={11} />
                       {avg}
                     </span>
                   )}
                   {durationLabel && (
-                    <span className="flex items-center gap-0.5 text-xs" style={{ color: "var(--color-text-muted)" }}>
+                    <span className="flex items-center gap-0.5 text-xs" style={{ color: "var(--text-muted)" }}>
                       <Clock size={11} />
                       {durationLabel}
                     </span>
                   )}
-                  <span className="text-xs" style={{ color: "var(--color-text-muted)" }}>
+                  <span className="text-xs" style={{ color: "var(--text-muted)" }}>
                     {formatDateShort(s.started_at)}
                   </span>
                 </div>
@@ -138,24 +138,24 @@ export default async function BrewerySessionsPage({
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between mt-8 pt-6 border-t" style={{ borderColor: "var(--color-border)" }}>
+        <div className="flex items-center justify-between mt-8 pt-6 border-t" style={{ borderColor: "var(--border)" }}>
           {page > 1 ? (
             <Link
               href={`/brewery-admin/${brewery_id}/sessions?page=${page - 1}`}
               className="px-4 py-2 rounded-xl text-sm border transition-all hover:opacity-80"
-              style={{ background: "var(--color-surface)", borderColor: "var(--color-border)", color: "var(--color-text-secondary)" }}
+              style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--text-secondary)" }}
             >
               ← Previous
             </Link>
           ) : <div />}
-          <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>
+          <p className="text-xs" style={{ color: "var(--text-muted)" }}>
             Page {page} of {totalPages}
           </p>
           {page < totalPages ? (
             <Link
               href={`/brewery-admin/${brewery_id}/sessions?page=${page + 1}`}
               className="px-4 py-2 rounded-xl text-sm border transition-all hover:opacity-80"
-              style={{ background: "var(--color-surface)", borderColor: "var(--color-border)", color: "var(--color-text-secondary)" }}
+              style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--text-secondary)" }}
             >
               Next →
             </Link>

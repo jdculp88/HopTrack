@@ -105,7 +105,6 @@ export function RecommendationCard({
 
       {/* Reaction footer */}
       <ReactionBar
-        sessionId={recommendation.id}
         reactionCounts={reactionCounts}
         userReactions={userReactions}
       />

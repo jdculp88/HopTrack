@@ -53,10 +53,8 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     return (
-      <motion.button
+      <button
         ref={ref}
-        whileTap={{ scale: 0.97 }}
-        transition={{ type: "spring", stiffness: 400, damping: 17 }}
         className={cn(
           "inline-flex items-center justify-center font-sans transition-all duration-150",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D4A843] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0F0E0C]",
@@ -67,18 +65,25 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           className
         )}
         disabled={disabled || loading}
-        {...(props as any)}
+        {...props}
       >
-        {loading ? (
-          <LoadingSpinner size={size} />
-        ) : icon ? (
-          <span className="flex-shrink-0">{icon}</span>
-        ) : null}
-        {children && <span>{children}</span>}
-        {iconRight && !loading && (
-          <span className="flex-shrink-0">{iconRight}</span>
-        )}
-      </motion.button>
+        <motion.span
+          className="inline-flex items-center justify-center gap-inherit w-full"
+          whileTap={{ scale: 0.97 }}
+          transition={{ type: "spring", stiffness: 400, damping: 17 }}
+          style={{ gap: "inherit" }}
+        >
+          {loading ? (
+            <LoadingSpinner size={size} />
+          ) : icon ? (
+            <span className="flex-shrink-0">{icon}</span>
+          ) : null}
+          {children && <span>{children}</span>}
+          {iconRight && !loading && (
+            <span className="flex-shrink-0">{iconRight}</span>
+          )}
+        </motion.span>
+      </button>
     );
   }
 );

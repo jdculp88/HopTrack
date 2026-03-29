@@ -88,7 +88,11 @@ export async function DELETE(request: Request) {
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { id } = await request.json();
-  const { error } = await supabase.from("friendships").delete().eq("id", id);
+  const { error } = await supabase
+    .from("friendships")
+    .delete()
+    .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`)
+    .eq("id", id);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ success: true });
 }

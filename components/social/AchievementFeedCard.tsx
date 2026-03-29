@@ -129,7 +129,6 @@ export function AchievementFeedCard({
 
       {/* Reaction footer */}
       <ReactionBar
-        sessionId={achievement.id}
         reactionCounts={reactionCounts}
         userReactions={userReactions}
         showShare={false}

@@ -160,7 +160,7 @@ export default async function HomePage() {
 
     // Wishlist (for You tab Want-to-Try)
     (supabase as any)
-      .from("wishlists")
+      .from("wishlist")
       .select("id, created_at, note, beer:beers(id, name, style, abv, brewery:breweries(id, name))")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false })

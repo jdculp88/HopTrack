@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { Beer, Home, MessageCircle } from "lucide-react";
+import { Beer, Home } from "lucide-react";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 
 interface ActiveFriend {
@@ -170,32 +170,7 @@ export function DrinkingNow() {
                     </div>
 
                     {/* Send cheers */}
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        // Fire-and-forget cheers notification
-                        fetch('/api/notifications', {
-                          method: 'POST',
-                          headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({
-                            recipient_id: f.userId,
-                            type: 'session_cheers',
-                            title: 'Cheers! 🍻',
-                            body: 'A friend sent you cheers!',
-                            data: { sessionId: f.sessionId },
-                          }),
-                        }).catch(() => {});
-                      }}
-                      className="flex items-center gap-1 text-[10px] font-medium px-2.5 py-1 rounded-lg transition-colors"
-                      style={{
-                        color: "var(--accent-gold)",
-                        background: "color-mix(in srgb, var(--accent-gold) 10%, transparent)",
-                      }}
-                    >
-                      <MessageCircle size={9} />
-                      Cheers
-                    </button>
+                    <CheersButton sessionId={f.sessionId} />
                   </div>
                 </Link>
               </motion.div>
@@ -204,5 +179,34 @@ export function DrinkingNow() {
         </div>
       </motion.div>
     </AnimatePresence>
+  );
+}
+
+function CheersButton({ sessionId }: { sessionId: string }) {
+  const [sent, setSent] = useState(false);
+
+  return (
+    <button
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (sent) return;
+        setSent(true);
+        fetch("/api/reactions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ session_id: sessionId, type: "beer" }),
+        }).catch(() => {});
+      }}
+      className="flex items-center gap-1 text-[10px] font-medium px-2.5 py-1 rounded-lg transition-colors"
+      style={{
+        color: sent ? "var(--text-muted)" : "var(--accent-gold)",
+        background: sent
+          ? "color-mix(in srgb, var(--text-muted) 10%, transparent)"
+          : "color-mix(in srgb, var(--accent-gold) 10%, transparent)",
+      }}
+    >
+      <span>{sent ? "Cheers sent" : "Cheers"}</span>
+    </button>
   );
 }

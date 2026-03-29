@@ -4,7 +4,7 @@ import { useState, useCallback } from "react";
 import { MessageCircle, Share2 } from "lucide-react";
 
 interface ReactionBarProps {
-  sessionId: string;
+  sessionId?: string;
   /** Reaction counts by type, e.g. { beer: 7, flame: 2 } */
   reactionCounts?: Record<string, number>;
   /** Types the current user has already reacted with */
@@ -33,6 +33,7 @@ export function ReactionBar({
   const hasReacted = myReactions.includes("beer");
 
   const toggleReaction = useCallback(async () => {
+    if (!sessionId) return;
     const type = "beer";
     const wasActive = myReactions.includes(type);
 
@@ -83,29 +84,31 @@ export function ReactionBar({
       className={`flex items-center gap-4 px-4 py-3 mt-1 border-t ${centered ? "justify-center" : ""}`}
       style={{ borderColor: "color-mix(in srgb, var(--border) 50%, transparent)" }}
     >
-      {/* Cheers button */}
-      <button
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          toggleReaction();
-        }}
-        className="flex items-center gap-1.5 text-[13px] transition-colors"
-        style={{
-          color: hasReacted ? "var(--accent-amber, #c0583a)" : "var(--text-muted)",
-        }}
-      >
-        <span
+      {/* Cheers button — only shown for session cards */}
+      {sessionId && (
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleReaction();
+          }}
+          className="flex items-center gap-1.5 text-[13px] transition-colors"
           style={{
-            display: "inline-block",
-            transform: animating === "beer" ? "scale(1.3)" : "scale(1)",
-            transition: "transform 0.2s ease",
+            color: hasReacted ? "var(--accent-amber, #c0583a)" : "var(--text-muted)",
           }}
         >
-          🍺
-        </span>
-        {beerCount > 0 && <span>{beerCount}</span>}
-      </button>
+          <span
+            style={{
+              display: "inline-block",
+              transform: animating === "beer" ? "scale(1.3)" : "scale(1)",
+              transition: "transform 0.2s ease",
+            }}
+          >
+            🍺
+          </span>
+          {beerCount > 0 && <span>{beerCount}</span>}
+        </button>
+      )}
 
       {/* Comment count */}
       {commentCount != null && (

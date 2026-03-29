@@ -121,13 +121,13 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
 
       {/* Header */}
       <div className="mb-8">
-        <p className="text-sm font-mono uppercase tracking-wider mb-1" style={{ color: "var(--color-accent-gold)" }}>
+        <p className="text-sm font-mono uppercase tracking-wider mb-1" style={{ color: "var(--accent-gold)" }}>
           {(account as any)?.role === "owner" ? "Owner" : "Manager"} · {(account as any)?.verified ? "Verified ✓" : "Pending Verification"}
         </p>
-        <h1 className="font-display text-3xl lg:text-4xl font-bold" style={{ color: "var(--color-text-primary)" }}>
+        <h1 className="font-display text-3xl lg:text-4xl font-bold" style={{ color: "var(--text-primary)" }}>
           {(brewery as any)?.name}
         </h1>
-        <p className="mt-1 text-sm" style={{ color: "var(--color-text-muted)" }}>
+        <p className="mt-1 text-sm" style={{ color: "var(--text-muted)" }}>
           {(brewery as any)?.city}, {(brewery as any)?.state} · {(brewery as any)?.brewery_type?.replace(/_/g, " ")}
         </p>
       </div>
@@ -166,13 +166,13 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
             positive: true,
           },
         ].map(({ label, value, icon: Icon, note, positive }) => (
-          <div key={label} className="rounded-2xl p-5 border" style={{ background: "var(--color-surface)", borderColor: "var(--color-border)" }}>
+          <div key={label} className="rounded-2xl p-5 border" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
             <div className="flex items-center justify-between mb-3">
-              <p className="text-xs font-mono uppercase tracking-wider" style={{ color: "var(--color-text-muted)" }}>{label}</p>
-              <Icon size={16} style={{ color: "var(--color-accent-gold)" }} />
+              <p className="text-xs font-mono uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>{label}</p>
+              <Icon size={16} style={{ color: "var(--accent-gold)" }} />
             </div>
-            <p className="font-display text-3xl font-bold" style={{ color: "var(--color-text-primary)" }}>{value}</p>
-            <p className="text-xs mt-1" style={{ color: positive ? "var(--color-text-muted)" : "#ef4444" }}>{note}</p>
+            <p className="font-display text-3xl font-bold" style={{ color: "var(--text-primary)" }}>{value}</p>
+            <p className="text-xs mt-1" style={{ color: positive ? "var(--text-muted)" : "#ef4444" }}>{note}</p>
           </div>
         ))}
       </div>
@@ -183,19 +183,19 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
         <div className="lg:col-span-2 space-y-6">
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="font-display text-lg font-bold" style={{ color: "var(--color-text-primary)" }}>Recent Visits</h2>
+              <h2 className="font-display text-lg font-bold" style={{ color: "var(--text-primary)" }}>Recent Visits</h2>
               <Link href={`/brewery-admin/${brewery_id}/sessions`}
                 className="text-xs flex items-center gap-1 transition-opacity hover:opacity-70"
-                style={{ color: "var(--color-accent-gold)" }}>
+                style={{ color: "var(--accent-gold)" }}>
                 View all <ArrowUpRight size={12} />
               </Link>
             </div>
             <div className="space-y-3">
               {((recentSessions as any[]) ?? []).length === 0 ? (
-                <div className="rounded-2xl p-8 text-center border" style={{ background: "var(--color-surface)", borderColor: "var(--color-border)" }}>
+                <div className="rounded-2xl p-8 text-center border" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
                   <p className="text-3xl mb-2">🍺</p>
-                  <p className="font-display" style={{ color: "var(--color-text-primary)" }}>No sessions yet</p>
-                  <p className="text-sm mt-1" style={{ color: "var(--color-text-muted)" }}>Share your HopTrack brewery page to get the first pour tracked.</p>
+                  <p className="font-display" style={{ color: "var(--text-primary)" }}>No sessions yet</p>
+                  <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>Share your HopTrack brewery page to get the first pour tracked.</p>
                 </div>
               ) : (
                 ((recentSessions as any[]) ?? []).map((s: any) => {
@@ -211,16 +211,16 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
 
                   return (
                     <div key={s.id} className="flex items-center gap-3 p-4 rounded-2xl border"
-                      style={{ background: "var(--color-surface)", borderColor: "var(--color-border)" }}>
+                      style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
                       <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0"
-                        style={{ background: "var(--color-surface-2)", color: "var(--color-text-secondary)" }}>
+                        style={{ background: "var(--surface-2)", color: "var(--text-secondary)" }}>
                         {(s.profile?.display_name ?? s.user_id?.slice(0, 1) ?? "?")[0].toUpperCase()}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate" style={{ color: "var(--color-text-primary)" }}>
+                        <p className="text-sm font-medium truncate" style={{ color: "var(--text-primary)" }}>
                           {s.profile?.display_name ?? "Guest"}
                         </p>
-                        <p className="text-xs truncate" style={{ color: "var(--color-text-muted)" }}>
+                        <p className="text-xs truncate" style={{ color: "var(--text-muted)" }}>
                           {beerCount > 0
                             ? `${beerCount} beer${beerCount !== 1 ? "s" : ""}${topBeerName ? ` · ${topBeerName}` : ""}`
                             : "Brewery visit"
@@ -230,9 +230,9 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
                       </div>
                       <div className="text-right flex-shrink-0">
                         {sessionAvg && (
-                          <p className="text-sm font-mono" style={{ color: "var(--color-accent-gold)" }}>★ {sessionAvg}</p>
+                          <p className="text-sm font-mono" style={{ color: "var(--accent-gold)" }}>★ {sessionAvg}</p>
                         )}
-                        <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>
+                        <p className="text-xs" style={{ color: "var(--text-muted)" }}>
                           {formatDateShort(s.started_at)}
                         </p>
                       </div>
@@ -246,27 +246,27 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
           {/* Top Beers */}
           {topBeersList.length > 0 && (
             <div>
-              <h2 className="font-display text-lg font-bold mb-4" style={{ color: "var(--color-text-primary)" }}>Top Beers</h2>
+              <h2 className="font-display text-lg font-bold mb-4" style={{ color: "var(--text-primary)" }}>Top Beers</h2>
               <div className="space-y-3">
                 {topBeersList.map((beer, i) => {
                   const ratedCount = beerLogs.filter((l: any) => l.beer_id && beerMap[l.beer_id]?.name === beer.name && l.rating > 0).length;
                   return (
                     <div key={beer.name} className="flex items-center gap-4 p-4 rounded-2xl border"
-                      style={{ background: "var(--color-surface)", borderColor: "var(--color-border)" }}>
+                      style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
                       <span className="font-display text-2xl font-bold w-8 flex-shrink-0"
                         style={{ color: i === 0 ? "#FFD700" : i === 1 ? "#C0C0C0" : "#CD7F32" }}>
                         {i + 1}
                       </span>
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm truncate" style={{ color: "var(--color-text-primary)" }}>{beer.name}</p>
-                        <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>{beer.style}</p>
+                        <p className="font-medium text-sm truncate" style={{ color: "var(--text-primary)" }}>{beer.name}</p>
+                        <p className="text-xs" style={{ color: "var(--text-muted)" }}>{beer.style}</p>
                       </div>
                       <div className="text-right flex-shrink-0">
-                        <p className="text-sm font-mono font-bold" style={{ color: "var(--color-text-primary)" }}>
+                        <p className="text-sm font-mono font-bold" style={{ color: "var(--text-primary)" }}>
                           {beer.count} pour{beer.count !== 1 ? "s" : ""}
                         </p>
                         {beer.totalRating > 0 && ratedCount > 0 && (
-                          <p className="text-xs" style={{ color: "var(--color-accent-gold)" }}>
+                          <p className="text-xs" style={{ color: "var(--accent-gold)" }}>
                             ★ {(beer.totalRating / ratedCount).toFixed(1)} avg
                           </p>
                         )}
@@ -283,27 +283,27 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
         <div className="space-y-6">
 
           {/* Loyalty */}
-          <div className="rounded-2xl p-5 border" style={{ background: "var(--color-surface)", borderColor: "var(--color-border)" }}>
+          <div className="rounded-2xl p-5 border" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
             <div className="flex items-center justify-between mb-3">
-              <h3 className="font-display font-bold" style={{ color: "var(--color-text-primary)" }}>Loyalty Program</h3>
-              <Award size={16} style={{ color: "var(--color-accent-gold)" }} />
+              <h3 className="font-display font-bold" style={{ color: "var(--text-primary)" }}>Loyalty Program</h3>
+              <Award size={16} style={{ color: "var(--accent-gold)" }} />
             </div>
             {loyaltyProgram ? (
               <>
-                <p className="font-medium text-sm mb-1" style={{ color: "var(--color-text-primary)" }}>{(loyaltyProgram as any).name}</p>
-                <p className="text-xs mb-3" style={{ color: "var(--color-text-muted)" }}>
+                <p className="font-medium text-sm mb-1" style={{ color: "var(--text-primary)" }}>{(loyaltyProgram as any).name}</p>
+                <p className="text-xs mb-3" style={{ color: "var(--text-muted)" }}>
                   {(loyaltyProgram as any).stamps_required} stamps → {(loyaltyProgram as any).reward_description}
                 </p>
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-green-500" />
-                  <span className="text-xs" style={{ color: "var(--color-text-secondary)" }}>Active</span>
+                  <span className="text-xs" style={{ color: "var(--text-secondary)" }}>Active</span>
                 </div>
               </>
             ) : (
               <>
-                <p className="text-sm mb-3" style={{ color: "var(--color-text-muted)" }}>No loyalty program yet.</p>
+                <p className="text-sm mb-3" style={{ color: "var(--text-muted)" }}>No loyalty program yet.</p>
                 <Link href={`/brewery-admin/${brewery_id}/loyalty`}
-                  className="text-xs font-medium" style={{ color: "var(--color-accent-gold)" }}>
+                  className="text-xs font-medium" style={{ color: "var(--accent-gold)" }}>
                   + Create program →
                 </Link>
               </>
@@ -311,18 +311,18 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
           </div>
 
           {/* Active Promotions */}
-          <div className="rounded-2xl p-5 border" style={{ background: "var(--color-surface)", borderColor: "var(--color-border)" }}>
+          <div className="rounded-2xl p-5 border" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
             <div className="flex items-center justify-between mb-3">
-              <h3 className="font-display font-bold" style={{ color: "var(--color-text-primary)" }}>Promotions</h3>
-              <TrendingUp size={16} style={{ color: "var(--color-accent-gold)" }} />
+              <h3 className="font-display font-bold" style={{ color: "var(--text-primary)" }}>Promotions</h3>
+              <TrendingUp size={16} style={{ color: "var(--accent-gold)" }} />
             </div>
             {((promotions as any[]) ?? []).length > 0 ? (
               <div className="space-y-2">
                 {((promotions as any[]) ?? []).map((p: any) => (
-                  <div key={p.id} className="p-3 rounded-xl" style={{ background: "var(--color-surface-2)" }}>
-                    <p className="text-sm font-medium" style={{ color: "var(--color-text-primary)" }}>{p.title}</p>
+                  <div key={p.id} className="p-3 rounded-xl" style={{ background: "var(--surface-2)" }}>
+                    <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{p.title}</p>
                     {p.ends_at && (
-                      <p className="text-xs mt-0.5 flex items-center gap-1" style={{ color: "var(--color-text-muted)" }}>
+                      <p className="text-xs mt-0.5 flex items-center gap-1" style={{ color: "var(--text-muted)" }}>
                         <Calendar size={10} />
                         Ends {formatDateShort(p.ends_at)}
                       </p>
@@ -331,17 +331,17 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
                 ))}
               </div>
             ) : (
-              <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>No active promotions.</p>
+              <p className="text-sm" style={{ color: "var(--text-muted)" }}>No active promotions.</p>
             )}
             <Link href={`/brewery-admin/${brewery_id}/loyalty`}
-              className="text-xs font-medium mt-3 block" style={{ color: "var(--color-accent-gold)" }}>
+              className="text-xs font-medium mt-3 block" style={{ color: "var(--accent-gold)" }}>
               Manage promotions →
             </Link>
           </div>
 
           {/* Quick Actions */}
-          <div className="rounded-2xl p-5 border" style={{ background: "var(--color-surface)", borderColor: "var(--color-border)" }}>
-            <h3 className="font-display font-bold mb-3" style={{ color: "var(--color-text-primary)" }}>Quick Actions</h3>
+          <div className="rounded-2xl p-5 border" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
+            <h3 className="font-display font-bold mb-3" style={{ color: "var(--text-primary)" }}>Quick Actions</h3>
             <div className="space-y-2">
               {[
                 { href: `/brewery-admin/${brewery_id}/tap-list`, label: "Manage tap list" },
@@ -354,7 +354,7 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
               ].map(({ href, label, external }) => (
                 <Link key={href} href={href} target={external ? "_blank" : undefined}
                   className="block text-sm py-1.5 transition-opacity hover:opacity-70"
-                  style={{ color: "var(--color-text-secondary)" }}>
+                  style={{ color: "var(--text-secondary)" }}>
                   → {label}
                 </Link>
               ))}

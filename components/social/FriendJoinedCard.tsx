@@ -1,7 +1,9 @@
 'use client'
 
+import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { UserAvatar } from '@/components/ui/UserAvatar'
+import { useToast } from '@/components/ui/Toast'
 
 export interface FriendJoinedItem {
   id: string
@@ -30,6 +32,35 @@ export function FriendJoinedCard({
   friend: FriendJoinedItem
   index?: number
 }) {
+  const [status, setStatus] = useState<'idle' | 'pending' | 'error'>('idle')
+  const { success: toastSuccess, error: toastError } = useToast()
+
+  async function handleFollow() {
+    if (status === 'pending') return
+    setStatus('pending')
+    try {
+      const res = await fetch('/api/friends', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ addressee_id: friend.userId }),
+      })
+      if (!res.ok) {
+        const data = await res.json()
+        if (res.status === 409) {
+          // Already friends or pending
+          setStatus('pending')
+          return
+        }
+        throw new Error(data.error || 'Failed to send request')
+      }
+      toastSuccess('Friend request sent!')
+    } catch (err: any) {
+      setStatus('error')
+      toastError(err.message || 'Something went wrong')
+      setTimeout(() => setStatus('idle'), 2000)
+    }
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -61,12 +92,17 @@ export function FriendJoinedCard({
         {timeAgo(friend.joinedAt)}
       </p>
       <button
-        className="mt-3 text-sm font-semibold px-6 py-2 rounded-full text-white transition-all hover:scale-105"
+        onClick={handleFollow}
+        disabled={status === 'pending'}
+        className="mt-3 text-sm font-semibold px-6 py-2 rounded-full text-white transition-all hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed"
         style={{
-          background: 'linear-gradient(145deg, var(--accent-gold), var(--accent-amber, var(--accent-gold)))',
+          background: status === 'pending'
+            ? 'var(--surface-2)'
+            : 'linear-gradient(145deg, var(--accent-gold), var(--accent-amber, var(--accent-gold)))',
+          color: status === 'pending' ? 'var(--text-muted)' : undefined,
         }}
       >
-        Follow
+        {status === 'pending' ? 'Pending' : 'Follow'}
       </button>
     </motion.div>
   )

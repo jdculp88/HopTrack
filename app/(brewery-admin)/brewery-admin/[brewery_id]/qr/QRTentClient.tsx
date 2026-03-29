@@ -219,14 +219,14 @@ export function QRTentClient({ breweryId, breweryName, breweryCity, breweryState
         <Link
           href={`/brewery-admin/${breweryId}`}
           className="inline-flex items-center gap-1.5 text-sm mb-4 transition-opacity hover:opacity-70"
-          style={{ color: "var(--color-accent-gold)" }}
+          style={{ color: "var(--accent-gold)" }}
         >
           <ArrowLeft size={14} /> Back to Dashboard
         </Link>
-        <h1 className="font-display text-3xl font-bold" style={{ color: "var(--color-text-primary)" }}>
+        <h1 className="font-display text-3xl font-bold" style={{ color: "var(--text-primary)" }}>
           QR Table Tent
         </h1>
-        <p className="text-sm mt-1" style={{ color: "var(--color-text-muted)" }}>
+        <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
           Print or download branded QR codes that link guests directly to your HopTrack page.
         </p>
       </div>
@@ -237,8 +237,8 @@ export function QRTentClient({ breweryId, breweryName, breweryCity, breweryState
         <div className="space-y-6">
 
           {/* Size picker */}
-          <div className="rounded-2xl p-5 border" style={{ background: "var(--color-surface)", borderColor: "var(--color-border)" }}>
-            <p className="text-xs font-mono uppercase tracking-wider mb-3" style={{ color: "var(--color-text-muted)" }}>Format</p>
+          <div className="rounded-2xl p-5 border" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
+            <p className="text-xs font-mono uppercase tracking-wider mb-3" style={{ color: "var(--text-muted)" }}>Format</p>
             <div className="space-y-2">
               {TENT_SIZES.map(s => (
                 <button
@@ -247,8 +247,8 @@ export function QRTentClient({ breweryId, breweryName, breweryCity, breweryState
                   className="w-full flex items-start gap-3 p-3 rounded-xl border text-left transition-all"
                   style={
                     selectedSize === s.id
-                      ? { background: "rgba(212,168,67,0.08)", borderColor: "rgba(212,168,67,0.4)", color: "var(--color-text-primary)" }
-                      : { background: "var(--color-surface-2)", borderColor: "var(--color-border)", color: "var(--color-text-secondary)" }
+                      ? { background: "rgba(212,168,67,0.08)", borderColor: "rgba(212,168,67,0.4)", color: "var(--text-primary)" }
+                      : { background: "var(--surface-2)", borderColor: "var(--border)", color: "var(--text-secondary)" }
                   }
                 >
                   <div className={`w-4 h-4 rounded-full border-2 flex-shrink-0 mt-0.5 flex items-center justify-center ${selectedSize === s.id ? "border-[#D4A843]" : "border-current opacity-40"}`}>
@@ -256,7 +256,7 @@ export function QRTentClient({ breweryId, breweryName, breweryCity, breweryState
                   </div>
                   <div>
                     <p className="font-semibold text-sm">{s.label}</p>
-                    <p className="text-xs mt-0.5" style={{ color: "var(--color-text-muted)" }}>{s.desc}</p>
+                    <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>{s.desc}</p>
                   </div>
                 </button>
               ))}
@@ -264,16 +264,16 @@ export function QRTentClient({ breweryId, breweryName, breweryCity, breweryState
           </div>
 
           {/* URL */}
-          <div className="rounded-2xl p-5 border" style={{ background: "var(--color-surface)", borderColor: "var(--color-border)" }}>
-            <p className="text-xs font-mono uppercase tracking-wider mb-2" style={{ color: "var(--color-text-muted)" }}>QR Links To</p>
+          <div className="rounded-2xl p-5 border" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
+            <p className="text-xs font-mono uppercase tracking-wider mb-2" style={{ color: "var(--text-muted)" }}>QR Links To</p>
             <div className="flex items-center gap-2">
-              <code className="flex-1 text-xs px-3 py-2 rounded-xl truncate" style={{ background: "var(--color-surface-2)", color: "var(--color-text-secondary)" }}>
+              <code className="flex-1 text-xs px-3 py-2 rounded-xl truncate" style={{ background: "var(--surface-2)", color: "var(--text-secondary)" }}>
                 {breweryUrl}
               </code>
               <button
                 onClick={copyUrl}
                 className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium flex-shrink-0 transition-all"
-                style={{ background: copied ? "rgba(34,197,94,0.1)" : "var(--color-surface-2)", color: copied ? "#22c55e" : "var(--color-text-secondary)", border: `1px solid ${copied ? "rgba(34,197,94,0.3)" : "var(--color-border)"}` }}
+                style={{ background: copied ? "rgba(34,197,94,0.1)" : "var(--surface-2)", color: copied ? "#22c55e" : "var(--text-secondary)", border: `1px solid ${copied ? "rgba(34,197,94,0.3)" : "var(--border)"}` }}
               >
                 {copied ? <><Check size={12} /> Copied</> : "Copy"}
               </button>
@@ -286,7 +286,7 @@ export function QRTentClient({ breweryId, breweryName, breweryCity, breweryState
               onClick={printTent}
               disabled={!qrDataUrl}
               className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-all disabled:opacity-40"
-              style={{ background: "var(--color-surface)", border: "1px solid var(--color-border)", color: "var(--color-text-secondary)" }}
+              style={{ background: "var(--surface)", border: "1px solid var(--border)", color: "var(--text-secondary)" }}
             >
               <Printer size={16} />
               Print
@@ -302,15 +302,15 @@ export function QRTentClient({ breweryId, breweryName, breweryCity, breweryState
             </button>
           </div>
 
-          <p className="text-xs text-center" style={{ color: "var(--color-text-muted)" }}>
+          <p className="text-xs text-center" style={{ color: "var(--text-muted)" }}>
             Print on cardstock and fold for table tents. Laminate for durability.
           </p>
         </div>
 
         {/* Live preview */}
         <div>
-          <p className="text-xs font-mono uppercase tracking-wider mb-3" style={{ color: "var(--color-text-muted)" }}>Preview</p>
-          <div className="flex items-center justify-center rounded-2xl p-6 border" style={{ background: "var(--color-surface)", borderColor: "var(--color-border)", minHeight: 400 }}>
+          <p className="text-xs font-mono uppercase tracking-wider mb-3" style={{ color: "var(--text-muted)" }}>Preview</p>
+          <div className="flex items-center justify-center rounded-2xl p-6 border" style={{ background: "var(--surface)", borderColor: "var(--border)", minHeight: 400 }}>
             {qrDataUrl ? (
               <div
                 style={{
@@ -361,7 +361,7 @@ export function QRTentClient({ breweryId, breweryName, breweryCity, breweryState
                 <div style={{ width: "100%", height: 6, background: "#D4A843", flexShrink: 0 }} />
               </div>
             ) : (
-              <div className="flex items-center gap-2" style={{ color: "var(--color-text-muted)" }}>
+              <div className="flex items-center gap-2" style={{ color: "var(--text-muted)" }}>
                 <QrCode size={20} className="animate-pulse" />
                 <span className="text-sm">Generating QR code...</span>
               </div>

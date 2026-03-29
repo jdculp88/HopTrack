@@ -79,7 +79,6 @@ export function NewFavoriteCard({
 
       {/* Reaction footer */}
       <ReactionBar
-        sessionId={favorite.id}
         reactionCounts={reactionCounts}
         userReactions={userReactions}
         showShare={false}

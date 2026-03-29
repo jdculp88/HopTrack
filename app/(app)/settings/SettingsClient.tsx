@@ -248,8 +248,12 @@ export function SettingsClient({ profile, userEmail }: SettingsClientProps) {
             <ChevronRight size={14} className="text-[var(--text-muted)]" />
           </button>
 
-          <button className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-[#C44B3A]/5 transition-colors text-left group">
-            <span className="text-sm text-[#C44B3A]">Delete Account</span>
+          <button
+            disabled
+            title="Account deletion will be available soon"
+            className="w-full flex items-center justify-between p-3 rounded-xl text-left opacity-50 cursor-not-allowed"
+          >
+            <span className="text-sm text-[#C44B3A]">Delete Account (Coming Soon)</span>
             <Trash2 size={14} className="text-[#C44B3A]" />
           </button>
         </div>

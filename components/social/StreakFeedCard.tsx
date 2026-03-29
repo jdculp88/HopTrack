@@ -86,7 +86,6 @@ export function StreakFeedCard({
 
       {/* Reaction footer */}
       <ReactionBar
-        sessionId={streak.profileId}
         showShare={false}
         centered
       />
