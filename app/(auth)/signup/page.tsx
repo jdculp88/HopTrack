@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Mail, Lock, User, MapPin, Eye, EyeOff, ArrowRight, ChevronLeft, Check, X, Loader2 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
 
 type SignupStep = "account" | "profile";
@@ -122,126 +123,185 @@ export default function SignupPage() {
         </p>
       </div>
 
-      {step === "account" ? (
-        <>
-          <button
-            onClick={handleGoogleSignup}
-            className="w-full flex items-center justify-center gap-3 bg-[var(--surface-2)] hover:bg-[#2a2720] border border-[var(--border)] hover:border-[#6B6456] text-[var(--text-primary)] py-3 rounded-xl transition-all text-sm font-medium mb-6"
+      <AnimatePresence mode="wait" initial={false}>
+        {step === "account" ? (
+          <motion.div
+            key="account"
+            initial={{ opacity: 0, x: -16 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -16 }}
+            transition={{ type: "spring", stiffness: 400, damping: 30 }}
           >
-            <GoogleIcon />
-            Continue with Google
-          </button>
+            <motion.button
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0 }}
+              onClick={handleGoogleSignup}
+              className="w-full flex items-center justify-center gap-3 bg-[var(--surface-2)] hover:bg-[#2a2720] border border-[var(--border)] hover:border-[#6B6456] text-[var(--text-primary)] py-3 rounded-xl transition-all text-sm font-medium mb-6"
+            >
+              <GoogleIcon />
+              Continue with Google
+            </motion.button>
 
-          <div className="flex items-center gap-4 mb-6">
-            <div className="flex-1 h-px bg-[#3A3628]" />
-            <span className="text-xs text-[var(--text-muted)]">or</span>
-            <div className="flex-1 h-px bg-[#3A3628]" />
-          </div>
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.05 }}
+              className="flex items-center gap-4 mb-6"
+            >
+              <div className="flex-1 h-px bg-[#3A3628]" />
+              <span className="text-xs text-[var(--text-muted)]">or</span>
+              <div className="flex-1 h-px bg-[#3A3628]" />
+            </motion.div>
 
-          <form onSubmit={handleAccountStep} className="space-y-4">
-            <div className="relative">
-              <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none" />
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Email"
-                required
-                className="w-full bg-[var(--surface-2)] border border-[var(--border)] rounded-xl pl-11 pr-4 py-3 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] text-sm focus:outline-none focus:border-[var(--accent-gold)] transition-colors"
-              />
-            </div>
-            <div className="relative">
-              <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none" />
-              <input
-                type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Password (8+ characters)"
-                required
-                minLength={8}
-                className="w-full bg-[var(--surface-2)] border border-[var(--border)] rounded-xl pl-11 pr-11 py-3 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] text-sm focus:outline-none focus:border-[var(--accent-gold)] transition-colors"
-              />
-              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-secondary)]">
-                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-              </button>
-            </div>
-            {error && <p className="text-sm text-[#C44B3A] bg-[#C44B3A]/10 border border-[#C44B3A]/20 rounded-xl px-4 py-3">{error}</p>}
-            <button type="submit" className="w-full flex items-center justify-center gap-2 bg-[#D4A843] hover:bg-[#E8841A] text-[#0F0E0C] font-bold py-3.5 rounded-xl transition-all text-sm">
-              Continue
-              <ArrowRight size={16} />
-            </button>
-          </form>
-        </>
-      ) : (
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="relative">
-            <User size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none" />
-            <input
-              type="text"
-              value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
-              placeholder="Display name"
-              required
-              className="w-full bg-[var(--surface-2)] border border-[var(--border)] rounded-xl pl-11 pr-4 py-3 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] text-sm focus:outline-none focus:border-[var(--accent-gold)] transition-colors"
-            />
-          </div>
-          <div>
-            <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] text-sm pointer-events-none">@</span>
-              <input
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""))}
-                placeholder="username"
-                required
-                maxLength={30}
-                className={`w-full bg-[var(--surface-2)] border rounded-xl pl-8 pr-10 py-3 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] text-sm focus:outline-none transition-colors font-mono ${
-                  usernameStatus === "available"
-                    ? "border-[#4ADE80] focus:border-[#4ADE80]"
-                    : usernameStatus === "taken"
-                    ? "border-[#C44B3A] focus:border-[#C44B3A]"
-                    : "border-[var(--border)] focus:border-[var(--accent-gold)]"
-                }`}
-              />
-              {usernameStatus === "checking" && (
-                <Loader2 size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] animate-spin" />
-              )}
-              {usernameStatus === "available" && (
-                <Check size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-[#4ADE80]" />
-              )}
-              {usernameStatus === "taken" && (
-                <X size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-[#C44B3A]" />
-              )}
-            </div>
-            {usernameStatus === "checking" && (
-              <p className="text-xs text-[var(--text-muted)] mt-1.5 ml-1">Checking...</p>
-            )}
-            {usernameStatus === "available" && (
-              <p className="text-xs text-[#4ADE80] mt-1.5 ml-1">Username available</p>
-            )}
-            {usernameStatus === "taken" && (
-              <p className="text-xs text-[#C44B3A] mt-1.5 ml-1">Username taken</p>
-            )}
-          </div>
-          <div className="relative">
-            <MapPin size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none" />
-            <input
-              type="text"
-              value={homeCity}
-              onChange={(e) => setHomeCity(e.target.value)}
-              placeholder="Home city (optional)"
-              className="w-full bg-[var(--surface-2)] border border-[var(--border)] rounded-xl pl-11 pr-4 py-3 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] text-sm focus:outline-none focus:border-[var(--accent-gold)] transition-colors"
-            />
-          </div>
-          {error && <p className="text-sm text-[#C44B3A] bg-[#C44B3A]/10 border border-[#C44B3A]/20 rounded-xl px-4 py-3">{error}</p>}
-          <button type="submit" disabled={loading || usernameStatus === "taken" || usernameStatus === "checking"} className="w-full bg-[#D4A843] hover:bg-[#E8841A] text-[#0F0E0C] font-bold py-3.5 rounded-xl transition-all disabled:opacity-60 text-sm">
-            {loading ? "Creating account..." : "Create Account"}
-          </button>
-          <p className="text-xs text-center text-[var(--text-muted)]">
-            By signing up, you agree to our terms and privacy policy.
-          </p>
-        </form>
-      )}
+            <form onSubmit={handleAccountStep} className="space-y-4">
+              {[
+                <div key="email" className="relative">
+                  <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none" />
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Email"
+                    required
+                    className="w-full bg-[var(--surface-2)] border border-[var(--border)] rounded-xl pl-11 pr-4 py-3 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] text-sm focus:outline-none focus:border-[var(--accent-gold)] transition-colors"
+                  />
+                </div>,
+                <div key="password" className="relative">
+                  <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none" />
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Password (8+ characters)"
+                    required
+                    minLength={8}
+                    className="w-full bg-[var(--surface-2)] border border-[var(--border)] rounded-xl pl-11 pr-11 py-3 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] text-sm focus:outline-none focus:border-[var(--accent-gold)] transition-colors"
+                  />
+                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-secondary)]">
+                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>,
+              ].map((field, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 + i * 0.05 }}
+                >
+                  {field}
+                </motion.div>
+              ))}
+              {error && <p className="text-sm text-[#C44B3A] bg-[#C44B3A]/10 border border-[#C44B3A]/20 rounded-xl px-4 py-3">{error}</p>}
+              <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+                <button type="submit" className="w-full flex items-center justify-center gap-2 bg-[#D4A843] hover:bg-[#E8841A] text-[#0F0E0C] font-bold py-3.5 rounded-xl transition-all text-sm">
+                  Continue
+                  <ArrowRight size={16} />
+                </button>
+              </motion.div>
+            </form>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="profile"
+            initial={{ opacity: 0, x: 16 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 16 }}
+            transition={{ type: "spring", stiffness: 400, damping: 30 }}
+          >
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {[
+                <div key="displayName" className="relative">
+                  <User size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none" />
+                  <input
+                    type="text"
+                    value={displayName}
+                    onChange={(e) => setDisplayName(e.target.value)}
+                    placeholder="Display name"
+                    required
+                    className="w-full bg-[var(--surface-2)] border border-[var(--border)] rounded-xl pl-11 pr-4 py-3 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] text-sm focus:outline-none focus:border-[var(--accent-gold)] transition-colors"
+                  />
+                </div>,
+                <div key="username">
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] text-sm pointer-events-none">@</span>
+                    <input
+                      type="text"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""))}
+                      placeholder="username"
+                      required
+                      maxLength={30}
+                      className={`w-full bg-[var(--surface-2)] border rounded-xl pl-8 pr-10 py-3 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] text-sm focus:outline-none transition-colors font-mono ${
+                        usernameStatus === "available"
+                          ? "border-[#4ADE80] focus:border-[#4ADE80]"
+                          : usernameStatus === "taken"
+                          ? "border-[#C44B3A] focus:border-[#C44B3A]"
+                          : "border-[var(--border)] focus:border-[var(--accent-gold)]"
+                      }`}
+                    />
+                    {usernameStatus === "checking" && (
+                      <Loader2 size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] animate-spin" />
+                    )}
+                    {usernameStatus === "available" && (
+                      <Check size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-[#4ADE80]" />
+                    )}
+                    {usernameStatus === "taken" && (
+                      <X size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-[#C44B3A]" />
+                    )}
+                  </div>
+                  {usernameStatus === "checking" && (
+                    <p className="text-xs text-[var(--text-muted)] mt-1.5 ml-1">Checking...</p>
+                  )}
+                  {usernameStatus === "available" && (
+                    <p className="text-xs text-[#4ADE80] mt-1.5 ml-1">Username available</p>
+                  )}
+                  {usernameStatus === "taken" && (
+                    <p className="text-xs text-[#C44B3A] mt-1.5 ml-1">Username taken</p>
+                  )}
+                </div>,
+                <div key="homeCity" className="relative">
+                  <MapPin size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none" />
+                  <input
+                    type="text"
+                    value={homeCity}
+                    onChange={(e) => setHomeCity(e.target.value)}
+                    placeholder="Home city (optional)"
+                    className="w-full bg-[var(--surface-2)] border border-[var(--border)] rounded-xl pl-11 pr-4 py-3 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] text-sm focus:outline-none focus:border-[var(--accent-gold)] transition-colors"
+                  />
+                </div>,
+              ].map((field, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.05 }}
+                >
+                  {field}
+                </motion.div>
+              ))}
+              {error && <p className="text-sm text-[#C44B3A] bg-[#C44B3A]/10 border border-[#C44B3A]/20 rounded-xl px-4 py-3">{error}</p>}
+              <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
+                <button type="submit" disabled={loading || usernameStatus === "taken" || usernameStatus === "checking"} className="w-full bg-[#D4A843] hover:bg-[#E8841A] text-[#0F0E0C] font-bold py-3.5 rounded-xl transition-all disabled:opacity-60 text-sm">
+                  {loading ? "Creating account..." : "Create Account"}
+                </button>
+              </motion.div>
+              <motion.p
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="text-center text-xs"
+                style={{ color: "var(--text-muted)" }}
+              >
+                By signing up you agree to our{" "}
+                <Link href="/terms" className="underline" style={{ color: "var(--text-secondary)" }}>Terms of Service</Link>
+                {" "}and{" "}
+                <Link href="/privacy" className="underline" style={{ color: "var(--text-secondary)" }}>Privacy Policy</Link>
+              </motion.p>
+            </form>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <p className="text-center text-sm text-[var(--text-muted)] mt-6">
         Already have an account?{" "}

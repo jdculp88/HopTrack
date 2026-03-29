@@ -10,6 +10,26 @@ import { FeedItemCard, type FeedItem } from "./FeedItemCard";
 import { FeedLoadingSpinner, FeedEndMessage } from "./FeedPaginationUI";
 import type { Profile } from "@/types/database";
 import type { FeaturedBeer } from "@/components/social/BeerOfTheWeekCard";
+import { useReactions } from "./ReactionContext";
+
+function getFeedItemKey(item: FeedItem, i: number): string {
+  switch (item.type) {
+    case "session":
+      return `session-${item.data.id}`;
+    case "rating":
+      return `rating-${item.data.id}`;
+    case "achievement":
+      return `achievement-${item.data.id}`;
+    case "streak":
+      return `streak-${item.data.profileId}`;
+    case "new_favorite":
+      return `new_favorite-${item.data.id || i}`;
+    case "friend_joined":
+      return `friend_joined-${item.data.userId || i}`;
+    default:
+      return `item-${i}`;
+  }
+}
 
 interface CommunityContentForFriends {
   featuredBeers: FeaturedBeer[];
@@ -22,9 +42,6 @@ export function FriendsTabContent({
   communityContent,
   friendCount,
   activeFriendCount,
-  reactionCounts,
-  userReactions,
-  commentCounts,
   loading,
   hasMore,
   sentinelRef,
@@ -35,13 +52,11 @@ export function FriendsTabContent({
   communityContent?: CommunityContentForFriends;
   friendCount: number;
   activeFriendCount: number;
-  reactionCounts?: Record<string, Record<string, number>>;
-  userReactions?: Record<string, string[]>;
-  commentCounts?: Record<string, number>;
   loading?: boolean;
   hasMore?: boolean;
   sentinelRef?: RefObject<HTMLDivElement | null>;
 }) {
+  const { reactionCounts, userReactions, commentCounts } = useReactions();
   const liveCountLabel =
     activeFriendCount > 0
       ? `${activeFriendCount} friend${activeFriendCount !== 1 ? "s" : ""} drinking right now`
@@ -118,14 +133,11 @@ export function FriendsTabContent({
       {feedItems.length > 0 ? (
         <div className="space-y-4">
           {feedItems.map((item, i) => (
-            <div key={`item-${i}`}>
+            <div key={getFeedItemKey(item, i)}>
               <FeedItemCard
                 item={item}
                 index={i}
                 currentUserId={currentUserId}
-                reactionCounts={reactionCounts}
-                userReactions={userReactions}
-                commentCounts={commentCounts}
               />
             </div>
           ))}

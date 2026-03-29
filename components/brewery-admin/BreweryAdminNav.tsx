@@ -168,7 +168,13 @@ export function BreweryAdminNav({ accounts }: { accounts: any[] }) {
           <Link href="/home" className="text-xs flex-shrink-0" style={{ color: "var(--accent-gold)" }}>← App</Link>
         </div>
         {/* Scrollable tab strip */}
-        <div className="flex overflow-x-auto scrollbar-hide border-t" style={{ borderColor: "var(--border)" }}>
+        <div className="relative border-t" style={{ borderColor: "var(--border)" }}>
+        {/* Fade indicator — hints there are more tabs to the right */}
+        <div
+          className="pointer-events-none absolute right-0 top-0 bottom-0 w-12 z-10"
+          style={{ background: "linear-gradient(to right, transparent, var(--surface))" }}
+        />
+        <div className="flex overflow-x-auto scrollbar-hide">
           {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
             const fullHref = `/brewery-admin/${activeBreweryId}${href}`;
             const isActive = href === ""
@@ -189,6 +195,7 @@ export function BreweryAdminNav({ accounts }: { accounts: any[] }) {
               </Link>
             );
           })}
+        </div>
         </div>
       </div>
     </>

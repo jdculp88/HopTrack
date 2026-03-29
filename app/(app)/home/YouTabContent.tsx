@@ -10,6 +10,7 @@ import { getLevelProgress } from "@/lib/xp";
 import { FeedLoadingSpinner, FeedEndMessage } from "./FeedPaginationUI";
 import type { Profile, Session } from "@/types/database";
 import type { StyleDNAEntry, WishlistItem, UserAchievement } from "./HomeFeed";
+import { useReactions } from "./ReactionContext";
 
 export function YouTabContent({
   profile,
@@ -19,9 +20,6 @@ export function YouTabContent({
   userAchievements,
   wishlist,
   styleDNA,
-  reactionCounts,
-  userReactions,
-  commentCounts,
   loading,
   hasMore,
   sentinelRef,
@@ -33,13 +31,11 @@ export function YouTabContent({
   userAchievements?: UserAchievement[];
   wishlist?: WishlistItem[];
   styleDNA?: StyleDNAEntry[];
-  reactionCounts?: Record<string, Record<string, number>>;
-  userReactions?: Record<string, string[]>;
-  commentCounts?: Record<string, number>;
   loading?: boolean;
   hasMore?: boolean;
   sentinelRef?: RefObject<HTMLDivElement | null>;
 }) {
+  const { reactionCounts, userReactions, commentCounts } = useReactions();
   const levelInfo = profile ? getLevelProgress(profile.xp) : null;
 
   if (!profile) return null;
@@ -47,7 +43,7 @@ export function YouTabContent({
   const visitedBreweries = useMemo(() => {
     const seen = new Map<string, { id: string; name: string; city: string | null; state: string | null }>();
     for (const s of sessions) {
-      const b = (s as any).brewery;
+      const b = s.brewery;
       if (b && !seen.has(b.id)) seen.set(b.id, b);
     }
     return Array.from(seen.values());
@@ -127,17 +123,17 @@ export function YouTabContent({
           },
           {
             label: "Beers",
-            value: (profile as any).unique_beers ?? 0,
+            value: profile.unique_beers ?? 0,
             icon: <span className="text-sm">🍺</span>,
           },
           {
             label: "Breweries",
-            value: visitedBreweries.length || ((profile as any).unique_breweries ?? 0),
+            value: visitedBreweries.length || (profile.unique_breweries ?? 0),
             icon: <MapPin size={14} style={{ color: "var(--accent-gold)" }} />,
           },
           {
             label: "Streak",
-            value: (profile as any).current_streak ?? 0,
+            value: profile.current_streak ?? 0,
             icon: <Flame size={14} style={{ color: "var(--accent-amber)" }} />,
           },
         ].map((stat) => (
@@ -355,11 +351,11 @@ export function YouTabContent({
                 transition={{ delay: i * 0.03, duration: 0.28 }}
               >
                 <SessionCard
-                  session={s as any}
+                  session={s}
                   currentUserId={currentUserId}
-                  reactionCounts={reactionCounts?.[(s as any).id]}
-                  userReactions={userReactions?.[(s as any).id]}
-                  commentCount={commentCounts?.[(s as any).id]}
+                  reactionCounts={reactionCounts?.[s.id]}
+                  userReactions={userReactions?.[s.id]}
+                  commentCount={commentCounts?.[s.id]}
                 />
               </motion.div>
             ))}

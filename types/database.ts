@@ -77,10 +77,14 @@ export interface Profile {
   level: number;
   xp: number;
   is_public: boolean;
+  is_superadmin?: boolean;
   current_streak: number;
   longest_streak: number;
   last_session_date: string | null;
   created_at: string;
+  // Preference fields stored as JSONB on the profiles row
+  notification_preferences?: Record<string, boolean> | null;
+  share_live?: boolean | null;
 }
 export type ProfileInsert = Partial<Profile> & { id: string; username: string; display_name: string };
 export type ProfileUpdate = Partial<Profile>;
@@ -338,8 +342,8 @@ export interface Session {
   brewery?: {
     id: string
     name: string
-    city: string
-    state: string
+    city: string | null
+    state: string | null
   }
   beer_logs?: BeerLog[]
   profile?: {
@@ -347,6 +351,8 @@ export interface Session {
     username: string
     display_name: string | null
     avatar_url: string | null
+    current_streak?: number
+    level?: number
   }
 }
 
@@ -370,6 +376,7 @@ export interface BeerLog {
     style: string | null
     abv: number | null
     avg_rating: number | null
+    glass_type?: string | null
   }
 }
 

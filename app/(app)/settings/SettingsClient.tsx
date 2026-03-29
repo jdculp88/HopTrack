@@ -1,13 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { User, MapPin, Lock, Palette, Trash2, ChevronRight, Bell, Camera, Loader2 } from "lucide-react";
+import { User, MapPin, Lock, Palette, Trash2, ChevronRight, Bell, Camera, Loader2, Check, X } from "lucide-react";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { createClient } from "@/lib/supabase/client";
 import { useToast } from "@/components/ui/Toast";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import type { Profile } from "@/types/database";
+
+type UsernameStatus = "idle" | "checking" | "available" | "taken" | "same";
 
 interface SettingsClientProps {
   profile: Profile | null;
@@ -28,13 +30,41 @@ export function SettingsClient({ profile, userEmail }: SettingsClientProps) {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [usernameStatus, setUsernameStatus] = useState<UsernameStatus>("idle");
+  const usernameDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { success: toastSuccess, error: toastError } = useToast();
   const [notifPrefs, setNotifPrefs] = useState<Record<string, boolean>>(
     () => ({ ...DEFAULT_PREFS, ...((profile as any)?.notification_preferences ?? {}) })
   );
 
+  const checkUsername = useCallback(async (value: string) => {
+    if (value.length < 3) { setUsernameStatus("idle"); return; }
+    if (!/^[a-z0-9_]+$/i.test(value)) { setUsernameStatus("idle"); return; }
+    setUsernameStatus("checking");
+    try {
+      const res = await fetch(`/api/users/check-username?username=${encodeURIComponent(value)}`);
+      const data = await res.json();
+      setUsernameStatus(data.available ? "available" : "taken");
+    } catch {
+      setUsernameStatus("idle");
+    }
+  }, []);
+
+  function handleUsernameChange(value: string) {
+    const cleaned = value.toLowerCase().replace(/[^a-z0-9_]/g, "");
+    setUsername(cleaned);
+    if (usernameDebounceRef.current) clearTimeout(usernameDebounceRef.current);
+    if (cleaned === (profile?.username ?? "")) {
+      setUsernameStatus("same");
+      return;
+    }
+    if (cleaned.length < 3) { setUsernameStatus("idle"); return; }
+    usernameDebounceRef.current = setTimeout(() => checkUsername(cleaned), 500);
+  }
+
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
+    if (usernameStatus === "taken") return;
     setSaving(true);
     const res = await fetch("/api/profiles", {
       method: "PATCH",
@@ -130,15 +160,41 @@ export function SettingsClient({ profile, userEmail }: SettingsClientProps) {
           </Field>
 
           <Field label="Username">
-            <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] text-sm pointer-events-none">@</span>
-              <input
-                value={username}
-                onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""))}
-                placeholder="username"
-                maxLength={30}
-                className={`${inputCls} pl-8 font-mono`}
-              />
+            <div>
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] text-sm pointer-events-none">@</span>
+                <input
+                  value={username}
+                  onChange={(e) => handleUsernameChange(e.target.value)}
+                  placeholder="username"
+                  maxLength={30}
+                  className={`${inputCls} pl-8 pr-10 font-mono ${
+                    usernameStatus === "available"
+                      ? "border-[#4ADE80] focus:border-[#4ADE80]"
+                      : usernameStatus === "taken"
+                      ? "border-[var(--danger)] focus:border-[var(--danger)]"
+                      : ""
+                  }`}
+                />
+                {usernameStatus === "checking" && (
+                  <Loader2 size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] animate-spin" />
+                )}
+                {usernameStatus === "available" && (
+                  <Check size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-[#4ADE80]" />
+                )}
+                {usernameStatus === "taken" && (
+                  <X size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--danger)]" />
+                )}
+              </div>
+              {usernameStatus === "checking" && (
+                <p className="text-xs text-[var(--text-muted)] mt-1.5 ml-1">Checking...</p>
+              )}
+              {usernameStatus === "available" && (
+                <p className="text-xs text-[#4ADE80] mt-1.5 ml-1">Username available</p>
+              )}
+              {usernameStatus === "taken" && (
+                <p className="text-xs text-[var(--danger)] mt-1.5 ml-1">Username already taken</p>
+              )}
             </div>
           </Field>
 
@@ -167,7 +223,7 @@ export function SettingsClient({ profile, userEmail }: SettingsClientProps) {
 
           <button
             type="submit"
-            disabled={saving}
+            disabled={saving || usernameStatus === "taken" || usernameStatus === "checking"}
             className="bg-[var(--accent-gold)] hover:bg-[var(--accent-amber)] text-[var(--bg)] font-bold px-6 py-3 rounded-xl transition-all disabled:opacity-60 text-sm"
           >
             {saved ? "✓ Saved!" : saving ? "Saving..." : "Save Changes"}

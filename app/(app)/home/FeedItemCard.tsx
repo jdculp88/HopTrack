@@ -20,6 +20,7 @@ import {
   type FriendJoinedItem,
 } from "@/components/social/FriendJoinedCard";
 import type { Session } from "@/types/database";
+import { useReactions } from "./ReactionContext";
 
 export type FeedItem =
   | { type: "session"; data: Session; sortDate: string; isLive?: boolean }
@@ -33,17 +34,12 @@ export function FeedItemCard({
   item,
   index,
   currentUserId,
-  reactionCounts,
-  userReactions,
-  commentCounts,
 }: {
   item: FeedItem;
   index: number;
   currentUserId: string;
-  reactionCounts?: Record<string, Record<string, number>>;
-  userReactions?: Record<string, string[]>;
-  commentCounts?: Record<string, number>;
 }) {
+  const { reactionCounts, userReactions, commentCounts } = useReactions();
   if (item.type === "session") {
     return (
       <motion.div
@@ -63,11 +59,11 @@ export function FeedItemCard({
         }
       >
         <SessionCard
-          session={item.data as any}
+          session={item.data}
           currentUserId={currentUserId}
-          reactionCounts={reactionCounts?.[(item.data as any).id]}
-          userReactions={userReactions?.[(item.data as any).id]}
-          commentCount={commentCounts?.[(item.data as any).id]}
+          reactionCounts={reactionCounts?.[item.data.id]}
+          userReactions={userReactions?.[item.data.id]}
+          commentCount={commentCounts?.[item.data.id]}
         />
       </motion.div>
     );

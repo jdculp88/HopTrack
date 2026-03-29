@@ -29,6 +29,7 @@ import { DiscoverTabContent } from "./DiscoverTabContent";
 import { YouTabContent } from "./YouTabContent";
 import { OnboardingCard } from "./OnboardingCard";
 import type { FeedItem } from "./FeedItemCard";
+import { ReactionProvider } from "./ReactionContext";
 
 // ─── Exported Types ─────────────────────────────────────────────────────────
 
@@ -188,7 +189,7 @@ export function HomeFeed({
           detail: session
             ? {
                 session,
-                breweryName: (session as any).brewery?.name ?? "Brewery",
+                breweryName: session.brewery?.name ?? "Brewery",
               }
             : null,
         })
@@ -253,7 +254,7 @@ export function HomeFeed({
     // Streak milestones (derived from session profiles)
     const seenStreakUsers = new Set<string>();
     [...activeFriendSessions, ...allFriendSessions].forEach((s) => {
-      const p = (s as any).profile;
+      const p = s.profile;
       if (
         p &&
         p.current_streak &&
@@ -269,7 +270,7 @@ export function HomeFeed({
           data: {
             profileId: p.id,
             username: p.username,
-            displayName: p.display_name || p.username,
+            displayName: p.display_name ?? p.username,
             currentStreak: p.current_streak,
           },
           sortDate: s.started_at,
@@ -329,20 +330,25 @@ export function HomeFeed({
             transition={{ duration: 0.15 }}
             className="space-y-5"
           >
-            <FriendsTabContent
-              profile={profile}
-              feedItems={friendsFeed}
-              currentUserId={currentUserId}
-              communityContent={communityContent}
-              friendCount={friendCount}
-              activeFriendCount={activeFriendSessions.length}
-              reactionCounts={friendsPagination.reactionCounts}
-              userReactions={friendsPagination.userReactions}
-              commentCounts={friendsPagination.commentCounts}
-              loading={friendsPagination.loading}
-              hasMore={friendsPagination.hasMore}
-              sentinelRef={friendsPagination.sentinelRef}
-            />
+            <ReactionProvider
+              value={{
+                reactionCounts: friendsPagination.reactionCounts,
+                userReactions: friendsPagination.userReactions,
+                commentCounts: friendsPagination.commentCounts,
+              }}
+            >
+              <FriendsTabContent
+                profile={profile}
+                feedItems={friendsFeed}
+                currentUserId={currentUserId}
+                communityContent={communityContent}
+                friendCount={friendCount}
+                activeFriendCount={activeFriendSessions.length}
+                loading={friendsPagination.loading}
+                hasMore={friendsPagination.hasMore}
+                sentinelRef={friendsPagination.sentinelRef}
+              />
+            </ReactionProvider>
           </motion.div>
         )}
 
@@ -371,21 +377,26 @@ export function HomeFeed({
             transition={{ duration: 0.15 }}
             className="space-y-5"
           >
-            <YouTabContent
-              profile={profile}
-              sessions={youPagination.sessions}
-              weekStats={weekStats}
-              currentUserId={currentUserId}
-              userAchievements={userAchievements}
-              wishlist={wishlist}
-              styleDNA={styleDNA}
-              reactionCounts={youPagination.reactionCounts}
-              userReactions={youPagination.userReactions}
-              commentCounts={youPagination.commentCounts}
-              loading={youPagination.loading}
-              hasMore={youPagination.hasMore}
-              sentinelRef={youPagination.sentinelRef}
-            />
+            <ReactionProvider
+              value={{
+                reactionCounts: youPagination.reactionCounts,
+                userReactions: youPagination.userReactions,
+                commentCounts: youPagination.commentCounts,
+              }}
+            >
+              <YouTabContent
+                profile={profile}
+                sessions={youPagination.sessions}
+                weekStats={weekStats}
+                currentUserId={currentUserId}
+                userAchievements={userAchievements}
+                wishlist={wishlist}
+                styleDNA={styleDNA}
+                loading={youPagination.loading}
+                hasMore={youPagination.hasMore}
+                sentinelRef={youPagination.sentinelRef}
+              />
+            </ReactionProvider>
           </motion.div>
         )}
       </AnimatePresence>

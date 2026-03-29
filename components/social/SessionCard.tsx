@@ -22,8 +22,8 @@ interface SessionCardProps {
     brewery?: {
       id: string;
       name: string;
-      city: string;
-      state: string;
+      city: string | null;
+      state: string | null;
     };
     beer_logs?: BeerLog[];
   };
@@ -55,7 +55,7 @@ export function SessionCard({ session, currentUserId, className, reactionCounts,
       })()
     : null;
 
-  const isAtHome = (session as any).context === "home" || !brewery;
+  const isAtHome = session.context === "home" || !brewery;
 
   // Show 4 beers, expand if more
   const [expanded, setExpanded] = useState(false);
@@ -66,7 +66,7 @@ export function SessionCard({ session, currentUserId, className, reactionCounts,
   const firstPhoto = (beer_logs ?? []).find((l) => l.photo_url)?.photo_url;
 
   // Session note
-  const note = (session as any).note;
+  const note = session.note;
 
   if (!profile) return null;
 
@@ -83,7 +83,7 @@ export function SessionCard({ session, currentUserId, className, reactionCounts,
       <div className="p-4 pb-0">
         <div className="flex items-start gap-3">
           <Link href={`/profile/${profile.username}`}>
-            <UserAvatar profile={profile as any} size="md" showLevel />
+            <UserAvatar profile={{ ...profile, display_name: profile.display_name ?? profile.username }} size="md" showLevel />
           </Link>
 
           <div className="flex-1 min-w-0">
@@ -156,7 +156,7 @@ export function SessionCard({ session, currentUserId, className, reactionCounts,
         <div className="px-4 pt-3 pb-1">
           <div className="space-y-1">
             {visibleLogs.map((log) => {
-              const beer = (log as any).beer;
+              const beer = log.beer;
               return (
                 <div
                   key={log.id}

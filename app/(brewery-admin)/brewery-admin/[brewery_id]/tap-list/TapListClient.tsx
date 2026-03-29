@@ -61,6 +61,23 @@ interface TapListClientProps {
 
 const emptyBeer = { name: "", style: "IPA" as BeerStyle, abv: "", ibu: "", description: "", price: "" };
 
+function validateNumericFields(form: typeof emptyBeer): Record<string, string> {
+  const errors: Record<string, string> = {};
+  if (form.abv !== "") {
+    const v = parseFloat(form.abv as string);
+    if (isNaN(v) || v < 0 || v > 100) errors.abv = "ABV must be 0–100%";
+  }
+  if (form.ibu !== "") {
+    const v = parseInt(form.ibu as string);
+    if (isNaN(v) || v < 0 || v > 200) errors.ibu = "IBU must be 0–200";
+  }
+  if (form.price !== "") {
+    const v = parseFloat(form.price as string);
+    if (isNaN(v) || v < 0 || v > 999) errors.price = "Price must be $0–$999";
+  }
+  return errors;
+}
+
 export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
   const [beers, setBeers] = useState<Beer[]>(initialBeers);
   const [showForm, setShowForm] = useState(false);
@@ -75,6 +92,7 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
   const [filter, setFilter] = useState<"all" | "on_tap" | "off_tap">("all");
   const [saveError, setSaveError] = useState<string | null>(null);
   const [confirmDiscard, setConfirmDiscard] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const initialFormRef = useRef(emptyBeer);
   const supabase = createClient();
 
@@ -111,6 +129,7 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
     setGlassType(null);
     setPourSizes([]);
     setSaveError(null);
+    setFieldErrors({});
     setConfirmDiscard(false);
     setShowForm(true);
   }
@@ -123,6 +142,7 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
     setPourSizes([]);
     setEditingBeer(beer);
     setSaveError(null);
+    setFieldErrors({});
     setConfirmDiscard(false);
     setShowForm(true);
 
@@ -147,6 +167,11 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
 
   async function handleSave() {
     if (!form.name.trim()) return;
+    const errors = validateNumericFields(form);
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      return;
+    }
     setSaving(true);
     setSaveError(null);
 
@@ -418,24 +443,78 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
                 <div className="grid grid-cols-3 gap-3">
                   <div>
                     <label className="text-xs font-mono uppercase tracking-wider block mb-1.5" style={{ color: "var(--text-muted)" }}>ABV %</label>
-                    <input type="number" step="0.1" min="0" max="25" value={form.abv} onChange={e => setForm(f => ({ ...f, abv: e.target.value }))}
+                    <input
+                      type="number"
+                      step="0.1"
+                      min="0"
+                      max="100"
+                      value={form.abv}
+                      onChange={e => {
+                        setForm(f => ({ ...f, abv: e.target.value }));
+                        const errs = validateNumericFields({ ...form, abv: e.target.value });
+                        setFieldErrors(prev => ({ ...prev, abv: errs.abv ?? "" }));
+                      }}
                       placeholder="5.5"
                       className="w-full px-4 py-2.5 rounded-xl border text-sm focus:outline-none"
-                      style={{ background: "var(--surface-2)", borderColor: "var(--border)", color: "var(--text-primary)" }} />
+                      style={{
+                        background: "var(--surface-2)",
+                        borderColor: fieldErrors.abv ? "var(--danger)" : "var(--border)",
+                        color: "var(--text-primary)",
+                      }}
+                    />
+                    {fieldErrors.abv && (
+                      <p className="text-xs mt-1" style={{ color: "var(--danger)" }}>{fieldErrors.abv}</p>
+                    )}
                   </div>
                   <div>
                     <label className="text-xs font-mono uppercase tracking-wider block mb-1.5" style={{ color: "var(--text-muted)" }}>IBU</label>
-                    <input type="number" min="0" max="200" value={form.ibu} onChange={e => setForm(f => ({ ...f, ibu: e.target.value }))}
+                    <input
+                      type="number"
+                      step="1"
+                      min="0"
+                      max="200"
+                      value={form.ibu}
+                      onChange={e => {
+                        setForm(f => ({ ...f, ibu: e.target.value }));
+                        const errs = validateNumericFields({ ...form, ibu: e.target.value });
+                        setFieldErrors(prev => ({ ...prev, ibu: errs.ibu ?? "" }));
+                      }}
                       placeholder="45"
                       className="w-full px-4 py-2.5 rounded-xl border text-sm focus:outline-none"
-                      style={{ background: "var(--surface-2)", borderColor: "var(--border)", color: "var(--text-primary)" }} />
+                      style={{
+                        background: "var(--surface-2)",
+                        borderColor: fieldErrors.ibu ? "var(--danger)" : "var(--border)",
+                        color: "var(--text-primary)",
+                      }}
+                    />
+                    {fieldErrors.ibu && (
+                      <p className="text-xs mt-1" style={{ color: "var(--danger)" }}>{fieldErrors.ibu}</p>
+                    )}
                   </div>
                   <div>
                     <label className="text-xs font-mono uppercase tracking-wider block mb-1.5" style={{ color: "var(--text-muted)" }}>Price $</label>
-                    <input type="number" step="0.5" min="0" max="50" value={form.price} onChange={e => setForm(f => ({ ...f, price: e.target.value }))}
-                      placeholder="7"
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      max="999"
+                      value={form.price}
+                      onChange={e => {
+                        setForm(f => ({ ...f, price: e.target.value }));
+                        const errs = validateNumericFields({ ...form, price: e.target.value });
+                        setFieldErrors(prev => ({ ...prev, price: errs.price ?? "" }));
+                      }}
+                      placeholder="7.00"
                       className="w-full px-4 py-2.5 rounded-xl border text-sm focus:outline-none"
-                      style={{ background: "var(--surface-2)", borderColor: "var(--border)", color: "var(--text-primary)" }} />
+                      style={{
+                        background: "var(--surface-2)",
+                        borderColor: fieldErrors.price ? "var(--danger)" : "var(--border)",
+                        color: "var(--text-primary)",
+                      }}
+                    />
+                    {fieldErrors.price && (
+                      <p className="text-xs mt-1" style={{ color: "var(--danger)" }}>{fieldErrors.price}</p>
+                    )}
                   </div>
                 </div>
 
@@ -621,7 +700,7 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
                   style={{ borderColor: "var(--border)", color: "var(--text-secondary)", background: "transparent" }}>
                   Cancel
                 </button>
-                <button onClick={handleSave} disabled={saving || !form.name.trim()}
+                <button onClick={handleSave} disabled={saving || !form.name.trim() || Object.values(fieldErrors).some(Boolean)}
                   className="flex-1 py-3 rounded-xl text-sm font-semibold transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                   style={{ background: "var(--accent-gold)", color: "var(--bg)" }}>
                   {saving ? <><Loader2 size={16} className="animate-spin" />Saving...</> : <><Save size={16} />{editingBeer ? "Save Changes" : "Add Beer"}</>}

@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/service";
 import Link from "next/link";
 import {
   Users,
@@ -14,7 +15,10 @@ import { formatDateTime } from "@/lib/dates";
 export const metadata = { title: "Overview" };
 
 export default async function SuperadminOverviewPage() {
+  // SSR client for auth check + recent admin actions (RLS-scoped, admin sees own actions)
   const supabase = await createClient();
+  // Service role client for aggregate counts that bypass RLS
+  const serviceSupabase = createServiceClient();
 
   const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
 
@@ -27,17 +31,17 @@ export default async function SuperadminOverviewPage() {
     { count: newUsersThisWeek },
     { data: recentActions },
   ] = await Promise.all([
-    supabase.from("profiles").select("id", { count: "exact", head: true }) as any,
-    supabase.from("breweries").select("id", { count: "exact", head: true }) as any,
-    (supabase as any).from("sessions").select("id", { count: "exact", head: true }).eq("is_active", false) as any,
-    supabase.from("brewery_claims").select("id", { count: "exact", head: true }).eq("status", "pending") as any,
-    supabase.from("brewery_accounts").select("id", { count: "exact", head: true }).eq("verified", true) as any,
-    supabase.from("profiles").select("id", { count: "exact", head: true }).gte("created_at", oneWeekAgo) as any,
+    serviceSupabase.from("profiles").select("id", { count: "exact", head: true }),
+    serviceSupabase.from("breweries").select("id", { count: "exact", head: true }),
+    serviceSupabase.from("sessions").select("id", { count: "exact", head: true }).eq("is_active", false),
+    serviceSupabase.from("brewery_claims").select("id", { count: "exact", head: true }).eq("status", "pending"),
+    serviceSupabase.from("brewery_accounts").select("id", { count: "exact", head: true }).eq("verified", true),
+    serviceSupabase.from("profiles").select("id", { count: "exact", head: true }).gte("created_at", oneWeekAgo),
     supabase
       .from("admin_actions")
       .select("*, admin:profiles(display_name, username)")
       .order("created_at", { ascending: false })
-      .limit(20) as any,
+      .limit(20),
   ]);
 
   const stats = [
@@ -86,7 +90,7 @@ export default async function SuperadminOverviewPage() {
     },
   ];
 
-  const actions = (recentActions as any[]) ?? [];
+  const actions = recentActions ?? [];
 
   return (
     <div className="p-6 lg:p-8 max-w-6xl mx-auto">
@@ -184,7 +188,7 @@ export default async function SuperadminOverviewPage() {
             className="rounded-xl border overflow-hidden"
             style={{ background: "var(--surface)", borderColor: "var(--border)" }}
           >
-            {actions.map((action: any, i: number) => (
+            {actions.map((action, i: number) => (
               <div
                 key={action.id}
                 className="flex items-start gap-4 px-5 py-4"

@@ -144,6 +144,13 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
     .limit(5);
   const upcomingEvents = (upcomingEventsRaw ?? []) as any[];
 
+  // Check if brewery has any admin accounts (for claim CTA)
+  const { count: adminCount } = await supabase
+    .from("brewery_accounts")
+    .select("id", { count: "exact", head: true })
+    .eq("brewery_id", id);
+  const hasAdmin = (adminCount ?? 0) > 0;
+
   const gradient = generateGradientFromString(brewery.name);
 
   return (
@@ -438,6 +445,22 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
                 />
               ))}
             </div>
+          </div>
+        )}
+        {/* Claim This Brewery CTA — only when no admin exists */}
+        {!hasAdmin && (
+          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-6 text-center space-y-3">
+            <p className="text-2xl">🍺</p>
+            <h3 className="font-display text-lg font-bold text-[var(--text-primary)]">Own this brewery?</h3>
+            <p className="text-sm text-[var(--text-secondary)] max-w-sm mx-auto">
+              Claim your listing to manage your tap list, run loyalty programs, and see analytics.
+            </p>
+            <Link
+              href={`/brewery-admin/claim?brewery_id=${id}`}
+              className="inline-flex items-center gap-2 border border-[var(--accent-gold)] text-[var(--accent-gold)] hover:bg-[var(--accent-gold)] hover:text-[var(--bg)] font-semibold text-sm px-5 py-2.5 rounded-xl transition-all"
+            >
+              Is this your brewery? Claim it →
+            </Link>
           </div>
         )}
       </div>
