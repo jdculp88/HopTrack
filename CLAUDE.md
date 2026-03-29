@@ -912,10 +912,11 @@ Full team testing audit (all 13 members) found 85 unique issues. Sprint 30 kille
 - `/terms` page added (Terms of Service placeholder)
 - Dead `checkins` INSERT blocks removed from seeds 003, 006 (~250 lines)
 
-### Migration state (Sprint 31)
-- 034: Fix 3 critical RLS policies — CREATED, APPLY TO REMOTE
-- 035: Reactions UNIQUE constraint, beer_logs.beer_id FK, push_subscriptions UPDATE — CREATED, APPLY TO REMOTE
-- 036: `increment_xp` RPC function — CREATED, APPLY TO REMOTE
+### Migration state (current)
+- 034: Fix 3 critical RLS policies ✅ APPLIED (S31)
+- 035: Reactions UNIQUE constraint (deduplicated first), beer_logs.beer_id FK, push_subscriptions UPDATE ✅ APPLIED (S31)
+- 036: `increment_xp` RPC function ✅ APPLIED (S31)
+- PGRST schema cache reloaded after 035/036 ✅
 
 ### Revenue Targets
 - Tap tier: $49/mo

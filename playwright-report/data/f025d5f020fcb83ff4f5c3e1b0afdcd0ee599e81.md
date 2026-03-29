@@ -1,0 +1,268 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - button "Open Next.js Dev Tools" [ref=e7] [cursor=pointer]:
+    - generic [ref=e10]:
+      - text: Compiling
+      - generic [ref=e11]:
+        - generic [ref=e12]: .
+        - generic [ref=e13]: .
+        - generic [ref=e14]: .
+  - alert [ref=e15]: Explore | HopTrack
+  - generic [ref=e16]:
+    - complementary [ref=e17]:
+      - link "HopTrack" [ref=e19] [cursor=pointer]:
+        - /url: /home
+        - img "HopTrack" [ref=e20]:
+          - generic [ref=e23]: HopTrack
+      - button "Start Session" [ref=e26]:
+        - img [ref=e27]
+        - text: Start Session
+      - navigation [ref=e29]:
+        - link "Feed" [ref=e30] [cursor=pointer]:
+          - /url: /home
+          - generic [ref=e31]:
+            - img [ref=e32]
+            - generic [ref=e35]: Feed
+        - link "Explore" [active] [ref=e36] [cursor=pointer]:
+          - /url: /explore
+          - generic [ref=e37]:
+            - img [ref=e38]
+            - generic [ref=e41]: Explore
+        - link "Friends" [ref=e43] [cursor=pointer]:
+          - /url: /friends
+          - generic [ref=e44]:
+            - img [ref=e45]
+            - generic [ref=e50]: Friends
+        - link "Achievements" [ref=e51] [cursor=pointer]:
+          - /url: /achievements
+          - generic [ref=e52]:
+            - img [ref=e53]
+            - generic [ref=e59]: Achievements
+      - generic [ref=e60]:
+        - link "Notifications" [ref=e61] [cursor=pointer]:
+          - /url: /notifications
+          - generic [ref=e62]:
+            - img [ref=e64]
+            - generic [ref=e67]: Notifications
+        - link "Profile" [ref=e68] [cursor=pointer]:
+          - /url: /profile/testflight
+          - generic [ref=e69]:
+            - img [ref=e71]
+            - generic [ref=e74]: Profile
+        - link "Settings" [ref=e75] [cursor=pointer]:
+          - /url: /settings
+          - generic [ref=e76]:
+            - img [ref=e78]
+            - generic [ref=e81]: Settings
+        - button "Light Mode" [ref=e83]:
+          - generic [ref=e84]:
+            - img [ref=e85]
+            - generic [ref=e91]: Light Mode
+        - button "Log out" [ref=e94]:
+          - img [ref=e95]
+          - generic [ref=e98]: Log out
+    - main [ref=e99]:
+      - generic [ref=e100]:
+        - generic [ref=e101]:
+          - heading "Explore" [level=1] [ref=e102]
+          - generic [ref=e103]:
+            - button "Filters" [ref=e104]:
+              - img [ref=e105]
+              - text: Filters
+            - generic [ref=e106]:
+              - button "List" [ref=e107]:
+                - img [ref=e108]
+                - text: List
+              - button "Map" [ref=e109]:
+                - img [ref=e110]
+                - text: Map
+        - generic [ref=e112]:
+          - img
+          - textbox "Search breweries by name or city..." [ref=e113]
+        - generic [ref=e114]:
+          - button "All (17)" [ref=e115]
+          - button "Visited (4)" [ref=e116]
+          - button "New to me (13)" [ref=e117]
+        - generic [ref=e118]:
+          - generic [ref=e119]:
+            - heading "All Breweries" [level=2] [ref=e120]
+            - generic [ref=e121]: (17)
+          - generic [ref=e122]:
+            - link "Pint & Pixel Brewing Co. ✓ Visited Pint & Pixel Brewing Co. microbrewery Austin, Texas" [ref=e124] [cursor=pointer]:
+              - /url: /brewery/a1b2c3d4-e5f6-7890-abcd-ef1234567890
+              - generic [ref=e125]:
+                - generic [ref=e126]:
+                  - img "Pint & Pixel Brewing Co." [ref=e127]
+                  - generic [ref=e128]: ✓ Visited
+                - generic [ref=e129]:
+                  - generic [ref=e130]:
+                    - heading "Pint & Pixel Brewing Co." [level=3] [ref=e131]
+                    - generic [ref=e132]: microbrewery
+                  - generic [ref=e133]:
+                    - img [ref=e134]
+                    - generic [ref=e137]: Austin, Texas
+            - link "Resident Culture Brewing Company LLC Microbrewery Charlotte, North Carolina" [ref=e139] [cursor=pointer]:
+              - /url: /brewery/5332682e-414d-47d5-ade4-dfdb91e85817
+              - generic [ref=e142]:
+                - generic [ref=e143]:
+                  - heading "Resident Culture Brewing Company LLC" [level=3] [ref=e144]
+                  - generic [ref=e145]: Microbrewery
+                - generic [ref=e146]:
+                  - img [ref=e147]
+                  - generic [ref=e150]: Charlotte, North Carolina
+            - link "Legion Brewing Company Brewpub Charlotte, North Carolina" [ref=e152] [cursor=pointer]:
+              - /url: /brewery/0d48cd36-5e94-4ae8-be6e-250a895066e8
+              - generic [ref=e155]:
+                - generic [ref=e156]:
+                  - heading "Legion Brewing Company" [level=3] [ref=e157]
+                  - generic [ref=e158]: Brewpub
+                - generic [ref=e159]:
+                  - img [ref=e160]
+                  - generic [ref=e163]: Charlotte, North Carolina
+            - link "Three Spirits Brewery Microbrewery Charlotte, North Carolina" [ref=e165] [cursor=pointer]:
+              - /url: /brewery/3d0d31bb-b7c7-4c4c-ba88-af00e1dd7d04
+              - generic [ref=e168]:
+                - generic [ref=e169]:
+                  - heading "Three Spirits Brewery" [level=3] [ref=e170]
+                  - generic [ref=e171]: Microbrewery
+                - generic [ref=e172]:
+                  - img [ref=e173]
+                  - generic [ref=e176]: Charlotte, North Carolina
+            - link "Sugar Creek Brewing Co. Microbrewery Charlotte, North Carolina" [ref=e178] [cursor=pointer]:
+              - /url: /brewery/29c91a99-7cfb-4c5a-82e2-89b531bafe01
+              - generic [ref=e181]:
+                - generic [ref=e182]:
+                  - heading "Sugar Creek Brewing Co." [level=3] [ref=e183]
+                  - generic [ref=e184]: Microbrewery
+                - generic [ref=e185]:
+                  - img [ref=e186]
+                  - generic [ref=e189]: Charlotte, North Carolina
+            - link "The Olde Mecklenburg Brewery Regional Charlotte, North Carolina" [ref=e191] [cursor=pointer]:
+              - /url: /brewery/edd77e5c-a397-483d-858c-c6a79e56e598
+              - generic [ref=e194]:
+                - generic [ref=e195]:
+                  - heading "The Olde Mecklenburg Brewery" [level=3] [ref=e196]
+                  - generic [ref=e197]: Regional
+                - generic [ref=e198]:
+                  - img [ref=e199]
+                  - generic [ref=e202]: Charlotte, North Carolina
+            - link "Full Pint Brewing Company Microbrewery North Versailles, Pennsylvania" [ref=e204] [cursor=pointer]:
+              - /url: /brewery/520085f7-9985-47a0-84bf-9aeadaddd94a
+              - generic [ref=e207]:
+                - generic [ref=e208]:
+                  - heading "Full Pint Brewing Company" [level=3] [ref=e209]
+                  - generic [ref=e210]: Microbrewery
+                - generic [ref=e211]:
+                  - img [ref=e212]
+                  - generic [ref=e215]: North Versailles, Pennsylvania
+            - link "Lone Pint Brewery Microbrewery Magnolia, Texas" [ref=e217] [cursor=pointer]:
+              - /url: /brewery/f77717ec-0e35-43d3-bf65-c0c19b88e2da
+              - generic [ref=e220]:
+                - generic [ref=e221]:
+                  - heading "Lone Pint Brewery" [level=3] [ref=e222]
+                  - generic [ref=e223]: Microbrewery
+                - generic [ref=e224]:
+                  - img [ref=e225]
+                  - generic [ref=e228]: Magnolia, Texas
+            - link "Pint Brewpub Kerrville, Texas" [ref=e230] [cursor=pointer]:
+              - /url: /brewery/b1c5c056-8166-4112-a777-37779e075399
+              - generic [ref=e233]:
+                - generic [ref=e234]:
+                  - heading "Pint" [level=3] [ref=e235]
+                  - generic [ref=e236]: Brewpub
+                - generic [ref=e237]:
+                  - img [ref=e238]
+                  - generic [ref=e241]: Kerrville, Texas
+            - link "Pint 9 Brewing Co Microbrewery La Vista, Nebraska" [ref=e243] [cursor=pointer]:
+              - /url: /brewery/a0adbefa-f535-46b1-a97f-965c59a20e4d
+              - generic [ref=e246]:
+                - generic [ref=e247]:
+                  - heading "Pint 9 Brewing Co" [level=3] [ref=e248]
+                  - generic [ref=e249]: Microbrewery
+                - generic [ref=e250]:
+                  - img [ref=e251]
+                  - generic [ref=e254]: La Vista, Nebraska
+            - link "Pinthouse Pizza North Brewpub Austin, Texas" [ref=e256] [cursor=pointer]:
+              - /url: /brewery/3ff1cde7-40fe-426f-be96-774f77f80a35
+              - generic [ref=e259]:
+                - generic [ref=e260]:
+                  - heading "Pinthouse Pizza North" [level=3] [ref=e261]
+                  - generic [ref=e262]: Brewpub
+                - generic [ref=e263]:
+                  - img [ref=e264]
+                  - generic [ref=e267]: Austin, Texas
+            - link "✓ Visited Barrel & Stone Brewing microbrewery Austin, Texas" [ref=e269] [cursor=pointer]:
+              - /url: /brewery/b2c3d4e5-f6a7-8901-bcde-f12345678901
+              - generic [ref=e270]:
+                - generic [ref=e272]: ✓ Visited
+                - generic [ref=e273]:
+                  - generic [ref=e274]:
+                    - heading "Barrel & Stone Brewing" [level=3] [ref=e275]
+                    - generic [ref=e276]: microbrewery
+                  - generic [ref=e277]:
+                    - img [ref=e278]
+                    - generic [ref=e281]: Austin, Texas
+            - link "✓ Visited Hopfield Brewing Co. Brewpub Austin, Texas" [ref=e283] [cursor=pointer]:
+              - /url: /brewery/c3d4e5f6-a7b8-9012-cdef-012345678902
+              - generic [ref=e284]:
+                - generic [ref=e286]: ✓ Visited
+                - generic [ref=e287]:
+                  - generic [ref=e288]:
+                    - heading "Hopfield Brewing Co." [level=3] [ref=e289]
+                    - generic [ref=e290]: Brewpub
+                  - generic [ref=e291]:
+                    - img [ref=e292]
+                    - generic [ref=e295]: Austin, Texas
+            - link "✓ Visited Lost Creek Brewing Regional Austin, Texas" [ref=e297] [cursor=pointer]:
+              - /url: /brewery/d4e5f6a7-b8c9-0123-defa-123456789003
+              - generic [ref=e298]:
+                - generic [ref=e300]: ✓ Visited
+                - generic [ref=e301]:
+                  - generic [ref=e302]:
+                    - heading "Lost Creek Brewing" [level=3] [ref=e303]
+                    - generic [ref=e304]: Regional
+                  - generic [ref=e305]:
+                    - img [ref=e306]
+                    - generic [ref=e309]: Austin, Texas
+            - link "Event Mountain Ridge Brewing Brewpub Asheville, North Carolina" [ref=e311] [cursor=pointer]:
+              - /url: /brewery/dd000001-0000-0000-0000-000000000001
+              - generic [ref=e312]:
+                - generic [ref=e314]:
+                  - img [ref=e315]
+                  - text: Event
+                - generic [ref=e317]:
+                  - generic [ref=e318]:
+                    - heading "Mountain Ridge Brewing" [level=3] [ref=e319]
+                    - generic [ref=e320]: Brewpub
+                  - generic [ref=e321]:
+                    - img [ref=e322]
+                    - generic [ref=e325]: Asheville, North Carolina
+            - link "Event River Bend Ales microbrewery Asheville, North Carolina" [ref=e327] [cursor=pointer]:
+              - /url: /brewery/dd000001-0000-0000-0000-000000000002
+              - generic [ref=e328]:
+                - generic [ref=e330]:
+                  - img [ref=e331]
+                  - text: Event
+                - generic [ref=e333]:
+                  - generic [ref=e334]:
+                    - heading "River Bend Ales" [level=3] [ref=e335]
+                    - generic [ref=e336]: microbrewery
+                  - generic [ref=e337]:
+                    - img [ref=e338]
+                    - generic [ref=e341]: Asheville, North Carolina
+            - link "Event Smoky Barrel Craft Co. Brewpub Black Mountain, North Carolina" [ref=e343] [cursor=pointer]:
+              - /url: /brewery/dd000001-0000-0000-0000-000000000003
+              - generic [ref=e344]:
+                - generic [ref=e346]:
+                  - img [ref=e347]
+                  - text: Event
+                - generic [ref=e349]:
+                  - generic [ref=e350]:
+                    - heading "Smoky Barrel Craft Co." [level=3] [ref=e351]
+                    - generic [ref=e352]: Brewpub
+                  - generic [ref=e353]:
+                    - img [ref=e354]
+                    - generic [ref=e357]: Black Mountain, North Carolina
+```
