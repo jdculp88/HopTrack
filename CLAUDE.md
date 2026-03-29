@@ -234,8 +234,8 @@ scripts/supabase-setup.mjs    — One-time setup script
 
 ## 🗺️ Where We Are
 
-**Current Sprint:** Sprint 31 — Launch Polish (in progress, 2026-03-29)
-**Last completed:** Sprint 30 — Foundation Fix ✅ (2026-03-29)
+**Current Sprint:** Sprint 32 (not started)
+**Last completed:** Sprint 31 — Launch Polish ✅ (2026-03-29)
 
 ### Key design decisions (still active from Sprint 11):
 - Marketing pages use hardcoded `C` color constants (not CSS vars)
@@ -858,10 +858,10 @@ Full team testing audit (all 13 members) found 85 unique issues. Sprint 30 kille
 - Feed infinite scroll / pagination
 - E2E tests
 
-### Sprint 31 — Launch Polish (2026-03-29, IN PROGRESS)
+### Sprint 31 — Launch Polish ✅ (2026-03-29)
 **Theme:** Make it maintainable, secure, and sellable
 **Plan:** `docs/sprint-31-plan.md`
-**Retro:** Sprint 30 retro at `docs/retros/sprint-30-retro.md`
+**Retro:** `docs/retros/sprint-31-retro.md`
 
 **Session 1 (2026-03-29):**
 - ✅ S31-005: HomeFeed.tsx split — 1318 lines → 6 files (HomeFeed orchestrator + FriendsTabContent, DiscoverTabContent, YouTabContent, OnboardingCard, FeedItemCard)
@@ -875,23 +875,41 @@ Full team testing audit (all 13 members) found 85 unique issues. Sprint 30 kille
 - ✅ S31-022/023: Session-end API rewrite — batched achievement checks + batched push notifications
 - ✅ S31-036: Dead checkins code removed from seed files 003, 006
 
-**Session 2 (2026-03-29, in progress):**
-- S31-006: Refactor `page.tsx` data fetching → `lib/queries/feed.ts`
-- S31-024: Feed infinite scroll / pagination with IntersectionObserver
-- S31-034/035: Playwright E2E test setup (Casey's 12th carry)
-- S31-029-033: UX polish — aria-labels, light theme fixes, copy sweep
+**Session 2 (2026-03-29):**
+- ✅ S31-006: Refactor `page.tsx` data fetching → `lib/queries/feed.ts` (374 → 95 lines)
+- ✅ S31-024: Feed infinite scroll / pagination with IntersectionObserver (`useFeedPagination` hook, `/api/feed` route)
+- ✅ S31-034/035: Playwright E2E test setup — smoke, core-flows, brewery-admin specs + auth helpers
+- ✅ S31-029-032: UX polish verified — UserAvatar badge, session share page, ReactionBar aria-labels, DrinkingNow all clean
+
+**Session 3 (2026-03-29):**
+- ✅ S31-003: Reduced `as any` casts — added missing fields to Profile/Session/Beer types
+- ✅ S31-004: Superadmin stats use service role client — `lib/supabase/service.ts` created
+- ✅ S31-007: ReactionContext — 4-level prop drilling replaced with `useReactions()` hook
+- ✅ S31-008: Feed array keys changed from index to stable IDs
+- ✅ S31-011: Username uniqueness check wired in Settings (debounced, inline feedback)
+- ✅ S31-012: Signup step transitions — AnimatePresence slide between steps
+- ✅ S31-013: ToS + Privacy Policy links on signup, `/terms` page added
+- ✅ S31-018: "Claim this brewery" CTA on unclaimed brewery detail pages
+- ✅ S31-019: `/for-breweries` copy — replaced remaining check-in references
+- ✅ S31-020: Tap list ABV/IBU/price numeric validation (min/max/step + inline errors)
+- ✅ S31-033: Mobile brewery admin tab strip right-edge fade indicator
 
 **Key architectural changes from Sprint 31:**
 - `HomeFeed.tsx` split into 6 files: `HomeFeed.tsx` (orchestrator), `FriendsTabContent.tsx`, `DiscoverTabContent.tsx`, `YouTabContent.tsx`, `OnboardingCard.tsx`, `FeedItemCard.tsx`
-- `FeedItem` union type exported from `FeedItemCard.tsx`
-- `NewBrewery`, `CommunityContent`, `UserAchievement`, `WishlistItem`, `StyleDNAEntry` types exported from `HomeFeed.tsx`
+- `ReactionContext.tsx` — `ReactionProvider` wraps each tab's content; `useReactions()` replaces 4-level prop drilling
+- `lib/queries/feed.ts` — 8 fault-tolerant query functions; `page.tsx` is 95 lines
+- `hooks/useFeedPagination.ts` — IntersectionObserver-based infinite scroll; `/api/feed` pagination endpoint
+- `lib/supabase/service.ts` — service role client (bypasses RLS); used in superadmin
+- `types/database.ts` — `Profile` extended with `notification_preferences`, `share_live`, `is_superadmin`; `Session` extended with typed `brewery`, `profile`, `beer_logs` join shapes
 - Password reset: `/forgot-password` → Supabase email → `/auth/reset-password` (code exchange) → `/reset-password` (new password form)
 - `/api/users/check-username` — public GET endpoint for username availability
 - `/brewery-admin/[id]/billing` — tier comparison page with trial countdown
 - `BreweryOnboardingCard` at `components/brewery-admin/BreweryOnboardingCard.tsx`
-- `BreweryAdminNav` — added Billing nav item (CreditCard icon), trial badge, upgrade CTA
+- `BreweryAdminNav` — Billing nav item, trial badge, upgrade CTA, mobile tab fade indicator
 - Migration 036: `increment_xp` RPC function — atomic XP + streak + brewery count update
 - Session-end API: 3 batch queries replace N+1 achievement checks, 1 batch query replaces N+1 push notifications
+- Playwright E2E: `e2e/smoke.spec.ts`, `e2e/core-flows.spec.ts`, `e2e/brewery-admin.spec.ts`, `e2e/helpers/auth.ts`
+- `/terms` page added (Terms of Service placeholder)
 - Dead `checkins` INSERT blocks removed from seeds 003, 006 (~250 lines)
 
 ### Migration state (Sprint 31)
