@@ -57,7 +57,7 @@ export default async function HomePage() {
       .select(`
         *,
         profile:profiles!sessions_user_id_fkey(id, username, display_name, avatar_url, current_streak),
-        brewery:breweries(id, name, city, state),
+        brewery:breweries!brewery_id(id, name, city, state),
         beer_logs(id, beer_id, rating, flavor_tags, serving_style, comment, photo_url, logged_at, quantity, beer:beers(id, name, style, glass_type))
       `)
       .in("user_id", feedUserIds)
@@ -73,7 +73,7 @@ export default async function HomePage() {
           .select(`
             *,
             profile:profiles!sessions_user_id_fkey(id, username, display_name, avatar_url, current_streak),
-            brewery:breweries(id, name, city, state),
+            brewery:breweries!brewery_id(id, name, city, state),
             beer_logs(id, beer_id, rating, flavor_tags, serving_style, comment, photo_url, logged_at, quantity, beer:beers(id, name, style, glass_type))
           `)
           .in("user_id", friendIds)
@@ -209,6 +209,41 @@ export default async function HomePage() {
   const activeFriendSessions = (activeFriendSessionsRes.data as Session[]) ?? [];
   const weekSessionList = (weekSessionsRes.data as any[]) ?? [];
   const weekLogList = (weekLogsRes.data as any[]) ?? [];
+
+  // Batch-fetch reaction counts + user's own reactions for all feed sessions
+  const allSessionIds = [
+    ...sessions.map((s: any) => s.id),
+    ...activeFriendSessions.map((s: any) => s.id),
+  ].filter(Boolean);
+
+  let reactionCounts: Record<string, Record<string, number>> = {};
+  let userReactions: Record<string, string[]> = {};
+
+  if (allSessionIds.length > 0) {
+    const [countsRes, userReactionsRes] = await Promise.all([
+      (supabase as any)
+        .from("reactions")
+        .select("session_id, type")
+        .in("session_id", allSessionIds),
+      (supabase as any)
+        .from("reactions")
+        .select("session_id, type")
+        .eq("user_id", user.id)
+        .in("session_id", allSessionIds),
+    ]);
+
+    // Aggregate counts: { sessionId: { beer: 7, flame: 2, ... } }
+    for (const r of ((countsRes.data ?? []) as any[])) {
+      if (!reactionCounts[r.session_id]) reactionCounts[r.session_id] = {};
+      reactionCounts[r.session_id][r.type] = (reactionCounts[r.session_id][r.type] ?? 0) + 1;
+    }
+
+    // User's own reactions: { sessionId: ["beer", "flame"] }
+    for (const r of ((userReactionsRes.data ?? []) as any[])) {
+      if (!userReactions[r.session_id]) userReactions[r.session_id] = [];
+      userReactions[r.session_id].push(r.type);
+    }
+  }
   const weekBeerCount = weekLogList.reduce((sum: number, l: any) => sum + (l.quantity ?? 1), 0);
 
   // Compute style distribution for Taste DNA
@@ -320,6 +355,8 @@ export default async function HomePage() {
       friendCount={friendIds.length}
       newFavorites={newFavorites}
       friendsJoined={friendsJoined}
+      reactionCounts={reactionCounts}
+      userReactions={userReactions}
     />
   );
 }
