@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -22,10 +22,26 @@ import {
   TrendingCard,
   BreweryReviewCard,
   EventCard,
+  SeasonalBeersScroll,
+  CuratedCollectionsList,
   type TrendingReview,
   type BreweryReviewItem,
   type EventItem,
+  type SeasonalBeer,
+  type CuratedCollection,
 } from "@/components/social/DiscoveryCard";
+import {
+  RecommendationCard,
+  type RecommendationItem,
+} from "@/components/social/RecommendationCard";
+import {
+  NewFavoriteCard,
+  type NewFavoriteItem,
+} from "@/components/social/NewFavoriteCard";
+import {
+  FriendJoinedCard,
+  type FriendJoinedItem,
+} from "@/components/social/FriendJoinedCard";
 import {
   AchievementFeedCard,
   type FriendAchievement,
@@ -60,6 +76,8 @@ interface CommunityContent {
   breweryReviews: BreweryReviewItem[];
   upcomingEvents: EventItem[];
   newBreweries: NewBrewery[];
+  seasonalBeers?: SeasonalBeer[];
+  curatedCollections?: CuratedCollection[];
 }
 
 interface UserAchievement {
@@ -107,13 +125,17 @@ interface HomeFeedProps {
   wishlist?: WishlistItem[];
   styleDNA?: StyleDNAEntry[];
   friendCount: number;
+  newFavorites?: NewFavoriteItem[];
+  friendsJoined?: FriendJoinedItem[];
 }
 
 type FeedItem =
   | { type: "session"; data: Session; sortDate: string; isLive?: boolean }
   | { type: "rating"; data: FriendRating; sortDate: string }
   | { type: "achievement"; data: FriendAchievement; sortDate: string }
-  | { type: "streak"; data: StreakData; sortDate: string };
+  | { type: "streak"; data: StreakData; sortDate: string }
+  | { type: "new_favorite"; data: NewFavoriteItem; sortDate: string }
+  | { type: "friend_joined"; data: FriendJoinedItem; sortDate: string };
 
 // ─── HomeFeed ───────────────────────────────────────────────────────────────
 
@@ -130,9 +152,31 @@ export function HomeFeed({
   wishlist,
   styleDNA,
   friendCount,
+  newFavorites,
+  friendsJoined,
 }: HomeFeedProps) {
   const [activeTab, setActiveTab] = useState<FeedTab>("friends");
   const [showOnboarding, setShowOnboarding] = useState(false);
+
+  // Scroll position memory per tab
+  const scrollPositions = useRef<Record<FeedTab, number>>({
+    friends: 0,
+    discover: 0,
+    you: 0,
+  });
+
+  const handleTabChange = useCallback(
+    (tab: FeedTab) => {
+      // Save current scroll position
+      scrollPositions.current[activeTab] = window.scrollY;
+      setActiveTab(tab);
+      // Restore scroll position for the target tab
+      requestAnimationFrame(() => {
+        window.scrollTo(0, scrollPositions.current[tab] || 0);
+      });
+    },
+    [activeTab]
+  );
 
   const { getActiveSession } = useSession();
 
@@ -200,6 +244,20 @@ export function HomeFeed({
       });
     }
 
+    // New favorites (friend 5-star reviews)
+    if (newFavorites && newFavorites.length > 0) {
+      newFavorites.forEach((f) => {
+        items.push({ type: "new_favorite", data: f, sortDate: f.createdAt });
+      });
+    }
+
+    // Friends who recently joined
+    if (friendsJoined && friendsJoined.length > 0) {
+      friendsJoined.forEach((f) => {
+        items.push({ type: "friend_joined", data: f, sortDate: f.joinedAt });
+      });
+    }
+
     // Streak milestones (derived from session profiles)
     const seenStreakUsers = new Set<string>();
     [...activeFriendSessions, ...sessions].forEach((s) => {
@@ -241,6 +299,8 @@ export function HomeFeed({
     activeFriendSessions,
     friendRatings,
     friendAchievements,
+    newFavorites,
+    friendsJoined,
     currentUserId,
   ]);
 
@@ -256,10 +316,12 @@ export function HomeFeed({
     (communityContent.featuredBeers.length > 0 ||
       communityContent.topReviews.length > 0 ||
       communityContent.breweryReviews.length > 0 ||
-      communityContent.upcomingEvents.length > 0);
+      communityContent.upcomingEvents.length > 0 ||
+      (communityContent.seasonalBeers?.length ?? 0) > 0 ||
+      (communityContent.curatedCollections?.length ?? 0) > 0);
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-6 space-y-5">
+    <div className="max-w-2xl mx-auto px-4 py-6 space-y-5" suppressHydrationWarning>
       {/* ── Onboarding Card ────────────────────────────────────────── */}
       {showOnboarding && (
         <OnboardingCard onDismiss={() => {
@@ -269,7 +331,7 @@ export function HomeFeed({
       )}
 
       {/* ── Feed Tab Bar ───────────────────────────────────────────── */}
-      <FeedTabBar activeTab={activeTab} onChange={setActiveTab} />
+      <FeedTabBar activeTab={activeTab} onChange={handleTabChange} />
 
       {/* ── Tab Content ────────────────────────────────────────────── */}
       <AnimatePresence mode="wait">
@@ -385,34 +447,58 @@ function FriendsTabContent({
       {/* Live Now strip */}
       <DrinkingNow />
 
+      {/* BOTW compact banner — only show when there's feed content */}
+      {firstBotw && feedItems.length > 0 && (
+        <div
+          className="rounded-xl px-4 py-3 flex items-center gap-3"
+          style={{
+            background:
+              "linear-gradient(135deg, color-mix(in srgb, var(--accent-gold) 10%, transparent), color-mix(in srgb, var(--accent-gold) 4%, transparent))",
+            border:
+              "1px solid color-mix(in srgb, var(--accent-gold) 15%, transparent)",
+          }}
+        >
+          <div
+            className="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0"
+            style={{
+              background:
+                "color-mix(in srgb, var(--accent-gold) 12%, transparent)",
+            }}
+          >
+            🍺
+          </div>
+          <div className="flex-1 min-w-0">
+            <p
+              className="text-[9.5px] font-mono uppercase tracking-widest mb-0.5"
+              style={{ color: "var(--accent-gold)" }}
+            >
+              Beer of the Week
+            </p>
+            <p
+              className="font-display text-sm font-semibold truncate"
+              style={{ color: "var(--text-primary)" }}
+            >
+              {firstBotw.name}
+            </p>
+            <p className="text-[11px] truncate" style={{ color: "var(--text-muted)" }}>
+              {firstBotw.brewery?.name} · {firstBotw.abv ? `${firstBotw.abv}%` : ""}
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Feed */}
       {feedItems.length > 0 ? (
         <div className="space-y-4">
-          {feedItems.map((item, i) => {
-            const cards: React.ReactNode[] = [];
-
-            // Render the feed item
-            cards.push(
-              <div key={`item-${i}`}>
-                <FeedItemCard
-                  item={item}
-                  index={i}
-                  currentUserId={currentUserId}
-                />
-              </div>
-            );
-
-            // Insert BOTW after 3rd item
-            if (i === 2 && firstBotw) {
-              cards.push(
-                <div key="botw-inline">
-                  <BeerOfTheWeekCard beer={firstBotw} index={0} />
-                </div>
-              );
-            }
-
-            return cards;
-          })}
+          {feedItems.map((item, i) => (
+            <div key={`item-${i}`}>
+              <FeedItemCard
+                item={item}
+                index={i}
+                currentUserId={currentUserId}
+              />
+            </div>
+          ))}
         </div>
       ) : (
         <FriendsEmptyState />
@@ -466,6 +552,14 @@ function FeedItemCard({
 
   if (item.type === "streak") {
     return <StreakFeedCard streak={item.data} index={index} />;
+  }
+
+  if (item.type === "new_favorite") {
+    return <NewFavoriteCard favorite={item.data} index={index} />;
+  }
+
+  if (item.type === "friend_joined") {
+    return <FriendJoinedCard friend={item.data} index={index} />;
   }
 
   return null;
@@ -677,6 +771,16 @@ function DiscoverTabContent({
             </Link>
           </div>
         </div>
+      )}
+
+      {/* Seasonal & Limited */}
+      {communityContent.seasonalBeers && communityContent.seasonalBeers.length > 0 && (
+        <SeasonalBeersScroll beers={communityContent.seasonalBeers} />
+      )}
+
+      {/* Curated Collections */}
+      {communityContent.curatedCollections && communityContent.curatedCollections.length > 0 && (
+        <CuratedCollectionsList collections={communityContent.curatedCollections} />
       )}
     </div>
   );

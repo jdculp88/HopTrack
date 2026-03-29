@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { TrendingUp, Calendar, Star } from 'lucide-react'
+import { TrendingUp, Calendar, Star, ChevronRight } from 'lucide-react'
 import { StarRating } from '@/components/ui/StarRating'
 import { UserAvatar } from '@/components/ui/UserAvatar'
 
@@ -52,58 +52,63 @@ function formatTime(time: string | null): string {
   return `${hr}:${m.toString().padStart(2, '0')} ${ampm}`
 }
 
-// ─── Trending Beer Review ────────────────────────────────────────────────────
+// ─── Trending Beer Reviews — Horizontal Scroll ──────────────────────────────
 export function TrendingCard({ reviews, index = 0 }: { reviews: TrendingReview[]; index?: number }) {
   if (reviews.length === 0) return null
-  const top3 = reviews.slice(0, 3)
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.04, duration: 0.3 }}
-      className="rounded-2xl p-4"
-      style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
     >
       <div className="flex items-center gap-2 mb-3">
         <TrendingUp size={14} style={{ color: 'var(--accent-gold)' }} />
-        <span className="text-xs font-mono uppercase tracking-widest" style={{ color: 'var(--accent-gold)' }}>
-          Trending This Week
+        <span className="text-[10px] font-mono uppercase tracking-widest" style={{ color: 'var(--accent-gold)' }}>
+          Trending Near You
         </span>
       </div>
-      <div className="space-y-2.5">
-        {top3.map((review) => (
-          <div key={review.id} className="flex items-start gap-3">
-            {review.profile && (
-              <UserAvatar
-                profile={{
-                  id: review.profile.id,
-                  username: review.profile.username,
-                  display_name: review.profile.display_name,
-                  avatar_url: review.profile.avatar_url,
-                } as any}
-                size="sm"
-              />
+      <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide">
+        {reviews.map((review, i) => (
+          <motion.div
+            key={review.id}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 + i * 0.05, duration: 0.25 }}
+            className="rounded-xl p-3.5 flex-shrink-0"
+            style={{
+              background: 'var(--surface)',
+              border: '1px solid var(--border)',
+              minWidth: 150,
+              maxWidth: 170,
+            }}
+          >
+            <p className="font-display text-sm font-semibold leading-tight truncate" style={{ color: 'var(--text-primary)' }}>
+              {review.beer?.name || 'Unknown'}
+            </p>
+            <p className="text-[11px] mt-1 truncate" style={{ color: 'var(--text-muted)' }}>
+              {review.profile?.display_name?.split(' ')[0] || 'Someone'}
+            </p>
+            {review.beer?.style && (
+              <span
+                className="inline-block mt-2 text-[10px] font-mono px-2 py-0.5 rounded-full"
+                style={{
+                  background: 'color-mix(in srgb, var(--accent-gold) 10%, transparent)',
+                  color: 'var(--accent-gold)',
+                }}
+              >
+                {review.beer.style}
+              </span>
             )}
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-1.5">
-                <span className="text-sm font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
-                  {review.beer?.name || 'Unknown'}
-                </span>
-                {review.beer?.style && (
-                  <span className="text-[10px] px-1.5 py-0.5 rounded-full flex-shrink-0" style={{ background: 'var(--surface-2)', color: 'var(--text-muted)' }}>
-                    {review.beer.style}
-                  </span>
-                )}
-              </div>
-              {review.comment && (
-                <p className="text-xs mt-0.5 line-clamp-1" style={{ color: 'var(--text-muted)' }}>
-                  &ldquo;{review.comment}&rdquo;
-                </p>
-              )}
+            <div className="mt-2">
+              <StarRating value={review.rating} readonly size="sm" />
             </div>
-            <StarRating value={review.rating} readonly size="sm" />
-          </div>
+            {review.comment && (
+              <p className="text-[10px] mt-1.5 line-clamp-2" style={{ color: 'var(--text-muted)' }}>
+                &ldquo;{review.comment}&rdquo;
+              </p>
+            )}
+          </motion.div>
         ))}
       </div>
     </motion.div>
@@ -185,6 +190,134 @@ export function EventCard({ event, index = 0 }: { event: EventItem; index?: numb
           </div>
         </div>
       </Link>
+    </motion.div>
+  )
+}
+
+// ─── Seasonal & Limited Beers — Horizontal Scroll ────────────────────────────
+
+export interface SeasonalBeer {
+  id: string
+  name: string
+  brewery: string
+  style: string
+  badge: 'Limited' | 'Seasonal'
+}
+
+export function SeasonalBeersScroll({ beers }: { beers: SeasonalBeer[] }) {
+  if (beers.length === 0) return null
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+    >
+      <p className="text-[10px] font-mono uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)' }}>
+        Seasonal & Limited
+      </p>
+      <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide">
+        {beers.map((beer, i) => (
+          <motion.div
+            key={beer.id}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.05, duration: 0.25 }}
+            className="rounded-xl p-3.5 flex-shrink-0 relative"
+            style={{
+              background: 'var(--surface)',
+              border: '1px solid var(--border)',
+              minWidth: 140,
+              maxWidth: 160,
+            }}
+          >
+            <span
+              className="absolute top-2 right-2 text-[9px] font-mono font-bold px-2 py-0.5 rounded-md"
+              style={{
+                color: beer.badge === 'Limited' ? 'var(--danger, #c0583a)' : 'var(--accent-gold)',
+                background: beer.badge === 'Limited'
+                  ? 'color-mix(in srgb, var(--danger, #c0583a) 10%, transparent)'
+                  : 'color-mix(in srgb, var(--accent-gold) 10%, transparent)',
+                letterSpacing: '0.5px',
+              }}
+            >
+              {beer.badge}
+            </span>
+            <p
+              className="font-display text-sm font-semibold leading-tight pr-12"
+              style={{ color: 'var(--text-primary)' }}
+            >
+              {beer.name}
+            </p>
+            <p className="text-[11px] mt-1 truncate" style={{ color: 'var(--text-muted)' }}>
+              {beer.brewery}
+            </p>
+            <span
+              className="inline-block mt-2 text-[10px] font-mono px-2 py-0.5 rounded-full"
+              style={{
+                background: 'color-mix(in srgb, var(--accent-gold) 10%, transparent)',
+                color: 'var(--accent-gold)',
+              }}
+            >
+              {beer.style}
+            </span>
+          </motion.div>
+        ))}
+      </div>
+    </motion.div>
+  )
+}
+
+// ─── Curated Collections ─────────────────────────────────────────────────────
+
+export interface CuratedCollection {
+  id: string
+  title: string
+  count: number
+  emoji: string
+}
+
+export function CuratedCollectionsList({ collections }: { collections: CuratedCollection[] }) {
+  if (collections.length === 0) return null
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+    >
+      <p
+        className="text-[10px] font-mono uppercase tracking-widest mb-3"
+        style={{ color: 'var(--accent-gold)' }}
+      >
+        Curated Collections
+      </p>
+      <div className="space-y-2.5">
+        {collections.map((col, i) => (
+          <motion.div
+            key={col.id}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.04, duration: 0.25 }}
+            className="rounded-xl px-4 py-3.5 flex items-center gap-3.5 cursor-pointer"
+            style={{
+              background: 'linear-gradient(135deg, color-mix(in srgb, var(--accent-gold) 8%, transparent), var(--surface))',
+              border: '1px solid color-mix(in srgb, var(--accent-gold) 15%, transparent)',
+            }}
+          >
+            <span className="text-2xl">{col.emoji}</span>
+            <div className="flex-1 min-w-0">
+              <p className="font-display text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+                {col.title}
+              </p>
+              <p className="text-[11px] mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                {col.count} beers
+              </p>
+            </div>
+            <ChevronRight size={16} style={{ color: 'var(--text-muted)' }} />
+          </motion.div>
+        ))}
+      </div>
     </motion.div>
   )
 }

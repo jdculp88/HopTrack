@@ -175,8 +175,8 @@ scripts/supabase-setup.mjs    — One-time setup script
 
 ## 🗺️ Where We Are
 
-**Current Sprint:** Sprint 28 — Feed Verification (2026-03-28)
-**Last completed:** Sprint 27 — Three-Tab Feed ✅ (2026-03-28)
+**Current Sprint:** Sprint 29 (next session)
+**Last completed:** Sprint 28 — Feed Spec Implementation ✅ (2026-03-29)
 
 ### Key design decisions (still active from Sprint 11):
 - Marketing pages use hardcoded `C` color constants (not CSS vars)
@@ -649,6 +649,42 @@ Retro: `docs/retros/sprint-13-retro.md`
 - Cheers/reaction button on feed cards (P1 — carried from Sprint 25)
 - Feed infinite scroll / pagination (P2 — carried from Sprint 25)
 - E2E tests (Casey, still waiting, still watching)
+
+### Sprint 28 — Feed Spec Implementation ✅ (2026-03-29)
+**Theme:** Close the gap between Morgan's feed spec and what shipped
+**Spec:** `docs/HopTrack-Feed-Implementation-Spec.docx` (Morgan)
+**Reference files:** `hoptrack-feed-complete.jsx` (dark+light), `hoptrack-feed-light.jsx` (light only)
+
+- ✅ S28-001: `RecommendationCard` — accent left border, "RECOMMENDS" label, beer info, "+ Add to My List" CTA
+- ✅ S28-002: `NewFavoriteCard` — compact card, "favorited [beer] from [brewery]", "Try it too" button
+- ✅ S28-003: `FriendJoinedCard` — centered layout, mutual friends count, gradient "Follow" button
+- ✅ S28-004: `SeasonalBeersScroll` — horizontal scroll with "Limited" (accent) / "Seasonal" (gold) badge overlays
+- ✅ S28-005: `CuratedCollectionsList` — gold gradient cards with emoji, beer count, chevron arrows
+- ✅ S28-006: `TrendingCard` redesigned — vertical list → horizontal scroll of compact beer cards with style badges + star ratings
+- ✅ S28-007: BOTW compact banner on Friends tab (gold gradient strip, above feed)
+- ✅ S28-008: Scroll position memory between tabs (`useRef` + `requestAnimationFrame`)
+- ✅ S28-009: New data queries — friend 5-star reviews (new_favorite), recent friendships (friend_joined)
+- ✅ S28-010: Editorial mock data — 4 seasonal beers, 3 curated collections (Jamie owns editorial)
+- ✅ S28-011: Hydration fix — `SessionRecapSheet` dynamic import (`ssr: false`) to break Turbopack module chain
+- ✅ S28-012: `hasCommunityContent` updated to include seasonal/curated data
+
+**Key architectural changes from Sprint 28:**
+- `RecommendationCard` at `components/social/RecommendationCard.tsx`
+- `NewFavoriteCard` at `components/social/NewFavoriteCard.tsx`
+- `FriendJoinedCard` at `components/social/FriendJoinedCard.tsx`
+- `SeasonalBeersScroll` + `CuratedCollectionsList` added to `components/social/DiscoveryCard.tsx`
+- `FeedItem` union type extended: `new_favorite`, `friend_joined`
+- `HomeFeedProps` extended: `newFavorites`, `friendsJoined`
+- `SessionRecapSheet` loaded via `next/dynamic` with `ssr: false` (fixes Turbopack cache corruption)
+- `confetti` import changed to dynamic `import()` call
+- Discover tab: 6 sections total (BOTW, Trending, Events, Seasonal & Limited, Curated Collections, New Breweries)
+- No new migrations — editorial data is hardcoded, new card types use existing tables
+
+**Deferred to Sprint 29:**
+- Cheers/reaction button on feed cards (P1 — carried from Sprint 25)
+- Feed infinite scroll / pagination (P2 — carried from Sprint 25)
+- PGRST schema cache refresh (`NOTIFY pgrst, 'reload schema';`) to restore session data in feed
+- E2E tests (Casey, eternal vigil)
 
 ### Revenue Targets
 - Tap tier: $49/mo

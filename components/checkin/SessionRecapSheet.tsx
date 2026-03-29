@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Share2, Trophy, Check, ChevronRight } from 'lucide-react'
-import confetti from 'canvas-confetti'
+import type { Options as ConfettiOptions } from 'canvas-confetti'
 import { StarRating } from '@/components/ui/StarRating'
 import { getGlass, getGlassSvgContent } from '@/lib/glassware'
 import { Session, BeerLog } from '@/types/database'
@@ -106,7 +106,7 @@ export default function SessionRecapSheet({
     if (isOpen && !fired) {
       setFired(true)
       setTimeout(() => {
-        confetti({ particleCount: 80, spread: 70, origin: { y: 0.4 }, colors: ['#D4A843', '#E8841A', '#fff'] })
+        import('canvas-confetti').then(m => m.default({ particleCount: 80, spread: 70, origin: { y: 0.4 }, colors: ['#D4A843', '#E8841A', '#fff'] }))
       }, 300)
     }
     if (!isOpen) {

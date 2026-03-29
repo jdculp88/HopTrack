@@ -48,6 +48,8 @@ export default async function HomePage() {
     wishlistRes,
     styleLogsRes,
     newBreweriesRes,
+    newFavoritesRes,
+    recentFriendshipsRes,
   ] = await Promise.all([
     // Feed sessions (completed)
     (supabase as any)
@@ -178,6 +180,29 @@ export default async function HomePage() {
       .eq("is_active", true)
       .order("created_at", { ascending: false })
       .limit(6),
+
+    // New favorites — friend 5-star beer reviews (for "favorited" cards)
+    friendIds.length > 0
+      ? (supabase as any)
+          .from("beer_reviews")
+          .select("id, rating, created_at, beer:beers(id, name, style, brewery:breweries(id, name)), profile:profiles(id, username, display_name, avatar_url)")
+          .in("user_id", friendIds)
+          .eq("rating", 5)
+          .order("created_at", { ascending: false })
+          .limit(5)
+      : Promise.resolve({ data: [] }),
+
+    // Recently accepted friendships (for "friend joined" cards)
+    friendIds.length > 0
+      ? (supabase as any)
+          .from("friendships")
+          .select("id, created_at, requester_id, addressee_id")
+          .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`)
+          .eq("status", "accepted")
+          .gte("created_at", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
+          .order("created_at", { ascending: false })
+          .limit(5)
+      : Promise.resolve({ data: [] }),
   ]);
 
   const sessions = (sessionsRes.data as Session[]) ?? [];
@@ -208,6 +233,65 @@ export default async function HomePage() {
     .sort((a, b) => b.count - a.count)
     .slice(0, 8);
 
+  // Transform 5-star reviews into "new favorite" feed items
+  const newFavorites = ((newFavoritesRes.data ?? []) as any[])
+    .filter((r: any) => r.profile && r.beer)
+    .map((r: any) => ({
+      id: r.id,
+      userId: r.profile.id,
+      username: r.profile.username,
+      displayName: r.profile.display_name,
+      avatarUrl: r.profile.avatar_url,
+      beerName: r.beer.name,
+      beerStyle: r.beer.style,
+      breweryName: r.beer.brewery?.name ?? "",
+      createdAt: r.created_at,
+      likes: 0,
+    }));
+
+  // Transform recent friendships into "friend joined" feed items
+  const recentFriendshipIds = ((recentFriendshipsRes.data ?? []) as any[]).map((f: any) =>
+    f.requester_id === user.id ? f.addressee_id : f.requester_id
+  );
+  // Fetch profiles for joined friends (minimal query, only if we have IDs)
+  let friendsJoined: any[] = [];
+  if (recentFriendshipIds.length > 0) {
+    const { data: joinedProfiles } = await (supabase as any)
+      .from("profiles")
+      .select("id, username, display_name, avatar_url, created_at")
+      .in("id", recentFriendshipIds)
+      .limit(5);
+    const recentFships = (recentFriendshipsRes.data ?? []) as any[];
+    friendsJoined = ((joinedProfiles ?? []) as any[]).map((p: any) => {
+      const fship = recentFships.find(
+        (f: any) => (f.requester_id === p.id || f.addressee_id === p.id)
+      );
+      return {
+        id: p.id,
+        userId: p.id,
+        username: p.username,
+        displayName: p.display_name ?? p.username,
+        avatarUrl: p.avatar_url,
+        mutualFriends: 0,
+        joinedAt: fship?.created_at ?? p.created_at,
+      };
+    });
+  }
+
+  // Editorial content — Seasonal & Limited + Curated Collections (Jamie owns)
+  const seasonalBeers = [
+    { id: "s1", name: "Spring Saison", brewery: "River Bend Ales", style: "Saison", badge: "Seasonal" as const },
+    { id: "s2", name: "Cherry Blossom Sour", brewery: "Mountain Ridge Brewing", style: "Sour", badge: "Limited" as const },
+    { id: "s3", name: "Citrus Wheat", brewery: "Smoky Barrel Craft Co.", style: "Wheat", badge: "Seasonal" as const },
+    { id: "s4", name: "Double Barrel Imp. Stout", brewery: "Smoky Barrel Craft Co.", style: "Stout", badge: "Limited" as const },
+  ];
+
+  const curatedCollections = [
+    { id: "c1", title: "5 Porters for Cold Nights", count: 5, emoji: "🌙" },
+    { id: "c2", title: "Starter Pack: Belgian Styles", count: 8, emoji: "🇧🇪" },
+    { id: "c3", title: "Best Patios in Asheville", count: 6, emoji: "☀️" },
+  ];
+
   return (
     <HomeFeed
       profile={profile}
@@ -225,6 +309,8 @@ export default async function HomePage() {
         breweryReviews: breweryReviewsRes.data ?? [],
         upcomingEvents: upcomingEventsRes.data ?? [],
         newBreweries: newBreweriesRes.data ?? [],
+        seasonalBeers,
+        curatedCollections,
       }}
       friendRatings={friendRatingsRes.data ?? []}
       friendAchievements={friendAchievementsRes.data ?? []}
@@ -232,6 +318,8 @@ export default async function HomePage() {
       wishlist={wishlistRes.data ?? []}
       styleDNA={styleDNA}
       friendCount={friendIds.length}
+      newFavorites={newFavorites}
+      friendsJoined={friendsJoined}
     />
   );
 }
