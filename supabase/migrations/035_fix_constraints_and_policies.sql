@@ -10,6 +10,15 @@
 -- ── 1. Reactions unique constraint ──────────────────────────────────────────
 -- Prevent duplicate reactions on the same session by the same user.
 -- Lost when checkins were dropped in S16 — the old constraint was on checkin_id.
+
+-- Deduplicate first: keep only the earliest reaction per (user_id, session_id, type)
+DELETE FROM reactions
+WHERE id NOT IN (
+  SELECT DISTINCT ON (user_id, session_id, type) id
+  FROM reactions
+  ORDER BY user_id, session_id, type, created_at ASC
+);
+
 ALTER TABLE reactions
 ADD CONSTRAINT reactions_user_session_type_unique
 UNIQUE(user_id, session_id, type);
