@@ -65,19 +65,19 @@ export function DrinkingNow() {
           <span className="relative flex-shrink-0">
             <span
               className="w-2.5 h-2.5 rounded-full block"
-              style={{ background: "#3D7A52" }}
+              style={{ background: "var(--accent-gold)" }}
             />
             <span
               className="absolute inset-0 w-2.5 h-2.5 rounded-full animate-pulse"
-              style={{ background: "#3D7A52", opacity: 0.5 }}
+              style={{ background: "var(--accent-gold)", opacity: 0.5 }}
             />
           </span>
           <h2 className="font-display font-bold text-sm" style={{ color: "var(--text-primary)" }}>
-            Drinking Now
+            Live Now
           </h2>
           <span
             className="text-[10px] font-mono px-1.5 py-0.5 rounded-full"
-            style={{ background: "color-mix(in srgb, #3D7A52 15%, transparent)", color: "#3D7A52" }}
+            style={{ background: "color-mix(in srgb, var(--accent-gold) 15%, transparent)", color: "var(--accent-gold)" }}
           >
             {friends.length}
           </span>
@@ -112,7 +112,7 @@ export function DrinkingNow() {
                       <div
                         className="absolute -inset-1 rounded-full animate-pulse"
                         style={{
-                          background: "rgba(61,122,82,0.15)",
+                          background: "color-mix(in srgb, var(--accent-gold) 15%, transparent)",
                           animationDuration: "3s",
                         }}
                       />
@@ -129,7 +129,7 @@ export function DrinkingNow() {
                       <span
                         className="absolute bottom-0 right-0 w-3 h-3 rounded-full border-2"
                         style={{
-                          background: "#3D7A52",
+                          background: "var(--accent-gold)",
                           borderColor: "var(--surface)",
                         }}
                       />

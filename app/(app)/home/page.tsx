@@ -32,9 +32,10 @@ export default async function HomePage() {
 
   const today = new Date().toISOString().split("T")[0];
 
-  // Parallel queries — sessions, weekly stats, and community content
+  // Parallel queries — sessions, weekly stats, community content, achievements
   const [
     sessionsRes,
+    activeFriendSessionsRes,
     weekSessionsRes,
     weekLogsRes,
     featuredBeersRes,
@@ -42,13 +43,18 @@ export default async function HomePage() {
     breweryReviewsRes,
     friendRatingsRes,
     upcomingEventsRes,
+    friendAchievementsRes,
+    userAchievementsRes,
+    wishlistRes,
+    styleLogsRes,
+    newBreweriesRes,
   ] = await Promise.all([
-    // Feed sessions
+    // Feed sessions (completed)
     (supabase as any)
       .from("sessions")
       .select(`
         *,
-        profile:profiles!sessions_user_id_fkey(id, username, display_name, avatar_url),
+        profile:profiles!sessions_user_id_fkey(id, username, display_name, avatar_url, current_streak),
         brewery:breweries(id, name, city, state),
         beer_logs(id, beer_id, rating, flavor_tags, serving_style, comment, photo_url, logged_at, quantity, beer:beers(id, name, style, glass_type))
       `)
@@ -57,6 +63,23 @@ export default async function HomePage() {
       .eq("is_active", false)
       .order("started_at", { ascending: false })
       .limit(20),
+
+    // Active friend sessions (live — for amber glow treatment)
+    friendIds.length > 0
+      ? (supabase as any)
+          .from("sessions")
+          .select(`
+            *,
+            profile:profiles!sessions_user_id_fkey(id, username, display_name, avatar_url, current_streak),
+            brewery:breweries(id, name, city, state),
+            beer_logs(id, beer_id, rating, flavor_tags, serving_style, comment, photo_url, logged_at, quantity, beer:beers(id, name, style, glass_type))
+          `)
+          .in("user_id", friendIds)
+          .eq("is_active", true)
+          .eq("share_to_feed", true)
+          .order("started_at", { ascending: false })
+          .limit(5)
+      : Promise.resolve({ data: [] }),
 
     // Weekly stats — sessions
     (supabase as any)
@@ -114,17 +137,82 @@ export default async function HomePage() {
       .eq("is_active", true)
       .order("event_date", { ascending: true })
       .limit(5),
+
+    // Friend achievements (for feed cards)
+    friendIds.length > 0
+      ? (supabase as any)
+          .from("user_achievements")
+          .select("id, earned_at, achievement:achievements(id, name, icon, tier, category, xp_reward), profile:profiles(id, username, display_name, avatar_url)")
+          .in("user_id", friendIds)
+          .order("earned_at", { ascending: false })
+          .limit(10)
+      : Promise.resolve({ data: [] }),
+
+    // User achievements (for You tab)
+    (supabase as any)
+      .from("user_achievements")
+      .select("id, earned_at, achievement:achievements(id, name, icon, tier, category, xp_reward)")
+      .eq("user_id", user.id)
+      .order("earned_at", { ascending: false })
+      .limit(5),
+
+    // Wishlist (for You tab Want-to-Try)
+    (supabase as any)
+      .from("wishlists")
+      .select("id, created_at, note, beer:beers(id, name, style, abv, brewery:breweries(id, name))")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(10),
+
+    // Style distribution from beer_logs (for Taste DNA)
+    (supabase as any)
+      .from("beer_logs")
+      .select("rating, beer:beers(style)")
+      .eq("user_id", user.id)
+      .not("beer", "is", null),
+
+    // New breweries (for Discover tab)
+    (supabase as any)
+      .from("breweries")
+      .select("id, name, city, state, type, created_at")
+      .eq("is_active", true)
+      .order("created_at", { ascending: false })
+      .limit(6),
   ]);
 
   const sessions = (sessionsRes.data as Session[]) ?? [];
+  const activeFriendSessions = (activeFriendSessionsRes.data as Session[]) ?? [];
   const weekSessionList = (weekSessionsRes.data as any[]) ?? [];
   const weekLogList = (weekLogsRes.data as any[]) ?? [];
   const weekBeerCount = weekLogList.reduce((sum: number, l: any) => sum + (l.quantity ?? 1), 0);
+
+  // Compute style distribution for Taste DNA
+  const styleLogs = (styleLogsRes.data as any[]) ?? [];
+  const styleMap: Record<string, { count: number; totalRating: number; ratedCount: number }> = {};
+  for (const log of styleLogs) {
+    const style = log.beer?.style;
+    if (!style) continue;
+    if (!styleMap[style]) styleMap[style] = { count: 0, totalRating: 0, ratedCount: 0 };
+    styleMap[style].count++;
+    if (log.rating != null) {
+      styleMap[style].totalRating += log.rating;
+      styleMap[style].ratedCount++;
+    }
+  }
+  const styleDNA = Object.entries(styleMap)
+    .map(([style, data]) => ({
+      style,
+      count: data.count,
+      avgRating: data.ratedCount > 0 ? data.totalRating / data.ratedCount : null,
+    }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 8);
 
   return (
     <HomeFeed
       profile={profile}
       sessions={sessions}
+      activeFriendSessions={activeFriendSessions}
       weekStats={{
         sessions: weekSessionList.length,
         beers: weekBeerCount,
@@ -136,8 +224,14 @@ export default async function HomePage() {
         topReviews: topReviewsRes.data ?? [],
         breweryReviews: breweryReviewsRes.data ?? [],
         upcomingEvents: upcomingEventsRes.data ?? [],
+        newBreweries: newBreweriesRes.data ?? [],
       }}
       friendRatings={friendRatingsRes.data ?? []}
+      friendAchievements={friendAchievementsRes.data ?? []}
+      userAchievements={userAchievementsRes.data ?? []}
+      wishlist={wishlistRes.data ?? []}
+      styleDNA={styleDNA}
+      friendCount={friendIds.length}
     />
   );
 }
