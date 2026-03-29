@@ -7,8 +7,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Search, Map, List, Loader2, SlidersHorizontal, X, Sparkles } from "lucide-react";
 import { BreweryCard } from "@/components/brewery/BreweryCard";
 import { SkeletonCard } from "@/components/ui/SkeletonLoader";
+import { useToast } from "@/components/ui/Toast";
 import type { BreweryWithStats, BreweryType } from "@/types/database";
 import { searchBreweries, mapOpenBreweryToDb } from "@/lib/openbrewerydb";
+
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const BreweryMap = dynamic(
   () => import("@/components/map/BreweryMap").then((m) => m.BreweryMap),
@@ -47,6 +50,7 @@ export function ExploreClient({ breweries: initialBreweries, hasBeerOfTheWeek = 
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
+  const { info } = useToast();
 
   const [view, setView] = useState<ViewMode>((searchParams.get("view") as ViewMode) ?? "list");
   const [query, setQuery] = useState(searchParams.get("q") ?? "");
@@ -309,16 +313,39 @@ export function ExploreClient({ breweries: initialBreweries, hasBeerOfTheWeek = 
                 ? Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)
                 : breweries.length === 0
                 ? <p className="col-span-full text-center text-[var(--text-muted)] py-12">No breweries found for &ldquo;{query}&rdquo;</p>
-                : filteredBreweries.map((b: any, i: number) => (
-                    <motion.div
-                      key={b.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: i * 0.04 }}
-                    >
-                      <BreweryCard brewery={b} />
-                    </motion.div>
-                  ))
+                : filteredBreweries.map((b: any, i: number) => {
+                    const isExternal = !UUID_REGEX.test(b.id);
+                    return (
+                      <motion.div
+                        key={b.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.04 }}
+                        className="relative"
+                      >
+                        {isExternal ? (
+                          <div
+                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); info("This brewery isn't on HopTrack yet — check back soon!"); }}
+                            className="cursor-pointer [&_a]:pointer-events-none"
+                          >
+                            <BreweryCard brewery={b} />
+                            <span
+                              className="absolute top-3 left-3 z-10 text-[10px] font-mono px-2 py-0.5 rounded-full"
+                              style={{
+                                background: "color-mix(in srgb, var(--text-muted) 15%, transparent)",
+                                color: "var(--text-muted)",
+                                border: "1px solid var(--border)",
+                              }}
+                            >
+                              Not on HopTrack yet
+                            </span>
+                          </div>
+                        ) : (
+                          <BreweryCard brewery={b} />
+                        )}
+                      </motion.div>
+                    );
+                  })
               }
             </div>
           )}

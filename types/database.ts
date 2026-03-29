@@ -273,6 +273,7 @@ export type NotificationType =
   | "tagged_checkin"
   | "achievement_unlocked"
   | "reaction"
+  | "session_cheers"
   | "session_comment"
   | "weekly_stats"
   | "nudge";

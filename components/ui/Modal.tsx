@@ -116,14 +116,33 @@ interface DrawerProps {
 }
 
 export function FullScreenDrawer({ open, onClose, children, className }: DrawerProps) {
+  const drawerRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
-    if (open) document.body.style.overflow = "hidden";
+    if (open) {
+      document.body.style.overflow = "hidden";
+      // Focus first focusable element on open
+      setTimeout(() => {
+        const el = drawerRef.current?.querySelector<HTMLElement>(FOCUSABLE);
+        el?.focus();
+      }, 50);
+    }
     return () => { document.body.style.overflow = ""; };
   }, [open]);
 
   useEffect(() => {
     function handleKey(e: KeyboardEvent) {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") { onClose(); return; }
+      if (e.key !== "Tab" || !drawerRef.current) return;
+      const focusable = Array.from(drawerRef.current.querySelectorAll<HTMLElement>(FOCUSABLE));
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey) {
+        if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+      } else {
+        if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
     }
     if (open) document.addEventListener("keydown", handleKey);
     return () => document.removeEventListener("keydown", handleKey);
@@ -139,11 +158,14 @@ export function FullScreenDrawer({ open, onClose, children, className }: DrawerP
           className="fixed inset-0 z-50 bg-[var(--bg)]"
         >
           <motion.div
+            ref={drawerRef}
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
             className={cn("h-full flex flex-col", className)}
+            role="dialog"
+            aria-modal="true"
           >
             {children}
           </motion.div>

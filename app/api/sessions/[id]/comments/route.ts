@@ -11,15 +11,33 @@ export async function GET(
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+  // Fetch comments (no profile join — session_comments FKs to auth.users, not profiles,
+  // so PostgREST can't reliably resolve profiles!user_id)
   const { data: comments, error } = await (supabase as any)
     .from("session_comments")
-    .select("id, session_id, user_id, body, created_at, profile:profiles!user_id(id, username, display_name, avatar_url)")
+    .select("id, session_id, user_id, body, created_at")
     .eq("session_id", sessionId)
     .order("created_at", { ascending: true });
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (!comments || comments.length === 0) return NextResponse.json([]);
 
-  return NextResponse.json(comments ?? []);
+  // Fetch profiles for all comment authors in one query
+  const userIds = [...new Set(comments.map((c: any) => c.user_id))];
+  const { data: profiles } = await (supabase as any)
+    .from("profiles")
+    .select("id, username, display_name, avatar_url")
+    .in("id", userIds);
+
+  const profileMap = new Map((profiles ?? []).map((p: any) => [p.id, p]));
+
+  // Attach profile to each comment (matches the shape the client expects)
+  const enriched = comments.map((c: any) => ({
+    ...c,
+    profile: profileMap.get(c.user_id) ?? null,
+  }));
+
+  return NextResponse.json(enriched);
 }
 
 export async function POST(
@@ -39,14 +57,23 @@ export async function POST(
     return NextResponse.json({ error: "Comment must be 500 characters or less" }, { status: 400 });
   }
 
-  // Insert the comment
+  // Insert the comment (no profile join — session_comments FKs to auth.users, not profiles)
   const { data: comment, error } = await (supabase as any)
     .from("session_comments")
     .insert({ session_id: sessionId, user_id: user.id, body: body.trim() })
-    .select("id, session_id, user_id, body, created_at, profile:profiles!user_id(id, username, display_name, avatar_url)")
+    .select("id, session_id, user_id, body, created_at")
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  // Attach the commenter's profile
+  const { data: commenterProfileData } = await (supabase as any)
+    .from("profiles")
+    .select("id, username, display_name, avatar_url")
+    .eq("id", user.id)
+    .single();
+
+  const enrichedComment = { ...comment, profile: commenterProfileData ?? null };
 
   // Notify the session owner (if not self-commenting)
   const { data: session } = await (supabase as any)
@@ -56,14 +83,8 @@ export async function POST(
     .single();
 
   if (session && session.user_id !== user.id) {
-    // Get commenter's display name
-    const { data: commenterProfile } = await (supabase as any)
-      .from("profiles")
-      .select("display_name, username")
-      .eq("id", user.id)
-      .single();
-
-    const commenterName = commenterProfile?.display_name || commenterProfile?.username || "Someone";
+    // Reuse profile data already fetched above
+    const commenterName = commenterProfileData?.display_name || commenterProfileData?.username || "Someone";
 
     // Create in-app notification
     await (supabase as any)
@@ -93,5 +114,5 @@ export async function POST(
     }
   }
 
-  return NextResponse.json(comment, { status: 201 });
+  return NextResponse.json(enrichedComment, { status: 201 });
 }

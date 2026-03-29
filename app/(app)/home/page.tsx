@@ -218,9 +218,10 @@ export default async function HomePage() {
 
   let reactionCounts: Record<string, Record<string, number>> = {};
   let userReactions: Record<string, string[]> = {};
+  let commentCounts: Record<string, number> = {};
 
   if (allSessionIds.length > 0) {
-    const [countsRes, userReactionsRes] = await Promise.all([
+    const [countsRes, userReactionsRes, commentsRes] = await Promise.all([
       (supabase as any)
         .from("reactions")
         .select("session_id, type")
@@ -229,6 +230,10 @@ export default async function HomePage() {
         .from("reactions")
         .select("session_id, type")
         .eq("user_id", user.id)
+        .in("session_id", allSessionIds),
+      (supabase as any)
+        .from("session_comments")
+        .select("session_id")
         .in("session_id", allSessionIds),
     ]);
 
@@ -242,6 +247,11 @@ export default async function HomePage() {
     for (const r of ((userReactionsRes.data ?? []) as any[])) {
       if (!userReactions[r.session_id]) userReactions[r.session_id] = [];
       userReactions[r.session_id].push(r.type);
+    }
+
+    // Comment counts: { sessionId: count }
+    for (const c of ((commentsRes.data ?? []) as any[])) {
+      commentCounts[c.session_id] = (commentCounts[c.session_id] ?? 0) + 1;
     }
   }
   const weekBeerCount = weekLogList.reduce((sum: number, l: any) => sum + (l.quantity ?? 1), 0);
@@ -357,6 +367,7 @@ export default async function HomePage() {
       friendsJoined={friendsJoined}
       reactionCounts={reactionCounts}
       userReactions={userReactions}
+      commentCounts={commentCounts}
     />
   );
 }

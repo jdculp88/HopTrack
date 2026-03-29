@@ -1,14 +1,10 @@
-export const XP_VALUES = {
-  checkin: 10,
-  new_beer: 5,
-  new_brewery: 10,
-  rating: 2,
-  comment: 3,
-  photo: 5,
-  achievement_bronze: 50,
-  achievement_silver: 100,
-  achievement_gold: 200,
-  achievement_platinum: 500,
+// Active XP values used by session-end API
+export const SESSION_XP = {
+  session_start: 25,
+  per_beer: 15,
+  per_rating: 10,
+  first_visit_bonus: 50,
+  three_plus_beers_bonus: 25,
 } as const;
 
 export const LEVELS = [
@@ -72,18 +68,3 @@ export function getLevelProgress(xp: number): {
   return { current, next, progress, xpToNext };
 }
 
-export function calculateCheckinXP(opts: {
-  hasRating: boolean;
-  hasComment: boolean;
-  hasPhoto: boolean;
-  isNewBeer: boolean;
-  isNewBrewery: boolean;
-}): number {
-  let total = XP_VALUES.checkin;
-  if (opts.hasRating) total += XP_VALUES.rating;
-  if (opts.hasComment) total += XP_VALUES.comment;
-  if (opts.hasPhoto) total += XP_VALUES.photo;
-  if (opts.isNewBeer) total += XP_VALUES.new_beer;
-  if (opts.isNewBrewery) total += XP_VALUES.new_brewery;
-  return total;
-}

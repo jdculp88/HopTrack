@@ -38,36 +38,40 @@ export function AchievementBadge({
   const s = SIZES[size];
 
   return (
-    <motion.button
+    <button
       type="button"
       onClick={onClick}
-      whileHover={earned ? { scale: 1.05 } : undefined}
-      whileTap={onClick ? { scale: 0.95 } : undefined}
       className={cn("flex flex-col items-center gap-2 cursor-default", onClick && "cursor-pointer", className)}
     >
-      <div
-        className={cn(
-          s.container,
-          "rounded-2xl flex items-center justify-center",
-          s.ring,
-          earned ? [tier.ring, tier.glow] : "ring-[#3A3628]",
-          earned ? "" : "opacity-40 grayscale"
-        )}
-        style={earned ? { background: `${achievement.badge_color}20` } : { background: "var(--surface)" }}
+      <motion.div
+        whileHover={earned ? { scale: 1.05 } : undefined}
+        whileTap={onClick ? { scale: 0.95 } : undefined}
+        className="flex flex-col items-center gap-2"
       >
-        <span className={cn(s.icon, earned ? "" : "opacity-50")}>{achievement.icon}</span>
-      </div>
-      {size !== "sm" && (
-        <div className="text-center">
-          <p className={cn("font-sans text-xs font-medium", earned ? "text-[var(--text-primary)]" : "text-[var(--text-muted)]")}>
-            {achievement.name}
-          </p>
-          <p className="text-[10px]" style={{ color: earned ? achievement.badge_color : "var(--text-muted)" }}>
-            {tier.label}
-          </p>
+        <div
+          className={cn(
+            s.container,
+            "rounded-2xl flex items-center justify-center",
+            s.ring,
+            earned ? [tier.ring, tier.glow] : "ring-[#3A3628]",
+            earned ? "" : "opacity-40 grayscale"
+          )}
+          style={earned ? { background: `${achievement.badge_color}20` } : { background: "var(--surface)" }}
+        >
+          <span className={cn(s.icon, earned ? "" : "opacity-50")}>{achievement.icon}</span>
         </div>
-      )}
-    </motion.button>
+        {size !== "sm" && (
+          <div className="text-center">
+            <p className={cn("font-sans text-xs font-medium", earned ? "text-[var(--text-primary)]" : "text-[var(--text-muted)]")}>
+              {achievement.name}
+            </p>
+            <p className="text-[10px]" style={{ color: earned ? achievement.badge_color : "var(--text-muted)" }}>
+              {tier.label}
+            </p>
+          </div>
+        )}
+      </motion.div>
+    </button>
   );
 }
 

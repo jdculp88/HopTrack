@@ -187,7 +187,7 @@ export function LoyaltyStampCard({ program, card, breweryName }: LoyaltyStampCar
               className="text-xs mt-1"
               style={{ color: "var(--text-secondary)" }}
             >
-              Check in to get your first stamp!
+              Visit to get your first stamp!
             </p>
           </div>
         ) : (

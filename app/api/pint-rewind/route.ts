@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
+import { LEVELS } from "@/lib/xp";
 
 export async function GET() {
   const supabase = await createClient();
@@ -140,16 +141,7 @@ export async function GET() {
 
   // ─── Level ────────────────────────────────────────────────────
   const level = profile?.level ?? 1;
-  const levelTitles: Record<number, string> = {
-    1: "Curious Sipper", 2: "Tap Room Tourist", 3: "Hop Curious",
-    4: "Craft Apprentice", 5: "Pint Scholar", 6: "Tap Handle Veteran",
-    7: "Brew Detective", 8: "Cellar Master", 9: "Draft Legend",
-    10: "Hop King", 11: "Brewery Oracle", 12: "Suds Sage",
-    13: "Foam Philosopher", 14: "Keg Conqueror", 15: "Cask Commander",
-    16: "Barrel Baron", 17: "Malt Monarch", 18: "Yeast Whisperer",
-    19: "Grain God", 20: "HopTrack Immortal",
-  };
-  const levelTitle = levelTitles[level] ?? "Beer Enthusiast";
+  const levelTitle = LEVELS.find(l => l.level === level)?.name ?? "Beer Enthusiast";
 
   return NextResponse.json({
     personality: { archetype: personality, topStyle: topStyleName, count: topStyleCount },

@@ -98,7 +98,7 @@ export function PushOptIn() {
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-[var(--text-primary)]">Stay in the loop</p>
-                  <p className="text-xs text-[var(--text-muted)]">Get notified when friends check in</p>
+                  <p className="text-xs text-[var(--text-muted)]">Get notified when friends start a session</p>
                 </div>
               </div>
               <button onClick={handleDismiss} className="p-1 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors">

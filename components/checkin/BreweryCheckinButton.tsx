@@ -25,7 +25,7 @@ export default function BreweryCheckinButton({ brewery, className }: BreweryChec
       }}
     >
       <Beer size={16} />
-      Check In Here
+      Start Session
     </button>
   )
 }

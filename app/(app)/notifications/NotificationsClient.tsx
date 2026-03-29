@@ -13,6 +13,7 @@ const ICONS: Record<NotificationType, { icon: React.ReactNode; color: string }> 
   tagged_checkin:      { icon: <Users size={16} />,         color: "#D4A843" },
   achievement_unlocked:{ icon: <Trophy size={16} />,        color: "#E8841A" },
   reaction:            { icon: <Heart size={16} />,         color: "#C44B3A" },
+  session_cheers:      { icon: <Beer size={16} />,          color: "#D4A843" },
   session_comment:     { icon: <MessageCircle size={16} />, color: "#5B8DEF" },
   weekly_stats:        { icon: <TrendingUp size={16} />,    color: "var(--text-secondary)" },
   nudge:               { icon: <Beer size={16} />,          color: "var(--text-muted)" },

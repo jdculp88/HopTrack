@@ -58,9 +58,8 @@ export function ThemeToggle({ className, variant = "compact" }: ThemeToggleProps
 
   // Compact icon button
   return (
-    <motion.button
+    <button
       onClick={toggle}
-      whileTap={{ scale: 0.9 }}
       className={cn(
         "p-2 rounded-xl transition-colors",
         "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-2)]",
@@ -72,10 +71,11 @@ export function ThemeToggle({ className, variant = "compact" }: ThemeToggleProps
         key={theme}
         initial={{ rotate: -30, opacity: 0 }}
         animate={{ rotate: 0,   opacity: 1 }}
+        whileTap={{ scale: 0.9 }}
         transition={{ duration: 0.2 }}
       >
         {isDark ? <Sun size={18} /> : <Moon size={18} />}
       </motion.div>
-    </motion.button>
+    </button>
   );
 }

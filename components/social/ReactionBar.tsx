@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { MessageCircle, Share2 } from "lucide-react";
+import { useToast } from "@/components/ui/Toast";
 
 interface ReactionBarProps {
   sessionId?: string;
@@ -28,6 +29,7 @@ export function ReactionBar({
   const [counts, setCounts] = useState(reactionCounts);
   const [myReactions, setMyReactions] = useState<string[]>(userReactions);
   const [animating, setAnimating] = useState<string | null>(null);
+  const { error: showError } = useToast();
 
   const beerCount = counts.beer ?? 0;
   const hasReacted = myReactions.includes("beer");
@@ -64,6 +66,7 @@ export function ReactionBar({
         ...prev,
         [type]: Math.max(0, (prev[type] ?? 0) + (wasActive ? 1 : -1)),
       }));
+      showError("Couldn't send cheers. Try again.");
     }
   }, [sessionId, myReactions]);
 

@@ -129,6 +129,7 @@ interface HomeFeedProps {
   friendsJoined?: FriendJoinedItem[];
   reactionCounts?: Record<string, Record<string, number>>;
   userReactions?: Record<string, string[]>;
+  commentCounts?: Record<string, number>;
 }
 
 type FeedItem =
@@ -158,6 +159,7 @@ export function HomeFeed({
   friendsJoined,
   reactionCounts,
   userReactions,
+  commentCounts,
 }: HomeFeedProps) {
   const [activeTab, setActiveTab] = useState<FeedTab>("friends");
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -357,6 +359,7 @@ export function HomeFeed({
               activeFriendCount={activeFriendSessions.length}
               reactionCounts={reactionCounts}
               userReactions={userReactions}
+              commentCounts={commentCounts}
             />
           </motion.div>
         )}
@@ -397,6 +400,7 @@ export function HomeFeed({
               styleDNA={styleDNA}
               reactionCounts={reactionCounts}
               userReactions={userReactions}
+              commentCounts={commentCounts}
             />
           </motion.div>
         )}
@@ -416,6 +420,7 @@ function FriendsTabContent({
   activeFriendCount,
   reactionCounts,
   userReactions,
+  commentCounts,
 }: {
   profile: Profile | null;
   feedItems: FeedItem[];
@@ -425,6 +430,7 @@ function FriendsTabContent({
   activeFriendCount: number;
   reactionCounts?: Record<string, Record<string, number>>;
   userReactions?: Record<string, string[]>;
+  commentCounts?: Record<string, number>;
 }) {
   const liveCountLabel =
     activeFriendCount > 0
@@ -510,6 +516,7 @@ function FriendsTabContent({
                 currentUserId={currentUserId}
                 reactionCounts={reactionCounts}
                 userReactions={userReactions}
+                commentCounts={commentCounts}
               />
             </div>
           ))}
@@ -527,12 +534,14 @@ function FeedItemCard({
   currentUserId,
   reactionCounts,
   userReactions,
+  commentCounts,
 }: {
   item: FeedItem;
   index: number;
   currentUserId: string;
   reactionCounts?: Record<string, Record<string, number>>;
   userReactions?: Record<string, string[]>;
+  commentCounts?: Record<string, number>;
 }) {
   if (item.type === "session") {
     return (
@@ -557,6 +566,7 @@ function FeedItemCard({
           currentUserId={currentUserId}
           reactionCounts={reactionCounts?.[(item.data as any).id]}
           userReactions={userReactions?.[(item.data as any).id]}
+          commentCount={commentCounts?.[(item.data as any).id]}
         />
       </motion.div>
     );
@@ -818,6 +828,7 @@ function YouTabContent({
   styleDNA,
   reactionCounts,
   userReactions,
+  commentCounts,
 }: {
   profile: Profile | null;
   sessions: Session[];
@@ -828,6 +839,7 @@ function YouTabContent({
   styleDNA?: StyleDNAEntry[];
   reactionCounts?: Record<string, Record<string, number>>;
   userReactions?: Record<string, string[]>;
+  commentCounts?: Record<string, number>;
 }) {
   const levelInfo = profile ? getLevelProgress(profile.xp) : null;
 
@@ -1000,7 +1012,7 @@ function YouTabContent({
             Your Taste DNA
           </p>
           <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-            Keep checking in to build your Taste DNA — needs 3+ styles.
+            Keep logging beers to build your Taste DNA — needs 3+ styles.
           </p>
         </div>
       )}
@@ -1149,6 +1161,7 @@ function YouTabContent({
                   currentUserId={currentUserId}
                   reactionCounts={reactionCounts?.[(s as any).id]}
                   userReactions={userReactions?.[(s as any).id]}
+                  commentCount={commentCounts?.[(s as any).id]}
                 />
               </motion.div>
             ))}

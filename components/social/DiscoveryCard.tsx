@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { TrendingUp, Calendar, Star, ChevronRight } from 'lucide-react'
+import { TrendingUp, Calendar, Star } from 'lucide-react'
 import { StarRating } from '@/components/ui/StarRating'
 import { UserAvatar } from '@/components/ui/UserAvatar'
 
@@ -299,7 +299,7 @@ export function CuratedCollectionsList({ collections }: { collections: CuratedCo
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.04, duration: 0.25 }}
-            className="rounded-xl px-4 py-3.5 flex items-center gap-3.5 cursor-pointer"
+            className="rounded-xl px-4 py-3.5 flex items-center gap-3.5"
             style={{
               background: 'linear-gradient(135deg, color-mix(in srgb, var(--accent-gold) 8%, transparent), var(--surface))',
               border: '1px solid color-mix(in srgb, var(--accent-gold) 15%, transparent)',
@@ -314,7 +314,15 @@ export function CuratedCollectionsList({ collections }: { collections: CuratedCo
                 {col.count} beers
               </p>
             </div>
-            <ChevronRight size={16} style={{ color: 'var(--text-muted)' }} />
+            <span
+              className="text-[9px] font-mono px-2 py-0.5 rounded-full flex-shrink-0"
+              style={{
+                color: 'var(--text-muted)',
+                background: 'color-mix(in srgb, var(--text-muted) 10%, transparent)',
+              }}
+            >
+              Coming soon
+            </span>
           </motion.div>
         ))}
       </div>

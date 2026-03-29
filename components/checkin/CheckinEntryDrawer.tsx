@@ -136,7 +136,7 @@ export default function CheckinEntryDrawer({ isOpen, onClose, onSessionStarted, 
           <X size={20} />
         </button>
         <h1 className="font-display font-bold text-lg" style={{ color: 'var(--text-primary)' }}>
-          Check In
+          Start Session
         </h1>
         <div className="w-10" />
       </div>
@@ -171,7 +171,7 @@ export default function CheckinEntryDrawer({ isOpen, onClose, onSessionStarted, 
             <div className="flex items-center gap-2">
               <MapPin size={14} style={{ color: 'var(--accent-gold)' }} />
               <p className="text-xs font-mono uppercase tracking-widest" style={{ color: 'var(--accent-gold)' }}>
-                You&rsquo;re checking in here
+                You&rsquo;re visiting here
               </p>
             </div>
 
@@ -260,7 +260,7 @@ export default function CheckinEntryDrawer({ isOpen, onClose, onSessionStarted, 
                   {startingFor === autoDetected.id ? (
                     <><Loader2 size={18} className="animate-spin" /> Starting...</>
                   ) : (
-                    <>Check in here <ChevronRight size={18} /></>
+                    <>Start your visit <ChevronRight size={18} /></>
                   )}
                 </button>
               </div>
@@ -410,7 +410,7 @@ export default function CheckinEntryDrawer({ isOpen, onClose, onSessionStarted, 
                   Drinking at home
                 </p>
                 <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
-                  Log beers without a brewery check-in
+                  Log beers without visiting a brewery
                 </p>
               </div>
               <ChevronRight size={16} style={{ color: 'var(--text-muted)' }} />

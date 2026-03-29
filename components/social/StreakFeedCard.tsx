@@ -81,7 +81,7 @@ export function StreakFeedCard({
         className="text-xs mt-1 font-mono"
         style={{ color: "var(--text-muted)" }}
       >
-        {streak.currentStreak}-day check-in streak
+        {streak.currentStreak}-day session streak
       </p>
 
       {/* Reaction footer */}

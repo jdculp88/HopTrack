@@ -23,23 +23,27 @@ export function ServingStylePicker({ value, onChange, className }: ServingStyleP
       {STYLES.map((s) => {
         const isSelected = value === s.value;
         return (
-          <motion.button
+          <button
             key={s.value}
             type="button"
             onClick={() => onChange(s.value)}
-            whileTap={{ scale: 0.9 }}
-            transition={{ type: "spring", stiffness: 500, damping: 25 }}
             className={cn(
               "flex-1 flex flex-col items-center gap-1.5 py-3 rounded-2xl",
               "border font-sans text-sm transition-all duration-150",
               isSelected
-                ? "bg-[#D4A843]/15 border-[#D4A843] text-[#D4A843]"
+                ? "bg-[var(--accent-gold)]/15 border-[var(--accent-gold)] text-[var(--accent-gold)]"
                 : "bg-[var(--surface)] border-[var(--border)] text-[var(--text-secondary)] hover:border-[#6B6456] hover:text-[var(--text-primary)]"
             )}
           >
-            <span className="text-2xl">{s.emoji}</span>
-            <span className="text-xs font-medium">{s.label}</span>
-          </motion.button>
+            <motion.span
+              whileTap={{ scale: 0.9 }}
+              transition={{ type: "spring", stiffness: 500, damping: 25 }}
+              className="flex flex-col items-center gap-1.5"
+            >
+              <span className="text-2xl">{s.emoji}</span>
+              <span className="text-xs font-medium">{s.label}</span>
+            </motion.span>
+          </button>
         );
       })}
     </div>

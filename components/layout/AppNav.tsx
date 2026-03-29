@@ -17,6 +17,14 @@ const NAV_ITEMS = [
   { href: "/achievements", label: "Achievements", icon: Trophy },
 ];
 
+// Mobile bottom nav — notifications replaces achievements (time-sensitive on mobile)
+const MOBILE_NAV_ITEMS = [
+  { href: "/home",         label: "Feed",         icon: Home },
+  { href: "/explore",      label: "Explore",      icon: Compass },
+  { href: "/friends",      label: "Friends",      icon: Users },
+  { href: "/notifications", label: "Alerts",      icon: Bell },
+];
+
 interface AppNavProps {
   username: string;
   unreadNotifications?: number;
@@ -181,7 +189,7 @@ export function AppNav({ username, unreadNotifications = 0, onCheckin }: AppNavP
         style={{ background: "color-mix(in srgb, var(--surface) 95%, transparent)", borderColor: "var(--border)" }}
       >
         <div className="flex items-center justify-around px-2 py-2 pb-safe-nav">
-          {NAV_ITEMS.slice(0, 2).map(({ href, label, icon: Icon }) => {
+          {MOBILE_NAV_ITEMS.slice(0, 2).map(({ href, label, icon: Icon }) => {
             const isActive = pathname.startsWith(href);
             return (
               <Link key={href} href={href} className="flex-1" aria-label={label}>
@@ -209,15 +217,26 @@ export function AppNav({ username, unreadNotifications = 0, onCheckin }: AppNavP
             </div>
           </button>
 
-          {NAV_ITEMS.slice(2).map(({ href, label, icon: Icon }) => {
-            const isActive = pathname.startsWith(href);
+          {MOBILE_NAV_ITEMS.slice(2).map(({ href, label, icon: Icon }) => {
+            const isActive = href === "/notifications" ? pathname === href : pathname.startsWith(href);
+            const isNotifications = href === "/notifications";
             return (
               <Link key={href} href={href} className="flex-1" aria-label={label}>
                 <div
                   className="flex flex-col items-center gap-1 py-1 rounded-xl transition-colors"
                   style={{ color: isActive ? "var(--accent-gold)" : "var(--text-muted)" }}
                 >
-                  <Icon size={20} aria-hidden="true" />
+                  <div className="relative">
+                    <Icon size={20} aria-hidden="true" />
+                    {isNotifications && unreadNotifications > 0 && (
+                      <span
+                        className="absolute -top-1 -right-2 min-w-[16px] h-4 px-0.5 rounded-full text-white text-[9px] font-mono flex items-center justify-center"
+                        style={{ background: "var(--danger)" }}
+                      >
+                        {unreadNotifications > 9 ? "9+" : unreadNotifications}
+                      </span>
+                    )}
+                  </div>
                   <span className="text-[10px] font-sans">{label}</span>
                 </div>
               </Link>

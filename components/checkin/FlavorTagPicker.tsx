@@ -35,33 +35,37 @@ export function FlavorTagPicker({ selected, onChange, max = 6, className }: Flav
         const isDisabled = !isSelected && selected.length >= max;
 
         return (
-          <motion.button
+          <button
             key={tag}
             type="button"
             onClick={() => toggle(tag)}
             disabled={isDisabled}
-            whileTap={{ scale: 0.92 }}
-            transition={{ type: "spring", stiffness: 500, damping: 25 }}
             className={cn(
               "px-3 py-1.5 rounded-full text-sm font-sans font-medium",
               "border transition-all duration-150 select-none",
               isSelected
-                ? "bg-[#D4A843]/20 border-[#D4A843] text-[#D4A843]"
+                ? "bg-[var(--accent-gold)]/20 border-[var(--accent-gold)] text-[var(--accent-gold)]"
                 : "bg-[var(--surface)] border-[var(--border)] text-[var(--text-secondary)] hover:border-[#6B6456] hover:text-[var(--text-primary)]",
               isDisabled && "opacity-40 pointer-events-none"
             )}
           >
-            {isSelected && (
-              <motion.span
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                className="inline-block mr-1"
-              >
-                ✓
-              </motion.span>
-            )}
-            {tag}
-          </motion.button>
+            <motion.span
+              whileTap={{ scale: 0.92 }}
+              transition={{ type: "spring", stiffness: 500, damping: 25 }}
+              className="inline-flex items-center"
+            >
+              {isSelected && (
+                <motion.span
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  className="inline-block mr-1"
+                >
+                  ✓
+                </motion.span>
+              )}
+              {tag}
+            </motion.span>
+          </button>
         );
       })}
       {max && (

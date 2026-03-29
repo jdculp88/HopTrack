@@ -1,16 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { getLevelFromXP } from '@/lib/xp'
+import { getLevelFromXP, SESSION_XP } from '@/lib/xp'
 import { sendPushToUser } from '@/lib/push'
-
-// New XP values for sessions
-const SESSION_XP = {
-  session_start: 25,
-  per_beer: 15,
-  per_rating: 10,
-  first_visit_bonus: 50,
-  three_plus_beers_bonus: 25,
-}
 
 export async function PATCH(
   request: NextRequest,
@@ -82,6 +73,11 @@ export async function PATCH(
   }
 
   // Award XP to user + update streak
+  // NOTE: This is a read-modify-write pattern which has a theoretical race condition
+  // if two sessions for the same user end in the exact same millisecond. The window is
+  // extremely small and acceptable for now. The proper fix is an RPC function with
+  // atomic increment (e.g., `SET xp = xp + $1`), planned for Sprint 31.
+  // See: S30-025
   const { data: profile } = await (supabase as any)
     .from('profiles')
     .select('xp, level, unique_breweries, current_streak, longest_streak, last_session_date')
