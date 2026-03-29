@@ -137,7 +137,7 @@ function AnalyticsMockup() {
       <div className="h-px" style={{ background: C.darkBorder }} />
       <div className="px-5 py-4 grid grid-cols-2 gap-4">
         {[
-          { label: "Check-ins", value: "347", delta: "+18%" },
+          { label: "Sessions", value: "347", delta: "+18%" },
           { label: "Loyal regulars", value: "89", delta: "+6" },
           { label: "Avg. rating", value: "4.3★", delta: "↑0.2" },
           { label: "Top beer", value: "Debug IPA", delta: "68 logs" },
@@ -177,7 +177,7 @@ const TIERS = [
     ctaHref: "/brewery-admin/claim",
     highlight: false,
     handle: "sm" as const,
-    features: ["Live tap list management", "Loyalty stamp card program", "Check-in analytics (30 days)", "Brewery profile on HopTrack", "Up to 2 staff accounts", "Email support"],
+    features: ["Live tap list management", "Loyalty stamp card program", "Session analytics (30 days)", "Brewery profile on HopTrack", "Up to 2 staff accounts", "Email support"],
   },
   {
     name: "Cask",
@@ -207,7 +207,7 @@ const FEATURES = [
   { icon: List, title: "Live Tap List", body: "Update from any device. Changes appear instantly on your brewery's HopTrack profile — no more outdated menus or printed sheets." },
   { icon: Gift, title: "Loyalty Without the Paper", body: "Digital stamp cards your customers actually use. Set the reward, define the stamps, and edit any time — no reprinting." },
   { icon: BarChart2, title: "Analytics That Tell a Story", body: "Your busiest nights, top beers, and most loyal regulars. Pint Rewind shows you your month at a glance." },
-  { icon: Smartphone, title: "Works on Any Device", body: "Dashboard on desktop, tap list on a tablet behind the bar, check-ins on the customer's phone. Fully synced." },
+  { icon: Smartphone, title: "Works on Any Device", body: "Dashboard on desktop, tap list on a tablet behind the bar, sessions on the customer's phone. Fully synced." },
   { icon: Zap, title: "Set Up in 20 Minutes", body: "Claim your brewery, add your beers, go live. No hardware, no installation, no IT person required." },
   { icon: HeartHandshake, title: "Built With Operators", body: "Designed alongside real brewery owners. If it doesn't work on a busy Friday night, we fix it." },
 ];

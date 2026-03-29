@@ -9,6 +9,7 @@ import {
 } from "@/components/social/StreakFeedCard";
 import { FeedTabBar, type FeedTab } from "@/components/social/FeedTabBar";
 import { useSession } from "@/hooks/useSession";
+import { useFeedPagination } from "@/hooks/useFeedPagination";
 import type { FriendRating } from "@/components/social/RatingCard";
 import type { FriendAchievement } from "@/components/social/AchievementFeedCard";
 import type { NewFavoriteItem } from "@/components/social/NewFavoriteCard";
@@ -146,6 +147,29 @@ export function HomeFeed({
 
   const { getActiveSession } = useSession();
 
+  // ─── Feed Pagination ──────────────────────────────────────────────────
+
+  const friendsPagination = useFeedPagination({
+    initialSessions: sessions,
+    initialReactionCounts: reactionCounts,
+    initialUserReactions: userReactions,
+    initialCommentCounts: commentCounts,
+    tab: "friends",
+  });
+
+  const initialYouSessions = useMemo(
+    () => sessions.filter((s) => s.user_id === currentUserId),
+    [sessions, currentUserId]
+  );
+
+  const youPagination = useFeedPagination({
+    initialSessions: initialYouSessions,
+    initialReactionCounts: reactionCounts,
+    initialUserReactions: userReactions,
+    initialCommentCounts: commentCounts,
+    tab: "you",
+  });
+
   useEffect(() => {
     if (
       profile &&
@@ -174,6 +198,8 @@ export function HomeFeed({
 
   // ─── Friends Tab Feed Items ─────────────────────────────────────────────
 
+  const allFriendSessions = friendsPagination.sessions;
+
   const friendsFeed = useMemo<FeedItem[]>(() => {
     const items: FeedItem[] = [];
 
@@ -187,8 +213,8 @@ export function HomeFeed({
       });
     });
 
-    // Completed sessions (user + friends)
-    sessions.forEach((s) => {
+    // Completed sessions (user + friends) — now includes paginated sessions
+    allFriendSessions.forEach((s) => {
       items.push({ type: "session", data: s, sortDate: s.started_at });
     });
 
@@ -226,7 +252,7 @@ export function HomeFeed({
 
     // Streak milestones (derived from session profiles)
     const seenStreakUsers = new Set<string>();
-    [...activeFriendSessions, ...sessions].forEach((s) => {
+    [...activeFriendSessions, ...allFriendSessions].forEach((s) => {
       const p = (s as any).profile;
       if (
         p &&
@@ -261,7 +287,7 @@ export function HomeFeed({
       );
     });
   }, [
-    sessions,
+    allFriendSessions,
     activeFriendSessions,
     friendRatings,
     friendAchievements,
@@ -269,13 +295,6 @@ export function HomeFeed({
     friendsJoined,
     currentUserId,
   ]);
-
-  // ─── You Tab Feed ─────────────────────────────────────────────────────
-
-  const youSessions = useMemo(
-    () => sessions.filter((s) => s.user_id === currentUserId),
-    [sessions, currentUserId]
-  );
 
   const hasCommunityContent =
     communityContent &&
@@ -317,9 +336,12 @@ export function HomeFeed({
               communityContent={communityContent}
               friendCount={friendCount}
               activeFriendCount={activeFriendSessions.length}
-              reactionCounts={reactionCounts}
-              userReactions={userReactions}
-              commentCounts={commentCounts}
+              reactionCounts={friendsPagination.reactionCounts}
+              userReactions={friendsPagination.userReactions}
+              commentCounts={friendsPagination.commentCounts}
+              loading={friendsPagination.loading}
+              hasMore={friendsPagination.hasMore}
+              sentinelRef={friendsPagination.sentinelRef}
             />
           </motion.div>
         )}
@@ -351,15 +373,18 @@ export function HomeFeed({
           >
             <YouTabContent
               profile={profile}
-              sessions={youSessions}
+              sessions={youPagination.sessions}
               weekStats={weekStats}
               currentUserId={currentUserId}
               userAchievements={userAchievements}
               wishlist={wishlist}
               styleDNA={styleDNA}
-              reactionCounts={reactionCounts}
-              userReactions={userReactions}
-              commentCounts={commentCounts}
+              reactionCounts={youPagination.reactionCounts}
+              userReactions={youPagination.userReactions}
+              commentCounts={youPagination.commentCounts}
+              loading={youPagination.loading}
+              hasMore={youPagination.hasMore}
+              sentinelRef={youPagination.sentinelRef}
             />
           </motion.div>
         )}

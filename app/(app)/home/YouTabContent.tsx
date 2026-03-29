@@ -1,12 +1,13 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, type RefObject } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Beer, MapPin, Flame } from "lucide-react";
 import { SessionCard } from "@/components/social/SessionCard";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import { getLevelProgress } from "@/lib/xp";
+import { FeedLoadingSpinner, FeedEndMessage } from "./FeedPaginationUI";
 import type { Profile, Session } from "@/types/database";
 import type { StyleDNAEntry, WishlistItem, UserAchievement } from "./HomeFeed";
 
@@ -21,6 +22,9 @@ export function YouTabContent({
   reactionCounts,
   userReactions,
   commentCounts,
+  loading,
+  hasMore,
+  sentinelRef,
 }: {
   profile: Profile | null;
   sessions: Session[];
@@ -32,6 +36,9 @@ export function YouTabContent({
   reactionCounts?: Record<string, Record<string, number>>;
   userReactions?: Record<string, string[]>;
   commentCounts?: Record<string, number>;
+  loading?: boolean;
+  hasMore?: boolean;
+  sentinelRef?: RefObject<HTMLDivElement | null>;
 }) {
   const levelInfo = profile ? getLevelProgress(profile.xp) : null;
 
@@ -356,6 +363,13 @@ export function YouTabContent({
                 />
               </motion.div>
             ))}
+
+            {/* Pagination sentinel + status */}
+            {loading && <FeedLoadingSpinner />}
+            {!hasMore && sessions.length >= 20 && <FeedEndMessage />}
+            {sentinelRef && hasMore && !loading && (
+              <div ref={sentinelRef} className="h-4" />
+            )}
           </div>
         ) : (
           <div className="text-center py-10 space-y-3">

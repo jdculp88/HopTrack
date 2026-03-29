@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Beer, Home } from "lucide-react";
 import { UserAvatar } from "@/components/ui/UserAvatar";
@@ -28,6 +28,7 @@ function elapsedLabel(startedAt: string): string {
 }
 
 export function DrinkingNow() {
+  const router = useRouter();
   const [friends, setFriends] = useState<ActiveFriend[]>([]);
   const [loaded, setLoaded] = useState(false);
 
@@ -99,14 +100,18 @@ export function DrinkingNow() {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: i * 0.06 }}
               >
-                <Link href={href}>
-                  <div
-                    className="flex flex-col items-center gap-2 p-3 rounded-2xl border transition-all flex-shrink-0 w-[140px]"
-                    style={{
-                      background: "var(--surface)",
-                      borderColor: "var(--border)",
-                    }}
-                  >
+                <div
+                  role="link"
+                  tabIndex={0}
+                  aria-label={`View ${f.displayName.split(" ")[0]}'s session`}
+                  onClick={() => router.push(href)}
+                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); router.push(href); } }}
+                  className="flex flex-col items-center gap-2 p-3 rounded-2xl border transition-all flex-shrink-0 w-[140px] cursor-pointer"
+                  style={{
+                    background: "var(--surface)",
+                    borderColor: "var(--border)",
+                  }}
+                >
                     {/* Avatar with subtle pulse ring */}
                     <div className="relative">
                       <div
@@ -172,7 +177,6 @@ export function DrinkingNow() {
                     {/* Send cheers */}
                     <CheersButton sessionId={f.sessionId} />
                   </div>
-                </Link>
               </motion.div>
             );
           })}
@@ -198,6 +202,7 @@ function CheersButton({ sessionId }: { sessionId: string }) {
           body: JSON.stringify({ session_id: sessionId, type: "beer" }),
         }).catch(() => {});
       }}
+      aria-label={sent ? "Cheers sent" : "Send cheers"}
       className="flex items-center gap-1 text-[10px] font-medium px-2.5 py-1 rounded-lg transition-colors"
       style={{
         color: sent ? "var(--text-muted)" : "var(--accent-gold)",

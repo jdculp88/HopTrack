@@ -95,6 +95,7 @@ export function ReactionBar({
             e.stopPropagation();
             toggleReaction();
           }}
+          aria-label={hasReacted ? "Remove cheers" : "Send cheers"}
           className="flex items-center gap-1.5 text-[13px] transition-colors"
           style={{
             color: hasReacted ? "var(--accent-amber, #c0583a)" : "var(--text-muted)",
@@ -118,6 +119,7 @@ export function ReactionBar({
         <div
           className="flex items-center gap-1.5 text-[13px]"
           style={{ color: "var(--text-muted)" }}
+          aria-label={`${commentCount} comment${commentCount !== 1 ? "s" : ""}`}
         >
           <MessageCircle size={14} />
           <span>{commentCount}</span>
@@ -132,6 +134,7 @@ export function ReactionBar({
             e.stopPropagation();
             handleShare();
           }}
+          aria-label="Share session"
           className={`flex items-center gap-1 text-[13px] transition-colors ${centered ? "" : "ml-auto"}`}
           style={{ color: "var(--text-muted)" }}
         >

@@ -1,11 +1,13 @@
 "use client";
 
+import type { RefObject } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Compass, UserPlus } from "lucide-react";
 import { DrinkingNow } from "@/components/social/DrinkingNow";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import { FeedItemCard, type FeedItem } from "./FeedItemCard";
+import { FeedLoadingSpinner, FeedEndMessage } from "./FeedPaginationUI";
 import type { Profile } from "@/types/database";
 import type { FeaturedBeer } from "@/components/social/BeerOfTheWeekCard";
 
@@ -23,6 +25,9 @@ export function FriendsTabContent({
   reactionCounts,
   userReactions,
   commentCounts,
+  loading,
+  hasMore,
+  sentinelRef,
 }: {
   profile: Profile | null;
   feedItems: FeedItem[];
@@ -33,6 +38,9 @@ export function FriendsTabContent({
   reactionCounts?: Record<string, Record<string, number>>;
   userReactions?: Record<string, string[]>;
   commentCounts?: Record<string, number>;
+  loading?: boolean;
+  hasMore?: boolean;
+  sentinelRef?: RefObject<HTMLDivElement | null>;
 }) {
   const liveCountLabel =
     activeFriendCount > 0
@@ -121,6 +129,13 @@ export function FriendsTabContent({
               />
             </div>
           ))}
+
+          {/* Pagination sentinel + status */}
+          {loading && <FeedLoadingSpinner />}
+          {!hasMore && feedItems.length >= 20 && <FeedEndMessage />}
+          {sentinelRef && hasMore && !loading && (
+            <div ref={sentinelRef} className="h-4" />
+          )}
         </div>
       ) : (
         <FriendsEmptyState />

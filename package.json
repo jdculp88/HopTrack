@@ -25,7 +25,9 @@
     "cap:add:ios": "npx cap add ios",
     "cap:sync": "npx cap sync",
     "cap:open:ios": "npx cap open ios",
-    "cap:build": "next build && npx cap sync"
+    "cap:build": "next build && npx cap sync",
+    "test:e2e": "npx playwright test",
+    "test:e2e:ui": "npx playwright test --ui"
   },
   "dependencies": {
     "@capacitor/cli": "^8.3.0",

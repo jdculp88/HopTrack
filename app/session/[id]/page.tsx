@@ -87,9 +87,9 @@ export default async function SessionSharePage({ params }: Props) {
     <div className="min-h-screen flex items-center justify-center p-4" style={{ background: "var(--bg)" }}>
       <div className="w-full max-w-md space-y-6">
         {/* Session card */}
-        <div className="bg-[#1A1917] border border-[#2A2723] rounded-2xl overflow-hidden">
+        <div className="rounded-2xl overflow-hidden" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
           {/* Header */}
-          <div className="bg-gradient-to-r from-[var(--accent-gold)]/10 to-transparent p-6 border-b border-[#2A2723]">
+          <div className="p-6" style={{ background: "linear-gradient(to right, color-mix(in srgb, var(--accent-gold) 10%, transparent), transparent)", borderBottom: "1px solid var(--border)" }}>
             <div className="flex items-center gap-3 mb-3">
               {session.profile?.avatar_url ? (
                 <img src={session.profile.avatar_url} alt="" className="w-10 h-10 rounded-full object-cover" />
@@ -99,47 +99,47 @@ export default async function SessionSharePage({ params }: Props) {
                 </div>
               )}
               <div>
-                <p className="font-semibold text-[#F5F0E8] text-sm">{displayName}</p>
+                <p className="font-semibold text-sm" style={{ color: "var(--text-primary)" }}>{displayName}</p>
                 {session.profile?.level && (
                   <p className="text-xs text-[var(--accent-gold)]">Level {session.profile.level}</p>
                 )}
               </div>
             </div>
-            <h1 className="font-display text-xl font-bold text-[#F5F0E8]">{breweryName}</h1>
-            {location && <p className="text-sm text-[#A89F8C] mt-1">{location}</p>}
+            <h1 className="font-display text-xl font-bold" style={{ color: "var(--text-primary)" }}>{breweryName}</h1>
+            {location && <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>{location}</p>}
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-3 divide-x divide-[#2A2723] border-b border-[#2A2723]">
-            <div className="p-4 text-center">
+          <div className="grid grid-cols-3" style={{ borderBottom: "1px solid var(--border)" }}>
+            <div className="p-4 text-center" style={{ borderRight: "1px solid var(--border)" }}>
               <p className="font-display text-2xl font-bold text-[var(--accent-gold)]">{beerCount}</p>
-              <p className="text-xs text-[#6B6456] mt-1">Beer{beerCount !== 1 ? "s" : ""}</p>
+              <p className="text-xs text-[var(--text-muted)] mt-1">Beer{beerCount !== 1 ? "s" : ""}</p>
             </div>
-            <div className="p-4 text-center">
+            <div className="p-4 text-center" style={{ borderRight: "1px solid var(--border)" }}>
               <p className="font-display text-2xl font-bold text-[var(--accent-gold)]">+{xpEarned}</p>
-              <p className="text-xs text-[#6B6456] mt-1">XP</p>
+              <p className="text-xs text-[var(--text-muted)] mt-1">XP</p>
             </div>
             <div className="p-4 text-center">
               <p className="font-display text-2xl font-bold text-[var(--accent-gold)]">{endedAt ? durationStr : "Live"}</p>
-              <p className="text-xs text-[#6B6456] mt-1">Duration</p>
+              <p className="text-xs text-[var(--text-muted)] mt-1">Duration</p>
             </div>
           </div>
 
           {/* Beer list */}
           {beerLogs.length > 0 && (
             <div className="p-4 space-y-2">
-              <p className="text-xs font-mono uppercase tracking-wider text-[#6B6456] mb-3">Beers Logged</p>
+              <p className="text-xs font-mono uppercase tracking-wider text-[var(--text-muted)] mb-3">Beers Logged</p>
               {beerLogs.slice(0, 8).map((log: any, i: number) => (
                 <div key={log.id || i} className="flex items-center justify-between py-1.5">
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-[#F5F0E8] truncate">{log.beer?.name || "Unknown Beer"}</p>
+                    <p className="text-sm text-[var(--text-primary)] truncate">{log.beer?.name || "Unknown Beer"}</p>
                     {log.beer?.style && (
-                      <p className="text-xs text-[#6B6456]">{log.beer.style}</p>
+                      <p className="text-xs text-[var(--text-muted)]">{log.beer.style}</p>
                     )}
                   </div>
                   <div className="flex items-center gap-3 ml-2">
                     {log.quantity > 1 && (
-                      <span className="text-xs text-[#A89F8C]">×{log.quantity}</span>
+                      <span className="text-xs text-[var(--text-secondary)]">×{log.quantity}</span>
                     )}
                     {log.rating && (
                       <span className="text-xs text-[var(--accent-gold)]">{"★".repeat(log.rating)}</span>
@@ -148,18 +148,18 @@ export default async function SessionSharePage({ params }: Props) {
                 </div>
               ))}
               {beerLogs.length > 8 && (
-                <p className="text-xs text-[#6B6456] pt-1">+{beerLogs.length - 8} more</p>
+                <p className="text-xs text-[var(--text-muted)] pt-1">+{beerLogs.length - 8} more</p>
               )}
             </div>
           )}
 
           {/* Footer */}
-          <div className="p-4 border-t border-[#2A2723] flex items-center justify-between">
+          <div className="p-4 flex items-center justify-between" style={{ borderTop: "1px solid var(--border)" }}>
             <div className="flex items-center gap-2">
               <span className="text-lg">🍺</span>
-              <span className="text-xs font-mono text-[#6B6456]">HopTrack</span>
+              <span className="text-xs font-mono text-[var(--text-muted)]">HopTrack</span>
             </div>
-            <p className="text-xs text-[#6B6456]">
+            <p className="text-xs text-[var(--text-muted)]">
               {startedAt.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
             </p>
           </div>
@@ -173,7 +173,7 @@ export default async function SessionSharePage({ params }: Props) {
           Open in HopTrack
         </Link>
 
-        <p className="text-center text-xs text-[#6B6456]">
+        <p className="text-center text-xs text-[var(--text-muted)]">
           Track every pour. Earn XP. Discover craft beer.
         </p>
       </div>

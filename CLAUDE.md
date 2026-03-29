@@ -234,7 +234,7 @@ scripts/supabase-setup.mjs    — One-time setup script
 
 ## 🗺️ Where We Are
 
-**Current Sprint:** Sprint 31 — Launch Polish (not started)
+**Current Sprint:** Sprint 31 — Launch Polish (in progress, 2026-03-29)
 **Last completed:** Sprint 30 — Foundation Fix ✅ (2026-03-29)
 
 ### Key design decisions (still active from Sprint 11):
@@ -858,9 +858,46 @@ Full team testing audit (all 13 members) found 85 unique issues. Sprint 30 kille
 - Feed infinite scroll / pagination
 - E2E tests
 
-### Migration state (Sprint 30)
-- 034: Fix 3 critical RLS policies (notifications INSERT, beers UPDATE/DELETE, user_achievements SELECT) — CREATED, APPLY TO REMOTE
-- 035: Reactions UNIQUE constraint, beer_logs.beer_id text→uuid FK, push_subscriptions UPDATE policy — CREATED, APPLY TO REMOTE
+### Sprint 31 — Launch Polish (2026-03-29, IN PROGRESS)
+**Theme:** Make it maintainable, secure, and sellable
+**Plan:** `docs/sprint-31-plan.md`
+**Retro:** Sprint 30 retro at `docs/retros/sprint-30-retro.md`
+
+**Session 1 (2026-03-29):**
+- ✅ S31-005: HomeFeed.tsx split — 1318 lines → 6 files (HomeFeed orchestrator + FriendsTabContent, DiscoverTabContent, YouTabContent, OnboardingCard, FeedItemCard)
+- ✅ S31-009: Password reset flow — forgot-password page, reset-password page, auth callback handler
+- ✅ S31-010: Username uniqueness check on signup — debounced API validation, inline feedback
+- ✅ S31-014: Trial badge + days remaining in BreweryAdminNav sidebar
+- ✅ S31-015: "Upgrade Plan" CTA in sidebar footer → links to billing page
+- ✅ S31-016: Billing page with 3-tier pricing (Tap $49/Cask $149/Barrel custom)
+- ✅ S31-017: Brewery admin onboarding card — 4-step checklist, auto-detect completion
+- ✅ S31-021: XP atomic increment via RPC (migration 036) — fixes race condition
+- ✅ S31-022/023: Session-end API rewrite — batched achievement checks + batched push notifications
+- ✅ S31-036: Dead checkins code removed from seed files 003, 006
+
+**Session 2 (2026-03-29, in progress):**
+- S31-006: Refactor `page.tsx` data fetching → `lib/queries/feed.ts`
+- S31-024: Feed infinite scroll / pagination with IntersectionObserver
+- S31-034/035: Playwright E2E test setup (Casey's 12th carry)
+- S31-029-033: UX polish — aria-labels, light theme fixes, copy sweep
+
+**Key architectural changes from Sprint 31:**
+- `HomeFeed.tsx` split into 6 files: `HomeFeed.tsx` (orchestrator), `FriendsTabContent.tsx`, `DiscoverTabContent.tsx`, `YouTabContent.tsx`, `OnboardingCard.tsx`, `FeedItemCard.tsx`
+- `FeedItem` union type exported from `FeedItemCard.tsx`
+- `NewBrewery`, `CommunityContent`, `UserAchievement`, `WishlistItem`, `StyleDNAEntry` types exported from `HomeFeed.tsx`
+- Password reset: `/forgot-password` → Supabase email → `/auth/reset-password` (code exchange) → `/reset-password` (new password form)
+- `/api/users/check-username` — public GET endpoint for username availability
+- `/brewery-admin/[id]/billing` — tier comparison page with trial countdown
+- `BreweryOnboardingCard` at `components/brewery-admin/BreweryOnboardingCard.tsx`
+- `BreweryAdminNav` — added Billing nav item (CreditCard icon), trial badge, upgrade CTA
+- Migration 036: `increment_xp` RPC function — atomic XP + streak + brewery count update
+- Session-end API: 3 batch queries replace N+1 achievement checks, 1 batch query replaces N+1 push notifications
+- Dead `checkins` INSERT blocks removed from seeds 003, 006 (~250 lines)
+
+### Migration state (Sprint 31)
+- 034: Fix 3 critical RLS policies — CREATED, APPLY TO REMOTE
+- 035: Reactions UNIQUE constraint, beer_logs.beer_id FK, push_subscriptions UPDATE — CREATED, APPLY TO REMOTE
+- 036: `increment_xp` RPC function — CREATED, APPLY TO REMOTE
 
 ### Revenue Targets
 - Tap tier: $49/mo
