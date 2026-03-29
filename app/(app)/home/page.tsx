@@ -10,7 +10,9 @@ import {
   fetchReactionData,
   fetchFriendActivity,
   fetchFriendIds,
+  fetchActivityHeatmap,
 } from "@/lib/queries/feed";
+import { getRecommendations } from "@/lib/recommendations";
 
 export const metadata = { title: "Feed" };
 
@@ -38,6 +40,12 @@ export default async function HomePage() {
       fetchSocialData(supabase, user.id, friendIds),
       fetchFriendActivity(supabase, user.id, friendIds),
     ]);
+
+  // Beer recommendations + activity heatmap (fault-tolerant)
+  const [recommendations, activityHeatmap] = await Promise.all([
+    getRecommendations(user.id).catch(() => []),
+    fetchActivityHeatmap(supabase, user.id),
+  ]);
 
   // Reaction + comment counts depend on session IDs from above
   const allSessionIds = [
@@ -89,6 +97,8 @@ export default async function HomePage() {
       reactionCounts={reactionCounts}
       userReactions={userReactions}
       commentCounts={commentCounts}
+      recommendations={recommendations}
+      activityHeatmap={activityHeatmap}
     />
   );
 }

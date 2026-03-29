@@ -1,15 +1,17 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Map, List, Loader2, SlidersHorizontal, X, Sparkles } from "lucide-react";
+import { Search, Map, List, Loader2, SlidersHorizontal, X, Sparkles, Navigation } from "lucide-react";
 import { BreweryCard } from "@/components/brewery/BreweryCard";
 import { SkeletonCard } from "@/components/ui/SkeletonLoader";
 import { useToast } from "@/components/ui/Toast";
 import type { BreweryWithStats, BreweryType } from "@/types/database";
 import { searchBreweries, mapOpenBreweryToDb } from "@/lib/openbrewerydb";
+import { useGeolocation } from "@/hooks/useGeolocation";
+import { haversineDistance, formatDistance } from "@/lib/geo";
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -61,8 +63,42 @@ export function ExploreClient({ breweries: initialBreweries, hasBeerOfTheWeek = 
   const enriched = initialBreweries.map(b => ({ ...b, has_upcoming_events: hasUpcomingEvents.includes(b.id) }));
   const [breweries, setBreweries] = useState<BreweryWithStats[]>(enriched);
   const [searching, setSearching] = useState(false);
+  const geo = useGeolocation();
+  const [nearMeActive, setNearMeActive] = useState(false);
 
   const activeFilterCount = (typeFilter !== "all" ? 1 : 0) + (botwFilter ? 1 : 0);
+
+  // Near Me toggle handler
+  const toggleNearMe = useCallback(() => {
+    if (nearMeActive) {
+      setNearMeActive(false);
+      geo.disable();
+    } else {
+      geo.requestLocation();
+      setNearMeActive(true);
+    }
+  }, [nearMeActive, geo]);
+
+  // When geolocation errors out (denied), disable the toggle
+  useEffect(() => {
+    if (geo.error && nearMeActive) {
+      setNearMeActive(false);
+    }
+  }, [geo.error, nearMeActive]);
+
+  // Pre-compute distances for all breweries when location is available
+  const distanceMap = useMemo(() => {
+    const map: Record<string, number> = {};
+    if (!geo.latitude || !geo.longitude) return map;
+    for (const b of initialBreweries) {
+      const lat = (b as any).latitude;
+      const lng = (b as any).longitude;
+      if (typeof lat === "number" && typeof lng === "number") {
+        map[b.id] = haversineDistance(geo.latitude, geo.longitude, lat, lng);
+      }
+    }
+    return map;
+  }, [geo.latitude, geo.longitude, initialBreweries]);
 
   // Sync state → URL without re-rendering the page
   const pushParams = useCallback((updates: Record<string, string>) => {
@@ -107,6 +143,12 @@ export function ExploreClient({ breweries: initialBreweries, hasBeerOfTheWeek = 
       // Beer of the Week filter
       if (botwFilter && !hasBeerOfTheWeek.includes(b.id)) return false;
       return true;
+    })
+    .sort((a: any, b: any) => {
+      if (!nearMeActive || !geo.enabled) return 0;
+      const distA = distanceMap[a.id] ?? Infinity;
+      const distB = distanceMap[b.id] ?? Infinity;
+      return distA - distB;
     });
 
   const visitedCount   = initialBreweries.filter((b: any) => !!b.user_visit).length;
@@ -118,6 +160,25 @@ export function ExploreClient({ breweries: initialBreweries, hasBeerOfTheWeek = 
       <div className="flex items-center justify-between">
         <h1 className="font-display text-3xl font-bold text-[var(--text-primary)]">Explore</h1>
         <div className="flex items-center gap-2">
+          {/* Near Me toggle — hidden if geolocation denied */}
+          {!(geo.error && !nearMeActive) && (
+            <button
+              onClick={toggleNearMe}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm transition-all border"
+              style={
+                nearMeActive && geo.enabled
+                  ? { background: "color-mix(in srgb, var(--accent-gold) 10%, transparent)", color: "var(--accent-gold)", borderColor: "color-mix(in srgb, var(--accent-gold) 30%, transparent)" }
+                  : { background: "var(--surface)", color: "var(--text-muted)", borderColor: "var(--border)" }
+              }
+            >
+              {geo.loading ? (
+                <Loader2 size={14} className="animate-spin" />
+              ) : (
+                <Navigation size={14} />
+              )}
+              Near Me
+            </button>
+          )}
           {/* Filter toggle */}
           <button
             onClick={() => setShowFilters((v) => !v)}
@@ -298,8 +359,21 @@ export function ExploreClient({ breweries: initialBreweries, hasBeerOfTheWeek = 
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: i * 0.04 }}
+                      className="relative"
                     >
                       <BreweryCard brewery={b} />
+                      {nearMeActive && geo.enabled && b.id in distanceMap && (
+                        <span
+                          className="absolute top-3 right-3 z-10 text-[10px] font-mono px-2 py-0.5 rounded-full"
+                          style={{
+                            background: "color-mix(in srgb, var(--accent-gold) 15%, transparent)",
+                            color: "var(--accent-gold)",
+                            border: "1px solid color-mix(in srgb, var(--accent-gold) 30%, transparent)",
+                          }}
+                        >
+                          {formatDistance(distanceMap[b.id]!)}
+                        </span>
+                      )}
                     </motion.div>
                   ))
               }
@@ -342,6 +416,18 @@ export function ExploreClient({ breweries: initialBreweries, hasBeerOfTheWeek = 
                           </div>
                         ) : (
                           <BreweryCard brewery={b} />
+                        )}
+                        {nearMeActive && geo.enabled && b.id in distanceMap && (
+                          <span
+                            className="absolute top-3 right-3 z-10 text-[10px] font-mono px-2 py-0.5 rounded-full"
+                            style={{
+                              background: "color-mix(in srgb, var(--accent-gold) 15%, transparent)",
+                              color: "var(--accent-gold)",
+                              border: "1px solid color-mix(in srgb, var(--accent-gold) 30%, transparent)",
+                            }}
+                          >
+                            {formatDistance(distanceMap[b.id]!)}
+                          </span>
                         )}
                       </motion.div>
                     );

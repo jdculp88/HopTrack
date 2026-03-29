@@ -9,6 +9,7 @@ import { StarRating, RatingDisplay } from "@/components/ui/StarRating";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import { generateGradientFromString, formatABV } from "@/lib/utils";
 import { BeerReviewSection } from "@/components/beer/BeerReviewSection";
+import { getSimilarBeers } from "@/lib/recommendations";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -54,6 +55,9 @@ export default async function BeerPage({ params }: { params: Promise<{ id: strin
   const tagFreq: Record<string, number> = {};
   allTags.forEach((t: string) => { tagFreq[t] = (tagFreq[t] ?? 0) + 1; });
   const sortedTags = Object.entries(tagFreq).sort((a, b) => b[1] - a[1]).slice(0, 10);
+
+  // Similar beers
+  const similarBeers = await getSimilarBeers(id, beer.style, beer.brewery_id).catch(() => []);
 
   const gradient = generateGradientFromString(beer.name + beer.brewery_id);
   const brewery = beer.brewery;
@@ -120,6 +124,31 @@ export default async function BeerPage({ params }: { params: Promise<{ id: strin
               >
                 {tag}
               </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Similar Beers */}
+      {similarBeers.length > 0 && (
+        <div>
+          <h2 className="font-display text-xl font-bold text-[var(--text-primary)] mb-3">Similar Beers</h2>
+          <div className="grid grid-cols-2 gap-3">
+            {similarBeers.map((similar: any) => (
+              <Link key={similar.id} href={`/beer/${similar.id}`}>
+                <div className="p-3 rounded-xl bg-[var(--surface)] border border-[var(--border)] hover:border-[var(--accent-gold)]/30 transition-all">
+                  <p className="font-display font-bold text-sm truncate text-[var(--text-primary)]">{similar.name}</p>
+                  {similar.brewery && (
+                    <p className="text-[10px] truncate text-[var(--text-muted)] mt-0.5">{similar.brewery.name}</p>
+                  )}
+                  <div className="flex items-center gap-2 mt-1.5">
+                    {similar.style && <BeerStyleBadge style={similar.style} size="xs" />}
+                    {similar.avg_rating > 0 && (
+                      <span className="text-xs font-mono text-[var(--accent-gold)]">★ {similar.avg_rating.toFixed(1)}</span>
+                    )}
+                  </div>
+                </div>
+              </Link>
             ))}
           </div>
         </div>

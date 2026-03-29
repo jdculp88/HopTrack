@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { MessageCircle, Share2 } from "lucide-react";
 import { useToast } from "@/components/ui/Toast";
 
@@ -29,6 +29,8 @@ export function ReactionBar({
   const [counts, setCounts] = useState(reactionCounts);
   const [myReactions, setMyReactions] = useState<string[]>(userReactions);
   const [animating, setAnimating] = useState<string | null>(null);
+  const [particles, setParticles] = useState<Array<{ id: number; angle: number }>>([]);
+  const particleIdRef = useRef(0);
   const { error: showError } = useToast();
 
   const beerCount = counts.beer ?? 0;
@@ -49,6 +51,19 @@ export function ReactionBar({
     }));
     setAnimating(type);
     setTimeout(() => setAnimating(null), 300);
+
+    // Cheers animation: gold particles + haptic
+    if (!wasActive) {
+      if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+        navigator.vibrate(30);
+      }
+      const newParticles = Array.from({ length: 6 }, (_, i) => ({
+        id: particleIdRef.current++,
+        angle: (i / 6) * 360 + Math.random() * 30,
+      }));
+      setParticles(newParticles);
+      setTimeout(() => setParticles([]), 600);
+    }
 
     try {
       const res = await fetch("/api/reactions", {
@@ -96,7 +111,7 @@ export function ReactionBar({
             toggleReaction();
           }}
           aria-label={hasReacted ? "Remove cheers" : "Send cheers"}
-          className="flex items-center gap-1.5 text-[13px] transition-colors"
+          className="flex items-center gap-1.5 text-[13px] transition-colors relative"
           style={{
             color: hasReacted ? "var(--accent-amber, #c0583a)" : "var(--text-muted)",
           }}
@@ -111,6 +126,23 @@ export function ReactionBar({
             🍺
           </span>
           {beerCount > 0 && <span>{beerCount}</span>}
+          {/* Gold particle burst on cheers */}
+          {particles.map((p) => (
+            <span
+              key={p.id}
+              className="absolute pointer-events-none"
+              style={{
+                left: "50%",
+                top: "50%",
+                width: 4,
+                height: 4,
+                borderRadius: "50%",
+                background: "var(--accent-gold)",
+                animation: "cheers-burst 0.5s ease-out forwards",
+                transform: `rotate(${p.angle}deg)`,
+              }}
+            />
+          ))}
         </button>
       )}
 

@@ -280,7 +280,10 @@ export type NotificationType =
   | "session_cheers"
   | "session_comment"
   | "weekly_stats"
-  | "nudge";
+  | "nudge"
+  | "brewery_follow"
+  | "new_tap"
+  | "new_event";
 
 export interface Notification {
   id: string;
@@ -404,3 +407,22 @@ export interface LeaderboardEntry {
   value: number;
   change?: number; // position change
 }
+
+// ─── Brewery Follows ─────────────────────────────────────────────────────────
+export interface BreweryFollow {
+  id: string;
+  user_id: string;
+  brewery_id: string;
+  created_at: string;
+}
+export type BreweryFollowInsert = Omit<BreweryFollow, "id" | "created_at"> & { id?: string };
+
+// ─── Session Photos ──────────────────────────────────────────────────────────
+export interface SessionPhoto {
+  id: string;
+  session_id: string;
+  user_id: string;
+  photo_url: string;
+  created_at: string;
+}
+export type SessionPhotoInsert = Omit<SessionPhoto, "id" | "created_at"> & { id?: string };

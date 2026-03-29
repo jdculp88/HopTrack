@@ -234,8 +234,8 @@ scripts/supabase-setup.mjs    — One-time setup script
 
 ## 🗺️ Where We Are
 
-**Current Sprint:** Sprint 32 (not started)
-**Last completed:** Sprint 31 — Launch Polish ✅ (2026-03-29)
+**Current Sprint:** Sprint 33 (not started)
+**Last completed:** Sprint 32 — The Vibe ✅ (2026-03-29)
 
 ### Key design decisions (still active from Sprint 11):
 - Marketing pages use hardcoded `C` color constants (not CSS vars)
@@ -912,11 +912,49 @@ Full team testing audit (all 13 members) found 85 unique issues. Sprint 30 kille
 - `/terms` page added (Terms of Service placeholder)
 - Dead `checkins` INSERT blocks removed from seeds 003, 006 (~250 lines)
 
+### Sprint 32 — The Vibe ✅ (2026-03-29)
+**Theme:** Make it feel alive — social depth, smart recommendations, micro-interactions
+**Plan:** `docs/sprint-32-plan.md`
+**Retro:** `docs/retros/sprint-32-retro.md`
+
+**Session 1 (2026-03-29):**
+- ✅ S32-001: Brewery Follow System — migration 037 (`brewery_follows` + `session_photos` tables), API (GET/POST/DELETE), `FollowBreweryButton` component, 3 new notification types
+- ✅ S32-002: Beer Recommendations — `lib/recommendations.ts` engine (style-based), `RecommendationsScroll` on Discover tab, `getSimilarBeers()` on beer detail page
+- ✅ S32-003: Activity Heatmap — `ActivityHeatmap` component (GitHub-style 52-week grid), wired into You tab, `fetchActivityHeatmap` query
+- ✅ S32-004: Cheers Animations — gold particle burst on ReactionBar cheers, haptic feedback, CSS keyframes
+- ✅ S32-005: Explore Geolocation — `useGeolocation` hook, `haversineDistance` utility, "Near Me" toggle on explore, distance badges
+- ✅ S32-006: Notification Grouping — same-type + same-session within 1hr grouped, avatar stacks, expandable groups, group-aware unread count
+- ✅ S32-007: Customer Insights — `/brewery-admin/[id]/customers` page, tier badges (Regular/Power User/VIP), sortable/searchable table, "Customers" nav item
+- ✅ S32-008: Session Photos — `session_photos` table + storage bucket (migration 037), API (GET/POST/DELETE), `SessionPhotos` carousel component
+- ✅ S32-009: Session Complete Redesign — sparkle celebration header, 4-column stats row, fun fact (brewery user stats API), per-beer stats + glass icons, XP breakdown card, level progress bar, polished actions
+
+**Key architectural changes from Sprint 32:**
+- Migration 037: `brewery_follows` table (UNIQUE user+brewery) + `session_photos` table + `session-photos` storage bucket
+- `FollowBreweryButton` at `components/brewery/FollowBreweryButton.tsx` — heart icon with fill animation, follow count
+- `/api/brewery/[id]/follow` — GET (status + count), POST (follow), DELETE (unfollow)
+- `lib/recommendations.ts` — `getRecommendations()` (style-based, excludes tried beers), `getSimilarBeers()` (same style, different brewery)
+- `RecommendationsScroll` at `components/social/RecommendationsScroll.tsx` — horizontal scroll "For You" section
+- `ActivityHeatmap` at `components/profile/ActivityHeatmap.tsx` — 52-week grid, 4 intensity levels, responsive (26-week compact mode)
+- `lib/geo.ts` — `haversineDistance()`, `formatDistance()` (client-side, no server data sent)
+- `hooks/useGeolocation.ts` — session-cached coordinates, graceful fallback
+- `hooks/useCheersAnimation.ts` — particle state + haptic trigger
+- `ReactionBar` — gold particle burst animation on cheers, `cheers-burst` CSS keyframe in globals.css
+- `NotificationsClient` — grouped notifications with `buildFeedEntries()`, `AvatarStack`, expandable groups
+- `/brewery-admin/[id]/customers` — server-side session aggregation, `CustomersClient` with tier badges + sort + search
+- `/api/brewery/[id]/user-stats` — total time, most-ordered beer, visitor rank
+- `/api/sessions/[id]/photos` — CRUD for session photos (5 limit per session)
+- `SessionPhotos` at `components/social/SessionPhotos.tsx` — carousel with dot indicators
+- `SessionRecapSheet` redesigned: sparkle header, stats row, fun fact, per-beer cards with stats, XP breakdown, level progress bar
+- `NotificationType` extended: `brewery_follow`, `new_tap`, `new_event`
+- `types/database.ts` — `BreweryFollow`, `SessionPhoto` types added
+- `BreweryAdminNav` — "Customers" nav item added
+
 ### Migration state (current)
 - 034: Fix 3 critical RLS policies ✅ APPLIED (S31)
 - 035: Reactions UNIQUE constraint (deduplicated first), beer_logs.beer_id FK, push_subscriptions UPDATE ✅ APPLIED (S31)
 - 036: `increment_xp` RPC function ✅ APPLIED (S31)
-- PGRST schema cache reloaded after 035/036 ✅
+- 037: `brewery_follows` + `session_photos` tables + `session-photos` storage bucket ✅ APPLIED (S32)
+- PGRST schema cache reloaded after 035/036/037 ✅
 
 ### Revenue Targets
 - Tap tier: $49/mo

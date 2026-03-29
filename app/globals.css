@@ -159,6 +159,11 @@
   100% { background-position: -200% 0; }
 }
 
+@keyframes cheers-burst {
+  0% { opacity: 1; transform: translate(-50%, -50%) translateY(0) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -50%) translateY(-20px) scale(0); }
+}
+
 /* ── Base ─────────────────────────────────────────────────────────────────── */
 * { box-sizing: border-box; }
 

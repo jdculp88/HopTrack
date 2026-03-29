@@ -84,6 +84,17 @@ export interface StyleDNAEntry {
   avgRating: number | null;
 }
 
+export interface RecommendedBeer {
+  id: string;
+  name: string;
+  style: string | null;
+  abv: number | null;
+  avg_rating: number | null;
+  total_ratings: number;
+  brewery: { id: string; name: string; city: string | null } | null;
+  reason: string;
+}
+
 interface HomeFeedProps {
   profile: Profile | null;
   sessions: Session[];
@@ -102,6 +113,8 @@ interface HomeFeedProps {
   reactionCounts?: Record<string, Record<string, number>>;
   userReactions?: Record<string, string[]>;
   commentCounts?: Record<string, number>;
+  recommendations?: RecommendedBeer[];
+  activityHeatmap?: { date: string; count: number }[];
 }
 
 // ─── HomeFeed ───────────────────────────────────────────────────────────────
@@ -124,6 +137,8 @@ export function HomeFeed({
   reactionCounts,
   userReactions,
   commentCounts,
+  recommendations,
+  activityHeatmap,
 }: HomeFeedProps) {
   const [activeTab, setActiveTab] = useState<FeedTab>("friends");
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -364,6 +379,7 @@ export function HomeFeed({
             <DiscoverTabContent
               communityContent={communityContent}
               hasCommunityContent={!!hasCommunityContent}
+              recommendations={recommendations}
             />
           </motion.div>
         )}
@@ -395,6 +411,7 @@ export function HomeFeed({
                 loading={youPagination.loading}
                 hasMore={youPagination.hasMore}
                 sentinelRef={youPagination.sentinelRef}
+                activityHeatmap={activityHeatmap}
               />
             </ReactionProvider>
           </motion.div>

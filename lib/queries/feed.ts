@@ -498,6 +498,37 @@ export async function fetchFriendActivity(
 /**
  * Fetch friend IDs from accepted friendships.
  */
+/**
+ * Activity heatmap data — daily pour counts for the last 52 weeks.
+ */
+export async function fetchActivityHeatmap(
+  supabase: SupabaseClient,
+  userId: string
+): Promise<{ date: string; count: number }[]> {
+  try {
+    const oneYearAgo = new Date();
+    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+
+    const { data: logs } = await (supabase as any)
+      .from("beer_logs")
+      .select("logged_at, quantity")
+      .eq("user_id", userId)
+      .gte("logged_at", oneYearAgo.toISOString());
+
+    if (!logs || logs.length === 0) return [];
+
+    const dayMap = new Map<string, number>();
+    for (const log of logs as any[]) {
+      const date = new Date(log.logged_at).toISOString().split("T")[0];
+      dayMap.set(date, (dayMap.get(date) || 0) + (log.quantity ?? 1));
+    }
+
+    return Array.from(dayMap.entries()).map(([date, count]) => ({ date, count }));
+  } catch {
+    return [];
+  }
+}
+
 export async function fetchFriendIds(
   supabase: SupabaseClient,
   userId: string

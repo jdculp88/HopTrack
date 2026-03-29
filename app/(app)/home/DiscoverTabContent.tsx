@@ -19,7 +19,8 @@ import {
   type SeasonalBeer,
   type CuratedCollection,
 } from "@/components/social/DiscoveryCard";
-import type { NewBrewery } from "./HomeFeed";
+import type { NewBrewery, RecommendedBeer } from "./HomeFeed";
+import { RecommendationsScroll } from "@/components/social/RecommendationsScroll";
 
 export interface CommunityContent {
   featuredBeers: FeaturedBeer[];
@@ -34,9 +35,11 @@ export interface CommunityContent {
 export function DiscoverTabContent({
   communityContent,
   hasCommunityContent,
+  recommendations,
 }: {
   communityContent?: CommunityContent;
   hasCommunityContent: boolean;
+  recommendations?: RecommendedBeer[];
 }) {
   const hasNewBreweries = (communityContent?.newBreweries?.length ?? 0) > 0;
   const effectivelyEmpty = !hasCommunityContent && !hasNewBreweries;
@@ -88,6 +91,11 @@ export function DiscoverTabContent({
           </p>
           <BeerOfTheWeekCard beer={communityContent.featuredBeers[0]} index={0} />
         </div>
+      )}
+
+      {/* For You — Personalized Recommendations */}
+      {recommendations && recommendations.length > 0 && (
+        <RecommendationsScroll beers={recommendations} />
       )}
 
       {/* Trending beer reviews */}

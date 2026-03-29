@@ -11,6 +11,7 @@ import { generateGradientFromString } from "@/lib/utils";
 import BreweryCheckinButton from "@/components/checkin/BreweryCheckinButton";
 import { BreweryReview } from "@/components/brewery/BreweryReview";
 import { BreweryRatingHeader } from "@/components/brewery/BreweryRatingHeader";
+import { FollowBreweryButton } from "@/components/brewery/FollowBreweryButton";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -194,8 +195,9 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
               </span>
             )}
           </div>
-          <div className="mt-4">
+          <div className="mt-4 flex items-center gap-3">
             <BreweryCheckinButton brewery={brewery as Brewery} />
+            <FollowBreweryButton breweryId={id} />
           </div>
         </div>
       </div>

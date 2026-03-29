@@ -4,6 +4,7 @@ import { useMemo, type RefObject } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Beer, MapPin, Flame } from "lucide-react";
+import { ActivityHeatmap } from "@/components/profile/ActivityHeatmap";
 import { SessionCard } from "@/components/social/SessionCard";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import { getLevelProgress } from "@/lib/xp";
@@ -23,6 +24,7 @@ export function YouTabContent({
   loading,
   hasMore,
   sentinelRef,
+  activityHeatmap,
 }: {
   profile: Profile | null;
   sessions: Session[];
@@ -34,6 +36,7 @@ export function YouTabContent({
   loading?: boolean;
   hasMore?: boolean;
   sentinelRef?: RefObject<HTMLDivElement | null>;
+  activityHeatmap?: { date: string; count: number }[];
 }) {
   const { reactionCounts, userReactions, commentCounts } = useReactions();
   const levelInfo = profile ? getLevelProgress(profile.xp) : null;
@@ -152,6 +155,16 @@ export function YouTabContent({
           </div>
         ))}
       </div>
+
+      {/* Activity Heatmap */}
+      {activityHeatmap && activityHeatmap.length > 0 && (
+        <div
+          className="rounded-2xl p-4"
+          style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
+        >
+          <ActivityHeatmap data={activityHeatmap} compact />
+        </div>
+      )}
 
       {/* Taste DNA */}
       {styleDNA && styleDNA.length >= 3 && (
