@@ -175,8 +175,8 @@ scripts/supabase-setup.mjs    — One-time setup script
 
 ## 🗺️ Where We Are
 
-**Current Sprint:** Sprint 25 — Rate & Relate (2026-03-28)
-**Last completed:** Sprint 24 — Avatar Fix + Stability ✅ (2026-03-28)
+**Current Sprint:** Sprint 28 — Feed Verification (2026-03-28)
+**Last completed:** Sprint 27 — Three-Tab Feed ✅ (2026-03-28)
 
 ### Key design decisions (still active from Sprint 11):
 - Marketing pages use hardcoded `C` color constants (not CSS vars)
@@ -448,6 +448,7 @@ Retro: `docs/retros/sprint-13-retro.md`
 - 030: `avatars` storage bucket + RLS (S23)
 - 031: `brewery_reviews` table + RLS (S23)
 - 032: `beer_reviews` table + RLS (S25)
+- 033: `sessions.brewery_id` + `beer_logs.brewery_id` text→uuid FK to `breweries` — CRITICAL feed fix (S27) ✅ APPLIED
 
 ### Sprint 20 — Close It ✅ (2026-03-27)
 **Theme:** Ship quality gates, close first brewery, polish The Board for Asheville demo
@@ -605,6 +606,49 @@ Retro: `docs/retros/sprint-13-retro.md`
 
 **Backlogged (no sprint):**
 - Playwright E2E — Casey, someday. We believe in you.
+
+### Sprint 26 — The Glow-Up ✅ (2026-03-28)
+**Theme:** Recap redesign, feed friends-first, brewery admin 404 fix
+**Retro:** `docs/retros/sprint-26-retro.md`
+
+- ✅ Session recap v2 — split beers into Rate These? / Already Rated, brewery quick review
+- ✅ Feed card visual refresh — brewery name as font-display headline, beer list rows
+- ✅ Welcome card slim-down — first-visit-of-day detection, slim bar on repeat visits
+- ✅ Filter tab redesign — full-width bar with counts
+- ✅ SessionComments redesign — always-visible input, 2-comment preview
+- ✅ Brewery admin 404 fix
+
+### Sprint 27 — Three-Tab Feed ✅ (2026-03-28)
+**Theme:** Friends / Discover / You — full three-tab feed redesign per Morgan's brief
+**Retro:** `docs/retros/sprint-27-retro.md`
+
+- ✅ Complete `HomeFeed.tsx` rewrite — three-tab architecture (Friends/Discover/You)
+- ✅ `FeedTabBar` — spring-animated layoutId underline indicator
+- ✅ `AchievementFeedCard` — gold gradient, tier pills (bronze/silver/gold/platinum), XP badge
+- ✅ `StreakFeedCard` — milestone detection (3/5/7/14/21/30/50/100), localStorage dedup
+- ✅ `DrinkingNow` updated — all green → `var(--accent-gold)`, renamed "Live Now"
+- ✅ You tab: profile hero + XP bar, 4-stat grid, Taste DNA animated bars, Recent Achievements, Want-to-Try wishlist, Brewery Passport
+- ✅ Discover tab: BOTW, Trending, Events, New Breweries 2-col grid
+- ✅ Seed 009 — 24 sessions, 65+ beer logs, 14 beer reviews, 8 brewery reviews, 2 active sessions
+- ✅ Seed 010 — friend achievements, streak milestones, refreshed active sessions, extra reviews
+- ✅ **Migration 033 — CRITICAL BUG FIX:** `sessions.brewery_id` and `beer_logs.brewery_id` changed from `text` → `uuid` with FK to `breweries`. Root cause of empty friends feed since Sprint 13.
+
+**Key architectural changes from Sprint 27:**
+- `FeedTabBar` at `components/social/FeedTabBar.tsx` — type `FeedTab = "friends" | "discover" | "you"`
+- `AchievementFeedCard` at `components/social/AchievementFeedCard.tsx`
+- `StreakFeedCard` at `components/social/StreakFeedCard.tsx` — exports `isStreakMilestone`, `isStreakSeen`, `markStreakSeen`
+- `HomeFeed.tsx` props: `activeFriendSessions`, `friendAchievements`, `userAchievements`, `wishlist`, `styleDNA`, `friendCount`
+- Taste DNA computed server-side in `page.tsx` from `beer_logs` join `beers(style)` — grouped/averaged per style
+- `visitedBreweries` for Brewery Passport derived client-side via `useMemo` from `youSessions` — zero extra queries
+- Migration 033: stale sessions with invalid brewery_ids were nulled (not deleted)
+- After migration 033: run `NOTIFY pgrst, 'reload schema';` in Supabase SQL editor to flush PostgREST schema cache
+- Service worker (`public/sw.js`) caches static routes — unregister via DevTools → Application → Service Workers after dev server restarts
+
+**Deferred to Sprint 28:**
+- Verify full feed render with all card types (requires PGRST schema reload + SW unregister + hard reload)
+- Cheers/reaction button on feed cards (P1 — carried from Sprint 25)
+- Feed infinite scroll / pagination (P2 — carried from Sprint 25)
+- E2E tests (Casey, still waiting, still watching)
 
 ### Revenue Targets
 - Tap tier: $49/mo
