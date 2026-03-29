@@ -175,8 +175,8 @@ scripts/supabase-setup.mjs    — One-time setup script
 
 ## 🗺️ Where We Are
 
-**Current Sprint:** Sprint 29 — Your Round (in progress)
-**Last completed:** Sprint 28 — Feed Spec Implementation ✅ (2026-03-29)
+**Current Sprint:** Sprint 30 — (not started)
+**Last completed:** Sprint 29 — Your Round ✅ (2026-03-29)
 
 ### Key design decisions (still active from Sprint 11):
 - Marketing pages use hardcoded `C` color constants (not CSS vars)
@@ -686,11 +686,11 @@ Retro: `docs/retros/sprint-13-retro.md`
 - PGRST schema cache refresh (`NOTIFY pgrst, 'reload schema';`) to restore session data in feed
 - E2E tests (Casey, eternal vigil)
 
-### Sprint 29 — Your Round (in progress, 2026-03-29)
+### Sprint 29 — Your Round ✅ (2026-03-29)
 **Theme:** Fix the empty feed, ship Cheers reactions, real-feeling demo data
 **Retro:** `docs/retros/sprint-28-retro.md` (compliments edition)
 
-- ✅ S29-001: PGRST schema reload + seed verification — fixed empty Friends feed
+- ✅ S29-001: PGRST schema reload + seed verification
 - ✅ S29-001b: Removed dead `INSERT INTO checkins` from seeds 003, 006, 007 (table dropped in S16)
 - ✅ S29-002: Seed 011 "Your Round" — 6 sessions, 38 reactions, 6 comments, Belgian Explorer achievement, Drew 7-day streak, BOTW: Smokehouse Porter
 - ✅ S29-003: `ReactionBar` component — 🍺 cheers toggle + 💬 count + ↗ share, optimistic UI, calls existing `/api/reactions`
@@ -698,6 +698,7 @@ Retro: `docs/retros/sprint-13-retro.md`
 - ✅ S29-005: "Your Round" header already existed from prior sprint
 - ✅ S29-006: Card footer polish — old stats footer replaced with ReactionBar across SessionCard, AchievementFeedCard, StreakFeedCard, RecommendationCard, NewFavoriteCard
 - ✅ S29-007: Team weekend testing doc at `docs/sprint-29-testing-weekend.md`
+- ✅ S29-008: Explicit FK hint `brewery:breweries!brewery_id` on feed sessions queries (matches working `/api/friends/active` pattern)
 
 **Key architectural changes from Sprint 29:**
 - `ReactionBar` at `components/social/ReactionBar.tsx` — reusable cheers/comment/share footer
@@ -709,8 +710,17 @@ Retro: `docs/retros/sprint-13-retro.md`
 - Display names updated to match mockup characters (Drew, Mika, Cole, Tara, Lena, Marcus)
 - `belgian_explorer` achievement added to achievements table
 - PGRST schema cache reloaded after migration 033
+- Both session queries in `page.tsx` now use `brewery:breweries!brewery_id(...)` explicit FK hint
+
+**OPEN BUG — Friends feed empty state (P0 for Sprint 30):**
+- **Symptom:** Friends tab shows "Your round starts here" empty state. DrinkingNow (Live Now strip) works fine via `/api/friends/active`.
+- **Root cause confirmed:** The SSR session queries in `page.tsx` used `brewery:breweries(...)` (implicit join) which fails when PostgREST schema cache is stale after migration 033 (text→uuid FK). Fix committed: `brewery:breweries!brewery_id(...)` explicit FK hint — but could not be verified because the Next.js dev server was running stale compiled code and did NOT hot-reload server components during the session.
+- **Secondary issue found:** `user_achievements` RLS policy (`auth.uid() = user_id`) blocks reading friends' achievements. Need a new policy: `FOR SELECT USING (true)` or scope to accepted friends.
+- **Sprint 30 Day 1:** Restart dev server (`pkill -f "next dev" && npm run dev`), hard reload, confirm feed loads. If still empty, write `get_friend_feed` RPC function to bypass PostgREST entirely.
 
 **Deferred to Sprint 30:**
+- Verify Friends feed fix after dev server restart (P0)
+- Fix `user_achievements` RLS for social feed visibility
 - Feed infinite scroll / pagination (P2 — carried from Sprint 25)
 - E2E tests (Casey, we still see you)
 
