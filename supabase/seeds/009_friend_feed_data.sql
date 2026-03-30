@@ -166,16 +166,16 @@ BEGIN
   UPDATE public.profiles SET current_streak = 5  WHERE id = u11; -- James: 5-day streak
 
   -- ── 5. Add 5-star reviews so NewFavoriteCard appears ────────────────────
-  -- beer_reviews table: user_id, beer_id, brewery_id, rating, comment
-  INSERT INTO beer_reviews (user_id, beer_id, brewery_id, rating, comment, created_at)
+  -- beer_reviews table: user_id, beer_id, rating, comment, created_at
+  INSERT INTO beer_reviews (user_id, beer_id, rating, comment, created_at)
   VALUES
-    (u10, lc_sour,  lc_id, 5.0, 'My new favorite beer. Period. Greenbelt Gose is perfect.', now() - interval '22 hours'),
-    (u07, hf_hazy,  hf_id, 5.0, 'Hazy Daze from Hopfield is elite. Top shelf hazy IPA.',   now() - interval '6 hours'),
-    (u08, hf_porter,hf_id, 5.0, 'Dark Matter Porter: this is what craft beer is all about.', now() - interval '3 days' + interval '14 hours')
+    (u10, lc_sour,   5.0, 'My new favorite beer. Period. Greenbelt Gose is perfect.', now() - interval '22 hours'),
+    (u07, hf_hazy,   5.0, 'Hazy Daze from Hopfield is elite. Top shelf hazy IPA.',   now() - interval '6 hours'),
+    (u08, hf_porter, 5.0, 'Dark Matter Porter: this is what craft beer is all about.', now() - interval '3 days' + interval '14 hours')
   ON CONFLICT DO NOTHING;
 
   -- ── 6. Update brewery visit records for friends ──────────────────────────
-  INSERT INTO brewery_visits (user_id, brewery_id, visit_count, last_visited_at)
+  INSERT INTO brewery_visits (user_id, brewery_id, total_visits, last_visit_at)
   VALUES
     (u01, pp_id, 3, now() - interval '4 hours'),
     (u07, hf_id, 5, now() - interval '6 hours'),
@@ -185,8 +185,8 @@ BEGIN
     (u08, hf_id, 3, now() - interval '3 days'),
     (u05, bs_id, 2, now() - interval '4 days')
   ON CONFLICT (user_id, brewery_id) DO UPDATE
-    SET visit_count = EXCLUDED.visit_count,
-        last_visited_at = EXCLUDED.last_visited_at;
+    SET total_visits = EXCLUDED.total_visits,
+        last_visit_at = EXCLUDED.last_visit_at;
 
   RAISE NOTICE 'Seed 009 complete — % friend sessions, streak milestones set, 5-star reviews added', 8;
 END $$;
