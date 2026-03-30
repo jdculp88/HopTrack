@@ -115,6 +115,7 @@ interface HomeFeedProps {
   commentCounts?: Record<string, number>;
   recommendations?: RecommendedBeer[];
   activityHeatmap?: { date: string; count: number }[];
+  pastRoutes?: Array<{ id: string; title: string; location_city: string | null; completed_at: string | null; hop_route_stops: Array<{ brewery: { name: string } | null }> }>;
 }
 
 // ─── HomeFeed ───────────────────────────────────────────────────────────────
@@ -139,6 +140,7 @@ export function HomeFeed({
   commentCounts,
   recommendations,
   activityHeatmap,
+  pastRoutes,
 }: HomeFeedProps) {
   const [activeTab, setActiveTab] = useState<FeedTab>("friends");
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -412,6 +414,7 @@ export function HomeFeed({
                 hasMore={youPagination.hasMore}
                 sentinelRef={youPagination.sentinelRef}
                 activityHeatmap={activityHeatmap}
+                pastRoutes={pastRoutes}
               />
             </ReactionProvider>
           </motion.div>

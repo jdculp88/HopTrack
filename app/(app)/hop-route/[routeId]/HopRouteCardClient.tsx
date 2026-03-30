@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MapPin, Clock, Users, ChevronDown, ChevronUp, Beer, Share2, Sparkles, ArrowRight, Star } from "lucide-react";
+import { MapPin, Clock, Users, ChevronDown, ChevronUp, Beer, Share2, Sparkles, ArrowRight, Star, Play, CheckCircle2, Zap } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/Toast";
 import { HopRouteShareCard } from "@/components/hop-route/HopRouteShareCard";
 
@@ -59,15 +60,66 @@ function formatTime(iso: string | null) {
   return new Date(iso).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
 }
 
-export function HopRouteCardClient({ route, userId }: HopRouteCardClientProps) {
-  const [expandedStop, setExpandedStop] = useState<string | null>(route.hop_route_stops[0]?.id ?? null);
+export function HopRouteCardClient({ route: initialRoute, userId }: HopRouteCardClientProps) {
+  const [route, setRoute] = useState(initialRoute);
+  const [expandedStop, setExpandedStop] = useState<string | null>(initialRoute.hop_route_stops[0]?.id ?? null);
   const [showShare, setShowShare] = useState(false);
-  const { success } = useToast();
+  const [actionLoading, setActionLoading] = useState(false);
+  const router = useRouter();
+  const { success, error: showError } = useToast();
 
   const stops = route.hop_route_stops.sort((a, b) => a.stop_order - b.stop_order);
+  const checkedInCount = stops.filter(s => s.checked_in).length;
+  const nextStop = stops.find(s => !s.checked_in) ?? null;
 
   function toggleStop(id: string) {
     setExpandedStop(prev => prev === id ? null : id);
+  }
+
+  async function handleAction(action: "start" | "complete", stopId?: string) {
+    setActionLoading(true);
+    try {
+      const res = await fetch(`/api/hop-route/${route.id}/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action, stop_id: stopId }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        showError(data.error ?? "Something went wrong");
+        return;
+      }
+      if (action === "start") {
+        setRoute(r => ({ ...r, status: "active" }));
+        success("HopRoute started! 🗺️");
+      } else if (action === "complete") {
+        setRoute(r => ({ ...r, status: "completed" }));
+        success("HopRoute complete! 🎉 +100 XP");
+      }
+    } finally {
+      setActionLoading(false);
+    }
+  }
+
+  async function handleCheckin(stopId: string) {
+    setActionLoading(true);
+    try {
+      const res = await fetch(`/api/hop-route/${route.id}/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "checkin", stop_id: stopId }),
+      });
+      if (!res.ok) return;
+      setRoute(r => ({
+        ...r,
+        hop_route_stops: r.hop_route_stops.map(s =>
+          s.id === stopId ? { ...s, checked_in: true, checked_in_at: new Date().toISOString() } : s
+        ),
+      }));
+      success("Checked in! 🍺");
+    } finally {
+      setActionLoading(false);
+    }
   }
 
   return (
@@ -100,6 +152,52 @@ export function HopRouteCardClient({ route, userId }: HopRouteCardClientProps) {
             <Share2 size={12} /> Share
           </button>
         </div>
+
+        {/* Status banner */}
+        {route.status === "draft" && (
+          <button
+            onClick={() => handleAction("start")}
+            disabled={actionLoading}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all disabled:opacity-60"
+            style={{ background: "var(--accent-gold)", color: "var(--bg)" }}
+          >
+            <Play size={14} fill="currentColor" /> Start HopRoute
+          </button>
+        )}
+
+        {route.status === "active" && (
+          <div className="space-y-2">
+            {/* Progress indicator */}
+            <div className="flex items-center gap-3">
+              <div className="flex-1 h-2 rounded-full" style={{ background: "var(--border)" }}>
+                <div
+                  className="h-full rounded-full transition-all"
+                  style={{ width: `${(checkedInCount / stops.length) * 100}%`, background: "var(--accent-gold)" }}
+                />
+              </div>
+              <span className="text-xs font-mono text-[var(--text-muted)]">
+                {checkedInCount}/{stops.length} stops
+              </span>
+            </div>
+
+            {nextStop && (
+              <div className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs" style={{ background: "color-mix(in srgb, var(--accent-gold) 10%, transparent)", color: "var(--accent-gold)" }}>
+                <Zap size={12} /> You&apos;re here: <strong>{nextStop.brewery?.name ?? "Next stop"}</strong>
+              </div>
+            )}
+
+            {checkedInCount === stops.length && (
+              <button
+                onClick={() => handleAction("complete")}
+                disabled={actionLoading}
+                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium transition-all disabled:opacity-60"
+                style={{ background: "var(--accent-gold)", color: "var(--bg)" }}
+              >
+                <CheckCircle2 size={14} /> Complete HopRoute 🎉
+              </button>
+            )}
+          </div>
+        )}
 
         {route.status === "completed" && (
           <div className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm" style={{ background: "color-mix(in srgb, var(--accent-gold) 10%, transparent)", color: "var(--accent-gold)" }}>
@@ -246,13 +344,23 @@ export function HopRouteCardClient({ route, userId }: HopRouteCardClientProps) {
                         )}
 
                         {/* Check in CTA */}
-                        {!stop.checked_in && (
+                        {!stop.checked_in && route.status === "active" && (
+                          <button
+                            onClick={() => handleCheckin(stop.id)}
+                            disabled={actionLoading}
+                            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium transition-all disabled:opacity-60"
+                            style={{ background: "var(--accent-gold)", color: "var(--bg)" }}
+                          >
+                            <CheckCircle2 size={14} /> Check In Here
+                          </button>
+                        )}
+                        {!stop.checked_in && route.status !== "active" && (
                           <Link
                             href={`/home?brewery=${brewery?.id ?? ""}`}
                             className="flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium transition-colors"
-                            style={{ background: "var(--accent-gold)", color: "var(--bg)" }}
+                            style={{ background: "var(--surface-2)", color: "var(--text-secondary)", border: "1px solid var(--border)" }}
                           >
-                            Check In Here <ArrowRight size={14} />
+                            View Brewery <ArrowRight size={14} />
                           </Link>
                         )}
                       </div>

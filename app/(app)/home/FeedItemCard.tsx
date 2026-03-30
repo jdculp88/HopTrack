@@ -19,6 +19,10 @@ import {
   FriendJoinedCard,
   type FriendJoinedItem,
 } from "@/components/social/FriendJoinedCard";
+import {
+  HopRouteFeedCard,
+  type HopRouteFeedItem,
+} from "@/components/social/HopRouteFeedCard";
 import type { Session } from "@/types/database";
 import { useReactions } from "./ReactionContext";
 
@@ -28,7 +32,8 @@ export type FeedItem =
   | { type: "achievement"; data: FriendAchievement; sortDate: string }
   | { type: "streak"; data: StreakData; sortDate: string }
   | { type: "new_favorite"; data: NewFavoriteItem; sortDate: string }
-  | { type: "friend_joined"; data: FriendJoinedItem; sortDate: string };
+  | { type: "friend_joined"; data: FriendJoinedItem; sortDate: string }
+  | { type: "hop_route_completed"; data: HopRouteFeedItem; sortDate: string };
 
 export function FeedItemCard({
   item,
@@ -87,6 +92,10 @@ export function FeedItemCard({
 
   if (item.type === "friend_joined") {
     return <FriendJoinedCard friend={item.data} index={index} />;
+  }
+
+  if (item.type === "hop_route_completed") {
+    return <HopRouteFeedCard route={item.data} index={index} currentUserId={currentUserId} />;
   }
 
   return null;

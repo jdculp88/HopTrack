@@ -41,11 +41,28 @@ export default async function HomePage() {
       fetchFriendActivity(supabase, user.id, friendIds),
     ]);
 
-  // Beer recommendations + activity heatmap (fault-tolerant)
-  const [recommendations, activityHeatmap] = await Promise.all([
+  // Beer recommendations + activity heatmap + past HopRoutes (fault-tolerant)
+  const [recommendations, activityHeatmap, pastRoutesResult] = await Promise.all([
     getRecommendations(user.id).catch(() => []),
     fetchActivityHeatmap(supabase, user.id),
+    (supabase as any)
+      .from("hop_routes")
+      .select("id, title, location_city, completed_at, hop_route_stops(brewery:breweries(name))")
+      .eq("user_id", user.id)
+      .eq("status", "completed")
+      .order("completed_at", { ascending: false })
+      .limit(3)
+      .then(({ data }: { data: unknown }) => data ?? [])
+      .catch(() => []),
   ]);
+
+  const pastRoutes = pastRoutesResult as Array<{
+    id: string;
+    title: string;
+    location_city: string | null;
+    completed_at: string | null;
+    hop_route_stops: Array<{ brewery: { name: string } | null }>;
+  }>;
 
   // Reaction + comment counts depend on session IDs from above
   const allSessionIds = [
@@ -99,6 +116,7 @@ export default async function HomePage() {
       commentCounts={commentCounts}
       recommendations={recommendations}
       activityHeatmap={activityHeatmap}
+      pastRoutes={pastRoutes}
     />
   );
 }

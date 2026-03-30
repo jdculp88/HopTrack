@@ -3,7 +3,7 @@
 import { useMemo, type RefObject } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Beer, MapPin, Flame } from "lucide-react";
+import { Beer, MapPin, Flame, Route } from "lucide-react";
 import { ActivityHeatmap } from "@/components/profile/ActivityHeatmap";
 import { SessionCard } from "@/components/social/SessionCard";
 import { UserAvatar } from "@/components/ui/UserAvatar";
@@ -25,6 +25,7 @@ export function YouTabContent({
   hasMore,
   sentinelRef,
   activityHeatmap,
+  pastRoutes,
 }: {
   profile: Profile | null;
   sessions: Session[];
@@ -37,6 +38,7 @@ export function YouTabContent({
   hasMore?: boolean;
   sentinelRef?: RefObject<HTMLDivElement | null>;
   activityHeatmap?: { date: string; count: number }[];
+  pastRoutes?: Array<{ id: string; title: string; location_city: string | null; completed_at: string | null; hop_route_stops: Array<{ brewery: { name: string } | null }> }>;
 }) {
   const { reactionCounts, userReactions, commentCounts } = useReactions();
   const levelInfo = profile ? getLevelProgress(profile.xp) : null;
@@ -342,6 +344,63 @@ export function YouTabContent({
             </p>
           )}
         </div>
+      )}
+
+      {/* Past HopRoutes */}
+      {pastRoutes && pastRoutes.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Route size={15} style={{ color: "var(--accent-gold)" }} />
+              <p className="text-xs font-mono uppercase tracking-widest" style={{ color: "var(--accent-gold)" }}>
+                Past HopRoutes
+              </p>
+            </div>
+            <Link href="/hop-route/new" className="text-xs font-mono" style={{ color: "var(--text-muted)" }}>
+              Plan new →
+            </Link>
+          </div>
+          <div className="space-y-2">
+            {pastRoutes.slice(0, 3).map((route) => (
+              <Link key={route.id} href={`/hop-route/${route.id}`}>
+                <motion.div
+                  whileHover={{ x: 2 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                  className="flex items-center gap-3 p-3 rounded-xl border transition-colors"
+                  style={{ background: "var(--surface)", borderColor: "var(--border)" }}
+                >
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "color-mix(in srgb, var(--accent-gold) 12%, transparent)", color: "var(--accent-gold)" }}>
+                    🗺️
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-[var(--text-primary)] truncate">{route.title}</p>
+                    <p className="text-xs text-[var(--text-muted)]">
+                      {route.hop_route_stops.map(s => s.brewery?.name).filter(Boolean).join(" → ")}
+                    </p>
+                  </div>
+                  {route.location_city && (
+                    <span className="text-xs text-[var(--text-muted)] flex items-center gap-0.5 flex-shrink-0">
+                      <MapPin size={9} /> {route.location_city}
+                    </span>
+                  )}
+                </motion.div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Plan HopRoute CTA if no past routes */}
+      {(!pastRoutes || pastRoutes.length === 0) && (
+        <Link href="/hop-route/new">
+          <div className="flex items-center gap-3 p-4 rounded-2xl border border-dashed transition-colors" style={{ borderColor: "color-mix(in srgb, var(--accent-gold) 30%, transparent)" }}>
+            <span className="text-2xl">🗺️</span>
+            <div>
+              <p className="text-sm font-semibold text-[var(--text-primary)]">Plan a HopRoute</p>
+              <p className="text-xs text-[var(--text-muted)]">AI-powered brewery crawl planner</p>
+            </div>
+          </div>
+        </Link>
       )}
 
       {/* Your activity */}
