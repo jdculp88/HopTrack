@@ -76,7 +76,7 @@ export function TrendingCard({ reviews, index = 0 }: { reviews: TrendingReview[]
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 + i * 0.05, duration: 0.25 }}
-            className="rounded-xl p-3.5 flex-shrink-0"
+            className="rounded-xl p-3.5 flex-shrink-0 relative overflow-hidden"
             style={{
               background: 'var(--surface-warm)',
               border: '1px solid var(--surface-warm-border)',
@@ -84,6 +84,7 @@ export function TrendingCard({ reviews, index = 0 }: { reviews: TrendingReview[]
               maxWidth: 170,
             }}
           >
+            <div className="absolute -top-2 -right-2 w-10 h-10 rounded-full pointer-events-none" style={{ background: 'var(--accent-gold)', opacity: 0.06 }} />
             <p className="font-display text-sm font-semibold leading-tight truncate" style={{ color: 'var(--text-primary)' }}>
               {review.beer?.name || 'Unknown'}
             </p>
@@ -128,9 +129,11 @@ export function BreweryReviewCard({ review, index = 0 }: { review: BreweryReview
     >
       <Link href={`/brewery/${review.brewery.id}`}>
         <div
-          className="rounded-xl px-4 py-3 flex items-center gap-3"
+          className="rounded-xl px-4 py-3 flex items-center gap-3 relative overflow-hidden"
           style={{ background: 'var(--surface-warm)', border: '1px solid var(--surface-warm-border)' }}
         >
+          <div className="absolute -top-3 -right-3 w-14 h-14 rounded-full pointer-events-none" style={{ background: 'var(--accent-gold)', opacity: 0.05 }} />
+          <div className="absolute bottom-1 right-12 w-4 h-4 rounded-full pointer-events-none" style={{ background: 'var(--accent-amber)', opacity: 0.07 }} />
           <UserAvatar
             profile={{
               id: review.profile.id,
@@ -171,9 +174,11 @@ export function EventCard({ event, index = 0 }: { event: EventItem; index?: numb
     >
       <Link href={`/brewery/${event.brewery.id}`}>
         <div
-          className="rounded-xl px-4 py-3 flex items-center gap-3"
+          className="rounded-xl px-4 py-3 flex items-center gap-3 relative overflow-hidden"
           style={{ background: 'var(--surface-warm)', border: '1px solid var(--surface-warm-border)' }}
         >
+          <div className="absolute -top-3 -right-2 w-12 h-12 rounded-full pointer-events-none" style={{ background: 'var(--accent-gold)', opacity: 0.06 }} />
+          <div className="absolute bottom-1 left-12 w-4 h-4 rounded-full pointer-events-none" style={{ background: 'var(--accent-amber)', opacity: 0.06 }} />
           <div
             className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
             style={{ background: 'color-mix(in srgb, var(--accent-gold) 12%, transparent)' }}
@@ -205,6 +210,12 @@ export interface SeasonalBeer {
   badge: 'Limited' | 'Seasonal'
 }
 
+const SEASONAL_BUBBLE_POS = [
+  "absolute -top-2 -right-2",
+  "absolute -top-3 right-2",
+  "absolute top-1 -right-3",
+] as const;
+
 export function SeasonalBeersScroll({ beers }: { beers: SeasonalBeer[] }) {
   if (beers.length === 0) return null
 
@@ -232,6 +243,7 @@ export function SeasonalBeersScroll({ beers }: { beers: SeasonalBeer[] }) {
               maxWidth: 160,
             }}
           >
+            <div className={`${SEASONAL_BUBBLE_POS[i % 3]} w-10 h-10 rounded-full pointer-events-none`} style={{ background: 'var(--accent-gold)', opacity: 0.07 }} />
             <span
               className="absolute top-2 right-2 text-[9px] font-mono font-bold px-2 py-0.5 rounded-md"
               style={{
@@ -308,6 +320,20 @@ function getTagStyles(tagColor: CollectionTagColor = 'gold'): { bg: string; bord
   }
 }
 
+const CURATED_LARGE_POS = [
+  "absolute -top-3 -right-3",
+  "absolute top-1 -right-4",
+  "absolute -top-4 right-8",
+  "absolute top-2 -right-2",
+] as const;
+
+const CURATED_SMALL_POS = [
+  "absolute bottom-2 right-8",
+  "absolute bottom-1 right-4",
+  "absolute bottom-3 right-12",
+  "absolute bottom-2 right-6",
+] as const;
+
 export function CuratedCollectionsList({ collections }: { collections: CuratedCollection[] }) {
   const { info } = useToast()
 
@@ -328,6 +354,7 @@ export function CuratedCollectionsList({ collections }: { collections: CuratedCo
       <div className="space-y-2.5">
         {collections.map((col, i) => {
           const tagStyles = getTagStyles(col.tagColor)
+          const bubbleIdx = i % 4
           return (
             <motion.div
               key={col.id}
@@ -343,12 +370,14 @@ export function CuratedCollectionsList({ collections }: { collections: CuratedCo
                 <motion.div
                   whileTap={{ scale: 0.98 }}
                   transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                  className="rounded-xl px-4 py-3.5 flex items-center gap-3.5"
+                  className="rounded-xl px-4 py-3.5 flex items-center gap-3.5 relative overflow-hidden"
                   style={{
                     background: tagStyles.bg,
                     border: `1px solid ${tagStyles.border}`,
                   }}
                 >
+                  <div className={`${CURATED_LARGE_POS[bubbleIdx]} w-14 h-14 rounded-full pointer-events-none`} style={{ background: 'var(--accent-gold)', opacity: 0.06 }} />
+                  <div className={`${CURATED_SMALL_POS[bubbleIdx]} w-4 h-4 rounded-full pointer-events-none`} style={{ background: 'var(--accent-amber)', opacity: 0.07 }} />
                   <span className="text-2xl flex-shrink-0">{col.emoji}</span>
                   <div className="flex-1 min-w-0">
                     <p className="font-display text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>

@@ -19,6 +19,20 @@ export interface NewFavoriteItem {
   likes: number
 }
 
+const LARGE_BUBBLE_POS = [
+  "absolute -top-3 -right-3",
+  "absolute top-1 -right-4",
+  "absolute -top-4 right-6",
+  "absolute top-2 -right-2",
+] as const;
+
+const SMALL_BUBBLE_POS = [
+  "absolute bottom-2 right-9",
+  "absolute bottom-1 right-3",
+  "absolute bottom-3 right-14",
+  "absolute bottom-2 right-6",
+] as const;
+
 export function NewFavoriteCard({
   favorite,
   index = 0,
@@ -28,6 +42,7 @@ export function NewFavoriteCard({
   reactionCounts?: Record<string, number>
   userReactions?: string[]
 }) {
+  const bubbleIdx = index % 4;
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
@@ -40,8 +55,8 @@ export function NewFavoriteCard({
       }}
     >
       {/* Bubble decorations */}
-      <div className="absolute -top-3 -right-3 w-14 h-14 rounded-full pointer-events-none" style={{ background: 'var(--accent-gold)', opacity: 0.06 }} />
-      <div className="absolute bottom-2 right-10 w-4 h-4 rounded-full pointer-events-none" style={{ background: 'var(--accent-gold)', opacity: 0.08 }} />
+      <div className={`${LARGE_BUBBLE_POS[bubbleIdx]} w-14 h-14 rounded-full pointer-events-none`} style={{ background: 'var(--accent-gold)', opacity: 0.06 }} />
+      <div className={`${SMALL_BUBBLE_POS[bubbleIdx]} w-4 h-4 rounded-full pointer-events-none`} style={{ background: 'var(--accent-gold)', opacity: 0.08 }} />
 
       {/* Gold accent bar */}
       <div

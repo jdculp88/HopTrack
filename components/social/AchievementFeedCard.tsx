@@ -53,6 +53,20 @@ const TIER_COLORS: Record<string, string> = {
   platinum: "#8BAABF",
 };
 
+const LARGE_BUBBLE_POS = [
+  "absolute -top-3 -right-3",
+  "absolute top-1 -right-4",
+  "absolute -top-4 right-6",
+  "absolute top-2 -right-2",
+] as const;
+
+const SMALL_BUBBLE_POS = [
+  "absolute bottom-2 right-9",
+  "absolute bottom-1 right-3",
+  "absolute bottom-3 right-14",
+  "absolute bottom-2 right-6",
+] as const;
+
 export function AchievementFeedCard({
   achievement,
   index = 0,
@@ -71,6 +85,7 @@ export function AchievementFeedCard({
   const firstName = (
     achievement.profile.display_name || achievement.profile.username
   ).split(" ")[0];
+  const bubbleIdx = index % 4;
 
   return (
     <motion.div
@@ -96,8 +111,8 @@ export function AchievementFeedCard({
       />
 
       {/* Bubble decorations */}
-      <div className="absolute -top-3 -right-3 w-16 h-16 rounded-full pointer-events-none" style={{ background: tierColor, opacity: 0.06 }} />
-      <div className="absolute bottom-2 right-8 w-5 h-5 rounded-full pointer-events-none" style={{ background: "var(--accent-gold)", opacity: 0.07 }} />
+      <div className={`${LARGE_BUBBLE_POS[bubbleIdx]} w-16 h-16 rounded-full pointer-events-none`} style={{ background: tierColor, opacity: 0.06 }} />
+      <div className={`${SMALL_BUBBLE_POS[bubbleIdx]} w-5 h-5 rounded-full pointer-events-none`} style={{ background: "var(--accent-gold)", opacity: 0.07 }} />
 
       {/* Tier accent bar */}
       <div

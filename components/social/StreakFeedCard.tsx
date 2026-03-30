@@ -15,6 +15,20 @@ export interface StreakData {
 
 const STREAK_MILESTONES = [3, 5, 7, 14, 21, 30, 50, 100];
 
+const LARGE_BUBBLE_POS = [
+  "absolute -top-3 -right-3",
+  "absolute top-0 -right-4",
+  "absolute -top-2 right-8",
+  "absolute top-3 -right-2",
+] as const;
+
+const SMALL_BUBBLE_POS = [
+  "absolute bottom-1 right-10",
+  "absolute bottom-2 right-4",
+  "absolute bottom-3 right-16",
+  "absolute bottom-1 right-7",
+] as const;
+
 export function isStreakMilestone(streak: number): boolean {
   return STREAK_MILESTONES.includes(streak);
 }
@@ -36,6 +50,8 @@ export function StreakFeedCard({
   streak: StreakData;
   index?: number;
 }) {
+  const bubbleIdx = index % 4;
+
   useEffect(() => {
     const t = setTimeout(() => markStreakSeen(streak.profileId, streak.currentStreak), 3000);
     return () => clearTimeout(t);
@@ -55,8 +71,8 @@ export function StreakFeedCard({
       }}
     >
       {/* Bubble decorations */}
-      <div className="absolute -top-3 -right-3 w-14 h-14 rounded-full pointer-events-none" style={{ background: "var(--accent-amber)", opacity: 0.07 }} />
-      <div className="absolute bottom-1 right-10 w-4 h-4 rounded-full pointer-events-none" style={{ background: "var(--accent-amber)", opacity: 0.09 }} />
+      <div className={`${LARGE_BUBBLE_POS[bubbleIdx]} w-14 h-14 rounded-full pointer-events-none`} style={{ background: "var(--accent-amber)", opacity: 0.07 }} />
+      <div className={`${SMALL_BUBBLE_POS[bubbleIdx]} w-4 h-4 rounded-full pointer-events-none`} style={{ background: "var(--accent-amber)", opacity: 0.09 }} />
 
       {/* Amber accent bar */}
       <div
