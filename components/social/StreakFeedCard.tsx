@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { Flame } from "lucide-react";
 
 export interface StreakData {
   profileId: string;
@@ -38,24 +39,33 @@ export function StreakFeedCard({
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.03, duration: 0.25 }}
-      className="rounded-xl px-4 py-3 flex items-center gap-3"
+      className="rounded-2xl overflow-hidden flex"
       style={{
-        background: "var(--surface)",
-        border: "1px solid var(--border)",
+        background:
+          "linear-gradient(135deg, color-mix(in srgb, var(--accent-amber) 10%, var(--surface)), var(--surface))",
+        border:
+          "1px solid color-mix(in srgb, var(--accent-amber) 22%, var(--border))",
       }}
     >
-      {/* Fire icon */}
+      {/* Amber accent bar */}
       <div
-        className="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0"
+        className="w-1 flex-shrink-0"
+        style={{ background: "var(--accent-amber)", opacity: 0.7 }}
+      />
+
+      {/* Flame icon column */}
+      <div
+        className="flex items-center justify-center w-14 flex-shrink-0"
         style={{
-          background: "color-mix(in srgb, var(--accent-amber) 10%, var(--surface-2))",
+          background:
+            "color-mix(in srgb, var(--accent-amber) 10%, transparent)",
         }}
       >
-        🔥
+        <Flame size={22} strokeWidth={1.75} style={{ color: "var(--accent-amber)" }} />
       </div>
 
       {/* Content */}
-      <div className="flex-1 min-w-0">
+      <div className="flex-1 min-w-0 px-4 py-3">
         <p className="text-sm leading-snug" style={{ color: "var(--text-primary)" }}>
           <Link
             href={`/profile/${streak.username}`}
@@ -63,16 +73,18 @@ export function StreakFeedCard({
           >
             {(streak.displayName || streak.username).split(" ")[0]}
           </Link>
-          <span style={{ color: "var(--text-muted)" }}> hit a </span>
+          <span style={{ color: "var(--text-muted)" }}> is on a </span>
           <span
-            className="font-mono font-semibold"
+            className="font-display font-bold"
             style={{ color: "var(--accent-amber)" }}
           >
-            {streak.currentStreak}-day
+            {streak.currentStreak}-day streak
           </span>
-          <span style={{ color: "var(--text-muted)" }}> streak!</span>
         </p>
-        <p className="text-[10px] font-mono mt-0.5" style={{ color: "var(--text-muted)" }}>
+        <p
+          className="text-[10px] font-mono mt-1"
+          style={{ color: "var(--text-muted)" }}
+        >
           {streak.currentStreak} sessions in a row
         </p>
       </div>

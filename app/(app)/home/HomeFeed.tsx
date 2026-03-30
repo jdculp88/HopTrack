@@ -30,6 +30,8 @@ import { YouTabContent } from "./YouTabContent";
 import { OnboardingCard } from "./OnboardingCard";
 import type { FeedItem } from "./FeedItemCard";
 import { ReactionProvider } from "./ReactionContext";
+import { usePullToRefresh } from "@/hooks/usePullToRefresh";
+import { WishlistOnTapAlert } from "@/components/wishlist/WishlistOnTapAlert";
 
 // ─── Exported Types ─────────────────────────────────────────────────────────
 
@@ -116,6 +118,7 @@ interface HomeFeedProps {
   recommendations?: RecommendedBeer[];
   activityHeatmap?: { date: string; count: number }[];
   pastRoutes?: Array<{ id: string; title: string; location_city: string | null; completed_at: string | null; hop_route_stops: Array<{ brewery: { name: string } | null }> }>;
+  wishlistOnTapCount?: number;
 }
 
 // ─── HomeFeed ───────────────────────────────────────────────────────────────
@@ -141,6 +144,7 @@ export function HomeFeed({
   recommendations,
   activityHeatmap,
   pastRoutes,
+  wishlistOnTapCount = 0,
 }: HomeFeedProps) {
   const [activeTab, setActiveTab] = useState<FeedTab>("friends");
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -197,6 +201,9 @@ export function HomeFeed({
       setShowOnboarding(true);
     }
   }, [profile]);
+
+  // Pull-to-refresh
+  const { containerRef, pullDistance, isPulling, isRefreshing } = usePullToRefresh({ threshold: 60 });
 
   // Broadcast active session to AppShell
   useEffect(() => {
@@ -324,7 +331,32 @@ export function HomeFeed({
       (communityContent.curatedCollections?.length ?? 0) > 0);
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-6 space-y-5" suppressHydrationWarning>
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ type: "spring", stiffness: 400, damping: 30 }}
+    >
+    <div ref={containerRef} className="max-w-2xl mx-auto px-4 py-6 space-y-5" suppressHydrationWarning>
+      {/* Pull-to-refresh indicator */}
+      <AnimatePresence>
+        {(isPulling || isRefreshing) && (
+          <motion.div
+            key="ptr"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 40 }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.15 }}
+            className="flex items-center justify-center"
+          >
+            <motion.div
+              animate={isRefreshing ? { rotate: 360 } : { rotate: (pullDistance / 60) * 180 }}
+              transition={isRefreshing ? { repeat: Infinity, duration: 0.7, ease: "linear" } : { duration: 0 }}
+              className="w-5 h-5 rounded-full border-2 border-t-transparent"
+              style={{ borderColor: "var(--accent-gold)", borderTopColor: "transparent" }}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
       {/* Onboarding Card */}
       {showOnboarding && (
         <OnboardingCard onDismiss={() => {
@@ -332,6 +364,9 @@ export function HomeFeed({
           localStorage.setItem("hoptrack:onboarding-dismissed", "1");
         }} />
       )}
+
+      {/* Wishlist On-Tap Alert */}
+      <WishlistOnTapAlert count={wishlistOnTapCount} />
 
       {/* Feed Tab Bar */}
       <FeedTabBar activeTab={activeTab} onChange={handleTabChange} />
@@ -358,7 +393,6 @@ export function HomeFeed({
                 profile={profile}
                 feedItems={friendsFeed}
                 currentUserId={currentUserId}
-                communityContent={communityContent}
                 friendCount={friendCount}
                 activeFriendCount={activeFriendSessions.length}
                 loading={friendsPagination.loading}
@@ -421,5 +455,6 @@ export function HomeFeed({
         )}
       </AnimatePresence>
     </div>
+    </motion.div>
   );
 }

@@ -9,7 +9,6 @@ import { UserAvatar } from "@/components/ui/UserAvatar";
 import { FeedItemCard, type FeedItem } from "./FeedItemCard";
 import { FeedCardSkeletons, FeedEndMessage } from "./FeedPaginationUI";
 import type { Profile } from "@/types/database";
-import type { FeaturedBeer } from "@/components/social/BeerOfTheWeekCard";
 import { useReactions } from "./ReactionContext";
 
 function getFeedItemKey(item: FeedItem, i: number): string {
@@ -31,15 +30,10 @@ function getFeedItemKey(item: FeedItem, i: number): string {
   }
 }
 
-interface CommunityContentForFriends {
-  featuredBeers: FeaturedBeer[];
-}
-
 export function FriendsTabContent({
   profile,
   feedItems,
   currentUserId,
-  communityContent,
   friendCount,
   activeFriendCount,
   loading,
@@ -49,7 +43,6 @@ export function FriendsTabContent({
   profile: Profile | null;
   feedItems: FeedItem[];
   currentUserId: string;
-  communityContent?: CommunityContentForFriends;
   friendCount: number;
   activeFriendCount: number;
   loading?: boolean;
@@ -61,8 +54,6 @@ export function FriendsTabContent({
     activeFriendCount > 0
       ? `${activeFriendCount} friend${activeFriendCount !== 1 ? "s" : ""} drinking right now`
       : `${friendCount} friend${friendCount !== 1 ? "s" : ""} on HopTrack`;
-
-  const firstBotw = communityContent?.featuredBeers?.[0] ?? null;
 
   return (
     <>
@@ -97,51 +88,7 @@ export function FriendsTabContent({
       {/* Live Now strip */}
       <DrinkingNow />
 
-      {/* BOTW compact banner */}
-      {firstBotw && feedItems.length > 0 && (
-        <Link href={`/beer/${firstBotw.id}`}>
-          <div
-            className="rounded-xl px-4 py-3 flex items-center gap-3 hover:brightness-110 transition-all"
-            style={{
-              background:
-                "linear-gradient(135deg, color-mix(in srgb, var(--accent-gold) 10%, transparent), color-mix(in srgb, var(--accent-gold) 4%, transparent))",
-              border:
-                "1px solid color-mix(in srgb, var(--accent-gold) 18%, transparent)",
-            }}
-          >
-            <div
-              className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 text-base"
-              style={{
-                background:
-                  "color-mix(in srgb, var(--accent-gold) 15%, transparent)",
-              }}
-            >
-              🍺
-            </div>
-            <div className="flex-1 min-w-0">
-              <p
-                className="text-[9px] font-mono uppercase tracking-widest mb-0.5"
-                style={{ color: "var(--accent-gold)" }}
-              >
-                Beer of the Week
-              </p>
-              <p
-                className="font-display text-sm font-bold truncate leading-tight"
-                style={{ color: "var(--text-primary)" }}
-              >
-                {firstBotw.name}
-              </p>
-              <p
-                className="text-[11px] truncate mt-0.5"
-                style={{ color: "var(--text-muted)" }}
-              >
-                {firstBotw.brewery?.name}
-                {firstBotw.abv ? ` · ${firstBotw.abv}%` : ""}
-              </p>
-            </div>
-          </div>
-        </Link>
-      )}
+      {/* BOTW lives in Discover — nothing here */}
 
       {/* Feed */}
       {feedItems.length > 0 ? (

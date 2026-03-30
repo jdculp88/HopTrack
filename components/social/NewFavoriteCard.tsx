@@ -1,8 +1,8 @@
 'use client'
 
+import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { UserAvatar } from '@/components/ui/UserAvatar'
-import { ReactionBar } from '@/components/social/ReactionBar'
+import { Heart } from 'lucide-react'
 import { formatRelativeTime } from '@/lib/dates'
 
 export interface NewFavoriteItem {
@@ -21,59 +21,55 @@ export interface NewFavoriteItem {
 export function NewFavoriteCard({
   favorite,
   index = 0,
-  reactionCounts,
-  userReactions,
 }: {
   favorite: NewFavoriteItem
   index?: number
   reactionCounts?: Record<string, number>
   userReactions?: string[]
 }) {
-
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
+      initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.03, duration: 0.25 }}
-      className="rounded-2xl px-4 py-3"
-      style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
+      className="rounded-2xl overflow-hidden flex"
+      style={{
+        background: 'linear-gradient(135deg, color-mix(in srgb, var(--accent-gold) 8%, var(--surface)), var(--surface))',
+        border: '1px solid color-mix(in srgb, var(--accent-gold) 20%, var(--border))',
+      }}
     >
-      {/* Compact content row */}
-      <div className="flex items-center gap-3">
-        <UserAvatar
-          profile={{
-            id: favorite.userId,
-            username: favorite.username,
-            display_name: favorite.displayName,
-            avatar_url: favorite.avatarUrl,
-          } as any}
-          size="sm"
-        />
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-1.5">
-            <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
-              {favorite.displayName.split(' ')[0]}
-            </span>
-            <span className="text-[11px]" style={{ color: 'var(--text-muted)' }}>
-              {formatRelativeTime(favorite.createdAt)}
-            </span>
-          </div>
-          <p className="text-xs mt-0.5" style={{ color: 'var(--text-secondary)' }}>
-            ❤️ favorited{' '}
-            <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>
-              {favorite.beerName}
-            </span>
-            {' '}from {favorite.breweryName}
-          </p>
-        </div>
+      {/* Gold accent bar */}
+      <div
+        className="w-1 flex-shrink-0"
+        style={{ background: 'var(--accent-gold)', opacity: 0.7 }}
+      />
+
+      {/* Heart icon column */}
+      <div
+        className="flex items-center justify-center w-14 flex-shrink-0"
+        style={{ background: 'color-mix(in srgb, var(--accent-gold) 10%, transparent)' }}
+      >
+        <Heart size={20} strokeWidth={1.75} style={{ color: 'var(--accent-gold)' }} />
       </div>
 
-      {/* Reaction footer */}
-      <ReactionBar
-        reactionCounts={reactionCounts}
-        userReactions={userReactions}
-        showShare={false}
-      />
+      {/* Content */}
+      <div className="flex-1 min-w-0 px-4 py-3">
+        <p className="text-sm leading-snug" style={{ color: 'var(--text-primary)' }}>
+          <Link
+            href={`/profile/${favorite.username}`}
+            className="font-semibold hover:underline underline-offset-2"
+          >
+            {favorite.displayName.split(' ')[0]}
+          </Link>
+          <span style={{ color: 'var(--text-muted)' }}> favorited </span>
+          <span className="font-display font-bold" style={{ color: 'var(--text-primary)' }}>
+            {favorite.beerName}
+          </span>
+        </p>
+        <p className="text-[10px] font-mono mt-1" style={{ color: 'var(--text-muted)' }}>
+          {favorite.breweryName} · {formatRelativeTime(favorite.createdAt)}
+        </p>
+      </div>
     </motion.div>
   )
 }
