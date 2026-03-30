@@ -80,7 +80,7 @@ export function AchievementFeedCard({
       transition={{ type: "spring", stiffness: 400, damping: 30 }}
       role="article"
       aria-label={`${achievement.profile.display_name || achievement.profile.username} earned ${achievement.achievement.name}`}
-      className="rounded-2xl overflow-hidden flex"
+      className="rounded-2xl overflow-hidden flex relative"
       style={{
         background: `linear-gradient(135deg, color-mix(in srgb, ${tierColor} 8%, var(--surface)), var(--surface))`,
         border: `1px solid color-mix(in srgb, ${tierColor} 20%, var(--border))`,
@@ -94,6 +94,10 @@ export function AchievementFeedCard({
         xpReward={achievement.achievement.xp_reward}
         onDismiss={() => setShowCelebration(false)}
       />
+
+      {/* Bubble decorations */}
+      <div className="absolute -top-3 -right-3 w-16 h-16 rounded-full pointer-events-none" style={{ background: tierColor, opacity: 0.06 }} />
+      <div className="absolute bottom-2 right-8 w-5 h-5 rounded-full pointer-events-none" style={{ background: "var(--accent-gold)", opacity: 0.07 }} />
 
       {/* Tier accent bar */}
       <div

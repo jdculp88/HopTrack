@@ -59,72 +59,103 @@ export function YouTabContent({
 
   return (
     <div className="space-y-5">
-      {/* Profile header */}
-      <div
-        className="rounded-2xl p-5"
+      {/* Profile header — pour fill hero card */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ type: "spring", stiffness: 400, damping: 30 }}
+        className="rounded-2xl p-5 relative overflow-hidden"
         style={{
-          background: "var(--surface)",
-          border: "1px solid var(--border)",
+          background: "var(--surface-2)",
+          border: "1px solid var(--surface-warm-border)",
         }}
       >
-        <div className="flex items-center gap-4 mb-4">
-          <UserAvatar profile={profile} size="lg" showLevel />
-          <div className="flex-1 min-w-0">
-            <h1
-              className="font-display text-xl font-bold leading-tight"
-              style={{ color: "var(--text-primary)" }}
-            >
-              {profile.display_name ?? profile.username}
-            </h1>
-            <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-              {levelInfo?.current.name} · Level {profile.level}
-            </p>
-          </div>
-          <Link
-            href={`/profile/${profile.username}`}
-            className="text-xs font-medium px-3 py-1.5 rounded-lg"
+        {/* Pour fill — rises from bottom, represents XP progress */}
+        {levelInfo && (
+          <motion.div
+            initial={{ height: "0%" }}
+            animate={{ height: `${Math.max(levelInfo.progress, 6)}%` }}
+            transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1], delay: 0.4 }}
+            className="absolute bottom-0 left-0 right-0 pointer-events-none"
             style={{
-              background: "var(--surface-2)",
-              color: "var(--text-secondary)",
-              border: "1px solid var(--border)",
+              background:
+                "linear-gradient(to top, color-mix(in srgb, var(--accent-gold) 22%, transparent) 0%, color-mix(in srgb, var(--accent-amber) 6%, transparent) 100%)",
             }}
-          >
-            Profile
-          </Link>
-        </div>
-        {levelInfo && levelInfo.next && (
-          <div className="space-y-1.5">
-            <div
-              className="flex items-center justify-between text-xs"
-              style={{ color: "var(--text-muted)" }}
-            >
-              <span>{profile.xp.toLocaleString()} XP</span>
-              <span>{levelInfo.xpToNext} XP to Level {levelInfo.next.level}</span>
-            </div>
-            <div
-              className="h-1.5 rounded-full overflow-hidden"
-              style={{ background: "var(--surface-2)" }}
-            >
-              <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: `${levelInfo.progress}%` }}
-                transition={{ duration: 1, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
-                className="h-full rounded-full"
-                style={{
-                  background: "linear-gradient(to right, var(--accent-gold), var(--accent-amber))",
-                }}
-              />
-            </div>
-          </div>
+          />
         )}
-      </div>
+
+        {/* Bubble decorations */}
+        <div
+          className="absolute -top-5 -right-5 w-24 h-24 rounded-full pointer-events-none"
+          style={{ background: "var(--accent-gold)", opacity: 0.07 }}
+        />
+        <div
+          className="absolute top-4 right-12 w-6 h-6 rounded-full pointer-events-none"
+          style={{ background: "var(--accent-amber)", opacity: 0.09 }}
+        />
+        <div
+          className="absolute bottom-4 -left-4 w-16 h-16 rounded-full pointer-events-none"
+          style={{ background: "var(--accent-gold)", opacity: 0.05 }}
+        />
+        <div
+          className="absolute bottom-8 w-4 h-4 rounded-full pointer-events-none"
+          style={{ left: "33.333%", background: "var(--accent-gold)", opacity: 0.10 }}
+        />
+        <div
+          className="absolute -right-3 w-10 h-10 rounded-full pointer-events-none"
+          style={{ top: "50%", transform: "translateY(-50%)", background: "var(--accent-amber)", opacity: 0.06 }}
+        />
+
+        {/* Content */}
+        <div className="relative z-10">
+          <div className="flex items-center gap-4 mb-4">
+            <UserAvatar profile={profile} size="lg" showLevel />
+            <div className="flex-1 min-w-0">
+              <h1
+                className="font-display text-xl font-bold leading-tight"
+                style={{ color: "var(--text-primary)" }}
+              >
+                {profile.display_name ?? profile.username}
+              </h1>
+              <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+                {levelInfo?.current.name} · Level {profile.level}
+              </p>
+            </div>
+            <Link
+              href={`/profile/${profile.username}`}
+              className="text-xs font-medium px-3 py-1.5 rounded-lg"
+              style={{
+                background: "var(--surface-2)",
+                color: "var(--text-secondary)",
+                border: "1px solid var(--border)",
+              }}
+            >
+              Profile
+            </Link>
+          </div>
+          {levelInfo && levelInfo.next && (
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-mono" style={{ color: "var(--text-muted)" }}>
+                {profile.xp.toLocaleString()} XP
+              </span>
+              <span className="text-[11px] font-mono" style={{ color: "var(--text-muted)" }}>
+                {levelInfo.xpToNext} to Level {levelInfo.next.level}
+              </span>
+            </div>
+          )}
+        </div>
+      </motion.div>
 
       {/* Stats card — BeerDNA warm treatment */}
       <div
-        className="rounded-2xl p-4"
+        className="rounded-2xl p-4 relative overflow-hidden"
         style={{ background: "var(--surface-warm)", border: "1px solid var(--surface-warm-border)" }}
       >
-        <p className="text-[10px] font-mono uppercase tracking-widest mb-3" style={{ color: "var(--text-muted)" }}>
+        {/* Bubble decorations */}
+        <div className="absolute -top-4 -right-4 w-20 h-20 rounded-full pointer-events-none" style={{ background: "var(--accent-gold)", opacity: 0.06 }} />
+        <div className="absolute bottom-3 left-12 w-8 h-8 rounded-full pointer-events-none" style={{ background: "var(--accent-amber)", opacity: 0.07 }} />
+        <div className="absolute top-1/2 -right-6 w-12 h-12 rounded-full pointer-events-none" style={{ background: "var(--accent-gold)", opacity: 0.05, transform: "translateY(-50%)" }} />
+        <p className="text-[10px] font-mono uppercase tracking-widest mb-3 relative z-10" style={{ color: "var(--text-muted)" }}>
           Your Numbers
         </p>
         <div className="grid grid-cols-2 gap-x-6 gap-y-3">
@@ -134,7 +165,7 @@ export function YouTabContent({
             { label: "Breweries", value: visitedBreweries.length || (profile.unique_breweries ?? 0), icon: <MapPin size={13} style={{ color: "var(--accent-gold)" }} /> },
             { label: "Day Streak", value: profile.current_streak ?? 0, icon: <Flame size={13} style={{ color: "var(--accent-amber)" }} /> },
           ].map((stat) => (
-            <div key={stat.label} className="flex items-center justify-between">
+            <div key={stat.label} className="flex items-center justify-between relative z-10">
               <div className="flex items-center gap-1.5">
                 {stat.icon}
                 <span className="text-[11px] font-mono" style={{ color: "var(--text-muted)" }}>
@@ -152,22 +183,32 @@ export function YouTabContent({
       {/* Activity Heatmap */}
       {activityHeatmap && activityHeatmap.length > 0 && (
         <div
-          className="rounded-2xl p-4"
+          className="rounded-2xl p-4 relative overflow-hidden"
           style={{ background: "var(--surface-warm)", border: "1px solid var(--surface-warm-border)" }}
         >
-          <p className="text-[10px] font-mono uppercase tracking-widest mb-3" style={{ color: "var(--text-muted)" }}>
+          {/* Bubble decorations */}
+          <div className="absolute -top-3 -right-3 w-16 h-16 rounded-full pointer-events-none" style={{ background: "var(--accent-gold)", opacity: 0.06 }} />
+          <div className="absolute bottom-4 left-8 w-6 h-6 rounded-full pointer-events-none" style={{ background: "var(--accent-amber)", opacity: 0.08 }} />
+          <p className="text-[10px] font-mono uppercase tracking-widest mb-3 relative z-10" style={{ color: "var(--text-muted)" }}>
             Activity
           </p>
-          <ActivityHeatmap data={activityHeatmap} compact />
+          <div className="relative z-10">
+            <ActivityHeatmap data={activityHeatmap} compact />
+          </div>
         </div>
       )}
 
       {/* Taste DNA — BeerDNA warm treatment */}
       {styleDNA && styleDNA.length >= 3 && (
         <div
-          className="rounded-2xl p-5 space-y-3"
+          className="rounded-2xl p-5 space-y-3 relative overflow-hidden"
           style={{ background: "var(--surface-warm)", border: "1px solid var(--surface-warm-border)" }}
         >
+          {/* Bubble decorations */}
+          <div className="absolute -top-6 -right-6 w-24 h-24 rounded-full pointer-events-none" style={{ background: "var(--accent-gold)", opacity: 0.07 }} />
+          <div className="absolute bottom-4 w-8 h-8 rounded-full pointer-events-none" style={{ left: "25%", background: "var(--accent-amber)", opacity: 0.06 }} />
+          <div className="absolute top-8 -left-2 w-5 h-5 rounded-full pointer-events-none" style={{ background: "var(--accent-gold)", opacity: 0.08 }} />
+          <div className="relative z-10 space-y-3">
           <div className="flex items-center justify-between">
             <p className="text-[10px] font-mono uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
               Taste DNA
@@ -204,6 +245,7 @@ export function YouTabContent({
               </div>
             ))}
           </div>
+          </div>
         </div>
       )}
       {styleDNA && styleDNA.length > 0 && styleDNA.length < 3 && (
@@ -228,10 +270,13 @@ export function YouTabContent({
       {/* Recent achievements */}
       {userAchievements && userAchievements.length > 0 && (
         <div
-          className="rounded-2xl p-4 space-y-3"
+          className="rounded-2xl p-4 space-y-3 relative overflow-hidden"
           style={{ background: "var(--surface-warm)", border: "1px solid var(--surface-warm-border)" }}
         >
-          <div className="flex items-center justify-between">
+          {/* Bubble decorations */}
+          <div className="absolute -top-4 -right-4 w-[72px] h-[72px] rounded-full pointer-events-none" style={{ background: "var(--accent-gold)", opacity: 0.06 }} />
+          <div className="absolute bottom-3 left-6 w-6 h-6 rounded-full pointer-events-none" style={{ background: "var(--accent-amber)", opacity: 0.07 }} />
+          <div className="flex items-center justify-between relative z-10">
             <p className="text-[10px] font-mono uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
               Recent Achievements
             </p>
@@ -239,7 +284,7 @@ export function YouTabContent({
               View All
             </Link>
           </div>
-          <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide">
+          <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide relative z-10">
             {userAchievements.map((ua) => (
               <div key={ua.id} className="flex flex-col items-center gap-1.5 flex-shrink-0 w-16">
                 <div

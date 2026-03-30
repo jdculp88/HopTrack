@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { Flame } from "lucide-react";
@@ -35,12 +36,17 @@ export function StreakFeedCard({
   streak: StreakData;
   index?: number;
 }) {
+  useEffect(() => {
+    const t = setTimeout(() => markStreakSeen(streak.profileId, streak.currentStreak), 3000);
+    return () => clearTimeout(t);
+  }, [streak.profileId, streak.currentStreak]);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.03, duration: 0.25 }}
-      className="rounded-2xl overflow-hidden flex"
+      className="rounded-2xl overflow-hidden flex relative"
       style={{
         background:
           "linear-gradient(135deg, color-mix(in srgb, var(--accent-amber) 10%, var(--surface)), var(--surface))",
@@ -48,6 +54,10 @@ export function StreakFeedCard({
           "1px solid color-mix(in srgb, var(--accent-amber) 22%, var(--border))",
       }}
     >
+      {/* Bubble decorations */}
+      <div className="absolute -top-3 -right-3 w-14 h-14 rounded-full pointer-events-none" style={{ background: "var(--accent-amber)", opacity: 0.07 }} />
+      <div className="absolute bottom-1 right-10 w-4 h-4 rounded-full pointer-events-none" style={{ background: "var(--accent-amber)", opacity: 0.09 }} />
+
       {/* Amber accent bar */}
       <div
         className="w-1 flex-shrink-0"

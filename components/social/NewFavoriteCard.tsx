@@ -33,12 +33,16 @@ export function NewFavoriteCard({
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.03, duration: 0.25 }}
-      className="rounded-2xl overflow-hidden flex"
+      className="rounded-2xl overflow-hidden flex relative"
       style={{
         background: 'linear-gradient(135deg, color-mix(in srgb, var(--accent-gold) 8%, var(--surface)), var(--surface))',
         border: '1px solid color-mix(in srgb, var(--accent-gold) 20%, var(--border))',
       }}
     >
+      {/* Bubble decorations */}
+      <div className="absolute -top-3 -right-3 w-14 h-14 rounded-full pointer-events-none" style={{ background: 'var(--accent-gold)', opacity: 0.06 }} />
+      <div className="absolute bottom-2 right-10 w-4 h-4 rounded-full pointer-events-none" style={{ background: 'var(--accent-gold)', opacity: 0.08 }} />
+
       {/* Gold accent bar */}
       <div
         className="w-1 flex-shrink-0"
