@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { Beer, Star, Stamp, Search } from "lucide-react";
 import { BeerStyleBadge } from "@/components/ui/BeerStyleBadge";
 import { formatDate, generateGradientFromString } from "@/lib/utils";
+import { getStyleFamily } from "@/lib/beerStyleColors";
 
 interface StampData {
   beerId: string;
@@ -60,7 +61,7 @@ export function PassportGrid({ stamps, totalBeers, totalStyles, totalBreweries }
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-[var(--surface)] border border-[var(--border)] rounded-3xl p-5"
+        className="card-bg-stats border border-[var(--border)] rounded-3xl p-5"
       >
         <div className="flex items-center gap-3 mb-4">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--accent-gold)] to-[var(--accent-amber)] flex items-center justify-center">
@@ -149,11 +150,12 @@ export function PassportGrid({ stamps, totalBeers, totalStyles, totalBreweries }
             >
               <Link href={`/beer/${stamp.beerId}`}>
                 <div
-                  className={`p-3 bg-[var(--surface)] rounded-2xl border transition-all hover:border-[var(--accent-gold)]/40 ${
+                  className={`card-bg-reco p-3 rounded-2xl border transition-all hover:border-[var(--accent-gold)]/40 ${
                     stamp.rating === 5
                       ? "border-[var(--accent-gold)]/60 shadow-[0_0_12px_color-mix(in_srgb,var(--accent-gold)_15%,transparent)]"
                       : "border-[var(--border)]"
                   }`}
+                  data-style={getStyleFamily(stamp.style)}
                 >
                   <div
                     className="w-full aspect-square rounded-xl mb-2.5 flex items-center justify-center text-3xl"

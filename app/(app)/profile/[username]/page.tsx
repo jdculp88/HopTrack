@@ -10,7 +10,8 @@ import { AchievementsGrid } from "./AchievementsGrid";
 import { FriendButton } from "@/components/social/FriendButton";
 import { getLevelProgress } from "@/lib/xp";
 import { generateGradientFromString, formatABV } from "@/lib/utils";
-import { getStyleFamily, getStyleVars } from "@/lib/beerStyleColors";
+import { getStyleFamily } from "@/lib/beerStyleColors";
+import { BeerDNACard } from "@/components/profile/BeerDNACard";
 import { PageEnterWrapper } from "@/components/ui/PageEnterWrapper";
 
 export async function generateMetadata({ params }: { params: Promise<{ username: string }> }) {
@@ -113,8 +114,6 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
       .sort((a, b) => b.count - a.count)
       .slice(0, 6);
   })();
-  const maxStyleCount = styleDNA.length > 0 ? styleDNA[0].count : 1;
-
   return (
     <PageEnterWrapper>
     <div className="max-w-3xl mx-auto">
@@ -243,46 +242,12 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
           <span className="text-[var(--text-muted)] text-sm">→</span>
         </Link>
 
-        {/* Taste DNA — horizontal bars showing style preferences */}
-        <div className="mb-8">
-          <h2 className="font-display text-xl font-bold text-[var(--text-primary)] mb-4">Taste DNA</h2>
-          {styleDNA.length > 0 ? (
-            <div className="card-bg-taste-dna border border-[var(--border)] rounded-2xl p-4 space-y-3">
-              {styleDNA.map((entry) => (
-                <div key={entry.style} className="space-y-1">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-[var(--text-primary)]">{entry.style}</span>
-                    <div className="flex items-center gap-2">
-                      {entry.avgRating != null && (
-                        <span className="flex items-center gap-0.5 text-xs font-mono text-[var(--accent-gold)]">
-                          <Star size={10} className="fill-[var(--accent-gold)]" />
-                          {entry.avgRating.toFixed(1)}
-                        </span>
-                      )}
-                      <span className="text-xs font-mono text-[var(--text-muted)]">{entry.count}</span>
-                    </div>
-                  </div>
-                  <div className="h-2 bg-[var(--surface-2)] rounded-full overflow-hidden">
-                    <div
-                      className="h-full rounded-full"
-                      style={{
-                        background: getStyleVars(entry.style).primary,
-                        width: `${Math.max(8, (entry.count / maxStyleCount) * 100)}%`,
-                        transition: "width 0.5s ease-out",
-                      }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-10 bg-[var(--surface)] rounded-2xl border border-[var(--border)]">
-              <p className="text-3xl mb-2">🧬</p>
-              <p className="font-display text-base text-[var(--text-primary)]">Your palate is a mystery</p>
-              <p className="text-sm text-[var(--text-secondary)] mt-1">Log a few beers and we&apos;ll map your taste preferences.</p>
-            </div>
-          )}
-        </div>
+        {/* Beer DNA */}
+        {styleDNA.length >= 3 && (
+          <div className="mb-8">
+            <BeerDNACard styleDNA={styleDNA} username={username} />
+          </div>
+        )}
 
         {/* Want to Try (Wishlist) */}
         {isOwnProfile && (

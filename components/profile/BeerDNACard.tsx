@@ -86,31 +86,23 @@ export function BeerDNACard({ styleDNA, username }: BeerDNACardProps) {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ type: "spring", stiffness: 400, damping: 30 }}
-      className="rounded-2xl p-5 relative overflow-hidden"
-      style={{
-        background: "linear-gradient(135deg, #faf6f0 0%, #f5eddc 100%)",
-        border: "1px solid color-mix(in srgb, var(--accent-gold) 30%, transparent)",
-      }}
+      className="card-bg-taste-dna rounded-2xl p-5 relative overflow-hidden"
+      style={{ border: "1px solid var(--border)" }}
     >
-      {/* Decorative gold circle */}
-      <div
-        className="absolute -top-6 -right-6 w-24 h-24 rounded-full opacity-10"
-        style={{ background: "var(--accent-gold)" }}
-      />
 
       {/* Header */}
       <div className="flex items-start justify-between mb-4">
         <div>
-          <p className="text-[10px] font-mono uppercase tracking-widest mb-1" style={{ color: "#8B6914" }}>
+          <p className="text-[10px] font-mono uppercase tracking-widest mb-1" style={{ color: "var(--accent-gold)" }}>
             Your Beer DNA
           </p>
           <div className="flex items-center gap-2">
             <span className="text-3xl">{personality.emoji}</span>
-            <h3 className="font-display text-xl font-bold leading-tight" style={{ color: "#3D2B00" }}>
+            <h3 className="font-display text-xl font-bold leading-tight" style={{ color: "var(--text-primary)" }}>
               {personality.label}
             </h3>
           </div>
-          <p className="text-xs mt-1 italic" style={{ color: "#6B4F00" }}>
+          <p className="text-xs mt-1 italic" style={{ color: "var(--text-secondary)" }}>
             {personality.tagline}
           </p>
         </div>
@@ -130,15 +122,15 @@ export function BeerDNACard({ styleDNA, username }: BeerDNACardProps) {
         {topStyles.map((entry, i) => (
           <div key={entry.style} className="space-y-0.5">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium" style={{ color: "#3D2B00" }}>
+              <span className="text-xs font-medium" style={{ color: "var(--text-primary)" }}>
                 {entry.style}
               </span>
-              <span className="text-[10px] font-mono" style={{ color: "#8B6914" }}>
+              <span className="text-[10px] font-mono" style={{ color: "var(--accent-gold)" }}>
                 {entry.count} beer{entry.count !== 1 ? "s" : ""}
                 {entry.avgRating != null ? ` · ★ ${entry.avgRating.toFixed(1)}` : ""}
               </span>
             </div>
-            <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(139,105,20,0.15)" }}>
+            <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "color-mix(in srgb, var(--accent-gold) 12%, var(--surface-2))" }}>
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${(entry.count / topStyles[0].count) * 100}%` }}
@@ -151,7 +143,7 @@ export function BeerDNACard({ styleDNA, username }: BeerDNACardProps) {
         ))}
       </div>
 
-      <p className="text-[10px] font-mono mt-3" style={{ color: "#8B6914" }}>
+      <p className="text-[10px] font-mono mt-3" style={{ color: "var(--accent-gold)" }}>
         Based on {totalBeers} beer{totalBeers !== 1 ? "s" : ""} logged · hoptrack.beer
       </p>
     </motion.div>

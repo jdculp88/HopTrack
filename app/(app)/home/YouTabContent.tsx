@@ -9,7 +9,6 @@ import { BeerDNACard } from "@/components/profile/BeerDNACard";
 import { SessionCard } from "@/components/social/SessionCard";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import { getLevelProgress } from "@/lib/xp";
-import { getStyleVars } from "@/lib/beerStyleColors";
 import { FeedCardSkeletons, FeedEndMessage } from "./FeedPaginationUI";
 import type { Profile, Session } from "@/types/database";
 import type { StyleDNAEntry, WishlistItem, UserAchievement } from "./HomeFeed";
@@ -55,8 +54,6 @@ export function YouTabContent({
     }
     return Array.from(seen.values());
   }, [sessions]);
-
-  const maxStyleCount = styleDNA && styleDNA.length > 0 ? styleDNA[0].count : 1;
 
   return (
     <div className="space-y-5">
@@ -168,63 +165,7 @@ export function YouTabContent({
         </div>
       )}
 
-      {/* Taste DNA — blended color wash treatment */}
-      {styleDNA && styleDNA.length >= 3 && (
-        <div
-          className="card-bg-taste-dna rounded-2xl p-5 space-y-3"
-          style={{ border: "1px solid var(--surface-warm-border)" }}
-        >
-          <div className="relative z-10 space-y-3">
-            <div className="flex items-center justify-between">
-              <p className="text-[10px] font-mono uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
-                Taste DNA
-              </p>
-              <span className="text-[10px] font-mono" style={{ color: "var(--text-muted)" }}>
-                {styleDNA.reduce((s, e) => s + e.count, 0)} beers logged
-              </span>
-            </div>
-            <div className="space-y-3">
-              {styleDNA.slice(0, 5).map((entry, i) => (
-                <div key={entry.style}>
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
-                      {entry.style}
-                    </span>
-                    <span className="text-[10px] font-mono" style={{ color: "var(--text-muted)" }}>
-                      {entry.count} {entry.count === 1 ? "beer" : "beers"}
-                      {entry.avgRating ? ` · ★ ${entry.avgRating.toFixed(1)}` : ""}
-                    </span>
-                  </div>
-                  <div className="h-2 rounded-full overflow-hidden" style={{ background: "color-mix(in srgb, var(--accent-gold) 12%, var(--surface-2))" }}>
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${(entry.count / maxStyleCount) * 100}%` }}
-                      transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: i * 0.06 }}
-                      className="h-full rounded-full"
-                      style={{ background: getStyleVars(entry.style).primary }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-      {styleDNA && styleDNA.length > 0 && styleDNA.length < 3 && (
-        <div
-          className="rounded-2xl p-4 text-center"
-          style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
-        >
-          <p className="text-sm font-semibold mb-1" style={{ color: "var(--text-primary)" }}>
-            Your Taste DNA
-          </p>
-          <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-            Keep logging beers to build your Taste DNA — needs 3+ styles.
-          </p>
-        </div>
-      )}
-
-      {/* Beer DNA Shareable Card */}
+      {/* Beer DNA */}
       {styleDNA && styleDNA.length >= 3 && profile.username && (
         <BeerDNACard styleDNA={styleDNA} username={profile.username} />
       )}
