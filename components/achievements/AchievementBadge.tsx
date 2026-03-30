@@ -58,7 +58,6 @@ export function AchievementBadge({
           style={earned
             ? {
                 background: `color-mix(in srgb, ${tier.color} 12%, transparent)`,
-                ringColor: `color-mix(in srgb, ${tier.color} 40%, transparent)`,
                 outline: `2px solid color-mix(in srgb, ${tier.color} 35%, transparent)`,
                 outlineOffset: "2px",
               }
