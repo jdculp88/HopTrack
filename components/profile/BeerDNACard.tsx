@@ -60,6 +60,10 @@ export function BeerDNACard({ styleDNA, username }: BeerDNACardProps) {
   const personality = getPersonality(styleDNA);
   const topStyles = styleDNA.slice(0, 5);
   const totalBeers = styleDNA.reduce((s, e) => s + e.count, 0);
+  // Drive the color wash from actual top 3 styles
+  const dnaC1 = getStyleVars(topStyles[0]?.style ?? "").primary;
+  const dnaC2 = getStyleVars(topStyles[1]?.style ?? "").primary;
+  const dnaC3 = getStyleVars(topStyles[2]?.style ?? "").primary;
   const shareText = `My Beer DNA on HopTrack: "${personality.label}" 🍺 — ${personality.tagline}. Top style: ${topStyles[0]?.style}. Track yours at hoptrack.beer`;
 
   async function handleShare() {
@@ -87,7 +91,12 @@ export function BeerDNACard({ styleDNA, username }: BeerDNACardProps) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ type: "spring", stiffness: 400, damping: 30 }}
       className="card-bg-taste-dna rounded-2xl p-5 relative overflow-hidden"
-      style={{ border: "1px solid var(--border)" }}
+      style={{
+        border: "1px solid var(--border)",
+        "--dna-c1": dnaC1,
+        "--dna-c2": dnaC2,
+        "--dna-c3": dnaC3,
+      } as React.CSSProperties}
     >
 
       {/* Header */}

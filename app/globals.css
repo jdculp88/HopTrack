@@ -572,11 +572,11 @@ input, select, textarea { font-size: max(16px, 1em); }
   content: '';
   position: absolute;
   left: 0; right: 0; bottom: 0;
-  height: 40%;
+  height: 50%;
   background:
-    radial-gradient(ellipse at 20% 100%, color-mix(in srgb, var(--ipa-green) 5%, transparent) 0%, transparent 50%),
-    radial-gradient(ellipse at 60% 100%, color-mix(in srgb, var(--sour-berry) 4%, transparent) 0%, transparent 40%),
-    radial-gradient(ellipse at 90% 100%, color-mix(in srgb, var(--lager-sky) 4%, transparent) 0%, transparent 45%);
+    radial-gradient(ellipse at 15% 100%, color-mix(in srgb, var(--dna-c1, var(--ipa-green)) 10%, transparent) 0%, transparent 55%),
+    radial-gradient(ellipse at 55% 100%, color-mix(in srgb, var(--dna-c2, var(--sour-berry))  8%, transparent) 0%, transparent 45%),
+    radial-gradient(ellipse at 90% 100%, color-mix(in srgb, var(--dna-c3, var(--lager-sky))   8%, transparent) 0%, transparent 50%);
   pointer-events: none;
 }
 
