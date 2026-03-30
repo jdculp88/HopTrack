@@ -195,9 +195,16 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
               </span>
             )}
           </div>
-          <div className="mt-4 flex items-center gap-3">
+          <div className="mt-4 flex items-center gap-3 flex-wrap">
             <BreweryCheckinButton brewery={brewery as Brewery} />
             <FollowBreweryButton breweryId={id} />
+            <Link
+              href={`/hop-route/new?brewery=${id}&city=${encodeURIComponent((brewery as any).city ?? "")}`}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-mono border transition-colors"
+              style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--text-muted)" }}
+            >
+              <Beer size={12} /> Start a HopRoute here
+            </Link>
           </div>
         </div>
       </div>

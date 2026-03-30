@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Compass } from "lucide-react";
+import { Compass, Beer } from "lucide-react";
 import {
   BeerOfTheWeekCard,
   type FeaturedBeer,
@@ -80,6 +80,31 @@ export function DiscoverTabContent({
 
   return (
     <div className="space-y-6">
+      {/* Plan a HopRoute — hero CTA */}
+      <Link href="/hop-route/new" className="block">
+        <motion.div
+          whileHover={{ scale: 1.01 }}
+          whileTap={{ scale: 0.99 }}
+          transition={{ type: "spring", stiffness: 400, damping: 30 }}
+          className="relative overflow-hidden rounded-2xl p-5 border"
+          style={{ background: "linear-gradient(135deg, color-mix(in srgb, var(--accent-gold) 12%, transparent), color-mix(in srgb, var(--accent-amber) 6%, transparent))", borderColor: "color-mix(in srgb, var(--accent-gold) 30%, transparent)" }}
+        >
+          <div className="flex items-center justify-between gap-4">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <Beer size={16} style={{ color: "var(--accent-gold)" }} />
+                <span className="text-xs font-mono uppercase tracking-widest" style={{ color: "var(--accent-gold)" }}>New</span>
+              </div>
+              <p className="font-display text-lg font-bold text-[var(--text-primary)]">Plan a HopRoute</p>
+              <p className="text-sm text-[var(--text-secondary)]">AI-powered brewery crawl planner. Tell us where and when — we build your night.</p>
+            </div>
+            <div className="flex-shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center text-2xl" style={{ background: "color-mix(in srgb, var(--accent-gold) 15%, transparent)" }}>
+              🗺️
+            </div>
+          </div>
+        </motion.div>
+      </Link>
+
       {/* Beer of the Week */}
       {communityContent.featuredBeers.length > 0 && (
         <div className="space-y-2">
