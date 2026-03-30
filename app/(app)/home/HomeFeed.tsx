@@ -29,6 +29,7 @@ import { DiscoverTabContent } from "./DiscoverTabContent";
 import { YouTabContent } from "./YouTabContent";
 import { OnboardingCard } from "./OnboardingCard";
 import type { FeedItem } from "./FeedItemCard";
+import type { FriendBreweryReview } from "@/components/social/BreweryRatingFeedCard";
 import { ReactionProvider } from "./ReactionContext";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { WishlistOnTapAlert } from "@/components/wishlist/WishlistOnTapAlert";
@@ -119,6 +120,7 @@ interface HomeFeedProps {
   activityHeatmap?: { date: string; count: number }[];
   pastRoutes?: Array<{ id: string; title: string; location_city: string | null; completed_at: string | null; hop_route_stops: Array<{ brewery: { name: string } | null }> }>;
   wishlistOnTapCount?: number;
+  friendBreweryReviews?: FriendBreweryReview[];
 }
 
 // ─── HomeFeed ───────────────────────────────────────────────────────────────
@@ -145,6 +147,7 @@ export function HomeFeed({
   activityHeatmap,
   pastRoutes,
   wishlistOnTapCount = 0,
+  friendBreweryReviews,
 }: HomeFeedProps) {
   const [activeTab, setActiveTab] = useState<FeedTab>("friends");
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -275,6 +278,13 @@ export function HomeFeed({
       });
     }
 
+    // Friend brewery reviews
+    if (friendBreweryReviews && friendBreweryReviews.length > 0) {
+      friendBreweryReviews.forEach((r) => {
+        items.push({ type: "brewery_review", data: r, sortDate: r.created_at });
+      });
+    }
+
     // Streak milestones (derived from session profiles)
     const seenStreakUsers = new Set<string>();
     [...activeFriendSessions, ...allFriendSessions].forEach((s) => {
@@ -303,7 +313,7 @@ export function HomeFeed({
     });
 
     // Sort: live first, then chronological
-    return items.sort((a, b) => {
+    const sorted = items.sort((a, b) => {
       const aLive = a.type === "session" && a.isLive ? 1 : 0;
       const bLive = b.type === "session" && b.isLive ? 1 : 0;
       if (aLive !== bLive) return bLive - aLive;
@@ -311,6 +321,18 @@ export function HomeFeed({
         new Date(b.sortDate).getTime() - new Date(a.sortDate).getTime()
       );
     });
+
+    // Inject HopRoute CTA at position 5 (if feed has enough items)
+    if (sorted.length >= 3) {
+      const insertAt = Math.min(5, sorted.length);
+      sorted.splice(insertAt, 0, {
+        type: "hop_route_cta",
+        data: { id: "hop-route-cta" },
+        sortDate: new Date(Date.now() - 1000).toISOString(),
+      });
+    }
+
+    return sorted;
   }, [
     allFriendSessions,
     activeFriendSessions,
@@ -318,6 +340,7 @@ export function HomeFeed({
     friendAchievements,
     newFavorites,
     friendsJoined,
+    friendBreweryReviews,
     currentUserId,
   ]);
 

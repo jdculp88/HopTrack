@@ -41,6 +41,58 @@ export default async function HomePage() {
       fetchFriendActivity(supabase, user.id, friendIds),
     ]);
 
+  // Wishlist on-tap count — how many wishlisted beers are currently on tap anywhere
+  const wishlistOnTapCount = await (async () => {
+    try {
+      const { data: wl } = await (supabase as any)
+        .from("wishlist")
+        .select("beer_id")
+        .eq("user_id", user.id);
+      if (!wl || wl.length === 0) return 0;
+      const beerIds = wl.map((w: any) => w.beer_id);
+      const { count } = await (supabase as any)
+        .from("beers")
+        .select("id", { count: "exact", head: true })
+        .in("id", beerIds)
+        .eq("is_on_tap", true)
+        .or("is_86d.is.null,is_86d.eq.false");
+      return count ?? 0;
+    } catch {
+      return 0;
+    }
+  })();
+
+  // Friend brewery reviews (past 7 days)
+  const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+  const friendBreweryReviews = await (async () => {
+    if (friendIds.length === 0) return [];
+    try {
+      const { data: breweryReviewsData } = await (supabase as any)
+        .from("brewery_reviews")
+        .select(`
+          id, rating, comment, created_at,
+          profile:profiles!user_id(id, username, display_name, avatar_url),
+          brewery:breweries!brewery_id(id, name, city, state)
+        `)
+        .in("user_id", friendIds.slice(0, 50))
+        .gte("created_at", oneWeekAgo)
+        .order("created_at", { ascending: false })
+        .limit(15);
+      return (breweryReviewsData ?? [])
+        .filter((r: any) => r.profile && r.brewery)
+        .map((r: any) => ({
+          id: r.id,
+          rating: r.rating,
+          comment: r.comment,
+          created_at: r.created_at,
+          profile: r.profile,
+          brewery: r.brewery,
+        }));
+    } catch {
+      return [];
+    }
+  })();
+
   // Beer recommendations + activity heatmap + past HopRoutes (fault-tolerant)
   const [recommendations, activityHeatmap, pastRoutesResult] = await Promise.all([
     getRecommendations(user.id).catch(() => []),
@@ -82,9 +134,12 @@ export default async function HomePage() {
   ];
 
   const curatedCollections = [
-    { id: "c1", title: "5 Porters for Cold Nights", count: 5, emoji: "🌙" },
-    { id: "c2", title: "Starter Pack: Belgian Styles", count: 8, emoji: "🇧🇪" },
-    { id: "c3", title: "Best Patios in Asheville", count: 6, emoji: "☀️" },
+    { id: "c1", title: "New England IPA Essentials", count: 12, emoji: "🍺", description: "Hazy, juicy, and endlessly crushable", tagColor: "gold" as const },
+    { id: "c2", title: "The Dark Side", count: 18, emoji: "🌑", description: "Stouts, porters, and midnight sippers", tagColor: "dark" as const },
+    { id: "c3", title: "Sour Power", count: 9, emoji: "🍋", description: "Tart, funky, and unapologetically weird", tagColor: "amber" as const },
+    { id: "c4", title: "Session Crushers", count: 15, emoji: "🏃", description: "Under 5% ABV and dangerously drinkable", tagColor: "green" as const },
+    { id: "c5", title: "Barrel-Aged Beasts", count: 7, emoji: "🛢️", description: "Big, boozy, and worth every calorie", tagColor: "gold" as const },
+    { id: "c6", title: "Lager Renaissance", count: 11, emoji: "🌾", description: "Crispy, clean, and back in style", tagColor: "amber" as const },
   ];
 
   return (
@@ -117,6 +172,8 @@ export default async function HomePage() {
       recommendations={recommendations}
       activityHeatmap={activityHeatmap}
       pastRoutes={pastRoutes}
+      wishlistOnTapCount={wishlistOnTapCount}
+      friendBreweryReviews={friendBreweryReviews}
     />
   );
 }
