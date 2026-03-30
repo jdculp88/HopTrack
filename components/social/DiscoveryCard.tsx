@@ -2,9 +2,10 @@
 
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { TrendingUp, Calendar, Star } from 'lucide-react'
+import { TrendingUp, Calendar } from 'lucide-react'
 import { StarRating } from '@/components/ui/StarRating'
 import { UserAvatar } from '@/components/ui/UserAvatar'
+import { useToast } from '@/components/ui/Toast'
 
 export interface BreweryReviewItem {
   id: string
@@ -77,8 +78,8 @@ export function TrendingCard({ reviews, index = 0 }: { reviews: TrendingReview[]
             transition={{ delay: 0.1 + i * 0.05, duration: 0.25 }}
             className="rounded-xl p-3.5 flex-shrink-0"
             style={{
-              background: 'var(--surface)',
-              border: '1px solid var(--border)',
+              background: 'var(--surface-warm)',
+              border: '1px solid var(--surface-warm-border)',
               minWidth: 150,
               maxWidth: 170,
             }}
@@ -128,7 +129,7 @@ export function BreweryReviewCard({ review, index = 0 }: { review: BreweryReview
       <Link href={`/brewery/${review.brewery.id}`}>
         <div
           className="rounded-xl px-4 py-3 flex items-center gap-3"
-          style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
+          style={{ background: 'var(--surface-warm)', border: '1px solid var(--surface-warm-border)' }}
         >
           <UserAvatar
             profile={{
@@ -171,7 +172,7 @@ export function EventCard({ event, index = 0 }: { event: EventItem; index?: numb
       <Link href={`/brewery/${event.brewery.id}`}>
         <div
           className="rounded-xl px-4 py-3 flex items-center gap-3"
-          style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
+          style={{ background: 'var(--surface-warm)', border: '1px solid var(--surface-warm-border)' }}
         >
           <div
             className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
@@ -270,14 +271,46 @@ export function SeasonalBeersScroll({ beers }: { beers: SeasonalBeer[] }) {
 
 // ─── Curated Collections ─────────────────────────────────────────────────────
 
+export type CollectionTagColor = 'gold' | 'dark' | 'amber' | 'green'
+
 export interface CuratedCollection {
   id: string
   title: string
   count: number
   emoji: string
+  description?: string
+  tagColor?: CollectionTagColor
+}
+
+function getTagStyles(tagColor: CollectionTagColor = 'gold'): { bg: string; border: string } {
+  switch (tagColor) {
+    case 'dark':
+      return {
+        bg: 'linear-gradient(135deg, color-mix(in srgb, var(--surface-2) 80%, transparent), var(--surface))',
+        border: 'color-mix(in srgb, var(--border) 60%, transparent)',
+      }
+    case 'amber':
+      return {
+        bg: 'linear-gradient(135deg, color-mix(in srgb, var(--accent-amber) 10%, transparent), var(--surface))',
+        border: 'color-mix(in srgb, var(--accent-amber) 20%, transparent)',
+      }
+    case 'green':
+      return {
+        bg: 'linear-gradient(135deg, color-mix(in srgb, #4ade80 8%, transparent), var(--surface))',
+        border: 'color-mix(in srgb, #4ade80 18%, transparent)',
+      }
+    case 'gold':
+    default:
+      return {
+        bg: 'linear-gradient(135deg, color-mix(in srgb, var(--accent-gold) 10%, transparent), var(--surface))',
+        border: 'color-mix(in srgb, var(--accent-gold) 18%, transparent)',
+      }
+  }
 }
 
 export function CuratedCollectionsList({ collections }: { collections: CuratedCollection[] }) {
+  const { info } = useToast()
+
   if (collections.length === 0) return null
 
   return (
@@ -293,38 +326,48 @@ export function CuratedCollectionsList({ collections }: { collections: CuratedCo
         Curated Collections
       </p>
       <div className="space-y-2.5">
-        {collections.map((col, i) => (
-          <motion.div
-            key={col.id}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.04, duration: 0.25 }}
-            className="rounded-xl px-4 py-3.5 flex items-center gap-3.5"
-            style={{
-              background: 'linear-gradient(135deg, color-mix(in srgb, var(--accent-gold) 8%, transparent), var(--surface))',
-              border: '1px solid color-mix(in srgb, var(--accent-gold) 15%, transparent)',
-            }}
-          >
-            <span className="text-2xl">{col.emoji}</span>
-            <div className="flex-1 min-w-0">
-              <p className="font-display text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
-                {col.title}
-              </p>
-              <p className="text-[11px] mt-0.5" style={{ color: 'var(--text-muted)' }}>
-                {col.count} beers
-              </p>
-            </div>
-            <span
-              className="text-[9px] font-mono px-2 py-0.5 rounded-full flex-shrink-0"
-              style={{
-                color: 'var(--text-muted)',
-                background: 'color-mix(in srgb, var(--text-muted) 10%, transparent)',
-              }}
+        {collections.map((col, i) => {
+          const tagStyles = getTagStyles(col.tagColor)
+          return (
+            <motion.div
+              key={col.id}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.04, duration: 0.25 }}
             >
-              Coming soon
-            </span>
-          </motion.div>
-        ))}
+              <button
+                type="button"
+                onClick={() => info('Collection coming soon — editorial loading!')}
+                className="w-full text-left"
+              >
+                <motion.div
+                  whileTap={{ scale: 0.98 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                  className="rounded-xl px-4 py-3.5 flex items-center gap-3.5"
+                  style={{
+                    background: tagStyles.bg,
+                    border: `1px solid ${tagStyles.border}`,
+                  }}
+                >
+                  <span className="text-2xl flex-shrink-0">{col.emoji}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-display text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+                      {col.title}
+                    </p>
+                    {col.description && (
+                      <p className="text-[11px] mt-0.5 leading-snug" style={{ color: 'var(--text-secondary)' }}>
+                        {col.description}
+                      </p>
+                    )}
+                    <p className="font-mono text-[10px] mt-1" style={{ color: 'var(--text-muted)' }}>
+                      {col.count} beers
+                    </p>
+                  </div>
+                </motion.div>
+              </button>
+            </motion.div>
+          )
+        })}
       </div>
     </motion.div>
   )

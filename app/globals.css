@@ -41,6 +41,9 @@
   --skeleton-shine:  #252219;
   --scrollbar-track: #1C1A16;
   --scrollbar-thumb: #3A3628;
+  /* Warm card gradient — BeerDNA-style treatment for data/stats cards */
+  --surface-warm:    linear-gradient(135deg, color-mix(in srgb, var(--accent-gold) 6%, var(--surface)), var(--surface));
+  --surface-warm-border: color-mix(in srgb, var(--accent-gold) 18%, var(--border));
 }
 
 /* ── Light / Cream theme (user toggle + forced on marketing pages) ─────────── */
@@ -61,6 +64,9 @@
   --skeleton-shine:  #F5EEE4;
   --scrollbar-track: #F3EDE3;
   --scrollbar-thumb: #D4C4B0;
+  /* Warm card gradient — matches BeerDNA card in light mode */
+  --surface-warm:    linear-gradient(135deg, #faf6f0 0%, #f5eddc 100%);
+  --surface-warm-border: #E8D9C0;
 }
 
 /* ── Dark floating section tokens (used on cream pages) ────────────────────── */

@@ -5,10 +5,11 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { Beer, MapPin, Flame, Route } from "lucide-react";
 import { ActivityHeatmap } from "@/components/profile/ActivityHeatmap";
+import { BeerDNACard } from "@/components/profile/BeerDNACard";
 import { SessionCard } from "@/components/social/SessionCard";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import { getLevelProgress } from "@/lib/xp";
-import { FeedLoadingSpinner, FeedEndMessage } from "./FeedPaginationUI";
+import { FeedCardSkeletons, FeedEndMessage } from "./FeedPaginationUI";
 import type { Profile, Session } from "@/types/database";
 import type { StyleDNAEntry, WishlistItem, UserAchievement } from "./HomeFeed";
 import { useReactions } from "./ReactionContext";
@@ -118,44 +119,34 @@ export function YouTabContent({
         )}
       </div>
 
-      {/* Stats row */}
-      <div className="grid grid-cols-4 gap-2">
-        {[
-          {
-            label: "Sessions",
-            value: profile.total_checkins,
-            icon: <Beer size={14} style={{ color: "var(--accent-gold)" }} />,
-          },
-          {
-            label: "Beers",
-            value: profile.unique_beers ?? 0,
-            icon: <span className="text-sm">🍺</span>,
-          },
-          {
-            label: "Breweries",
-            value: visitedBreweries.length || (profile.unique_breweries ?? 0),
-            icon: <MapPin size={14} style={{ color: "var(--accent-gold)" }} />,
-          },
-          {
-            label: "Streak",
-            value: profile.current_streak ?? 0,
-            icon: <Flame size={14} style={{ color: "var(--accent-amber)" }} />,
-          },
-        ].map((stat) => (
-          <div
-            key={stat.label}
-            className="rounded-xl p-3 text-center"
-            style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
-          >
-            <div className="flex justify-center mb-1">{stat.icon}</div>
-            <p className="text-lg font-bold font-mono" style={{ color: "var(--text-primary)" }}>
-              {stat.value}
-            </p>
-            <p className="text-[10px] font-mono uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
-              {stat.label}
-            </p>
-          </div>
-        ))}
+      {/* Stats card — BeerDNA warm treatment */}
+      <div
+        className="rounded-2xl p-4"
+        style={{ background: "var(--surface-warm)", border: "1px solid var(--surface-warm-border)" }}
+      >
+        <p className="text-[10px] font-mono uppercase tracking-widest mb-3" style={{ color: "var(--text-muted)" }}>
+          Your Numbers
+        </p>
+        <div className="grid grid-cols-2 gap-x-6 gap-y-3">
+          {[
+            { label: "Sessions", value: profile.total_checkins, icon: <Beer size={13} style={{ color: "var(--accent-gold)" }} /> },
+            { label: "Unique Beers", value: profile.unique_beers ?? 0, icon: <MapPin size={13} style={{ color: "var(--accent-gold)" }} /> },
+            { label: "Breweries", value: visitedBreweries.length || (profile.unique_breweries ?? 0), icon: <MapPin size={13} style={{ color: "var(--accent-gold)" }} /> },
+            { label: "Day Streak", value: profile.current_streak ?? 0, icon: <Flame size={13} style={{ color: "var(--accent-amber)" }} /> },
+          ].map((stat) => (
+            <div key={stat.label} className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5">
+                {stat.icon}
+                <span className="text-[11px] font-mono" style={{ color: "var(--text-muted)" }}>
+                  {stat.label}
+                </span>
+              </div>
+              <span className="text-base font-bold font-mono" style={{ color: "var(--text-primary)" }}>
+                {stat.value}
+              </span>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Activity Heatmap */}
@@ -168,25 +159,25 @@ export function YouTabContent({
         </div>
       )}
 
-      {/* Taste DNA */}
+      {/* Taste DNA — BeerDNA warm treatment */}
       {styleDNA && styleDNA.length >= 3 && (
         <div
-          className="rounded-2xl p-4 space-y-3"
-          style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
+          className="rounded-2xl p-5 space-y-3"
+          style={{ background: "var(--surface-warm)", border: "1px solid var(--surface-warm-border)" }}
         >
           <div className="flex items-center justify-between">
-            <p className="text-xs font-semibold" style={{ color: "var(--text-primary)" }}>
-              Your Taste DNA
+            <p className="text-[10px] font-mono uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
+              Taste DNA
             </p>
             <span className="text-[10px] font-mono" style={{ color: "var(--text-muted)" }}>
-              based on {styleDNA.reduce((s, e) => s + e.count, 0)} beers
+              {styleDNA.reduce((s, e) => s + e.count, 0)} beers logged
             </span>
           </div>
-          <div className="space-y-2">
-            {styleDNA.slice(0, 6).map((entry, i) => (
-              <div key={entry.style} className="space-y-1">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs" style={{ color: "var(--text-secondary)" }}>
+          <div className="space-y-3">
+            {styleDNA.slice(0, 5).map((entry, i) => (
+              <div key={entry.style}>
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
                     {entry.style}
                   </span>
                   <span className="text-[10px] font-mono" style={{ color: "var(--text-muted)" }}>
@@ -194,16 +185,16 @@ export function YouTabContent({
                     {entry.avgRating ? ` · ★ ${entry.avgRating.toFixed(1)}` : ""}
                   </span>
                 </div>
-                <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "var(--surface-2)" }}>
+                <div className="h-2 rounded-full overflow-hidden" style={{ background: "color-mix(in srgb, var(--accent-gold) 12%, var(--surface-2))" }}>
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${(entry.count / maxStyleCount) * 100}%` }}
-                    transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: i * 0.05 }}
+                    transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: i * 0.06 }}
                     className="h-full rounded-full"
                     style={{
                       background: i === 0
                         ? "linear-gradient(to right, var(--accent-gold), var(--accent-amber))"
-                        : "color-mix(in srgb, var(--accent-gold) 50%, var(--surface-2))",
+                        : "color-mix(in srgb, var(--accent-gold) 55%, transparent)",
                     }}
                   />
                 </div>
@@ -224,6 +215,11 @@ export function YouTabContent({
             Keep logging beers to build your Taste DNA — needs 3+ styles.
           </p>
         </div>
+      )}
+
+      {/* Beer DNA Shareable Card */}
+      {styleDNA && styleDNA.length >= 3 && profile.username && (
+        <BeerDNACard styleDNA={styleDNA} username={profile.username} />
       )}
 
       {/* Recent achievements */}
@@ -433,21 +429,24 @@ export function YouTabContent({
             ))}
 
             {/* Pagination sentinel + status */}
-            {loading && <FeedLoadingSpinner />}
+            {loading && <FeedCardSkeletons count={3} />}
             {!hasMore && sessions.length >= 20 && <FeedEndMessage />}
             {sentinelRef && hasMore && !loading && (
               <div ref={sentinelRef} className="h-4" />
             )}
           </div>
         ) : (
-          <div className="text-center py-10 space-y-3">
-            <span className="text-5xl block">🍻</span>
-            <h3 className="font-display text-lg font-bold" style={{ color: "var(--text-primary)" }}>
-              Start your story
-            </h3>
-            <p className="text-sm max-w-xs mx-auto" style={{ color: "var(--text-muted)" }}>
-              Your sessions, ratings, and achievements will appear here.
-            </p>
+          <div className="text-center py-10 space-y-4">
+            <span className="text-5xl block">🍺</span>
+            <div className="space-y-2">
+              <h3 className="font-display text-2xl font-bold" style={{ color: "var(--text-primary)" }}>
+                Time to crack one open.
+              </h3>
+              <p className="text-sm max-w-xs mx-auto leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+                Your session history will live here. Start a session to see the
+                magic.
+              </p>
+            </div>
             <button
               onClick={() => window.dispatchEvent(new CustomEvent("hoptrack:open-checkin"))}
               className="inline-flex items-center gap-2 font-semibold text-sm px-5 py-3 rounded-xl transition-all"

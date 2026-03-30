@@ -3,7 +3,7 @@
 import type { RefObject } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Compass, UserPlus } from "lucide-react";
+import { Compass, UserPlus, Radio } from "lucide-react";
 import { DrinkingNow } from "@/components/social/DrinkingNow";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import { FeedItemCard, type FeedItem } from "./FeedItemCard";
@@ -50,39 +50,39 @@ export function FriendsTabContent({
   sentinelRef?: RefObject<HTMLDivElement | null>;
 }) {
   const { reactionCounts, userReactions, commentCounts } = useReactions();
-  const liveCountLabel =
-    activeFriendCount > 0
-      ? `${activeFriendCount} friend${activeFriendCount !== 1 ? "s" : ""} drinking right now`
-      : `${friendCount} friend${friendCount !== 1 ? "s" : ""} on HopTrack`;
 
   return (
     <>
-      {/* Your Round header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1
-            className="font-display font-bold"
-            style={{
-              color: "var(--text-primary)",
-              fontSize: "clamp(28px, 8vw, 36px)",
-              letterSpacing: "-0.03em",
-              lineHeight: 1.1,
-            }}
-          >
-            Your Round
-          </h1>
-          <p
-            className="text-sm mt-1 font-mono tracking-wide"
-            style={{ color: "var(--text-muted)" }}
-          >
-            {liveCountLabel}
-          </p>
-        </div>
+      {/* Compact context bar: avatar + friend count + live pulse */}
+      <div className="flex items-center justify-between gap-3">
+        {/* Left: avatar + name */}
         {profile && (
-          <Link href={`/profile/${profile.username}`}>
-            <UserAvatar profile={profile} size="md" />
+          <Link href={`/profile/${profile.username}`} className="flex items-center gap-2.5 min-w-0">
+            <UserAvatar profile={profile} size="sm" />
+            <span
+              className="text-sm font-semibold truncate"
+              style={{ color: "var(--text-primary)" }}
+            >
+              {(profile.display_name || profile.username).split(" ")[0]}
+            </span>
           </Link>
         )}
+
+        {/* Right: live count or friend count */}
+        <div className="flex items-center gap-1.5 flex-shrink-0">
+          {activeFriendCount > 0 ? (
+            <>
+              <Radio size={11} style={{ color: "var(--accent-gold)" }} />
+              <span className="text-[11px] font-mono" style={{ color: "var(--accent-gold)" }}>
+                {activeFriendCount} live now
+              </span>
+            </>
+          ) : (
+            <span className="text-[11px] font-mono" style={{ color: "var(--text-muted)" }}>
+              {friendCount} friend{friendCount !== 1 ? "s" : ""}
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Live Now strip */}
