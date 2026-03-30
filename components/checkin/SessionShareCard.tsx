@@ -2,11 +2,13 @@
 
 import { useRef, useCallback, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Share2, Copy, Star, Beer, Zap, Download, QrCode } from "lucide-react";
+import { X, Share2, Copy, Star, Beer, Zap, Download, QrCode, Smartphone } from "lucide-react";
 import { HopMark } from "@/components/ui/HopMark";
 import QRCode from "react-qr-code";
 import { useToast } from "@/components/ui/Toast";
 import type { Session, BeerLog } from "@/types/database";
+
+type ShareFormat = "card" | "story";
 
 interface SessionShareCardProps {
   open: boolean;
@@ -15,6 +17,8 @@ interface SessionShareCardProps {
   beerLogs: BeerLog[];
   session: Session | null;
   xpGained: number;
+  format?: ShareFormat;
+  onToggleFormat?: () => void;
 }
 
 function formatDuration(startedAt: string, endedAt?: string | null) {
@@ -27,7 +31,7 @@ function formatDuration(startedAt: string, endedAt?: string | null) {
   return `${mins}m`;
 }
 
-export function SessionShareCard({ open, onClose, breweryName, beerLogs, session, xpGained }: SessionShareCardProps) {
+export function SessionShareCard({ open, onClose, breweryName, beerLogs, session, xpGained, format = "card", onToggleFormat }: SessionShareCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
   const { success, error: showError } = useToast();
   const [showQR, setShowQR] = useState(false);
@@ -134,32 +138,92 @@ export function SessionShareCard({ open, onClose, breweryName, beerLogs, session
               </button>
             </div>
 
+            {/* Format toggle */}
+            {onToggleFormat && (
+              <div className="flex justify-center gap-2 mb-3">
+                <button
+                  onClick={onToggleFormat}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                  style={{
+                    background: format === "card"
+                      ? "color-mix(in srgb, var(--accent-gold) 15%, transparent)"
+                      : "rgba(255,255,255,0.06)",
+                    color: format === "card" ? "var(--accent-gold)" : "rgba(255,255,255,0.5)",
+                  }}
+                >
+                  <QrCode size={12} />
+                  Card
+                </button>
+                <button
+                  onClick={onToggleFormat}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                  style={{
+                    background: format === "story"
+                      ? "color-mix(in srgb, var(--accent-gold) 15%, transparent)"
+                      : "rgba(255,255,255,0.06)",
+                    color: format === "story" ? "var(--accent-gold)" : "rgba(255,255,255,0.5)",
+                  }}
+                >
+                  <Smartphone size={12} />
+                  Story
+                </button>
+              </div>
+            )}
+
             {/* Card */}
             <div
               ref={cardRef}
               className="rounded-3xl overflow-hidden"
-              style={{ background: "#1C1A16" }}
+              style={{
+                background: format === "story" ? "linear-gradient(180deg, #1C1A16 0%, #2A2520 50%, #1C1A16 100%)" : "#1C1A16",
+                aspectRatio: format === "story" ? "9 / 16" : undefined,
+                display: "flex",
+                flexDirection: "column",
+              }}
             >
               {/* Gold header */}
               <div
-                className="p-5 text-center"
-                style={{ background: "linear-gradient(135deg, var(--accent-gold) 0%, var(--accent-amber) 100%)" }}
+                className={format === "story" ? "px-6 pt-10 pb-6 text-center" : "p-5 text-center"}
+                style={{
+                  background: format === "story"
+                    ? "transparent"
+                    : "linear-gradient(135deg, var(--accent-gold) 0%, var(--accent-amber) 100%)",
+                }}
               >
-                <p className="text-xs font-mono uppercase tracking-widest text-black/60 mb-1">
+                {format === "story" && (
+                  <div className="mb-4 flex justify-center" style={{ opacity: 0.6 }}>
+                    <HopMark variant="horizontal" theme="gold-mono" height={20} aria-hidden />
+                  </div>
+                )}
+                <p
+                  className="text-xs font-mono uppercase tracking-widest mb-1"
+                  style={{ color: format === "story" ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.6)" }}
+                >
                   Session Recap
                 </p>
-                <h2 className="font-display text-2xl font-bold text-[var(--bg)]">
+                <h2
+                  className={`font-display font-bold ${format === "story" ? "text-3xl" : "text-2xl"}`}
+                  style={{ color: format === "story" ? "var(--accent-gold)" : "var(--bg)" }}
+                >
                   {breweryName}
                 </h2>
                 {duration && (
-                  <p className="text-sm text-black/70 mt-1">
+                  <p
+                    className="text-sm mt-1"
+                    style={{ color: format === "story" ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.7)" }}
+                  >
                     {duration} · {beerCount} beer{beerCount !== 1 ? "s" : ""}
+                  </p>
+                )}
+                {format === "story" && session?.started_at && (
+                  <p className="text-xs mt-2 font-mono" style={{ color: "rgba(255,255,255,0.3)" }}>
+                    {new Date(session.started_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                   </p>
                 )}
               </div>
 
               {/* Beer list */}
-              <div className="p-4 space-y-2">
+              <div className={`p-4 space-y-2 ${format === "story" ? "flex-1" : ""}`}>
                 {beerLogs.slice(0, 6).map((log: any) => (
                   <div
                     key={log.id}

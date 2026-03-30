@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import Link from "next/link";
-import { Search, MapPin, Building2, CheckCircle, ChevronRight, ArrowLeft } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Search, MapPin, Building2, CheckCircle, ChevronRight, ArrowLeft, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input, Textarea } from "@/components/ui/Input";
 import { formatDate } from "@/lib/dates";
@@ -246,17 +247,17 @@ export function ClaimBreweryClient({ userEmail, pendingClaim }: ClaimBreweryClie
             className="font-display text-4xl font-bold mb-3"
             style={{ color: "var(--text-primary)" }}
           >
-            {step === "search" && "Find Your Brewery"}
+            {step === "search" && "Is This Your Brewery?"}
             {step === "claim" && "Claim Your Brewery"}
-            {step === "success" && "You're on the list!"}
+            {step === "success" && "You're Live on HopTrack!"}
           </h1>
           <p className="text-sm leading-relaxed" style={{ color: "var(--text-secondary)" }}>
             {step === "search" &&
-              "Search for your brewery in our database to get started."}
+              "Search for your brewery — we'll have you set up in 2 minutes."}
             {step === "claim" &&
-              "Fill in your details so we can verify your ownership."}
+              "Quick verification so we know it's really you."}
             {step === "success" &&
-              "We'll review your claim and verify your ownership shortly."}
+              "Your dashboard is ready. Set up your tap list and start tracking."}
           </p>
         </div>
 
@@ -534,76 +535,112 @@ export function ClaimBreweryClient({ userEmail, pendingClaim }: ClaimBreweryClie
 
         {/* ── Step 3: Success ──────────────────────────────────────────────── */}
         {step === "success" && (
-          <div
-            className="rounded-2xl border p-8 text-center"
-            style={{ background: "var(--surface)", borderColor: "var(--border)" }}
-          >
-            <div
-              className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-5"
-              style={{ background: "var(--success)" }}
-            >
-              <CheckCircle size={32} style={{ color: "var(--text-primary)" }} />
-            </div>
-
-            <h2
-              className="font-display text-2xl font-bold mb-3"
-              style={{ color: "var(--text-primary)" }}
-            >
-              Claim Submitted!
-            </h2>
-
-            <p
-              className="text-sm leading-relaxed mb-2"
-              style={{ color: "var(--text-secondary)" }}
-            >
-              We'll verify your ownership within{" "}
-              <strong style={{ color: "var(--text-primary)" }}>24 hours</strong>.
-            </p>
-            <p className="text-sm leading-relaxed mb-4" style={{ color: "var(--text-secondary)" }}>
-              In the meantime, you can explore your dashboard — it's waiting for
-              you.
-            </p>
-
-            {/* Free trial badge */}
-            <div
-              className="rounded-xl p-4 mb-8 text-left space-y-2"
-              style={{ background: "rgba(212,168,67,0.05)", border: "1px solid rgba(212,168,67,0.2)" }}
-            >
-              <p className="text-xs font-mono uppercase tracking-wider" style={{ color: "var(--accent-gold)" }}>
-                Your 14-day free trial starts now
-              </p>
-              <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-                Full access to tap list management, loyalty programs, and analytics.
-                No credit card required. Upgrade anytime starting at $49/mo.
-              </p>
-            </div>
-
-            {/* Pending badge */}
-            <div
-              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-mono font-medium mb-8"
-              style={{
-                background: "var(--surface-2)",
-                color: "var(--accent-gold)",
-                border: "1px solid var(--border)",
-              }}
-            >
-              <span
-                className="w-1.5 h-1.5 rounded-full animate-pulse"
-                style={{ background: "var(--accent-gold)" }}
-              />
-              Pending Verification
-            </div>
-
-            {claimedBreweryId && (
-              <Link href={`/brewery-admin/${claimedBreweryId}`}>
-                <Button variant="primary" size="lg" fullWidth>
-                  Explore Your Dashboard →
-                </Button>
-              </Link>
-            )}
-          </div>
+          <SuccessStep
+            claimedBreweryId={claimedBreweryId}
+            selectedBrewery={selectedBrewery}
+          />
         )}
       </div>
     </div>
+  );
+}
+
+function SuccessStep({ claimedBreweryId, selectedBrewery }: { claimedBreweryId: string | null; selectedBrewery: OpenBrewery | null }) {
+  const fired = useRef(false);
+
+  useEffect(() => {
+    if (fired.current) return;
+    fired.current = true;
+    import("canvas-confetti").then(({ default: confetti }) => {
+      confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 }, colors: ["#D4A843", "#E8841A", "#b7522f", "#4A7C59"] });
+      setTimeout(() => {
+        confetti({ particleCount: 60, spread: 100, origin: { y: 0.5 }, colors: ["#D4A843", "#E8841A"] });
+      }, 300);
+    }).catch(() => {});
+  }, []);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ type: "spring", stiffness: 400, damping: 30 }}
+      className="rounded-2xl border p-8 text-center space-y-6"
+      style={{ background: "var(--surface)", borderColor: "var(--accent-gold)", boxShadow: "0 0 40px rgba(212,168,67,0.1)" }}
+    >
+      {/* Celebration icon */}
+      <motion.div
+        initial={{ scale: 0 }}
+        animate={{ scale: 1 }}
+        transition={{ delay: 0.2, type: "spring", stiffness: 300 }}
+        className="w-20 h-20 rounded-full flex items-center justify-center mx-auto"
+        style={{ background: "linear-gradient(135deg, var(--accent-gold), var(--accent-amber))" }}
+      >
+        <Sparkles size={36} style={{ color: "var(--bg)" }} />
+      </motion.div>
+
+      <div>
+        <h2 className="font-display text-3xl font-bold mb-2" style={{ color: "var(--text-primary)" }}>
+          Welcome to HopTrack!
+        </h2>
+        {selectedBrewery && (
+          <p className="font-display text-lg" style={{ color: "var(--accent-gold)" }}>
+            {selectedBrewery.name}
+          </p>
+        )}
+      </div>
+
+      <p className="text-sm leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+        Your claim is submitted. We'll verify ownership within{" "}
+        <strong style={{ color: "var(--text-primary)" }}>24 hours</strong>.
+        In the meantime, your dashboard is ready to explore.
+      </p>
+
+      {/* 14-day trial */}
+      <div
+        className="rounded-xl p-4 text-left space-y-2"
+        style={{
+          background: "color-mix(in srgb, var(--accent-gold) 5%, var(--surface))",
+          border: "1px solid color-mix(in srgb, var(--accent-gold) 20%, transparent)",
+        }}
+      >
+        <p className="text-xs font-mono uppercase tracking-wider" style={{ color: "var(--accent-gold)" }}>
+          Your 14-day free trial starts now
+        </p>
+        <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+          Full access to tap list management, loyalty programs, analytics, and The Board TV display.
+          No credit card required.
+        </p>
+      </div>
+
+      {/* Quick start checklist */}
+      <div className="text-left space-y-2">
+        <p className="text-xs font-mono uppercase tracking-wider mb-2" style={{ color: "var(--text-muted)" }}>
+          Get started in 2 minutes
+        </p>
+        {[
+          "Add your beers to the tap list",
+          "Generate QR table tents",
+          "Launch The Board on your TV",
+        ].map((step, i) => (
+          <div key={i} className="flex items-center gap-3 py-1.5">
+            <span
+              className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
+              style={{ background: "color-mix(in srgb, var(--accent-gold) 15%, transparent)", color: "var(--accent-gold)" }}
+            >
+              {i + 1}
+            </span>
+            <span className="text-sm" style={{ color: "var(--text-primary)" }}>{step}</span>
+          </div>
+        ))}
+      </div>
+
+      {claimedBreweryId && (
+        <Link href={`/brewery-admin/${claimedBreweryId}`}>
+          <Button variant="primary" size="lg" fullWidth>
+            Explore Your Dashboard →
+          </Button>
+        </Link>
+      )}
+    </motion.div>
   );
 }

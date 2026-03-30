@@ -4,7 +4,8 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Map, List, Loader2, SlidersHorizontal, X, Sparkles, Navigation } from "lucide-react";
+import { Search, Map, List, Loader2, SlidersHorizontal, X, Sparkles, Navigation, Trophy } from "lucide-react";
+import Link from "next/link";
 import { BreweryCard } from "@/components/brewery/BreweryCard";
 import { SkeletonCard } from "@/components/ui/SkeletonLoader";
 import { useToast } from "@/components/ui/Toast";
@@ -160,6 +161,14 @@ export function ExploreClient({ breweries: initialBreweries, hasBeerOfTheWeek = 
       <div className="flex items-center justify-between">
         <h1 className="font-display text-3xl font-bold text-[var(--text-primary)]">Explore</h1>
         <div className="flex items-center gap-2">
+          <Link
+            href="/leaderboard"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm border transition-colors"
+            style={{ background: "var(--surface)", color: "var(--text-muted)", borderColor: "var(--border)" }}
+          >
+            <Trophy size={14} />
+            <span className="hidden sm:inline">Leaderboard</span>
+          </Link>
           {/* Near Me toggle — hidden if geolocation denied */}
           {!(geo.error && !nearMeActive) && (
             <button

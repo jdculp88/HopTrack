@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Mail, Lock, User, MapPin, Eye, EyeOff, ArrowRight, ChevronLeft, Check, X, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
@@ -12,6 +12,7 @@ type UsernameStatus = "idle" | "checking" | "available" | "taken" | "invalid";
 
 export default function SignupPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [step, setStep] = useState<SignupStep>("account");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -90,6 +91,16 @@ export default function SignupPage() {
       setError(signUpError.message);
       setLoading(false);
       return;
+    }
+
+    // Redeem referral code if one was in the URL
+    const refCode = searchParams.get("ref");
+    if (refCode) {
+      fetch("/api/referrals", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: refCode }),
+      }).catch(() => {}); // fire-and-forget, don't block signup flow
     }
 
     router.push("/home");

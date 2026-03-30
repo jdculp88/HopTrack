@@ -114,5 +114,45 @@ export async function POST(
     }
   }
 
+  // Handle @mentions — batch insert notifications, fire pushes in parallel
+  const mentionRegex = /@([a-zA-Z0-9_]+)/g;
+  const mentions = [...body.matchAll(mentionRegex)].map((m: any) => m[1]);
+  if (mentions.length > 0) {
+    const { data: mentionedUsers } = await (supabase as any)
+      .from("profiles")
+      .select("id, username")
+      .in("username", mentions);
+
+    const commenterName = commenterProfileData?.display_name || commenterProfileData?.username || "Someone";
+
+    const toNotify = ((mentionedUsers ?? []) as any[]).filter(
+      (m) => m.id !== user.id && (!session || m.id !== session.user_id)
+    );
+
+    if (toNotify.length > 0) {
+      // Batch-insert all mention notifications in one query
+      await (supabase as any).from("notifications").insert(
+        toNotify.map((mentioned) => ({
+          user_id: mentioned.id,
+          type: "mention",
+          title: "You were mentioned",
+          body: `${commenterName} mentioned you in a comment`,
+          data: { session_id: sessionId, commenter_id: user.id },
+        }))
+      );
+
+      // Fire all push notifications in parallel
+      await Promise.all(
+        toNotify.map((mentioned) =>
+          sendPushToUser(supabase, mentioned.id, {
+            title: "You were mentioned",
+            body: `${commenterName} mentioned you in a comment`,
+            data: { url: `/home` },
+          }).catch(() => {})
+        )
+      );
+    }
+  }
+
   return NextResponse.json(enrichedComment, { status: 201 });
 }

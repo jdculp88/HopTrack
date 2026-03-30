@@ -1,7 +1,8 @@
 # Sprint 34 — Own Your Data
 
 **Theme:** Give breweries the tools that make HopTrack worth $149/mo. The killer counter to Untappd's data-hostage model.
-**Status:** Not started
+**Status:** Complete
+**Date:** 2026-03-30
 **Sprint Lead:** Morgan
 
 ---
@@ -17,10 +18,10 @@ Sprint 34 directly attacks all three. Taylor's pitch headline: **"You own your g
 
 ---
 
-## Tickets
+## Delivered (Session 1)
 
-### P0 — Customer Data Export
-**Owner:** Avery · **Est:** 1 session
+### S34-001: Customer Data Export ✅
+**Owner:** Avery · **Priority:** P0
 
 Add CSV export to the Customers page (`/brewery-admin/[id]/customers`).
 
@@ -34,8 +35,8 @@ Add CSV export to the Customers page (`/brewery-admin/[id]/customers`).
 
 ---
 
-### P0 — Superfans Highlight on Customers Page
-**Owner:** Avery · **Est:** half session
+### S34-002: Superfans Highlight on Customers Page ✅
+**Owner:** Avery · **Priority:** P0
 
 Surface the top 10–20% of visitors by visit frequency on the Customers page.
 
@@ -47,8 +48,8 @@ Surface the top 10–20% of visitors by visit frequency on the Customers page.
 
 ---
 
-### P1 — Tap List Performance Analytics
-**Owner:** Avery · **Est:** 1 session
+### S34-003: Tap List Performance Analytics ✅
+**Owner:** Avery · **Priority:** P1
 
 Add a new analytics section: which beers are actually driving engagement.
 
@@ -62,8 +63,8 @@ Add a new analytics section: which beers are actually driving engagement.
 
 ---
 
-### P0 — E2E Test Coverage (Casey's sit-in ends here)
-**Owner:** Reese (build) · Casey (sign-off) · **Est:** 1 session
+### S34-004: E2E Test Coverage ✅ (Casey's sit-in ends here)
+**Owner:** Reese (build) · Casey (sign-off)
 
 Playwright scaffolded since Sprint 31. We need actual passing test coverage before first paid brewery.
 
@@ -72,6 +73,19 @@ Playwright scaffolded since Sprint 31. We need actual passing test coverage befo
 - `core-flows.spec.ts`: login → home feed → explore → brewery page
 - `brewery-admin.spec.ts`: brewery admin login → tap list loads → analytics loads
 - Auth helpers already exist at `e2e/helpers/auth.ts`
+
+---
+
+## Key Architectural Changes
+
+- `GET /api/brewery/[brewery_id]/customers/export` — CSV download endpoint with auth + brewery admin check
+- "Export CSV" button on Customers page header (gold-accented `<a download>`)
+- "Your Superfans" section: top 5 visitors by visit count (min 5 visits), gold gradient card, crown badge on #1, "X% of all sessions" callout
+- "Beer Performance" section in Analytics: per-beer table with pours, avg rating, days on tap, trending direction (↑↓→), sortable by pours/rating/newest
+- `AnalyticsClient` now uses `useState` for beer perf sort toggle
+- E2E tests hardened: `smoke.spec.ts` (8 tests — public pages + auth pages + QR landing), `core-flows.spec.ts` (8 tests — feed tabs, explore, friends, profile, notifications, settings, session drawer), `brewery-admin.spec.ts` (8 tests — overview, tap list, analytics, customers, events, loyalty, sessions, billing)
+- Zero new migrations — all features use existing `sessions` + `beer_logs` tables
+- TypeScript clean: `npx tsc --noEmit` passes with zero errors
 
 ---
 

@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { User, MapPin, Lock, Palette, Trash2, ChevronRight, Bell, Camera, Loader2, Check, X } from "lucide-react";
+import { User, MapPin, Lock, Palette, Trash2, ChevronRight, Bell, Camera, Loader2, Check, X, Gift, Copy } from "lucide-react";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { createClient } from "@/lib/supabase/client";
 import { useToast } from "@/components/ui/Toast";
@@ -36,6 +36,30 @@ export function SettingsClient({ profile, userEmail }: SettingsClientProps) {
   const [notifPrefs, setNotifPrefs] = useState<Record<string, boolean>>(
     () => ({ ...DEFAULT_PREFS, ...((profile as any)?.notification_preferences ?? {}) })
   );
+  const [referralCode, setReferralCode] = useState<string | null>(null);
+  const [referralUseCount, setReferralUseCount] = useState(0);
+  const [copiedCode, setCopiedCode] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/referrals")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data?.code) {
+          setReferralCode(data.code);
+          setReferralUseCount(data.use_count ?? 0);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  function handleCopyCode() {
+    if (!referralCode) return;
+    const link = `${window.location.origin}/join?ref=${referralCode}`;
+    navigator.clipboard.writeText(link).then(() => {
+      setCopiedCode(true);
+      setTimeout(() => setCopiedCode(false), 2000);
+    });
+  }
 
   const checkUsername = useCallback(async (value: string) => {
     if (value.length < 3) { setUsernameStatus("idle"); return; }
@@ -283,6 +307,46 @@ export function SettingsClient({ profile, userEmail }: SettingsClientProps) {
             </div>
             <Toggle value={notifPrefs.share_live} onChange={(v) => handleNotifToggle("share_live", v)} />
           </div>
+        </div>
+      </Section>
+
+      {/* Invite Friends section */}
+      <Section title="Invite Friends" icon={<Gift size={16} />}>
+        <div className="space-y-4">
+          <p className="text-sm text-[var(--text-secondary)]">
+            Share your invite link. When a friend joins HopTrack with your code, you earn <span className="text-[var(--accent-gold)] font-medium">+250 XP</span>.
+          </p>
+          {referralCode ? (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <div className="flex-1 bg-[var(--surface-2)] border border-[var(--border)] rounded-xl px-4 py-2.5 font-mono text-sm text-[var(--accent-gold)] tracking-widest select-all">
+                  {referralCode}
+                </div>
+                <button
+                  onClick={handleCopyCode}
+                  className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-medium transition-all border"
+                  style={{
+                    background: copiedCode ? "var(--accent-gold)" : "var(--surface-2)",
+                    borderColor: copiedCode ? "var(--accent-gold)" : "var(--border)",
+                    color: copiedCode ? "var(--bg)" : "var(--text-primary)",
+                  }}
+                >
+                  {copiedCode ? <Check size={14} /> : <Copy size={14} />}
+                  {copiedCode ? "Copied!" : "Copy Link"}
+                </button>
+              </div>
+              {referralUseCount > 0 && (
+                <p className="text-xs text-[var(--text-muted)]">
+                  🍺 {referralUseCount} {referralUseCount === 1 ? "person has" : "people have"} joined with your code
+                </p>
+              )}
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 text-sm text-[var(--text-muted)]">
+              <Loader2 size={14} className="animate-spin" />
+              Generating your invite code...
+            </div>
+          )}
         </div>
       </Section>
 

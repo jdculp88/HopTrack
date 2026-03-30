@@ -20,6 +20,8 @@ const ICONS: Record<NotificationType, { icon: React.ReactNode; color: string }> 
   brewery_follow:      { icon: <Heart size={16} />,         color: "var(--accent-gold)" },
   new_tap:             { icon: <Beer size={16} />,          color: "var(--accent-amber)" },
   new_event:           { icon: <Bell size={16} />,          color: "#5B8DEF" },
+  first_referral:      { icon: <Users size={16} />,         color: "var(--accent-gold)" },
+  group_invite:        { icon: <Users size={16} />,         color: "#5B8DEF" },
 };
 
 // Types that can be grouped when targeting the same session within 1 hour
@@ -569,6 +571,68 @@ function SingleNotification({
             </AnimatePresence>
           )}
 
+          {/* Group invite — Accept / Decline */}
+          {n.type === "group_invite" && data.session_id && (
+            <AnimatePresence mode="wait">
+              {!friendState && (
+                <motion.div
+                  key="buttons"
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="flex gap-2"
+                >
+                  <button
+                    onClick={async () => {
+                      const res = await fetch(`/api/sessions/${data.session_id}/participants/status`, {
+                        method: "PATCH",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ status: "accepted" }),
+                      });
+                      if (res.ok) onAccept(n.id, data.session_id);
+                    }}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono bg-[#5B8DEF]/20 text-[#5B8DEF] hover:bg-[#5B8DEF]/30 transition-colors"
+                  >
+                    <Check size={12} /> Join
+                  </button>
+                  <button
+                    onClick={async () => {
+                      await fetch(`/api/sessions/${data.session_id}/participants/status`, {
+                        method: "PATCH",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ status: "declined" }),
+                      });
+                      onDecline(n.id, data.session_id);
+                    }}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono bg-[var(--surface-2)]/60 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
+                  >
+                    <X size={12} /> Decline
+                  </button>
+                </motion.div>
+              )}
+              {friendState === "accepted" && (
+                <motion.p
+                  key="accepted"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="text-xs text-[#5B8DEF] font-mono flex items-center gap-1"
+                >
+                  <Check size={12} /> Joined!
+                </motion.p>
+              )}
+              {friendState === "declined" && (
+                <motion.p
+                  key="declined"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="text-xs text-[var(--text-muted)] font-mono"
+                >
+                  Invite declined
+                </motion.p>
+              )}
+            </AnimatePresence>
+          )}
+
           {/* Session comment / friend checkin — View Session */}
           {(n.type === "session_comment" || n.type === "friend_checkin") && data.session_id && (
             <Link
@@ -586,6 +650,16 @@ function SingleNotification({
               className="inline-flex items-center gap-1.5 text-xs font-mono text-[var(--text-muted)] hover:text-[var(--accent-gold)] transition-colors"
             >
               <ExternalLink size={11} /> View Achievements
+            </Link>
+          )}
+
+          {/* First referral — View Invite Stats */}
+          {n.type === "first_referral" && (
+            <Link
+              href="/settings#invite-friends"
+              className="inline-flex items-center gap-1.5 text-xs font-mono text-[var(--text-muted)] hover:text-[var(--accent-gold)] transition-colors"
+            >
+              <ExternalLink size={11} /> View Invite Stats
             </Link>
           )}
         </div>

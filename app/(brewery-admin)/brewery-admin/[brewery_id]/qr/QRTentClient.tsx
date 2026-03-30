@@ -352,11 +352,15 @@ export function QRTentClient({ breweryId, breweryName, breweryCity, breweryState
                 {/* Spacer */}
                 <div style={{ flex: 1 }} />
                 {/* CTA */}
-                <div style={{ background: "rgba(212,168,67,0.12)", borderRadius: 8, padding: "7px 20px", marginBottom: 18 }}>
+                <div style={{ background: "rgba(212,168,67,0.12)", borderRadius: 8, padding: "7px 20px", marginBottom: 8 }}>
                   <span style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, fontSize: 10, letterSpacing: 2, color: "#D4A843", textTransform: "uppercase" }}>
                     Scan to track your pours
                   </span>
                 </div>
+                {/* Powered by */}
+                <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 7, letterSpacing: 1, color: "#B5A893", textTransform: "uppercase", marginBottom: 12 }}>
+                  Download HopTrack — track every pour
+                </p>
                 {/* Gold bottom bar */}
                 <div style={{ width: "100%", height: 6, background: "#D4A843", flexShrink: 0 }} />
               </div>

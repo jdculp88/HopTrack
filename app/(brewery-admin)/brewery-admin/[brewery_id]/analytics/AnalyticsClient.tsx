@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, CartesianGrid, PieChart, Pie, Cell } from "recharts";
 import { formatDateShort } from "@/lib/dates";
 
@@ -115,6 +115,72 @@ export function AnalyticsClient({ sessions, beerLogs }: AnalyticsClientProps) {
     const repeats = Object.values(counts).filter(c => c >= 2).length;
     return Math.round((repeats / total) * 100);
   }, [sessions]);
+
+  // Beer Performance — per-beer engagement metrics with trending direction
+  const beerPerformance = useMemo(() => {
+    const now = Date.now();
+    const thirtyDaysAgo = now - 30 * 86400000;
+    const sixtyDaysAgo = now - 60 * 86400000;
+
+    const stats: Record<string, {
+      name: string;
+      style: string | null;
+      pours: number;
+      recentPours: number;
+      olderPours: number;
+      totalRating: number;
+      ratingCount: number;
+      firstSeen: number;
+    }> = {};
+
+    beerLogs.forEach((l: any) => {
+      if (!l.beer_id || !l.beer?.name) return;
+      if (!stats[l.beer_id]) {
+        stats[l.beer_id] = {
+          name: l.beer.name,
+          style: l.beer.style ?? null,
+          pours: 0,
+          recentPours: 0,
+          olderPours: 0,
+          totalRating: 0,
+          ratingCount: 0,
+          firstSeen: now,
+        };
+      }
+      const qty = l.quantity ?? 1;
+      const logTime = new Date(l.logged_at).getTime();
+      stats[l.beer_id].pours += qty;
+      if (logTime >= thirtyDaysAgo) stats[l.beer_id].recentPours += qty;
+      else if (logTime >= sixtyDaysAgo) stats[l.beer_id].olderPours += qty;
+      if (l.rating > 0) { stats[l.beer_id].totalRating += l.rating; stats[l.beer_id].ratingCount++; }
+      if (logTime < stats[l.beer_id].firstSeen) stats[l.beer_id].firstSeen = logTime;
+    });
+
+    return Object.values(stats)
+      .map(b => {
+        const avgRating = b.ratingCount > 0 ? parseFloat((b.totalRating / b.ratingCount).toFixed(1)) : null;
+        const daysOnTap = Math.ceil((now - b.firstSeen) / 86400000);
+        let trend: "up" | "down" | "steady" = "steady";
+        if (b.olderPours > 0) {
+          const ratio = b.recentPours / b.olderPours;
+          if (ratio > 1.2) trend = "up";
+          else if (ratio < 0.8) trend = "down";
+        } else if (b.recentPours > 0) {
+          trend = "up";
+        }
+        return { ...b, avgRating, daysOnTap, trend };
+      })
+      .sort((a, b) => b.pours - a.pours);
+  }, [beerLogs]);
+
+  const [beerPerfSort, setBeerPerfSort] = useState<"pours" | "rating" | "newest">("pours");
+
+  const sortedBeerPerf = useMemo(() => {
+    const list = [...beerPerformance];
+    if (beerPerfSort === "rating") return list.sort((a, b) => (b.avgRating ?? 0) - (a.avgRating ?? 0));
+    if (beerPerfSort === "newest") return list.sort((a, b) => b.firstSeen - a.firstSeen);
+    return list;
+  }, [beerPerformance, beerPerfSort]);
 
   const tooltipStyle = { background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12, color: "var(--text-primary)" };
 
@@ -252,6 +318,108 @@ export function AnalyticsClient({ sessions, beerLogs }: AnalyticsClientProps) {
               </BarChart>
             </ResponsiveContainer>
           </div>
+
+          {/* Beer Performance */}
+          {sortedBeerPerf.length > 0 && (
+            <div className="rounded-2xl p-6 border" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
+              <div className="flex items-start justify-between gap-4 mb-4">
+                <div>
+                  <h2 className="font-display font-bold" style={{ color: "var(--text-primary)" }}>Beer Performance</h2>
+                  <p className="text-xs font-mono" style={{ color: "var(--text-muted)" }}>Which beers are driving engagement (90 days)</p>
+                </div>
+                <div className="flex gap-1.5">
+                  {(["pours", "rating", "newest"] as const).map((key) => (
+                    <button
+                      key={key}
+                      onClick={() => setBeerPerfSort(key)}
+                      className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all border"
+                      style={
+                        beerPerfSort === key
+                          ? {
+                              background: "color-mix(in srgb, var(--accent-gold) 15%, transparent)",
+                              borderColor: "var(--accent-gold)",
+                              color: "var(--accent-gold)",
+                            }
+                          : {
+                              background: "var(--surface-2)",
+                              borderColor: "var(--border)",
+                              color: "var(--text-secondary)",
+                            }
+                      }
+                    >
+                      {key === "pours" ? "Most Pours" : key === "rating" ? "Highest Rated" : "Newest"}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                {sortedBeerPerf.slice(0, 12).map((beer, i) => (
+                  <div
+                    key={beer.name + i}
+                    className="flex items-center gap-4 px-4 py-3 rounded-xl"
+                    style={{ background: i % 2 === 0 ? "var(--surface-2)" : "transparent" }}
+                  >
+                    {/* Rank */}
+                    <span className="font-mono text-xs w-6 text-right shrink-0" style={{ color: "var(--text-muted)" }}>
+                      {i + 1}
+                    </span>
+
+                    {/* Beer info */}
+                    <div className="min-w-0 flex-1">
+                      <p className="font-display font-semibold text-sm truncate" style={{ color: "var(--text-primary)" }}>
+                        {beer.name}
+                      </p>
+                      {beer.style && (
+                        <p className="text-xs truncate" style={{ color: "var(--text-muted)" }}>{beer.style}</p>
+                      )}
+                    </div>
+
+                    {/* Pours */}
+                    <div className="text-right shrink-0">
+                      <p className="font-mono text-sm font-bold" style={{ color: "var(--accent-gold)" }}>
+                        {beer.pours}
+                      </p>
+                      <p className="text-[10px]" style={{ color: "var(--text-muted)" }}>pours</p>
+                    </div>
+
+                    {/* Rating */}
+                    <div className="text-right shrink-0 w-14">
+                      {beer.avgRating ? (
+                        <>
+                          <p className="font-mono text-sm" style={{ color: "var(--text-primary)" }}>
+                            {beer.avgRating} ★
+                          </p>
+                          <p className="text-[10px]" style={{ color: "var(--text-muted)" }}>{beer.ratingCount} ratings</p>
+                        </>
+                      ) : (
+                        <p className="text-xs" style={{ color: "var(--text-muted)" }}>—</p>
+                      )}
+                    </div>
+
+                    {/* Days on tap */}
+                    <div className="text-right shrink-0 w-12 hidden sm:block">
+                      <p className="font-mono text-xs" style={{ color: "var(--text-secondary)" }}>
+                        {beer.daysOnTap}d
+                      </p>
+                    </div>
+
+                    {/* Trend */}
+                    <div className="shrink-0 w-6 text-center">
+                      <span
+                        className="text-sm"
+                        style={{
+                          color: beer.trend === "up" ? "#4A7C59" : beer.trend === "down" ? "#C44B3A" : "var(--text-muted)",
+                        }}
+                      >
+                        {beer.trend === "up" ? "↑" : beer.trend === "down" ? "↓" : "→"}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

@@ -12,7 +12,7 @@ export async function PATCH(
 
   const { id: sessionId, logId } = await params
   const body = await request.json()
-  const { rating } = body
+  const { rating, comment } = body
 
   if (rating != null && (rating < 1 || rating > 5)) {
     return NextResponse.json({ error: 'Rating must be between 1 and 5' }, { status: 400 })
@@ -33,6 +33,7 @@ export async function PATCH(
 
   const updates: Record<string, any> = {}
   if (rating !== undefined) updates.rating = rating
+  if (comment !== undefined) updates.comment = comment || null
 
   const { data: updated, error } = await (supabase as any)
     .from('beer_logs')

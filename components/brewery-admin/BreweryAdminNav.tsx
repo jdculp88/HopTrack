@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, List, BarChart2, Gift, Settings, ChevronDown, ExternalLink, Rewind, LogOut, Calendar, QrCode, CreditCard, Users } from "lucide-react";
+import { LayoutDashboard, List, BarChart2, Gift, Settings, ChevronDown, ExternalLink, Rewind, LogOut, Calendar, QrCode, CreditCard, Users, FileText } from "lucide-react";
 import { HopMark } from "@/components/ui/HopMark";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
@@ -16,6 +16,7 @@ const NAV_ITEMS = [
   { href: "/loyalty",       label: "Loyalty",      icon: Gift },
   { href: "/events",        label: "Events",       icon: Calendar },
   { href: "/qr",            label: "Table Tent",   icon: QrCode },
+  { href: "/report",        label: "Report",       icon: FileText },
   { href: "/pint-rewind",   label: "Pint Rewind",  icon: Rewind },
   { href: "/settings",      label: "Settings",     icon: Settings },
   { href: "/billing",       label: "Billing",      icon: CreditCard },

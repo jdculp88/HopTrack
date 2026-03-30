@@ -276,6 +276,25 @@ export default function SessionRecapSheet({
     }
   }, [session])
 
+  // Save all tasting notes on close (fire-and-forget)
+  const saveBeerNotes = useCallback(() => {
+    if (!session?.id) return
+    Object.entries(beerNotes).forEach(([logId, note]) => {
+      if (note.trim()) {
+        fetch(`/api/sessions/${session.id}/beers/${logId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ comment: note.trim() }),
+        }).catch(() => {})
+      }
+    })
+  }, [session, beerNotes])
+
+  const handleClose = useCallback(() => {
+    saveBeerNotes()
+    onClose()
+  }, [saveBeerNotes, onClose])
+
   const handleBreweryReview = useCallback(async () => {
     if (!isBrewerySession || breweryRating === 0) return
     setBreweryReviewLoading(true)
@@ -325,7 +344,7 @@ export default function SessionRecapSheet({
 
             {/* Close button */}
             <button
-              onClick={onClose}
+              onClick={handleClose}
               className="absolute top-4 right-4 z-10 w-9 h-9 rounded-full flex items-center justify-center text-lg transition-colors"
               style={{
                 background: 'rgba(255,255,255,0.6)',
@@ -872,7 +891,7 @@ export default function SessionRecapSheet({
                 </button>
               )}
               <button
-                onClick={onClose}
+                onClick={handleClose}
                 className="transition-all active:scale-[0.98]"
                 style={{
                   width: '100%',

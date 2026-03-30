@@ -1,7 +1,8 @@
 # Sprint 36 — Close the Loop
 
 **Theme:** Stability, sales-readiness, and the features that close the first paid brewery.
-**Status:** Not started
+**Status:** Complete
+**Date:** 2026-03-30
 **Sprint Lead:** Morgan
 
 ---

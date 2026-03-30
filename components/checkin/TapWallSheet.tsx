@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Search, Check, Loader2, Beer, Plus } from 'lucide-react'
+import { X, Search, Check, Loader2, Beer, Plus, Users } from 'lucide-react'
+import { UserAvatar } from '@/components/ui/UserAvatar'
 import { FullScreenDrawer } from '@/components/ui/Modal'
 import { Skeleton } from '@/components/ui/SkeletonLoader'
 import { useSession } from '@/hooks/useSession'
@@ -84,10 +85,58 @@ export default function TapWallSheet({
   const [ratingSheet, setRatingSheet] = useState<{ log: BeerLog; beerName: string } | null>(null)
   const [showEndConfirm, setShowEndConfirm] = useState(false)
   const [ending, setEnding] = useState(false)
+  const [sessionNote, setSessionNote] = useState(session.note ?? '')
+  const [showNoteInput, setShowNoteInput] = useState(!!session.note)
+  const [participants, setParticipants] = useState<Array<{ id: string; user_id: string; status: string; profile: { id: string; username: string; display_name: string | null; avatar_url: string | null } | null }>>([])
+  const [showInvite, setShowInvite] = useState(false)
+  const [friendSearch, setFriendSearch] = useState('')
+  const [friendResults, setFriendResults] = useState<Array<{ id: string; username: string; display_name: string | null; avatar_url: string | null }>>([])
+  const [inviting, setInviting] = useState<string | null>(null)
   // Map of beer_id → previous rating (from any past session)
   const [previousRatings, setPreviousRatings] = useState<Map<string, number>>(new Map())
   const { logBeer, updateBeerLog, incrementBeerQuantity, endSession } = useSession()
   const elapsed = useElapsedTime(session.started_at)
+
+  // Fetch participants on open
+  useEffect(() => {
+    if (!isOpen) return
+    fetch(`/api/sessions/${session.id}/participants`)
+      .then((r) => (r.ok ? r.json() : []))
+      .then((data) => setParticipants(Array.isArray(data) ? data : []))
+      .catch(() => {})
+  }, [isOpen, session.id])
+
+  // Debounced friend search for invite
+  useEffect(() => {
+    if (!friendSearch.trim() || friendSearch.length < 2) { setFriendResults([]); return }
+    const timer = setTimeout(() => {
+      fetch(`/api/users/search?q=${encodeURIComponent(friendSearch)}&limit=5`)
+        .then((r) => (r.ok ? r.json() : []))
+        .then((data) => setFriendResults(Array.isArray(data) ? data : []))
+        .catch(() => setFriendResults([]))
+    }, 250)
+    return () => clearTimeout(timer)
+  }, [friendSearch])
+
+  async function handleInvite(friendId: string) {
+    setInviting(friendId)
+    try {
+      const res = await fetch(`/api/sessions/${session.id}/participants`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: friendId }),
+      })
+      if (res.ok) {
+        const participant = await res.json()
+        setParticipants((prev) => [...prev, participant])
+        setShowInvite(false)
+        setFriendSearch('')
+        setFriendResults([])
+      }
+    } finally {
+      setInviting(null)
+    }
+  }
 
   // Fetch beers on open
   useEffect(() => {
@@ -217,6 +266,14 @@ export default function TapWallSheet({
 
   async function handleEndSession() {
     setEnding(true)
+    // Save session note if present
+    if (sessionNote.trim()) {
+      await fetch(`/api/sessions/${session.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ note: sessionNote.trim() }),
+      }).catch(() => {})
+    }
     const result = await endSession(session.id)
     setEnding(false)
     setShowEndConfirm(false)
@@ -399,6 +456,118 @@ export default function TapWallSheet({
                   </div>
                 </div>
               </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Drinking With */}
+          <div className="py-1">
+            <div className="flex items-center gap-2">
+              {participants.filter((p) => p.status === 'accepted').map((p) => (
+                <div key={p.id} title={p.profile?.display_name ?? p.profile?.username ?? ''}>
+                  <UserAvatar
+                    profile={{ display_name: p.profile?.display_name ?? p.profile?.username ?? '', avatar_url: p.profile?.avatar_url ?? null, username: p.profile?.username ?? '' }}
+                    size="xs"
+                  />
+                </div>
+              ))}
+              {participants.filter((p) => p.status === 'pending').length > 0 && (
+                <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                  +{participants.filter((p) => p.status === 'pending').length} pending
+                </span>
+              )}
+              <button
+                onClick={() => setShowInvite(!showInvite)}
+                className="flex items-center gap-1 text-xs px-2 py-1 rounded-lg transition-colors"
+                style={{
+                  background: 'var(--surface-2)',
+                  color: 'var(--text-muted)',
+                  border: '1px solid var(--border)',
+                }}
+              >
+                <Users size={11} />
+                {participants.length > 0 ? 'Invite more' : 'Invite friends'}
+              </button>
+            </div>
+
+            <AnimatePresence>
+              {showInvite && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="overflow-hidden mt-2"
+                >
+                  <input
+                    type="text"
+                    value={friendSearch}
+                    onChange={(e) => setFriendSearch(e.target.value)}
+                    placeholder="Search friends to invite..."
+                    className="w-full px-3 py-2 rounded-xl text-sm border outline-none"
+                    style={{ background: 'var(--surface-2)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}
+                  />
+                  {friendResults.length > 0 && (
+                    <div className="mt-1 rounded-xl border overflow-hidden" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
+                      {friendResults.map((friend) => {
+                        const alreadyInvited = participants.some((p) => p.user_id === friend.id)
+                        return (
+                          <button
+                            key={friend.id}
+                            onClick={() => !alreadyInvited && handleInvite(friend.id)}
+                            disabled={alreadyInvited || inviting === friend.id}
+                            className="w-full flex items-center justify-between px-3 py-2 text-sm text-left transition-colors disabled:opacity-60"
+                            style={{ color: 'var(--text-primary)' }}
+                          >
+                            <div className="flex items-center gap-2">
+                              <UserAvatar profile={{ display_name: friend.display_name ?? friend.username, avatar_url: friend.avatar_url, username: friend.username }} size="xs" />
+                              <span>{friend.display_name ?? friend.username}</span>
+                            </div>
+                            {alreadyInvited ? (
+                              <span className="text-xs" style={{ color: 'var(--text-muted)' }}>Invited</span>
+                            ) : inviting === friend.id ? (
+                              <Loader2 size={12} className="animate-spin" style={{ color: 'var(--accent-gold)' }} />
+                            ) : (
+                              <Plus size={14} style={{ color: 'var(--accent-gold)' }} />
+                            )}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* Session note */}
+          <AnimatePresence>
+            {showNoteInput ? (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="overflow-hidden py-1"
+              >
+                <input
+                  type="text"
+                  value={sessionNote}
+                  onChange={(e) => setSessionNote(e.target.value)}
+                  placeholder="Add a note... (date night, solo Friday)"
+                  className="w-full px-3 py-2 rounded-xl text-sm border outline-none"
+                  style={{
+                    background: 'var(--surface-2)',
+                    borderColor: 'var(--border)',
+                    color: 'var(--text-primary)',
+                  }}
+                />
+              </motion.div>
+            ) : (
+              <button
+                onClick={() => setShowNoteInput(true)}
+                className="text-xs py-1"
+                style={{ color: 'var(--text-muted)' }}
+              >
+                + Add a note
+              </button>
             )}
           </AnimatePresence>
 

@@ -85,6 +85,7 @@ export interface Profile {
   // Preference fields stored as JSONB on the profiles row
   notification_preferences?: Record<string, boolean> | null;
   share_live?: boolean | null;
+  streak_grace_used_at?: string | null;
 }
 export type ProfileInsert = Partial<Profile> & { id: string; username: string; display_name: string };
 export type ProfileUpdate = Partial<Profile>;
@@ -283,7 +284,9 @@ export type NotificationType =
   | "nudge"
   | "brewery_follow"
   | "new_tap"
-  | "new_event";
+  | "new_event"
+  | "first_referral"
+  | "group_invite";
 
 export interface Notification {
   id: string;
@@ -416,6 +419,65 @@ export interface BreweryFollow {
   created_at: string;
 }
 export type BreweryFollowInsert = Omit<BreweryFollow, "id" | "created_at"> & { id?: string };
+
+// ─── Beer Lists ──────────────────────────────────────────────────────────────
+export interface BeerList {
+  id: string;
+  user_id: string;
+  title: string;
+  description: string | null;
+  is_public: boolean;
+  created_at: string;
+  updated_at: string;
+  // joined fields
+  items?: BeerListItem[];
+  profile?: { username: string; display_name: string | null; avatar_url: string | null };
+}
+export type BeerListInsert = Omit<BeerList, "id" | "created_at" | "updated_at" | "items" | "profile"> & { id?: string };
+export type BeerListUpdate = Partial<BeerListInsert>;
+
+export interface BeerListItem {
+  id: string;
+  list_id: string;
+  beer_id: string;
+  note: string | null;
+  position: number;
+  created_at: string;
+  // joined fields
+  beer?: { id: string; name: string; style: string | null; abv: number | null; avg_rating: number | null };
+}
+export type BeerListItemInsert = Omit<BeerListItem, "id" | "created_at" | "beer"> & { id?: string };
+
+// ─── Referrals ────────────────────────────────────────────────────────────────
+export interface ReferralCode {
+  id: string;
+  user_id: string;
+  code: string;
+  use_count: number;
+  created_at: string;
+}
+
+export interface ReferralUse {
+  id: string;
+  referrer_id: string;
+  referred_id: string;
+  created_at: string;
+}
+
+// ─── Session Participants ─────────────────────────────────────────────────────
+export type ParticipantStatus = "pending" | "accepted" | "declined";
+
+export interface SessionParticipant {
+  id: string;
+  session_id: string;
+  user_id: string;
+  invited_by: string;
+  status: ParticipantStatus;
+  created_at: string;
+  // joined
+  profile?: { id: string; username: string; display_name: string | null; avatar_url: string | null };
+}
+export type SessionParticipantInsert = Omit<SessionParticipant, "id" | "created_at" | "profile"> & { id?: string };
 
 // ─── Session Photos ──────────────────────────────────────────────────────────
 export interface SessionPhoto {

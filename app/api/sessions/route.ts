@@ -1,9 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { sendPushToUser } from '@/lib/push'
+import { rateLimitResponse } from '@/lib/rate-limit'
 
 // POST /api/sessions — start a new session (check-in at brewery or home)
 export async function POST(request: NextRequest) {
+  // 20 sessions per hour per IP — raised from 10 in S38-009 (power users hit the old limit)
+  const limited = rateLimitResponse(request, 'sessions', { limit: 20, windowMs: 60 * 60 * 1000 })
+  if (limited) return limited
+
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

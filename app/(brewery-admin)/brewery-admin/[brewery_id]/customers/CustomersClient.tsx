@@ -2,7 +2,8 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
-import { Search, ArrowUpDown, Users, Crown, Star, TrendingUp } from "lucide-react";
+import { useParams } from "next/navigation";
+import { Search, ArrowUpDown, Users, Crown, Star, TrendingUp, Download } from "lucide-react";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import { formatRelativeTime } from "@/lib/dates";
 
@@ -71,6 +72,7 @@ function TierBadge({ tier }: { tier: "VIP" | "Power User" | "Regular" | null }) 
 }
 
 export function CustomersClient({ customers }: { customers: CustomerRow[] }) {
+  const { brewery_id } = useParams<{ brewery_id: string }>();
   const [search, setSearch] = useState("");
   const [sortKey, setSortKey] = useState<SortKey>("visits");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
@@ -109,16 +111,44 @@ export function CustomersClient({ customers }: { customers: CustomerRow[] }) {
   const powerUsers = customers.filter((c) => getTier(c.visits) === "Power User").length;
   const vips = customers.filter((c) => getTier(c.visits) === "VIP").length;
 
+  // Superfans: top 5 visitors by visit count (minimum 5 visits to qualify)
+  const superfans = useMemo(() => {
+    const qualified = customers.filter((c) => c.visits >= 5);
+    if (qualified.length === 0) return { fans: [], sessionPct: 0 };
+    const sorted = [...qualified].sort((a, b) => b.visits - a.visits).slice(0, 5);
+    const totalSessions = customers.reduce((sum, c) => sum + c.visits, 0);
+    const fanSessions = sorted.reduce((sum, c) => sum + c.visits, 0);
+    const sessionPct = totalSessions > 0 ? Math.round((fanSessions / totalSessions) * 100) : 0;
+    return { fans: sorted, sessionPct };
+  }, [customers]);
+
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 space-y-6">
       {/* Page header */}
-      <div>
-        <h1 className="font-display text-2xl sm:text-3xl font-bold" style={{ color: "var(--text-primary)" }}>
-          Customer Insights
-        </h1>
-        <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
-          Your regulars, power users, and VIPs at a glance.
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="font-display text-2xl sm:text-3xl font-bold" style={{ color: "var(--text-primary)" }}>
+            Customer Insights
+          </h1>
+          <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
+            Your regulars, power users, and VIPs at a glance.
+          </p>
+        </div>
+        {customers.length > 0 && (
+          <a
+            href={`/api/brewery/${brewery_id}/customers/export`}
+            download
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all border shrink-0"
+            style={{
+              background: "color-mix(in srgb, var(--accent-gold) 12%, transparent)",
+              borderColor: "var(--accent-gold)",
+              color: "var(--accent-gold)",
+            }}
+          >
+            <Download size={16} />
+            Export CSV
+          </a>
+        )}
       </div>
 
       {/* Summary bar */}
@@ -128,6 +158,79 @@ export function CustomersClient({ customers }: { customers: CustomerRow[] }) {
         <SummaryCard icon={Star} label="Power Users (15+)" value={powerUsers} accent />
         <SummaryCard icon={Crown} label="VIPs (30+)" value={vips} accent />
       </div>
+
+      {/* Superfans highlight */}
+      {superfans.fans.length > 0 && (
+        <div
+          className="rounded-2xl border p-5 space-y-4"
+          style={{
+            background: "linear-gradient(135deg, color-mix(in srgb, var(--accent-gold) 8%, var(--surface)), color-mix(in srgb, var(--accent-gold) 3%, var(--surface)))",
+            borderColor: "color-mix(in srgb, var(--accent-gold) 30%, transparent)",
+          }}
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Crown size={18} style={{ color: "var(--accent-gold)" }} />
+              <h2 className="font-display text-lg font-bold" style={{ color: "var(--text-primary)" }}>
+                Your Superfans
+              </h2>
+            </div>
+            <span
+              className="text-xs font-mono px-3 py-1 rounded-full"
+              style={{
+                background: "color-mix(in srgb, var(--accent-gold) 15%, transparent)",
+                color: "var(--accent-gold)",
+              }}
+            >
+              {superfans.sessionPct}% of all sessions
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-5 gap-3">
+            {superfans.fans.map((fan, i) => (
+              <div
+                key={fan.user_id}
+                className="flex sm:flex-col items-center gap-3 sm:gap-2 p-3 rounded-xl text-center"
+                style={{
+                  background: "color-mix(in srgb, var(--accent-gold) 6%, var(--surface))",
+                }}
+              >
+                <div className="relative">
+                  <UserAvatar
+                    profile={{
+                      display_name: fan.display_name,
+                      avatar_url: fan.avatar_url,
+                      username: fan.username,
+                    }}
+                    size="md"
+                  />
+                  {i === 0 && (
+                    <span
+                      className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-[10px]"
+                      style={{ background: "var(--accent-gold)", color: "var(--bg)" }}
+                    >
+                      👑
+                    </span>
+                  )}
+                </div>
+                <div className="sm:text-center text-left min-w-0">
+                  <p className="font-display font-semibold text-sm truncate" style={{ color: "var(--text-primary)" }}>
+                    {fan.display_name}
+                  </p>
+                  <p className="text-xs font-mono" style={{ color: "var(--accent-gold)" }}>
+                    {fan.visits} visits
+                  </p>
+                  {fan.favorite_beer && (
+                    <p className="text-[11px] truncate mt-0.5" style={{ color: "var(--text-muted)" }}>
+                      Loves {fan.favorite_beer}
+                    </p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Search + sort controls */}
       <div className="rounded-2xl border overflow-hidden" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>

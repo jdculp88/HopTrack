@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { rateLimitResponse } from "@/lib/rate-limit";
 
 // GET /api/brewery/[brewery_id]/reviews — fetch reviews + user's own review
 export async function GET(
@@ -41,6 +42,8 @@ export async function POST(
   req: Request,
   { params }: { params: Promise<{ brewery_id: string }> },
 ) {
+  const rl = rateLimitResponse(req, "brewery-reviews", { limit: 20, windowMs: 60_000 });
+  if (rl) return rl;
   const { brewery_id } = await params;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();

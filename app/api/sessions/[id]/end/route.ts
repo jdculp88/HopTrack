@@ -71,14 +71,22 @@ export async function PATCH(
     return NextResponse.json({ error: 'Failed to end session' }, { status: 500 })
   }
 
-  // Streak calculation
+  // Clean up pending participants (S38-010) — accepted ones stay for history
+  await (supabase as any)
+    .from('session_participants')
+    .delete()
+    .eq('session_id', sessionId)
+    .eq('status', 'pending')
+
+  // Streak calculation (with grace period)
   const { data: profile } = await (supabase as any)
     .from('profiles')
-    .select('xp, level, current_streak, longest_streak, last_session_date')
+    .select('xp, level, current_streak, longest_streak, last_session_date, streak_grace_used_at')
     .eq('id', user.id)
     .single()
 
   let streakUpdates: any = null
+  let streakGraceUsed = false
   if (profile) {
     const today = new Date().toISOString().split('T')[0]
     const lastDate = profile.last_session_date
@@ -89,7 +97,21 @@ export async function PATCH(
       let currentStreak = profile.current_streak || 0
 
       if (lastDate === yesterday || lastDate === dayBefore) {
+        // Normal streak continuation
         currentStreak += 1
+      } else if (currentStreak >= 3) {
+        // Streak would break — check grace period eligibility
+        const graceUsedAt = profile.streak_grace_used_at
+        const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString()
+        const graceAvailable = !graceUsedAt || graceUsedAt < thirtyDaysAgo
+
+        if (graceAvailable) {
+          // Grace period: preserve streak instead of resetting
+          currentStreak += 1
+          streakGraceUsed = true
+        } else {
+          currentStreak = 1
+        }
       } else {
         currentStreak = 1
       }
@@ -97,6 +119,7 @@ export async function PATCH(
       streakUpdates = {
         current_streak: currentStreak,
         last_session_date: today,
+        ...(streakGraceUsed ? { streak_grace_used_at: new Date().toISOString() } : {}),
       }
     }
   }
@@ -295,5 +318,6 @@ export async function PATCH(
     sessionId,
     session: completedSession ?? null,
     beerLogs: completedSession?.beer_logs ?? [],
+    streakGraceUsed,
   })
 }
