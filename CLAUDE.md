@@ -234,8 +234,8 @@ scripts/supabase-setup.mjs    — One-time setup script
 
 ## 🗺️ Where We Are
 
-**Current Sprint:** Sprint 34 — Own Your Data (not started)
-**Last completed:** Sprint 33 — The Recap ✅ (2026-03-30)
+**Current Sprint:** Sprint 41 — TBD (not started)
+**Last completed:** Sprint 40 — HopRoute Live + The Close ✅ (2026-03-30)
 
 ### Key design decisions (still active from Sprint 11):
 - Marketing pages use hardcoded `C` color constants (not CSS vars)
@@ -976,7 +976,11 @@ Full team testing audit (all 13 members) found 85 unique issues. Sprint 30 kille
 - 035: Reactions UNIQUE constraint (deduplicated first), beer_logs.beer_id FK, push_subscriptions UPDATE ✅ APPLIED (S31)
 - 036: `increment_xp` RPC function ✅ APPLIED (S31)
 - 037: `brewery_follows` + `session_photos` tables + `session-photos` storage bucket ✅ APPLIED (S32)
-- PGRST schema cache reloaded after 035/036/037 ✅
+- 038: (S37 — group sessions, referrals, beer lists) ✅ APPLIED (S37)
+- 039: (S37 — HopTrack Report, beer list URLs) ✅ APPLIED (S37)
+- 040: `hop_routes`, `hop_route_stops`, `hop_route_stop_beers` tables + RLS ✅ APPLIED (S40)
+- 041: `hop_route_eligible`, `hop_route_offer`, `vibe_tags` on breweries + HopRoute achievements ✅ APPLIED (S40)
+- PGRST schema cache reloaded after 040/041 ✅
 
 ### Revenue Targets
 - Tap tier: $49/mo
