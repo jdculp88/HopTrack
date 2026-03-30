@@ -20,7 +20,7 @@ export default async function HopRoutePage({ params }: { params: Promise<{ route
         travel_to_next_minutes, reasoning_text, social_context,
         is_sponsored, checked_in, checked_in_at,
         brewery:breweries(id, name, city, state, latitude, longitude, cover_image_url, brewery_type, hop_route_offer),
-        hop_route_stop_beers(id, beer_id, beer_name, reason_text)
+        hop_route_stop_beers(id, beer_id, beer_name, reason_text, beer:beers(style))
       )
     `)
     .eq("id", routeId)

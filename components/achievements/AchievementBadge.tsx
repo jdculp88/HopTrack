@@ -4,11 +4,11 @@ import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import type { Achievement, AchievementTier } from "@/types/database";
 
-const TIER_STYLES: Record<AchievementTier, { ring: string; glow: string; label: string }> = {
-  bronze:   { ring: "ring-[#CD7F32]/40", glow: "shadow-[0_0_12px_rgba(205,127,50,0.3)]",  label: "Bronze" },
-  silver:   { ring: "ring-[#C0C0C0]/40", glow: "shadow-[0_0_12px_rgba(192,192,192,0.3)]", label: "Silver" },
-  gold:     { ring: "ring-[#FFD700]/40", glow: "shadow-[0_0_12px_rgba(255,215,0,0.4)]",   label: "Gold" },
-  platinum: { ring: "ring-[#E5E4E2]/40", glow: "shadow-[0_0_16px_rgba(229,228,226,0.5)]", label: "Platinum" },
+const TIER_STYLES: Record<AchievementTier, { ring: string; glow: string; label: string; color: string }> = {
+  bronze:   { ring: "ring-2",  glow: "shadow-[0_0_12px_rgba(160,120,80,0.3)]",  label: "Bronze",   color: "var(--badge-bronze)" },
+  silver:   { ring: "ring-2",  glow: "shadow-[0_0_12px_rgba(138,144,152,0.3)]", label: "Silver",   color: "var(--badge-silver)" },
+  gold:     { ring: "ring-2",  glow: "shadow-[0_0_12px_rgba(200,148,58,0.4)]",  label: "Gold",     color: "var(--badge-gold)" },
+  platinum: { ring: "ring-2",  glow: "shadow-[0_0_16px_rgba(139,170,191,0.5)]", label: "Platinum", color: "#8BAABF" },
 };
 
 interface AchievementBadgeProps {
@@ -51,12 +51,18 @@ export function AchievementBadge({
         <div
           className={cn(
             s.container,
-            "rounded-2xl flex items-center justify-center flex-shrink-0",
-            s.ring,
-            earned ? [tier.ring, tier.glow] : "ring-[#3A3628]",
+            "rounded-2xl flex items-center justify-center flex-shrink-0 ring-2",
+            earned ? tier.glow : "",
             earned ? "" : "opacity-40 grayscale"
           )}
-          style={earned ? { background: `${achievement.badge_color}20` } : { background: "var(--surface)" }}
+          style={earned
+            ? {
+                background: `color-mix(in srgb, ${tier.color} 12%, transparent)`,
+                ringColor: `color-mix(in srgb, ${tier.color} 40%, transparent)`,
+                outline: `2px solid color-mix(in srgb, ${tier.color} 35%, transparent)`,
+                outlineOffset: "2px",
+              }
+            : { background: "var(--surface)", outline: "2px solid var(--border)", outlineOffset: "2px" }}
         >
           <span className={cn(s.icon, earned ? "" : "opacity-50")}>{achievement.icon}</span>
         </div>

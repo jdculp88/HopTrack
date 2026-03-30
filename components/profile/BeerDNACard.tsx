@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Share2, Check } from "lucide-react";
+import { getStyleVars } from "@/lib/beerStyleColors";
 
 // Match HomeFeed's StyleDNAEntry shape (avgRating can be null)
 interface StyleDNAEntry {
@@ -143,11 +144,7 @@ export function BeerDNACard({ styleDNA, username }: BeerDNACardProps) {
                 animate={{ width: `${(entry.count / topStyles[0].count) * 100}%` }}
                 transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: i * 0.06 }}
                 className="h-full rounded-full"
-                style={{
-                  background: i === 0
-                    ? "linear-gradient(to right, var(--accent-gold), var(--accent-amber))"
-                    : "color-mix(in srgb, var(--accent-gold) 50%, transparent)",
-                }}
+                style={{ background: getStyleVars(entry.style).primary }}
               />
             </div>
           </div>

@@ -14,10 +14,10 @@ interface AchievementCelebrationProps {
 }
 
 const TIER_COLORS: Record<string, string> = {
-  bronze: "#CD7F32",
-  silver: "#A8A8A8",
-  gold: "var(--accent-gold)",
-  platinum: "#B0C4DE",
+  bronze:   "var(--badge-bronze)",
+  silver:   "var(--badge-silver)",
+  gold:     "var(--badge-gold)",
+  platinum: "#8BAABF",
 };
 
 export function AchievementCelebration({

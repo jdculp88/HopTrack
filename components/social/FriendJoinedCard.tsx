@@ -17,20 +17,6 @@ export interface FriendJoinedItem {
   joinedAt: string
 }
 
-const LARGE_BUBBLE_POS = [
-  "absolute -top-3 -right-3",
-  "absolute top-1 -right-4",
-  "absolute -top-4 right-6",
-  "absolute top-2 -right-2",
-] as const;
-
-const SMALL_BUBBLE_POS = [
-  "absolute bottom-2 right-9",
-  "absolute bottom-1 right-3",
-  "absolute bottom-3 right-14",
-  "absolute bottom-2 right-6",
-] as const;
-
 export function FriendJoinedCard({
   friend,
   index = 0,
@@ -68,7 +54,6 @@ export function FriendJoinedCard({
   }
 
   const firstName = (friend.displayName || friend.username).split(' ')[0]
-  const bubbleIdx = index % 4;
 
   return (
     <motion.div
@@ -76,14 +61,8 @@ export function FriendJoinedCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.03, duration: 0.25 }}
       className="rounded-2xl overflow-hidden flex relative"
-      style={{
-        background: 'linear-gradient(135deg, color-mix(in srgb, var(--accent-gold) 8%, var(--surface)), var(--surface))',
-        border: '1px solid color-mix(in srgb, var(--accent-gold) 20%, var(--border))',
-      }}
+      style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
     >
-      {/* Bubble decorations */}
-      <div className={`${LARGE_BUBBLE_POS[bubbleIdx]} w-14 h-14 rounded-full pointer-events-none`} style={{ background: 'var(--accent-gold)', opacity: 0.06 }} />
-      <div className={`${SMALL_BUBBLE_POS[bubbleIdx]} w-4 h-4 rounded-full pointer-events-none`} style={{ background: 'var(--accent-amber)', opacity: 0.08 }} />
 
       {/* Gold accent bar */}
       <div

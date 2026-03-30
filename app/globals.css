@@ -44,6 +44,42 @@
   /* Warm card gradient — BeerDNA-style treatment for data/stats cards */
   --surface-warm:    linear-gradient(135deg, color-mix(in srgb, var(--accent-gold) 6%, var(--surface)), var(--surface));
   --surface-warm-border: color-mix(in srgb, var(--accent-gold) 18%, var(--border));
+
+  /* ── Beer Style Colors (dark mode) ──────────────────────────────────────── */
+  /* Primary: used for bars, dots, text accents                               */
+  /* Light:   darkened tint for dark-mode backgrounds                         */
+  /* Soft:    lighter/desaturated for dark-mode text/icons                    */
+  --ipa-green:              #5a8a4a;
+  --ipa-green-light:        #1a2c14;
+  --ipa-green-soft:         #7aaa6a;
+
+  --stout-espresso:         #3d2b1f;
+  --stout-espresso-light:   #1e1510;
+  --stout-espresso-mid:     #6b5445;
+
+  --sour-berry:             #a8456a;
+  --sour-berry-light:       #2a1020;
+  --sour-berry-soft:        #c87090;
+
+  --porter-plum:            #5c3d5e;
+  --porter-plum-light:      #1e1220;
+  --porter-plum-soft:       #8a6a8c;
+
+  --lager-sky:              #4a7a8a;
+  --lager-sky-light:        #12262c;
+  --lager-sky-soft:         #6a9aaa;
+
+  --saison-peach:           #d48a50;
+  --saison-peach-light:     #2a1a08;
+
+  /* ── Functional System Colors ───────────────────────────────────────────── */
+  --streak-flame:           #e07830;
+  --xp-emerald:             #4a8a5c;
+  --live-green:             #48a058;
+
+  --badge-bronze:           #a07850;
+  --badge-silver:           #8a9098;
+  --badge-gold:             #c8943a;
 }
 
 /* ── Light / Cream theme (user toggle + forced on marketing pages) ─────────── */
@@ -67,6 +103,39 @@
   /* Warm card gradient — matches BeerDNA card in light mode */
   --surface-warm:    linear-gradient(135deg, #faf6f0 0%, #f5eddc 100%);
   --surface-warm-border: #E8D9C0;
+
+  /* ── Beer Style Colors (light mode) ─────────────────────────────────────── */
+  --ipa-green:              #5a8a4a;
+  --ipa-green-light:        #eaf2e6;
+  --ipa-green-soft:         #4a7a3a;
+
+  --stout-espresso:         #3d2b1f;
+  --stout-espresso-light:   #ebe3dc;
+  --stout-espresso-mid:     #6b5445;
+
+  --sour-berry:             #a8456a;
+  --sour-berry-light:       #f5e6ec;
+  --sour-berry-soft:        #8a2a52;
+
+  --porter-plum:            #5c3d5e;
+  --porter-plum-light:      #ece4ed;
+  --porter-plum-soft:       #4a2a4c;
+
+  --lager-sky:              #4a7a8a;
+  --lager-sky-light:        #e4eef2;
+  --lager-sky-soft:         #3a6070;
+
+  --saison-peach:           #d48a50;
+  --saison-peach-light:     #f8eddf;
+
+  /* ── Functional System Colors ───────────────────────────────────────────── */
+  --streak-flame:           #d06020;
+  --xp-emerald:             #3a7a4c;
+  --live-green:             #38904a;
+
+  --badge-bronze:           #8a6838;
+  --badge-silver:           #6a7080;
+  --badge-gold:             #b07828;
 }
 
 /* ── Dark floating section tokens (used on cream pages) ────────────────────── */
@@ -322,4 +391,231 @@ input, select, textarea { font-size: max(16px, 1em); }
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   CARD BACKGROUND SYSTEM — Sprint 63
+   Each card type gets its own CSS-only background texture.
+   "Every card should feel like it knows what it is."
+   All pseudo-elements: position absolute, pointer-events none.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* ── 1. ACHIEVEMENT — Concentric arcs radiating from badge icon ─────────── */
+.card-bg-achievement {
+  position: relative;
+  overflow: hidden;
+  background: radial-gradient(circle at 28px 50%,
+    color-mix(in srgb, var(--badge-bronze) 6%, transparent) 0%,
+    color-mix(in srgb, var(--badge-bronze) 2%, transparent) 40%,
+    transparent 65%);
+}
+.card-bg-achievement::before {
+  content: '';
+  position: absolute;
+  left: 10px; top: 50%; transform: translateY(-50%);
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--badge-bronze) 8%, transparent);
+  pointer-events: none;
+}
+.card-bg-achievement::after {
+  content: '';
+  position: absolute;
+  left: -5px; top: 50%; transform: translateY(-50%);
+  width: 110px; height: 110px;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--badge-bronze) 4%, transparent);
+  pointer-events: none;
+}
+.card-bg-achievement[data-tier="silver"] {
+  background: radial-gradient(circle at 28px 50%,
+    color-mix(in srgb, var(--badge-silver) 6%, transparent) 0%,
+    color-mix(in srgb, var(--badge-silver) 2%, transparent) 40%,
+    transparent 65%);
+}
+.card-bg-achievement[data-tier="silver"]::before { border-color: color-mix(in srgb, var(--badge-silver) 8%, transparent); }
+.card-bg-achievement[data-tier="silver"]::after  { border-color: color-mix(in srgb, var(--badge-silver) 4%, transparent); }
+.card-bg-achievement[data-tier="gold"],
+.card-bg-achievement[data-tier="platinum"] {
+  background: radial-gradient(circle at 28px 50%,
+    color-mix(in srgb, var(--badge-gold) 6%, transparent) 0%,
+    color-mix(in srgb, var(--badge-gold) 2%, transparent) 40%,
+    transparent 65%);
+}
+.card-bg-achievement[data-tier="gold"]::before,
+.card-bg-achievement[data-tier="platinum"]::before { border-color: color-mix(in srgb, var(--badge-gold) 8%, transparent); }
+.card-bg-achievement[data-tier="gold"]::after,
+.card-bg-achievement[data-tier="platinum"]::after  { border-color: color-mix(in srgb, var(--badge-gold) 4%, transparent); }
+
+/* ── 2. LIVE SESSION — Warm green glow + pulsing dot ────────────────────── */
+.card-bg-live {
+  position: relative;
+  overflow: hidden;
+  background: radial-gradient(ellipse at 50% 40%,
+    color-mix(in srgb, var(--live-green) 7%, transparent) 0%,
+    transparent 60%),
+    var(--surface);
+  border-color: color-mix(in srgb, var(--live-green) 12%, var(--border)) !important;
+}
+.card-bg-live::before {
+  content: '';
+  position: absolute;
+  top: 12px; right: 14px;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--live-green);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--live-green) 50%, transparent);
+  animation: livePulse 2s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes livePulse {
+  0%, 100% { box-shadow: 0 0 6px color-mix(in srgb, var(--live-green) 35%, transparent); }
+  50%       { box-shadow: 0 0 14px color-mix(in srgb, var(--live-green) 65%, transparent); }
+}
+
+/* ── 3. STREAK — Flame warmth from left ─────────────────────────────────── */
+.card-bg-streak {
+  position: relative;
+  overflow: hidden;
+  background: radial-gradient(ellipse at 20% 50%,
+    color-mix(in srgb, var(--streak-flame) 8%, transparent) 0%,
+    transparent 55%),
+    var(--surface);
+  border-color: color-mix(in srgb, var(--streak-flame) 15%, var(--border)) !important;
+}
+
+/* ── 4. FEATURED / BEER OF THE WEEK — Warm spotlight glow ───────────────── */
+.card-bg-featured {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 30% 30%, color-mix(in srgb, var(--accent-gold) 9%, transparent) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 80%, color-mix(in srgb, var(--accent-amber) 5%, transparent) 0%, transparent 40%),
+    var(--surface);
+  border-color: color-mix(in srgb, var(--accent-gold) 15%, var(--border)) !important;
+}
+.card-bg-featured::before {
+  content: '';
+  position: absolute;
+  top: -20px; left: -20px;
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--accent-gold) 7%, transparent) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* ── 5. HOPROUTE CTA — Topographic diagonal lines + dashed circles ──────── */
+.card-bg-hoproute {
+  position: relative;
+  overflow: hidden;
+  background:
+    repeating-linear-gradient(
+      165deg,
+      transparent,
+      transparent 18px,
+      color-mix(in srgb, var(--accent-amber) 3%, transparent) 18px,
+      color-mix(in srgb, var(--accent-amber) 3%, transparent) 19px
+    ),
+    radial-gradient(ellipse at 70% 50%, color-mix(in srgb, var(--accent-gold) 6%, transparent) 0%, transparent 50%),
+    var(--surface);
+}
+.card-bg-hoproute::before {
+  content: '';
+  position: absolute;
+  right: 20px; top: 50%; transform: translateY(-50%);
+  width: 60px; height: 60px;
+  border-radius: 50%;
+  border: 1.5px dashed color-mix(in srgb, var(--accent-amber) 10%, transparent);
+  pointer-events: none;
+}
+.card-bg-hoproute::after {
+  content: '';
+  position: absolute;
+  right: 8px; top: 50%; transform: translateY(-50%);
+  width: 84px; height: 84px;
+  border-radius: 50%;
+  border: 1px dashed color-mix(in srgb, var(--accent-amber) 5%, transparent);
+  pointer-events: none;
+}
+
+/* ── 6. TASTE DNA — Layered color wash at bottom ────────────────────────── */
+.card-bg-taste-dna {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(180deg, var(--surface) 0%, color-mix(in srgb, var(--accent-gold) 4%, var(--surface)) 50%, var(--surface) 100%);
+}
+.card-bg-taste-dna::before {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 40%;
+  background:
+    radial-gradient(ellipse at 20% 100%, color-mix(in srgb, var(--ipa-green) 5%, transparent) 0%, transparent 50%),
+    radial-gradient(ellipse at 60% 100%, color-mix(in srgb, var(--sour-berry) 4%, transparent) 0%, transparent 40%),
+    radial-gradient(ellipse at 90% 100%, color-mix(in srgb, var(--lager-sky) 4%, transparent) 0%, transparent 45%);
+  pointer-events: none;
+}
+
+/* ── 7. COLLECTION — Left-edge color bar + gradient tint ────────────────── */
+.card-bg-collection {
+  position: relative;
+  overflow: hidden;
+  padding-left: 18px !important;
+}
+.card-bg-collection::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 4px;
+  background: var(--collection-color, var(--accent-gold));
+  pointer-events: none;
+}
+.card-bg-collection::after {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0; right: 0;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--collection-color, var(--accent-gold)) 5%, transparent) 0%, transparent 40%);
+  pointer-events: none;
+}
+
+/* ── 8. NOTIFICATION — Warm attention gradient ───────────────────────────── */
+.card-bg-notification {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg,
+    color-mix(in srgb, var(--accent-gold) 7%, transparent) 0%,
+    transparent 40%),
+    var(--surface);
+  border-color: color-mix(in srgb, var(--accent-gold) 14%, var(--border)) !important;
+}
+
+/* ── 9. RECOMMENDATION — Style-tinted diagonal gradient ─────────────────── */
+.card-bg-reco {
+  position: relative;
+  overflow: hidden;
+}
+.card-bg-reco[data-style="ipa"]    { background: linear-gradient(135deg, color-mix(in srgb, var(--ipa-green) 8%, var(--surface)) 0%, var(--surface) 60%); border-color: color-mix(in srgb, var(--ipa-green) 10%, var(--border)) !important; }
+.card-bg-reco[data-style="stout"]  { background: linear-gradient(135deg, color-mix(in srgb, var(--stout-espresso-mid) 8%, var(--surface)) 0%, var(--surface) 60%); border-color: color-mix(in srgb, var(--stout-espresso-mid) 10%, var(--border)) !important; }
+.card-bg-reco[data-style="sour"]   { background: linear-gradient(135deg, color-mix(in srgb, var(--sour-berry) 8%, var(--surface)) 0%, var(--surface) 60%); border-color: color-mix(in srgb, var(--sour-berry) 10%, var(--border)) !important; }
+.card-bg-reco[data-style="porter"] { background: linear-gradient(135deg, color-mix(in srgb, var(--porter-plum) 8%, var(--surface)) 0%, var(--surface) 60%); border-color: color-mix(in srgb, var(--porter-plum) 10%, var(--border)) !important; }
+.card-bg-reco[data-style="lager"]  { background: linear-gradient(135deg, color-mix(in srgb, var(--lager-sky) 8%, var(--surface)) 0%, var(--surface) 60%); border-color: color-mix(in srgb, var(--lager-sky) 10%, var(--border)) !important; }
+.card-bg-reco[data-style="saison"] { background: linear-gradient(135deg, color-mix(in srgb, var(--saison-peach) 8%, var(--surface)) 0%, var(--surface) 60%); border-color: color-mix(in srgb, var(--saison-peach) 10%, var(--border)) !important; }
+
+/* ── 10. SOCIAL — Intentionally bare ────────────────────────────────────── */
+/* No styles needed — restraint IS the design */
+
+/* ── SEASONAL BLOB — Organic shape corner accent ────────────────────────── */
+.card-bg-seasonal {
+  position: relative;
+  overflow: hidden;
+}
+.card-bg-seasonal::before {
+  content: '';
+  position: absolute;
+  bottom: -30px; right: -20px;
+  width: 120px; height: 120px;
+  border-radius: 40% 60% 55% 45% / 50% 40% 60% 50%;
+  background: color-mix(in srgb, var(--seasonal-color, var(--accent-gold)) 6%, transparent);
+  border: 1px solid color-mix(in srgb, var(--seasonal-color, var(--accent-gold)) 5%, transparent);
+  pointer-events: none;
 }

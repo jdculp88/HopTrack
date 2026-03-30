@@ -8,6 +8,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/Toast";
 import { HopRouteShareCard } from "@/components/hop-route/HopRouteShareCard";
+import { getStyleVars } from "@/lib/beerStyleColors";
 
 interface RouteStop {
   id: string;
@@ -34,6 +35,7 @@ interface RouteStop {
     beer_id: string | null;
     beer_name: string | null;
     reason_text: string | null;
+    beer: { style: string | null } | null;
   }>;
 }
 
@@ -212,6 +214,9 @@ export function HopRouteCardClient({ route: initialRoute, userId }: HopRouteCard
           const brewery = stop.brewery;
           const isExpanded = expandedStop === stop.id;
           const isLast = idx === stops.length - 1;
+          // Style-code the stop number bubble: use first recommended beer's style, fall back to accent-gold
+          const stopStyle = stop.hop_route_stop_beers[0]?.beer?.style ?? null;
+          const stopVars = stopStyle ? getStyleVars(stopStyle) : null;
 
           return (
             <div key={stop.id} className="relative">
@@ -233,15 +238,21 @@ export function HopRouteCardClient({ route: initialRoute, userId }: HopRouteCard
                   onClick={() => toggleStop(stop.id)}
                   className="w-full flex items-center gap-3 p-4 text-left"
                 >
-                  {/* Stop number / check indicator */}
+                  {/* Stop number / check indicator — style-coded to first recommended beer's style */}
                   <div
                     className="w-8 h-8 rounded-xl flex items-center justify-center text-sm font-bold flex-shrink-0"
-                    style={{
-                      background: stop.checked_in
-                        ? "var(--accent-gold)"
-                        : "color-mix(in srgb, var(--accent-gold) 15%, transparent)",
-                      color: stop.checked_in ? "var(--bg)" : "var(--accent-gold)",
-                    }}
+                    style={stop.checked_in
+                      ? {
+                          background: stopVars ? stopVars.primary : "var(--accent-gold)",
+                          color: "var(--bg)",
+                        }
+                      : {
+                          background: stopVars
+                            ? `color-mix(in srgb, ${stopVars.primary} 15%, transparent)`
+                            : "color-mix(in srgb, var(--accent-gold) 15%, transparent)",
+                          color: stopVars ? stopVars.primary : "var(--accent-gold)",
+                        }
+                    }
                   >
                     {stop.checked_in ? "✓" : stop.stop_order}
                   </div>

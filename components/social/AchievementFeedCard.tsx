@@ -47,29 +47,14 @@ function getCategoryIcon(category: string): LucideIcon {
 }
 
 const TIER_COLORS: Record<string, string> = {
-  bronze: "#CD7F32",
-  silver: "#A8A9AD",
-  gold: "#D4A843",
+  bronze:   "var(--badge-bronze)",
+  silver:   "var(--badge-silver)",
+  gold:     "var(--badge-gold)",
   platinum: "#8BAABF",
 };
 
-const LARGE_BUBBLE_POS = [
-  "absolute -top-3 -right-3",
-  "absolute top-1 -right-4",
-  "absolute -top-4 right-6",
-  "absolute top-2 -right-2",
-] as const;
-
-const SMALL_BUBBLE_POS = [
-  "absolute bottom-2 right-9",
-  "absolute bottom-1 right-3",
-  "absolute bottom-3 right-14",
-  "absolute bottom-2 right-6",
-] as const;
-
 export function AchievementFeedCard({
   achievement,
-  index = 0,
 }: {
   achievement: FriendAchievement;
   index?: number;
@@ -77,7 +62,7 @@ export function AchievementFeedCard({
   userReactions?: string[];
 }) {
   const tier = achievement.achievement.tier;
-  const tierColor = TIER_COLORS[tier] ?? "#D4A843";
+  const tierColor = TIER_COLORS[tier] ?? "var(--badge-gold)";
   const CategoryIcon = getCategoryIcon(achievement.achievement.category);
   const [showCelebration, setShowCelebration] = useState(() =>
     isNewAchievement(achievement.earned_at)
@@ -85,7 +70,6 @@ export function AchievementFeedCard({
   const firstName = (
     achievement.profile.display_name || achievement.profile.username
   ).split(" ")[0];
-  const bubbleIdx = index % 4;
 
   return (
     <motion.div
@@ -95,7 +79,8 @@ export function AchievementFeedCard({
       transition={{ type: "spring", stiffness: 400, damping: 30 }}
       role="article"
       aria-label={`${achievement.profile.display_name || achievement.profile.username} earned ${achievement.achievement.name}`}
-      className="rounded-2xl overflow-hidden flex relative"
+      className="card-bg-achievement rounded-2xl overflow-hidden flex relative"
+      data-tier={tier}
       style={{
         background: `linear-gradient(135deg, color-mix(in srgb, ${tierColor} 8%, var(--surface)), var(--surface))`,
         border: `1px solid color-mix(in srgb, ${tierColor} 20%, var(--border))`,
@@ -109,10 +94,6 @@ export function AchievementFeedCard({
         xpReward={achievement.achievement.xp_reward}
         onDismiss={() => setShowCelebration(false)}
       />
-
-      {/* Bubble decorations */}
-      <div className={`${LARGE_BUBBLE_POS[bubbleIdx]} w-16 h-16 rounded-full pointer-events-none`} style={{ background: tierColor, opacity: 0.06 }} />
-      <div className={`${SMALL_BUBBLE_POS[bubbleIdx]} w-5 h-5 rounded-full pointer-events-none`} style={{ background: "var(--accent-gold)", opacity: 0.07 }} />
 
       {/* Tier accent bar */}
       <div

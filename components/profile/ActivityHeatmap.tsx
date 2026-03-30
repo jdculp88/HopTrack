@@ -1,34 +1,38 @@
 "use client";
 
 import { useMemo } from "react";
+import { getStyleVars } from "@/lib/beerStyleColors";
 
 interface ActivityHeatmapProps {
-  /** Array of { date: "YYYY-MM-DD", count: number } */
-  data: { date: string; count: number }[];
+  /** Array of { date: "YYYY-MM-DD", count: number, style?: string } */
+  data: { date: string; count: number; style?: string }[];
   /** Show full 52 weeks or compact 26 weeks */
   compact?: boolean;
 }
 
 const DAYS_OF_WEEK = ["Mon", "", "Wed", "", "Fri", "", ""];
 
-function getIntensity(count: number): string {
+function getCellColor(count: number, style?: string): string {
   if (count === 0) return "var(--surface-2)";
-  if (count <= 2) return "color-mix(in srgb, var(--accent-gold) 30%, var(--surface-2))";
-  if (count <= 5) return "color-mix(in srgb, var(--accent-gold) 55%, var(--surface-2))";
-  return "var(--accent-gold)";
+  const vars = getStyleVars(style ?? null);
+  const primary = vars.primary;
+  if (count <= 2) return `color-mix(in srgb, ${primary} 30%, var(--surface-2))`;
+  if (count <= 5) return `color-mix(in srgb, ${primary} 60%, var(--surface-2))`;
+  return primary;
 }
 
 export function ActivityHeatmap({ data, compact = false }: ActivityHeatmapProps) {
   const { grid, months, totalPours, activeDays } = useMemo(() => {
     const weeks = compact ? 26 : 52;
     const today = new Date();
-    const countMap = new Map<string, number>();
+    const countMap = new Map<string, { count: number; style?: string }>();
     for (const d of data) {
-      countMap.set(d.date, (countMap.get(d.date) || 0) + d.count);
+      const existing = countMap.get(d.date);
+      countMap.set(d.date, { count: (existing?.count ?? 0) + d.count, style: d.style ?? existing?.style });
     }
 
     // Build grid: weeks × 7 days
-    const grid: { date: string; count: number; dayOfWeek: number }[][] = [];
+    const grid: { date: string; count: number; style?: string; dayOfWeek: number }[][] = [];
     const endDate = new Date(today);
     endDate.setDate(endDate.getDate() - endDate.getDay()); // Start of current week (Sunday)
     endDate.setDate(endDate.getDate() + 6); // End of current week (Saturday)
@@ -44,7 +48,9 @@ export function ActivityHeatmap({ data, compact = false }: ActivityHeatmapProps)
 
     while (currentDate <= endDate) {
       const dateStr = currentDate.toISOString().split("T")[0];
-      const count = countMap.get(dateStr) || 0;
+      const entry = countMap.get(dateStr);
+      const count = entry?.count ?? 0;
+      const style = entry?.style;
       const dayOfWeek = currentDate.getDay();
 
       if (dayOfWeek === 0 && currentWeek.length > 0) {
@@ -52,7 +58,7 @@ export function ActivityHeatmap({ data, compact = false }: ActivityHeatmapProps)
         currentWeek = [];
       }
 
-      currentWeek.push({ date: dateStr, count, dayOfWeek });
+      currentWeek.push({ date: dateStr, count, style, dayOfWeek });
       total += count;
       if (count > 0) active++;
 
@@ -147,9 +153,9 @@ export function ActivityHeatmap({ data, compact = false }: ActivityHeatmapProps)
                     style={{
                       width: cellSize,
                       height: cellSize,
-                      background: getIntensity(day.count),
+                      background: getCellColor(day.count, day.style),
                     }}
-                    title={`${new Date(day.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })} — ${day.count} pour${day.count !== 1 ? "s" : ""}`}
+                    title={`${new Date(day.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })} — ${day.count} pour${day.count !== 1 ? "s" : ""}${day.style ? ` · ${day.style}` : ""}`}
                   />
                 ))}
               </div>
@@ -158,19 +164,19 @@ export function ActivityHeatmap({ data, compact = false }: ActivityHeatmapProps)
 
           {/* Legend */}
           <div className="flex items-center gap-1.5 mt-2 justify-end">
-            <span className="text-[9px] font-mono" style={{ color: "var(--text-muted)" }}>Less</span>
-            {[0, 1, 3, 6].map((c) => (
+            <span className="text-[9px] font-mono" style={{ color: "var(--text-muted)" }}>Color = style</span>
+            {(["IPA", "Stout", "Sour", "Porter", "Lager", "Saison"] as const).map((s) => (
               <div
-                key={c}
+                key={s}
                 className="rounded-[2px]"
+                title={s}
                 style={{
                   width: cellSize,
                   height: cellSize,
-                  background: getIntensity(c),
+                  background: getStyleVars(s).primary,
                 }}
               />
             ))}
-            <span className="text-[9px] font-mono" style={{ color: "var(--text-muted)" }}>More</span>
           </div>
         </div>
       </div>

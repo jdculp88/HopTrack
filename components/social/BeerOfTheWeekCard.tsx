@@ -27,11 +27,8 @@ export function BeerOfTheWeekCard({ beer, index = 0 }: { beer: FeaturedBeer; ind
     >
       <Link href={`/beer/${beer.id}`}>
         <div
-          className="rounded-2xl p-4 flex items-center gap-4"
-          style={{
-            background: 'linear-gradient(135deg, color-mix(in srgb, var(--accent-gold) 8%, var(--surface)), var(--surface))',
-            border: '2px solid color-mix(in srgb, var(--accent-gold) 25%, transparent)',
-          }}
+          className="card-bg-featured rounded-2xl p-4 flex items-center gap-4"
+          style={{ border: '2px solid color-mix(in srgb, var(--accent-gold) 25%, transparent)' }}
         >
           {/* Glass SVG */}
           {svgHtml && (

@@ -26,20 +26,6 @@ export interface FriendBreweryReview {
   } | null;
 }
 
-const LARGE_BUBBLE_POS = [
-  "absolute -top-3 -right-3",
-  "absolute top-1 -right-4",
-  "absolute -top-4 right-6",
-  "absolute top-2 -right-2",
-] as const;
-
-const SMALL_BUBBLE_POS = [
-  "absolute bottom-2 right-9",
-  "absolute bottom-1 right-3",
-  "absolute bottom-3 right-14",
-  "absolute bottom-2 right-6",
-] as const;
-
 export function BreweryRatingFeedCard({
   review,
   index = 0,
@@ -47,7 +33,6 @@ export function BreweryRatingFeedCard({
   review: FriendBreweryReview;
   index?: number;
 }) {
-  const bubbleIdx = index % 4;
   const firstName = (
     review.profile?.display_name || review.profile?.username || "Someone"
   ).split(" ")[0];
@@ -68,15 +53,6 @@ export function BreweryRatingFeedCard({
           "1px solid color-mix(in srgb, var(--accent-gold) 18%, var(--border))",
       }}
     >
-      {/* Bubble decorations */}
-      <div
-        className={`${LARGE_BUBBLE_POS[bubbleIdx]} w-16 h-16 rounded-full pointer-events-none`}
-        style={{ background: "var(--accent-gold)", opacity: 0.06 }}
-      />
-      <div
-        className={`${SMALL_BUBBLE_POS[bubbleIdx]} w-5 h-5 rounded-full pointer-events-none`}
-        style={{ background: "var(--accent-gold)", opacity: 0.07 }}
-      />
 
       {/* Gold accent bar */}
       <div

@@ -580,27 +580,40 @@ export async function fetchFriendActivity(
 export async function fetchActivityHeatmap(
   supabase: SupabaseClient,
   userId: string
-): Promise<{ date: string; count: number }[]> {
+): Promise<{ date: string; count: number; style?: string }[]> {
   try {
     const oneYearAgo = new Date();
     oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
 
     const { data: logs } = await supabase
       .from("beer_logs")
-      .select("logged_at, quantity")
+      .select("logged_at, quantity, beer:beers(style)")
       .eq("user_id", userId)
       .gte("logged_at", oneYearAgo.toISOString());
 
     if (!logs || logs.length === 0) return [];
 
-    type HeatmapLogRow = { logged_at: string; quantity: number | null };
-    const dayMap = new Map<string, number>();
+    type HeatmapLogRow = { logged_at: string; quantity: number | null; beer: { style: string | null } | null };
+    const dayMap = new Map<string, { count: number; styleCount: Map<string, number> }>();
     for (const log of logs as HeatmapLogRow[]) {
       const date = new Date(log.logged_at).toISOString().split("T")[0];
-      dayMap.set(date, (dayMap.get(date) || 0) + (log.quantity ?? 1));
+      const existing = dayMap.get(date) ?? { count: 0, styleCount: new Map<string, number>() };
+      existing.count += log.quantity ?? 1;
+      const style = log.beer?.style;
+      if (style) {
+        existing.styleCount.set(style, (existing.styleCount.get(style) ?? 0) + 1);
+      }
+      dayMap.set(date, existing);
     }
 
-    return Array.from(dayMap.entries()).map(([date, count]) => ({ date, count }));
+    return Array.from(dayMap.entries()).map(([date, { count, styleCount }]) => {
+      let dominantStyle: string | undefined;
+      let max = 0;
+      for (const [style, n] of styleCount) {
+        if (n > max) { max = n; dominantStyle = style; }
+      }
+      return { date, count, style: dominantStyle };
+    });
   } catch {
     return [];
   }

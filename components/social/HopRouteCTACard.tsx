@@ -19,16 +19,11 @@ export function HopRouteCTACard({ route, index = 0 }: { route: FriendActiveRoute
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.03, duration: 0.25 }}
-      className="rounded-2xl p-4 relative overflow-hidden"
+      className="card-bg-hoproute rounded-2xl p-4 relative overflow-hidden"
       style={{
-        background: "linear-gradient(135deg, color-mix(in srgb, var(--accent-gold) 13%, var(--surface)), color-mix(in srgb, var(--accent-amber) 5%, var(--surface)))",
-        border: "1px solid color-mix(in srgb, var(--accent-gold) 28%, var(--border))",
+        border: "1px solid color-mix(in srgb, var(--accent-gold) 20%, var(--border))",
       }}
     >
-      {/* 3 bubbles: large top-right, medium bottom-left, small mid */}
-      <div className="absolute -top-4 -right-4 w-20 h-20 rounded-full pointer-events-none" style={{ background: "var(--accent-gold)", opacity: 0.07 }} />
-      <div className="absolute -bottom-3 -left-3 w-14 h-14 rounded-full pointer-events-none" style={{ background: "var(--accent-amber)", opacity: 0.05 }} />
-      <div className="absolute top-1/2 right-8 w-5 h-5 rounded-full pointer-events-none" style={{ background: "var(--accent-gold)", opacity: 0.08 }} />
 
       {/* Live header */}
       <div className="flex items-center gap-2 mb-3 relative z-10">

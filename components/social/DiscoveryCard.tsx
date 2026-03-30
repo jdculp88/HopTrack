@@ -294,45 +294,35 @@ export interface CuratedCollection {
   tagColor?: CollectionTagColor
 }
 
-function getTagStyles(tagColor: CollectionTagColor = 'gold'): { bg: string; border: string } {
+function getTagStyles(tagColor: CollectionTagColor = 'gold'): { bg: string; border: string; accent: string } {
   switch (tagColor) {
     case 'dark':
       return {
         bg: 'linear-gradient(135deg, color-mix(in srgb, var(--surface-2) 80%, transparent), var(--surface))',
         border: 'color-mix(in srgb, var(--border) 60%, transparent)',
+        accent: 'var(--stout-espresso-mid)',
       }
     case 'amber':
       return {
         bg: 'linear-gradient(135deg, color-mix(in srgb, var(--accent-amber) 10%, transparent), var(--surface))',
         border: 'color-mix(in srgb, var(--accent-amber) 20%, transparent)',
+        accent: 'var(--accent-amber)',
       }
     case 'green':
       return {
-        bg: 'linear-gradient(135deg, color-mix(in srgb, #4ade80 8%, transparent), var(--surface))',
-        border: 'color-mix(in srgb, #4ade80 18%, transparent)',
+        bg: 'linear-gradient(135deg, color-mix(in srgb, var(--ipa-green) 8%, transparent), var(--surface))',
+        border: 'color-mix(in srgb, var(--ipa-green) 18%, transparent)',
+        accent: 'var(--ipa-green)',
       }
     case 'gold':
     default:
       return {
         bg: 'linear-gradient(135deg, color-mix(in srgb, var(--accent-gold) 10%, transparent), var(--surface))',
         border: 'color-mix(in srgb, var(--accent-gold) 18%, transparent)',
+        accent: 'var(--accent-gold)',
       }
   }
 }
-
-const CURATED_LARGE_POS = [
-  "absolute -top-3 -right-3",
-  "absolute top-1 -right-4",
-  "absolute -top-4 right-8",
-  "absolute top-2 -right-2",
-] as const;
-
-const CURATED_SMALL_POS = [
-  "absolute bottom-2 right-8",
-  "absolute bottom-1 right-4",
-  "absolute bottom-3 right-12",
-  "absolute bottom-2 right-6",
-] as const;
 
 export function CuratedCollectionsList({ collections }: { collections: CuratedCollection[] }) {
   const { info } = useToast()
@@ -354,7 +344,6 @@ export function CuratedCollectionsList({ collections }: { collections: CuratedCo
       <div className="space-y-2.5">
         {collections.map((col, i) => {
           const tagStyles = getTagStyles(col.tagColor)
-          const bubbleIdx = i % 4
           return (
             <motion.div
               key={col.id}
@@ -370,14 +359,13 @@ export function CuratedCollectionsList({ collections }: { collections: CuratedCo
                 <motion.div
                   whileTap={{ scale: 0.98 }}
                   transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                  className="rounded-xl px-4 py-3.5 flex items-center gap-3.5 relative overflow-hidden"
+                  className="card-bg-collection rounded-xl py-3.5 pr-4 flex items-center gap-3.5 relative overflow-hidden"
                   style={{
                     background: tagStyles.bg,
                     border: `1px solid ${tagStyles.border}`,
-                  }}
+                    "--collection-color": tagStyles.accent,
+                  } as React.CSSProperties}
                 >
-                  <div className={`${CURATED_LARGE_POS[bubbleIdx]} w-14 h-14 rounded-full pointer-events-none`} style={{ background: 'var(--accent-gold)', opacity: 0.06 }} />
-                  <div className={`${CURATED_SMALL_POS[bubbleIdx]} w-4 h-4 rounded-full pointer-events-none`} style={{ background: 'var(--accent-amber)', opacity: 0.07 }} />
                   <span className="text-2xl flex-shrink-0">{col.emoji}</span>
                   <div className="flex-1 min-w-0">
                     <p className="font-display text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
