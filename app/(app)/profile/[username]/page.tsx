@@ -340,7 +340,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
         </div>
 
         {/* Achievements */}
-        <div className="mb-8">
+        <div className="mb-8 card-bg-achievement rounded-2xl p-5" style={{ border: "1px solid var(--border)" }}>
           {userAchievements && userAchievements.length > 0 ? (
             <AchievementsGrid achievements={userAchievements as any[]} />
           ) : (
@@ -364,9 +364,9 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
             <div className="space-y-3">
               {(topBreweries as any[]).map((visit) => (
                 <Link key={visit.id} href={`/brewery/${visit.brewery_id}`}>
-                  <div className="flex items-center gap-3 p-3 bg-[var(--surface)] border border-[var(--border)] hover:border-[var(--accent-gold)]/30 rounded-2xl transition-colors">
+                  <div className="card-bg-collection flex items-center gap-3 p-3 border border-[var(--border)] hover:border-[var(--accent-gold)]/30 rounded-2xl transition-colors">
                     <div
-                      className="w-12 h-12 rounded-xl"
+                      className="w-12 h-12 rounded-xl flex-shrink-0"
                       style={{ background: generateGradientFromString(visit.brewery?.name ?? "") }}
                     />
                     <div className="flex-1 min-w-0">
