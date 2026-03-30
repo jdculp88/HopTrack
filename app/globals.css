@@ -94,9 +94,9 @@
   --color-dark-border:    var(--dark-border);
   --color-dark-text:      var(--dark-text);
 
-  /* Fonts */
-  --font-display: var(--font-playfair), serif;
-  --font-sans:    var(--font-instrument), system-ui, sans-serif;
+  /* Fonts — Sprint 62: Satoshi (primary) + General Sans (display) + JetBrains Mono (data) */
+  --font-display: 'General Sans', sans-serif;
+  --font-sans:    'Satoshi', sans-serif;
   --font-mono:    var(--font-jetbrains), monospace;
 
   /* Animations */

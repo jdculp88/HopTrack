@@ -4,8 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Zap } from "lucide-react";
-import { UserAvatar } from "@/components/ui/UserAvatar";
-import { ReactionBar } from "@/components/social/ReactionBar";
 import { formatRelativeTime } from "@/lib/dates";
 import { AchievementCelebration } from "@/components/achievements/AchievementCelebration";
 
@@ -42,8 +40,6 @@ const TIER_COLORS: Record<string, string> = {
 export function AchievementFeedCard({
   achievement,
   index = 0,
-  reactionCounts,
-  userReactions,
 }: {
   achievement: FriendAchievement;
   index?: number;
@@ -54,20 +50,21 @@ export function AchievementFeedCard({
   const [showCelebration, setShowCelebration] = useState(() =>
     isNewAchievement(achievement.earned_at)
   );
+  const firstName =
+    (achievement.profile.display_name || achievement.profile.username).split(" ")[0];
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 12 }}
+      initial={{ opacity: 0, y: 8 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-50px" }}
       transition={{ type: "spring", stiffness: 400, damping: 30 }}
-      className="rounded-2xl p-5"
+      className="rounded-xl px-4 py-3 flex items-center gap-3"
       role="article"
       aria-label={`${achievement.profile.display_name || achievement.profile.username} earned ${achievement.achievement.name}`}
       style={{
-        background:
-          "linear-gradient(135deg, color-mix(in srgb, var(--accent-gold) 10%, var(--surface)), var(--surface))",
-        border: "1px solid color-mix(in srgb, var(--accent-gold) 20%, transparent)",
+        background: "var(--surface)",
+        border: "1px solid var(--border)",
       }}
     >
       <AchievementCelebration
@@ -79,69 +76,50 @@ export function AchievementFeedCard({
         onDismiss={() => setShowCelebration(false)}
       />
 
-      {/* Header row */}
-      <div className="flex items-center gap-3 mb-4">
-        <Link href={`/profile/${achievement.profile.username}`}>
-          <UserAvatar profile={achievement.profile as any} size="sm" />
-        </Link>
-        <div className="flex-1 min-w-0">
+      {/* Achievement icon badge */}
+      <div
+        className="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0"
+        style={{
+          background: `color-mix(in srgb, ${tierColor} 12%, var(--surface-2))`,
+        }}
+      >
+        {achievement.achievement.icon}
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 min-w-0">
+        <p className="text-sm leading-snug" style={{ color: "var(--text-primary)" }}>
           <Link
             href={`/profile/${achievement.profile.username}`}
-            className="font-sans font-semibold text-sm hover:underline"
-            style={{ color: "var(--text-primary)" }}
+            className="font-semibold hover:underline underline-offset-2"
           >
-            {achievement.profile.display_name || achievement.profile.username}
+            {firstName}
           </Link>
-          <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-            {formatRelativeTime(achievement.earned_at)}
-          </p>
-        </div>
-      </div>
-
-      {/* Achievement content */}
-      <div className="flex items-center gap-4">
-        <div
-          className="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl flex-shrink-0"
-          style={{
-            background: `color-mix(in srgb, var(--accent-gold) 12%, transparent)`,
-          }}
-        >
-          {achievement.achievement.icon}
-        </div>
-        <div className="flex-1 min-w-0">
-          <p
-            className="font-display text-base font-semibold leading-tight"
-            style={{ color: "var(--text-primary)" }}
+          <span style={{ color: "var(--text-muted)" }}> earned </span>
+          <span className="font-semibold">{achievement.achievement.name}</span>
+        </p>
+        <div className="flex items-center gap-2 mt-1">
+          <span
+            className="text-[9px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full font-semibold"
+            style={{
+              background: `color-mix(in srgb, ${tierColor} 15%, transparent)`,
+              color: tierColor,
+            }}
           >
-            {achievement.achievement.name}
-          </p>
-          <div className="flex items-center gap-2 mt-1.5">
-            <span
-              className="text-[10px] font-mono uppercase tracking-wider px-2.5 py-0.5 rounded-full font-semibold"
-              style={{
-                background: `color-mix(in srgb, ${tierColor} 15%, transparent)`,
-                color: tierColor,
-              }}
-            >
-              {achievement.achievement.tier}
-            </span>
-            <span
-              className="flex items-center gap-1 text-[10px] font-mono"
-              style={{ color: "var(--accent-gold)" }}
-            >
-              <Zap size={10} />
-              +{achievement.achievement.xp_reward} XP
-            </span>
-          </div>
+            {achievement.achievement.tier}
+          </span>
+          <span
+            className="flex items-center gap-0.5 text-[10px] font-mono"
+            style={{ color: "var(--accent-gold)" }}
+          >
+            <Zap size={9} />
+            +{achievement.achievement.xp_reward} XP
+          </span>
+          <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>
+            · {formatRelativeTime(achievement.earned_at)}
+          </span>
         </div>
       </div>
-
-      {/* Reaction footer */}
-      <ReactionBar
-        reactionCounts={reactionCounts}
-        userReactions={userReactions}
-        showShare={false}
-      />
     </motion.div>
   );
 }

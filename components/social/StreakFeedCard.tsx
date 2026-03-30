@@ -2,7 +2,6 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { ReactionBar } from "@/components/social/ReactionBar";
 
 export interface StreakData {
   profileId: string;
@@ -36,59 +35,47 @@ export function StreakFeedCard({
 }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 16 }}
+      initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.03, duration: 0.28 }}
-      className="rounded-2xl p-6 text-center"
+      transition={{ delay: index * 0.03, duration: 0.25 }}
+      className="rounded-xl px-4 py-3 flex items-center gap-3"
       style={{
-        background:
-          "color-mix(in srgb, var(--accent-amber) 6%, var(--surface))",
+        background: "var(--surface)",
         border: "1px solid var(--border)",
       }}
     >
-      {/* User info */}
+      {/* Fire icon */}
       <div
-        className="flex items-center justify-center gap-2 mb-3"
-      >
-        <Link
-          href={`/profile/${streak.username}`}
-          className="font-sans font-semibold text-sm hover:underline"
-          style={{ color: "var(--text-primary)" }}
-        >
-          {streak.displayName || streak.username}
-        </Link>
-      </div>
-
-      {/* Fire emoji */}
-      <div
-        className="text-5xl mb-2"
+        className="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0"
         style={{
-          filter: "drop-shadow(0 2px 8px color-mix(in srgb, var(--accent-amber) 30%, transparent))",
+          background: "color-mix(in srgb, var(--accent-amber) 10%, var(--surface-2))",
         }}
       >
         🔥
       </div>
 
-      {/* Streak count */}
-      <p
-        className="font-display text-3xl font-bold"
-        style={{ color: "var(--text-primary)" }}
-      >
-        {streak.currentStreak}-Day Streak
-      </p>
-
-      <p
-        className="text-xs mt-1 font-mono"
-        style={{ color: "var(--text-muted)" }}
-      >
-        {streak.currentStreak}-day session streak
-      </p>
-
-      {/* Reaction footer */}
-      <ReactionBar
-        showShare={false}
-        centered
-      />
+      {/* Content */}
+      <div className="flex-1 min-w-0">
+        <p className="text-sm leading-snug" style={{ color: "var(--text-primary)" }}>
+          <Link
+            href={`/profile/${streak.username}`}
+            className="font-semibold hover:underline underline-offset-2"
+          >
+            {(streak.displayName || streak.username).split(" ")[0]}
+          </Link>
+          <span style={{ color: "var(--text-muted)" }}> hit a </span>
+          <span
+            className="font-mono font-semibold"
+            style={{ color: "var(--accent-amber)" }}
+          >
+            {streak.currentStreak}-day
+          </span>
+          <span style={{ color: "var(--text-muted)" }}> streak!</span>
+        </p>
+        <p className="text-[10px] font-mono mt-0.5" style={{ color: "var(--text-muted)" }}>
+          {streak.currentStreak} sessions in a row
+        </p>
+      </div>
     </motion.div>
   );
 }

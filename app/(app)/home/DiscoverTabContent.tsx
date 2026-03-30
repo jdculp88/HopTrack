@@ -32,6 +32,18 @@ export interface CommunityContent {
   curatedCollections?: CuratedCollection[];
 }
 
+// Consistent section label — JetBrains Mono, uppercase, tracked
+function SectionLabel({ label, gold }: { label: string; gold?: boolean }) {
+  return (
+    <p
+      className="text-[10px] font-mono uppercase tracking-widest px-1 font-medium"
+      style={{ color: gold ? "var(--accent-gold)" : "var(--text-muted)" }}
+    >
+      {label}
+    </p>
+  );
+}
+
 export function DiscoverTabContent({
   communityContent,
   hasCommunityContent,
@@ -51,19 +63,19 @@ export function DiscoverTabContent({
         animate={{ opacity: 1 }}
         className="text-center py-16 space-y-5"
       >
-        <span className="text-6xl block">🌍</span>
+        <span className="text-6xl block">🍶</span>
         <div className="space-y-2">
           <h3
             className="font-display text-2xl font-bold"
             style={{ color: "var(--text-primary)" }}
           >
-            Nothing brewing yet
+            The cellar is being restocked.
           </h3>
           <p
             className="max-w-xs mx-auto text-sm leading-relaxed"
             style={{ color: "var(--text-secondary)" }}
           >
-            Check back soon for trending beers, events, and community reviews.
+            Fresh recommendations loading soon.
           </p>
         </div>
         <Link
@@ -87,18 +99,37 @@ export function DiscoverTabContent({
           whileTap={{ scale: 0.99 }}
           transition={{ type: "spring", stiffness: 400, damping: 30 }}
           className="relative overflow-hidden rounded-2xl p-5 border"
-          style={{ background: "linear-gradient(135deg, color-mix(in srgb, var(--accent-gold) 12%, transparent), color-mix(in srgb, var(--accent-amber) 6%, transparent))", borderColor: "color-mix(in srgb, var(--accent-gold) 30%, transparent)" }}
+          style={{
+            background:
+              "linear-gradient(135deg, color-mix(in srgb, var(--accent-gold) 12%, transparent), color-mix(in srgb, var(--accent-amber) 6%, transparent))",
+            borderColor: "color-mix(in srgb, var(--accent-gold) 30%, transparent)",
+          }}
         >
           <div className="flex items-center justify-between gap-4">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
                 <Beer size={16} style={{ color: "var(--accent-gold)" }} />
-                <span className="text-xs font-mono uppercase tracking-widest" style={{ color: "var(--accent-gold)" }}>New</span>
+                <span
+                  className="text-[10px] font-mono uppercase tracking-widest"
+                  style={{ color: "var(--accent-gold)" }}
+                >
+                  New
+                </span>
               </div>
-              <p className="font-display text-lg font-bold text-[var(--text-primary)]">Plan a HopRoute</p>
-              <p className="text-sm text-[var(--text-secondary)]">AI-powered brewery crawl planner. Tell us where and when — we build your night.</p>
+              <p className="font-display text-lg font-bold text-[var(--text-primary)]">
+                Plan a HopRoute
+              </p>
+              <p className="text-sm text-[var(--text-secondary)]">
+                AI-powered brewery crawl planner. Tell us where and when — we
+                build your night.
+              </p>
             </div>
-            <div className="flex-shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center text-2xl" style={{ background: "color-mix(in srgb, var(--accent-gold) 15%, transparent)" }}>
+            <div
+              className="flex-shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center text-2xl"
+              style={{
+                background: "color-mix(in srgb, var(--accent-gold) 15%, transparent)",
+              }}
+            >
               🗺️
             </div>
           </div>
@@ -108,12 +139,7 @@ export function DiscoverTabContent({
       {/* Beer of the Week */}
       {communityContent.featuredBeers.length > 0 && (
         <div className="space-y-2">
-          <p
-            className="text-[10px] font-mono uppercase tracking-widest px-1"
-            style={{ color: "var(--accent-gold)" }}
-          >
-            Beer of the Week
-          </p>
+          <SectionLabel label="Beer of the Week" gold />
           <BeerOfTheWeekCard beer={communityContent.featuredBeers[0]} index={0} />
         </div>
       )}
@@ -133,12 +159,7 @@ export function DiscoverTabContent({
       {/* Upcoming events */}
       {communityContent.upcomingEvents.length > 0 && (
         <div className="space-y-2">
-          <p
-            className="text-[10px] font-mono uppercase tracking-widest px-1"
-            style={{ color: "var(--text-muted)" }}
-          >
-            Happening Soon
-          </p>
+          <SectionLabel label="Happening Soon" />
           {communityContent.upcomingEvents.slice(0, 3).map((event, i) => (
             <EventCard key={event.id} event={event} index={i} />
           ))}
@@ -148,12 +169,7 @@ export function DiscoverTabContent({
       {/* Community brewery reviews */}
       {communityContent.breweryReviews.length > 0 && (
         <div className="space-y-2">
-          <p
-            className="text-[10px] font-mono uppercase tracking-widest px-1"
-            style={{ color: "var(--text-muted)" }}
-          >
-            Community Reviews
-          </p>
+          <SectionLabel label="Community Reviews" />
           {communityContent.breweryReviews.slice(0, 4).map((review, i) => (
             <BreweryReviewCard key={review.id} review={review} index={i} />
           ))}
@@ -163,12 +179,7 @@ export function DiscoverTabContent({
       {/* New Breweries */}
       {communityContent.newBreweries && communityContent.newBreweries.length > 0 && (
         <div className="space-y-2">
-          <p
-            className="text-[10px] font-mono uppercase tracking-widest px-1"
-            style={{ color: "var(--text-muted)" }}
-          >
-            New on HopTrack
-          </p>
+          <SectionLabel label="New on HopTrack" />
           <div className="grid grid-cols-2 gap-2">
             {communityContent.newBreweries.slice(0, 6).map((brewery, i) => (
               <motion.div
@@ -180,16 +191,25 @@ export function DiscoverTabContent({
                 <Link href={`/brewery/${brewery.id}`}>
                   <div
                     className="p-3 rounded-xl h-full"
-                    style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
+                    style={{
+                      background: "var(--surface)",
+                      border: "1px solid var(--border)",
+                    }}
                   >
                     <div className="flex items-center gap-2 mb-1">
                       <span className="text-base">🍻</span>
-                      <p className="text-xs font-semibold truncate" style={{ color: "var(--text-primary)" }}>
+                      <p
+                        className="text-xs font-semibold truncate"
+                        style={{ color: "var(--text-primary)" }}
+                      >
                         {brewery.name}
                       </p>
                     </div>
                     {(brewery.city || brewery.state) && (
-                      <p className="text-[10px] truncate" style={{ color: "var(--text-muted)" }}>
+                      <p
+                        className="text-[10px] truncate"
+                        style={{ color: "var(--text-muted)" }}
+                      >
                         {[brewery.city, brewery.state].filter(Boolean).join(", ")}
                       </p>
                     )}
@@ -197,7 +217,8 @@ export function DiscoverTabContent({
                       <span
                         className="inline-block mt-1.5 text-[10px] font-mono px-2 py-0.5 rounded-full"
                         style={{
-                          background: "color-mix(in srgb, var(--accent-gold) 10%, transparent)",
+                          background:
+                            "color-mix(in srgb, var(--accent-gold) 10%, transparent)",
                           color: "var(--accent-gold)",
                         }}
                       >
@@ -227,9 +248,10 @@ export function DiscoverTabContent({
       )}
 
       {/* Curated Collections */}
-      {communityContent.curatedCollections && communityContent.curatedCollections.length > 0 && (
-        <CuratedCollectionsList collections={communityContent.curatedCollections} />
-      )}
+      {communityContent.curatedCollections &&
+        communityContent.curatedCollections.length > 0 && (
+          <CuratedCollectionsList collections={communityContent.curatedCollections} />
+        )}
     </div>
   );
 }
