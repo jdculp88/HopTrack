@@ -4,12 +4,65 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { MapPin, Beer, Star, Zap, Clock, Home } from "lucide-react";
+import { MapPin, Beer, Star, Zap, Clock, Home, Users } from "lucide-react";
 import { cn, formatRelativeTime } from "@/lib/utils";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import { SessionComments } from "@/components/social/SessionComments";
 import { ReactionBar } from "@/components/social/ReactionBar";
-import type { Session, BeerLog } from "@/types/database";
+import { ParticipantAvatars } from "@/components/session/ParticipantAvatars";
+import type { Session, BeerLog, SessionParticipant } from "@/types/database";
+
+// ── Photo strip for feed cards ───────────────────────────────────────────────
+
+interface SessionPhotoStripProps {
+  photos: { id: string; url: string; created_at: string }[];
+}
+
+function SessionPhotoStrip({ photos }: SessionPhotoStripProps) {
+  const MAX_VISIBLE = 3;
+  const visible = photos.slice(0, MAX_VISIBLE);
+  const overflow = photos.length - MAX_VISIBLE;
+
+  return (
+    <div
+      className="flex gap-2 overflow-x-auto px-4 pt-3 pb-1"
+      style={{ scrollbarWidth: "none" }}
+    >
+      {visible.map((photo, idx) => {
+        const isLast = idx === MAX_VISIBLE - 1 && overflow > 0;
+        return (
+          <div
+            key={photo.id}
+            className="relative flex-shrink-0 rounded-xl overflow-hidden"
+            style={{ width: 128, height: 128 }}
+          >
+            <Image
+              src={photo.url}
+              alt="Session photo"
+              fill
+              className="object-cover"
+              sizes="128px"
+            />
+            {isLast && (
+              <div
+                className="absolute inset-0 flex items-center justify-center text-sm font-semibold"
+                style={{
+                  background: "color-mix(in srgb, var(--bg) 60%, transparent)",
+                  color: "var(--text-primary)",
+                  backdropFilter: "blur(4px)",
+                }}
+              >
+                +{overflow} more
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ── Main card ────────────────────────────────────────────────────────────────
 
 interface SessionCardProps {
   session: Session & {
@@ -32,9 +85,10 @@ interface SessionCardProps {
   reactionCounts?: Record<string, number>;
   userReactions?: string[];
   commentCount?: number;
+  participants?: SessionParticipant[];
 }
 
-export function SessionCard({ session, currentUserId, className, reactionCounts, userReactions, commentCount }: SessionCardProps) {
+export function SessionCard({ session, currentUserId, className, reactionCounts, userReactions, commentCount, participants }: SessionCardProps) {
   const { profile, brewery, beer_logs } = session;
   const beerCount = beer_logs?.length ?? 0;
   const ratedLogs = (beer_logs ?? []).filter((l) => l.rating != null);
@@ -57,6 +111,18 @@ export function SessionCard({ session, currentUserId, className, reactionCounts,
 
   const isAtHome = session.context === "home" || !brewery;
 
+  // Group session helpers
+  const acceptedParticipants = (participants ?? []).filter((p) => p.status === "accepted");
+  const isGroupSession = acceptedParticipants.length > 0;
+  const groupLabel = (() => {
+    if (!isGroupSession) return null;
+    const names = acceptedParticipants.slice(0, 2).map((p) => p.profile?.display_name ?? p.profile?.username ?? "Someone");
+    const overflow = acceptedParticipants.length - 2;
+    const nameStr = names.join(", ") + (overflow > 0 ? ` and ${overflow} other${overflow > 1 ? "s" : ""}` : "");
+    const location = isAtHome ? "at home" : brewery ? `at ${brewery.name}` : "";
+    return `${nameStr} ${location}`.trim();
+  })();
+
   // Show 4 beers, expand if more
   const [expanded, setExpanded] = useState(false);
   const visibleLogs = expanded ? (beer_logs ?? []) : (beer_logs ?? []).slice(0, 4);
@@ -70,10 +136,18 @@ export function SessionCard({ session, currentUserId, className, reactionCounts,
 
   if (!profile) return null;
 
+  const cardLabel = isAtHome
+    ? `Session by ${profile.display_name ?? profile.username} at home`
+    : `${brewery?.name ?? "brewery"} session by ${profile.display_name ?? profile.username}`;
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0, y: 12 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-50px" }}
+      transition={{ type: "spring", stiffness: 400, damping: 30 }}
+      role="article"
+      aria-label={cardLabel}
       className={cn(
         "bg-[var(--surface)] rounded-2xl border border-[var(--border)] overflow-hidden",
         className
@@ -164,7 +238,7 @@ export function SessionCard({ session, currentUserId, className, reactionCounts,
                 >
                   <Beer size={12} className="flex-shrink-0" style={{ color: "var(--accent-gold)" }} />
                   <span
-                    className="text-sm font-medium flex-1 min-w-0 truncate"
+                    className="font-display text-sm font-semibold flex-1 min-w-0 truncate"
                     style={{ color: "var(--text-primary)" }}
                     title={beer?.name}
                   >
@@ -203,6 +277,24 @@ export function SessionCard({ session, currentUserId, className, reactionCounts,
             >
               Show {hiddenCount} more
             </button>
+          )}
+        </div>
+      )}
+
+      {/* Session photos strip */}
+      {(session.session_photos ?? []).length > 0 && (
+        <SessionPhotoStrip photos={session.session_photos!} />
+      )}
+
+      {/* Group session participants */}
+      {isGroupSession && (
+        <div className="px-4 pt-2 pb-1 flex items-center gap-2">
+          <Users size={12} style={{ color: "var(--text-muted)" }} className="flex-shrink-0" />
+          <ParticipantAvatars participants={acceptedParticipants} size="xs" maxShow={3} />
+          {groupLabel && (
+            <span className="text-xs truncate" style={{ color: "var(--text-muted)" }}>
+              {groupLabel}
+            </span>
           )}
         </div>
       )}

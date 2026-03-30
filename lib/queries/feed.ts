@@ -131,7 +131,8 @@ const SESSION_SELECT = `
   *,
   profile:profiles!sessions_user_id_fkey(id, username, display_name, avatar_url, current_streak),
   brewery:breweries!brewery_id(id, name, city, state),
-  beer_logs(id, beer_id, rating, flavor_tags, serving_style, comment, photo_url, logged_at, quantity, beer:beers(id, name, style, glass_type))
+  beer_logs(id, beer_id, rating, flavor_tags, serving_style, comment, photo_url, logged_at, quantity, beer:beers(id, name, style, glass_type)),
+  session_photos(id, url, created_at)
 `;
 
 const ONE_WEEK_AGO = () =>
@@ -151,7 +152,7 @@ export async function fetchFeedSessions(
       .from("sessions")
       .select(SESSION_SELECT)
       .in("user_id", feedUserIds)
-      .eq("share_to_feed", true)
+      .neq("share_to_feed", false)
       .eq("is_active", false)
       .order("started_at", { ascending: false })
       .limit(20);
@@ -175,7 +176,7 @@ export async function fetchActiveFriendSessions(
       .select(SESSION_SELECT)
       .in("user_id", friendIds)
       .eq("is_active", true)
-      .eq("share_to_feed", true)
+      .neq("share_to_feed", false)
       .order("started_at", { ascending: false })
       .limit(5);
     return (data as Session[]) ?? [];
@@ -232,7 +233,7 @@ export async function fetchCommunityContent(
   supabase: SupabaseClient,
   today: string,
   friendIds: string[]
-): Promise<CommunityContent & { friendRatings: any[] }> {
+): Promise<CommunityContent & { friendRatings: ReviewItem[] }> {
   const empty = {
     featuredBeers: [],
     topReviews: [],
@@ -371,7 +372,8 @@ export async function fetchSocialData(
     ]);
 
     // Compute style distribution for Taste DNA
-    const styleLogs = (styleLogsRes.data as any[]) ?? [];
+    type StyleLogRow = { rating: number | null; beer: { style: string | null } | null };
+    const styleLogs = (styleLogsRes.data ?? []) as StyleLogRow[];
     const styleMap: Record<
       string,
       { count: number; totalRating: number; ratedCount: number }
@@ -446,21 +448,24 @@ export async function fetchReactionData(
         .in("session_id", sessionIds),
     ]);
 
+    type ReactionRow = { session_id: string; type: string };
+    type CommentRow = { session_id: string };
+
     const reactionCounts: Record<string, Record<string, number>> = {};
-    for (const r of (countsRes.data ?? []) as any[]) {
+    for (const r of (countsRes.data ?? []) as ReactionRow[]) {
       if (!reactionCounts[r.session_id]) reactionCounts[r.session_id] = {};
       reactionCounts[r.session_id][r.type] =
         (reactionCounts[r.session_id][r.type] ?? 0) + 1;
     }
 
     const userReactions: Record<string, string[]> = {};
-    for (const r of (userReactionsRes.data ?? []) as any[]) {
+    for (const r of (userReactionsRes.data ?? []) as ReactionRow[]) {
       if (!userReactions[r.session_id]) userReactions[r.session_id] = [];
       userReactions[r.session_id].push(r.type);
     }
 
     const commentCounts: Record<string, number> = {};
-    for (const c of (commentsRes.data ?? []) as any[]) {
+    for (const c of (commentsRes.data ?? []) as CommentRow[]) {
       commentCounts[c.session_id] = (commentCounts[c.session_id] ?? 0) + 1;
     }
 
@@ -504,26 +509,34 @@ export async function fetchFriendActivity(
     ]);
 
     // Transform 5-star reviews into "new favorite" feed items
+    type NewFavoriteRow = { // supabase join
+      id: string;
+      rating: number;
+      created_at: string;
+      beer: { id: string; name: string; style: string | null; brewery: { id: string; name: string } | null } | null;
+      profile: { id: string; username: string; display_name: string | null; avatar_url: string | null } | null;
+    };
     const newFavorites: NewFavoriteItem[] = (
-      (newFavoritesRes.data ?? []) as any[]
+      (newFavoritesRes.data ?? []) as NewFavoriteRow[]
     )
-      .filter((r: any) => r.profile && r.beer)
-      .map((r: any) => ({
+      .filter((r) => r.profile && r.beer)
+      .map((r) => ({
         id: r.id,
-        userId: r.profile.id,
-        username: r.profile.username,
-        displayName: r.profile.display_name,
-        avatarUrl: r.profile.avatar_url,
-        beerName: r.beer.name,
-        beerStyle: r.beer.style,
-        breweryName: r.beer.brewery?.name ?? "",
+        userId: r.profile!.id,
+        username: r.profile!.username,
+        displayName: r.profile!.display_name ?? r.profile!.username,
+        avatarUrl: r.profile!.avatar_url,
+        beerName: r.beer!.name,
+        beerStyle: r.beer!.style ?? "",
+        breweryName: r.beer!.brewery?.name ?? "",
         createdAt: r.created_at,
         likes: 0,
       }));
 
     // Transform recent friendships into "friend joined" feed items
-    const recentFriendships = (recentFriendshipsRes.data ?? []) as any[];
-    const recentFriendshipIds = recentFriendships.map((f: any) =>
+    type FriendshipRow = { id: string; created_at: string; requester_id: string; addressee_id: string };
+    const recentFriendships = (recentFriendshipsRes.data ?? []) as FriendshipRow[];
+    const recentFriendshipIds = recentFriendships.map((f) =>
       f.requester_id === userId ? f.addressee_id : f.requester_id
     );
 
@@ -535,9 +548,10 @@ export async function fetchFriendActivity(
         .in("id", recentFriendshipIds)
         .limit(5);
 
-      friendsJoined = ((joinedProfiles ?? []) as any[]).map((p: any) => {
+      type JoinedProfileRow = { id: string; username: string; display_name: string | null; avatar_url: string | null; created_at: string };
+      friendsJoined = ((joinedProfiles ?? []) as JoinedProfileRow[]).map((p) => {
         const fship = recentFriendships.find(
-          (f: any) => f.requester_id === p.id || f.addressee_id === p.id
+          (f) => f.requester_id === p.id || f.addressee_id === p.id
         );
         return {
           id: p.id,
@@ -579,8 +593,9 @@ export async function fetchActivityHeatmap(
 
     if (!logs || logs.length === 0) return [];
 
+    type HeatmapLogRow = { logged_at: string; quantity: number | null };
     const dayMap = new Map<string, number>();
-    for (const log of logs as any[]) {
+    for (const log of logs as HeatmapLogRow[]) {
       const date = new Date(log.logged_at).toISOString().split("T")[0];
       dayMap.set(date, (dayMap.get(date) || 0) + (log.quantity ?? 1));
     }
@@ -602,7 +617,8 @@ export async function fetchFriendIds(
       .or(`requester_id.eq.${userId},addressee_id.eq.${userId}`)
       .eq("status", "accepted");
 
-    return ((friendships ?? []) as any[]).map((f: any) =>
+    type FriendshipRow = { requester_id: string; addressee_id: string };
+    return ((friendships ?? []) as FriendshipRow[]).map((f) =>
       f.requester_id === userId ? f.addressee_id : f.requester_id
     );
   } catch {

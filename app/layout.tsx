@@ -1,7 +1,8 @@
 import type { Metadata, Viewport } from "next";
-import { Playfair_Display, Instrument_Sans, JetBrains_Mono } from "next/font/google";
+import { Playfair_Display, DM_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
+import { MotionConfig } from "framer-motion";
 import Script from "next/script";
 
 const playfair = Playfair_Display({
@@ -9,12 +10,14 @@ const playfair = Playfair_Display({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700", "800", "900"],
   style: ["normal", "italic"],
+  display: "swap",
 });
 
-const instrumentSans = Instrument_Sans({
-  variable: "--font-instrument",
+const dmSans = DM_Sans({
+  variable: "--font-dm-sans",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
+  display: "swap",
 });
 
 const jetbrainsMono = JetBrains_Mono({
@@ -32,13 +35,14 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://hoptrack.beer"),
   title: {
     default: "HopTrack — Track Every Pour",
     template: "%s | HopTrack",
   },
   description:
-    "The social brewery and beer tracking app. Track sessions, rate, compete, and discover the world's best craft beers.",
-  keywords: ["beer", "brewery", "craft beer", "tracking", "session", "social"],
+    "The social brewery and beer tracking app. Track sessions, rate beers, earn XP, and discover the best craft breweries near you.",
+  keywords: ["beer", "brewery", "craft beer", "beer tracking", "beer check-in", "brewery loyalty", "tap list", "beer app"],
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
@@ -53,9 +57,27 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     siteName: "HopTrack",
+    locale: "en_US",
     title: "HopTrack — Track Every Pour",
     description:
-      "The social brewery and beer tracking app. Check in, rate, compete, and discover.",
+      "The social brewery and beer tracking app. Track sessions, rate beers, earn XP, and discover the best craft breweries near you.",
+    url: "https://hoptrack.beer",
+    images: [
+      {
+        url: "/og?type=home",
+        width: 1200,
+        height: 630,
+        alt: "HopTrack — Track Every Pour",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    site: "@hoptrack",
+    title: "HopTrack — Track Every Pour",
+    description:
+      "The social brewery and beer tracking app. Track sessions, rate beers, earn XP, and discover the best craft breweries near you.",
+    images: ["/og?type=home"],
   },
 };
 
@@ -67,12 +89,14 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${playfair.variable} ${instrumentSans.variable} ${jetbrainsMono.variable}`}
+      className={`${playfair.variable} ${dmSans.variable} ${jetbrainsMono.variable}`}
     >
       <body className="min-h-screen antialiased" suppressHydrationWarning>
-        <ThemeProvider>
-          {children}
-        </ThemeProvider>
+        <MotionConfig reducedMotion="user">
+          <ThemeProvider>
+            {children}
+          </ThemeProvider>
+        </MotionConfig>
         <Script
           id="sw-registration"
           strategy="afterInteractive"

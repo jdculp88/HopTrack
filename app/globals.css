@@ -13,7 +13,7 @@
  *
  * TYPOGRAPHY
  *   Display:  Playfair Display — editorial serif, italic contrast, 80-108px heroes
- *   Body:     Instrument Sans  — humanist, refined
+ *   Body:     DM Sans          — clean, modern, legible
  *   Mono:     JetBrains Mono   — labels, stats, data
  *
  * LAYOUT
@@ -31,7 +31,7 @@
   --border:          #3A3628;
   --text-primary:    #F5F0E8;
   --text-secondary:  #A89F8C;
-  --text-muted:      #6B6456;
+  --text-muted:      #8B7D6E;
   --accent-gold:     #D4A843;
   --accent-amber:    #E8841A;
   --accent-green:    #2D5A3D;
@@ -51,7 +51,7 @@
   --border:          #E5DDD0;
   --text-primary:    #1A1714;
   --text-secondary:  #6B5E4E;
-  --text-muted:      #9E8E7A;
+  --text-muted:      #6E5E4E;
   --accent-gold:     #C49A35;
   --accent-amber:    #D4730E;
   --accent-green:    #2D5A3D;
@@ -188,7 +188,16 @@ body {
 ::selection { background: rgba(212,168,67,0.25); color: var(--text-primary); }
 
 /* ── Focus ────────────────────────────────────────────────────────────────── */
-:focus-visible { outline: 2px solid var(--accent-gold); outline-offset: 2px; border-radius: 4px; }
+/* Keyboard users: gold outline ring */
+:focus-visible {
+  outline: 2px solid var(--accent-gold);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+/* Mouse/touch users: suppress outline (browser default can be jarring) */
+:focus:not(:focus-visible) {
+  outline: none;
+}
 
 /* ── Tap highlight ────────────────────────────────────────────────────────── */
 * { -webkit-tap-highlight-color: transparent; }
@@ -247,7 +256,7 @@ body {
   --border:          #3A3628 !important;
   --text-primary:    #F5F0E8 !important;
   --text-secondary:  #A89F8C !important;
-  --text-muted:      #6B6456 !important;
+  --text-muted:      #8B7D6E !important;
   --accent-gold:     #D4A843 !important;
   --accent-amber:    #E8841A !important;
   --accent-green:    #2D5A3D !important;
@@ -299,3 +308,12 @@ body {
 
 /* ── Font size floor (16px prevents iOS zoom on inputs) ──────────────────── */
 input, select, textarea { font-size: max(16px, 1em); }
+
+/* ── Reduced motion — respect OS accessibility preference ────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
