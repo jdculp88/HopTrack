@@ -153,8 +153,11 @@ export function YouTabContent({
       {activityHeatmap && activityHeatmap.length > 0 && (
         <div
           className="rounded-2xl p-4"
-          style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
+          style={{ background: "var(--surface-warm)", border: "1px solid var(--surface-warm-border)" }}
         >
+          <p className="text-[10px] font-mono uppercase tracking-widest mb-3" style={{ color: "var(--text-muted)" }}>
+            Activity
+          </p>
           <ActivityHeatmap data={activityHeatmap} compact />
         </div>
       )}
@@ -224,7 +227,10 @@ export function YouTabContent({
 
       {/* Recent achievements */}
       {userAchievements && userAchievements.length > 0 && (
-        <div className="space-y-3">
+        <div
+          className="rounded-2xl p-4 space-y-3"
+          style={{ background: "var(--surface-warm)", border: "1px solid var(--surface-warm-border)" }}
+        >
           <div className="flex items-center justify-between">
             <p className="text-[10px] font-mono uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
               Recent Achievements
@@ -271,7 +277,7 @@ export function YouTabContent({
                 <Link key={item.id} href={`/beer/${item.beer.id}`}>
                   <div
                     className="flex items-center gap-3 p-3 rounded-xl"
-                    style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
+                    style={{ background: "var(--surface-warm)", border: "1px solid var(--surface-warm-border)" }}
                   >
                     <div
                       className="w-8 h-8 rounded-lg flex items-center justify-center text-lg flex-shrink-0"
@@ -317,7 +323,7 @@ export function YouTabContent({
               <Link key={b.id} href={`/brewery/${b.id}`}>
                 <div
                   className="p-3 rounded-xl"
-                  style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
+                  style={{ background: "var(--surface-warm)", border: "1px solid var(--surface-warm-border)" }}
                 >
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-base">🍻</span>
@@ -362,8 +368,8 @@ export function YouTabContent({
                 <motion.div
                   whileHover={{ x: 2 }}
                   transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                  className="flex items-center gap-3 p-3 rounded-xl border transition-colors"
-                  style={{ background: "var(--surface)", borderColor: "var(--border)" }}
+                  className="flex items-center gap-3 p-3 rounded-xl transition-colors"
+                  style={{ background: "var(--surface-warm)", border: "1px solid var(--surface-warm-border)" }}
                 >
                   <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "color-mix(in srgb, var(--accent-gold) 12%, transparent)", color: "var(--accent-gold)" }}>
                     🗺️

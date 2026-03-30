@@ -226,8 +226,8 @@ export function SeasonalBeersScroll({ beers }: { beers: SeasonalBeer[] }) {
             transition={{ delay: i * 0.05, duration: 0.25 }}
             className="rounded-xl p-3.5 flex-shrink-0 relative"
             style={{
-              background: 'var(--surface)',
-              border: '1px solid var(--border)',
+              background: 'var(--surface-warm)',
+              border: '1px solid var(--surface-warm-border)',
               minWidth: 140,
               maxWidth: 160,
             }}

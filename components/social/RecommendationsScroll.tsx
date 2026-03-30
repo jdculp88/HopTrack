@@ -48,10 +48,10 @@ export function RecommendationsScroll({ beers }: { beers: RecommendedBeer[] }) {
           >
             <Link href={`/beer/${beer.id}`}>
               <div
-                className="w-[160px] p-3 rounded-xl h-full transition-all hover:border-[var(--accent-gold)]/30"
+                className="w-[160px] p-3 rounded-xl h-full transition-all"
                 style={{
-                  background: "var(--surface)",
-                  border: "1px solid var(--border)",
+                  background: "var(--surface-warm)",
+                  border: "1px solid var(--surface-warm-border)",
                 }}
               >
                 <p
