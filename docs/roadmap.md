@@ -1,7 +1,7 @@
 # HopTrack Product Roadmap
-**Last updated:** 2026-03-29
+**Last updated:** 2026-03-30
 **PM:** Morgan
-**Current Sprint:** Sprint 30 — Foundation Fix (not started)
+**Current Sprint:** Sprint 41 — Crystal Clear (starting)
 
 > This is a living document -- updated every sprint. For completed sprints 1-12, see `docs/roadmap-archive.md`.
 
@@ -109,16 +109,72 @@ ReactionBar component (cheers toggle + comment count + share). Reaction counts A
 
 ---
 
-## Sprint 30 -- Foundation Fix (NOT STARTED)
+## Sprint 30 -- Foundation Fix (COMPLETE)
 **Theme:** Kill every P0, fix the RLS layer, ship a product that actually works
-**Plan:** `docs/sprint-30-plan.md`
-**Source:** `docs/sprint-30-testing-audit.md` (12 P0 ship-blockers identified)
+**Plan:** `docs/sprint-30-plan.md` | **Retro:** `docs/retros/sprint-29-retro.md`
+
+85-issue testing audit. 12 P0s + 20 P1s killed. Hardcoded color sweep. `timeAgo` consolidation. Migrations 034-035.
 
 ---
 
-## Sprint 31 -- Launch Polish (PLANNED)
+## Sprint 31 -- Launch Polish (COMPLETE)
 **Theme:** P1 cleanup, code quality, revenue readiness
-**Plan:** `docs/sprint-31-plan.md`
+**Plan:** `docs/sprint-31-plan.md` | **Retro:** `docs/retros/sprint-31-retro.md`
+
+HomeFeed split (1318→6 files), ReactionContext, feed queries to `lib/queries/feed.ts`, infinite scroll, password reset, username uniqueness, billing page, brewery onboarding, XP atomic RPC, session-end batch rewrite, Playwright scaffolded. Migrations 034-036.
+
+---
+
+## Sprint 32 -- The Vibe (COMPLETE)
+**Plan:** `docs/sprint-32-plan.md` | **Retro:** `docs/retros/sprint-32-retro.md`
+
+Brewery follows, recommendation engine, activity heatmap, cheers animations, geolocation, notification grouping, customer insights page, session photos, session complete redesign. Migration 037.
+
+---
+
+## Sprint 33 -- The Recap (COMPLETE)
+**Plan:** `docs/sprint-33-plan.md`
+
+Session recap v3 (cream reskin), mobile branding header, beer stats in recap, session photos carousel, `/api/beer-logs/stats` endpoint.
+
+---
+
+## Sprints 34-36 -- Own Your Data / Social Layer / Close the Loop (COMPLETE)
+**Plans:** `docs/sprint-34-plan.md` through `docs/sprint-36-plan.md`
+
+Customer export CSV, superfans VIP highlight, tap list performance analytics, referral system, group sessions V1, HopTrack Report page, beer lists (tables), @ mentions, wishlist-to-tap matching, brewery leaderboard.
+
+---
+
+## Sprint 37 -- Grow Together (COMPLETE)
+**Plan:** `docs/sprint-37-plan.md`
+
+Referrals, group sessions V1, HopTrack Report page, beer list URLs. Migrations 038-039.
+
+---
+
+## Sprints 38-40 -- Audit & Harden / HopRoute Phase 1 / HopRoute Live (COMPLETE)
+**Plans:** `docs/sprint-38-plan.md` through `docs/sprint-40-plan.md` | **Retro:** `docs/retros/sprint-38-40-retro.md`
+
+10 audit fixes (XP race condition, N+1 mentions, friendship validation, rate limits on 4 endpoints, leaderboard page). HopRoute AI-powered brewery crawl planner end-to-end (generate → live mode → achievements). Brewery promotions tab (vibe tags, sponsored stops). Migrations 040-041.
+
+---
+
+## Sprints 41-50 -- Make It Crisp (PLANNED)
+**Master Plan:** `docs/sprint-41-50-master-plan.md`
+
+| Sprint | Theme | One-Liner |
+|--------|-------|-----------|
+| **41** | Crystal Clear | Fix HopRoute data, seed 60+ real breweries, visual cohesion audit |
+| **42** | Smooth Operator | Workflow polish, every user action intuitive, onboarding redesign |
+| **43** | The Dashboard | Brewery admin = sales demo, customer messaging, review responses |
+| **44** | Lock It Down | E2E tests, rate limit expansion, edge functions, Supabase type gen |
+| **45** | Social Glue | Beer lists UI, group sessions UI, brewery leaderboard on Board |
+| **46** | Revenue Ready | Stripe integration, trial conversion, sales demo mode |
+| **47** | The Feel | Micro-interactions, animations, accessibility audit |
+| **48** | Smart & Personal | Recommendation engine v2, insights, personalization |
+| **49** | Scale Prep | Query audit, caching, multi-tenant security, staging env |
+| **50** | Ship It | Launch checklist, App Store, first 10 breweries, launch party |
 
 ---
 
@@ -134,10 +190,14 @@ ReactionBar component (cheers toggle + comment count + share). Reaction counts A
 | Full Web Push (VAPID keys + push) | COMPLETE (S16) |
 | Supabase Storage buckets + RLS | COMPLETE (S23) |
 | Realtime subscriptions (TV display) | COMPLETE (S16) |
-| 33 migrations applied (001-033) | COMPLETE (S29) |
-| Staging Supabase project | Planned |
-| Supabase Edge Functions | Planned |
-| Email (Resend integration) | Planned |
+| 43 migrations applied (001-043) | COMPLETE (S41) |
+| Rate limiting (in-memory, 6 endpoints) | COMPLETE (S38) |
+| Supabase type generation | Planned (S44) |
+| Staging Supabase project | Planned (S49) |
+| Supabase Edge Functions (session-end) | Planned (S44) |
+| Email (Resend integration) | Planned (S43) |
+| Stripe billing integration | Planned (S46) |
+| CI/CD (GitHub Actions) | Planned (S44) |
 
 ---
 
@@ -215,7 +275,15 @@ ReactionBar component (cheers toggle + comment count + share). Reaction counts A
 | REQ-042 | Error Boundaries + Sentry | COMPLETE | S15-S23 |
 | REQ-043 | Onboarding Card | COMPLETE | S15-S25 |
 
-**Score:** 41 of 43 requirements COMPLETE. 2 IN PROGRESS (PWA TestFlight, staging infra).
+| REQ-044 | HopRoute AI Crawl Planner | COMPLETE | S39-S40 |
+| REQ-045 | Customer Export + Superfans | COMPLETE | S34-S36 |
+| REQ-046 | Brewery Leaderboard | COMPLETE | S38 |
+| REQ-047 | Referral System | COMPLETE | S37 |
+| REQ-048 | Group Sessions V1 | COMPLETE | S37 |
+| REQ-049 | Beer Lists (tables) | COMPLETE | S37 |
+| REQ-050 | @ Mentions | COMPLETE | S37 |
+
+**Score:** 48 of 50 requirements COMPLETE. 2 IN PROGRESS (PWA TestFlight, staging infra).
 
 ---
 

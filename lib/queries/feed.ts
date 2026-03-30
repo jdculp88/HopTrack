@@ -2,14 +2,12 @@
  * Feed data queries — extracted from home/page.tsx (S31-006)
  *
  * Each function accepts a Supabase client + params, handles its own errors
- * (returns empty/default data on failure), and uses `as any` where needed
- * until proper Supabase type generation is set up.
+ * (returns empty/default data on failure). The Supabase client is untyped
+ * (no codegen), so query results are typed via local interfaces.
  */
 
-import type { Session } from "@/types/database";
-
-// ── Supabase client type (untyped until codegen) ────────────────────────────
-type SupabaseClient = any;
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Session, Achievement, Beer, Brewery, Profile } from "@/types/database";
 
 // ── Return types ────────────────────────────────────────────────────────────
 
@@ -19,18 +17,82 @@ export interface WeekStats {
   uniqueBreweries: number;
 }
 
+export interface FeaturedBeer {
+  id: string;
+  name: string;
+  style: string | null;
+  abv: number | null;
+  glass_type: string | null;
+  description: string | null;
+  brewery: { id: string; name: string } | null;
+}
+
+export interface ReviewItem {
+  id: string;
+  rating: number;
+  comment: string | null;
+  created_at: string;
+  beer?: { id: string; name: string; style: string | null; glass_type?: string | null };
+  brewery?: { id: string; name: string; city: string | null; state: string | null };
+  profile: { id: string; username: string; display_name: string | null; avatar_url: string | null } | null;
+}
+
+export interface EventItem {
+  id: string;
+  title: string;
+  description: string | null;
+  event_date: string;
+  start_time: string | null;
+  brewery: { id: string; name: string } | null;
+}
+
+export interface NewBreweryItem {
+  id: string;
+  name: string;
+  city: string | null;
+  state: string | null;
+  type: string | null;
+  created_at: string;
+}
+
 export interface CommunityContent {
-  featuredBeers: any[];
-  topReviews: any[];
-  breweryReviews: any[];
-  upcomingEvents: any[];
-  newBreweries: any[];
+  featuredBeers: FeaturedBeer[];
+  topReviews: ReviewItem[];
+  breweryReviews: ReviewItem[];
+  upcomingEvents: EventItem[];
+  newBreweries: NewBreweryItem[];
+}
+
+export interface FriendAchievementItem {
+  id: string;
+  earned_at: string;
+  achievement: Pick<Achievement, "id" | "name" | "icon" | "tier" | "category" | "xp_reward"> | null;
+  profile: { id: string; username: string; display_name: string | null; avatar_url: string | null } | null;
+}
+
+export interface UserAchievementItem {
+  id: string;
+  earned_at: string;
+  achievement: Pick<Achievement, "id" | "name" | "icon" | "tier" | "category" | "xp_reward"> | null;
+}
+
+export interface WishlistFeedItem {
+  id: string;
+  created_at: string;
+  note: string | null;
+  beer: {
+    id: string;
+    name: string;
+    style: string | null;
+    abv: number | null;
+    brewery: { id: string; name: string } | null;
+  } | null;
 }
 
 export interface SocialData {
-  friendAchievements: any[];
-  userAchievements: any[];
-  wishlist: any[];
+  friendAchievements: FriendAchievementItem[];
+  userAchievements: UserAchievementItem[];
+  wishlist: WishlistFeedItem[];
   styleDNA: { style: string; count: number; avgRating: number | null }[];
 }
 
@@ -85,7 +147,7 @@ export async function fetchFeedSessions(
   feedUserIds: string[]
 ): Promise<Session[]> {
   try {
-    const { data } = await (supabase as any)
+    const { data } = await supabase
       .from("sessions")
       .select(SESSION_SELECT)
       .in("user_id", feedUserIds)
@@ -108,7 +170,7 @@ export async function fetchActiveFriendSessions(
 ): Promise<Session[]> {
   if (friendIds.length === 0) return [];
   try {
-    const { data } = await (supabase as any)
+    const { data } = await supabase
       .from("sessions")
       .select(SESSION_SELECT)
       .in("user_id", friendIds)
@@ -131,23 +193,23 @@ export async function fetchWeekStats(
 ): Promise<WeekStats> {
   try {
     const [sessionsRes, logsRes] = await Promise.all([
-      (supabase as any)
+      supabase
         .from("sessions")
         .select("id, brewery_id")
         .eq("user_id", userId)
         .eq("is_active", false)
         .gte("started_at", ONE_WEEK_AGO()),
-      (supabase as any)
+      supabase
         .from("beer_logs")
         .select("id, quantity")
         .eq("user_id", userId)
         .gte("logged_at", ONE_WEEK_AGO()),
     ]);
 
-    const weekSessions = (sessionsRes.data as any[]) ?? [];
-    const weekLogs = (logsRes.data as any[]) ?? [];
+    const weekSessions: { id: string; brewery_id: string | null }[] = sessionsRes.data ?? [];
+    const weekLogs: { id: string; quantity: number }[] = logsRes.data ?? [];
     const beers = weekLogs.reduce(
-      (sum: number, l: any) => sum + (l.quantity ?? 1),
+      (sum, l) => sum + (l.quantity ?? 1),
       0
     );
 
@@ -155,7 +217,7 @@ export async function fetchWeekStats(
       sessions: weekSessions.length,
       beers,
       uniqueBreweries: new Set(
-        weekSessions.map((s: any) => s.brewery_id).filter(Boolean)
+        weekSessions.map((s) => s.brewery_id).filter(Boolean)
       ).size,
     };
   } catch {
@@ -189,7 +251,7 @@ export async function fetchCommunityContent(
       upcomingEventsRes,
       newBreweriesRes,
     ] = await Promise.all([
-      (supabase as any)
+      supabase
         .from("beers")
         .select(
           "id, name, style, abv, glass_type, description, brewery:breweries(id, name)"
@@ -198,7 +260,7 @@ export async function fetchCommunityContent(
         .eq("is_active", true)
         .limit(3),
 
-      (supabase as any)
+      supabase
         .from("beer_reviews")
         .select(
           "id, rating, comment, created_at, beer:beers(id, name, style, glass_type), profile:profiles(id, username, display_name, avatar_url)"
@@ -207,7 +269,7 @@ export async function fetchCommunityContent(
         .order("created_at", { ascending: false })
         .limit(10),
 
-      (supabase as any)
+      supabase
         .from("brewery_reviews")
         .select(
           "id, rating, comment, created_at, brewery:breweries(id, name, city, state), profile:profiles(id, username, display_name, avatar_url)"
@@ -216,7 +278,7 @@ export async function fetchCommunityContent(
         .limit(8),
 
       friendIds.length > 0
-        ? (supabase as any)
+        ? supabase
             .from("beer_reviews")
             .select(
               "id, rating, comment, created_at, beer:beers(id, name, style), profile:profiles(id, username, display_name, avatar_url)"
@@ -226,7 +288,7 @@ export async function fetchCommunityContent(
             .limit(15)
         : Promise.resolve({ data: [] }),
 
-      (supabase as any)
+      supabase
         .from("brewery_events")
         .select(
           "id, title, description, event_date, start_time, brewery:breweries(id, name)"
@@ -236,7 +298,7 @@ export async function fetchCommunityContent(
         .order("event_date", { ascending: true })
         .limit(5),
 
-      (supabase as any)
+      supabase
         .from("breweries")
         .select("id, name, city, state, type, created_at")
         .eq("is_active", true)
@@ -273,7 +335,7 @@ export async function fetchSocialData(
       styleLogsRes,
     ] = await Promise.all([
       friendIds.length > 0
-        ? (supabase as any)
+        ? supabase
             .from("user_achievements")
             .select(
               "id, earned_at, achievement:achievements(id, name, icon, tier, category, xp_reward), profile:profiles(id, username, display_name, avatar_url)"
@@ -283,7 +345,7 @@ export async function fetchSocialData(
             .limit(10)
         : Promise.resolve({ data: [] }),
 
-      (supabase as any)
+      supabase
         .from("user_achievements")
         .select(
           "id, earned_at, achievement:achievements(id, name, icon, tier, category, xp_reward)"
@@ -292,7 +354,7 @@ export async function fetchSocialData(
         .order("earned_at", { ascending: false })
         .limit(5),
 
-      (supabase as any)
+      supabase
         .from("wishlist")
         .select(
           "id, created_at, note, beer:beers(id, name, style, abv, brewery:breweries(id, name))"
@@ -301,7 +363,7 @@ export async function fetchSocialData(
         .order("created_at", { ascending: false })
         .limit(10),
 
-      (supabase as any)
+      supabase
         .from("beer_logs")
         .select("rating, beer:beers(style)")
         .eq("user_id", userId)
@@ -369,16 +431,16 @@ export async function fetchReactionData(
 
   try {
     const [countsRes, userReactionsRes, commentsRes] = await Promise.all([
-      (supabase as any)
+      supabase
         .from("reactions")
         .select("session_id, type")
         .in("session_id", sessionIds),
-      (supabase as any)
+      supabase
         .from("reactions")
         .select("session_id, type")
         .eq("user_id", userId)
         .in("session_id", sessionIds),
-      (supabase as any)
+      supabase
         .from("session_comments")
         .select("session_id")
         .in("session_id", sessionIds),
@@ -421,7 +483,7 @@ export async function fetchFriendActivity(
 
   try {
     const [newFavoritesRes, recentFriendshipsRes] = await Promise.all([
-      (supabase as any)
+      supabase
         .from("beer_reviews")
         .select(
           "id, rating, created_at, beer:beers(id, name, style, brewery:breweries(id, name)), profile:profiles(id, username, display_name, avatar_url)"
@@ -431,7 +493,7 @@ export async function fetchFriendActivity(
         .order("created_at", { ascending: false })
         .limit(5),
 
-      (supabase as any)
+      supabase
         .from("friendships")
         .select("id, created_at, requester_id, addressee_id")
         .or(`requester_id.eq.${userId},addressee_id.eq.${userId}`)
@@ -467,7 +529,7 @@ export async function fetchFriendActivity(
 
     let friendsJoined: FriendJoinedItem[] = [];
     if (recentFriendshipIds.length > 0) {
-      const { data: joinedProfiles } = await (supabase as any)
+      const { data: joinedProfiles } = await supabase
         .from("profiles")
         .select("id, username, display_name, avatar_url, created_at")
         .in("id", recentFriendshipIds)
@@ -509,7 +571,7 @@ export async function fetchActivityHeatmap(
     const oneYearAgo = new Date();
     oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
 
-    const { data: logs } = await (supabase as any)
+    const { data: logs } = await supabase
       .from("beer_logs")
       .select("logged_at, quantity")
       .eq("user_id", userId)

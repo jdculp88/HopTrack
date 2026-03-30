@@ -63,10 +63,9 @@ export async function POST(request: Request) {
   const breweryIds = nearbyBreweries.map((b: any) => b.id);
   const { data: beers } = await (supabase as any)
     .from("beers")
-    .select("id, name, style, brewery_id, avg_rating")
+    .select("id, name, style, brewery_id")
     .in("brewery_id", breweryIds)
-    .eq("is_active", true)
-    .order("avg_rating", { ascending: false });
+    .eq("is_on_tap", true);
 
   const beersByBrewery = new Map<string, any[]>();
   for (const beer of beers ?? []) {
@@ -162,6 +161,8 @@ export async function POST(request: Request) {
 
   const { system, user: userMsg } = buildHopRoutePrompt(hopRouteInput);
 
+  console.log(`[HopRoute] ${nearbyBreweries.length} breweries found near ${location.city}, ${beers?.length ?? 0} beers on tap`);
+
   let aiOutput: HopRouteOutput;
   try {
     const message = await anthropic.messages.create({
@@ -176,7 +177,7 @@ export async function POST(request: Request) {
     const clean = text.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "").trim();
     aiOutput = JSON.parse(clean) as HopRouteOutput;
   } catch (err) {
-    console.error("HopRoute AI error:", err);
+    console.error("[HopRoute] AI error:", err);
     return NextResponse.json({ error: "Failed to generate route. Please try again." }, { status: 502 });
   }
 
