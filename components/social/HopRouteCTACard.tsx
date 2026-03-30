@@ -4,82 +4,82 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { Map, Route } from "lucide-react";
 
-export function HopRouteCTACard({ index = 0 }: { index?: number }) {
-  void index; // used for future stagger if needed
+export interface FriendActiveRoute {
+  routeId: string;
+  friendName: string;
+  friendUsername: string;
+  routeTitle: string;
+  currentStop: number;
+  totalStops: number;
+}
+
+export function HopRouteCTACard({ route, index = 0 }: { route: FriendActiveRoute; index?: number }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-50px" }}
-      transition={{ type: "spring", stiffness: 400, damping: 30 }}
-      className="rounded-2xl p-5 relative overflow-hidden"
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.03, duration: 0.25 }}
+      className="rounded-2xl p-4 relative overflow-hidden"
       style={{
-        background:
-          "linear-gradient(135deg, color-mix(in srgb, var(--accent-gold) 12%, var(--surface)), color-mix(in srgb, var(--accent-amber) 6%, var(--surface)))",
-        border:
-          "1px solid color-mix(in srgb, var(--accent-gold) 25%, var(--border))",
+        background: "linear-gradient(135deg, color-mix(in srgb, var(--accent-gold) 13%, var(--surface)), color-mix(in srgb, var(--accent-amber) 5%, var(--surface)))",
+        border: "1px solid color-mix(in srgb, var(--accent-gold) 28%, var(--border))",
       }}
     >
-      {/* Bubble decorations */}
-      {/* Large — top-right */}
-      <div
-        className="absolute -top-4 -right-4 w-24 h-24 rounded-full pointer-events-none"
-        style={{ background: "var(--accent-gold)", opacity: 0.07 }}
-      />
-      {/* Medium — bottom-left */}
-      <div
-        className="absolute -bottom-3 -left-3 w-16 h-16 rounded-full pointer-events-none"
-        style={{ background: "var(--accent-amber)", opacity: 0.05 }}
-      />
-      {/* Small — mid-right */}
-      <div
-        className="absolute top-1/2 -right-2 w-8 h-8 rounded-full pointer-events-none"
-        style={{ background: "var(--accent-gold)", opacity: 0.08 }}
-      />
+      {/* 3 bubbles: large top-right, medium bottom-left, small mid */}
+      <div className="absolute -top-4 -right-4 w-20 h-20 rounded-full pointer-events-none" style={{ background: "var(--accent-gold)", opacity: 0.07 }} />
+      <div className="absolute -bottom-3 -left-3 w-14 h-14 rounded-full pointer-events-none" style={{ background: "var(--accent-amber)", opacity: 0.05 }} />
+      <div className="absolute top-1/2 right-8 w-5 h-5 rounded-full pointer-events-none" style={{ background: "var(--accent-gold)", opacity: 0.08 }} />
 
-      {/* Content */}
-      <div className="relative z-10">
-        {/* Top row: icon + label */}
-        <div className="flex items-center gap-2 mb-2">
-          <Map
-            size={18}
-            strokeWidth={1.5}
-            style={{ color: "var(--accent-gold)" }}
-          />
-          <span
-            className="text-[10px] font-mono uppercase tracking-widest"
-            style={{ color: "var(--accent-gold)" }}
-          >
-            HopRoute
-          </span>
-        </div>
-
-        {/* Heading */}
-        <p
-          className="font-display text-lg font-bold"
-          style={{ color: "var(--text-primary)" }}
-        >
-          Ready for a crawl?
-        </p>
-
-        {/* Subtext */}
-        <p className="text-sm mt-0.5" style={{ color: "var(--text-muted)" }}>
-          Let AI plan your perfect brewery route.
-        </p>
-
-        {/* CTA button */}
-        <Link
-          href="/hop-route/new"
-          className="inline-flex items-center gap-2 mt-3 px-4 py-2 rounded-xl text-sm font-semibold"
-          style={{
-            background: "var(--accent-gold)",
-            color: "var(--bg)",
-          }}
-        >
-          <Route size={14} />
-          Plan a HopRoute
-        </Link>
+      {/* Live header */}
+      <div className="flex items-center gap-2 mb-3 relative z-10">
+        <Map size={12} strokeWidth={1.5} style={{ color: "var(--accent-gold)" }} />
+        <span className="text-[10px] font-mono uppercase tracking-widest" style={{ color: "var(--accent-gold)" }}>
+          HopRoute · Live
+        </span>
+        <span
+          className="w-1.5 h-1.5 rounded-full animate-pulse ml-1"
+          style={{ background: "var(--accent-gold)" }}
+        />
       </div>
+
+      {/* Route info */}
+      <p className="text-sm relative z-10" style={{ color: "var(--text-primary)" }}>
+        <Link href={`/profile/${route.friendUsername}`} className="font-semibold hover:underline underline-offset-2">
+          {route.friendName.split(" ")[0]}
+        </Link>
+        <span style={{ color: "var(--text-muted)" }}> is on a route</span>
+      </p>
+      <p className="font-display text-base font-bold mt-0.5 mb-3 relative z-10" style={{ color: "var(--text-primary)" }}>
+        {route.routeTitle}
+      </p>
+
+      {/* Stop progress bar — segments */}
+      <div className="flex items-center gap-1 mb-1.5 relative z-10">
+        {Array.from({ length: route.totalStops }).map((_, i) => (
+          <div
+            key={i}
+            className="h-1.5 rounded-full flex-1 transition-all"
+            style={{
+              background: i < route.currentStop
+                ? "var(--accent-gold)"
+                : "color-mix(in srgb, var(--border) 70%, transparent)",
+            }}
+          />
+        ))}
+      </div>
+      <p className="text-[10px] font-mono mb-3 relative z-10" style={{ color: "var(--text-muted)" }}>
+        Stop {route.currentStop} of {route.totalStops}
+      </p>
+
+      {/* Join CTA */}
+      <Link
+        href={`/hop-route/${route.routeId}`}
+        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold relative z-10"
+        style={{ background: "var(--accent-gold)", color: "var(--bg)" }}
+      >
+        <Route size={14} />
+        Join {route.friendName.split(" ")[0]} on this route
+      </Link>
     </motion.div>
   );
 }

@@ -5,6 +5,7 @@ import { motion } from 'framer-motion'
 import { Heart } from 'lucide-react'
 import { formatRelativeTime } from '@/lib/dates'
 import { EmojiPulse } from '@/components/social/EmojiPulse'
+import { StarRating } from '@/components/ui/StarRating'
 
 export interface NewFavoriteItem {
   id: string
@@ -48,47 +49,44 @@ export function NewFavoriteCard({
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.03, duration: 0.25 }}
-      className="rounded-2xl overflow-hidden flex relative"
+      className="rounded-2xl p-4 relative overflow-hidden"
       style={{
-        background: 'linear-gradient(135deg, color-mix(in srgb, var(--accent-gold) 8%, var(--surface)), var(--surface))',
-        border: '1px solid color-mix(in srgb, var(--accent-gold) 20%, var(--border))',
+        background: "linear-gradient(135deg, color-mix(in srgb, var(--accent-gold) 10%, var(--surface)), color-mix(in srgb, var(--accent-amber) 4%, var(--surface)))",
+        border: "1px solid color-mix(in srgb, var(--accent-gold) 22%, var(--border))",
       }}
     >
       {/* Bubble decorations */}
       <div className={`${LARGE_BUBBLE_POS[bubbleIdx]} w-14 h-14 rounded-full pointer-events-none`} style={{ background: 'var(--accent-gold)', opacity: 0.06 }} />
       <div className={`${SMALL_BUBBLE_POS[bubbleIdx]} w-4 h-4 rounded-full pointer-events-none`} style={{ background: 'var(--accent-gold)', opacity: 0.08 }} />
 
-      {/* Gold accent bar */}
-      <div
-        className="w-1 flex-shrink-0"
-        style={{ background: 'var(--accent-gold)', opacity: 0.7 }}
-      />
-
-      {/* Heart icon column */}
-      <div
-        className="flex items-center justify-center w-14 flex-shrink-0"
-        style={{ background: 'color-mix(in srgb, var(--accent-gold) 10%, transparent)' }}
-      >
-        <Heart size={20} strokeWidth={1.75} style={{ color: 'var(--accent-gold)' }} />
-      </div>
-
-      {/* Content */}
-      <div className="flex-1 min-w-0 px-4 py-3">
-        <p className="text-sm leading-snug" style={{ color: 'var(--text-primary)' }}>
-          <Link
-            href={`/profile/${favorite.username}`}
-            className="font-semibold hover:underline underline-offset-2"
-          >
+      {/* Header row: Heart icon + "{firstName} found a new favorite" + timestamp */}
+      <div className="flex items-center gap-1.5 mb-2.5 relative z-10">
+        <Heart size={11} strokeWidth={2} fill="currentColor" style={{ color: "var(--accent-gold)" }} />
+        <p className="text-[11px] leading-none flex-1 min-w-0" style={{ color: "var(--text-muted)" }}>
+          <Link href={`/profile/${favorite.username}`} className="font-semibold hover:underline underline-offset-2" style={{ color: "var(--text-primary)" }}>
             {favorite.displayName.split(' ')[0]}
           </Link>
-          <span style={{ color: 'var(--text-muted)' }}> favorited </span>
-          <span className="font-display font-bold" style={{ color: 'var(--text-primary)' }}>
-            {favorite.beerName}
-          </span>
+          {" "}found a new favorite
         </p>
-        <p className="text-[10px] font-mono mt-1" style={{ color: 'var(--text-muted)' }}>
-          {favorite.breweryName} · {formatRelativeTime(favorite.createdAt)}
-        </p>
+        <span className="text-[10px] font-mono flex-shrink-0" style={{ color: "var(--text-muted)" }}>
+          {formatRelativeTime(favorite.createdAt)}
+        </span>
+      </div>
+
+      {/* Beer name — hero text */}
+      <p className="font-display text-lg font-bold leading-tight mb-1.5 relative z-10" style={{ color: "var(--text-primary)" }}>
+        {favorite.beerName}
+      </p>
+
+      {/* Stars + brewery on one line */}
+      <div className="flex items-center gap-2 mb-2 relative z-10">
+        <StarRating value={5} readonly size="sm" />
+        <span className="text-xs truncate" style={{ color: "var(--text-muted)" }}>
+          {favorite.breweryName}{favorite.beerStyle ? ` · ${favorite.beerStyle}` : ""}
+        </span>
+      </div>
+
+      <div className="relative z-10">
         <EmojiPulse itemKey={`favorite-${favorite.id}`} />
       </div>
     </motion.div>

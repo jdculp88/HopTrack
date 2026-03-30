@@ -30,6 +30,7 @@ import { YouTabContent } from "./YouTabContent";
 import { OnboardingCard } from "./OnboardingCard";
 import type { FeedItem } from "./FeedItemCard";
 import type { FriendBreweryReview } from "@/components/social/BreweryRatingFeedCard";
+import type { FriendActiveRoute } from "@/components/social/HopRouteCTACard";
 import { ReactionProvider } from "./ReactionContext";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { WishlistOnTapAlert } from "@/components/wishlist/WishlistOnTapAlert";
@@ -121,6 +122,7 @@ interface HomeFeedProps {
   pastRoutes?: Array<{ id: string; title: string; location_city: string | null; completed_at: string | null; hop_route_stops: Array<{ brewery: { name: string } | null }> }>;
   wishlistOnTapCount?: number;
   friendBreweryReviews?: FriendBreweryReview[];
+  friendActiveRoutes?: FriendActiveRoute[];
 }
 
 // ─── HomeFeed ───────────────────────────────────────────────────────────────
@@ -148,6 +150,7 @@ export function HomeFeed({
   pastRoutes,
   wishlistOnTapCount = 0,
   friendBreweryReviews,
+  friendActiveRoutes,
 }: HomeFeedProps) {
   const [activeTab, setActiveTab] = useState<FeedTab>("friends");
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -312,6 +315,17 @@ export function HomeFeed({
       }
     });
 
+    // Friend active HopRoutes — "join them" invite cards
+    if (friendActiveRoutes && friendActiveRoutes.length > 0) {
+      friendActiveRoutes.forEach((r) => {
+        items.push({
+          type: "hop_route_cta",
+          data: r,
+          sortDate: new Date().toISOString(), // float near top
+        });
+      });
+    }
+
     // Sort: live first, then chronological
     const sorted = items.sort((a, b) => {
       const aLive = a.type === "session" && a.isLive ? 1 : 0;
@@ -322,16 +336,6 @@ export function HomeFeed({
       );
     });
 
-    // Inject HopRoute CTA at position 5 (if feed has enough items)
-    if (sorted.length >= 3) {
-      const insertAt = Math.min(5, sorted.length);
-      sorted.splice(insertAt, 0, {
-        type: "hop_route_cta",
-        data: { id: "hop-route-cta" },
-        sortDate: new Date(Date.now() - 1000).toISOString(),
-      });
-    }
-
     return sorted;
   }, [
     allFriendSessions,
@@ -341,6 +345,7 @@ export function HomeFeed({
     newFavorites,
     friendsJoined,
     friendBreweryReviews,
+    friendActiveRoutes,
     currentUserId,
   ]);
 

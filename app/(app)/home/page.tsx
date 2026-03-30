@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { HomeFeed } from "./HomeFeed";
+import type { FriendActiveRoute } from "@/components/social/HopRouteCTACard";
 import {
   fetchFeedSessions,
   fetchActiveFriendSessions,
@@ -93,6 +94,36 @@ export default async function HomePage() {
     }
   })();
 
+  // Friend active HopRoutes — "join them" cards
+  const friendActiveRoutesData: FriendActiveRoute[] = [];
+  if (friendIds.length > 0) {
+    const { data: activeRoutes } = await (supabase as any)
+      .from("hop_routes")
+      .select(`
+        id, title, status, stop_count, started_at,
+        profile:profiles!user_id(id, username, display_name),
+        hop_route_stops(id, stop_order, checked_in)
+      `)
+      .in("user_id", friendIds)
+      .eq("status", "active")
+      .order("started_at", { ascending: false })
+      .limit(3);
+
+    for (const r of (activeRoutes ?? [])) {
+      if (!r.profile || !r.title) continue;
+      const stops = r.hop_route_stops ?? [];
+      const checkedIn = stops.filter((s: any) => s.checked_in).length;
+      friendActiveRoutesData.push({
+        routeId: r.id,
+        friendName: r.profile.display_name || r.profile.username,
+        friendUsername: r.profile.username,
+        routeTitle: r.title,
+        currentStop: checkedIn,
+        totalStops: r.stop_count ?? stops.length,
+      });
+    }
+  }
+
   // Beer recommendations + activity heatmap + past HopRoutes (fault-tolerant)
   const [recommendations, activityHeatmap, pastRoutesResult] = await Promise.all([
     getRecommendations(user.id).catch(() => []),
@@ -174,6 +205,7 @@ export default async function HomePage() {
       pastRoutes={pastRoutes}
       wishlistOnTapCount={wishlistOnTapCount}
       friendBreweryReviews={friendBreweryReviews}
+      friendActiveRoutes={friendActiveRoutesData}
     />
   );
 }

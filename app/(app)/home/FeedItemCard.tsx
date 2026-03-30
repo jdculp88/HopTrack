@@ -27,7 +27,10 @@ import {
   BreweryRatingFeedCard,
   type FriendBreweryReview,
 } from "@/components/social/BreweryRatingFeedCard";
-import { HopRouteCTACard } from "@/components/social/HopRouteCTACard";
+import {
+  HopRouteCTACard,
+  type FriendActiveRoute,
+} from "@/components/social/HopRouteCTACard";
 import type { Session } from "@/types/database";
 import { useReactions } from "./ReactionContext";
 
@@ -40,7 +43,7 @@ export type FeedItem =
   | { type: "friend_joined"; data: FriendJoinedItem; sortDate: string }
   | { type: "hop_route_completed"; data: HopRouteFeedItem; sortDate: string }
   | { type: "brewery_review"; data: FriendBreweryReview; sortDate: string }
-  | { type: "hop_route_cta"; data: { id: string }; sortDate: string };
+  | { type: "hop_route_cta"; data: FriendActiveRoute; sortDate: string };
 
 export type { FriendBreweryReview };
 
@@ -112,7 +115,7 @@ export function FeedItemCard({
   }
 
   if (item.type === "hop_route_cta") {
-    return <HopRouteCTACard index={index} />;
+    return <HopRouteCTACard route={item.data} index={index} />;
   }
 
   return null;

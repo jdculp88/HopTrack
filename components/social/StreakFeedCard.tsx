@@ -62,59 +62,50 @@ export function StreakFeedCard({
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.03, duration: 0.25 }}
-      className="rounded-2xl overflow-hidden flex relative"
+      className="rounded-2xl p-4 relative overflow-hidden flex items-center gap-4"
       style={{
-        background:
-          "linear-gradient(135deg, color-mix(in srgb, var(--accent-amber) 10%, var(--surface)), var(--surface))",
-        border:
-          "1px solid color-mix(in srgb, var(--accent-amber) 22%, var(--border))",
+        background: "linear-gradient(135deg, color-mix(in srgb, var(--accent-amber) 14%, var(--surface)), var(--surface))",
+        border: "1px solid color-mix(in srgb, var(--accent-amber) 26%, var(--border))",
       }}
     >
       {/* Bubble decorations */}
       <div className={`${LARGE_BUBBLE_POS[bubbleIdx]} w-14 h-14 rounded-full pointer-events-none`} style={{ background: "var(--accent-amber)", opacity: 0.07 }} />
       <div className={`${SMALL_BUBBLE_POS[bubbleIdx]} w-4 h-4 rounded-full pointer-events-none`} style={{ background: "var(--accent-amber)", opacity: 0.09 }} />
 
-      {/* Amber accent bar */}
-      <div
-        className="w-1 flex-shrink-0"
-        style={{ background: "var(--accent-amber)", opacity: 0.7 }}
-      />
-
-      {/* Flame icon column */}
-      <div
-        className="flex items-center justify-center w-14 flex-shrink-0"
-        style={{
-          background:
-            "color-mix(in srgb, var(--accent-amber) 10%, transparent)",
-        }}
-      >
-        <Flame size={22} strokeWidth={1.75} style={{ color: "var(--accent-amber)" }} />
-      </div>
-
-      {/* Content */}
-      <div className="flex-1 min-w-0 px-4 py-3">
-        <p className="text-sm leading-snug" style={{ color: "var(--text-primary)" }}>
-          <Link
-            href={`/profile/${streak.username}`}
-            className="font-semibold hover:underline underline-offset-2"
-          >
+      {/* Left: label + friend + subtext + EmojiPulse */}
+      <div className="flex-1 min-w-0 relative z-10">
+        <div className="flex items-center gap-1.5 mb-1">
+          <Flame size={12} strokeWidth={1.75} style={{ color: "var(--accent-amber)" }} />
+          <span className="text-[10px] font-mono uppercase tracking-widest" style={{ color: "var(--accent-amber)" }}>
+            On Fire
+          </span>
+        </div>
+        <p className="text-sm font-semibold leading-snug" style={{ color: "var(--text-primary)" }}>
+          <Link href={`/profile/${streak.username}`} className="hover:underline underline-offset-2">
             {(streak.displayName || streak.username).split(" ")[0]}
           </Link>
-          <span style={{ color: "var(--text-muted)" }}> is on a </span>
-          <span
-            className="font-display font-bold"
-            style={{ color: "var(--accent-amber)" }}
-          >
-            {streak.currentStreak}-day streak
-          </span>
+          <span style={{ color: "var(--text-muted)" }}> is on a streak</span>
         </p>
-        <p
-          className="text-[10px] font-mono mt-1"
-          style={{ color: "var(--text-muted)" }}
-        >
+        <p className="text-[10px] font-mono mt-0.5" style={{ color: "var(--text-muted)" }}>
           {streak.currentStreak} sessions in a row
         </p>
         <EmojiPulse itemKey={`streak-${streak.profileId}-${streak.currentStreak}`} />
+      </div>
+
+      {/* Right: BIG NUMBER */}
+      <div className="flex flex-col items-center flex-shrink-0 relative z-10">
+        <span
+          className="font-mono font-black leading-none"
+          style={{ fontSize: "3.25rem", color: "var(--accent-amber)", lineHeight: 1 }}
+        >
+          {streak.currentStreak}
+        </span>
+        <span
+          className="text-[10px] font-mono uppercase tracking-widest mt-0.5"
+          style={{ color: "var(--text-muted)" }}
+        >
+          days
+        </span>
       </div>
     </motion.div>
   );
