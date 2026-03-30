@@ -43,6 +43,35 @@ export function AppNav({ username, unreadNotifications = 0, onCheckin }: AppNavP
 
   return (
     <>
+      {/* ── Mobile top header (branding) ──────────────────────────────────── */}
+      <div
+        className="lg:hidden fixed top-0 left-0 right-0 z-40 backdrop-blur-md border-b"
+        style={{ background: "color-mix(in srgb, var(--surface) 92%, transparent)", borderColor: "var(--border)" }}
+      >
+        <div className="flex items-center justify-between px-4 py-2.5">
+          <Link href="/home" className="flex items-center gap-2 transition-opacity hover:opacity-80">
+            <HopMark variant="mark" theme="auto" height={26} />
+            <span
+              className="font-display text-[15px] font-semibold tracking-tight"
+              style={{ color: "var(--text-primary)" }}
+            >
+              HopTrack
+            </span>
+          </Link>
+          <Link href={`/profile/${username}`} aria-label="Profile">
+            <div
+              className="w-8 h-8 rounded-full flex items-center justify-center transition-colors"
+              style={{
+                background: "color-mix(in srgb, var(--accent-gold) 12%, transparent)",
+                color: "var(--accent-gold)",
+              }}
+            >
+              <User size={16} />
+            </div>
+          </Link>
+        </div>
+      </div>
+
       {/* ── Desktop sidebar ─────────────────────────────────────────────────── */}
       <aside
         className="hidden lg:flex flex-col w-64 h-screen sticky top-0 flex-shrink-0 border-r"

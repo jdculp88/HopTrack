@@ -282,7 +282,7 @@ export async function PATCH(
     .from('sessions')
     .select(`
       *,
-      beer_logs(id, beer_id, rating, quantity, comment, serving_style, logged_at, beer:beers(id, name, style, glass_type))
+      beer_logs(id, beer_id, rating, quantity, comment, serving_style, logged_at, beer:beers(id, name, style, glass_type, abv, avg_rating))
     `)
     .eq('id', sessionId)
     .single()

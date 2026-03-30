@@ -2,12 +2,30 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Share2, Trophy, Check, ChevronRight } from 'lucide-react'
+import { Share2, ChevronRight, Trophy, ChevronLeft, Camera } from 'lucide-react'
+import Image from 'next/image'
 import type { Options as ConfettiOptions } from 'canvas-confetti'
-import { StarRating } from '@/components/ui/StarRating'
 import { getGlass, getGlassSvgContent } from '@/lib/glassware'
 import { Session, BeerLog } from '@/types/database'
 import { SESSION_XP, getLevelProgress } from '@/lib/xp'
+
+// ── Cream color palette (self-contained, like The Board) ─────────────────────
+const C = {
+  bg: '#faf6f0',
+  card: 'rgba(255,255,255,0.75)',
+  cardBorder: 'rgba(180,155,120,0.13)',
+  accent: '#b7522f',
+  accentSoft: 'rgba(183,82,47,0.10)',
+  gold: '#c8943a',
+  goldSoft: 'rgba(200,148,58,0.10)',
+  text1: '#2e2418',
+  text2: '#6b5d4e',
+  text3: '#a39580',
+  text4: '#c4b8a6',
+  divider: 'rgba(180,155,120,0.10)',
+  avatarBg: '#efe7da',
+  ring: 'linear-gradient(135deg, #b7522f 0%, #c8943a 100%)',
+}
 
 interface SessionRecapSheetProps {
   isOpen: boolean
@@ -72,7 +90,6 @@ function GlassIcon({ glassType, instanceId, size = 36 }: { glassType?: string | 
   )
 }
 
-// Sparkle decoration
 function Sparkles() {
   const positions = [
     { top: '15%', left: '12%', delay: 0 },
@@ -90,9 +107,11 @@ function Sparkles() {
           key={i}
           className="absolute text-sm"
           style={{
-            ...pos,
-            color: 'var(--accent-gold)',
-            animation: `sparkle-float 2s ease-in-out infinite`,
+            top: pos.top,
+            left: 'left' in pos ? pos.left : undefined,
+            right: 'right' in pos ? (pos as any).right : undefined,
+            color: C.gold,
+            animation: `recap-sparkle 2s ease-in-out infinite`,
             animationDelay: `${pos.delay}s`,
           }}
         >
@@ -100,7 +119,7 @@ function Sparkles() {
         </span>
       ))}
       <style>{`
-        @keyframes sparkle-float {
+        @keyframes recap-sparkle {
           0%, 100% { opacity: 0; transform: scale(0) rotate(0deg); }
           50% { opacity: 1; transform: scale(1) rotate(180deg); }
         }
@@ -117,6 +136,16 @@ interface BreweryStats {
   total_visitors: number
 }
 
+// ── Stagger animation helper ─────────────────────────────────────────────────
+const stagger = (delay: number) => ({
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.55, ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number], delay },
+})
+
+// ── Star rating hints ────────────────────────────────────────────────────────
+const HINTS = ['', 'Not great', 'It was okay', 'Good spot', 'Really liked it', 'Loved it']
+
 export default function SessionRecapSheet({
   isOpen,
   session,
@@ -129,15 +158,18 @@ export default function SessionRecapSheet({
 }: SessionRecapSheetProps) {
   const [fired, setFired] = useState(false)
   const [recapRatings, setRecapRatings] = useState<Record<string, number>>({})
+  const [beerNotes, setBeerNotes] = useState<Record<string, string>>({})
   const [breweryRating, setBreweryRating] = useState(0)
-  const [breweryComment, setBreweryComment] = useState('')
-  const [showBreweryComment, setShowBreweryComment] = useState(false)
+  const [breweryHoverRating, setBreweryHoverRating] = useState(0)
   const [breweryReviewSubmitted, setBreweryReviewSubmitted] = useState(false)
   const [hasExistingBreweryReview, setHasExistingBreweryReview] = useState(false)
   const [existingBreweryRating, setExistingBreweryRating] = useState(0)
   const [breweryReviewLoading, setBreweryReviewLoading] = useState(false)
   const [breweryStats, setBreweryStats] = useState<BreweryStats | null>(null)
   const [progressAnimated, setProgressAnimated] = useState(false)
+  const [beerHistory, setBeerHistory] = useState<Record<string, { timesTried: number; avgRating: number | null }>>({})
+  const [sessionPhotos, setSessionPhotos] = useState<Array<{ id: string; photo_url: string }>>([])
+  const [activePhotoIndex, setActivePhotoIndex] = useState(0)
 
   const isBrewerySession = session && (session as any).context !== 'home' && (session as any).brewery_id
   const isHomeSession = !isBrewerySession
@@ -146,15 +178,17 @@ export default function SessionRecapSheet({
   const duration = session ? formatDuration(session.started_at, session.ended_at) : ''
   const dateStr = session ? formatSessionDate(session.started_at, session.ended_at) : ''
   const uniqueStyles = Array.from(new Set(allLogs.map((l) => (l as any).beer?.style).filter(Boolean)))
+  const newTries = allLogs.filter(l => !l.rating || l.rating === 0).length
 
   // XP breakdown
   const xpBreakdown = [
     { label: 'Session completed', value: SESSION_XP.session_start },
-    ...(totalBeers > 0 ? [{ label: `${totalBeers} beer${totalBeers > 1 ? 's' : ''} logged`, value: totalBeers * SESSION_XP.per_beer }] : []),
+    ...(totalBeers > 0 ? [{ label: `${totalBeers} beer${totalBeers > 1 ? 's' : ''} checked in`, value: totalBeers * SESSION_XP.per_beer }] : []),
     ...(allLogs.filter(l => l.rating && l.rating > 0).length > 0
-      ? [{ label: `${allLogs.filter(l => l.rating && l.rating > 0).length} beer${allLogs.filter(l => l.rating && l.rating > 0).length > 1 ? 's' : ''} rated`, value: allLogs.filter(l => l.rating && l.rating > 0).length * SESSION_XP.per_rating }]
+      ? [{ label: `${allLogs.filter(l => l.rating && l.rating > 0).length} new beer${allLogs.filter(l => l.rating && l.rating > 0).length > 1 ? 's' : ''} tried`, value: allLogs.filter(l => l.rating && l.rating > 0).length * SESSION_XP.per_rating }]
       : []),
     ...(totalBeers >= 3 ? [{ label: '3+ beers bonus', value: SESSION_XP.three_plus_beers_bonus }] : []),
+    ...((breweryStats?.visit_count ?? 0) > 1 ? [{ label: `${breweryStats?.visit_count ?? 0}${getOrdinalSuffix(breweryStats?.visit_count ?? 0)} visit streak (${breweryName})`, value: 10 }] : []),
     ...newAchievements.map(a => ({ label: `🏆 ${a.name}`, value: a.xp_reward })),
   ]
 
@@ -164,7 +198,7 @@ export default function SessionRecapSheet({
 
   const getRating = (log: BeerLog) => recapRatings[log.id] ?? log.rating ?? 0
 
-  // Fetch brewery review status + brewery stats
+  // Fetch brewery review status + stats
   useEffect(() => {
     if (!isOpen || !isBrewerySession) return
     const breweryId = (session as any).brewery_id
@@ -185,25 +219,49 @@ export default function SessionRecapSheet({
       .catch(() => {})
   }, [isOpen, isBrewerySession, session])
 
+  // Fetch per-beer history stats
+  useEffect(() => {
+    if (!isOpen || allLogs.length === 0) return
+    const beerIds = allLogs.map(l => (l as any).beer_id ?? (l as any).beer?.id).filter(Boolean)
+    if (beerIds.length === 0) return
+
+    fetch(`/api/beer-logs/stats?beer_ids=${beerIds.join(',')}`)
+      .then(r => r.json())
+      .then(data => { if (data.stats) setBeerHistory(data.stats) })
+      .catch(() => {})
+  }, [isOpen, allLogs])
+
+  // Fetch session photos
+  useEffect(() => {
+    if (!isOpen || !session?.id) return
+    fetch(`/api/sessions/${session.id}/photos`)
+      .then(r => r.json())
+      .then(data => { if (Array.isArray(data)) setSessionPhotos(data) })
+      .catch(() => {})
+  }, [isOpen, session])
+
   useEffect(() => {
     if (isOpen && !fired) {
       setFired(true)
       setTimeout(() => {
-        import('canvas-confetti').then(m => m.default({ particleCount: 80, spread: 70, origin: { y: 0.4 }, colors: ['#D4A843', '#E8841A', '#fff'] }))
+        import('canvas-confetti').then(m => m.default({ particleCount: 80, spread: 70, origin: { y: 0.4 }, colors: ['#c8943a', '#b7522f', '#fff'] }))
       }, 300)
       setTimeout(() => setProgressAnimated(true), 800)
     }
     if (!isOpen) {
       setFired(false)
       setRecapRatings({})
+      setBeerNotes({})
       setBreweryRating(0)
-      setBreweryComment('')
-      setShowBreweryComment(false)
+      setBreweryHoverRating(0)
       setBreweryReviewSubmitted(false)
       setHasExistingBreweryReview(false)
       setExistingBreweryRating(0)
       setBreweryStats(null)
       setProgressAnimated(false)
+      setBeerHistory({})
+      setSessionPhotos([])
+      setActivePhotoIndex(0)
     }
   }, [isOpen, fired])
 
@@ -218,21 +276,36 @@ export default function SessionRecapSheet({
     }
   }, [session])
 
-  const handleBreweryReview = useCallback(async (rating: number) => {
-    if (!isBrewerySession) return
+  const handleBreweryReview = useCallback(async () => {
+    if (!isBrewerySession || breweryRating === 0) return
     setBreweryReviewLoading(true)
     const breweryId = (session as any).brewery_id
     const res = await fetch(`/api/brewery/${breweryId}/reviews`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ rating, comment: breweryComment || null }),
+      body: JSON.stringify({ rating: breweryRating, comment: null }),
     })
-    if (res.ok) {
-      setBreweryReviewSubmitted(true)
-      setBreweryRating(rating)
-    }
+    if (res.ok) setBreweryReviewSubmitted(true)
     setBreweryReviewLoading(false)
-  }, [isBrewerySession, session, breweryComment])
+  }, [isBrewerySession, session, breweryRating])
+
+  // Auto-submit brewery rating on star click
+  const handleBreweryStarClick = useCallback((val: number) => {
+    setBreweryRating(val)
+    // Auto-submit after a brief moment
+    setTimeout(async () => {
+      if (!isBrewerySession) return
+      setBreweryReviewLoading(true)
+      const breweryId = (session as any).brewery_id
+      const res = await fetch(`/api/brewery/${breweryId}/reviews`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rating: val, comment: null }),
+      })
+      if (res.ok) setBreweryReviewSubmitted(true)
+      setBreweryReviewLoading(false)
+    }, 200)
+  }, [isBrewerySession, session])
 
   return (
     <AnimatePresence>
@@ -242,49 +315,54 @@ export default function SessionRecapSheet({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           className="fixed inset-0 z-[100] overflow-y-auto"
-          style={{ background: 'var(--bg)' }}
+          style={{
+            background: C.bg,
+            backgroundImage: `radial-gradient(ellipse at 50% -5%, ${C.goldSoft} 0%, transparent 50%), radial-gradient(ellipse at 30% 100%, ${C.accentSoft} 0%, transparent 40%)`,
+            fontFamily: "'DM Sans', sans-serif",
+          }}
         >
-          <div className="max-w-lg mx-auto px-5 pb-12">
+          <div className="max-w-[430px] mx-auto relative" style={{ minHeight: '100vh', paddingBottom: 40 }}>
+
             {/* Close button */}
-            <div className="flex justify-end pt-4 pb-2">
-              <button
-                onClick={onClose}
-                className="w-9 h-9 rounded-full flex items-center justify-center backdrop-blur-sm transition-opacity hover:opacity-60"
-                style={{
-                  background: 'color-mix(in srgb, var(--surface) 60%, transparent)',
-                  border: '1px solid var(--border)',
-                  color: 'var(--text-muted)',
-                }}
-                aria-label="Close recap"
-              >
-                <X size={18} />
-              </button>
-            </div>
+            <button
+              onClick={onClose}
+              className="absolute top-4 right-4 z-10 w-9 h-9 rounded-full flex items-center justify-center text-lg transition-colors"
+              style={{
+                background: 'rgba(255,255,255,0.6)',
+                backdropFilter: 'blur(8px)',
+                border: `1px solid ${C.cardBorder}`,
+                color: C.text3,
+              }}
+              aria-label="Close recap"
+            >
+              ✕
+            </button>
 
             {/* ═══ CELEBRATION HEADER ═══ */}
-            <motion.div
-              initial={{ opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ type: 'spring', stiffness: 280, damping: 26, delay: 0.05 }}
-              className="text-center pb-5 relative"
-            >
+            <div className="text-center relative overflow-hidden" style={{ padding: '50px 20px 20px' }}>
               <Sparkles />
-              <p
-                className="font-mono text-[11px] uppercase tracking-[2px] mb-2"
-                style={{ color: 'var(--accent-gold)' }}
+              <motion.p
+                {...stagger(0.1)}
+                className="uppercase tracking-[2px] font-semibold"
+                style={{ fontSize: 11, color: C.gold }}
               >
                 {isHomeSession ? 'Home Session Complete' : 'Session Complete'}
-              </p>
-              <h1
-                className="font-display font-bold leading-none mb-1"
-                style={{ color: 'var(--text-primary)', fontSize: 'clamp(2rem, 8vw, 2.5rem)' }}
+              </motion.p>
+              <motion.h1
+                {...stagger(0.15)}
+                className="font-display font-bold leading-none"
+                style={{ fontSize: 32, color: C.text1, margin: '8px 0 4px' }}
               >
                 {isHomeSession ? 'Home Session' : 'Great Round'}
-              </h1>
+              </motion.h1>
               {!isHomeSession && (
-                <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{breweryName}</p>
+                <motion.p {...stagger(0.2)} style={{ fontSize: 14, color: C.text2, marginBottom: 6 }}>
+                  {breweryName}
+                </motion.p>
               )}
-              <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>{dateStr}</p>
+              <motion.p {...stagger(0.25)} style={{ fontSize: 12, color: C.text3 }}>
+                {dateStr}
+              </motion.p>
 
               {/* XP pill */}
               {xpGained > 0 && (
@@ -292,45 +370,127 @@ export default function SessionRecapSheet({
                   initial={{ opacity: 0, scale: 0.5, y: 10 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   transition={{ delay: 0.3, type: 'spring', stiffness: 400, damping: 24 }}
-                  className="inline-flex items-center gap-1 mt-4 px-5 py-2 rounded-full"
+                  className="inline-flex items-center gap-1 rounded-full"
                   style={{
-                    background: 'linear-gradient(135deg, color-mix(in srgb, var(--accent-gold) 15%, transparent), color-mix(in srgb, var(--accent-amber) 10%, transparent))',
-                    border: '1px solid color-mix(in srgb, var(--accent-gold) 25%, transparent)',
+                    marginTop: 16,
+                    padding: '8px 20px',
+                    background: `linear-gradient(135deg, ${C.goldSoft}, ${C.accentSoft})`,
+                    border: `1px solid rgba(200,148,58,0.25)`,
+                    fontSize: 20,
+                    fontWeight: 700,
+                    color: C.gold,
                   }}
                 >
-                  <span className="text-xl font-bold font-mono" style={{ color: 'var(--accent-gold)' }}>
-                    +<AnimatedXP target={xpGained} />
-                  </span>
-                  <span className="text-sm font-medium" style={{ color: 'var(--accent-gold)', opacity: 0.8 }}>XP</span>
+                  +<AnimatedXP target={xpGained} />
+                  <span style={{ fontSize: 13, fontWeight: 500, marginLeft: 2 }}>XP</span>
                 </motion.div>
               )}
-            </motion.div>
+            </div>
+
+            {/* ═══ SESSION PHOTOS ═══ */}
+            {sessionPhotos.length > 0 && (
+              <motion.div
+                {...stagger(0.18)}
+                className="relative overflow-hidden"
+                style={{
+                  margin: '16px 20px 0',
+                  borderRadius: 16,
+                  border: `1px solid ${C.cardBorder}`,
+                  aspectRatio: '16/9',
+                  background: C.avatarBg,
+                }}
+              >
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={sessionPhotos[activePhotoIndex]?.id}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute inset-0"
+                  >
+                    <Image
+                      src={sessionPhotos[activePhotoIndex]?.photo_url}
+                      alt=""
+                      fill
+                      className="object-cover"
+                    />
+                  </motion.div>
+                </AnimatePresence>
+                {sessionPhotos.length > 1 && (
+                  <>
+                    <button
+                      onClick={() => setActivePhotoIndex(i => (i - 1 + sessionPhotos.length) % sessionPhotos.length)}
+                      className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full flex items-center justify-center"
+                      style={{ background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(8px)', color: C.text2 }}
+                      aria-label="Previous photo"
+                    >
+                      <ChevronLeft size={16} />
+                    </button>
+                    <button
+                      onClick={() => setActivePhotoIndex(i => (i + 1) % sessionPhotos.length)}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full flex items-center justify-center"
+                      style={{ background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(8px)', color: C.text2 }}
+                      aria-label="Next photo"
+                    >
+                      <ChevronRight size={16} />
+                    </button>
+                    <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5">
+                      {sessionPhotos.map((_, i) => (
+                        <div
+                          key={i}
+                          className="w-1.5 h-1.5 rounded-full transition-all"
+                          style={{ background: i === activePhotoIndex ? C.gold : 'rgba(255,255,255,0.5)' }}
+                        />
+                      ))}
+                    </div>
+                  </>
+                )}
+                <div
+                  className="absolute top-2 right-2 flex items-center gap-1 px-2 py-1 rounded-full"
+                  style={{ background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(8px)', fontSize: 10, color: C.text2, fontWeight: 500 }}
+                >
+                  <Camera size={12} />
+                  {sessionPhotos.length}
+                </div>
+              </motion.div>
+            )}
 
             {/* ═══ STATS ROW ═══ */}
             <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="grid grid-cols-4 gap-px rounded-2xl overflow-hidden mb-4"
-              style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
+              {...stagger(0.2)}
+              className="flex overflow-hidden"
+              style={{
+                margin: '20px 20px 0',
+                background: C.card,
+                borderRadius: 16,
+                border: `1px solid ${C.cardBorder}`,
+                boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
+              }}
             >
               {[
                 { value: duration, label: 'Duration' },
                 { value: String(totalBeers), label: 'Beers' },
-                { value: String(allLogs.filter(l => !l.rating || l.rating === 0).length), label: 'New Tries' },
-                { value: breweryStats ? `${breweryStats.visit_count}${breweryStats.visit_count === 1 ? 'st' : breweryStats.visit_count === 2 ? 'nd' : breweryStats.visit_count === 3 ? 'rd' : 'th'}` : '—', label: 'Visit' },
+                { value: String(newTries), label: 'New Tries' },
+                { value: breweryStats ? `${breweryStats.visit_count}${getOrdinalSuffix(breweryStats.visit_count)}` : '—', label: 'Visit' },
               ].map((stat, i) => (
-                <div key={stat.label} className="text-center py-4 px-2" style={{ borderRight: i < 3 ? '1px solid var(--border)' : 'none' }}>
+                <div
+                  key={stat.label}
+                  className="flex-1 text-center"
+                  style={{ padding: '16px 8px', borderRight: i < 3 ? `1px solid ${C.divider}` : 'none' }}
+                >
                   <motion.p
-                    initial={{ opacity: 0, scale: 0.5 }}
-                    animate={{ opacity: 1, scale: 1 }}
+                    initial={{ opacity: 0, scale: 0.5, y: 10 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
                     transition={{ delay: 0.35 + i * 0.07, type: 'spring', stiffness: 400, damping: 24 }}
-                    className="font-display text-xl font-bold"
-                    style={{ color: 'var(--text-primary)' }}
+                    className="font-display font-bold"
+                    style={{ fontSize: 24, color: C.text1 }}
                   >
                     {stat.value}
                   </motion.p>
-                  <p className="text-[10px] font-mono uppercase tracking-wider mt-1" style={{ color: 'var(--text-muted)' }}>{stat.label}</p>
+                  <p style={{ fontSize: 10, color: C.text3, letterSpacing: 0.5, marginTop: 4, fontWeight: 500 }}>
+                    {stat.label}
+                  </p>
                 </div>
               ))}
             </motion.div>
@@ -338,23 +498,24 @@ export default function SessionRecapSheet({
             {/* ═══ FUN FACT ═══ */}
             {breweryStats && breweryStats.visit_count > 1 && (
               <motion.div
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.35 }}
-                className="flex items-start gap-3 p-4 rounded-xl mb-5"
+                {...stagger(0.3)}
+                className="flex items-start gap-2.5"
                 style={{
-                  background: 'color-mix(in srgb, var(--accent-amber) 8%, var(--surface))',
-                  border: '1px solid color-mix(in srgb, var(--accent-amber) 12%, transparent)',
+                  margin: '16px 20px 0',
+                  padding: '14px 16px',
+                  background: C.accentSoft,
+                  borderRadius: 12,
+                  border: `1px solid rgba(183,82,47,0.08)`,
                 }}
               >
-                <span className="text-lg flex-shrink-0 mt-0.5">📊</span>
-                <p className="text-xs leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
-                  You've spent <strong style={{ color: 'var(--accent-amber)' }}>{breweryStats.total_time_formatted}</strong> at {breweryName} across {breweryStats.visit_count} visits.
+                <span style={{ fontSize: 18, flexShrink: 0, marginTop: 1 }}>📊</span>
+                <p style={{ fontSize: 12, color: C.text2, lineHeight: 1.5 }}>
+                  You've spent <strong style={{ color: C.accent, fontWeight: 600 }}>{breweryStats.total_time_formatted}</strong> at {breweryName} across {breweryStats.visit_count} visits.
                   {breweryStats.most_ordered_beer && (
-                    <> Your most-ordered beer here is <strong style={{ color: 'var(--accent-amber)' }}>{breweryStats.most_ordered_beer.name}</strong> ({breweryStats.most_ordered_beer.count} times).</>
+                    <> Your most-ordered beer here is <strong style={{ color: C.accent, fontWeight: 600 }}>{breweryStats.most_ordered_beer.name}</strong> ({breweryStats.most_ordered_beer.count} times).</>
                   )}
                   {breweryStats.visitor_rank > 0 && breweryStats.visitor_rank <= 10 && (
-                    <> You're their <strong style={{ color: 'var(--accent-amber)' }}>#{breweryStats.visitor_rank} most frequent</strong> visitor on HopTrack.</>
+                    <> You're their <strong style={{ color: C.accent, fontWeight: 600 }}>#{breweryStats.visitor_rank} most frequent</strong> visitor on HopTrack.</>
                   )}
                 </p>
               </motion.div>
@@ -362,83 +523,80 @@ export default function SessionRecapSheet({
 
             {/* ═══ RATE THE BREWERY ═══ */}
             {isBrewerySession && (
-              <motion.div
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-                className="mb-5"
-              >
-                <p className="text-[10px] font-mono uppercase tracking-[1.5px] mb-3 px-0.5" style={{ color: 'var(--accent-amber)' }}>
-                  Rate the Brewery
-                </p>
-                <div className="rounded-2xl p-5" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
+              <motion.div {...stagger(0.35)}>
+                <SectionTitle>Rate the Brewery</SectionTitle>
+                <div
+                  style={{
+                    margin: '0 20px',
+                    padding: 20,
+                    background: C.card,
+                    backdropFilter: 'blur(16px)',
+                    borderRadius: 16,
+                    border: `1px solid ${C.cardBorder}`,
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
+                  }}
+                >
                   {hasExistingBreweryReview && !breweryReviewSubmitted ? (
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: 'color-mix(in srgb, var(--accent-gold) 15%, transparent)' }}>
-                        <Check size={15} style={{ color: 'var(--accent-gold)' }} />
+                      <div className="flex items-center gap-1">
+                        {[1, 2, 3, 4, 5].map(v => (
+                          <span key={v} style={{ fontSize: 16, color: v <= existingBreweryRating ? C.gold : C.text4, lineHeight: 1 }}>★</span>
+                        ))}
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>You've reviewed {breweryName}</p>
-                        <StarRating value={existingBreweryRating} readonly size="sm" className="mt-1" />
-                      </div>
+                      <span style={{ fontSize: 10, color: C.text3, background: C.divider, padding: '2px 8px', borderRadius: 20, fontWeight: 500 }}>
+                        Rated previously
+                      </span>
                     </div>
                   ) : breweryReviewSubmitted ? (
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: 'color-mix(in srgb, var(--accent-gold) 15%, transparent)' }}>
-                        <Check size={15} style={{ color: 'var(--accent-gold)' }} />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{breweryName} rated</p>
-                        <StarRating value={breweryRating} readonly size="sm" className="mt-1" />
+                      <div className="flex items-center gap-1">
+                        {[1, 2, 3, 4, 5].map(v => (
+                          <span key={v} style={{ fontSize: 32, color: v <= breweryRating ? C.gold : C.text4, lineHeight: 1 }}>★</span>
+                        ))}
                       </div>
                     </div>
                   ) : (
                     <div>
-                      <div className="flex items-center gap-3 mb-4">
-                        <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0" style={{ background: 'color-mix(in srgb, var(--accent-gold) 10%, var(--surface-2))' }}>🏭</div>
+                      <div className="flex items-center gap-3.5" style={{ marginBottom: 16 }}>
+                        <div
+                          className="flex items-center justify-center"
+                          style={{ width: 48, height: 48, borderRadius: 12, background: C.avatarBg, fontSize: 24 }}
+                        >
+                          🏭
+                        </div>
                         <div>
-                          <p className="font-display font-bold" style={{ color: 'var(--text-primary)' }}>{breweryName}</p>
-                          {breweryStats && <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{breweryStats.visit_count} visit{breweryStats.visit_count !== 1 ? 's' : ''}</p>}
+                          <p className="font-display font-semibold" style={{ fontSize: 18, color: C.text1 }}>{breweryName}</p>
+                          {breweryStats && (
+                            <p style={{ fontSize: 12, color: C.text3, marginTop: 2 }}>
+                              {breweryStats.visit_count > 1 ? `${breweryStats.visit_count}${getOrdinalSuffix(breweryStats.visit_count)} visit` : 'First visit'}
+                            </p>
+                          )}
                         </div>
                       </div>
-                      <div className="flex justify-center">
-                        <StarRating
-                          value={breweryRating}
-                          onChange={(v) => { setBreweryRating(v); setShowBreweryComment(true) }}
-                          size="lg"
-                        />
-                      </div>
-                      <p className="text-center text-xs mt-2 italic min-h-[18px]" style={{ color: 'var(--text-muted)' }}>
-                        {breweryRating === 0 ? 'Tap to rate your experience' : ['', 'Not great', 'It was okay', 'Good spot', 'Really liked it', 'Loved it'][breweryRating]}
-                      </p>
-                      <AnimatePresence>
-                        {showBreweryComment && breweryRating > 0 && (
-                          <motion.div
-                            initial={{ height: 0, opacity: 0 }}
-                            animate={{ height: 'auto', opacity: 1 }}
-                            exit={{ height: 0, opacity: 0 }}
-                            transition={{ duration: 0.22 }}
-                            className="overflow-hidden"
+                      <div className="flex items-center justify-center gap-0.5">
+                        {[1, 2, 3, 4, 5].map(v => (
+                          <span
+                            key={v}
+                            role="button"
+                            tabIndex={0}
+                            className="select-none transition-transform hover:scale-[1.2]"
+                            style={{
+                              fontSize: 32,
+                              color: v <= (breweryHoverRating || breweryRating) ? C.gold : C.text4,
+                              cursor: 'pointer',
+                              lineHeight: 1,
+                            }}
+                            onMouseEnter={() => setBreweryHoverRating(v)}
+                            onMouseLeave={() => setBreweryHoverRating(0)}
+                            onClick={() => handleBreweryStarClick(v)}
                           >
-                            <div className="pt-3 space-y-3">
-                              <textarea
-                                value={breweryComment}
-                                onChange={(e) => setBreweryComment(e.target.value)}
-                                placeholder="Any thoughts? (optional)"
-                                rows={2}
-                                className="w-full rounded-xl border px-3 py-2.5 text-sm resize-none outline-none transition-colors"
-                                style={{ background: 'color-mix(in srgb, var(--surface-2) 50%, transparent)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}
-                              />
-                              <div className="flex items-center gap-2">
-                                <button onClick={() => handleBreweryReview(breweryRating)} disabled={breweryReviewLoading} className="px-5 py-2 rounded-xl text-sm font-semibold disabled:opacity-40 transition-all" style={{ background: 'var(--accent-gold)', color: 'var(--bg)' }}>
-                                  {breweryReviewLoading ? 'Saving…' : 'Submit'}
-                                </button>
-                                <button onClick={() => { setShowBreweryComment(false); setBreweryRating(0); setBreweryComment('') }} className="px-3 py-2 text-sm rounded-xl" style={{ color: 'var(--text-muted)' }}>Skip</button>
-                              </div>
-                            </div>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
+                            ★
+                          </span>
+                        ))}
+                      </div>
+                      <p className="text-center italic" style={{ fontSize: 12, color: C.text3, marginTop: 8, minHeight: 18 }}>
+                        {breweryRating === 0 ? 'Tap to rate your experience' : HINTS[breweryRating]}
+                      </p>
                     </div>
                   )}
                 </div>
@@ -447,16 +605,9 @@ export default function SessionRecapSheet({
 
             {/* ═══ YOUR BEERS THIS SESSION ═══ */}
             {allLogs.length > 0 && (
-              <motion.div
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.45 }}
-                className="mb-5"
-              >
-                <p className="text-[10px] font-mono uppercase tracking-[1.5px] mb-3 px-0.5" style={{ color: 'var(--accent-amber)' }}>
-                  Your Beers This Session
-                </p>
-                <div className="space-y-2.5">
+              <motion.div {...stagger(0.4)}>
+                <SectionTitle>Your Beers This Session</SectionTitle>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                   {allLogs.map((log, i) => {
                     const rating = getRating(log)
                     const isDone = rating > 0
@@ -465,64 +616,114 @@ export default function SessionRecapSheet({
                     const beerAbv = (log as any).beer?.abv
                     const communityRating = (log as any).beer?.avg_rating
                     const logTime = new Date(log.logged_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+                    const beerId = (log as any).beer_id ?? (log as any).beer?.id
+                    const history = beerId ? beerHistory[beerId] : null
 
                     return (
                       <motion.div
                         key={log.id}
                         initial={{ opacity: 0, y: 8 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.5 + i * 0.06 }}
-                        className="rounded-2xl p-4"
-                        style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
+                        transition={{ delay: 0.45 + i * 0.06 }}
+                        style={{
+                          margin: '0 20px',
+                          padding: '16px 18px',
+                          background: C.card,
+                          backdropFilter: 'blur(16px)',
+                          borderRadius: 16,
+                          border: `1px solid ${C.cardBorder}`,
+                          boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
+                        }}
                       >
                         {/* Beer top row */}
-                        <div className="flex items-start gap-3">
-                          <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'linear-gradient(135deg, color-mix(in srgb, var(--accent-gold) 10%, transparent), color-mix(in srgb, var(--accent-amber) 8%, transparent))' }}>
-                            <GlassIcon glassType={(log as any).beer?.glass_type} instanceId={`recap-${log.id}`} size={24} />
+                        <div className="flex items-start gap-3.5">
+                          <div
+                            className="flex items-center justify-center flex-shrink-0"
+                            style={{
+                              width: 44, height: 44, borderRadius: 10,
+                              background: `linear-gradient(135deg, ${C.goldSoft}, ${C.accentSoft})`,
+                            }}
+                          >
+                            <GlassIcon glassType={(log as any).beer?.glass_type} instanceId={`recap-${log.id}`} size={22} />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="font-display font-bold text-[15px] truncate" style={{ color: 'var(--text-primary)' }}>{beerName}</p>
-                            <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                            <p className="font-display font-semibold truncate" style={{ fontSize: 16, color: C.text1 }}>{beerName}</p>
+                            <div className="flex items-center gap-2 flex-wrap" style={{ marginTop: 3 }}>
                               {beerStyle && (
-                                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full" style={{ background: 'color-mix(in srgb, var(--accent-amber) 10%, transparent)', color: 'var(--accent-amber)' }}>{beerStyle}</span>
+                                <span style={{
+                                  fontSize: 10, color: C.accent, background: C.accentSoft,
+                                  padding: '2px 8px', borderRadius: 20, fontWeight: 600, letterSpacing: 0.3,
+                                }}>{beerStyle}</span>
                               )}
-                              {beerAbv && <span className="text-[11px]" style={{ color: 'var(--text-muted)' }}>{beerAbv}%</span>}
-                              <span className="text-[11px]" style={{ color: 'var(--text-muted)' }}>· {logTime}</span>
+                              {beerAbv && <span style={{ fontSize: 11, color: C.text3 }}>{beerAbv}%</span>}
+                              <span style={{ fontSize: 11, color: C.text4 }}>·</span>
+                              <span style={{ fontSize: 11, color: C.text3 }}>{logTime}</span>
                             </div>
                           </div>
                         </div>
 
                         {/* Beer stats row */}
-                        <div className="flex gap-4 mt-3 pt-3" style={{ borderTop: '1px solid var(--border)' }}>
+                        <div className="flex gap-4" style={{ marginTop: 12, paddingTop: 12, borderTop: `1px solid ${C.divider}` }}>
                           <div className="flex flex-col">
-                            <span className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>—</span>
-                            <span className="text-[10px]" style={{ color: 'var(--text-muted)' }}>time trying</span>
+                            <span style={{ fontSize: 14, fontWeight: 700, color: C.text1 }}>
+                              {history ? `${history.timesTried}${getOrdinalSuffix(history.timesTried)}` : '1st'}
+                            </span>
+                            <span style={{ fontSize: 10, color: C.text3, marginTop: 1, letterSpacing: 0.3 }}>time trying</span>
                           </div>
                           <div className="flex flex-col">
-                            <span className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>—</span>
-                            <span className="text-[10px]" style={{ color: 'var(--text-muted)' }}>your avg</span>
+                            <span style={{ fontSize: 14, fontWeight: 700, color: C.text1 }}>
+                              {history?.avgRating ? `${history.avgRating.toFixed(1)} ★` : '—'}
+                            </span>
+                            <span style={{ fontSize: 10, color: C.text3, marginTop: 1, letterSpacing: 0.3 }}>your avg</span>
                           </div>
                           {communityRating > 0 && (
                             <div className="flex flex-col">
-                              <span className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>{communityRating.toFixed(1)} ★</span>
-                              <span className="text-[10px]" style={{ color: 'var(--text-muted)' }}>community</span>
+                              <span style={{ fontSize: 14, fontWeight: 700, color: C.text1 }}>{communityRating.toFixed(1)} ★</span>
+                              <span style={{ fontSize: 10, color: C.text3, marginTop: 1, letterSpacing: 0.3 }}>community</span>
                             </div>
                           )}
                         </div>
 
                         {/* Rating section */}
-                        <div className="mt-3 pt-3" style={{ borderTop: '1px solid var(--border)' }}>
+                        <div style={{ marginTop: 12, paddingTop: 12, borderTop: `1px solid ${C.divider}` }}>
                           {isDone ? (
                             <div className="flex items-center gap-2">
-                              <StarRating value={rating} readonly size="sm" />
-                              <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: 'color-mix(in srgb, var(--border) 50%, transparent)', color: 'var(--text-muted)' }}>
+                              <div className="flex items-center gap-px">
+                                {[1, 2, 3, 4, 5].map(v => (
+                                  <span key={v} style={{ fontSize: 16, color: v <= rating ? C.gold : C.text4, lineHeight: 1 }}>★</span>
+                                ))}
+                              </div>
+                              <span style={{ fontSize: 10, color: C.text3, background: C.divider, padding: '2px 8px', borderRadius: 20, fontWeight: 500 }}>
                                 {log.rating && log.rating > 0 ? 'Rated previously' : 'Just rated'}
                               </span>
                             </div>
                           ) : (
                             <div>
-                              <p className="text-[11px] font-medium mb-1.5" style={{ color: 'var(--text-muted)' }}>Rate this beer</p>
-                              <StarRating value={rating} onChange={(v) => handleBeerRate(log.id, v)} size="md" />
+                              <p style={{ fontSize: 11, fontWeight: 500, color: C.text3, marginBottom: 6 }}>Rate this beer</p>
+                              <div className="flex items-center gap-0.5">
+                                {[1, 2, 3, 4, 5].map(v => (
+                                  <BeerStar key={v} value={v} current={rating} logId={log.id} onRate={handleBeerRate} />
+                                ))}
+                              </div>
+                              <textarea
+                                value={beerNotes[log.id] || ''}
+                                onChange={e => setBeerNotes(prev => ({ ...prev, [log.id]: e.target.value }))}
+                                placeholder="Add a tasting note... (optional)"
+                                rows={2}
+                                style={{
+                                  width: '100%',
+                                  marginTop: 10,
+                                  padding: '10px 14px',
+                                  border: `1px solid ${C.cardBorder}`,
+                                  borderRadius: 10,
+                                  background: 'rgba(255,255,255,0.5)',
+                                  fontFamily: "'DM Sans', sans-serif",
+                                  fontSize: 13,
+                                  color: C.text1,
+                                  resize: 'none',
+                                  outline: 'none',
+                                }}
+                              />
                             </div>
                           )}
                         </div>
@@ -533,33 +734,75 @@ export default function SessionRecapSheet({
               </motion.div>
             )}
 
+            {/* ═══ ACHIEVEMENTS ═══ */}
+            {newAchievements.length > 0 && (
+              <motion.div {...stagger(0.55)}>
+                <SectionTitle>Achievements Unlocked</SectionTitle>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, margin: '0 20px' }}>
+                  {newAchievements.map((ach, i) => (
+                    <motion.div
+                      key={ach.id}
+                      initial={{ opacity: 0, x: -16 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.6 + i * 0.1 }}
+                      className="flex items-center gap-3"
+                      style={{
+                        padding: '14px 16px',
+                        background: C.card,
+                        backdropFilter: 'blur(16px)',
+                        borderRadius: 16,
+                        border: `1px solid ${C.cardBorder}`,
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
+                      }}
+                    >
+                      <div
+                        className="flex items-center justify-center flex-shrink-0"
+                        style={{ width: 40, height: 40, borderRadius: 10, background: `linear-gradient(135deg, ${C.goldSoft}, ${C.accentSoft})`, fontSize: 18 }}
+                      >
+                        {ach.icon || '🏆'}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-display font-semibold" style={{ fontSize: 15, color: C.text1 }}>{ach.name}</p>
+                        <p style={{ fontSize: 12, color: C.text3, marginTop: 2 }}>Achievement unlocked · +{ach.xp_reward} XP</p>
+                      </div>
+                      <Trophy size={14} style={{ color: C.gold, flexShrink: 0 }} />
+                    </motion.div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
             {/* ═══ XP BREAKDOWN ═══ */}
             {xpGained > 0 && (
-              <motion.div
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6 }}
-                className="mb-3"
-              >
-                <p className="text-[10px] font-mono uppercase tracking-[1.5px] mb-3 px-0.5" style={{ color: 'var(--accent-amber)' }}>
-                  XP Earned
-                </p>
+              <motion.div {...stagger(0.6)}>
+                <SectionTitle>XP Earned</SectionTitle>
                 <div
-                  className="rounded-2xl p-5"
                   style={{
-                    background: 'linear-gradient(135deg, color-mix(in srgb, var(--accent-gold) 8%, var(--surface)), color-mix(in srgb, var(--surface) 100%, transparent))',
-                    border: '1px solid color-mix(in srgb, var(--accent-gold) 15%, transparent)',
+                    margin: '0 20px',
+                    padding: '18px 20px',
+                    background: `linear-gradient(135deg, rgba(200,148,58,0.08), rgba(255,255,255,0.6))`,
+                    backdropFilter: 'blur(16px)',
+                    borderRadius: 16,
+                    border: `1px solid rgba(200,148,58,0.15)`,
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
                   }}
                 >
                   {xpBreakdown.map((item, i) => (
-                    <div key={i} className="flex items-center justify-between py-1.5" style={{ borderTop: i > 0 ? '1px solid color-mix(in srgb, var(--border) 50%, transparent)' : 'none' }}>
-                      <span className="text-[13px]" style={{ color: 'var(--text-secondary)' }}>{item.label}</span>
-                      <span className="text-[13px] font-semibold" style={{ color: 'var(--accent-gold)' }}>+{item.value} XP</span>
+                    <div
+                      key={i}
+                      className="flex items-center justify-between"
+                      style={{ padding: '6px 0', borderTop: i > 0 ? `1px solid ${C.divider}` : 'none' }}
+                    >
+                      <span style={{ fontSize: 13, color: C.text2 }}>{item.label}</span>
+                      <span style={{ fontSize: 13, fontWeight: 600, color: C.gold }}>+{item.value} XP</span>
                     </div>
                   ))}
-                  <div className="flex items-center justify-between pt-2.5 mt-1.5" style={{ borderTop: '2px solid color-mix(in srgb, var(--accent-gold) 20%, transparent)' }}>
-                    <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Total Earned</span>
-                    <span className="font-display text-xl font-bold" style={{ color: 'var(--accent-gold)' }}>+{xpGained} XP</span>
+                  <div
+                    className="flex items-center justify-between"
+                    style={{ padding: '10px 0 0', marginTop: 6, borderTop: `2px solid rgba(200,148,58,0.2)` }}
+                  >
+                    <span style={{ fontSize: 14, fontWeight: 600, color: C.text1 }}>Total Earned</span>
+                    <span className="font-display font-bold" style={{ fontSize: 20, color: C.gold }}>+{xpGained} XP</span>
                   </div>
                 </div>
               </motion.div>
@@ -568,86 +811,81 @@ export default function SessionRecapSheet({
             {/* ═══ LEVEL PROGRESS ═══ */}
             {levelInfo && levelInfo.next && (
               <motion.div
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.65 }}
-                className="rounded-2xl p-5 mb-5"
-                style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
+                {...stagger(0.65)}
+                style={{
+                  margin: '12px 20px 0',
+                  padding: '18px 20px',
+                  background: C.card,
+                  backdropFilter: 'blur(16px)',
+                  borderRadius: 16,
+                  border: `1px solid ${C.cardBorder}`,
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
+                }}
               >
-                <div className="flex items-baseline justify-between mb-3">
-                  <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-                    Level <span className="font-bold" style={{ color: 'var(--text-primary)' }}>{levelInfo.current.level}</span> → <span className="font-bold" style={{ color: 'var(--text-primary)' }}>{levelInfo.next.level}</span>
+                <div className="flex items-baseline justify-between" style={{ marginBottom: 10 }}>
+                  <p style={{ fontSize: 13, color: C.text2 }}>
+                    Level <span style={{ fontWeight: 700, color: C.text1 }}>{levelInfo.current.level}</span> → <span style={{ fontWeight: 700, color: C.text1 }}>{levelInfo.next.level}</span>
                   </p>
-                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{levelInfo.xpToNext.toLocaleString()} XP to go</p>
+                  <p style={{ fontSize: 12, color: C.text3 }}>
+                    {((levelInfo.current as any).xp ?? 0).toLocaleString()} / {((levelInfo.next as any).xp ?? 0).toLocaleString()} XP
+                  </p>
                 </div>
-                <div className="h-2 rounded-full overflow-hidden" style={{ background: 'var(--surface-2)' }}>
+                <div style={{ width: '100%', height: 8, borderRadius: 10, background: C.avatarBg, overflow: 'hidden' }}>
                   <div
-                    className="h-full rounded-full transition-all duration-[1500ms] ease-out"
                     style={{
+                      height: '100%',
+                      borderRadius: 10,
+                      background: C.ring,
+                      transition: 'width 1.5s ease',
                       width: progressAnimated ? `${levelInfo.progress}%` : '0%',
-                      background: 'linear-gradient(to right, var(--accent-gold), var(--accent-amber))',
                     }}
                   />
                 </div>
               </motion.div>
             )}
 
-            {/* ═══ ACHIEVEMENTS ═══ */}
-            {newAchievements.length > 0 && (
-              <motion.div
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.7 }}
-                className="mb-5 space-y-2"
-              >
-                {newAchievements.map((ach, i) => (
-                  <motion.div
-                    key={ach.id}
-                    initial={{ opacity: 0, x: -16 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.75 + i * 0.1 }}
-                    className="flex items-center gap-3 p-3 rounded-xl text-left"
-                    style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
-                  >
-                    <div className="w-9 h-9 rounded-lg flex items-center justify-center text-base flex-shrink-0" style={{ background: 'linear-gradient(135deg, var(--accent-gold), var(--accent-amber))' }}>
-                      {ach.icon || '🏆'}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>{ach.name}</p>
-                      <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Achievement unlocked · +{ach.xp_reward} XP</p>
-                    </div>
-                    <Trophy size={13} style={{ color: 'var(--accent-gold)' }} />
-                  </motion.div>
-                ))}
-              </motion.div>
-            )}
-
             {/* ═══ ACTIONS ═══ */}
             <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.8 }}
-              className="space-y-3 pt-2"
+              {...stagger(0.75)}
+              style={{ padding: '24px 20px 0', display: 'flex', flexDirection: 'column', gap: 10 }}
             >
               {onShare && (
                 <button
                   onClick={onShare}
-                  className="w-full py-4 rounded-2xl font-semibold flex items-center justify-center gap-2.5 transition-all active:scale-[0.98]"
+                  className="flex items-center justify-center gap-2 font-semibold transition-all active:scale-[0.98]"
                   style={{
-                    background: 'linear-gradient(135deg, var(--accent-gold) 0%, var(--accent-amber) 100%)',
-                    color: 'var(--bg)',
-                    boxShadow: '0 4px 16px color-mix(in srgb, var(--accent-amber) 25%, transparent)',
+                    width: '100%',
+                    padding: 16,
+                    borderRadius: 14,
+                    border: 'none',
+                    background: C.ring,
+                    color: '#fff',
+                    fontFamily: "'DM Sans', sans-serif",
+                    fontSize: 15,
+                    fontWeight: 600,
+                    letterSpacing: 0.3,
+                    boxShadow: '0 4px 16px rgba(183,82,47,0.25)',
+                    cursor: 'pointer',
                   }}
                 >
-                  <Share2 size={17} />
-                  Share Your Session
-                  <ChevronRight size={15} className="ml-auto opacity-60" />
+                  <span>↗</span> Share Your Session
                 </button>
               )}
               <button
                 onClick={onClose}
-                className="w-full py-4 rounded-2xl font-medium transition-all active:scale-[0.98]"
-                style={{ background: 'var(--surface)', color: 'var(--text-secondary)', border: '1px solid var(--border)' }}
+                className="transition-all active:scale-[0.98]"
+                style={{
+                  width: '100%',
+                  padding: 14,
+                  borderRadius: 14,
+                  border: `1px solid ${C.cardBorder}`,
+                  background: C.card,
+                  color: C.text2,
+                  fontFamily: "'DM Sans', sans-serif",
+                  fontSize: 14,
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                }}
               >
                 Done
               </button>
@@ -657,4 +895,45 @@ export default function SessionRecapSheet({
       )}
     </AnimatePresence>
   )
+}
+
+// ── Sub-components ───────────────────────────────────────────────────────────
+
+function SectionTitle({ children }: { children: React.ReactNode }) {
+  return (
+    <p
+      className="uppercase font-semibold"
+      style={{ fontSize: 10, letterSpacing: 1.5, color: C.accent, margin: '24px 20px 12px', paddingLeft: 2 }}
+    >
+      {children}
+    </p>
+  )
+}
+
+function BeerStar({ value, current, logId, onRate }: { value: number; current: number; logId: string; onRate: (logId: string, rating: number) => void }) {
+  const [hovered, setHovered] = useState(false)
+  return (
+    <span
+      role="button"
+      tabIndex={0}
+      className="select-none transition-transform hover:scale-[1.2]"
+      style={{
+        fontSize: 22,
+        color: value <= current || hovered ? C.gold : C.text4,
+        cursor: 'pointer',
+        lineHeight: 1,
+      }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      onClick={() => onRate(logId, value)}
+    >
+      ★
+    </span>
+  )
+}
+
+function getOrdinalSuffix(n: number): string {
+  const s = ['th', 'st', 'nd', 'rd']
+  const v = n % 100
+  return s[(v - 20) % 10] || s[v] || s[0]
 }

@@ -118,7 +118,7 @@ export function AppShell({ children, username, unreadNotifications = 0 }: AppShe
           onCheckin={handleCheckin}
         />
 
-        <main className="flex-1 min-w-0 pb-20 lg:pb-0" style={{ background: 'var(--bg)' }}>
+        <main className="flex-1 min-w-0 pb-20 lg:pb-0 pt-12 lg:pt-0" style={{ background: 'var(--bg)' }}>
           {children}
         </main>
 

@@ -234,8 +234,8 @@ scripts/supabase-setup.mjs    — One-time setup script
 
 ## 🗺️ Where We Are
 
-**Current Sprint:** Sprint 33 (not started)
-**Last completed:** Sprint 32 — The Vibe ✅ (2026-03-29)
+**Current Sprint:** Sprint 34 — Own Your Data (not started)
+**Last completed:** Sprint 33 — The Recap ✅ (2026-03-30)
 
 ### Key design decisions (still active from Sprint 11):
 - Marketing pages use hardcoded `C` color constants (not CSS vars)
@@ -948,6 +948,28 @@ Full team testing audit (all 13 members) found 85 unique issues. Sprint 30 kille
 - `NotificationType` extended: `brewery_follow`, `new_tap`, `new_event`
 - `types/database.ts` — `BreweryFollow`, `SessionPhoto` types added
 - `BreweryAdminNav` — "Customers" nav item added
+
+### Sprint 33 — The Recap ✅ (2026-03-30)
+**Theme:** Make the session complete screen feel like a celebration. Brand the mobile experience.
+**Plan:** `docs/sprint-33-plan.md`
+
+- ✅ S33-001: Session Recap v3 — cream color world reskin matching HTML mockup (self-contained `C` palette, glass-morphism cards, sparkles, terracotta+gold accents, warm browns)
+- ✅ S33-002: Mobile branding — HopMark top header bar on `lg:hidden` screens (hop mark + "HopTrack" in Playfair Display + profile shortcut)
+- ✅ S33-003: Beer stats in recap — real "times tried" (ordinal) + "your avg" from `/api/beer-logs/stats` batch endpoint
+- ✅ S33-004: Session photos in recap — carousel with dot indicators + photo count badge, warm cream styling
+- ✅ New API: `GET /api/beer-logs/stats?beer_ids=...` — lightweight per-beer history aggregation
+- ✅ Session-end API: added `abv` + `avg_rating` to beer select
+- ✅ Roadmap planned: Sprint 34/35/36 scoped with research from brewery industry pain points
+- ✅ Bug log documented: 20-item comparison against HTML mockup (all closed)
+
+**Key architectural changes from Sprint 33:**
+- `SessionRecapSheet` uses self-contained cream `C` color constants — does not use app CSS vars (same pattern as The Board)
+- Recap background: `#faf6f0` with warm radial gradients; cards: `rgba(255,255,255,0.75)` + `backdrop-filter: blur(16px)`
+- `AppNav`: mobile-only fixed top header (`lg:hidden`) with HopMark mark + wordmark + profile link
+- `AppShell`: `pt-12 lg:pt-0` on main content to clear mobile header
+- `/api/beer-logs/stats` — new GET endpoint, batch beer history by `beer_ids` query param
+- Beer stats in recap: "1st", "2nd"... ordinal via `getOrdinalSuffix()`, real avg rating from history
+- Session photos: inline carousel in recap, self-contained nav buttons + dots using `C` palette
 
 ### Migration state (current)
 - 034: Fix 3 critical RLS policies ✅ APPLIED (S31)
