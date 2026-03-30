@@ -1,6 +1,21 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { rateLimitResponse } from "@/lib/rate-limit";
+import type { ReferralCode } from "@/types/database";
+
+interface ReferralUseWithProfile {
+  referred_id: string;
+  created_at: string;
+  profile: {
+    username: string;
+    display_name: string | null;
+    avatar_url: string | null;
+  } | null;
+}
+
+interface ReferralCodeRow extends Pick<ReferralCode, "id" | "code" | "use_count" | "created_at"> {
+  user_id: string;
+}
 
 // Generate a random 8-char alphanumeric code
 function generateCode(): string {
@@ -21,22 +36,22 @@ export async function GET(request: Request) {
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   // Try to fetch existing code
-  let { data: codeRow } = await (supabase as any)
-    .from("referral_codes")
+  let { data: codeRow } = await supabase
+    .from("referral_codes" as any)
     .select("id, code, use_count, created_at")
     .eq("user_id", user.id)
-    .single();
+    .single() as { data: ReferralCodeRow | null };
 
   // Create one if it doesn't exist
   if (!codeRow) {
     let code = generateCode();
     // Retry on collision (extremely rare)
     for (let attempt = 0; attempt < 5; attempt++) {
-      const { data: inserted, error } = await (supabase as any)
-        .from("referral_codes")
+      const { data: inserted, error } = await supabase
+        .from("referral_codes" as any)
         .insert({ user_id: user.id, code })
         .select("id, code, use_count, created_at")
-        .single();
+        .single() as { data: ReferralCodeRow | null; error: unknown };
       if (!error) {
         codeRow = inserted;
         break;
@@ -49,12 +64,12 @@ export async function GET(request: Request) {
   }
 
   // Fetch referred users count + list
-  const { data: uses } = await (supabase as any)
-    .from("referral_uses")
+  const { data: uses } = await supabase
+    .from("referral_uses" as any)
     .select("referred_id, created_at, profile:profiles!referral_uses_referred_id_fkey(username, display_name, avatar_url)")
     .eq("referrer_id", user.id)
     .order("created_at", { ascending: false })
-    .limit(10);
+    .limit(10) as { data: ReferralUseWithProfile[] | null };
 
   return NextResponse.json({
     code: codeRow.code,
@@ -81,22 +96,22 @@ export async function POST(request: Request) {
   }
 
   // Check if this user has already been referred
-  const { data: existingUse } = await (supabase as any)
-    .from("referral_uses")
+  const { data: existingUse } = await supabase
+    .from("referral_uses" as any)
     .select("id")
     .eq("referred_id", user.id)
-    .single();
+    .single() as { data: { id: string } | null };
 
   if (existingUse) {
     return NextResponse.json({ error: "You have already used a referral code" }, { status: 409 });
   }
 
   // Look up the code
-  const { data: codeRow } = await (supabase as any)
-    .from("referral_codes")
+  const { data: codeRow } = await supabase
+    .from("referral_codes" as any)
     .select("id, user_id, use_count")
     .eq("code", code.toUpperCase().trim())
-    .single();
+    .single() as { data: Pick<ReferralCodeRow, "id" | "user_id" | "use_count"> | null };
 
   if (!codeRow) {
     return NextResponse.json({ error: "Invalid referral code" }, { status: 404 });
@@ -107,8 +122,8 @@ export async function POST(request: Request) {
   }
 
   // Record the referral use
-  const { error: useError } = await (supabase as any)
-    .from("referral_uses")
+  const { error: useError } = await supabase
+    .from("referral_uses" as any)
     .insert({ referrer_id: codeRow.user_id, referred_id: user.id });
 
   if (useError) {
@@ -116,34 +131,34 @@ export async function POST(request: Request) {
   }
 
   // Increment use_count on the code
-  await (supabase as any)
-    .from("referral_codes")
+  await supabase
+    .from("referral_codes" as any)
     .update({ use_count: codeRow.use_count + 1 })
     .eq("id", codeRow.id);
 
   // Mark referred_by on the new user's profile
-  await (supabase as any)
+  await supabase
     .from("profiles")
-    .update({ referred_by: codeRow.user_id })
+    .update({ referred_by: codeRow.user_id } as any)
     .eq("id", user.id);
 
   // Reward the referrer: +250 XP (atomic via RPC — no race condition)
-  await (supabase as any).rpc("increment_xp", { p_user_id: codeRow.user_id, p_xp_amount: 250 });
+  await (supabase as any).rpc("increment_xp", { p_user_id: codeRow.user_id, p_xp_amount: 250 }); // supabase join shape
 
   // Notify the referrer
-  const { data: newUserProfile } = await (supabase as any)
+  const { data: newUserProfile } = await supabase
     .from("profiles")
     .select("display_name, username")
     .eq("id", user.id)
-    .single();
+    .single() as { data: { display_name: string | null; username: string } | null };
 
   const newUserName = newUserProfile?.display_name || newUserProfile?.username || "Someone";
 
-  await (supabase as any)
+  await supabase
     .from("notifications")
     .insert({
       user_id: codeRow.user_id,
-      type: "first_referral",
+      type: "first_referral" as const,
       title: "Your invite worked! 🍺",
       body: `${newUserName} joined HopTrack with your invite code. You earned 250 XP!`,
       data: { referred_user_id: user.id },

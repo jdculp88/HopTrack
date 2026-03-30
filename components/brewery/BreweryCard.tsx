@@ -4,9 +4,29 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { MapPin, ExternalLink, Star, Users, Calendar } from "lucide-react";
-import { cn, formatCount, generateGradientFromString } from "@/lib/utils";
+import { cn, formatCount } from "@/lib/utils";
 import { BeerStyleBadge } from "@/components/ui/BeerStyleBadge";
 import type { BreweryWithStats } from "@/types/database";
+
+const BREWERY_PLACEHOLDER_IMAGES = [
+  "https://picsum.photos/seed/brewery1/400/200",
+  "https://picsum.photos/seed/brewery2/400/200",
+  "https://picsum.photos/seed/brewery3/400/200",
+  "https://picsum.photos/seed/brewery4/400/200",
+  "https://picsum.photos/seed/brewery5/400/200",
+  "https://picsum.photos/seed/brewery6/400/200",
+  "https://picsum.photos/seed/brewery7/400/200",
+  "https://picsum.photos/seed/brewery8/400/200",
+];
+
+/** Pick a deterministic placeholder image from the brewery name */
+export function getBreweryPlaceholder(name: string): string {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = ((hash << 5) - hash + name.charCodeAt(i)) | 0;
+  }
+  return BREWERY_PLACEHOLDER_IMAGES[Math.abs(hash) % BREWERY_PLACEHOLDER_IMAGES.length];
+}
 
 const BREWERY_TYPE_LABELS: Record<string, string> = {
   micro: "Microbrewery",
@@ -30,15 +50,16 @@ interface BreweryCardProps {
 }
 
 export function BreweryCard({ brewery, distance, variant = "default", className }: BreweryCardProps) {
-  const gradient = generateGradientFromString(brewery.name);
+  const placeholderSrc = getBreweryPlaceholder(brewery.name);
+  const coverSrc = brewery.cover_image_url || placeholderSrc;
   const typeLabel = brewery.brewery_type ? BREWERY_TYPE_LABELS[brewery.brewery_type] ?? brewery.brewery_type : null;
 
   if (variant === "compact") {
     return (
-      <Link href={`/brewery/${brewery.id}`}>
+      <Link href={`/brewery/${brewery.id}`} aria-label={brewery.name}>
         <motion.div
           whileHover={{ y: -2, scale: 1.01 }}
-          transition={{ type: "spring", stiffness: 400, damping: 20 }}
+          transition={{ type: "spring", stiffness: 400, damping: 30 }}
           className={cn(
             "flex items-center gap-3 p-3 rounded-2xl",
             "bg-[var(--surface)] border border-[var(--border)] hover:border-[var(--accent-gold)]/30",
@@ -46,13 +67,8 @@ export function BreweryCard({ brewery, distance, variant = "default", className 
             className
           )}
         >
-          <div
-            className="w-12 h-12 rounded-xl flex-shrink-0 overflow-hidden"
-            style={!brewery.cover_image_url ? { background: gradient } : undefined}
-          >
-            {brewery.cover_image_url && (
-              <Image src={brewery.cover_image_url} alt={brewery.name} fill className="object-cover" />
-            )}
+          <div className="w-12 h-12 rounded-xl flex-shrink-0 overflow-hidden relative">
+            <Image src={coverSrc} alt={brewery.name} fill className="object-cover" sizes="48px" />
           </div>
           <div className="flex-1 min-w-0">
             <p className="font-display font-semibold text-[var(--text-primary)] truncate text-sm group-hover:text-[var(--accent-gold)] transition-colors">
@@ -75,10 +91,10 @@ export function BreweryCard({ brewery, distance, variant = "default", className 
 
   if (variant === "featured") {
     return (
-      <Link href={`/brewery/${brewery.id}`}>
+      <Link href={`/brewery/${brewery.id}`} aria-label={brewery.name}>
         <motion.div
           whileHover={{ y: -4 }}
-          transition={{ type: "spring", stiffness: 300, damping: 20 }}
+          transition={{ type: "spring", stiffness: 400, damping: 30 }}
           className={cn(
             "relative rounded-3xl overflow-hidden h-64",
             "border border-[var(--border)] group cursor-pointer",
@@ -86,18 +102,14 @@ export function BreweryCard({ brewery, distance, variant = "default", className 
           )}
         >
           {/* Background */}
-          <div
-            className="absolute inset-0"
-            style={!brewery.cover_image_url ? { background: gradient } : undefined}
-          >
-            {brewery.cover_image_url && (
-              <Image
-                src={brewery.cover_image_url}
-                alt={brewery.name}
-                fill
-                className="object-cover group-hover:scale-105 transition-transform duration-500"
-              />
-            )}
+          <div className="absolute inset-0">
+            <Image
+              src={coverSrc}
+              alt={brewery.name}
+              fill
+              className="object-cover group-hover:scale-105 transition-transform duration-500"
+              sizes="(max-width: 640px) 100vw, 50vw"
+            />
           </div>
           {/* Gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg)] via-[var(--bg)]/40 to-transparent" />
@@ -133,30 +145,26 @@ export function BreweryCard({ brewery, distance, variant = "default", className 
 
   // Default card
   return (
-    <Link href={`/brewery/${brewery.id}`}>
+    <Link href={`/brewery/${brewery.id}`} aria-label={brewery.name}>
       <motion.div
         whileHover={{ y: -3, scale: 1.01 }}
-        transition={{ type: "spring", stiffness: 300, damping: 20 }}
+        transition={{ type: "spring", stiffness: 400, damping: 30 }}
         className={cn(
-          "bg-[var(--surface)] rounded-2xl overflow-hidden",
+          "bg-[var(--surface)] rounded-2xl overflow-hidden h-full flex flex-col",
           "border border-[var(--border)] hover:border-[var(--accent-gold)]/30",
           "transition-colors duration-150 group",
           className
         )}
       >
         {/* Cover */}
-        <div
-          className="h-36 w-full relative overflow-hidden"
-          style={!brewery.cover_image_url ? { background: gradient } : undefined}
-        >
-          {brewery.cover_image_url && (
-            <Image
-              src={brewery.cover_image_url}
-              alt={brewery.name}
-              fill
-              className="object-cover group-hover:scale-105 transition-transform duration-500"
-            />
-          )}
+        <div className="h-36 w-full relative overflow-hidden flex-shrink-0">
+          <Image
+            src={coverSrc}
+            alt={brewery.name}
+            fill
+            className="object-cover group-hover:scale-105 transition-transform duration-500"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          />
           {brewery.user_visit && (
             <div className="absolute top-3 right-3 bg-[#3D7A52]/90 text-white text-xs font-mono px-2 py-0.5 rounded-full">
               ✓ Visited
@@ -169,9 +177,9 @@ export function BreweryCard({ brewery, distance, variant = "default", className 
           )}
         </div>
 
-        <div className="p-4 space-y-2">
+        <div className="p-4 flex flex-col flex-1 gap-2">
           <div className="flex items-start justify-between gap-2">
-            <h3 className="font-display font-semibold text-[var(--text-primary)] leading-tight group-hover:text-[var(--accent-gold)] transition-colors">
+            <h3 className="font-display font-semibold text-[var(--text-primary)] leading-tight group-hover:text-[var(--accent-gold)] transition-colors line-clamp-2">
               {brewery.name}
             </h3>
             {typeLabel && (
@@ -182,18 +190,20 @@ export function BreweryCard({ brewery, distance, variant = "default", className 
           </div>
 
           <div className="flex items-center gap-1 text-sm text-[var(--text-muted)]">
-            <MapPin size={12} />
+            <MapPin size={12} className="flex-shrink-0" />
             <span className="truncate">
               {brewery.city}{brewery.state ? `, ${brewery.state}` : ""}
             </span>
-            {distance && <span className="ml-auto text-[var(--accent-gold)] text-xs flex-shrink-0">{distance}</span>}
           </div>
 
-          {brewery.beer_count !== undefined && brewery.beer_count > 0 && (
-            <p className="text-xs text-[var(--text-muted)]">
-              {brewery.beer_count} beer{brewery.beer_count !== 1 ? "s" : ""} on tap
-            </p>
-          )}
+          {/* Spacer pushes bottom content down for equal-height grid alignment */}
+          <div className="mt-auto">
+            {brewery.beer_count !== undefined && brewery.beer_count > 0 && (
+              <p className="text-xs text-[var(--text-muted)]">
+                {brewery.beer_count} beer{brewery.beer_count !== 1 ? "s" : ""} on tap
+              </p>
+            )}
+          </div>
         </div>
       </motion.div>
     </Link>

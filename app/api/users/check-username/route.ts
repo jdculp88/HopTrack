@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { rateLimitResponse } from "@/lib/rate-limit";
 
 export async function GET(request: NextRequest) {
+  const rl = rateLimitResponse(request, 'users/check-username', { limit: 20, windowMs: 60_000 })
+  if (rl) return rl
+
   const username = request.nextUrl.searchParams.get("username");
 
   if (!username || username.length < 3) {

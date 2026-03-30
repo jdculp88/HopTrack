@@ -360,6 +360,11 @@ export interface Session {
     current_streak?: number
     level?: number
   }
+  session_photos?: {
+    id: string
+    url: string
+    created_at: string
+  }[]
 }
 
 export interface BeerLog {
@@ -474,6 +479,7 @@ export interface SessionParticipant {
   invited_by: string;
   status: ParticipantStatus;
   created_at: string;
+  updated_at?: string;
   // joined
   profile?: { id: string; username: string; display_name: string | null; avatar_url: string | null };
 }

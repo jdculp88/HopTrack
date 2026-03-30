@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
+import { rateLimitResponse } from "@/lib/rate-limit";
 
 // GET — list photos for a session
 export async function GET(
@@ -24,6 +25,9 @@ export async function POST(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const rl = rateLimitResponse(req, 'sessions/photos', { limit: 20, windowMs: 60_000 })
+  if (rl) return rl
+
   const { id } = await params;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();

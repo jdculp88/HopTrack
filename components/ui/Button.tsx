@@ -24,7 +24,7 @@ const VARIANTS: Record<ButtonVariant, string> = {
   ghost:
     "bg-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface)] border border-transparent",
   danger:
-    "bg-[#C44B3A]/10 text-[#C44B3A] hover:bg-[#C44B3A]/20 border border-[#C44B3A]/30",
+    "bg-[var(--danger)]/10 text-[var(--danger)] hover:bg-[var(--danger)]/20 border border-[var(--danger)]/30",
   gold:
     "bg-transparent text-[var(--accent-gold)] hover:bg-[var(--accent-gold)]/10 border border-[var(--accent-gold)]/40 hover:border-[var(--accent-gold)]",
 };
@@ -69,8 +69,9 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       >
         <motion.span
           className="inline-flex items-center justify-center gap-inherit w-full"
+          whileHover={variant === "primary" ? { scale: 1.01 } : undefined}
           whileTap={{ scale: 0.97 }}
-          transition={{ type: "spring", stiffness: 400, damping: 17 }}
+          transition={{ type: "spring", stiffness: 400, damping: 30 }}
           style={{ gap: "inherit" }}
         >
           {loading ? (

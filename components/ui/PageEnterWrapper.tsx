@@ -1,0 +1,16 @@
+"use client";
+
+import { motion } from "framer-motion";
+
+/** Wraps server-component page content with a consistent enter animation. */
+export function PageEnterWrapper({ children }: { children: React.ReactNode }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ type: "spring", stiffness: 400, damping: 30 }}
+    >
+      {children}
+    </motion.div>
+  );
+}

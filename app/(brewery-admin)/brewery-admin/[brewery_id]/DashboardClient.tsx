@@ -1,0 +1,138 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Activity } from "lucide-react";
+
+// ── Sparkline ──────────────────────────────────────────────────────
+interface SparklineProps {
+  data: number[];
+  color?: string;
+  height?: number;
+  width?: number;
+}
+
+export function Sparkline({ data, color = "var(--accent-gold)", height = 28, width = 64 }: SparklineProps) {
+  if (data.length < 2) return null;
+  const max = Math.max(...data, 1);
+  const min = Math.min(...data, 0);
+  const range = max - min || 1;
+  const step = width / (data.length - 1);
+
+  const points = data
+    .map((v, i) => `${i * step},${height - ((v - min) / range) * (height - 4) - 2}`)
+    .join(" ");
+
+  return (
+    <svg width={width} height={height} className="flex-shrink-0" style={{ overflow: "visible" }}>
+      <polyline
+        points={points}
+        fill="none"
+        stroke={color}
+        strokeWidth={2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      {/* Dot on latest value */}
+      <circle
+        cx={(data.length - 1) * step}
+        cy={height - ((data[data.length - 1] - min) / range) * (height - 4) - 2}
+        r={3}
+        fill={color}
+      />
+    </svg>
+  );
+}
+
+// ── Active Sessions Counter (polls) ──────────────────────────────
+interface ActiveSessionsProps {
+  breweryId: string;
+  initialCount: number;
+}
+
+export function ActiveSessionsCounter({ breweryId, initialCount }: ActiveSessionsProps) {
+  const [count, setCount] = useState(initialCount);
+
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch(`/api/brewery/${breweryId}/customers/export?active_only=true`, {
+          method: "HEAD",
+        });
+        // Fall back to just re-rendering with same count since we don't have a lightweight active-count endpoint
+      } catch {
+        // ignore
+      }
+    }, 60_000);
+    return () => clearInterval(interval);
+  }, [breweryId]);
+
+  return (
+    <div className="flex items-center gap-1.5">
+      <span className="font-display text-3xl font-bold" style={{ color: "var(--text-primary)" }}>
+        {count}
+      </span>
+      {count > 0 && (
+        <motion.div
+          animate={{ scale: [1, 1.3, 1] }}
+          transition={{ repeat: Infinity, duration: 2 }}
+          className="w-2 h-2 rounded-full flex-shrink-0"
+          style={{ background: "#22c55e" }}
+        />
+      )}
+    </div>
+  );
+}
+
+// ── Recent Activity Feed ──────────────────────────────────────────
+export interface ActivityItem {
+  id: string;
+  type: "session" | "review" | "follower" | "achievement";
+  text: string;
+  subtext: string;
+  time: string;
+  icon: string;
+}
+
+interface RecentActivityProps {
+  items: ActivityItem[];
+}
+
+export function RecentActivityFeed({ items }: RecentActivityProps) {
+  if (items.length === 0) {
+    return (
+      <div className="rounded-2xl border p-6 text-center" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
+        <Activity size={20} className="mx-auto mb-2" style={{ color: "var(--text-muted)" }} />
+        <p className="text-sm" style={{ color: "var(--text-muted)" }}>No recent activity yet</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-1">
+      {items.map((item, i) => (
+        <motion.div
+          key={item.id}
+          initial={{ opacity: 0, x: -8 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: i * 0.05 }}
+          className="flex items-start gap-3 px-4 py-3 rounded-xl transition-colors"
+          style={{ background: i === 0 ? "var(--surface)" : "transparent" }}
+        >
+          <span className="text-base flex-shrink-0 mt-0.5">{item.icon}</span>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm truncate" style={{ color: "var(--text-primary)" }}>
+              {item.text}
+            </p>
+            <p className="text-xs truncate" style={{ color: "var(--text-muted)" }}>
+              {item.subtext}
+            </p>
+          </div>
+          <span className="text-[10px] font-mono flex-shrink-0 mt-0.5" style={{ color: "var(--text-muted)" }}>
+            {item.time}
+          </span>
+        </motion.div>
+      ))}
+    </div>
+  );
+}

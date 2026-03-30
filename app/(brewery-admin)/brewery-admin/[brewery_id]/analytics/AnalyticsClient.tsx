@@ -1,7 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useCallback, Suspense } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, CartesianGrid, PieChart, Pie, Cell } from "recharts";
+import { Download } from "lucide-react";
 import { formatDateShort } from "@/lib/dates";
 
 interface AnalyticsClientProps {
@@ -10,14 +12,53 @@ interface AnalyticsClientProps {
   beerLogs: any[];
 }
 
+type TimeRange = "7d" | "30d" | "90d" | "all";
+
+const RANGE_OPTIONS: { key: TimeRange; label: string; days: number | null }[] = [
+  { key: "7d", label: "7 Days", days: 7 },
+  { key: "30d", label: "30 Days", days: 30 },
+  { key: "90d", label: "90 Days", days: 90 },
+  { key: "all", label: "All Time", days: null },
+];
+
 const COLORS = ["#D4A843", "#E8841A", "#4A7C59", "#C44B3A", "#A89F8C", "#6B6456", "#8B6E3C", "#5C8A6E"];
 
-export function AnalyticsClient({ sessions, beerLogs }: AnalyticsClientProps) {
-  // Visits by day (last 30 days)
+function isValidRange(v: string | null): v is TimeRange {
+  return v === "7d" || v === "30d" || v === "90d" || v === "all";
+}
+
+function AnalyticsInner({ sessions: allSessions, beerLogs: allBeerLogs }: { sessions: any[]; beerLogs: any[] }) {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const rangeParam = searchParams.get("range");
+  const range: TimeRange = isValidRange(rangeParam) ? rangeParam : "30d";
+
+  const setRange = useCallback((newRange: TimeRange) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("range", newRange);
+    router.replace(`?${params.toString()}`, { scroll: false });
+  }, [searchParams, router]);
+
+  // Filter data by selected time range
+  const { sessions, beerLogs } = useMemo(() => {
+    const option = RANGE_OPTIONS.find((o) => o.key === range)!;
+    if (!option.days) return { sessions: allSessions, beerLogs: allBeerLogs };
+
+    const since = new Date(Date.now() - option.days * 24 * 60 * 60 * 1000).toISOString();
+    return {
+      sessions: allSessions.filter((s) => s.started_at >= since),
+      beerLogs: allBeerLogs.filter((l) => l.logged_at >= since),
+    };
+  }, [allSessions, allBeerLogs, range]);
+
+  // Compute chart day count based on range
+  const chartDays = range === "7d" ? 7 : range === "30d" ? 30 : range === "90d" ? 90 : Math.min(90, Math.ceil((Date.now() - new Date(allSessions[0]?.started_at ?? Date.now()).getTime()) / 86400000) || 30);
+
+  // Visits by day
   const dailyData = useMemo(() => {
     const days: Record<string, number> = {};
     const now = new Date();
-    for (let i = 29; i >= 0; i--) {
+    for (let i = chartDays - 1; i >= 0; i--) {
       const d = new Date(now);
       d.setDate(d.getDate() - i);
       const key = formatDateShort(d);
@@ -28,7 +69,7 @@ export function AnalyticsClient({ sessions, beerLogs }: AnalyticsClientProps) {
       if (key in days) days[key]++;
     });
     return Object.entries(days).map(([date, count]) => ({ date, count }));
-  }, [sessions]);
+  }, [sessions, chartDays]);
 
   // Visits by day of week
   const dowData = useMemo(() => {
@@ -182,27 +223,95 @@ export function AnalyticsClient({ sessions, beerLogs }: AnalyticsClientProps) {
     return list;
   }, [beerPerformance, beerPerfSort]);
 
+  const rangeLabel = RANGE_OPTIONS.find((o) => o.key === range)!.label;
   const tooltipStyle = { background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12, color: "var(--text-primary)" };
+  const xAxisInterval = range === "7d" ? 0 : range === "30d" ? 6 : 14;
+
+  function exportCSV() {
+    const rows: string[][] = [
+      ["Beer Name", "Style", "Total Pours", "Avg Rating", "Rating Count", "Days On Tap", "Trend"],
+    ];
+    sortedBeerPerf.forEach(b => {
+      rows.push([
+        b.name,
+        b.style ?? "",
+        String(b.pours),
+        b.avgRating != null ? String(b.avgRating) : "",
+        String(b.ratingCount),
+        String(b.daysOnTap),
+        b.trend,
+      ]);
+    });
+    const csvContent = rows.map(r => r.map(cell => `"${cell.replace(/"/g, '""')}"`).join(",")).join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `analytics-${range}-${new Date().toISOString().split("T")[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
 
   return (
     <div className="p-6 lg:p-8 max-w-5xl mx-auto pt-16 lg:pt-8">
-      <div className="mb-8">
-        <h1 className="font-display text-3xl font-bold" style={{ color: "var(--text-primary)" }}>Analytics</h1>
-        <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>Last 90 days · {totalVisits} visit{totalVisits !== 1 ? "s" : ""} · {totalBeersLogged} beer{totalBeersLogged !== 1 ? "s" : ""} logged by {uniqueVisitors} visitor{uniqueVisitors !== 1 ? "s" : ""}</p>
+      {/* Header + Range selector */}
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8">
+        <div>
+          <h1 className="font-display text-3xl font-bold" style={{ color: "var(--text-primary)" }}>Analytics</h1>
+          <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
+            {rangeLabel} · {totalVisits} visit{totalVisits !== 1 ? "s" : ""} · {totalBeersLogged} beer{totalBeersLogged !== 1 ? "s" : ""} logged by {uniqueVisitors} visitor{uniqueVisitors !== 1 ? "s" : ""}
+          </p>
+        </div>
+        {/* Time range pills + CSV export */}
+        <div className="flex items-center gap-2">
+          <div className="flex gap-1.5">
+            {RANGE_OPTIONS.map(({ key, label }) => (
+              <button
+                key={key}
+                onClick={() => setRange(key)}
+                className="px-3.5 py-2 rounded-xl text-xs font-semibold transition-all border"
+                style={
+                  range === key
+                    ? {
+                        background: "var(--accent-gold)",
+                        borderColor: "var(--accent-gold)",
+                        color: "var(--bg)",
+                      }
+                    : {
+                        background: "var(--surface-2)",
+                        borderColor: "var(--border)",
+                        color: "var(--text-secondary)",
+                      }
+                }
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          <button
+            onClick={exportCSV}
+            title="Export beer performance data as CSV"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold border transition-opacity hover:opacity-80"
+            style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--text-secondary)" }}
+          >
+            <Download size={13} />
+            CSV
+          </button>
+        </div>
       </div>
 
       {/* Summary stats */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
         {[
-          { label: "Visits (90d)", value: totalVisits },
+          { label: `Visits (${rangeLabel})`, value: totalVisits },
           { label: "Unique Visitors", value: uniqueVisitors },
           { label: "This Week", value: thisWeek },
           { label: "Avg Rating", value: avgRating ? `${avgRating} ★` : "—" },
           { label: "Repeat Visitors", value: repeatVisitorPct != null ? `${repeatVisitorPct}%` : "—" },
         ].map(({ label, value }) => (
-          <div key={label} className="rounded-2xl p-5 border text-center" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
-            <p className="font-display text-3xl font-bold" style={{ color: "var(--accent-gold)" }}>{value}</p>
-            <p className="text-xs mt-1 font-mono uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>{label}</p>
+          <div key={label} className="rounded-2xl p-4 sm:p-5 border text-center" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
+            <p className="font-display text-2xl sm:text-3xl font-bold" style={{ color: "var(--accent-gold)" }}>{value}</p>
+            <p className="text-[10px] sm:text-xs mt-1 font-mono uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>{label}</p>
           </div>
         ))}
       </div>
@@ -217,11 +326,11 @@ export function AnalyticsClient({ sessions, beerLogs }: AnalyticsClientProps) {
         <div className="space-y-6">
           {/* Daily visits */}
           <div className="rounded-2xl p-6 border" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
-            <h2 className="font-display font-bold mb-4" style={{ color: "var(--text-primary)" }}>Visits — Last 30 Days</h2>
+            <h2 className="font-display font-bold mb-4" style={{ color: "var(--text-primary)" }}>Visits — {rangeLabel}</h2>
             <ResponsiveContainer width="100%" height={200}>
               <LineChart data={dailyData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                <XAxis dataKey="date" tick={{ fontSize: 10, fill: "var(--text-muted)" }} interval={6} />
+                <XAxis dataKey="date" tick={{ fontSize: 10, fill: "var(--text-muted)" }} interval={xAxisInterval} />
                 <YAxis tick={{ fontSize: 10, fill: "var(--text-muted)" }} allowDecimals={false} />
                 <Tooltip contentStyle={tooltipStyle} />
                 <Line type="monotone" dataKey="count" stroke="#D4A843" strokeWidth={2} dot={false} name="Visits" />
@@ -263,14 +372,18 @@ export function AnalyticsClient({ sessions, beerLogs }: AnalyticsClientProps) {
           {topBeers.length > 0 && (
             <div className="rounded-2xl p-6 border" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
               <h2 className="font-display font-bold mb-4" style={{ color: "var(--text-primary)" }}>Most Popular Beers</h2>
-              <ResponsiveContainer width="100%" height={Math.max(200, topBeers.length * 40)}>
-                <BarChart data={topBeers} layout="vertical">
-                  <XAxis type="number" tick={{ fontSize: 11, fill: "var(--text-muted)" }} allowDecimals={false} />
-                  <YAxis type="category" dataKey="name" width={160} tick={{ fontSize: 11, fill: "var(--text-muted)" }} />
-                  <Tooltip contentStyle={tooltipStyle} formatter={(v: any) => [`${v} pours`, ""]} />
-                  <Bar dataKey="count" fill="#D4A843" radius={[0,4,4,0]} name="Pours" />
-                </BarChart>
-              </ResponsiveContainer>
+              <div className="overflow-x-auto -mx-6 px-6">
+                <div className="min-w-[400px]">
+                  <ResponsiveContainer width="100%" height={Math.max(200, topBeers.length * 40)}>
+                    <BarChart data={topBeers} layout="vertical">
+                      <XAxis type="number" tick={{ fontSize: 11, fill: "var(--text-muted)" }} allowDecimals={false} />
+                      <YAxis type="category" dataKey="name" width={120} tick={{ fontSize: 11, fill: "var(--text-muted)" }} />
+                      <Tooltip contentStyle={tooltipStyle} formatter={(v: any) => [`${v} pours`, ""]} />
+                      <Bar dataKey="count" fill="#D4A843" radius={[0,4,4,0]} name="Pours" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
             </div>
           )}
 
@@ -294,14 +407,18 @@ export function AnalyticsClient({ sessions, beerLogs }: AnalyticsClientProps) {
             <div className="rounded-2xl p-6 border" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
               <h2 className="font-display font-bold mb-1" style={{ color: "var(--text-primary)" }}>Top Beers by Rating</h2>
               <p className="text-xs mb-4 font-mono" style={{ color: "var(--text-muted)" }}>Minimum 3 ratings</p>
-              <ResponsiveContainer width="100%" height={Math.max(200, topBeersByRating.length * 40)}>
-                <BarChart data={topBeersByRating} layout="vertical">
-                  <XAxis type="number" domain={[0, 5]} tick={{ fontSize: 11, fill: "var(--text-muted)" }} />
-                  <YAxis type="category" dataKey="name" width={160} tick={{ fontSize: 11, fill: "var(--text-muted)" }} />
-                  <Tooltip contentStyle={tooltipStyle} formatter={(v: any, _: any, p: any) => [`${v} ★ (${p.payload.ratingCount} ratings)`, ""]} />
-                  <Bar dataKey="avgRating" fill="#4A7C59" radius={[0,4,4,0]} name="Avg Rating" />
-                </BarChart>
-              </ResponsiveContainer>
+              <div className="overflow-x-auto -mx-6 px-6">
+                <div className="min-w-[400px]">
+                  <ResponsiveContainer width="100%" height={Math.max(200, topBeersByRating.length * 40)}>
+                    <BarChart data={topBeersByRating} layout="vertical">
+                      <XAxis type="number" domain={[0, 5]} tick={{ fontSize: 11, fill: "var(--text-muted)" }} />
+                      <YAxis type="category" dataKey="name" width={120} tick={{ fontSize: 11, fill: "var(--text-muted)" }} />
+                      <Tooltip contentStyle={tooltipStyle} formatter={(v: any, _: any, p: any) => [`${v} ★ (${p.payload.ratingCount} ratings)`, ""]} />
+                      <Bar dataKey="avgRating" fill="#4A7C59" radius={[0,4,4,0]} name="Avg Rating" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
             </div>
           )}
 
@@ -322,17 +439,17 @@ export function AnalyticsClient({ sessions, beerLogs }: AnalyticsClientProps) {
           {/* Beer Performance */}
           {sortedBeerPerf.length > 0 && (
             <div className="rounded-2xl p-6 border" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
-              <div className="flex items-start justify-between gap-4 mb-4">
+              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 sm:gap-4 mb-4">
                 <div>
                   <h2 className="font-display font-bold" style={{ color: "var(--text-primary)" }}>Beer Performance</h2>
-                  <p className="text-xs font-mono" style={{ color: "var(--text-muted)" }}>Which beers are driving engagement (90 days)</p>
+                  <p className="text-xs font-mono" style={{ color: "var(--text-muted)" }}>Which beers are driving engagement ({rangeLabel})</p>
                 </div>
                 <div className="flex gap-1.5">
                   {(["pours", "rating", "newest"] as const).map((key) => (
                     <button
                       key={key}
                       onClick={() => setBeerPerfSort(key)}
-                      className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all border"
+                      className="px-3 py-2 sm:py-1.5 rounded-lg text-xs font-medium transition-all border min-h-[44px] sm:min-h-0"
                       style={
                         beerPerfSort === key
                           ? {
@@ -357,11 +474,11 @@ export function AnalyticsClient({ sessions, beerLogs }: AnalyticsClientProps) {
                 {sortedBeerPerf.slice(0, 12).map((beer, i) => (
                   <div
                     key={beer.name + i}
-                    className="flex items-center gap-4 px-4 py-3 rounded-xl"
+                    className="flex items-center gap-3 sm:gap-4 px-3 sm:px-4 py-3 rounded-xl"
                     style={{ background: i % 2 === 0 ? "var(--surface-2)" : "transparent" }}
                   >
                     {/* Rank */}
-                    <span className="font-mono text-xs w-6 text-right shrink-0" style={{ color: "var(--text-muted)" }}>
+                    <span className="font-mono text-xs w-5 sm:w-6 text-right shrink-0" style={{ color: "var(--text-muted)" }}>
                       {i + 1}
                     </span>
 
@@ -380,17 +497,17 @@ export function AnalyticsClient({ sessions, beerLogs }: AnalyticsClientProps) {
                       <p className="font-mono text-sm font-bold" style={{ color: "var(--accent-gold)" }}>
                         {beer.pours}
                       </p>
-                      <p className="text-[10px]" style={{ color: "var(--text-muted)" }}>pours</p>
+                      <p className="text-[10px] hidden sm:block" style={{ color: "var(--text-muted)" }}>pours</p>
                     </div>
 
                     {/* Rating */}
-                    <div className="text-right shrink-0 w-14">
+                    <div className="text-right shrink-0 w-12 sm:w-14">
                       {beer.avgRating ? (
                         <>
                           <p className="font-mono text-sm" style={{ color: "var(--text-primary)" }}>
                             {beer.avgRating} ★
                           </p>
-                          <p className="text-[10px]" style={{ color: "var(--text-muted)" }}>{beer.ratingCount} ratings</p>
+                          <p className="text-[10px] hidden sm:block" style={{ color: "var(--text-muted)" }}>{beer.ratingCount} ratings</p>
                         </>
                       ) : (
                         <p className="text-xs" style={{ color: "var(--text-muted)" }}>—</p>
@@ -405,7 +522,7 @@ export function AnalyticsClient({ sessions, beerLogs }: AnalyticsClientProps) {
                     </div>
 
                     {/* Trend */}
-                    <div className="shrink-0 w-6 text-center">
+                    <div className="shrink-0 w-5 sm:w-6 text-center">
                       <span
                         className="text-sm"
                         style={{
@@ -423,5 +540,20 @@ export function AnalyticsClient({ sessions, beerLogs }: AnalyticsClientProps) {
         </div>
       )}
     </div>
+  );
+}
+
+export function AnalyticsClient({ breweryId, sessions, beerLogs }: AnalyticsClientProps) {
+  return (
+    <Suspense fallback={
+      <div className="p-6 lg:p-8 max-w-5xl mx-auto pt-16 lg:pt-8">
+        <div className="mb-8">
+          <div className="h-8 w-40 rounded-lg animate-pulse" style={{ background: "var(--surface-2)" }} />
+          <div className="h-4 w-64 mt-2 rounded-lg animate-pulse" style={{ background: "var(--surface-2)" }} />
+        </div>
+      </div>
+    }>
+      <AnalyticsInner sessions={sessions} beerLogs={beerLogs} />
+    </Suspense>
   );
 }

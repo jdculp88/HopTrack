@@ -9,6 +9,8 @@ export function OnboardingCard({ onDismiss }: { onDismiss: () => void }) {
     <motion.div
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
+      role="region"
+      aria-label="Getting started"
       className="rounded-2xl p-5 relative"
       style={{
         background:

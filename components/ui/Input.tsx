@@ -31,10 +31,10 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
               "text-[var(--text-primary)] placeholder:text-[var(--text-muted)] font-sans text-sm",
               "px-4 py-3 transition-all duration-150",
               "focus:outline-none focus:border-[var(--accent-gold)] focus:ring-1 focus:ring-[var(--accent-gold)]/30",
-              "hover:border-[#6B6456]",
+              "hover:border-[var(--text-muted)]",
               icon && "pl-10",
               iconRight && "pr-10",
-              error && "border-[#C44B3A] focus:border-[#C44B3A] focus:ring-[#C44B3A]/30",
+              error && "border-[var(--danger)] focus:border-[var(--danger)] focus:ring-[var(--danger)]/30",
               className
             )}
             {...props}
@@ -45,7 +45,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             </div>
           )}
         </div>
-        {error && <p className="text-xs text-[#C44B3A] font-sans">{error}</p>}
+        {error && <p className="text-xs text-[var(--danger)] font-sans">{error}</p>}
         {hint && !error && <p className="text-xs text-[var(--text-muted)] font-sans">{hint}</p>}
       </div>
     );
@@ -73,13 +73,13 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
             "text-[var(--text-primary)] placeholder:text-[var(--text-muted)] font-sans text-sm",
             "px-4 py-3 transition-all duration-150 resize-none",
             "focus:outline-none focus:border-[var(--accent-gold)] focus:ring-1 focus:ring-[var(--accent-gold)]/30",
-            "hover:border-[#6B6456]",
-            error && "border-[#C44B3A]",
+            "hover:border-[var(--text-muted)]",
+            error && "border-[var(--danger)]",
             className
           )}
           {...props}
         />
-        {error && <p className="text-xs text-[#C44B3A]">{error}</p>}
+        {error && <p className="text-xs text-[var(--danger)]">{error}</p>}
         {hint && !error && <p className="text-xs text-[var(--text-muted)]">{hint}</p>}
       </div>
     );

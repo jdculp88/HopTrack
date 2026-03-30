@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, List, BarChart2, Gift, Settings, ChevronDown, ExternalLink, Rewind, LogOut, Calendar, QrCode, CreditCard, Users, FileText, Beer } from "lucide-react";
+import { LayoutDashboard, List, BarChart2, Gift, Settings, ChevronDown, ExternalLink, Rewind, LogOut, Calendar, QrCode, CreditCard, Users, FileText, Beer, Mail } from "lucide-react";
 import { HopMark } from "@/components/ui/HopMark";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
@@ -13,6 +13,7 @@ const NAV_ITEMS = [
   { href: "/tap-list",  label: "Tap List",   icon: List },
   { href: "/analytics", label: "Analytics",  icon: BarChart2 },
   { href: "/customers", label: "Customers",  icon: Users },
+  { href: "/messages",  label: "Messages",   icon: Mail },
   { href: "/loyalty",       label: "Loyalty",      icon: Gift },
   { href: "/events",        label: "Events",       icon: Calendar },
   { href: "/qr",            label: "Table Tent",   icon: QrCode },

@@ -138,7 +138,7 @@ export function CustomersClient({ customers }: { customers: CustomerRow[] }) {
           <a
             href={`/api/brewery/${brewery_id}/customers/export`}
             download
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all border shrink-0"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all border shrink-0 min-h-[44px]"
             style={{
               background: "color-mix(in srgb, var(--accent-gold) 12%, transparent)",
               borderColor: "var(--accent-gold)",
@@ -186,11 +186,11 @@ export function CustomersClient({ customers }: { customers: CustomerRow[] }) {
             </span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-5 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
             {superfans.fans.map((fan, i) => (
               <div
                 key={fan.user_id}
-                className="flex sm:flex-col items-center gap-3 sm:gap-2 p-3 rounded-xl text-center"
+                className="flex sm:flex-col items-center gap-3 sm:gap-2 p-3 rounded-xl text-center min-h-[44px]"
                 style={{
                   background: "color-mix(in srgb, var(--accent-gold) 6%, var(--surface))",
                 }}
@@ -264,7 +264,7 @@ export function CustomersClient({ customers }: { customers: CustomerRow[] }) {
               <button
                 key={key}
                 onClick={() => toggleSort(key)}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium transition-all border"
+                className="flex items-center gap-1.5 px-3 py-2.5 sm:py-2 rounded-xl text-xs font-medium transition-all border min-h-[44px] sm:min-h-0"
                 style={
                   sortKey === key
                     ? {

@@ -10,13 +10,20 @@ export async function GET(request: Request) {
   const { data } = await supabase
     .from("friendships")
     .select(`
-      *,
-      requester:profiles!requester_id(id, username, display_name, avatar_url, level, xp, total_checkins),
-      addressee:profiles!addressee_id(id, username, display_name, avatar_url, level, xp, total_checkins)
+      id, requester_id, addressee_id, status, created_at,
+      requester:profiles!requester_id(id, username, display_name, avatar_url),
+      addressee:profiles!addressee_id(id, username, display_name, avatar_url)
     `)
     .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`);
 
-  return NextResponse.json({ friendships: data ?? [] });
+  // Normalize: always expose `profile` as the OTHER person (not the current user)
+  const friendships = (data ?? []).map((f: any) => {
+    const profile = f.requester_id === user.id ? f.addressee : f.requester;
+    const { requester, addressee, ...rest } = f;
+    return { ...rest, profile };
+  });
+
+  return NextResponse.json({ friendships });
 }
 
 export async function POST(request: Request) {

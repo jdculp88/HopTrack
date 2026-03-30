@@ -73,18 +73,24 @@ export function FollowBreweryButton({ breweryId, variant = "default" }: FollowBr
             : "1px solid var(--border)",
         }}
       >
-        <motion.div
-          key={isFollowing ? "on" : "off"}
-          initial={{ scale: 0.8 }}
-          animate={{ scale: 1 }}
-          transition={{ type: "spring", stiffness: 500, damping: 20 }}
+        <motion.span
+          className="flex items-center gap-1.5"
+          whileTap={{ scale: 0.97 }}
+          transition={{ type: "spring", stiffness: 400, damping: 30 }}
         >
-          <Heart
-            size={13}
-            className={isFollowing ? "fill-[var(--accent-gold)] text-[var(--accent-gold)]" : ""}
-          />
-        </motion.div>
-        {isFollowing ? "Following" : "Follow"}
+          <motion.div
+            key={isFollowing ? "on" : "off"}
+            initial={{ scale: 0.8 }}
+            animate={{ scale: 1 }}
+            transition={{ type: "spring", stiffness: 500, damping: 20 }}
+          >
+            <Heart
+              size={13}
+              className={isFollowing ? "fill-[var(--accent-gold)] text-[var(--accent-gold)]" : ""}
+            />
+          </motion.div>
+          {isFollowing ? "Following" : "Follow"}
+        </motion.span>
       </button>
     );
   }
@@ -104,25 +110,31 @@ export function FollowBreweryButton({ breweryId, variant = "default" }: FollowBr
           : "1px solid var(--border)",
       }}
     >
-      <motion.div
-        key={isFollowing ? "on" : "off"}
-        initial={{ scale: 0.8 }}
-        animate={{ scale: 1 }}
-        transition={{ type: "spring", stiffness: 500, damping: 20 }}
+      <motion.span
+        className="flex items-center gap-2"
+        whileTap={{ scale: 0.97 }}
+        transition={{ type: "spring", stiffness: 400, damping: 30 }}
       >
-        <Heart
-          size={16}
-          className={isFollowing ? "fill-[var(--accent-gold)] text-[var(--accent-gold)]" : ""}
-        />
-      </motion.div>
-      <span>{isFollowing ? "Following" : "Follow"}</span>
-      {count > 0 && (
-        <span
-          className="text-xs font-mono ml-1 opacity-60"
+        <motion.div
+          key={isFollowing ? "on" : "off"}
+          initial={{ scale: 0.8 }}
+          animate={{ scale: 1 }}
+          transition={{ type: "spring", stiffness: 500, damping: 20 }}
         >
-          {count.toLocaleString()}
-        </span>
-      )}
+          <Heart
+            size={16}
+            className={isFollowing ? "fill-[var(--accent-gold)] text-[var(--accent-gold)]" : ""}
+          />
+        </motion.div>
+        <span>{isFollowing ? "Following" : "Follow"}</span>
+        {count > 0 && (
+          <span
+            className="text-xs font-mono ml-1 opacity-60"
+          >
+            {count.toLocaleString()}
+          </span>
+        )}
+      </motion.span>
     </button>
   );
 }

@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HopTrack — Session Complete</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #faf6f0;
+    --card: rgba(255,255,255,0.75);
+    --card-border: rgba(180,155,120,0.13);
+    --accent: #b7522f;
+    --accent-soft: rgba(183,82,47,0.10);
+    --gold: #c8943a;
+    --gold-soft: rgba(200,148,58,0.10);
+    --text-1: #2e2418;
+    --text-2: #6b5d4e;
+    --text-3: #a39580;
+    --text-4: #c4b8a6;
+    --divider: rgba(180,155,120,0.10);
+    --ring: linear-gradient(135deg, #b7522f 0%, #c8943a 100%);
+    --avatar-bg: #efe7da;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  *::-webkit-scrollbar { display: none; }
+  body {
+    background: #e8e0d4;
+    display: flex; justify-content: center;
+    min-height: 100vh; font-family: 'DM Sans', sans-serif;
+  }
+  .phone {
+    width: 430px; min-height: 100vh;
+    background: var(--bg);
+    background-image:
+      radial-gradient(ellipse at 50% -5%, rgba(200,148,58,0.10) 0%, transparent 50%),
+      radial-gradient(ellipse at 30% 100%, rgba(183,82,47,0.04) 0%, transparent 40%);
+    position: relative; overflow-x: hidden; padding-bottom: 40px;
+  }
+  @keyframes fadeSlideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes countUp {
+    from { opacity: 0; transform: scale(0.5) translateY(10px); }
+    60% { transform: scale(1.15) translateY(-2px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  @keyframes starPop { 0% { transform: scale(0); } 70% { transform: scale(1.3); } 100% { transform: scale(1); } }
+  @keyframes sparkle {
+    0%, 100% { opacity: 0; transform: scale(0) rotate(0deg); }
+    50% { opacity: 1; transform: scale(1) rotate(180deg); }
+  }
+  .anim { animation: fadeSlideUp 0.55s ease both; }
+  .d1{animation-delay:.05s}.d2{animation-delay:.15s}.d3{animation-delay:.25s}
+  .d4{animation-delay:.35s}.d5{animation-delay:.45s}.d6{animation-delay:.55s}
+  .d7{animation-delay:.65s}.d8{animation-delay:.75s}
+
+  .close-btn {
+    position:absolute;top:16px;right:16px;z-index:5;
+    width:36px;height:36px;border-radius:50%;
+    background:rgba(255,255,255,0.6);backdrop-filter:blur(8px);
+    border:1px solid var(--card-border);
+    display:flex;align-items:center;justify-content:center;
+    font-size:18px;color:var(--text-3);cursor:pointer;transition:background .2s;
+  }
+  .close-btn:hover{background:rgba(255,255,255,0.9)}
+
+  .celebration{text-align:center;padding:50px 20px 20px;position:relative;overflow:hidden}
+  .celebration .sparkles{position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none}
+  .sparkle{position:absolute;font-size:14px;animation:sparkle 2s ease-in-out infinite;color:var(--gold)}
+  .sparkle:nth-child(1){top:15%;left:12%;animation-delay:0s}
+  .sparkle:nth-child(2){top:8%;right:18%;animation-delay:.4s}
+  .sparkle:nth-child(3){top:30%;left:22%;animation-delay:.8s}
+  .sparkle:nth-child(4){top:25%;right:10%;animation-delay:1.2s}
+  .sparkle:nth-child(5){top:12%;left:45%;animation-delay:.6s}
+  .sparkle:nth-child(6){top:35%;right:30%;animation-delay:1.5s}
+
+  .session-label{font-size:11px;font-weight:600;letter-spacing:2px;color:var(--gold);text-transform:uppercase;animation:fadeIn .5s ease both;animation-delay:.1s}
+  .session-title{font-family:'Playfair Display',serif;font-size:32px;font-weight:700;color:var(--text-1);margin:8px 0 4px;animation:fadeSlideUp .6s ease both;animation-delay:.15s}
+  .session-brewery{font-size:14px;color:var(--text-2);margin-bottom:6px;animation:fadeSlideUp .6s ease both;animation-delay:.2s}
+  .session-date{font-size:12px;color:var(--text-3);animation:fadeIn .6s ease both;animation-delay:.25s}
+
+  .xp-pill{display:inline-flex;align-items:center;gap:4px;margin-top:16px;padding:8px 20px;background:linear-gradient(135deg,rgba(200,148,58,.15),rgba(183,82,47,.10));border:1px solid rgba(200,148,58,.25);border-radius:100px;font-size:20px;font-weight:700;color:var(--gold);animation:countUp .7s ease both;animation-delay:.3s}
+  .xp-pill .xp-label{font-size:13px;font-weight:500;margin-left:2px}
+
+  .stats-row{display:flex;gap:1px;margin:20px 20px 0;background:var(--card);border-radius:16px;border:1px solid var(--card-border);overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.03)}
+  .stat-cell{flex:1;text-align:center;padding:16px 8px;border-right:1px solid var(--divider)}
+  .stat-cell:last-child{border-right:none}
+  .stat-value{font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:var(--text-1);animation:countUp .6s ease both}
+  .stat-cell:nth-child(1) .stat-value{animation-delay:.35s}
+  .stat-cell:nth-child(2) .stat-value{animation-delay:.42s}
+  .stat-cell:nth-child(3) .stat-value{animation-delay:.49s}
+  .stat-cell:nth-child(4) .stat-value{animation-delay:.56s}
+  .stat-label{font-size:10px;color:var(--text-3);letter-spacing:.5px;margin-top:4px;font-weight:500}
+
+  .fun-fact{margin:16px 20px 0;padding:14px 16px;background:var(--accent-soft);border-radius:12px;display:flex;align-items:flex-start;gap:10px;border:1px solid rgba(183,82,47,.08)}
+  .fun-fact-icon{font-size:18px;flex-shrink:0;margin-top:1px}
+  .fun-fact-text{font-size:12px;color:var(--text-2);line-height:1.5}
+  .fun-fact-text strong{color:var(--accent);font-weight:600}
+
+  .section-title{font-size:10px;font-weight:600;letter-spacing:1.5px;color:var(--accent);text-transform:uppercase;margin:24px 20px 12px;padding-left:2px}
+
+  .brewery-card{margin:0 20px;padding:20px;background:var(--card);backdrop-filter:blur(16px);border-radius:16px;border:1px solid var(--card-border);box-shadow:0 1px 3px rgba(0,0,0,.03)}
+  .brewery-row{display:flex;align-items:center;gap:14px;margin-bottom:16px}
+  .brewery-icon{width:48px;height:48px;border-radius:12px;background:var(--avatar-bg);display:flex;align-items:center;justify-content:center;font-size:24px}
+  .brewery-name{font-family:'Playfair Display',serif;font-size:18px;font-weight:600;color:var(--text-1)}
+  .brewery-visits{font-size:12px;color:var(--text-3);margin-top:2px}
+  .rate-row{display:flex;align-items:center;gap:2px;justify-content:center}
+  .rate-star{font-size:32px;cursor:pointer;transition:transform .15s ease;color:var(--text-4);line-height:1;-webkit-user-select:none;user-select:none}
+  .rate-star.filled{color:var(--gold)}
+  .rate-star:hover{transform:scale(1.2)}
+  .rate-star.pop{animation:starPop .3s ease}
+  .rate-hint{text-align:center;font-size:12px;color:var(--text-3);margin-top:8px;font-style:italic;min-height:18px}
+
+  .beer-card{margin:0 20px 10px;padding:16px 18px;background:var(--card);backdrop-filter:blur(16px);border-radius:16px;border:1px solid var(--card-border);box-shadow:0 1px 3px rgba(0,0,0,.03)}
+  .beer-top{display:flex;align-items:flex-start;gap:14px}
+  .beer-glass{width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--gold-soft),var(--accent-soft));display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+  .beer-info{flex:1}
+  .beer-name{font-family:'Playfair Display',serif;font-size:16px;font-weight:600;color:var(--text-1)}
+  .beer-meta-row{display:flex;align-items:center;gap:8px;margin-top:3px;flex-wrap:wrap}
+  .beer-style-tag{font-size:10px;color:var(--accent);background:var(--accent-soft);padding:2px 8px;border-radius:20px;font-weight:600;letter-spacing:.3px}
+  .beer-abv{font-size:11px;color:var(--text-3)}
+  .beer-sep{font-size:11px;color:var(--text-4)}
+
+  .beer-stats-row{display:flex;gap:16px;margin-top:12px;padding-top:12px;border-top:1px solid var(--divider)}
+  .beer-stat{display:flex;flex-direction:column}
+  .beer-stat-val{font-size:14px;font-weight:700;color:var(--text-1)}
+  .beer-stat-lbl{font-size:10px;color:var(--text-3);margin-top:1px;letter-spacing:.3px}
+
+  .beer-rating-section{margin-top:12px;padding-top:12px;border-top:1px solid var(--divider)}
+  .beer-rate-label{font-size:11px;font-weight:500;color:var(--text-3);margin-bottom:6px}
+  .beer-stars{display:flex;align-items:center;gap:2px}
+  .beer-star{font-size:22px;cursor:pointer;transition:transform .15s ease;color:var(--text-4);line-height:1;-webkit-user-select:none;user-select:none}
+  .beer-star.filled{color:var(--gold)}
+  .beer-star:hover{transform:scale(1.2)}
+
+  .already-rated{display:flex;align-items:center;gap:8px}
+  .beer-stars-static{display:flex;align-items:center;gap:1px}
+  .beer-star-s{font-size:16px;color:var(--gold);line-height:1}
+  .beer-star-s.empty{color:var(--text-4)}
+  .rated-badge{font-size:10px;color:var(--text-3);background:var(--divider);padding:2px 8px;border-radius:20px;font-weight:500}
+
+  .beer-note-input{width:100%;margin-top:10px;padding:10px 14px;border:1px solid var(--card-border);border-radius:10px;background:rgba(255,255,255,.5);font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text-1);resize:none;outline:none;transition:border-color .2s}
+  .beer-note-input::placeholder{color:var(--text-4);font-style:italic}
+  .beer-note-input:focus{border-color:rgba(200,148,58,.4)}
+
+  .xp-card{margin:0 20px;padding:18px 20px;background:linear-gradient(135deg,rgba(200,148,58,.08),rgba(255,255,255,.6));backdrop-filter:blur(16px);border-radius:16px;border:1px solid rgba(200,148,58,.15);box-shadow:0 1px 3px rgba(0,0,0,.03)}
+  .xp-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0}
+  .xp-row+.xp-row{border-top:1px solid var(--divider)}
+  .xp-item{font-size:13px;color:var(--text-2)}
+  .xp-val{font-size:13px;font-weight:600;color:var(--gold)}
+  .xp-total-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0 0;margin-top:6px;border-top:2px solid rgba(200,148,58,.2)}
+  .xp-total-label{font-size:14px;font-weight:600;color:var(--text-1)}
+  .xp-total-val{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--gold)}
+
+  .level-card{margin:12px 20px 0;padding:18px 20px;background:var(--card);backdrop-filter:blur(16px);border-radius:16px;border:1px solid var(--card-border);box-shadow:0 1px 3px rgba(0,0,0,.03)}
+  .level-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
+  .level-text{font-size:13px;color:var(--text-2)}
+  .level-num{font-weight:700;color:var(--text-1)}
+  .level-xp{font-size:12px;color:var(--text-3)}
+  .progress-track{width:100%;height:8px;border-radius:10px;background:var(--avatar-bg);overflow:hidden}
+  .progress-fill{height:100%;border-radius:10px;background:var(--ring);transition:width 1.5s ease;width:0}
+  .progress-fill.animate{width:93%}
+
+  .actions{padding:24px 20px 0;display:flex;flex-direction:column;gap:10px}
+  .btn-share{width:100%;padding:16px;border-radius:14px;border:none;cursor:pointer;background:var(--ring);color:#fff;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;letter-spacing:.3px;box-shadow:0 4px 16px rgba(183,82,47,.25);display:flex;align-items:center;justify-content:center;gap:8px;transition:transform .15s ease,box-shadow .15s ease}
+  .btn-share:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(183,82,47,.3)}
+  .btn-done{width:100%;padding:14px;border-radius:14px;border:1px solid var(--card-border);cursor:pointer;background:var(--card);color:var(--text-2);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;transition:background .15s ease}
+  .btn-done:hover{background:rgba(255,255,255,.9)}
+</style>
+</head>
+<body>
+<div class="phone">
+  <button class="close-btn">✕</button>
+
+  <div class="celebration">
+    <div class="sparkles"><span class="sparkle">✦</span><span class="sparkle">✧</span><span class="sparkle">✦</span><span class="sparkle">✧</span><span class="sparkle">✦</span><span class="sparkle">✧</span></div>
+    <div class="session-label">Session Complete</div>
+    <div class="session-title">Great Round</div>
+    <div class="session-brewery">Smoky Barrel Craft Co.</div>
+    <div class="session-date">Saturday, Mar 28 · 6:30 PM – 9:12 PM</div>
+    <div class="xp-pill">+55 <span class="xp-label">XP</span></div>
+  </div>
+
+  <div class="stats-row anim d2">
+    <div class="stat-cell"><div class="stat-value">2h 42m</div><div class="stat-label">Duration</div></div>
+    <div class="stat-cell"><div class="stat-value">3</div><div class="stat-label">Beers</div></div>
+    <div class="stat-cell"><div class="stat-value">2</div><div class="stat-label">New Tries</div></div>
+    <div class="stat-cell"><div class="stat-value">4th</div><div class="stat-label">Visit</div></div>
+  </div>
+
+  <div class="anim d3">
+    <div class="fun-fact">
+      <span class="fun-fact-icon">📊</span>
+      <div class="fun-fact-text">You've spent <strong>9h 14m</strong> at Smoky Barrel across 4 visits. Your most-ordered beer here is <strong>Oatmeal Stout</strong> (6 times). You're their <strong>#3 most frequent</strong> visitor on HopTrack.</div>
+    </div>
+  </div>
+
+  <div class="section-title anim d3">Rate the Brewery</div>
+  <div class="brewery-card anim d3">
+    <div class="brewery-row">
+      <div class="brewery-icon">🏭</div>
+      <div><div class="brewery-name">Smoky Barrel Craft Co.</div><div class="brewery-visits">Asheville, NC · 4th visit</div></div>
+    </div>
+    <div class="rate-row" id="breweryStars">
+      <span class="rate-star" data-val="1">★</span><span class="rate-star" data-val="2">★</span><span class="rate-star" data-val="3">★</span><span class="rate-star" data-val="4">★</span><span class="rate-star" data-val="5">★</span>
+    </div>
+    <div class="rate-hint" id="breweryHint">Tap to rate your experience</div>
+  </div>
+
+  <div class="section-title anim d4">Your Beers This Session</div>
+
+  <div class="beer-card anim d4">
+    <div class="beer-top">
+      <div class="beer-glass">🍺</div>
+      <div class="beer-info"><div class="beer-name">Barrel-Aged Oatmeal Stout</div><div class="beer-meta-row"><span class="beer-style-tag">Stout</span><span class="beer-abv">6.2%</span><span class="beer-sep">·</span><span class="beer-abv">7:04 PM</span></div></div>
+    </div>
+    <div class="beer-stats-row">
+      <div class="beer-stat"><span class="beer-stat-val">6th</span><span class="beer-stat-lbl">time trying</span></div>
+      <div class="beer-stat"><span class="beer-stat-val">4.3 ★</span><span class="beer-stat-lbl">your avg</span></div>
+      <div class="beer-stat"><span class="beer-stat-val">4.1 ★</span><span class="beer-stat-lbl">community</span></div>
+    </div>
+    <div class="beer-rating-section">
+      <div class="already-rated">
+        <div class="beer-stars-static"><span class="beer-star-s">★</span><span class="beer-star-s">★</span><span class="beer-star-s">★</span><span class="beer-star-s">★</span><span class="beer-star-s empty">★</span></div>
+        <span class="rated-badge">Rated previously</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="beer-card anim d5">
+    <div class="beer-top">
+      <div class="beer-glass">🥃</div>
+      <div class="beer-info"><div class="beer-name">Smokehouse Porter</div><div class="beer-meta-row"><span class="beer-style-tag">Porter</span><span class="beer-abv">5.8%</span><span class="beer-sep">·</span><span class="beer-abv">7:48 PM</span></div></div>
+    </div>
+    <div class="beer-stats-row">
+      <div class="beer-stat"><span class="beer-stat-val">1st</span><span class="beer-stat-lbl">time trying</span></div>
+      <div class="beer-stat"><span class="beer-stat-val">—</span><span class="beer-stat-lbl">your avg</span></div>
+      <div class="beer-stat"><span class="beer-stat-val">3.8 ★</span><span class="beer-stat-lbl">community</span></div>
+    </div>
+    <div class="beer-rating-section">
+      <div class="beer-rate-label">Rate this beer</div>
+      <div class="beer-stars" data-beer="porter"><span class="beer-star" data-val="1">★</span><span class="beer-star" data-val="2">★</span><span class="beer-star" data-val="3">★</span><span class="beer-star" data-val="4">★</span><span class="beer-star" data-val="5">★</span></div>
+      <textarea class="beer-note-input" rows="2" placeholder="Add a tasting note... (optional)"></textarea>
+    </div>
+  </div>
+
+  <div class="beer-card anim d6">
+    <div class="beer-top">
+      <div class="beer-glass">🍻</div>
+      <div class="beer-info"><div class="beer-name">Hefeweizen Classique</div><div class="beer-meta-row"><span class="beer-style-tag">Wheat</span><span class="beer-abv">4.9%</span><span class="beer-sep">·</span><span class="beer-abv">8:35 PM</span></div></div>
+    </div>
+    <div class="beer-stats-row">
+      <div class="beer-stat"><span class="beer-stat-val">1st</span><span class="beer-stat-lbl">time trying</span></div>
+      <div class="beer-stat"><span class="beer-stat-val">—</span><span class="beer-stat-lbl">your avg</span></div>
+      <div class="beer-stat"><span class="beer-stat-val">4.0 ★</span><span class="beer-stat-lbl">community</span></div>
+    </div>
+    <div class="beer-rating-section">
+      <div class="beer-rate-label">Rate this beer</div>
+      <div class="beer-stars" data-beer="hefe"><span class="beer-star" data-val="1">★</span><span class="beer-star" data-val="2">★</span><span class="beer-star" data-val="3">★</span><span class="beer-star" data-val="4">★</span><span class="beer-star" data-val="5">★</span></div>
+      <textarea class="beer-note-input" rows="2" placeholder="Add a tasting note... (optional)"></textarea>
+    </div>
+  </div>
+
+  <div class="section-title anim d7">XP Earned</div>
+  <div class="xp-card anim d7">
+    <div class="xp-row"><span class="xp-item">Session completed</span><span class="xp-val">+20 XP</span></div>
+    <div class="xp-row"><span class="xp-item">3 beers checked in</span><span class="xp-val">+15 XP</span></div>
+    <div class="xp-row"><span class="xp-item">2 new beers tried</span><span class="xp-val">+10 XP</span></div>
+    <div class="xp-row"><span class="xp-item">4th visit streak (Smoky Barrel)</span><span class="xp-val">+10 XP</span></div>
+    <div class="xp-total-row"><span class="xp-total-label">Total Earned</span><span class="xp-total-val">+55 XP</span></div>
+  </div>
+
+  <div class="level-card anim d7">
+    <div class="level-header"><div class="level-text">Level <span class="level-num">8</span> → <span class="level-num">9</span></div><div class="level-xp">4,650 / 5,000 XP</div></div>
+    <div class="progress-track"><div class="progress-fill" id="progressBar"></div></div>
+  </div>
+
+  <div class="actions anim d8">
+    <button class="btn-share"><span>↗</span> Share Your Session</button>
+    <button class="btn-done">Done</button>
+  </div>
+</div>
+
+<script>
+  const breweryStars=document.querySelectorAll('#breweryStars .rate-star');
+  const breweryHint=document.getElementById('breweryHint');
+  const hints=['','Not great','It was okay','Good spot','Really liked it','Loved it'];
+  let breweryRating=0;
+  breweryStars.forEach(star=>{
+    star.addEventListener('click',()=>{
+      breweryRating=parseInt(star.dataset.val);
+      breweryStars.forEach(s=>{
+        s.classList.toggle('filled',parseInt(s.dataset.val)<=breweryRating);
+        if(parseInt(s.dataset.val)<=breweryRating){s.classList.add('pop');setTimeout(()=>s.classList.remove('pop'),300)}
+      });
+      breweryHint.textContent=hints[breweryRating];
+    });
+    star.addEventListener('mouseenter',()=>{breweryStars.forEach(s=>s.classList.toggle('filled',parseInt(s.dataset.val)<=parseInt(star.dataset.val)))});
+    star.addEventListener('mouseleave',()=>{breweryStars.forEach(s=>s.classList.toggle('filled',parseInt(s.dataset.val)<=breweryRating))});
+  });
+  document.querySelectorAll('.beer-stars').forEach(container=>{
+    const stars=container.querySelectorAll('.beer-star');let rating=0;
+    stars.forEach(star=>{
+      star.addEventListener('click',()=>{rating=parseInt(star.dataset.val);stars.forEach(s=>s.classList.toggle('filled',parseInt(s.dataset.val)<=rating))});
+      star.addEventListener('mouseenter',()=>{stars.forEach(s=>s.classList.toggle('filled',parseInt(s.dataset.val)<=parseInt(star.dataset.val)))});
+      star.addEventListener('mouseleave',()=>{stars.forEach(s=>s.classList.toggle('filled',parseInt(s.dataset.val)<=rating))});
+    });
+  });
+  setTimeout(()=>document.getElementById('progressBar').classList.add('animate'),800);
+</script>
+</body>
+</html>

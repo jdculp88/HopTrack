@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Bell, Trophy, Users, Beer, Heart, TrendingUp, MessageCircle, Check, X, ExternalLink, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { formatRelativeTime } from "@/lib/utils";
+import { useToast } from "@/components/ui/Toast";
 import type { Notification, NotificationType } from "@/types/database";
 
 const ICONS: Record<NotificationType, { icon: React.ReactNode; color: string }> = {
@@ -158,8 +159,16 @@ export function NotificationsClient({ notifications: initial }: NotificationsCli
   const [friendActions, setFriendActions] = useState<Record<string, "accepting" | "declining" | "accepted" | "declined">>({});
   const [markingRead, setMarkingRead] = useState(false);
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
+  const { success, error: showError } = useToast();
 
-  const feedEntries = useMemo(() => buildFeedEntries(notifications), [notifications]);
+  const [dismissedIds, setDismissedIds] = useState<Set<string>>(new Set());
+
+  const visibleNotifications = useMemo(
+    () => notifications.filter(n => !dismissedIds.has(n.id)),
+    [notifications, dismissedIds]
+  );
+
+  const feedEntries = useMemo(() => buildFeedEntries(visibleNotifications), [visibleNotifications]);
 
   // Count unread by groups (a group with any unread counts as 1)
   const unread = useMemo(() => {
@@ -184,8 +193,32 @@ export function NotificationsClient({ notifications: initial }: NotificationsCli
   async function markAllRead() {
     setMarkingRead(true);
     setNotifications(prev => prev.map(n => ({ ...n, read: true })));
-    await fetch("/api/notifications", { method: "PATCH" });
+    try {
+      const res = await fetch("/api/notifications", { method: "PATCH" });
+      if (res.ok) {
+        success("All notifications marked as read");
+      } else {
+        showError("Failed to mark notifications as read");
+        setNotifications(initial);
+      }
+    } catch {
+      showError("Failed to mark notifications as read");
+      setNotifications(initial);
+    }
     setMarkingRead(false);
+  }
+
+  async function dismissNotification(id: string, isUnread: boolean) {
+    // Optimistic removal
+    setDismissedIds(prev => new Set(prev).add(id));
+    // If unread, mark as read on the server
+    if (isUnread) {
+      fetch("/api/notifications", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      }).catch(() => {});
+    }
   }
 
   async function handleFriendAccept(notifId: string, friendshipId: string) {
@@ -197,8 +230,10 @@ export function NotificationsClient({ notifications: initial }: NotificationsCli
     });
     if (res.ok) {
       setFriendActions(p => ({ ...p, [notifId]: "accepted" }));
+      success("Friend request accepted!");
     } else {
       setFriendActions(p => ({ ...p, [notifId]: undefined as any }));
+      showError("Failed to accept friend request");
     }
   }
 
@@ -211,69 +246,102 @@ export function NotificationsClient({ notifications: initial }: NotificationsCli
     });
     if (res.ok) {
       setFriendActions(p => ({ ...p, [notifId]: "declined" }));
+      success("Friend request declined");
     } else {
       setFriendActions(p => ({ ...p, [notifId]: undefined as any }));
+      showError("Failed to decline friend request");
     }
   }
 
   if (notifications.length === 0) {
     return (
-      <div className="max-w-2xl mx-auto px-4 py-6">
-        <h1 className="font-display text-3xl font-bold text-[var(--text-primary)] mb-8">Notifications</h1>
-        <div className="text-center py-20 space-y-4">
-          <div className="w-16 h-16 rounded-2xl bg-[var(--surface)] border border-[var(--border)] flex items-center justify-center mx-auto">
-            <Bell size={24} className="text-[var(--text-muted)]" />
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ type: "spring", stiffness: 400, damping: 30 }}
+      >
+        <div className="max-w-2xl mx-auto px-4 py-6">
+          <h1 className="font-sans text-3xl font-bold text-[var(--text-primary)] mb-8">Notifications</h1>
+          <div className="text-center py-20 space-y-4">
+            <div className="w-16 h-16 rounded-2xl bg-[var(--surface)] border border-[var(--border)] flex items-center justify-center mx-auto">
+              <Bell size={24} className="text-[var(--text-muted)]" />
+            </div>
+            <p className="font-display text-xl text-[var(--text-primary)]">The taps are quiet</p>
+            <p className="text-[var(--text-secondary)] text-sm max-w-xs mx-auto">
+              No notifications yet -- start a session to get social! Your friends&apos; cheers and comments will show up here.
+            </p>
+            <Link
+              href="/explore"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[var(--accent-gold)] text-[var(--bg)] text-sm font-bold hover:bg-[var(--accent-amber)] transition-colors mt-2"
+            >
+              <Beer size={14} /> Find a Brewery
+            </Link>
           </div>
-          <p className="font-display text-xl text-[var(--text-primary)]">All caught up!</p>
-          <p className="text-[var(--text-secondary)] text-sm">No new notifications.</p>
         </div>
-      </div>
+      </motion.div>
     );
   }
 
   return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ type: "spring", stiffness: 400, damping: 30 }}
+    >
     <div className="max-w-2xl mx-auto px-4 py-6 space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="font-display text-3xl font-bold text-[var(--text-primary)]">Notifications</h1>
+        <div>
+          <h1 className="font-sans text-3xl font-bold text-[var(--text-primary)]">Notifications</h1>
+          {unread > 0 && (
+            <p className="text-xs text-[var(--text-muted)] mt-1">{unread} unread</p>
+          )}
+        </div>
         {unread > 0 && (
           <button
             onClick={markAllRead}
             disabled={markingRead}
-            className="text-xs font-mono text-[var(--text-muted)] hover:text-[var(--accent-gold)] transition-colors disabled:opacity-50"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium bg-[var(--surface)] border border-[var(--border)] text-[var(--accent-gold)] hover:bg-[var(--surface-2)] transition-colors disabled:opacity-50"
           >
-            Mark all as read
+            <motion.span className="flex items-center gap-1.5" whileTap={{ scale: 0.97 }} transition={{ type: "spring", stiffness: 400, damping: 30 }}>
+              <Check size={14} />
+              {markingRead ? "Marking..." : "Mark all read"}
+            </motion.span>
           </button>
         )}
       </div>
 
       <div className="space-y-2">
-        {feedEntries.map((entry, i) => {
-          if (entry.kind === "group") {
+        <AnimatePresence initial={false}>
+          {feedEntries.map((entry, i) => {
+            if (entry.kind === "group") {
+              return (
+                <GroupedNotification
+                  key={`group-${entry.type}-${entry.sessionId}-${entry.latestAt}`}
+                  group={entry}
+                  index={i}
+                  expanded={expandedGroups.has(`${entry.type}-${entry.sessionId}-${entry.latestAt}`)}
+                  onToggle={() => toggleGroup(`${entry.type}-${entry.sessionId}-${entry.latestAt}`)}
+                />
+              );
+            }
+
+            const n = entry.notification;
             return (
-              <GroupedNotification
-                key={`group-${entry.type}-${entry.sessionId}-${entry.latestAt}`}
-                group={entry}
+              <SingleNotification
+                key={n.id}
+                notification={n}
                 index={i}
-                expanded={expandedGroups.has(`${entry.type}-${entry.sessionId}-${entry.latestAt}`)}
-                onToggle={() => toggleGroup(`${entry.type}-${entry.sessionId}-${entry.latestAt}`)}
+                friendActions={friendActions}
+                onAccept={handleFriendAccept}
+                onDecline={handleFriendDecline}
+                onDismiss={() => dismissNotification(n.id, !n.read)}
               />
             );
-          }
-
-          const n = entry.notification;
-          return (
-            <SingleNotification
-              key={n.id}
-              notification={n}
-              index={i}
-              friendActions={friendActions}
-              onAccept={handleFriendAccept}
-              onDecline={handleFriendDecline}
-            />
-          );
-        })}
+          })}
+        </AnimatePresence>
       </div>
     </div>
+    </motion.div>
   );
 }
 
@@ -476,12 +544,14 @@ function SingleNotification({
   friendActions,
   onAccept,
   onDecline,
+  onDismiss,
 }: {
   notification: Notification;
   index: number;
   friendActions: Record<string, "accepting" | "declining" | "accepted" | "declined">;
   onAccept: (notifId: string, friendshipId: string) => void;
   onDecline: (notifId: string, friendshipId: string) => void;
+  onDismiss: () => void;
 }) {
   const iconConfig = ICONS[n.type] ?? { icon: <Bell size={16} />, color: "var(--text-muted)" };
   const data = (n.data as Record<string, string> | null) ?? {};
@@ -490,10 +560,12 @@ function SingleNotification({
   return (
     <motion.div
       key={n.id}
+      layout
       initial={{ opacity: 0, x: -10 }}
       animate={{ opacity: 1, x: 0 }}
-      transition={{ delay: index * 0.04 }}
-      className={`flex items-start gap-4 p-4 rounded-2xl border transition-colors ${
+      exit={{ opacity: 0, height: 0, marginBottom: 0, overflow: "hidden" }}
+      transition={{ type: "spring", stiffness: 400, damping: 30 }}
+      className={`relative group flex items-start gap-4 p-4 rounded-2xl border transition-colors ${
         !n.read
           ? "bg-[var(--surface)] border-[var(--accent-gold)]/20"
           : "bg-[var(--surface)]/50 border-[var(--border)]"
@@ -584,12 +656,17 @@ function SingleNotification({
                 >
                   <button
                     onClick={async () => {
-                      const res = await fetch(`/api/sessions/${data.session_id}/participants/status`, {
-                        method: "PATCH",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ status: "accepted" }),
-                      });
-                      if (res.ok) onAccept(n.id, data.session_id);
+                      try {
+                        const res = await fetch(`/api/sessions/${data.session_id}/participants/status`, {
+                          method: "PATCH",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ status: "accepted" }),
+                        });
+                        if (res.ok) onAccept(n.id, data.session_id);
+                        else throw new Error();
+                      } catch {
+                        // error handled by parent via onAccept/onDecline state
+                      }
                     }}
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono bg-[#5B8DEF]/20 text-[#5B8DEF] hover:bg-[#5B8DEF]/30 transition-colors"
                   >
@@ -665,9 +742,20 @@ function SingleNotification({
         </div>
       </div>
 
-      {!n.read && (
-        <div className="w-2 h-2 rounded-full bg-[var(--accent-gold)] flex-shrink-0 mt-2" />
-      )}
+      <div className="flex flex-col items-center gap-2 flex-shrink-0 mt-1">
+        {!n.read && (
+          <div className="w-2 h-2 rounded-full bg-[var(--accent-gold)]" />
+        )}
+        <button
+          onClick={(e) => { e.stopPropagation(); onDismiss(); }}
+          className="w-6 h-6 rounded-lg flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-2)] transition-colors opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
+          aria-label="Dismiss notification"
+        >
+          <motion.span className="flex items-center justify-center" whileTap={{ scale: 0.9 }} transition={{ type: "spring", stiffness: 400, damping: 30 }}>
+            <X size={12} />
+          </motion.span>
+        </button>
+      </div>
     </motion.div>
   );
 }

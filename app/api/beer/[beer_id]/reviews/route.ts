@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { rateLimitResponse } from "@/lib/rate-limit";
 
 // GET /api/beer/[beer_id]/reviews — fetch reviews + user's own review
 export async function GET(
@@ -32,7 +33,7 @@ export async function GET(
     userReview,
     avgRating: avg,
     totalReviews: allRatings.length,
-  });
+  }, { headers: { 'Cache-Control': 'public, max-age=60, stale-while-revalidate=300' } });
 }
 
 // POST /api/beer/[beer_id]/reviews — create or update user's review
@@ -40,6 +41,9 @@ export async function POST(
   req: Request,
   { params }: { params: Promise<{ beer_id: string }> },
 ) {
+  const rl = rateLimitResponse(req, 'beer/reviews', { limit: 20, windowMs: 60_000 })
+  if (rl) return rl
+
   const { beer_id } = await params;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();

@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HopTrack — Card Background System</title>
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@300,400,500,700,900&f[]=general-sans@300,400,500,600,700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --amber: #b7522f;
+    --amber-light: #d4723f;
+    --gold: #c8943a;
+    --gold-light: #e0b85c;
+    --cream: #faf6f0;
+    --warm-white: #fefcf8;
+    --dark: #1a1410;
+    --charcoal: #3d3228;
+    --warm-gray: #8a7e72;
+    --mid-gray: #b5a99a;
+    --light-gray: #e8e2da;
+    --ipa-green: #5a8a4a;
+    --ipa-green-light: #eaf2e6;
+    --stout-espresso: #3d2b1f;
+    --stout-espresso-light: #ebe3dc;
+    --stout-espresso-mid: #6b5445;
+    --sour-berry: #a8456a;
+    --sour-berry-light: #f5e6ec;
+    --porter-plum: #5c3d5e;
+    --porter-plum-light: #ece4ed;
+    --lager-sky: #4a7a8a;
+    --lager-sky-light: #e4eef2;
+    --saison-peach: #d48a50;
+    --saison-peach-light: #f8eddf;
+    --streak-flame: #e07830;
+    --xp-emerald: #4a8a5c;
+    --live-green: #48a058;
+    --badge-bronze: #a07850;
+    --badge-silver: #8a9098;
+    --badge-gold: #c8943a;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background: var(--cream);
+    color: var(--dark);
+    font-family: 'Satoshi', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    background: var(--dark); color: var(--cream);
+    padding: 68px 60px 58px;
+    position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content:''; position:absolute;
+    top:-80px; right:-80px;
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(200,148,58,.08) 0%, transparent 60%);
+    pointer-events:none;
+  }
+  .hero-label {
+    font-family:'JetBrains Mono',monospace;
+    font-size:10px; letter-spacing:3px;
+    text-transform:uppercase; color:var(--gold);
+    margin-bottom:26px;
+    opacity:0; animation:fadeUp .5s ease forwards .2s;
+  }
+  .hero h1 {
+    font-family:'General Sans',sans-serif;
+    font-weight:700;
+    font-size:clamp(36px,5.5vw,64px);
+    line-height:.95; letter-spacing:-1.5px;
+    margin-bottom:16px;
+    opacity:0; animation:fadeUp .5s ease forwards .35s;
+  }
+  .hero h1 span { color:var(--gold); }
+  .hero-sub {
+    font-weight:300; font-size:16px;
+    color:var(--mid-gray); max-width:520px; line-height:1.6;
+    opacity:0; animation:fadeUp .5s ease forwards .5s;
+  }
+  @keyframes fadeUp {
+    from{opacity:0;transform:translateY(12px)}
+    to{opacity:1;transform:translateY(0)}
+  }
+
+  .content { max-width:1140px; margin:0 auto; padding:0 56px; }
+  section { padding:68px 0; border-bottom:1px solid var(--light-gray); }
+  section:last-child { border-bottom:none; }
+  .slabel {
+    font-family:'JetBrains Mono',monospace;
+    font-size:10px; letter-spacing:3px;
+    text-transform:uppercase; color:var(--amber);
+    margin-bottom:10px;
+  }
+  .stitle {
+    font-family:'General Sans',sans-serif;
+    font-weight:600; font-size:24px;
+    letter-spacing:-.4px; margin-bottom:6px;
+  }
+  .sdesc {
+    font-size:14px; color:var(--warm-gray);
+    margin-bottom:44px; max-width:540px; line-height:1.6;
+  }
+
+  /* ── PHONE FRAME ── */
+  .phone-frame {
+    width: 375px;
+    background: var(--cream);
+    border-radius: 40px;
+    border: 8px solid var(--dark);
+    padding: 24px 16px 32px;
+    box-shadow: 0 24px 80px rgba(26,20,16,.15);
+    position: relative;
+    overflow: hidden;
+  }
+  .phone-frame::before {
+    content:'';
+    position:absolute; top:10px; left:50%; transform:translateX(-50%);
+    width:100px; height:24px;
+    background:var(--dark); border-radius:0 0 16px 16px;
+  }
+  .phone-frame-inner {
+    padding-top: 20px;
+    display:flex; flex-direction:column; gap:12px;
+  }
+
+  /* ── COMPARISON LAYOUT ── */
+  .compare-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    align-items: start;
+    margin-bottom: 56px;
+  }
+  .compare-side { }
+  .compare-label {
+    font-family:'JetBrains Mono',monospace;
+    font-size:9px; letter-spacing:2px;
+    text-transform:uppercase; margin-bottom:16px;
+    text-align:center;
+  }
+  .compare-label.before { color:var(--warm-gray); }
+  .compare-label.after { color:var(--amber); }
+
+  /* ── CARD TYPE SHOWCASE ── */
+  .showcase-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+
+  .showcase-item {
+    background: var(--warm-white);
+    border: 1px solid var(--light-gray);
+    border-radius: 20px;
+    padding: 32px;
+    overflow: hidden;
+  }
+
+  .showcase-label {
+    font-family:'JetBrains Mono',monospace;
+    font-size:9px; letter-spacing:2px;
+    text-transform:uppercase; color:var(--amber);
+    margin-bottom:6px;
+  }
+  .showcase-name {
+    font-family:'General Sans',sans-serif;
+    font-weight:600; font-size:16px;
+    margin-bottom:4px;
+  }
+  .showcase-desc {
+    font-size:12px; color:var(--warm-gray);
+    margin-bottom:20px; line-height:1.5;
+  }
+
+  /* ══════════════════════════════════════════
+     CARD BACKGROUNDS — The actual system
+     ══════════════════════════════════════════ */
+
+  /* Base card */
+  .card {
+    border-radius: 16px;
+    padding: 18px;
+    position: relative;
+    overflow: hidden;
+    background: var(--warm-white);
+    border: 1px solid rgba(0,0,0,.04);
+  }
+
+  /* ── 1. ACHIEVEMENT — Concentric arcs radiating from icon ── */
+  .card.achievement {
+    background:
+      radial-gradient(circle at 28px 50%, rgba(183,82,47,.04) 0%, rgba(183,82,47,.02) 40%, transparent 65%);
+  }
+  .card.achievement::before {
+    content:'';
+    position:absolute;
+    left: 10px; top: 50%; transform:translateY(-50%);
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    border: 1px solid rgba(183,82,47,.06);
+  }
+  .card.achievement::after {
+    content:'';
+    position:absolute;
+    left: -5px; top: 50%; transform:translateY(-50%);
+    width: 110px; height: 110px;
+    border-radius: 50%;
+    border: 1px solid rgba(183,82,47,.03);
+  }
+
+  /* Bronze variant */
+  .card.achievement.bronze {
+    background:
+      radial-gradient(circle at 28px 50%, rgba(160,120,80,.06) 0%, rgba(160,120,80,.02) 40%, transparent 65%);
+  }
+  .card.achievement.bronze::before { border-color: rgba(160,120,80,.08); }
+  .card.achievement.bronze::after { border-color: rgba(160,120,80,.04); }
+
+  /* Silver variant */
+  .card.achievement.silver {
+    background:
+      radial-gradient(circle at 28px 50%, rgba(138,144,152,.06) 0%, rgba(138,144,152,.02) 40%, transparent 65%);
+  }
+  .card.achievement.silver::before { border-color: rgba(138,144,152,.08); }
+  .card.achievement.silver::after { border-color: rgba(138,144,152,.04); }
+
+  /* Gold variant */
+  .card.achievement.gold {
+    background:
+      radial-gradient(circle at 28px 50%, rgba(200,148,58,.06) 0%, rgba(200,148,58,.02) 40%, transparent 65%);
+  }
+  .card.achievement.gold::before { border-color: rgba(200,148,58,.08); }
+  .card.achievement.gold::after { border-color: rgba(200,148,58,.04); }
+
+  /* ── 2. LIVE SESSION — Warm glow + pulse ── */
+  .card.live-session {
+    background:
+      radial-gradient(ellipse at 50% 40%, rgba(72,160,88,.06) 0%, transparent 60%),
+      var(--warm-white);
+    border-color: rgba(72,160,88,.1);
+  }
+  .card.live-session::before {
+    content:'';
+    position:absolute;
+    top: 12px; right: 14px;
+    width: 8px; height: 8px;
+    border-radius:50%;
+    background: var(--live-green);
+    box-shadow: 0 0 8px rgba(72,160,88,.4);
+    animation: livePulse 2s ease-in-out infinite;
+  }
+  @keyframes livePulse {
+    0%,100% { box-shadow: 0 0 6px rgba(72,160,88,.3); }
+    50% { box-shadow: 0 0 14px rgba(72,160,88,.6); }
+  }
+
+  /* ── 3. STATS / YOUR NUMBERS — Subtle grid lines ── */
+  .card.stats {
+    background:
+      repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 23%,
+        rgba(183,82,47,.025) 23%,
+        rgba(183,82,47,.025) 23.5%,
+        transparent 23.5%
+      ),
+      repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 48%,
+        rgba(183,82,47,.025) 48%,
+        rgba(183,82,47,.025) 49%,
+        transparent 49%
+      ),
+      var(--warm-white);
+  }
+
+  /* ── 4. BEER OF THE WEEK — Warm spotlight glow ── */
+  .card.featured {
+    background:
+      radial-gradient(ellipse at 30% 30%, rgba(200,148,58,.08) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 80%, rgba(183,82,47,.04) 0%, transparent 40%),
+      var(--warm-white);
+    border-color: rgba(200,148,58,.12);
+  }
+  .card.featured::before {
+    content:'';
+    position:absolute;
+    top: -20px; left: -20px;
+    width: 80px; height: 80px;
+    border-radius:50%;
+    background: radial-gradient(circle, rgba(200,148,58,.06) 0%, transparent 70%);
+  }
+
+  /* ── 5. SEASONAL / LIMITED — Organic flowing shape ── */
+  .card.seasonal {
+    background: var(--warm-white);
+  }
+  .card.seasonal::before {
+    content:'';
+    position:absolute;
+    bottom: -30px; right: -20px;
+    width: 120px; height: 120px;
+    border-radius: 40% 60% 55% 45% / 50% 40% 60% 50%;
+    opacity: 1;
+  }
+  .card.seasonal.spring::before {
+    background: rgba(90,138,74,.06);
+    border: 1px solid rgba(90,138,74,.05);
+  }
+  .card.seasonal.berry::before {
+    background: rgba(168,69,106,.05);
+    border: 1px solid rgba(168,69,106,.04);
+  }
+  .card.seasonal.wheat::before {
+    background: rgba(200,148,58,.06);
+    border: 1px solid rgba(200,148,58,.04);
+  }
+
+  /* ── 6. CURATED COLLECTION — Left-edge color bar + tint ── */
+  .card.collection {
+    padding-left: 22px;
+    background: var(--warm-white);
+  }
+  .card.collection::before {
+    content:'';
+    position:absolute;
+    left:0; top:0; bottom:0;
+    width: 4px;
+  }
+  .card.collection::after {
+    content:'';
+    position:absolute;
+    left:0; top:0; bottom:0; right:0;
+    opacity: 1;
+    pointer-events:none;
+  }
+  .card.collection.ipa::before { background: var(--ipa-green); }
+  .card.collection.ipa::after { background: linear-gradient(90deg, rgba(90,138,74,.04) 0%, transparent 40%); }
+  .card.collection.stout::before { background: var(--stout-espresso); }
+  .card.collection.stout::after { background: linear-gradient(90deg, rgba(61,43,31,.04) 0%, transparent 40%); }
+  .card.collection.sour::before { background: var(--sour-berry); }
+  .card.collection.sour::after { background: linear-gradient(90deg, rgba(168,69,106,.04) 0%, transparent 40%); }
+  .card.collection.lager::before { background: var(--lager-sky); }
+  .card.collection.lager::after { background: linear-gradient(90deg, rgba(74,122,138,.04) 0%, transparent 40%); }
+  .card.collection.porter::before { background: var(--porter-plum); }
+  .card.collection.porter::after { background: linear-gradient(90deg, rgba(92,61,94,.04) 0%, transparent 40%); }
+
+  /* ── 7. HOPROUTE CTA — Topo map lines ── */
+  .card.hoproute {
+    background:
+      repeating-linear-gradient(
+        165deg,
+        transparent,
+        transparent 18px,
+        rgba(183,82,47,.025) 18px,
+        rgba(183,82,47,.025) 19px
+      ),
+      radial-gradient(ellipse at 70% 50%, rgba(200,148,58,.05) 0%, transparent 50%),
+      var(--warm-white);
+  }
+  .card.hoproute::before {
+    content:'';
+    position:absolute;
+    right: 24px; top: 50%; transform:translateY(-50%);
+    width: 60px; height: 60px;
+    border-radius:50%;
+    border: 1.5px dashed rgba(183,82,47,.08);
+  }
+  .card.hoproute::after {
+    content:'';
+    position:absolute;
+    right: 12px; top: 50%; transform:translateY(-50%);
+    width: 84px; height: 84px;
+    border-radius:50%;
+    border: 1px dashed rgba(183,82,47,.04);
+  }
+
+  /* ── 8. TASTE DNA / BEER DNA — Layered horizontal waves ── */
+  .card.taste-dna {
+    background:
+      linear-gradient(180deg,
+        var(--warm-white) 0%,
+        rgba(200,148,58,.03) 50%,
+        var(--warm-white) 100%
+      );
+  }
+  .card.taste-dna::before {
+    content:'';
+    position:absolute;
+    left:0; right:0; bottom: 0;
+    height: 40%;
+    background:
+      radial-gradient(ellipse at 20% 100%, rgba(90,138,74,.04) 0%, transparent 50%),
+      radial-gradient(ellipse at 60% 100%, rgba(168,69,106,.03) 0%, transparent 40%),
+      radial-gradient(ellipse at 90% 100%, rgba(74,122,138,.03) 0%, transparent 45%);
+    pointer-events:none;
+  }
+
+  /* ── 9. NOTIFICATION / ALERT — Warm attention gradient ── */
+  .card.notification {
+    background:
+      linear-gradient(135deg, rgba(200,148,58,.06) 0%, transparent 40%),
+      var(--warm-white);
+    border-color: rgba(200,148,58,.1);
+  }
+
+  /* ── 10. SOCIAL / FRIEND ACTION — Clean, no pattern ── */
+  .card.social {
+    background: var(--warm-white);
+    /* Intentionally minimal — the avatar and content ARE the visual */
+  }
+
+  /* ── 11. FOR YOU / RECO — Style-tinted with soft glow ── */
+  .card.reco {
+    position: relative;
+  }
+  .card.reco::before {
+    content:'';
+    position:absolute;
+    top:0; left:0; right:0; bottom:0;
+    pointer-events:none;
+  }
+  .card.reco.ipa {
+    background: linear-gradient(135deg, var(--ipa-green-light) 0%, var(--warm-white) 60%);
+    border-color: rgba(90,138,74,.08);
+  }
+  .card.reco.sour {
+    background: linear-gradient(135deg, var(--sour-berry-light) 0%, var(--warm-white) 60%);
+    border-color: rgba(168,69,106,.08);
+  }
+  .card.reco.stout {
+    background: linear-gradient(135deg, var(--stout-espresso-light) 0%, var(--warm-white) 60%);
+    border-color: rgba(61,43,31,.06);
+  }
+
+  /* ══ MOCK CARD CONTENT ══ */
+  .mc-row { display:flex; align-items:center; gap:10px; }
+  .mc-icon {
+    width:34px; height:34px; border-radius:10px;
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0;
+  }
+  .mc-title { font-weight:600; font-size:14px; margin-bottom:1px; }
+  .mc-sub { font-size:11px; color:var(--warm-gray); }
+  .mc-meta {
+    font-family:'JetBrains Mono',monospace;
+    font-size:9px; color:var(--warm-gray);
+    letter-spacing:.5px; margin-top:2px;
+  }
+  .mc-avatar {
+    width:28px; height:28px; border-radius:50%;
+    background: var(--light-gray); flex-shrink:0;
+  }
+  .mc-tag {
+    display:inline-block;
+    font-family:'JetBrains Mono',monospace;
+    font-size:8px; letter-spacing:.8px;
+    text-transform:uppercase;
+    padding:2px 8px; border-radius:100px;
+  }
+  .mc-stat-grid {
+    display:grid; grid-template-columns:1fr 1fr;
+    gap:6px; margin-top:10px;
+  }
+  .mc-stat {
+    text-align:center; padding:8px;
+    background:rgba(0,0,0,.02); border-radius:8px;
+  }
+  .mc-stat-val {
+    font-family:'JetBrains Mono',monospace;
+    font-weight:700; font-size:18px;
+  }
+  .mc-stat-lbl {
+    font-family:'JetBrains Mono',monospace;
+    font-size:8px; letter-spacing:1px;
+    text-transform:uppercase; color:var(--warm-gray);
+    margin-top:1px;
+  }
+  .mc-bar-row { display:flex; align-items:center; gap:8px; padding:4px 0; }
+  .mc-bar-lbl { font-size:11px; font-weight:500; min-width:38px; }
+  .mc-bar-track { flex:1; height:6px; border-radius:100px; background:rgba(0,0,0,.04); overflow:hidden; }
+  .mc-bar-fill { height:100%; border-radius:100px; }
+  .mc-cta {
+    display:inline-block;
+    font-family:'Satoshi',sans-serif;
+    font-weight:600; font-size:12px;
+    color:var(--warm-white);
+    background:var(--amber);
+    padding:8px 16px;
+    border-radius:10px;
+    margin-top:10px;
+  }
+  .mc-right { margin-left:auto; }
+  .mc-beer-name {
+    font-family:'General Sans',sans-serif;
+    font-weight:600; font-size:13px;
+  }
+  .mc-brew { font-size:10px; color:var(--warm-gray); margin-top:1px; }
+  .mc-badge-tier {
+    font-family:'JetBrains Mono',monospace;
+    font-size:7px; letter-spacing:1.5px;
+    text-transform:uppercase;
+    padding:2px 6px; border-radius:100px;
+    display:inline-block; margin-right:4px;
+  }
+
+  /* ── RULES ── */
+  .rules-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:18px; }
+  .rule-card {
+    background:var(--warm-white);
+    border:1px solid var(--light-gray);
+    border-radius:14px; padding:24px;
+  }
+  .rule-num {
+    font-family:'JetBrains Mono',monospace;
+    font-size:10px; color:var(--amber);
+    letter-spacing:1px; margin-bottom:8px;
+  }
+  .rule-title {
+    font-family:'General Sans',sans-serif;
+    font-weight:600; font-size:14px; margin-bottom:6px;
+  }
+  .rule-text { font-size:12px; color:var(--warm-gray); line-height:1.6; }
+
+  /* ── CSS CODE ── */
+  .code-block {
+    background:var(--dark); color:var(--cream);
+    border-radius:14px; padding:28px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px; line-height:2.1;
+    overflow-x:auto; white-space:pre;
+  }
+  .cc { color:var(--warm-gray); }
+  .cp { color:var(--gold); }
+  .cv { color:#7aaa6a; }
+
+  .footer {
+    text-align:center; padding:52px 56px;
+    color:var(--mid-gray); font-size:13px;
+  }
+  .footer em {
+    display:block; margin-top:10px;
+    font-family:'General Sans',sans-serif;
+    font-style:italic; font-size:14px;
+    color:var(--warm-gray);
+  }
+  .footer-logo {
+    font-family:'General Sans',sans-serif;
+    font-weight:700; font-size:15px;
+    color:var(--amber); margin-bottom:6px;
+  }
+
+  @media(max-width:800px){
+    .hero{padding:44px 24px}
+    .content{padding:0 24px}
+    .showcase-grid{grid-template-columns:1fr}
+    .compare-row{grid-template-columns:1fr; gap:24px}
+    .rules-grid{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-label">HopTrack Design System — Card Backgrounds</div>
+  <h1>Same Bubbles<br>Everywhere <span>Is The Problem</span></h1>
+  <p class="hero-sub">Every card type has a different job. Achievements celebrate. Live sessions pulse. Stats inform. The background should whisper what kind of card this is before you read a word.</p>
+</div>
+
+<div class="content">
+
+<!-- ═══ 01: THE PROBLEM ═══ -->
+<section>
+  <div class="slabel">01 — The Problem</div>
+  <div class="stitle">One Pattern, Ten Jobs</div>
+  <div class="sdesc">Right now every card uses the same scattered bubble/circle decorations. Achievements, stats, check-ins, recommendations — they all feel the same. The background isn't adding information, it's adding noise.</div>
+
+  <div style="background:var(--warm-white); border:1px solid var(--light-gray); border-radius:16px; padding:32px; max-width:700px; margin:0 auto;">
+    <div style="font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:2px; text-transform:uppercase; color:var(--warm-gray); margin-bottom:18px; text-align:center;">Current: Same decoration on every card type</div>
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <!-- Fake "same bubble" cards -->
+      <div style="border-radius:12px; padding:14px; background: radial-gradient(circle at 85% 30%, rgba(200,148,58,.06) 0%, transparent 40%), radial-gradient(circle at 90% 70%, rgba(200,148,58,.04) 0%, transparent 30%), var(--warm-white); border:1px solid rgba(0,0,0,.04);">
+        <div style="font-weight:600; font-size:13px;">Tom earned Style Student</div>
+        <div style="font-size:10px; color:var(--warm-gray); margin-top:2px;">BRONZE · +50 XP · 7h ago</div>
+      </div>
+      <div style="border-radius:12px; padding:14px; background: radial-gradient(circle at 85% 30%, rgba(200,148,58,.06) 0%, transparent 40%), radial-gradient(circle at 90% 70%, rgba(200,148,58,.04) 0%, transparent 30%), var(--warm-white); border:1px solid rgba(0,0,0,.04);">
+        <div style="font-weight:600; font-size:13px;">Your Numbers</div>
+        <div style="font-size:10px; color:var(--warm-gray); margin-top:2px;">50 Sessions · 26 Unique Beers</div>
+      </div>
+      <div style="border-radius:12px; padding:14px; background: radial-gradient(circle at 85% 30%, rgba(200,148,58,.06) 0%, transparent 40%), radial-gradient(circle at 90% 70%, rgba(200,148,58,.04) 0%, transparent 30%), var(--warm-white); border:1px solid rgba(0,0,0,.04);">
+        <div style="font-weight:600; font-size:13px;">Plan a HopRoute</div>
+        <div style="font-size:10px; color:var(--warm-gray); margin-top:2px;">AI-powered brewery crawl planner</div>
+      </div>
+      <div style="border-radius:12px; padding:14px; background: radial-gradient(circle at 85% 30%, rgba(200,148,58,.06) 0%, transparent 40%), radial-gradient(circle at 90% 70%, rgba(200,148,58,.04) 0%, transparent 30%), var(--warm-white); border:1px solid rgba(0,0,0,.04);">
+        <div style="font-weight:600; font-size:13px;">Beer of the Week</div>
+        <div style="font-size:10px; color:var(--warm-gray); margin-top:2px;">404 Wheat Not Found · 4.5%</div>
+      </div>
+    </div>
+    <div style="text-align:center; margin-top:16px; font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--sour-berry);">↑ Can you tell which is which without reading? No. That's the problem.</div>
+  </div>
+</section>
+
+<!-- ═══ 02: THE SYSTEM ═══ -->
+<section>
+  <div class="slabel">02 — The System</div>
+  <div class="stitle">Each Card Type Gets Its Own Texture</div>
+  <div class="sdesc">Backgrounds are contextual. They tell you what kind of information you're looking at before you read a single word. All CSS-only — no images, no performance hit.</div>
+
+  <div class="showcase-grid">
+
+    <!-- Achievement Cards -->
+    <div class="showcase-item">
+      <div class="showcase-label">Achievement</div>
+      <div class="showcase-name">Radiating Arcs</div>
+      <div class="showcase-desc">Concentric circles radiate outward from the badge icon — celebration energy. Arcs tinted to match the tier: bronze warm, silver cool, gold warm.</div>
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        <div class="card achievement bronze">
+          <div class="mc-row">
+            <div class="mc-icon" style="background:rgba(160,120,80,.1);">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--badge-bronze)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h14v2l-2 14H7L5 5V3z"/><path d="M19 7h1.5a1.5 1.5 0 011.5 1.5v1a1.5 1.5 0 01-1.5 1.5H18"/></svg>
+            </div>
+            <div>
+              <div class="mc-title">Tom earned <strong>Style Student</strong></div>
+              <div class="mc-meta">
+                <span class="mc-badge-tier" style="background:rgba(160,120,80,.1); color:var(--badge-bronze);">BRONZE</span>
+                <span style="color:var(--xp-emerald);">+50 XP</span> · 7h ago
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card achievement silver">
+          <div class="mc-row">
+            <div class="mc-icon" style="background:rgba(138,144,152,.08);">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--badge-silver)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polygon points="16.24,7.76 14.12,14.12 7.76,16.24 9.88,9.88" fill="rgba(138,144,152,.1)"/></svg>
+            </div>
+            <div>
+              <div class="mc-title">Tara earned <strong>Local Legend</strong></div>
+              <div class="mc-meta">
+                <span class="mc-badge-tier" style="background:rgba(138,144,152,.08); color:var(--badge-silver);">SILVER</span>
+                <span style="color:var(--xp-emerald);">+100 XP</span> · 19h ago
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card achievement gold">
+          <div class="mc-row">
+            <div class="mc-icon" style="background:rgba(200,148,58,.1);">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--badge-gold)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="12" cy="12" r="4" fill="rgba(200,148,58,.1)"/><line x1="3" y1="8" x2="21" y2="8"/></svg>
+            </div>
+            <div>
+              <div class="mc-title">Mika earned <strong>Belgian Explorer</strong></div>
+              <div class="mc-meta">
+                <span class="mc-badge-tier" style="background:rgba(200,148,58,.1); color:var(--badge-gold);">GOLD</span>
+                <span style="color:var(--xp-emerald);">+200 XP</span> · 1d ago
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Session -->
+    <div class="showcase-item">
+      <div class="showcase-label">Live Session</div>
+      <div class="showcase-name">Soft Glow + Pulse</div>
+      <div class="showcase-desc">Gentle green radial glow centered on the card with a pulsing live dot. Feels alive. The subtle green border separates it from static content.</div>
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        <div class="card live-session">
+          <div class="mc-row">
+            <div class="mc-avatar"></div>
+            <div>
+              <div class="mc-title">Tom</div>
+              <div class="mc-sub">River Bend Ales</div>
+            </div>
+            <div class="mc-right">
+              <div class="mc-meta">1 beer · 41m</div>
+              <div style="font-size:11px; color:var(--live-green); font-weight:500; text-align:right;">Cheers</div>
+            </div>
+          </div>
+        </div>
+        <div class="card live-session">
+          <div class="mc-row">
+            <div class="mc-avatar"></div>
+            <div>
+              <div class="mc-title">Cole</div>
+              <div class="mc-sub">Mountain Ridge Brewing</div>
+            </div>
+            <div class="mc-right">
+              <div class="mc-meta">2 beers · 1h 1m</div>
+              <div style="font-size:11px; color:var(--live-green); font-weight:500; text-align:right;">Cheers</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats Card -->
+    <div class="showcase-item">
+      <div class="showcase-label">Stats / Numbers</div>
+      <div class="showcase-name">Subtle Grid Lines</div>
+      <div class="showcase-desc">Faint grid pattern says "data lives here" without showing an actual chart. It's subliminal — you feel it's a numbers card before you read the values.</div>
+      <div class="card stats" style="padding:20px;">
+        <div style="font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:2px; text-transform:uppercase; color:var(--warm-gray); margin-bottom:12px;">YOUR NUMBERS</div>
+        <div class="mc-stat-grid">
+          <div class="mc-stat">
+            <div class="mc-stat-val" style="color:var(--charcoal);">50</div>
+            <div class="mc-stat-lbl">Sessions</div>
+          </div>
+          <div class="mc-stat">
+            <div class="mc-stat-val" style="color:var(--charcoal);">26</div>
+            <div class="mc-stat-lbl">Unique Beers</div>
+          </div>
+          <div class="mc-stat">
+            <div class="mc-stat-val" style="color:var(--charcoal);">4</div>
+            <div class="mc-stat-lbl">Breweries</div>
+          </div>
+          <div class="mc-stat">
+            <div class="mc-stat-val" style="color:var(--streak-flame);">3</div>
+            <div class="mc-stat-lbl">Day Streak</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Featured / Beer of the Week -->
+    <div class="showcase-item">
+      <div class="showcase-label">Featured / BOTW</div>
+      <div class="showcase-name">Warm Spotlight</div>
+      <div class="showcase-desc">Dual radial gradients create a soft golden "spotlight" effect — this card is special. The glow emanates from upper-left like a stage light.</div>
+      <div class="card featured" style="padding:20px;">
+        <div style="font-family:'JetBrains Mono',monospace; font-size:8px; letter-spacing:2px; text-transform:uppercase; color:var(--gold); margin-bottom:8px;">
+          <svg width="10" height="10" viewBox="0 0 16 16" fill="var(--gold)" style="vertical-align:middle; margin-right:3px;"><polygon points="8,1 10,6 15.5,6.5 11.2,10 12.5,15.5 8,12.5 3.5,15.5 4.8,10 0.5,6.5 6,6"/></svg>
+          BEER OF THE WEEK
+        </div>
+        <div style="font-family:'General Sans',sans-serif; font-weight:600; font-size:18px; margin-bottom:2px;">404 Wheat Not Found</div>
+        <div style="font-size:12px; color:var(--warm-gray);">Hefeweizen · 4.5%</div>
+        <div style="font-size:12px; color:var(--warm-gray);">Pint & Pixel Brewing Co.</div>
+        <div style="font-size:11px; color:var(--mid-gray); margin-top:8px;">Most sessions this week</div>
+      </div>
+    </div>
+
+    <!-- Seasonal -->
+    <div class="showcase-item">
+      <div class="showcase-label">Seasonal & Limited</div>
+      <div class="showcase-name">Organic Blob Shape</div>
+      <div class="showcase-desc">A soft, organic blob in the corner tinted to the beer's style color. Feels natural and fleeting — like the beer itself. The shape is irregular, never geometric.</div>
+      <div style="display:flex; gap:10px;">
+        <div class="card seasonal spring" style="flex:1;">
+          <div class="mc-tag" style="background:var(--ipa-green-light); color:var(--ipa-green); margin-bottom:6px;">Seasonal</div>
+          <div class="mc-beer-name">Spring Saison</div>
+          <div class="mc-brew">River Bend Ales</div>
+          <div class="mc-meta" style="margin-top:4px;">
+            <span class="mc-tag" style="background:rgba(212,138,80,.1); color:var(--saison-peach); padding:1px 6px; font-size:7px;">Saison</span>
+          </div>
+        </div>
+        <div class="card seasonal berry" style="flex:1;">
+          <div class="mc-tag" style="background:var(--sour-berry-light); color:var(--sour-berry); margin-bottom:6px;">Limited</div>
+          <div class="mc-beer-name">Cherry Blossom Sour</div>
+          <div class="mc-brew">Mountain Ridge</div>
+          <div class="mc-meta" style="margin-top:4px;">
+            <span class="mc-tag" style="background:rgba(168,69,106,.08); color:var(--sour-berry); padding:1px 6px; font-size:7px;">Sour</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HopRoute CTA -->
+    <div class="showcase-item">
+      <div class="showcase-label">HopRoute CTA</div>
+      <div class="showcase-name">Topographic Lines</div>
+      <div class="showcase-desc">Diagonal repeating lines suggest map contours — you're going somewhere. A dashed circle hints at destination. This card means "plan an adventure."</div>
+      <div class="card hoproute" style="padding:20px;">
+        <div style="font-family:'JetBrains Mono',monospace; font-size:8px; letter-spacing:2px; text-transform:uppercase; color:var(--amber); margin-bottom:6px;">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle; margin-right:3px;"><circle cx="12" cy="12" r="3"/><path d="M12 2v4"/><path d="M12 18v4"/><path d="M4.93 4.93l2.83 2.83"/><path d="M16.24 16.24l2.83 2.83"/><path d="M2 12h4"/><path d="M18 12h4"/></svg>
+          NEW
+        </div>
+        <div style="font-family:'General Sans',sans-serif; font-weight:700; font-size:17px; margin-bottom:4px;">Plan a HopRoute</div>
+        <div style="font-size:12px; color:var(--warm-gray); line-height:1.5;">AI-powered brewery crawl planner. Tell us where and when — we build your night.</div>
+      </div>
+    </div>
+
+    <!-- Taste DNA -->
+    <div class="showcase-item">
+      <div class="showcase-label">Taste DNA</div>
+      <div class="showcase-name">Blended Color Wash</div>
+      <div class="showcase-desc">A soft gradient wash that blends the user's top style colors along the bottom edge. It's literally their taste fingerprint rendered as ambient light.</div>
+      <div class="card taste-dna" style="padding:20px;">
+        <div style="font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:2px; text-transform:uppercase; color:var(--warm-gray); margin-bottom:10px;">TASTE DNA</div>
+        <div class="mc-bar-row">
+          <div class="mc-bar-lbl">IPA</div>
+          <div class="mc-bar-track"><div class="mc-bar-fill" style="width:72%; background:var(--ipa-green);"></div></div>
+          <div class="mc-meta" style="min-width:50px; text-align:right;">32</div>
+        </div>
+        <div class="mc-bar-row">
+          <div class="mc-bar-lbl">Stout</div>
+          <div class="mc-bar-track"><div class="mc-bar-fill" style="width:48%; background:var(--stout-espresso-mid);"></div></div>
+          <div class="mc-meta" style="min-width:50px; text-align:right;">18</div>
+        </div>
+        <div class="mc-bar-row">
+          <div class="mc-bar-lbl">Sour</div>
+          <div class="mc-bar-track"><div class="mc-bar-fill" style="width:30%; background:var(--sour-berry);"></div></div>
+          <div class="mc-meta" style="min-width:50px; text-align:right;">8</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Curated Collections -->
+    <div class="showcase-item">
+      <div class="showcase-label">Curated Collection</div>
+      <div class="showcase-name">Left-Edge Color Bar + Tint</div>
+      <div class="showcase-desc">A 4px color bar on the left edge plus a subtle gradient tint. Each collection is immediately identifiable by its style color. Clean, scannable, purposeful.</div>
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        <div class="card collection ipa">
+          <div class="mc-row">
+            <div>
+              <div class="mc-beer-name">NE IPA Essentials</div>
+              <div class="mc-sub">Hazy, juicy, endlessly crushable</div>
+              <div class="mc-meta">12 beers</div>
+            </div>
+          </div>
+        </div>
+        <div class="card collection stout">
+          <div class="mc-row">
+            <div>
+              <div class="mc-beer-name">The Dark Side</div>
+              <div class="mc-sub">Stouts, porters, midnight sippers</div>
+              <div class="mc-meta">18 beers</div>
+            </div>
+          </div>
+        </div>
+        <div class="card collection sour">
+          <div class="mc-row">
+            <div>
+              <div class="mc-beer-name">Sour Power</div>
+              <div class="mc-sub">Tart, funky, unapologetically weird</div>
+              <div class="mc-meta">9 beers</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Social Actions -->
+    <div class="showcase-item">
+      <div class="showcase-label">Social / Friend Action</div>
+      <div class="showcase-name">Intentionally Bare</div>
+      <div class="showcase-desc">No background pattern at all. The avatar and name ARE the visual. Adding decoration here competes with the human element. Restraint is the design.</div>
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        <div class="card social">
+          <div class="mc-row">
+            <div class="mc-avatar"></div>
+            <div>
+              <div class="mc-title">Maya joined your crew</div>
+              <div class="mc-sub">18h ago · Say hi →</div>
+            </div>
+            <div class="mc-right">
+              <div style="font-size:11px; font-weight:600; color:var(--amber); border:1px solid rgba(183,82,47,.2); border-radius:8px; padding:4px 12px;">Follow</div>
+            </div>
+          </div>
+        </div>
+        <div class="card social">
+          <div class="mc-row">
+            <div class="mc-avatar"></div>
+            <div>
+              <div class="mc-title">Drew started following you</div>
+              <div class="mc-sub">2d ago</div>
+            </div>
+            <div class="mc-right">
+              <div style="font-size:11px; font-weight:600; color:var(--amber); border:1px solid rgba(183,82,47,.2); border-radius:8px; padding:4px 12px;">Follow</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notification -->
+    <div class="showcase-item">
+      <div class="showcase-label">Notification / Alert</div>
+      <div class="showcase-name">Warm Attention Gradient</div>
+      <div class="showcase-desc">A diagonal gold-tinted gradient with a slightly warm border. Says "look at me" without screaming. The wishlisted-nearby card and prompts use this.</div>
+      <div class="card notification" style="padding:16px;">
+        <div class="mc-row">
+          <div class="mc-icon" style="background:rgba(200,148,58,.1);">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h14v2l-2 14H7L5 5V3z"/><path d="M19 7h1.5a1.5 1.5 0 011.5 1.5v1a1.5 1.5 0 01-1.5 1.5H18"/></svg>
+          </div>
+          <div style="flex:1;">
+            <div class="mc-title">1 wishlisted beer on tap nearby!</div>
+            <div class="mc-sub">Beers you want to try are available right now</div>
+          </div>
+          <div style="font-size:11px; font-weight:600; color:var(--warm-white); background:var(--amber); border-radius:8px; padding:5px 12px;">Explore</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- For You / Recommendations -->
+    <div class="showcase-item">
+      <div class="showcase-label">Recommendations</div>
+      <div class="showcase-name">Style-Tinted Gradient</div>
+      <div class="showcase-desc">A soft diagonal gradient from the beer's style color to neutral. The tint is barely there — just enough to create visual grouping when scanning a row of reco cards.</div>
+      <div style="display:flex; gap:10px;">
+        <div class="card reco sour" style="flex:1; padding:14px;">
+          <div class="mc-beer-name">Barrel Room Sour</div>
+          <div class="mc-brew">River Bend Ales</div>
+          <div style="display:flex; gap:10px; margin-top:8px;">
+            <div class="mc-tag" style="background:var(--sour-berry-light); color:var(--sour-berry);">Sour</div>
+            <div class="mc-meta" style="padding-top:3px;">5.2%</div>
+          </div>
+        </div>
+        <div class="card reco ipa" style="flex:1; padding:14px;">
+          <div class="mc-beer-name">Ridgeline IPA</div>
+          <div class="mc-brew">Mountain Ridge</div>
+          <div style="display:flex; gap:10px; margin-top:8px;">
+            <div class="mc-tag" style="background:var(--ipa-green-light); color:var(--ipa-green);">IPA</div>
+            <div class="mc-meta" style="padding-top:3px;">6.8%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══ 03: THE DECISION TREE ═══ -->
+<section>
+  <div class="slabel">03 — Decision Tree</div>
+  <div class="stitle">Which Background For What</div>
+  <div class="sdesc">Don't think about it — follow the map. Card type determines background. No freestyle.</div>
+
+  <div class="rules-grid">
+    <div class="rule-card">
+      <div class="rule-num">01</div>
+      <div class="rule-title">Is it celebrating something?</div>
+      <div class="rule-text">Achievement unlocked, badge earned, milestone hit → <strong>Radiating Arcs</strong> from the icon. Tint to match the tier (bronze/silver/gold). The arcs say "something special happened here."</div>
+    </div>
+    <div class="rule-card">
+      <div class="rule-num">02</div>
+      <div class="rule-title">Is it happening right now?</div>
+      <div class="rule-text">Live session, active check-in, someone drinking right now → <strong>Glow + Pulse</strong>. Green dot pulses. Background has a faint green wash. The card literally feels alive.</div>
+    </div>
+    <div class="rule-card">
+      <div class="rule-num">03</div>
+      <div class="rule-title">Is it showing numbers?</div>
+      <div class="rule-text">Your Numbers, session stats, profile metrics → <strong>Grid Lines</strong>. Faint intersecting lines create a subliminal chart/graph feel. Data has structure; the background should too.</div>
+    </div>
+    <div class="rule-card">
+      <div class="rule-num">04</div>
+      <div class="rule-title">Is it editorially featured?</div>
+      <div class="rule-text">Beer of the Week, staff pick, curated spotlight → <strong>Warm Spotlight</strong>. Dual radial glow from upper-left. Gold border. This content was chosen — it should feel chosen.</div>
+    </div>
+    <div class="rule-card">
+      <div class="rule-num">05</div>
+      <div class="rule-title">Is it seasonal or limited?</div>
+      <div class="rule-text">Seasonal release, limited drop, time-bound beer → <strong>Organic Blob</strong>. Soft irregular shape in the corner, tinted to the beer's style color. Feels ephemeral, natural, not-forever.</div>
+    </div>
+    <div class="rule-card">
+      <div class="rule-num">06</div>
+      <div class="rule-title">Is it a collection or category?</div>
+      <div class="rule-text">Curated collection, style group, "The Dark Side" → <strong>Left-Edge Bar + Tint</strong>. 4px color bar on the left, subtle gradient bleed. Instant style identification on scroll.</div>
+    </div>
+    <div class="rule-card">
+      <div class="rule-num">07</div>
+      <div class="rule-title">Is it asking you to do something?</div>
+      <div class="rule-text">Plan a HopRoute, start a session, explore nearby → <strong>Topo Lines</strong> (for HopRoute) or <strong>Attention Gradient</strong> (for alerts). CTAs get directional energy. Notifications get warmth.</div>
+    </div>
+    <div class="rule-card">
+      <div class="rule-num">08</div>
+      <div class="rule-title">Is it about a person?</div>
+      <div class="rule-text">Friend joined, someone followed you, social action → <strong>Nothing</strong>. Clean white. The avatar IS the visual. Background would compete with the human element. Restraint is the design here.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 04: CSS PATTERNS ═══ -->
+<section style="border-bottom:none;">
+  <div class="slabel">04 — Implementation</div>
+  <div class="stitle">Pure CSS — No Images</div>
+  <div class="sdesc">Every background is built from gradients, borders, and pseudo-elements. Zero image loads. Zero performance cost. Jordan can copy these directly.</div>
+
+  <div class="code-block"><span class="cc">/* Achievement — Radiating arcs from icon */</span>
+<span class="cp">.card-achievement</span> {
+  background: <span class="cv">radial-gradient(circle at 28px 50%,
+    rgba(160,120,80,.06) 0%,
+    rgba(160,120,80,.02) 40%,
+    transparent 65%)</span>;
+}
+<span class="cp">.card-achievement::before</span> {
+  <span class="cc">/* Inner arc */</span>
+  width: <span class="cv">80px</span>; height: <span class="cv">80px</span>;
+  border-radius: <span class="cv">50%</span>;
+  border: <span class="cv">1px solid rgba(160,120,80,.08)</span>;
+}
+<span class="cp">.card-achievement::after</span> {
+  <span class="cc">/* Outer arc */</span>
+  width: <span class="cv">110px</span>; height: <span class="cv">110px</span>;
+  border: <span class="cv">1px solid rgba(160,120,80,.04)</span>;
+}
+
+<span class="cc">/* Live Session — Glow + pulse */</span>
+<span class="cp">.card-live</span> {
+  background: <span class="cv">radial-gradient(ellipse at 50% 40%,
+    rgba(72,160,88,.06) 0%, transparent 60%)</span>;
+  border-color: <span class="cv">rgba(72,160,88,.1)</span>;
+}
+
+<span class="cc">/* Stats — Subtle grid */</span>
+<span class="cp">.card-stats</span> {
+  background:
+    <span class="cv">repeating-linear-gradient(90deg,
+      transparent, transparent 23%,
+      rgba(183,82,47,.025) 23%, rgba(183,82,47,.025) 23.5%,
+      transparent 23.5%)</span>,
+    <span class="cv">repeating-linear-gradient(0deg,
+      transparent, transparent 48%,
+      rgba(183,82,47,.025) 48%, rgba(183,82,47,.025) 49%,
+      transparent 49%)</span>;
+}
+
+<span class="cc">/* Featured — Warm spotlight */</span>
+<span class="cp">.card-featured</span> {
+  background:
+    <span class="cv">radial-gradient(ellipse at 30% 30%,
+      rgba(200,148,58,.08) 0%, transparent 50%)</span>,
+    <span class="cv">radial-gradient(ellipse at 80% 80%,
+      rgba(183,82,47,.04) 0%, transparent 40%)</span>;
+}
+
+<span class="cc">/* HopRoute CTA — Topo lines */</span>
+<span class="cp">.card-hoproute</span> {
+  background:
+    <span class="cv">repeating-linear-gradient(165deg,
+      transparent, transparent 18px,
+      rgba(183,82,47,.025) 18px, rgba(183,82,47,.025) 19px)</span>;
+}
+
+<span class="cc">/* Collection — Left-edge bar + gradient bleed */</span>
+<span class="cp">.card-collection::before</span> {
+  width: <span class="cv">4px</span>;
+  background: <span class="cv">var(--style-color)</span>;
+}
+<span class="cp">.card-collection::after</span> {
+  background: <span class="cv">linear-gradient(90deg,
+    rgba(var(--style-rgb), .04) 0%, transparent 40%)</span>;
+}
+
+<span class="cc">/* Seasonal — Organic blob */</span>
+<span class="cp">.card-seasonal::before</span> {
+  border-radius: <span class="cv">40% 60% 55% 45% / 50% 40% 60% 50%</span>;
+  background: <span class="cv">rgba(var(--style-rgb), .06)</span>;
+}
+
+<span class="cc">/* Social — intentionally nothing */</span>
+<span class="cp">.card-social</span> { background: <span class="cv">var(--warm-white)</span>; }</div>
+</section>
+
+</div>
+
+<div class="footer">
+  <div class="footer-logo">HopTrack</div>
+  Card Background System v1.0 — This is a living document.
+  <em>"Every card should feel like it knows what it is." — Morgan, arranging mugs by glaze type</em>
+</div>
+
+</body>
+</html>

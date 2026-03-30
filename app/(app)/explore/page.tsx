@@ -46,6 +46,35 @@ export default async function ExplorePage() {
 
   const eventBreweryIds = [...new Set((upcomingEventBreweries ?? []).map((e: any) => e.brewery_id))] as string[];
 
+  // Follower counts per brewery
+  const { data: followCounts } = await (supabase as any)
+    .from("brewery_follows")
+    .select("brewery_id");
+
+  const followerCountMap: Record<string, number> = {};
+  for (const f of (followCounts ?? []) as any[]) {
+    followerCountMap[f.brewery_id] = (followerCountMap[f.brewery_id] ?? 0) + 1;
+  }
+
+  // Recently visited breweries (from user's sessions, last 10 unique)
+  const { data: recentSessions } = await supabase
+    .from("sessions")
+    .select("brewery_id, started_at")
+    .eq("user_id", user.id)
+    .not("brewery_id", "is", null)
+    .order("started_at", { ascending: false })
+    .limit(50);
+
+  const recentBreweryIds: string[] = [];
+  const seenRecent = new Set<string>();
+  for (const s of (recentSessions ?? []) as any[]) {
+    if (s.brewery_id && !seenRecent.has(s.brewery_id)) {
+      seenRecent.add(s.brewery_id);
+      recentBreweryIds.push(s.brewery_id);
+      if (recentBreweryIds.length >= 10) break;
+    }
+  }
+
   return (
     <Suspense fallback={<div className="max-w-5xl mx-auto px-4 py-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">{Array.from({length:6}).map((_,i)=><SkeletonCard key={i}/>)}</div>}>
       <ExploreClient
@@ -55,6 +84,8 @@ export default async function ExplorePage() {
         }))}
         hasBeerOfTheWeek={botwBreweryIds}
         hasUpcomingEvents={eventBreweryIds}
+        followerCounts={followerCountMap}
+        recentBreweryIds={recentBreweryIds}
       />
     </Suspense>
   );

@@ -79,6 +79,11 @@ export function BeerOfTheWeekCard({ beer, index = 0 }: { beer: FeaturedBeer; ind
                 {beer.brewery.name}
               </p>
             )}
+
+            {/* Context descriptor */}
+            <p className="text-xs font-mono mt-1" style={{ color: 'var(--text-muted)' }}>
+              Most sessions this week
+            </p>
           </div>
         </div>
       </Link>

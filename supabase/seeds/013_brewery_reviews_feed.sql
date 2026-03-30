@@ -37,8 +37,9 @@ BEGIN
     now() - interval '6 hours'
   )
   ON CONFLICT (user_id, brewery_id) DO UPDATE
-    SET rating  = EXCLUDED.rating,
-        comment = EXCLUDED.comment;
+    SET rating      = EXCLUDED.rating,
+        comment     = EXCLUDED.comment,
+        created_at  = EXCLUDED.created_at;
 
   -- Marcus → Hopfield Brewing (4 stars)
   INSERT INTO brewery_reviews (user_id, brewery_id, rating, comment, created_at)
@@ -48,8 +49,9 @@ BEGIN
     now() - interval '14 hours'
   )
   ON CONFLICT (user_id, brewery_id) DO UPDATE
-    SET rating  = EXCLUDED.rating,
-        comment = EXCLUDED.comment;
+    SET rating      = EXCLUDED.rating,
+        comment     = EXCLUDED.comment,
+        created_at  = EXCLUDED.created_at;
 
   -- Priya → River Bend Ales (5 stars)
   INSERT INTO brewery_reviews (user_id, brewery_id, rating, comment, created_at)
@@ -59,8 +61,9 @@ BEGIN
     now() - interval '1 day'
   )
   ON CONFLICT (user_id, brewery_id) DO UPDATE
-    SET rating  = EXCLUDED.rating,
-        comment = EXCLUDED.comment;
+    SET rating      = EXCLUDED.rating,
+        comment     = EXCLUDED.comment,
+        created_at  = EXCLUDED.created_at;
 
   -- Derek → Smoky Barrel (3 stars)
   INSERT INTO brewery_reviews (user_id, brewery_id, rating, comment, created_at)
@@ -70,8 +73,9 @@ BEGIN
     now() - interval '2 days'
   )
   ON CONFLICT (user_id, brewery_id) DO UPDATE
-    SET rating  = EXCLUDED.rating,
-        comment = EXCLUDED.comment;
+    SET rating      = EXCLUDED.rating,
+        comment     = EXCLUDED.comment,
+        created_at  = EXCLUDED.created_at;
 
   -- Sam → Lucky Clover (4 stars)
   INSERT INTO brewery_reviews (user_id, brewery_id, rating, comment, created_at)
@@ -81,8 +85,9 @@ BEGIN
     now() - interval '2 days 4 hours'
   )
   ON CONFLICT (user_id, brewery_id) DO UPDATE
-    SET rating  = EXCLUDED.rating,
-        comment = EXCLUDED.comment;
+    SET rating      = EXCLUDED.rating,
+        comment     = EXCLUDED.comment,
+        created_at  = EXCLUDED.created_at;
 
   -- Tom → Mountain Ridge (4 stars, no comment)
   INSERT INTO brewery_reviews (user_id, brewery_id, rating, comment, created_at)
@@ -92,8 +97,9 @@ BEGIN
     now() - interval '3 days'
   )
   ON CONFLICT (user_id, brewery_id) DO UPDATE
-    SET rating  = EXCLUDED.rating,
-        comment = EXCLUDED.comment;
+    SET rating      = EXCLUDED.rating,
+        comment     = EXCLUDED.comment,
+        created_at  = EXCLUDED.created_at;
 
   -- Carlos → River Bend (5 stars)
   INSERT INTO brewery_reviews (user_id, brewery_id, rating, comment, created_at)
@@ -103,8 +109,9 @@ BEGIN
     now() - interval '4 days'
   )
   ON CONFLICT (user_id, brewery_id) DO UPDATE
-    SET rating  = EXCLUDED.rating,
-        comment = EXCLUDED.comment;
+    SET rating      = EXCLUDED.rating,
+        comment     = EXCLUDED.comment,
+        created_at  = EXCLUDED.created_at;
 
   -- Rachel → Smoky Barrel (4 stars)
   INSERT INTO brewery_reviews (user_id, brewery_id, rating, comment, created_at)
@@ -114,8 +121,9 @@ BEGIN
     now() - interval '5 days'
   )
   ON CONFLICT (user_id, brewery_id) DO UPDATE
-    SET rating  = EXCLUDED.rating,
-        comment = EXCLUDED.comment;
+    SET rating      = EXCLUDED.rating,
+        comment     = EXCLUDED.comment,
+        created_at  = EXCLUDED.created_at;
 
   -- Alex → Hopfield (3 stars)
   INSERT INTO brewery_reviews (user_id, brewery_id, rating, comment, created_at)
@@ -125,8 +133,9 @@ BEGIN
     now() - interval '5 days 8 hours'
   )
   ON CONFLICT (user_id, brewery_id) DO UPDATE
-    SET rating  = EXCLUDED.rating,
-        comment = EXCLUDED.comment;
+    SET rating      = EXCLUDED.rating,
+        comment     = EXCLUDED.comment,
+        created_at  = EXCLUDED.created_at;
 
   -- Marcus → Mountain Ridge (5 stars, no comment)
   INSERT INTO brewery_reviews (user_id, brewery_id, rating, comment, created_at)
@@ -136,8 +145,9 @@ BEGIN
     now() - interval '6 days'
   )
   ON CONFLICT (user_id, brewery_id) DO UPDATE
-    SET rating  = EXCLUDED.rating,
-        comment = EXCLUDED.comment;
+    SET rating      = EXCLUDED.rating,
+        comment     = EXCLUDED.comment,
+        created_at  = EXCLUDED.created_at;
 
   RAISE NOTICE 'Seed 013 complete — 10 brewery reviews inserted for BreweryRatingFeedCard demo';
 END $$;

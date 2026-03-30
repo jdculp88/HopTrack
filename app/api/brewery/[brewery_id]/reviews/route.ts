@@ -14,7 +14,7 @@ export async function GET(
 
   const { data: reviews, error } = await (supabase as any)
     .from("brewery_reviews")
-    .select("id, rating, comment, created_at, updated_at, user_id, profile:profiles!user_id(username, display_name, avatar_url)")
+    .select("id, rating, comment, created_at, updated_at, user_id, owner_response, responded_at, profile:profiles!user_id(username, display_name, avatar_url)")
     .eq("brewery_id", brewery_id)
     .order("created_at", { ascending: false })
     .limit(50);
@@ -34,7 +34,7 @@ export async function GET(
     userReview,
     avgRating: avg,
     totalReviews: allRatings.length,
-  });
+  }, { headers: { 'Cache-Control': 'public, max-age=60, stale-while-revalidate=300' } });
 }
 
 // POST /api/brewery/[brewery_id]/reviews — create or update user's review

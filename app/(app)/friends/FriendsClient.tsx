@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Users, Trophy, Search, UserPlus, Loader2, UserX, Clock, X } from "lucide-react";
+import { Users, Trophy, Search, UserPlus, Loader2, UserX, Clock, X, Beer } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { LeaderboardRow } from "@/components/social/LeaderboardRow";
 import { UserAvatar } from "@/components/ui/UserAvatar";
@@ -34,7 +34,7 @@ export function FriendsClient({
 }: FriendsClientProps) {
   const router = useRouter();
   const { success, error: toastError } = useToast();
-  const [tab, setTab] = useState<Tab>("leaderboard");
+  const [tab, setTab] = useState<Tab>("friends");
   const [leaderboardType, setLeaderboardType] = useState<LeaderboardType>("sessions");
   const [searchQuery, setSearchQuery] = useState("");
   const [pendingRequests, setPendingRequests] = useState(initialPending);
@@ -45,6 +45,7 @@ export function FriendsClient({
   const [sendingRequest, setSendingRequest] = useState<string | null>(null);
   const [confirmUnfriendId, setConfirmUnfriendId] = useState<string | null>(null);
   const [unfriending, setUnfriending] = useState<string | null>(null);
+  const [confirmCancelSentId, setConfirmCancelSentId] = useState<string | null>(null);
 
   const leaderboards: Record<LeaderboardType, { data: LeaderboardEntry[]; label: string }> = {
     sessions:  { data: checkinLeaders,  label: "sessions" },
@@ -114,6 +115,7 @@ export function FriendsClient({
       });
       if (!res.ok) throw new Error("Failed to cancel");
       setSentRequests((prev) => prev.filter((r: any) => r.id !== reqId));
+      setConfirmCancelSentId(null);
       success("Friend request cancelled");
     } catch {
       toastError("Failed to cancel request");
@@ -126,7 +128,6 @@ export function FriendsClient({
   const handleUnfriend = useCallback(async (friendId: string) => {
     setUnfriending(friendId);
     try {
-      // Find the friendship row
       const friendship = friendships.find(
         (f: any) =>
           (f.requester_id === currentUserId && f.addressee_id === friendId) ||
@@ -212,27 +213,46 @@ export function FriendsClient({
     (u: any) => u.id !== currentUserId && !friendIds.has(u.id) && !pendingIds.has(u.id)
   );
 
+  const totalRequests = pendingRequests.length + sentRequests.length;
+
   return (
     <div className="max-w-2xl mx-auto px-4 py-6 space-y-5">
-      <h1 className="font-display text-3xl font-bold text-[var(--text-primary)]">Friends</h1>
+      <h1 className="font-sans text-3xl font-bold" style={{ color: "var(--text-primary)" }}>Friends</h1>
 
       {/* Tab bar */}
-      <div className="flex gap-1 bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-1">
+      <div
+        className="flex gap-1 rounded-2xl p-1"
+        style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
+      >
         {([
-          { key: "leaderboard", label: "Leaderboards", icon: Trophy },
-          { key: "friends",     label: "My Friends",    icon: Users },
-        ] as const).map(({ key, label, icon: Icon }) => (
+          { key: "friends" as Tab, label: "My Friends", icon: Users, count: friends.length },
+          { key: "leaderboard" as Tab, label: "Leaderboards", icon: Trophy, count: null },
+        ] as const).map(({ key, label, icon: Icon, count }) => (
           <button
             key={key}
             onClick={() => setTab(key)}
-            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium transition-all ${
+            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium transition-all"
+            style={
               tab === key
-                ? "bg-[var(--accent-gold)]/10 text-[var(--accent-gold)]"
-                : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
-            }`}
+                ? { background: "color-mix(in srgb, var(--accent-gold) 10%, transparent)", color: "var(--accent-gold)" }
+                : { color: "var(--text-muted)" }
+            }
           >
             <Icon size={14} />
             {label}
+            {count !== null && count > 0 && (
+              <span
+                className="text-[10px] font-mono px-1.5 py-0.5 rounded-md"
+                style={{
+                  background: tab === key
+                    ? "color-mix(in srgb, var(--accent-gold) 15%, transparent)"
+                    : "var(--surface-2)",
+                  color: tab === key ? "var(--accent-gold)" : "var(--text-muted)",
+                }}
+              >
+                {count}
+              </span>
+            )}
           </button>
         ))}
       </div>
@@ -245,11 +265,20 @@ export function FriendsClient({
               <button
                 key={t}
                 onClick={() => setLeaderboardType(t)}
-                className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all flex-shrink-0 ${
+                className="px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all flex-shrink-0"
+                style={
                   leaderboardType === t
-                    ? "bg-[var(--accent-gold)]/15 text-[var(--accent-gold)] border border-[var(--accent-gold)]/30"
-                    : "bg-[var(--surface)] text-[var(--text-secondary)] border border-[var(--border)] hover:border-[#6B6456]"
-                }`}
+                    ? {
+                        background: "color-mix(in srgb, var(--accent-gold) 15%, transparent)",
+                        color: "var(--accent-gold)",
+                        border: "1px solid color-mix(in srgb, var(--accent-gold) 30%, transparent)",
+                      }
+                    : {
+                        background: "var(--surface)",
+                        color: "var(--text-secondary)",
+                        border: "1px solid var(--border)",
+                      }
+                }
               >
                 {t === "sessions" ? "Sessions" : t === "beers" ? "Unique Beers" : "Breweries"}
               </button>
@@ -272,145 +301,309 @@ export function FriendsClient({
 
       {tab === "friends" && (
         <>
-          {/* Pending incoming requests */}
-          {pendingRequests.length > 0 && (
-            <div className="bg-[var(--accent-gold)]/5 border border-[var(--accent-gold)]/20 rounded-2xl p-4 space-y-3">
-              <p className="text-xs font-medium text-[var(--accent-gold)] uppercase tracking-wider">
-                Requests ({pendingRequests.length})
-              </p>
-              {pendingRequests.map((req: any) => (
-                <div key={req.id} className="flex items-center gap-3">
-                  <UserAvatar profile={req.requester} size="sm" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-[var(--text-primary)]">{req.requester.display_name}</p>
-                    <p className="text-xs text-[var(--text-muted)]">@{req.requester.username}</p>
-                  </div>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => handleAccept(req.id)}
-                      disabled={loadingRequest === req.id}
-                      className="text-xs bg-[#3D7A52]/20 text-[#3D7A52] border border-[#3D7A52]/30 px-3 py-1.5 rounded-xl hover:bg-[#3D7A52]/30 transition-colors disabled:opacity-50"
-                    >
-                      {loadingRequest === req.id ? <Loader2 size={12} className="animate-spin" /> : "Accept"}
-                    </button>
-                    <button
-                      onClick={() => handleDecline(req.id)}
-                      disabled={loadingRequest === req.id}
-                      className="text-xs bg-[#C44B3A]/10 text-[#C44B3A] border border-[#C44B3A]/20 px-3 py-1.5 rounded-xl hover:bg-[#C44B3A]/20 transition-colors disabled:opacity-50"
-                    >
-                      Decline
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Outgoing sent requests */}
-          {sentRequests.length > 0 && (
-            <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-4 space-y-3">
-              <p className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">
-                Sent ({sentRequests.length})
-              </p>
-              {sentRequests.map((req: any) => (
-                <div key={req.id} className="flex items-center gap-3">
-                  <UserAvatar profile={req.addressee} size="sm" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-[var(--text-primary)]">{req.addressee.display_name}</p>
-                    <p className="text-xs text-[var(--text-muted)]">@{req.addressee.username}</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="flex items-center gap-1 text-xs text-[var(--text-muted)]">
-                      <Clock size={12} />
-                      Pending
-                    </span>
-                    <button
-                      onClick={() => handleCancelSent(req.id)}
-                      disabled={loadingRequest === req.id}
-                      className="text-xs text-[var(--text-muted)] hover:text-[#C44B3A] border border-[var(--border)] hover:border-[#C44B3A]/30 px-2.5 py-1.5 rounded-xl transition-colors disabled:opacity-50"
-                    >
-                      {loadingRequest === req.id ? <Loader2 size={12} className="animate-spin" /> : <X size={12} />}
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Search */}
+          {/* Search — prominent at top */}
           <div className="relative">
-            <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none" />
+            <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: "var(--text-muted)" }} />
             <input
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
               placeholder="Search friends or find new ones..."
-              className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-2xl pl-11 pr-4 py-3 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent-gold)] transition-colors text-sm"
+              className="w-full rounded-2xl pl-11 pr-4 py-3.5 text-sm transition-colors focus:outline-none"
+              style={{
+                background: "var(--surface)",
+                border: "1px solid var(--border)",
+                color: "var(--text-primary)",
+              }}
+              onFocus={(e) => { (e.target as HTMLElement).style.borderColor = "var(--accent-gold)"; }}
+              onBlur={(e) => { (e.target as HTMLElement).style.borderColor = "var(--border)"; }}
             />
             {searching && (
-              <Loader2 size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] animate-spin" />
+              <Loader2 size={14} className="absolute right-4 top-1/2 -translate-y-1/2 animate-spin" style={{ color: "var(--text-muted)" }} />
             )}
           </div>
 
           {/* Search results — users not yet friends */}
-          {searchQuery.length >= 2 && filteredSearchResults.length > 0 && (
-            <div className="space-y-1">
-              <p className="text-xs text-[var(--text-muted)] font-medium uppercase tracking-wider px-1">Add Friends</p>
-              {filteredSearchResults.map((user: any) => (
-                <div key={user.id} className="flex items-center gap-3 p-3 bg-[var(--surface)] border border-[var(--border)] rounded-2xl">
-                  <UserAvatar profile={user} size="sm" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-[var(--text-primary)] truncate">{user.display_name}</p>
-                    <p className="text-xs text-[var(--text-muted)]">@{user.username}</p>
-                  </div>
-                  <button
-                    onClick={() => handleAddFriend(user.id)}
-                    disabled={sendingRequest === user.id}
-                    className="flex items-center gap-1.5 text-xs bg-[var(--accent-gold)]/15 text-[var(--accent-gold)] border border-[var(--accent-gold)]/30 px-3 py-1.5 rounded-xl hover:bg-[var(--accent-gold)]/25 transition-colors disabled:opacity-50"
+          <AnimatePresence>
+            {searchQuery.length >= 2 && filteredSearchResults.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.2 }}
+                className="space-y-1 overflow-hidden"
+              >
+                <p className="text-xs font-medium uppercase tracking-wider px-1" style={{ color: "var(--text-muted)" }}>Add Friends</p>
+                {filteredSearchResults.map((user: any) => (
+                  <motion.div
+                    key={user.id}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                    className="flex items-center gap-3 p-3 rounded-2xl"
+                    style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
                   >
-                    {sendingRequest === user.id ? (
-                      <Loader2 size={12} className="animate-spin" />
-                    ) : (
-                      <UserPlus size={12} />
-                    )}
-                    Add
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
+                    <UserAvatar profile={user} size="sm" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate" style={{ color: "var(--text-primary)" }}>{user.display_name}</p>
+                      <p className="text-xs" style={{ color: "var(--text-muted)" }}>@{user.username}</p>
+                    </div>
+                    <button
+                      onClick={() => handleAddFriend(user.id)}
+                      disabled={sendingRequest === user.id}
+                      className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-xl transition-colors disabled:opacity-50"
+                      style={{
+                        background: "color-mix(in srgb, var(--accent-gold) 15%, transparent)",
+                        color: "var(--accent-gold)",
+                        border: "1px solid color-mix(in srgb, var(--accent-gold) 30%, transparent)",
+                      }}
+                    >
+                      {sendingRequest === user.id ? (
+                        <Loader2 size={12} className="animate-spin" />
+                      ) : (
+                        <UserPlus size={12} />
+                      )}
+                      Add
+                    </button>
+                  </motion.div>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {searchQuery.length >= 2 && !searching && filteredSearchResults.length === 0 && filteredFriends.length === 0 && (
-            <p className="text-sm text-[var(--text-muted)] text-center py-4">No users found for &ldquo;{searchQuery}&rdquo;</p>
+            <p className="text-sm text-center py-4" style={{ color: "var(--text-muted)" }}>No users found for &ldquo;{searchQuery}&rdquo;</p>
           )}
+
+          {/* Pending incoming requests */}
+          <AnimatePresence>
+            {pendingRequests.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="rounded-2xl p-4 space-y-3"
+                style={{
+                  background: "color-mix(in srgb, var(--accent-gold) 5%, var(--surface))",
+                  border: "1px solid color-mix(in srgb, var(--accent-gold) 20%, transparent)",
+                }}
+              >
+                <div className="flex items-center gap-2">
+                  <div
+                    className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold"
+                    style={{ background: "var(--accent-gold)", color: "var(--bg)" }}
+                  >
+                    {pendingRequests.length}
+                  </div>
+                  <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--accent-gold)" }}>
+                    Friend Request{pendingRequests.length > 1 ? "s" : ""}
+                  </p>
+                </div>
+                {pendingRequests.map((req: any) => (
+                  <motion.div
+                    key={req.id}
+                    layout
+                    exit={{ opacity: 0, x: -100, height: 0 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                    className="flex items-center gap-3"
+                  >
+                    <Link href={`/profile/${req.requester.username}`}>
+                      <UserAvatar profile={req.requester} size="sm" />
+                    </Link>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{req.requester.display_name}</p>
+                      <p className="text-xs" style={{ color: "var(--text-muted)" }}>@{req.requester.username}</p>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleAccept(req.id)}
+                        disabled={loadingRequest === req.id}
+                        className="text-xs px-3.5 py-1.5 rounded-xl font-medium transition-colors disabled:opacity-50"
+                        style={{
+                          background: "color-mix(in srgb, #3D7A52 20%, transparent)",
+                          color: "#3D7A52",
+                          border: "1px solid color-mix(in srgb, #3D7A52 30%, transparent)",
+                        }}
+                      >
+                        {loadingRequest === req.id ? <Loader2 size={12} className="animate-spin" /> : "Accept"}
+                      </button>
+                      <button
+                        onClick={() => handleDecline(req.id)}
+                        disabled={loadingRequest === req.id}
+                        className="text-xs px-3 py-1.5 rounded-xl transition-colors disabled:opacity-50"
+                        style={{
+                          background: "color-mix(in srgb, var(--danger) 10%, transparent)",
+                          color: "var(--danger)",
+                          border: "1px solid color-mix(in srgb, var(--danger) 20%, transparent)",
+                        }}
+                      >
+                        Decline
+                      </button>
+                    </div>
+                  </motion.div>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Outgoing sent requests */}
+          <AnimatePresence>
+            {sentRequests.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="rounded-2xl p-4 space-y-3"
+                style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
+              >
+                <p className="text-xs font-medium uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
+                  Sent ({sentRequests.length})
+                </p>
+                {sentRequests.map((req: any) => (
+                  <motion.div
+                    key={req.id}
+                    layout
+                    exit={{ opacity: 0, x: -100, height: 0 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                    className="overflow-hidden rounded-2xl"
+                    style={{ border: "1px solid var(--border)" }}
+                  >
+                    <div className="flex items-center gap-3 p-3" style={{ background: "var(--surface)" }}>
+                      <Link href={`/profile/${req.addressee.username}`}>
+                        <UserAvatar profile={req.addressee} size="sm" />
+                      </Link>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{req.addressee.display_name}</p>
+                        <p className="text-xs" style={{ color: "var(--text-muted)" }}>@{req.addressee.username}</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="flex items-center gap-1 text-xs" style={{ color: "var(--text-muted)" }}>
+                          <Clock size={12} />
+                          Pending
+                        </span>
+                        <button
+                          onClick={() => setConfirmCancelSentId(confirmCancelSentId === req.id ? null : req.id)}
+                          className="p-1.5 rounded-lg transition-colors"
+                          style={{
+                            color: confirmCancelSentId === req.id ? "var(--danger)" : "var(--text-muted)",
+                            background: confirmCancelSentId === req.id ? "color-mix(in srgb, var(--danger) 8%, transparent)" : "transparent",
+                            border: "1px solid var(--border)",
+                          }}
+                        >
+                          <X size={12} />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Inline cancel confirmation */}
+                    <AnimatePresence>
+                      {confirmCancelSentId === req.id && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.15 }}
+                          className="overflow-hidden"
+                        >
+                          <div
+                            className="flex items-center justify-between px-4 py-3 border-t"
+                            style={{ background: "color-mix(in srgb, var(--danger) 5%, var(--surface))", borderColor: "var(--border)" }}
+                          >
+                            <span className="text-xs" style={{ color: "var(--text-secondary)" }}>
+                              Cancel request to <strong style={{ color: "var(--text-primary)" }}>{req.addressee.display_name}</strong>?
+                            </span>
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => setConfirmCancelSentId(null)}
+                                className="px-3 py-1 rounded-lg text-xs font-medium"
+                                style={{ color: "var(--text-secondary)", background: "var(--surface-2)" }}
+                              >
+                                Keep
+                              </button>
+                              <button
+                                onClick={() => handleCancelSent(req.id)}
+                                disabled={loadingRequest === req.id}
+                                className="px-3 py-1 rounded-lg text-xs font-semibold disabled:opacity-50"
+                                style={{ background: "var(--danger)", color: "#fff" }}
+                              >
+                                {loadingRequest === req.id ? <Loader2 size={12} className="animate-spin" /> : "Cancel Request"}
+                              </button>
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </motion.div>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Friends list */}
           {filteredFriends.length === 0 && searchQuery.length < 2 && pendingRequests.length === 0 && sentRequests.length === 0 ? (
-            <div className="text-center py-16 space-y-3">
-              <p className="text-5xl">🍻</p>
-              <p className="font-display text-xl text-[var(--text-primary)]">Drinking solo?</p>
-              <p className="text-sm text-[var(--text-secondary)]">Search by username above to find friends and share the round.</p>
+            <div className="text-center py-16 space-y-4">
+              <div
+                className="w-20 h-20 rounded-full flex items-center justify-center mx-auto"
+                style={{ background: "color-mix(in srgb, var(--accent-gold) 8%, transparent)" }}
+              >
+                <Beer size={32} style={{ color: "var(--accent-gold)" }} />
+              </div>
+              <div>
+                <p className="font-display text-xl font-bold" style={{ color: "var(--text-primary)" }}>Drinking solo?</p>
+                <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>Find your crew! Search by username above to add friends and share the round.</p>
+              </div>
+              <button
+                onClick={() => {
+                  const input = document.querySelector<HTMLInputElement>('input[placeholder*="Search friends"]');
+                  input?.focus();
+                }}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-colors"
+                style={{
+                  background: "color-mix(in srgb, var(--accent-gold) 10%, transparent)",
+                  color: "var(--accent-gold)",
+                  border: "1px solid color-mix(in srgb, var(--accent-gold) 25%, transparent)",
+                }}
+              >
+                <Search size={14} />
+                Find Friends
+              </button>
             </div>
           ) : filteredFriends.length > 0 && (
             <div className="space-y-2">
-              <p className="text-xs text-[var(--text-muted)] font-medium uppercase tracking-wider px-1">
+              <p className="text-xs font-medium uppercase tracking-wider px-1" style={{ color: "var(--text-muted)" }}>
                 Friends ({filteredFriends.length})
               </p>
-              {filteredFriends.map((friend: any) => (
-                <div key={friend.id} className="overflow-hidden rounded-2xl border border-[var(--border)]">
-                  <div className="flex items-center gap-3 p-3 bg-[var(--surface)] group">
+              {filteredFriends.map((friend: any, i: number) => (
+                <motion.div
+                  key={friend.id}
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.03, type: "spring", stiffness: 400, damping: 30 }}
+                  className="overflow-hidden rounded-2xl"
+                  style={{ border: "1px solid var(--border)" }}
+                >
+                  <div
+                    className="flex items-center gap-3 p-3 group"
+                    style={{ background: "var(--surface)" }}
+                  >
                     <Link href={`/profile/${friend.username}`} className="flex items-center gap-3 flex-1 min-w-0">
                       <UserAvatar profile={friend} size="sm" showLevel />
                       <div className="flex-1 min-w-0">
-                        <p className="font-sans font-semibold text-[var(--text-primary)] truncate group-hover:text-[var(--accent-gold)] transition-colors text-sm">
+                        <p className="font-sans font-semibold truncate text-sm transition-colors" style={{ color: "var(--text-primary)" }}>
                           {friend.display_name}
                         </p>
-                        <p className="text-xs text-[var(--text-muted)]">@{friend.username} · {friend.total_checkins} sessions</p>
+                        <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+                          @{friend.username} · {friend.total_checkins} sessions
+                        </p>
                       </div>
                     </Link>
                     <button
                       onClick={() => setConfirmUnfriendId(confirmUnfriendId === friend.id ? null : friend.id)}
-                      className="p-2 rounded-lg transition-colors flex-shrink-0 hover:bg-[var(--surface-2)]"
-                      style={{ color: confirmUnfriendId === friend.id ? "var(--danger)" : "var(--text-muted)" }}
+                      className="p-2 rounded-lg transition-colors flex-shrink-0"
+                      style={{
+                        color: confirmUnfriendId === friend.id ? "var(--danger)" : "var(--text-muted)",
+                        background: confirmUnfriendId === friend.id ? "color-mix(in srgb, var(--danger) 8%, transparent)" : "transparent",
+                      }}
                     >
                       <UserX size={15} />
                     </button>
@@ -426,10 +619,12 @@ export function FriendsClient({
                         transition={{ duration: 0.15 }}
                         className="overflow-hidden"
                       >
-                        <div className="flex items-center justify-between px-4 py-3 border-t"
-                          style={{ background: "rgba(196,75,58,0.06)", borderColor: "var(--border)" }}>
-                          <span className="text-xs text-[var(--text-secondary)]">
-                            Remove <strong className="text-[var(--text-primary)]">{friend.display_name}</strong>?
+                        <div
+                          className="flex items-center justify-between px-4 py-3 border-t"
+                          style={{ background: "color-mix(in srgb, var(--danger) 5%, var(--surface))", borderColor: "var(--border)" }}
+                        >
+                          <span className="text-xs" style={{ color: "var(--text-secondary)" }}>
+                            Remove <strong style={{ color: "var(--text-primary)" }}>{friend.display_name}</strong>?
                           </span>
                           <div className="flex gap-2">
                             <button
@@ -452,7 +647,7 @@ export function FriendsClient({
                       </motion.div>
                     )}
                   </AnimatePresence>
-                </div>
+                </motion.div>
               ))}
             </div>
           )}

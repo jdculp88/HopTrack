@@ -102,13 +102,36 @@ export function HopRouteNewClient({ tasteDna }: HopRouteNewClientProps) {
     }, 2200);
 
     try {
+      // Geocode the city if user typed a name instead of using GPS
+      let lat = coords?.lat;
+      let lng = coords?.lng;
+      if (!lat || !lng) {
+        try {
+          const geoRes = await fetch(
+            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(cityName)}&limit=1&countrycodes=us`,
+            { headers: { "User-Agent": "HopTrack/1.0" } }
+          );
+          const geoData = await geoRes.json();
+          if (geoData.length > 0) {
+            lat = parseFloat(geoData[0].lat);
+            lng = parseFloat(geoData[0].lon);
+          } else {
+            showError(`Couldn't find "${cityName}". Try a different city or use GPS.`);
+            return;
+          }
+        } catch {
+          showError("Couldn't look up that city. Try using GPS instead.");
+          return;
+        }
+      }
+
       const res = await fetch("/api/hop-route/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           location: {
-            lat: coords?.lat ?? 35.5951, // Asheville default
-            lng: coords?.lng ?? -82.5515,
+            lat,
+            lng,
             city: cityName,
           },
           time_window: {
@@ -371,7 +394,7 @@ export function HopRouteNewClient({ tasteDna }: HopRouteNewClientProps) {
 
             {dna.length > 0 ? (
               <div className="space-y-2">
-                <p className="text-xs text-[var(--text-muted)]">Based on your check-in history. The AI uses this to pick the right beers for each stop.</p>
+                <p className="text-xs text-[var(--text-muted)]">Based on your session history. The AI uses this to pick the right beers for each stop.</p>
                 {dna.map((entry) => (
                   <div key={entry.style} className="flex items-center gap-3">
                     <span className="text-sm text-[var(--text-secondary)] w-32 truncate">{entry.style}</span>

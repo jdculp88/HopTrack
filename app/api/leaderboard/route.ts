@@ -49,7 +49,7 @@ export async function GET(request: Request) {
       .slice(0, 20)
       .map((entry, i) => ({ ...entry, rank: i + 1 }));
 
-    return NextResponse.json({ period: "monthly", leaderboard });
+    return NextResponse.json({ period: "monthly", leaderboard }, { headers: { 'Cache-Control': 'public, max-age=300, stale-while-revalidate=600' } });
   }
 
   // All-time: top 20 by total XP on profiles table
@@ -68,5 +68,5 @@ export async function GET(request: Request) {
     rank: i + 1,
   }));
 
-  return NextResponse.json({ period: "alltime", leaderboard });
+  return NextResponse.json({ period: "alltime", leaderboard }, { headers: { 'Cache-Control': 'public, max-age=300, stale-while-revalidate=600' } });
 }

@@ -17,12 +17,15 @@ const TABS: { key: FeedTab; label: string }[] = [
 
 export function FeedTabBar({ activeTab, onChange }: FeedTabBarProps) {
   return (
-    <div className="flex relative">
+    <div className="flex relative" role="tablist" aria-label="Feed tabs">
       {TABS.map(({ key, label }) => {
         const active = activeTab === key;
         return (
           <button
             key={key}
+            role="tab"
+            aria-selected={active}
+            aria-controls={`feed-panel-${key}`}
             onClick={() => onChange(key)}
             className="flex-1 py-3 text-sm font-sans transition-colors relative"
             style={{
@@ -30,7 +33,6 @@ export function FeedTabBar({ activeTab, onChange }: FeedTabBarProps) {
               fontWeight: active ? 600 : 400,
               letterSpacing: "0.3px",
             }}
-            aria-pressed={active}
           >
             {label}
             {active && (

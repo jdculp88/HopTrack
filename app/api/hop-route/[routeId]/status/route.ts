@@ -16,22 +16,35 @@ export async function PATCH(
 
   const { action, stop_id } = await request.json();
 
+  interface HopRouteRow {
+    id: string;
+    status: string;
+    user_id: string;
+  }
+
+  interface AchievementRow {
+    id: string;
+    key: string;
+    xp_reward: number | null;
+  }
+
   // Verify ownership
-  const { data: route } = await (supabase as any)
-    .from("hop_routes")
+  const { data: route } = await supabase
+    .from("hop_routes" as never)
     .select("id, status, user_id")
     .eq("id", routeId)
     .single();
 
-  if (!route) return NextResponse.json({ error: "Route not found" }, { status: 404 });
-  if (route.user_id !== user.id) return NextResponse.json({ error: "Not authorized" }, { status: 403 });
+  const typedRoute = route as HopRouteRow | null;
+  if (!typedRoute) return NextResponse.json({ error: "Route not found" }, { status: 404 });
+  if (typedRoute.user_id !== user.id) return NextResponse.json({ error: "Not authorized" }, { status: 403 });
 
   if (action === "start") {
-    if (route.status !== "draft") {
+    if (typedRoute.status !== "draft") {
       return NextResponse.json({ error: "Route is not in draft status" }, { status: 409 });
     }
-    await (supabase as any)
-      .from("hop_routes")
+    await supabase
+      .from("hop_routes" as never)
       .update({ status: "active", started_at: new Date().toISOString() })
       .eq("id", routeId);
     return NextResponse.json({ status: "active" });
@@ -39,27 +52,27 @@ export async function PATCH(
 
   if (action === "checkin") {
     if (!stop_id) return NextResponse.json({ error: "stop_id is required" }, { status: 400 });
-    const { error } = await (supabase as any)
-      .from("hop_route_stops")
+    const { error } = await supabase
+      .from("hop_route_stops" as never)
       .update({ checked_in: true, checked_in_at: new Date().toISOString() })
       .eq("id", stop_id)
       .eq("route_id", routeId);
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) return NextResponse.json({ error: (error as { message: string }).message }, { status: 500 });
     return NextResponse.json({ checked_in: true });
   }
 
   if (action === "complete") {
-    if (route.status !== "active") {
+    if (typedRoute.status !== "active") {
       return NextResponse.json({ error: "Route is not active" }, { status: 409 });
     }
-    await (supabase as any)
-      .from("hop_routes")
+    await supabase
+      .from("hop_routes" as never)
       .update({ status: "completed", completed_at: new Date().toISOString() })
       .eq("id", routeId);
 
     // Check and award achievements
-    const { data: completedRoutes } = await (supabase as any)
-      .from("hop_routes")
+    const { data: completedRoutes } = await supabase
+      .from("hop_routes" as never)
       .select("id")
       .eq("user_id", user.id)
       .eq("status", "completed");
@@ -71,16 +84,17 @@ export async function PATCH(
     if (completedCount === 5) achievementsToCheck.push("route_master");
 
     for (const key of achievementsToCheck) {
-      const { data: achievement } = await (supabase as any)
+      const { data: achievementData } = await supabase
         .from("achievements")
         .select("id, key, xp_reward")
         .eq("key", key)
         .single();
 
+      const achievement = achievementData as AchievementRow | null;
       if (!achievement) continue;
 
       // Check not already unlocked
-      const { data: existing } = await (supabase as any)
+      const { data: existing } = await supabase
         .from("user_achievements")
         .select("id")
         .eq("user_id", user.id)
@@ -89,22 +103,22 @@ export async function PATCH(
 
       if (existing) continue;
 
-      await (supabase as any)
+      await supabase
         .from("user_achievements")
         .insert({ user_id: user.id, achievement_id: achievement.id });
 
-      await (supabase as any).rpc("increment_xp", {
+      await supabase.rpc("increment_xp", {
         p_user_id: user.id,
         p_xp_amount: achievement.xp_reward ?? 0,
       });
 
-      await (supabase as any).from("notifications").insert({
+      await supabase.from("notifications").insert({
         user_id: user.id,
         type: "achievement_unlocked",
         title: "Achievement Unlocked! 🏆",
         body: `You earned the ${key.replace(/_/g, " ")} achievement`,
         data: { achievement_key: key },
-      });
+      } as never);
     }
 
     // Post to friends feed (hop_route_completed event)

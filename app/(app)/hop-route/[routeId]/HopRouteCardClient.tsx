@@ -128,7 +128,7 @@ export function HopRouteCardClient({ route: initialRoute, userId }: HopRouteCard
       <div className="space-y-2">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h1 className="font-display text-2xl font-bold text-[var(--text-primary)]">{route.title}</h1>
+            <h1 className="font-display text-3xl font-bold text-[var(--text-primary)]">{route.title}</h1>
             <div className="flex items-center gap-3 mt-1 flex-wrap">
               {route.location_city && (
                 <span className="flex items-center gap-1 text-xs text-[var(--text-muted)]">

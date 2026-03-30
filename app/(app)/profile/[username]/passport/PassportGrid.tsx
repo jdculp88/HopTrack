@@ -66,7 +66,7 @@ export function PassportGrid({ stamps, totalBeers, totalStyles, totalBreweries }
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--accent-gold)] to-[var(--accent-amber)] flex items-center justify-center">
             <Stamp size={20} className="text-[var(--bg)]" />
           </div>
-          <h1 className="font-display text-2xl font-bold text-[var(--text-primary)]">Beer Passport</h1>
+          <h1 className="font-display text-3xl font-bold text-[var(--text-primary)]">Beer Passport</h1>
         </div>
         <div className="grid grid-cols-3 gap-3">
           <div className="text-center">

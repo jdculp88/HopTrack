@@ -46,7 +46,7 @@ export async function sendPushNotification(
   } catch (err: any) {
     // 410 Gone or 404 means subscription expired — caller should clean up
     if (err.statusCode === 410 || err.statusCode === 404) {
-      console.log('[push] Subscription expired:', subscription.endpoint.slice(0, 50))
+      console.warn('[push] Subscription expired:', subscription.endpoint.slice(0, 50))
       return false
     }
     console.error('[push] Failed to send:', err.message)

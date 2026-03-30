@@ -36,5 +36,5 @@ export async function GET(
     return NextResponse.json({ error: "Route not found" }, { status: 404 });
   }
 
-  return NextResponse.json(route);
+  return NextResponse.json(route, { headers: { 'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400' } });
 }

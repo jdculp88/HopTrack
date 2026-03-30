@@ -70,8 +70,8 @@ const ICONS: Record<ToastType, React.ComponentType<{ size?: number; style?: Reac
 };
 
 const COLORS: Record<ToastType, { border: string; icon: string }> = {
-  success: { border: "rgba(61,122,82,0.5)",   icon: "#3D7A52" },
-  error:   { border: "rgba(196,75,58,0.5)",   icon: "#C44B3A" },
+  success: { border: "color-mix(in srgb, var(--success) 50%, transparent)",   icon: "var(--success)" },
+  error:   { border: "color-mix(in srgb, var(--danger) 50%, transparent)",   icon: "var(--danger)" },
   info:    { border: "color-mix(in srgb, var(--accent-gold) 40%, transparent)",  icon: "var(--accent-gold)" },
 };
 

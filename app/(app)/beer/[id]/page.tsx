@@ -10,13 +10,45 @@ import { UserAvatar } from "@/components/ui/UserAvatar";
 import { generateGradientFromString, formatABV } from "@/lib/utils";
 import { BeerReviewSection } from "@/components/beer/BeerReviewSection";
 import { getSimilarBeers } from "@/lib/recommendations";
+import type { Beer } from "@/types/database";
+
+// Supabase join shapes for tables not in generated types
+interface BeerWithBrewery extends Beer {
+  brewery: { id: string; name: string; city: string | null } | null;
+}
+
+interface BeerLogEntry {
+  id: string;
+  rating: number | null;
+  quantity: number;
+  flavor_tags: string[] | null;
+  serving_style: string | null;
+  comment: string | null;
+  logged_at: string;
+  user_id: string;
+  profile: {
+    id: string;
+    username: string;
+    display_name: string | null;
+    avatar_url: string | null;
+  } | null;
+}
+
+interface SimilarBeer {
+  id: string;
+  name: string;
+  style: string | null;
+  abv: number | null;
+  avg_rating: number | null;
+  total_ratings: number;
+  brewery: { id: string; name: string; city: string | null } | null;
+}
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createClient();
   const { data } = await supabase.from("beers").select("name, style").eq("id", id).single();
-  const beer = data as any;
-  return { title: beer ? `${beer.name}` : "Beer" };
+  return { title: data ? `${data.name}` : "Beer" };
 }
 
 export default async function BeerPage({ params }: { params: Promise<{ id: string }> }) {
@@ -32,15 +64,16 @@ export default async function BeerPage({ params }: { params: Promise<{ id: strin
     .single();
 
   if (!beerRaw) notFound();
-  const beer = beerRaw as any;
+  const beer = beerRaw as BeerWithBrewery;
 
   // Recent beer logs for this beer
-  const { data: beerLogs } = await (supabase as any)
+  const { data: beerLogsRaw } = await (supabase as any) // supabase join shape
     .from("beer_logs")
     .select("id, rating, quantity, flavor_tags, serving_style, comment, logged_at, user_id, profile:profiles(id, username, display_name, avatar_url)")
     .eq("beer_id", id)
     .order("logged_at", { ascending: false })
-    .limit(20) as any;
+    .limit(20);
+  const beerLogs = (beerLogsRaw ?? []) as BeerLogEntry[];
 
   // On wishlist?
   const { data: wishlistItem } = await supabase
@@ -51,13 +84,13 @@ export default async function BeerPage({ params }: { params: Promise<{ id: strin
     .single();
 
   // Flavor tag frequencies from beer_logs
-  const allTags = ((beerLogs as any[]) ?? []).flatMap((l: any) => l.flavor_tags ?? []);
+  const allTags = beerLogs.flatMap((l) => l.flavor_tags ?? []);
   const tagFreq: Record<string, number> = {};
   allTags.forEach((t: string) => { tagFreq[t] = (tagFreq[t] ?? 0) + 1; });
   const sortedTags = Object.entries(tagFreq).sort((a, b) => b[1] - a[1]).slice(0, 10);
 
   // Similar beers
-  const similarBeers = await getSimilarBeers(id, beer.style, beer.brewery_id).catch(() => []);
+  const similarBeers = (await getSimilarBeers(id, beer.style, beer.brewery_id).catch(() => [])) as SimilarBeer[];
 
   const gradient = generateGradientFromString(beer.name + beer.brewery_id);
   const brewery = beer.brewery;
@@ -81,7 +114,7 @@ export default async function BeerPage({ params }: { params: Promise<{ id: strin
         <div className="p-6 -mt-8 relative">
           <div className="flex items-start justify-between gap-4 mb-3">
             <div>
-              <h1 className="font-display text-3xl font-bold text-[var(--text-primary)] leading-tight">{(beer as any).name}</h1>
+              <h1 className="font-display text-3xl font-bold text-[var(--text-primary)] leading-tight">{beer.name}</h1>
               <Link href={`/brewery/${beer.brewery_id}`}>
                 <p className="hover:underline text-sm mt-1" style={{ color: "var(--accent-gold)" }}>{brewery?.name}</p>
               </Link>
@@ -90,7 +123,7 @@ export default async function BeerPage({ params }: { params: Promise<{ id: strin
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            <BeerStyleBadge style={(beer as any).style} size="md" />
+            <BeerStyleBadge style={beer.style} size="md" />
             {beer.abv && (
               <span className="font-mono text-sm text-[var(--text-secondary)]">{formatABV(beer.abv)}</span>
             )}
@@ -134,7 +167,7 @@ export default async function BeerPage({ params }: { params: Promise<{ id: strin
         <div>
           <h2 className="font-display text-xl font-bold text-[var(--text-primary)] mb-3">Similar Beers</h2>
           <div className="grid grid-cols-2 gap-3">
-            {similarBeers.map((similar: any) => (
+            {similarBeers.map((similar) => (
               <Link key={similar.id} href={`/beer/${similar.id}`}>
                 <div className="p-3 rounded-xl bg-[var(--surface)] border border-[var(--border)] hover:border-[var(--accent-gold)]/30 transition-all">
                   <p className="font-display font-bold text-sm truncate text-[var(--text-primary)]">{similar.name}</p>
@@ -164,7 +197,7 @@ export default async function BeerPage({ params }: { params: Promise<{ id: strin
         </h2>
         {beerLogs && beerLogs.length > 0 ? (
           <div className="space-y-3">
-            {((beerLogs as any[]) ?? []).map((log: any) => (
+            {beerLogs.map((log) => (
               <div key={log.id} className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-4">
                 <div className="flex items-center gap-3 mb-2">
                   <UserAvatar profile={log.profile} size="sm" />

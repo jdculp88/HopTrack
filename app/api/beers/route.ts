@@ -21,7 +21,7 @@ export async function GET(request: Request) {
 
   const { data, error } = await query.order("total_ratings", { ascending: false });
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json({ beers: data ?? [] });
+  return NextResponse.json({ beers: data ?? [] }, { headers: { 'Cache-Control': 'public, max-age=60, stale-while-revalidate=120' } });
 }
 
 export async function POST(request: Request) {

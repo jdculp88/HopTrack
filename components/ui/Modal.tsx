@@ -26,15 +26,21 @@ const SIZES = {
 
 export function Modal({ open, onClose, title, children, size = "md", className }: ModalProps) {
   const panelRef = useRef<HTMLDivElement>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     if (open) {
+      previousFocusRef.current = document.activeElement as HTMLElement;
       document.body.style.overflow = "hidden";
       // Focus first focusable element on open
       setTimeout(() => {
         const el = panelRef.current?.querySelector<HTMLElement>(FOCUSABLE);
         el?.focus();
       }, 50);
+    } else {
+      // Restore focus to trigger element on close
+      previousFocusRef.current?.focus();
+      previousFocusRef.current = null;
     }
     return () => { document.body.style.overflow = ""; };
   }, [open]);
@@ -86,10 +92,11 @@ export function Modal({ open, onClose, title, children, size = "md", className }
             )}
             role="dialog"
             aria-modal="true"
+            aria-labelledby={title ? "modal-title" : undefined}
           >
             {title && (
               <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border)] flex-shrink-0">
-                <h2 className="font-display text-lg font-semibold text-[var(--text-primary)]">{title}</h2>
+                <h2 id="modal-title" className="font-display text-lg font-semibold text-[var(--text-primary)]">{title}</h2>
                 <button
                   onClick={onClose}
                   aria-label="Close dialog"
@@ -113,19 +120,26 @@ interface DrawerProps {
   onClose: () => void;
   children: React.ReactNode;
   className?: string;
+  "aria-label"?: string;
 }
 
-export function FullScreenDrawer({ open, onClose, children, className }: DrawerProps) {
+export function FullScreenDrawer({ open, onClose, children, className, "aria-label": ariaLabel }: DrawerProps) {
   const drawerRef = useRef<HTMLDivElement>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     if (open) {
+      previousFocusRef.current = document.activeElement as HTMLElement;
       document.body.style.overflow = "hidden";
       // Focus first focusable element on open
       setTimeout(() => {
         const el = drawerRef.current?.querySelector<HTMLElement>(FOCUSABLE);
         el?.focus();
       }, 50);
+    } else {
+      // Restore focus to trigger element on close
+      previousFocusRef.current?.focus();
+      previousFocusRef.current = null;
     }
     return () => { document.body.style.overflow = ""; };
   }, [open]);
@@ -166,6 +180,7 @@ export function FullScreenDrawer({ open, onClose, children, className }: DrawerP
             className={cn("h-full flex flex-col", className)}
             role="dialog"
             aria-modal="true"
+            aria-label={ariaLabel}
           >
             {children}
           </motion.div>

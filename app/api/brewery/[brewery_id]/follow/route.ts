@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
+import { rateLimitResponse } from "@/lib/rate-limit";
 
 // GET — check if current user follows this brewery + get follow count
 export async function GET(
@@ -33,9 +34,12 @@ export async function GET(
 
 // POST — follow a brewery
 export async function POST(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ brewery_id: string }> }
 ) {
+  const rl = rateLimitResponse(req, 'brewery/follow', { limit: 30, windowMs: 60_000 })
+  if (rl) return rl
+
   const { brewery_id } = await params;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();

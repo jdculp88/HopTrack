@@ -46,12 +46,12 @@ export function AchievementBadge({
       <motion.div
         whileHover={earned ? { scale: 1.05 } : undefined}
         whileTap={onClick ? { scale: 0.95 } : undefined}
-        className="flex flex-col items-center gap-2"
+        className="h-full flex flex-col items-center gap-2"
       >
         <div
           className={cn(
             s.container,
-            "rounded-2xl flex items-center justify-center",
+            "rounded-2xl flex items-center justify-center flex-shrink-0",
             s.ring,
             earned ? [tier.ring, tier.glow] : "ring-[#3A3628]",
             earned ? "" : "opacity-40 grayscale"
@@ -61,11 +61,11 @@ export function AchievementBadge({
           <span className={cn(s.icon, earned ? "" : "opacity-50")}>{achievement.icon}</span>
         </div>
         {size !== "sm" && (
-          <div className="text-center">
-            <p className={cn("font-sans text-xs font-medium", earned ? "text-[var(--text-primary)]" : "text-[var(--text-muted)]")}>
+          <div className="text-center flex-1 flex flex-col justify-between">
+            <p className={cn("font-sans text-xs font-medium leading-tight", earned ? "text-[var(--text-primary)]" : "text-[var(--text-muted)]")}>
               {achievement.name}
             </p>
-            <p className="text-[10px]" style={{ color: earned ? achievement.badge_color : "var(--text-muted)" }}>
+            <p className="text-[10px] mt-1" style={{ color: earned ? achievement.badge_color : "var(--text-muted)" }}>
               {tier.label}
             </p>
           </div>

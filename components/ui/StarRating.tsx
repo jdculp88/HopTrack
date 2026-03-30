@@ -57,6 +57,8 @@ export function StarRating({
 
   return (
     <div
+      role="radiogroup"
+      aria-label="Star rating"
       className={cn("inline-flex items-center gap-0.5", className)}
       onMouseLeave={() => setHovered(null)}
     >
@@ -74,6 +76,8 @@ export function StarRating({
             key={i}
             type="button"
             disabled={!isInteractive}
+            aria-label={`Rate ${starValue} star${starValue !== 1 ? "s" : ""}`}
+            aria-checked={value >= starValue - 0.5 && value <= starValue}
             className={cn(
               "relative appearance-none border-0 bg-transparent p-0",
               isInteractive ? "cursor-pointer" : "cursor-default"

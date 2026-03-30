@@ -37,15 +37,19 @@ export async function GET(request: NextRequest) {
 
   let userIds: string[];
 
+  type FriendshipRow = { requester_id: string; addressee_id: string };
+  type ReactionRow = { session_id: string; type: string };
+  type CommentRow = { session_id: string };
+
   if (tab === "friends") {
     // Get accepted friend IDs
-    const { data: friendships } = await (supabase as any)
+    const { data: friendships } = await supabase
       .from("friendships")
       .select("requester_id, addressee_id")
       .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`)
       .eq("status", "accepted");
 
-    const friendIds = ((friendships ?? []) as any[]).map((f: any) =>
+    const friendIds = ((friendships ?? []) as FriendshipRow[]).map((f) =>
       f.requester_id === user.id ? f.addressee_id : f.requester_id
     );
     userIds = [user.id, ...friendIds];
@@ -54,7 +58,7 @@ export async function GET(request: NextRequest) {
   }
 
   // Fetch one extra to determine hasMore
-  const { data: sessions, error } = await (supabase as any)
+  const { data: sessions, error } = await supabase
     .from("sessions")
     .select(SESSION_SELECT)
     .in("user_id", userIds)
@@ -67,12 +71,12 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  const allSessions = (sessions ?? []) as any[];
+  const allSessions = (sessions ?? []) as unknown[];
   const hasMore = allSessions.length > PAGE_SIZE;
   const pageSessions = hasMore ? allSessions.slice(0, PAGE_SIZE) : allSessions;
 
   // Batch-fetch reaction counts, user reactions, and comment counts
-  const sessionIds = pageSessions.map((s: any) => s.id).filter(Boolean);
+  const sessionIds = (pageSessions as Array<{ id: string }>).map((s) => s.id).filter(Boolean);
 
   let reactionCounts: Record<string, Record<string, number>> = {};
   let userReactions: Record<string, string[]> = {};
@@ -80,33 +84,33 @@ export async function GET(request: NextRequest) {
 
   if (sessionIds.length > 0) {
     const [countsRes, userReactionsRes, commentsRes] = await Promise.all([
-      (supabase as any)
+      supabase
         .from("reactions")
         .select("session_id, type")
         .in("session_id", sessionIds),
-      (supabase as any)
+      supabase
         .from("reactions")
         .select("session_id, type")
         .eq("user_id", user.id)
         .in("session_id", sessionIds),
-      (supabase as any)
+      supabase
         .from("session_comments")
         .select("session_id")
         .in("session_id", sessionIds),
     ]);
 
-    for (const r of (countsRes.data ?? []) as any[]) {
+    for (const r of (countsRes.data ?? []) as ReactionRow[]) {
       if (!reactionCounts[r.session_id]) reactionCounts[r.session_id] = {};
       reactionCounts[r.session_id][r.type] =
         (reactionCounts[r.session_id][r.type] ?? 0) + 1;
     }
 
-    for (const r of (userReactionsRes.data ?? []) as any[]) {
+    for (const r of (userReactionsRes.data ?? []) as ReactionRow[]) {
       if (!userReactions[r.session_id]) userReactions[r.session_id] = [];
       userReactions[r.session_id].push(r.type);
     }
 
-    for (const c of (commentsRes.data ?? []) as any[]) {
+    for (const c of (commentsRes.data ?? []) as CommentRow[]) {
       commentCounts[c.session_id] = (commentCounts[c.session_id] ?? 0) + 1;
     }
   }

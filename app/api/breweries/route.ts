@@ -34,7 +34,7 @@ export async function GET(request: Request) {
     }).slice(0, limit);
 
     if (nearby.length > 0) {
-      return NextResponse.json({ breweries: nearby });
+      return NextResponse.json({ breweries: nearby }, { headers: { 'Cache-Control': 'public, max-age=60, stale-while-revalidate=120' } });
     }
 
     // Fallback to Open Brewery DB
@@ -48,7 +48,7 @@ export async function GET(request: Request) {
         .upsert(brewery, { onConflict: "external_id", ignoreDuplicates: true });
     }
 
-    return NextResponse.json({ breweries: mapped });
+    return NextResponse.json({ breweries: mapped }, { headers: { 'Cache-Control': 'public, max-age=60, stale-while-revalidate=120' } });
   }
 
   if (q) {
@@ -60,7 +60,7 @@ export async function GET(request: Request) {
       .limit(limit);
 
     if (dbResults && dbResults.length >= 5) {
-      return NextResponse.json({ breweries: dbResults });
+      return NextResponse.json({ breweries: dbResults }, { headers: { 'Cache-Control': 'public, max-age=60, stale-while-revalidate=120' } });
     }
 
     // Supplement with Open Brewery DB
@@ -80,7 +80,7 @@ export async function GET(request: Request) {
       .ilike("name", `%${q}%`)
       .limit(limit);
 
-    return NextResponse.json({ breweries: merged ?? [] });
+    return NextResponse.json({ breweries: merged ?? [] }, { headers: { 'Cache-Control': 'public, max-age=60, stale-while-revalidate=120' } });
   }
 
   // Default: return recently added / trending breweries
@@ -90,7 +90,7 @@ export async function GET(request: Request) {
     .order("created_at", { ascending: false })
     .limit(limit);
 
-  return NextResponse.json({ breweries: data ?? [] });
+  return NextResponse.json({ breweries: data ?? [] }, { headers: { 'Cache-Control': 'public, max-age=60, stale-while-revalidate=120' } });
 }
 
 export async function POST(request: Request) {

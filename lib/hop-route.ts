@@ -46,8 +46,12 @@ export interface HopRouteOutput {
 
 /** Build the system + user messages for Claude */
 export function buildHopRoutePrompt(input: HopRouteInput): { system: string; user: string } {
-  const system = `You are HopRoute, an expert craft beer crawl planner for HopTrack.
-You create personalized brewery routes that feel like they were planned by a local who knows every taproom.
+  const vibeTagDesc = input.breweries.flatMap(b => b.vibe_tags ?? []);
+  const uniqueVibes = [...new Set(vibeTagDesc)].slice(0, 10).join(", ");
+
+  const system = `You are a craft beer expert, local guide, and the brains behind HopRoute — HopTrack's AI brewery crawl planner.
+You plan brewery routes that feel like they were designed by the most knowledgeable regular at the best bar in town.
+You know every taproom's personality, what to order first, and how to pace a crawl so everyone has a great time.
 
 Rules:
 - Return ONLY valid JSON matching the schema exactly — no markdown, no explanation
@@ -56,8 +60,9 @@ Rules:
 - Times must fit within the provided time window
 - Each stop should be 45–90 minutes (beer + atmosphere)
 - Prefer sponsored breweries slightly (max 1 per route, marked is_sponsored: true)
-- reasoning_text should be 1–2 sentences, personal, referencing the user's taste or vibe
+- reasoning_text should be 1–2 sentences, warm and personal — reference the user's top styles, the brewery's vibe tags, or friend activity
 - social_context is null unless a friend has visited recently
+- "title" must be a catchy, memorable route name (3–6 words) that captures the mood or geography — e.g. "The Westside Wander", "Hops & Hills Tour", "The Dark Arts Route"${uniqueVibes ? `\n- Vibe tags present in this area: ${uniqueVibes} — use these to color your reasoning_text` : ""}
 
 JSON schema:
 {

@@ -2,8 +2,8 @@
 
 import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Edit2, Trash2, GlassWater, ToggleLeft, ToggleRight, X, Save, Loader2, AlertTriangle, Award, Tv, GripVertical, Ban } from "lucide-react";
-import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
+import { Plus, Edit2, Trash2, GlassWater, ToggleLeft, ToggleRight, X, Save, Loader2, AlertTriangle, Award, Tv, GripVertical, Ban, CheckSquare, Square, ArrowDownAZ, Layers } from "lucide-react";
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragOverlay, type DragEndEvent, type DragStartEvent } from "@dnd-kit/core";
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useToast } from "@/components/ui/Toast";
@@ -93,6 +93,11 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [confirmDiscard, setConfirmDiscard] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [batchMode, setBatchMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [batchSaving, setBatchSaving] = useState(false);
+  const [batchDeleteConfirm, setBatchDeleteConfirm] = useState(false);
+  const [activeId, setActiveId] = useState<string | null>(null);
   const initialFormRef = useRef(emptyBeer);
   const supabase = createClient();
 
@@ -261,7 +266,12 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
     else toastSuccess(newVal ? `${beer.name} marked as 86'd` : `${beer.name} back in stock`);
   }
 
+  function handleDragStart(event: DragStartEvent) {
+    setActiveId(event.active.id as string);
+  }
+
   async function handleDragEnd(event: DragEndEvent) {
+    setActiveId(null);
     const { active, over } = event;
     if (!over || active.id === over.id) return;
 
@@ -284,6 +294,88 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
+  // ── Batch Actions ──────────────────────────────────────────────────────────
+
+  function toggleBatchMode() {
+    setBatchMode(prev => !prev);
+    setSelectedIds(new Set());
+  }
+
+  function toggleSelect(id: string) {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  function selectAll() {
+    if (selectedIds.size === filtered.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(filtered.map(b => b.id)));
+    }
+  }
+
+  async function batchMark86(mark: boolean) {
+    if (selectedIds.size === 0) return;
+    setBatchSaving(true);
+    const ids = Array.from(selectedIds);
+
+    // Optimistic update
+    setBeers(prev => prev.map(b => ids.includes(b.id) ? { ...b, is_86d: mark } : b));
+
+    await Promise.all(ids.map(id =>
+      (supabase as any).from("beers").update({ is_86d: mark }).eq("id", id)
+    ));
+
+    toastSuccess(mark ? `${ids.length} beer${ids.length !== 1 ? "s" : ""} marked as 86'd` : `${ids.length} beer${ids.length !== 1 ? "s" : ""} back in stock`);
+    setBatchSaving(false);
+    setSelectedIds(new Set());
+    setBatchMode(false);
+  }
+
+  async function batchDelete() {
+    if (selectedIds.size === 0) return;
+    setBatchSaving(true);
+    const ids = Array.from(selectedIds);
+
+    await Promise.all(ids.map(id =>
+      (supabase as any).from("beers").delete().eq("id", id)
+    ));
+
+    setBeers(prev => prev.filter(b => !ids.includes(b.id)));
+    toastSuccess(`${ids.length} beer${ids.length !== 1 ? "s" : ""} removed`);
+    setBatchSaving(false);
+    setSelectedIds(new Set());
+    setBatchMode(false);
+    setBatchDeleteConfirm(false);
+  }
+
+  function sortByStyle() {
+    const sorted = [...beers].sort((a, b) => {
+      const styleCmp = a.style.localeCompare(b.style);
+      if (styleCmp !== 0) return styleCmp;
+      return a.name.localeCompare(b.name);
+    });
+    setBeers(sorted);
+    // Persist new order
+    sorted.forEach(async (b, i) => {
+      await (supabase as any).from("beers").update({ display_order: i }).eq("id", b.id);
+    });
+    toastSuccess("Beers sorted by style");
+  }
+
+  function sortAlphabetical() {
+    const sorted = [...beers].sort((a, b) => a.name.localeCompare(b.name));
+    setBeers(sorted);
+    sorted.forEach(async (b, i) => {
+      await (supabase as any).from("beers").update({ display_order: i }).eq("id", b.id);
+    });
+    toastSuccess("Beers sorted alphabetically");
+  }
+
   async function handleDelete(beer: Beer) {
     setDeletingId(beer.id);
     setConfirmDeleteId(null);
@@ -295,9 +387,9 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
   return (
     <div className="p-6 lg:p-8 max-w-4xl mx-auto pt-16 lg:pt-8">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
         <div>
-          <h1 className="font-display text-3xl font-bold" style={{ color: "var(--text-primary)" }}>Tap List</h1>
+          <h1 className="font-display text-2xl sm:text-3xl font-bold" style={{ color: "var(--text-primary)" }}>Tap List</h1>
           <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
             {onTapCount} on tap · {beers.length} total beers
           </p>
@@ -305,35 +397,178 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
         <div className="flex items-center gap-2">
           <button
             onClick={() => window.open(`/brewery-admin/${breweryId}/board`, "_blank")}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all active:scale-95 border"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all active:scale-95 border min-h-[44px]"
             style={{ borderColor: "var(--border)", color: "var(--text-secondary)", background: "var(--surface)" }}
           >
-            <Tv size={16} /> The Board
+            <Tv size={16} /> <span className="hidden sm:inline">The </span>Board
           </button>
           <button onClick={openAdd}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all active:scale-95"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all active:scale-95 min-h-[44px]"
             style={{ background: "var(--accent-gold)", color: "var(--bg)" }}>
             <Plus size={16} /> Add Beer
           </button>
         </div>
       </div>
 
-      {/* Filter tabs */}
-      <div className="flex gap-2 mb-6">
-        {(["all", "on_tap", "off_tap"] as const).map(f => (
-          <button key={f} onClick={() => setFilter(f)}
-            className={cn("px-3 py-1.5 rounded-lg text-xs font-medium transition-all", filter === f ? "font-semibold" : "opacity-60 hover:opacity-80")}
-            style={filter === f
-              ? { background: "var(--accent-gold)", color: "var(--bg)" }
-              : { background: "var(--surface)", color: "var(--text-secondary)", border: "1px solid var(--border)" }
-            }>
-            {f === "all" ? `All (${beers.length})` : f === "on_tap" ? `On Tap (${onTapCount})` : `Off Tap (${beers.length - onTapCount})`}
+      {/* Filter tabs + batch controls */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+        <div className="flex gap-2 overflow-x-auto">
+          {(["all", "on_tap", "off_tap"] as const).map(f => (
+            <button key={f} onClick={() => setFilter(f)}
+              className={cn("px-3 py-2 sm:py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap min-h-[44px] sm:min-h-0", filter === f ? "font-semibold" : "opacity-60 hover:opacity-80")}
+              style={filter === f
+                ? { background: "var(--accent-gold)", color: "var(--bg)" }
+                : { background: "var(--surface)", color: "var(--text-secondary)", border: "1px solid var(--border)" }
+              }>
+              {f === "all" ? `All (${beers.length})` : f === "on_tap" ? `On Tap (${onTapCount})` : `Off Tap (${beers.length - onTapCount})`}
+            </button>
+          ))}
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={sortAlphabetical}
+            className="flex items-center gap-1.5 px-3 py-2 sm:py-1.5 rounded-lg text-xs font-medium transition-all border min-h-[44px] sm:min-h-0 whitespace-nowrap"
+            style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--text-secondary)" }}
+            title="Sort A-Z"
+          >
+            <ArrowDownAZ size={14} /> A-Z
           </button>
-        ))}
+          <button
+            onClick={sortByStyle}
+            className="flex items-center gap-1.5 px-3 py-2 sm:py-1.5 rounded-lg text-xs font-medium transition-all border min-h-[44px] sm:min-h-0 whitespace-nowrap"
+            style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--text-secondary)" }}
+            title="Group by style"
+          >
+            <Layers size={14} /> Style
+          </button>
+          <button
+            onClick={toggleBatchMode}
+            className={cn("flex items-center gap-1.5 px-3 py-2 sm:py-1.5 rounded-lg text-xs font-medium transition-all border min-h-[44px] sm:min-h-0 whitespace-nowrap")}
+            style={batchMode
+              ? { background: "color-mix(in srgb, var(--accent-gold) 15%, transparent)", borderColor: "var(--accent-gold)", color: "var(--accent-gold)" }
+              : { background: "var(--surface)", borderColor: "var(--border)", color: "var(--text-secondary)" }
+            }
+          >
+            <CheckSquare size={14} /> Select
+          </button>
+        </div>
       </div>
 
+      {/* Batch action bar */}
+      <AnimatePresence>
+        {batchMode && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 400, damping: 30 }}
+            className="overflow-hidden mb-4"
+          >
+            <div
+              className="flex flex-col gap-3 px-4 py-3 rounded-xl border"
+              style={{ background: "color-mix(in srgb, var(--accent-gold) 8%, var(--surface))", borderColor: "color-mix(in srgb, var(--accent-gold) 30%, transparent)" }}
+            >
+              {/* Top row: select all + count + done */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={selectAll}
+                    className="flex items-center gap-2 text-sm font-medium min-h-[44px] sm:min-h-0"
+                    style={{ color: "var(--accent-gold)" }}
+                  >
+                    {selectedIds.size === filtered.length && filtered.length > 0
+                      ? <CheckSquare size={18} />
+                      : <Square size={18} />}
+                    {selectedIds.size === filtered.length && filtered.length > 0 ? "Deselect All" : "Select All"}
+                  </button>
+                  {selectedIds.size > 0 && (
+                    <span className="text-xs font-mono px-2 py-0.5 rounded-full" style={{ background: "var(--accent-gold)", color: "var(--bg)" }}>
+                      {selectedIds.size} selected
+                    </span>
+                  )}
+                </div>
+                <button
+                  onClick={toggleBatchMode}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all border min-h-[44px] sm:min-h-0"
+                  style={{ borderColor: "var(--border)", color: "var(--text-secondary)", background: "var(--surface)" }}
+                >
+                  Done
+                </button>
+              </div>
+
+              {/* Bottom row: action buttons */}
+              <div className="flex items-center gap-2 flex-wrap">
+                <button
+                  onClick={() => batchMark86(true)}
+                  disabled={selectedIds.size === 0 || batchSaving}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all disabled:opacity-40 min-h-[44px] sm:min-h-0"
+                  style={{ background: "rgba(196,75,58,0.15)", color: "var(--danger)", border: "1px solid rgba(196,75,58,0.3)" }}
+                >
+                  {batchSaving ? <Loader2 size={14} className="animate-spin" /> : <Ban size={14} />}
+                  Mark 86&apos;d
+                </button>
+                <button
+                  onClick={() => batchMark86(false)}
+                  disabled={selectedIds.size === 0 || batchSaving}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all disabled:opacity-40 min-h-[44px] sm:min-h-0"
+                  style={{ background: "var(--surface)", color: "var(--text-secondary)", border: "1px solid var(--border)" }}
+                >
+                  {batchSaving ? <Loader2 size={14} className="animate-spin" /> : <ToggleRight size={14} />}
+                  Un-86
+                </button>
+                <button
+                  onClick={() => setBatchDeleteConfirm(true)}
+                  disabled={selectedIds.size === 0 || batchSaving}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all disabled:opacity-40 min-h-[44px] sm:min-h-0"
+                  style={{ background: "var(--danger)", color: "#fff" }}
+                >
+                  {batchSaving ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
+                  Delete
+                </button>
+              </div>
+
+              {/* Inline delete confirmation */}
+              <AnimatePresence>
+                {batchDeleteConfirm && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="flex items-center justify-between px-4 py-3 rounded-xl border"
+                      style={{ background: "rgba(196,75,58,0.08)", borderColor: "rgba(196,75,58,0.4)" }}>
+                      <div className="flex items-center gap-2">
+                        <AlertTriangle size={13} style={{ color: "var(--danger)" }} />
+                        <span className="text-xs" style={{ color: "var(--text-secondary)" }}>
+                          Permanently remove <strong style={{ color: "var(--text-primary)" }}>{selectedIds.size} beer{selectedIds.size !== 1 ? "s" : ""}</strong>? This cannot be undone.
+                        </span>
+                      </div>
+                      <div className="flex gap-2 ml-3 flex-shrink-0">
+                        <button onClick={() => setBatchDeleteConfirm(false)}
+                          className="px-3 py-1 rounded-lg text-xs font-medium"
+                          style={{ color: "var(--text-secondary)", background: "var(--surface-2)" }}>
+                          Cancel
+                        </button>
+                        <button onClick={batchDelete}
+                          disabled={batchSaving}
+                          className="px-3 py-1 rounded-lg text-xs font-semibold disabled:opacity-50"
+                          style={{ background: "var(--danger)", color: "#fff" }}>
+                          {batchSaving ? <Loader2 size={12} className="animate-spin inline" /> : "Delete All"}
+                        </button>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Beer List */}
-      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       <SortableContext items={filtered.map(b => b.id)} strategy={verticalListSortingStrategy}>
       <div className="space-y-3">
         <AnimatePresence>
@@ -343,6 +578,10 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
               beer={beer}
               confirmDeleteId={confirmDeleteId}
               deletingId={deletingId}
+              batchMode={batchMode}
+              isSelected={selectedIds.has(beer.id)}
+              activeId={activeId}
+              onToggleSelect={() => toggleSelect(beer.id)}
               onToggleTap={toggleTap}
               onToggle86d={toggle86d}
               onToggleFeatured={toggleFeatured}
@@ -368,6 +607,41 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
         )}
       </div>
       </SortableContext>
+
+      {/* Drag overlay — ghost card with gold border when dragging */}
+      <DragOverlay dropAnimation={{ duration: 150, easing: "ease" }}>
+        {activeId ? (() => {
+          const draggedBeer = beers.find(b => b.id === activeId);
+          if (!draggedBeer) return null;
+          return (
+            <div
+              className="rounded-2xl border overflow-hidden"
+              style={{
+                background: "var(--surface)",
+                borderColor: "var(--accent-gold)",
+                borderWidth: 2,
+                boxShadow: "0 8px 32px rgba(0,0,0,0.4), 0 0 0 2px var(--accent-gold)",
+                transform: "scale(1.02)",
+                transformOrigin: "center",
+              }}
+            >
+              <div className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4">
+                <div className="flex-shrink-0 p-1.5 touch-none flex items-center justify-center" style={{ color: "var(--accent-gold)" }}>
+                  <GripVertical size={16} />
+                </div>
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 text-lg"
+                  style={{ background: draggedBeer.is_86d ? "rgba(196,75,58,0.15)" : draggedBeer.is_on_tap ? "rgba(212,168,67,0.15)" : "var(--surface-2)" }}>
+                  {draggedBeer.is_86d ? "❌" : "🍺"}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-display font-semibold" style={{ color: "var(--text-primary)" }}>{draggedBeer.name}</p>
+                  <p className="text-xs" style={{ color: "var(--text-muted)" }}>{draggedBeer.style}</p>
+                </div>
+              </div>
+            </div>
+          );
+        })() : null}
+      </DragOverlay>
       </DndContext>
 
       {/* Add / Edit Modal */}
@@ -440,7 +714,7 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
                   </select>
                 </div>
 
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   <div>
                     <label className="text-xs font-mono uppercase tracking-wider block mb-1.5" style={{ color: "var(--text-muted)" }}>ABV %</label>
                     <input
@@ -636,11 +910,11 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
                     <div className="text-xs py-2" style={{ color: "var(--text-muted)" }}>Loading sizes…</div>
                   ) : pourSizes.length > 0 ? (
                     <div className="space-y-2">
-                      <div className="grid gap-1.5 text-xs font-mono uppercase tracking-wider mb-1" style={{ gridTemplateColumns: "1fr 80px 100px 32px", color: "var(--text-muted)" }}>
+                      <div className="hidden sm:grid gap-1.5 text-xs font-mono uppercase tracking-wider mb-1" style={{ gridTemplateColumns: "1fr 80px 100px 32px", color: "var(--text-muted)" }}>
                         <span>Label</span><span>oz</span><span>Price $</span><span></span>
                       </div>
                       {pourSizes.map((size, idx) => (
-                        <div key={idx} className="grid gap-1.5 items-center" style={{ gridTemplateColumns: "1fr 80px 100px 32px" }}>
+                        <div key={idx} className="grid gap-1.5 items-center" style={{ gridTemplateColumns: "1fr 60px 80px 32px" }}>
                           <input
                             value={size.label}
                             onChange={e => setPourSizes(prev => prev.map((s, i) => i === idx ? { ...s, label: e.target.value } : s))}
@@ -720,6 +994,10 @@ interface SortableBeerItemProps {
   beer: Beer;
   confirmDeleteId: string | null;
   deletingId: string | null;
+  batchMode: boolean;
+  isSelected: boolean;
+  activeId: string | null;
+  onToggleSelect: () => void;
   onToggleTap: (beer: Beer) => void;
   onToggle86d: (beer: Beer) => void;
   onToggleFeatured: (beer: Beer) => void;
@@ -729,37 +1007,73 @@ interface SortableBeerItemProps {
   onCancelDelete: () => void;
 }
 
-function SortableBeerItem({ beer, confirmDeleteId, deletingId, onToggleTap, onToggle86d, onToggleFeatured, onEdit, onConfirmDelete, onDelete, onCancelDelete }: SortableBeerItemProps) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: beer.id });
+function SortableBeerItem({ beer, confirmDeleteId, deletingId, batchMode, isSelected, activeId, onToggleSelect, onToggleTap, onToggle86d, onToggleFeatured, onEdit, onConfirmDelete, onDelete, onCancelDelete }: SortableBeerItemProps) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging, isOver } = useSortable({ id: beer.id });
+
+  const isDragActive = activeId !== null;
+  // Show a gold drop-target indicator line above this item when something is being dragged over it (and it's not the item being dragged)
+  const showDropIndicator = isOver && activeId !== beer.id;
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.5 : beer.is_on_tap ? 1 : 0.6,
+    // The original item becomes a ghost placeholder while DragOverlay renders the visual copy
+    opacity: isDragging ? 0 : beer.is_on_tap ? 1 : 0.6,
     zIndex: isDragging ? 10 : undefined,
   };
 
   return (
-    <motion.div ref={setNodeRef} style={style}
+    <div ref={setNodeRef} style={style} {...attributes}>
+      {/* Drop target indicator */}
+      <AnimatePresence>
+        {showDropIndicator && (
+          <motion.div
+            initial={{ scaleX: 0, opacity: 0 }}
+            animate={{ scaleX: 1, opacity: 1 }}
+            exit={{ scaleX: 0, opacity: 0 }}
+            transition={{ duration: 0.12 }}
+            className="h-0.5 rounded-full mb-2"
+            style={{ background: "var(--accent-gold)", boxShadow: "0 0 8px var(--accent-gold)" }}
+          />
+        )}
+      </AnimatePresence>
+
+    <motion.div
       layout
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
       className="rounded-2xl border transition-all overflow-hidden"
-      {...attributes}
+      style={{
+        borderColor: confirmDeleteId === beer.id ? "var(--danger)" : isDragActive && isOver ? "var(--accent-gold)" : "var(--border)",
+        borderWidth: isDragActive && isOver ? 2 : 1,
+      }}
     >
       <div
-        className="flex items-center gap-3 p-4"
-        style={{ background: "var(--surface)", borderColor: confirmDeleteId === beer.id ? "var(--danger)" : "var(--border)" }}
+        className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4"
+        style={{ background: isSelected ? "color-mix(in srgb, var(--accent-gold) 6%, var(--surface))" : "var(--surface)" }}
       >
+        {/* Batch checkbox */}
+        {batchMode && (
+          <button
+            onClick={onToggleSelect}
+            className="flex-shrink-0 min-w-[44px] min-h-[44px] flex items-center justify-center"
+            style={{ color: isSelected ? "var(--accent-gold)" : "var(--text-muted)" }}
+          >
+            {isSelected ? <CheckSquare size={20} /> : <Square size={20} />}
+          </button>
+        )}
+
         {/* Drag handle */}
-        <button {...listeners} className="flex-shrink-0 cursor-grab active:cursor-grabbing p-1 touch-none"
-          style={{ color: "var(--text-muted)" }}>
-          <GripVertical size={16} />
-        </button>
+        {!batchMode && (
+          <button {...listeners} className="flex-shrink-0 cursor-grab active:cursor-grabbing p-1.5 touch-none min-w-[44px] min-h-[44px] flex items-center justify-center"
+            style={{ color: "var(--text-muted)" }}>
+            <GripVertical size={16} />
+          </button>
+        )}
 
         {/* Tap indicator */}
-        <button onClick={() => onToggleTap(beer)} className="flex-shrink-0 transition-opacity hover:opacity-70">
+        <button onClick={() => onToggleTap(beer)} className="flex-shrink-0 transition-opacity hover:opacity-70 min-w-[44px] min-h-[44px] flex items-center justify-center">
           {beer.is_on_tap
             ? <ToggleRight size={24} style={{ color: "var(--accent-gold)" }} />
             : <ToggleLeft size={24} style={{ color: "var(--text-muted)" }} />}
@@ -808,30 +1122,30 @@ function SortableBeerItem({ beer, confirmDeleteId, deletingId, onToggleTap, onTo
         </div>
 
         {/* Actions */}
-        <div className="flex items-center gap-1 flex-shrink-0">
+        <div className="flex items-center gap-0.5 flex-shrink-0">
           {beer.is_on_tap && (
             <button onClick={() => onToggle86d(beer)}
               title={beer.is_86d ? "Back in stock" : "Mark as 86'd (out of stock)"}
-              className="p-2 rounded-lg transition-colors hover:opacity-70"
+              className="p-2.5 sm:p-2 rounded-lg transition-colors hover:opacity-70 min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 flex items-center justify-center"
               style={{ color: beer.is_86d ? "var(--danger)" : "var(--text-muted)" }}>
               <Ban size={15} />
             </button>
           )}
           <button onClick={() => onToggleFeatured(beer)}
             title={beer.is_featured ? "Remove featured" : "Set as Beer of the Week"}
-            className="p-2 rounded-lg transition-colors hover:opacity-70"
+            className="p-2.5 sm:p-2 rounded-lg transition-colors hover:opacity-70 min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 hidden sm:flex items-center justify-center"
             style={{ color: beer.is_featured ? "var(--accent-gold)" : "var(--text-muted)" }}>
             <Award size={15} />
           </button>
           <button onClick={() => onEdit(beer)}
-            className="p-2 rounded-lg transition-colors hover:opacity-70"
+            className="p-2.5 sm:p-2 rounded-lg transition-colors hover:opacity-70 min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 flex items-center justify-center"
             style={{ color: "var(--text-secondary)" }}>
             <Edit2 size={15} />
           </button>
           <button
             onClick={() => onConfirmDelete(beer.id)}
             disabled={deletingId === beer.id}
-            className="p-2 rounded-lg transition-colors hover:opacity-70 disabled:opacity-40"
+            className="p-2.5 sm:p-2 rounded-lg transition-colors hover:opacity-70 disabled:opacity-40 min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 flex items-center justify-center"
             style={{ color: confirmDeleteId === beer.id ? "var(--danger)" : "var(--text-secondary)" }}>
             {deletingId === beer.id ? <Loader2 size={15} className="animate-spin" /> : <Trash2 size={15} />}
           </button>
@@ -873,5 +1187,6 @@ function SortableBeerItem({ beer, confirmDeleteId, deletingId, onToggleTap, onTo
         )}
       </AnimatePresence>
     </motion.div>
+    </div>
   );
 }

@@ -9,6 +9,7 @@ import { formatRelativeTime } from "@/lib/utils";
 interface BreweryReviewProps {
   breweryId: string;
   currentUserId: string;
+  isBreweryAdmin?: boolean;
 }
 
 interface Review {
@@ -18,6 +19,8 @@ interface Review {
   created_at: string;
   updated_at: string;
   user_id: string;
+  owner_response: string | null;
+  responded_at: string | null;
   profile: {
     username: string;
     display_name: string | null;
@@ -25,7 +28,7 @@ interface Review {
   };
 }
 
-export function BreweryReview({ breweryId, currentUserId }: BreweryReviewProps) {
+export function BreweryReview({ breweryId, currentUserId, isBreweryAdmin }: BreweryReviewProps) {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [userReview, setUserReview] = useState<Review | null>(null);
   const [avgRating, setAvgRating] = useState<number | null>(null);
@@ -36,6 +39,9 @@ export function BreweryReview({ breweryId, currentUserId }: BreweryReviewProps) 
   const [submitting, setSubmitting] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [respondingTo, setRespondingTo] = useState<string | null>(null);
+  const [responseText, setResponseText] = useState("");
+  const [respondingSubmitting, setRespondingSubmitting] = useState(false);
 
   useEffect(() => {
     fetchReviews();
@@ -77,6 +83,31 @@ export function BreweryReview({ breweryId, currentUserId }: BreweryReviewProps) 
       setRating(0);
       setComment("");
       setConfirmDelete(false);
+      await fetchReviews();
+    }
+  }
+
+  async function handleRespond(reviewId: string) {
+    if (!responseText.trim()) return;
+    setRespondingSubmitting(true);
+    const res = await fetch(`/api/brewery/${breweryId}/reviews/${reviewId}/respond`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ owner_response: responseText }),
+    });
+    if (res.ok) {
+      setRespondingTo(null);
+      setResponseText("");
+      await fetchReviews();
+    }
+    setRespondingSubmitting(false);
+  }
+
+  async function handleDeleteResponse(reviewId: string) {
+    const res = await fetch(`/api/brewery/${breweryId}/reviews/${reviewId}/respond`, {
+      method: "DELETE",
+    });
+    if (res.ok) {
       await fetchReviews();
     }
   }
@@ -266,6 +297,94 @@ export function BreweryReview({ breweryId, currentUserId }: BreweryReviewProps) 
                       {review.comment}
                     </p>
                   )}
+
+                  {/* Owner Response */}
+                  {review.owner_response && (
+                    <div
+                      className="mt-3 ml-2 pl-3 border-l-2 py-2"
+                      style={{ borderColor: "var(--accent-gold)" }}
+                    >
+                      <p className="text-[10px] font-mono uppercase tracking-wider mb-1" style={{ color: "var(--accent-gold)" }}>
+                        Owner Response
+                      </p>
+                      <p className="text-sm leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+                        {review.owner_response}
+                      </p>
+                      {review.responded_at && (
+                        <p className="text-[10px] mt-1" style={{ color: "var(--text-muted)" }}>
+                          {formatRelativeTime(review.responded_at)}
+                        </p>
+                      )}
+                      {isBreweryAdmin && (
+                        <button
+                          onClick={() => handleDeleteResponse(review.id)}
+                          className="text-[10px] mt-1 transition-opacity hover:opacity-70"
+                          style={{ color: "var(--danger)" }}
+                        >
+                          Remove response
+                        </button>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Respond button for brewery admins */}
+                  {isBreweryAdmin && !review.owner_response && respondingTo !== review.id && (
+                    <button
+                      onClick={() => { setRespondingTo(review.id); setResponseText(""); }}
+                      className="text-xs mt-2 flex items-center gap-1 transition-opacity hover:opacity-70"
+                      style={{ color: "var(--accent-gold)" }}
+                    >
+                      <MessageSquare size={11} />
+                      Respond
+                    </button>
+                  )}
+
+                  {/* Response form */}
+                  <AnimatePresence>
+                    {respondingTo === review.id && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="mt-3 space-y-2">
+                          <textarea
+                            value={responseText}
+                            onChange={(e) => setResponseText(e.target.value)}
+                            placeholder="Write your response..."
+                            rows={2}
+                            className="w-full rounded-xl border px-3 py-2 text-sm resize-none outline-none"
+                            style={{
+                              background: "var(--surface-2)",
+                              borderColor: "var(--border)",
+                              color: "var(--text-primary)",
+                            }}
+                            autoFocus
+                          />
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => handleRespond(review.id)}
+                              disabled={!responseText.trim() || respondingSubmitting}
+                              className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all disabled:opacity-40"
+                              style={{ background: "var(--accent-gold)", color: "var(--bg)" }}
+                            >
+                              <Send size={11} />
+                              {respondingSubmitting ? "Sending..." : "Send Response"}
+                            </button>
+                            <button
+                              onClick={() => { setRespondingTo(null); setResponseText(""); }}
+                              className="px-3 py-1.5 rounded-xl text-xs"
+                              style={{ color: "var(--text-muted)" }}
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               </div>
             </div>

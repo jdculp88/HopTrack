@@ -11,6 +11,24 @@ interface RecommendedBeer {
   reason: string;
 }
 
+interface BeerLogStyleRow {
+  beer: { style: string | null } | null;
+}
+
+interface BeerLogIdRow {
+  beer_id: string | null;
+}
+
+interface BeerCandidateRow {
+  id: string;
+  name: string;
+  style: string | null;
+  abv: number | null;
+  avg_rating: number | null;
+  total_ratings: number;
+  brewery: { id: string; name: string; city: string | null } | null;
+}
+
 /**
  * Get personalized beer recommendations for a user.
  * Algorithm:
@@ -23,7 +41,7 @@ export async function getRecommendations(userId: string): Promise<RecommendedBee
   const supabase = await createClient();
 
   // 1. Get user's style preferences from beer_logs
-  const { data: userLogs } = await (supabase as any)
+  const { data: userLogs } = await supabase // supabase join shape
     .from("beer_logs")
     .select("beer:beers(style)")
     .eq("user_id", userId);
@@ -31,7 +49,7 @@ export async function getRecommendations(userId: string): Promise<RecommendedBee
   if (!userLogs || userLogs.length === 0) return [];
 
   const styleCounts: Record<string, number> = {};
-  for (const log of userLogs as any[]) {
+  for (const log of (userLogs as unknown as BeerLogStyleRow[])) {
     const style = log.beer?.style;
     if (style) {
       styleCounts[style] = (styleCounts[style] || 0) + 1;
@@ -46,15 +64,17 @@ export async function getRecommendations(userId: string): Promise<RecommendedBee
   if (topStyles.length === 0) return [];
 
   // 2. Get beers user has already tried
-  const { data: triedBeers } = await (supabase as any)
+  const { data: triedBeers } = await supabase // supabase join shape
     .from("beer_logs")
     .select("beer_id")
     .eq("user_id", userId);
 
-  const triedIds = new Set((triedBeers ?? []).map((b: any) => b.beer_id).filter(Boolean));
+  const triedIds = new Set(
+    ((triedBeers ?? []) as BeerLogIdRow[]).map((b) => b.beer_id).filter(Boolean)
+  );
 
   // 3. Find highly-rated beers in user's preferred styles
-  const { data: candidates } = await (supabase as any)
+  const { data: candidates } = await supabase // supabase join shape
     .from("beers")
     .select("id, name, style, abv, avg_rating, total_ratings, brewery:breweries(id, name, city)")
     .in("style", topStyles)
@@ -67,7 +87,7 @@ export async function getRecommendations(userId: string): Promise<RecommendedBee
 
   // Filter out already tried beers, take top 10
   const recommendations: RecommendedBeer[] = [];
-  for (const beer of candidates as any[]) {
+  for (const beer of (candidates as unknown as BeerCandidateRow[])) {
     if (triedIds.has(beer.id)) continue;
     if (recommendations.length >= 10) break;
 
@@ -102,7 +122,7 @@ export async function getSimilarBeers(beerId: string, style: string | null, brew
   if (!style) return [];
 
   const supabase = await createClient();
-  const { data } = await (supabase as any)
+  const { data } = await supabase // supabase join shape
     .from("beers")
     .select("id, name, style, abv, avg_rating, total_ratings, brewery:breweries(id, name, city)")
     .eq("style", style)
@@ -112,5 +132,5 @@ export async function getSimilarBeers(beerId: string, style: string | null, brew
     .order("avg_rating", { ascending: false, nullsFirst: false })
     .limit(4);
 
-  return (data ?? []) as any[];
+  return (data ?? []) as unknown as BeerCandidateRow[];
 }

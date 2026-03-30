@@ -58,7 +58,7 @@ export function PromotionsClient({ brewery }: PromotionsClientProps) {
           <Beer size={20} />
         </div>
         <div>
-          <h1 className="font-display text-2xl font-bold text-[var(--text-primary)]">Promotions</h1>
+          <h1 className="font-display text-3xl font-bold text-[var(--text-primary)]">Promotions</h1>
           <p className="text-sm text-[var(--text-secondary)]">HopRoute placement &amp; offers</p>
         </div>
       </div>
@@ -146,16 +146,16 @@ export function PromotionsClient({ brewery }: PromotionsClientProps) {
         )}
       </div>
 
-      <motion.button
+      <button
         onClick={handleSave}
         disabled={saving}
-        whileTap={{ scale: 0.98 }}
-        transition={{ type: "spring", stiffness: 400, damping: 30 }}
         className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-medium transition-all disabled:opacity-60"
         style={{ background: "var(--accent-gold)", color: "var(--bg)" }}
       >
-        {saving ? "Saving..." : <><Save size={14} /> Save Promotions Settings</>}
-      </motion.button>
+        <motion.span whileTap={{ scale: 0.98 }} className="flex items-center gap-2">
+          {saving ? "Saving..." : <><Save size={14} /> Save Promotions Settings</>}
+        </motion.span>
+      </button>
     </div>
   );
 }

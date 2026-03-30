@@ -6,6 +6,13 @@ import { Calendar, Plus, X, Save, Loader2, Trash2, AlertTriangle, ToggleLeft, To
 import { createClient } from "@/lib/supabase/client";
 import { formatDate } from "@/lib/dates";
 
+function getNowDatetimeLocal() {
+  const now = new Date();
+  // Format as YYYY-MM-DDTHH:MM for datetime-local min attribute
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+}
+
 const EVENT_TYPES = [
   { value: "tap_takeover", label: "Tap Takeover", emoji: "🍺" },
   { value: "release_party", label: "Release Party", emoji: "🎉" },
@@ -21,8 +28,8 @@ const emptyForm = {
   title: "",
   description: "",
   event_date: "",
-  start_time: "",
-  end_time: "",
+  start_datetime: "",
+  end_datetime: "",
   event_type: "other" as EventType,
 };
 
@@ -39,6 +46,7 @@ export function EventsClient({ breweryId, initialEvents }: EventsClientProps) {
   const [saving, setSaving] = useState(false);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [formErrors, setFormErrors] = useState<{ start?: string; end?: string }>({});
   const supabase = createClient();
 
   const today = new Date().toISOString().split("T")[0];
@@ -47,33 +55,73 @@ export function EventsClient({ breweryId, initialEvents }: EventsClientProps) {
 
   function openAdd() {
     setForm(emptyForm);
+    setFormErrors({});
     setEditingEvent(null);
     setShowForm(true);
   }
 
   function openEdit(event: any) {
+    // Reconstruct datetime-local strings from stored date + time fields
+    const startDt = event.event_date && event.start_time
+      ? `${event.event_date}T${event.start_time.slice(0, 5)}`
+      : event.event_date
+      ? `${event.event_date}T00:00`
+      : "";
+    const endDt = event.event_date && event.end_time
+      ? `${event.event_date}T${event.end_time.slice(0, 5)}`
+      : "";
     setForm({
       title: event.title,
       description: event.description ?? "",
       event_date: event.event_date,
-      start_time: event.start_time ?? "",
-      end_time: event.end_time ?? "",
+      start_datetime: startDt,
+      end_datetime: endDt,
       event_type: event.event_type,
     });
+    setFormErrors({});
     setEditingEvent(event);
     setShowForm(true);
   }
 
   async function save() {
-    if (!form.title.trim() || !form.event_date) return;
+    if (!form.title.trim() || !form.start_datetime) return;
+
+    const errors: { start?: string; end?: string } = {};
+    const now = new Date();
+    const startDt = new Date(form.start_datetime);
+
+    // Only block past dates for new events (not edits)
+    if (!editingEvent && startDt < now) {
+      errors.start = "Event start time cannot be in the past";
+    }
+
+    if (form.end_datetime) {
+      const endDt = new Date(form.end_datetime);
+      if (endDt <= startDt) {
+        errors.end = "End time must be after start time";
+      }
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      return;
+    }
+    setFormErrors({});
+
     setSaving(true);
+
+    // Parse out date/time components for DB storage
+    const startDate = form.start_datetime.split("T")[0];
+    const startTime = form.start_datetime.split("T")[1] ?? null;
+    const endTime = form.end_datetime ? form.end_datetime.split("T")[1] : null;
+
     const payload = {
       brewery_id: breweryId,
       title: form.title,
       description: form.description || null,
-      event_date: form.event_date,
-      start_time: form.start_time || null,
-      end_time: form.end_time || null,
+      event_date: startDate,
+      start_time: startTime,
+      end_time: endTime,
       event_type: form.event_type,
     };
 
@@ -91,6 +139,7 @@ export function EventsClient({ breweryId, initialEvents }: EventsClientProps) {
     setShowForm(false);
     setEditingEvent(null);
     setForm(emptyForm);
+    setFormErrors({});
   }
 
   async function toggleEvent(event: any) {
@@ -110,16 +159,16 @@ export function EventsClient({ breweryId, initialEvents }: EventsClientProps) {
 
   return (
     <div className="p-6 lg:p-8 max-w-3xl mx-auto pt-16 lg:pt-8">
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-8">
         <div>
-          <h1 className="font-display text-3xl font-bold" style={{ color: "var(--text-primary)" }}>Events</h1>
+          <h1 className="font-display text-2xl sm:text-3xl font-bold" style={{ color: "var(--text-primary)" }}>Events</h1>
           <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
             Post upcoming events — customers see them on your brewery page.
           </p>
         </div>
         <button
           onClick={openAdd}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold"
+          className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold min-h-[44px] shrink-0"
           style={{ background: "var(--accent-gold)", color: "var(--bg)" }}
         >
           <Plus size={15} /> Add Event
@@ -173,7 +222,7 @@ export function EventsClient({ breweryId, initialEvents }: EventsClientProps) {
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4"
             style={{ background: "rgba(0,0,0,0.7)" }}
-            onClick={e => e.target === e.currentTarget && setShowForm(false)}
+            onClick={e => { if (e.target === e.currentTarget) { setShowForm(false); setFormErrors({}); } }}
           >
             <motion.div
               initial={{ y: 60, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 60, opacity: 0 }}
@@ -185,17 +234,17 @@ export function EventsClient({ breweryId, initialEvents }: EventsClientProps) {
                 <h2 className="font-display text-xl font-bold" style={{ color: "var(--text-primary)" }}>
                   {editingEvent ? "Edit Event" : "Add Event"}
                 </h2>
-                <button onClick={() => setShowForm(false)} style={{ color: "var(--text-muted)" }}><X size={20} /></button>
+                <button onClick={() => { setShowForm(false); setFormErrors({}); }} style={{ color: "var(--text-muted)" }}><X size={20} /></button>
               </div>
 
               <div>
                 <label className="text-xs font-mono uppercase tracking-wider block mb-1.5" style={{ color: "var(--text-muted)" }}>Event Type</label>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {EVENT_TYPES.map(et => (
                     <button
                       key={et.value}
                       onClick={() => setForm(f => ({ ...f, event_type: et.value }))}
-                      className="flex flex-col items-center gap-1 py-2.5 rounded-xl border text-xs font-mono transition-colors"
+                      className="flex flex-col items-center gap-1 py-3 sm:py-2.5 rounded-xl border text-xs font-mono transition-colors min-h-[44px]"
                       style={form.event_type === et.value
                         ? { background: "rgba(212,168,67,0.15)", borderColor: "var(--accent-gold)", color: "var(--accent-gold)" }
                         : { background: "var(--surface-2)", borderColor: "var(--border)", color: "var(--text-muted)" }
@@ -213,17 +262,62 @@ export function EventsClient({ breweryId, initialEvents }: EventsClientProps) {
                   placeholder="e.g. Summer IPA Release Party" style={inputStyle} />
               </Field>
 
-              <div className="grid grid-cols-2 gap-3">
-                <Field label="Date *">
-                  <input type="date" value={form.event_date} onChange={e => setForm(f => ({ ...f, event_date: e.target.value }))} style={inputStyle} />
-                </Field>
-                <div className="grid grid-cols-2 gap-2">
-                  <Field label="Start">
-                    <input type="time" value={form.start_time} onChange={e => setForm(f => ({ ...f, start_time: e.target.value }))} style={inputStyle} />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <Field label="Start Date & Time *">
+                    <input
+                      type="datetime-local"
+                      value={form.start_datetime}
+                      min={!editingEvent ? getNowDatetimeLocal() : undefined}
+                      onChange={e => {
+                        setForm(f => ({ ...f, start_datetime: e.target.value }));
+                        if (formErrors.start) setFormErrors(fe => ({ ...fe, start: undefined }));
+                      }}
+                      style={{
+                        ...inputStyle,
+                        borderColor: formErrors.start ? "var(--danger)" : "var(--border)",
+                      }}
+                    />
                   </Field>
-                  <Field label="End">
-                    <input type="time" value={form.end_time} onChange={e => setForm(f => ({ ...f, end_time: e.target.value }))} style={inputStyle} />
+                  <AnimatePresence>
+                    {formErrors.start && (
+                      <motion.p
+                        initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}
+                        className="text-xs mt-1"
+                        style={{ color: "var(--danger)" }}
+                      >
+                        {formErrors.start}
+                      </motion.p>
+                    )}
+                  </AnimatePresence>
+                </div>
+                <div>
+                  <Field label="End Date & Time">
+                    <input
+                      type="datetime-local"
+                      value={form.end_datetime}
+                      min={form.start_datetime || (!editingEvent ? getNowDatetimeLocal() : undefined)}
+                      onChange={e => {
+                        setForm(f => ({ ...f, end_datetime: e.target.value }));
+                        if (formErrors.end) setFormErrors(fe => ({ ...fe, end: undefined }));
+                      }}
+                      style={{
+                        ...inputStyle,
+                        borderColor: formErrors.end ? "var(--danger)" : "var(--border)",
+                      }}
+                    />
                   </Field>
+                  <AnimatePresence>
+                    {formErrors.end && (
+                      <motion.p
+                        initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}
+                        className="text-xs mt-1"
+                        style={{ color: "var(--danger)" }}
+                      >
+                        {formErrors.end}
+                      </motion.p>
+                    )}
+                  </AnimatePresence>
                 </div>
               </div>
 
@@ -234,12 +328,12 @@ export function EventsClient({ breweryId, initialEvents }: EventsClientProps) {
               </Field>
 
               <div className="flex gap-3 pt-1">
-                <button onClick={() => setShowForm(false)}
+                <button onClick={() => { setShowForm(false); setFormErrors({}); }}
                   className="flex-1 py-3 rounded-xl text-sm font-medium border"
                   style={{ borderColor: "var(--border)", color: "var(--text-secondary)", background: "transparent" }}>
                   Cancel
                 </button>
-                <button onClick={save} disabled={saving || !form.title.trim() || !form.event_date}
+                <button onClick={save} disabled={saving || !form.title.trim() || !form.start_datetime}
                   className="flex-1 py-3 rounded-xl text-sm font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
                   style={{ background: "var(--accent-gold)", color: "var(--bg)" }}>
                   {saving ? <><Loader2 size={16} className="animate-spin" />Saving…</> : <><Save size={16} />{editingEvent ? "Save Changes" : "Post Event"}</>}
@@ -288,11 +382,11 @@ function EventCard({ event, onEdit, onToggle, onDelete, confirmDeleteId, setConf
             {et && <span className="font-mono">{et.label}</span>}
           </div>
         </div>
-        <div className="flex items-center gap-1 flex-shrink-0">
-          <button onClick={() => onEdit(event)} className="p-2 rounded-lg hover:opacity-70 transition-opacity" style={{ color: "var(--text-secondary)" }}>
+        <div className="flex items-center gap-0.5 flex-shrink-0">
+          <button onClick={() => onEdit(event)} className="p-2.5 sm:p-2 rounded-lg hover:opacity-70 transition-opacity min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 flex items-center justify-center" style={{ color: "var(--text-secondary)" }}>
             ✏️
           </button>
-          <button onClick={() => onToggle(event)}>
+          <button onClick={() => onToggle(event)} className="min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 flex items-center justify-center">
             {event.is_active
               ? <ToggleRight size={26} style={{ color: "var(--accent-gold)" }} />
               : <ToggleLeft size={26} style={{ color: "var(--text-muted)" }} />}
@@ -300,7 +394,7 @@ function EventCard({ event, onEdit, onToggle, onDelete, confirmDeleteId, setConf
           <button
             onClick={() => setConfirmDeleteId(confirmDeleteId === event.id ? null : event.id)}
             disabled={deletingId === event.id}
-            className="p-1 hover:opacity-70 transition-opacity disabled:opacity-40"
+            className="p-2.5 sm:p-1 rounded-lg hover:opacity-70 transition-opacity disabled:opacity-40 min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 flex items-center justify-center"
             style={{ color: confirmDeleteId === event.id ? "var(--danger)" : "var(--text-secondary)" }}>
             {deletingId === event.id ? <Loader2 size={15} className="animate-spin" /> : <Trash2 size={15} />}
           </button>

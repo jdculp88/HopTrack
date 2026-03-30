@@ -4,6 +4,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { HopMark } from "@/components/ui/HopMark";
 
+export const revalidate = 300; // 5-minute ISR — public page, no auth required
+
 interface Props {
   params: Promise<{ id: string }>;
 }
@@ -129,9 +131,9 @@ export default async function BreweryWelcomePage({ params }: Props) {
           </div>
         )}
 
-        {/* CTA */}
+        {/* CTA — navigates to home with brewery pre-selected for session start */}
         <a
-          href={`/brewery/${brewery.id}`}
+          href={`/home?start_brewery=${brewery.id}`}
           style={{
             display: "flex",
             alignItems: "center",

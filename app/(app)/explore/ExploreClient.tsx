@@ -1,18 +1,23 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Map, List, Loader2, SlidersHorizontal, X, Sparkles, Navigation, Trophy } from "lucide-react";
+import {
+  Search, Map, List, Loader2, SlidersHorizontal, X, Sparkles,
+  Navigation, Trophy, ChevronDown, ChevronUp, MapPin, Users, Calendar, Clock,
+} from "lucide-react";
 import Link from "next/link";
-import { BreweryCard } from "@/components/brewery/BreweryCard";
+import Image from "next/image";
+import { BreweryCard, getBreweryPlaceholder } from "@/components/brewery/BreweryCard";
 import { SkeletonCard } from "@/components/ui/SkeletonLoader";
 import { useToast } from "@/components/ui/Toast";
 import type { BreweryWithStats, BreweryType } from "@/types/database";
 import { searchBreweries, mapOpenBreweryToDb } from "@/lib/openbrewerydb";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { haversineDistance, formatDistance } from "@/lib/geo";
+
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -31,8 +36,10 @@ const BreweryMap = dynamic(
 
 interface ExploreClientProps {
   breweries: BreweryWithStats[];
-  hasBeerOfTheWeek?: string[]; // brewery IDs that have a Beer of the Week
-  hasUpcomingEvents?: string[]; // brewery IDs with upcoming events
+  hasBeerOfTheWeek?: string[];
+  hasUpcomingEvents?: string[];
+  followerCounts?: Record<string, number>;
+  recentBreweryIds?: string[];
 }
 
 type ViewMode = "list" | "map";
@@ -49,11 +56,18 @@ const BREWERY_TYPE_OPTIONS: { value: BreweryType; label: string }[] = [
   { value: "contract", label: "Contract" },
 ];
 
-export function ExploreClient({ breweries: initialBreweries, hasBeerOfTheWeek = [], hasUpcomingEvents = [] }: ExploreClientProps) {
+export function ExploreClient({
+  breweries: initialBreweries,
+  hasBeerOfTheWeek = [],
+  hasUpcomingEvents = [],
+  followerCounts = {},
+  recentBreweryIds = [],
+}: ExploreClientProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
   const { info } = useToast();
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   const [view, setView] = useState<ViewMode>((searchParams.get("view") as ViewMode) ?? "list");
   const [query, setQuery] = useState(searchParams.get("q") ?? "");
@@ -65,27 +79,8 @@ export function ExploreClient({ breweries: initialBreweries, hasBeerOfTheWeek = 
   const [breweries, setBreweries] = useState<BreweryWithStats[]>(enriched);
   const [searching, setSearching] = useState(false);
   const geo = useGeolocation();
-  const [nearMeActive, setNearMeActive] = useState(false);
 
   const activeFilterCount = (typeFilter !== "all" ? 1 : 0) + (botwFilter ? 1 : 0);
-
-  // Near Me toggle handler
-  const toggleNearMe = useCallback(() => {
-    if (nearMeActive) {
-      setNearMeActive(false);
-      geo.disable();
-    } else {
-      geo.requestLocation();
-      setNearMeActive(true);
-    }
-  }, [nearMeActive, geo]);
-
-  // When geolocation errors out (denied), disable the toggle
-  useEffect(() => {
-    if (geo.error && nearMeActive) {
-      setNearMeActive(false);
-    }
-  }, [geo.error, nearMeActive]);
 
   // Pre-compute distances for all breweries when location is available
   const distanceMap = useMemo(() => {
@@ -101,7 +96,23 @@ export function ExploreClient({ breweries: initialBreweries, hasBeerOfTheWeek = 
     return map;
   }, [geo.latitude, geo.longitude, initialBreweries]);
 
-  // Sync state → URL without re-rendering the page
+  // Near Me breweries — sorted by distance, top 10
+  const nearMeBreweries = useMemo(() => {
+    if (!geo.latitude || !geo.longitude) return [];
+    return [...initialBreweries]
+      .filter(b => b.id in distanceMap)
+      .sort((a, b) => (distanceMap[a.id] ?? Infinity) - (distanceMap[b.id] ?? Infinity))
+      .slice(0, 10);
+  }, [initialBreweries, distanceMap, geo.latitude, geo.longitude]);
+
+  // Recently visited breweries
+  const recentBreweries = useMemo(() => {
+    return recentBreweryIds
+      .map(id => initialBreweries.find(b => b.id === id))
+      .filter(Boolean) as BreweryWithStats[];
+  }, [recentBreweryIds, initialBreweries]);
+
+  // Sync state to URL without re-rendering the page
   const pushParams = useCallback((updates: Record<string, string>) => {
     const params = new URLSearchParams(searchParams.toString());
     for (const [k, v] of Object.entries(updates)) {
@@ -131,68 +142,112 @@ export function ExploreClient({ breweries: initialBreweries, hasBeerOfTheWeek = 
     return () => clearTimeout(t);
   }, [query]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Request geolocation on mount (silently — no prompt if already granted)
+  useEffect(() => {
+    geo.requestLocation();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   // Apply all filters
-  const filteredBreweries = (query.trim() ? breweries : breweries)
+  const filteredBreweries = breweries
     .filter((b: any) => {
-      // Visit filter (only when not searching)
       if (!query.trim()) {
         if (visitFilter === "visited" && !b.user_visit) return false;
         if (visitFilter === "unvisited" && b.user_visit) return false;
       }
-      // Type filter
       if (typeFilter !== "all" && b.brewery_type !== typeFilter) return false;
-      // Beer of the Week filter
       if (botwFilter && !hasBeerOfTheWeek.includes(b.id)) return false;
       return true;
     })
     .sort((a: any, b: any) => {
-      if (!nearMeActive || !geo.enabled) return 0;
-      const distA = distanceMap[a.id] ?? Infinity;
-      const distB = distanceMap[b.id] ?? Infinity;
-      return distA - distB;
+      // If geo available, sort by distance
+      if (geo.latitude && geo.longitude && !query.trim()) {
+        const distA = distanceMap[a.id] ?? Infinity;
+        const distB = distanceMap[b.id] ?? Infinity;
+        return distA - distB;
+      }
+      return 0;
     });
 
-  const visitedCount   = initialBreweries.filter((b: any) => !!b.user_visit).length;
+  const visitedCount = initialBreweries.filter((b: any) => !!b.user_visit).length;
   const unvisitedCount = initialBreweries.filter((b: any) => !b.user_visit).length;
 
+  const isSearching = query.trim().length > 0;
+
   return (
-    <div className="max-w-5xl mx-auto px-4 py-6 space-y-5">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <h1 className="font-display text-3xl font-bold text-[var(--text-primary)]">Explore</h1>
-        <div className="flex items-center gap-2">
-          <Link
-            href="/leaderboard"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm border transition-colors"
-            style={{ background: "var(--surface)", color: "var(--text-muted)", borderColor: "var(--border)" }}
-          >
-            <Trophy size={14} />
-            <span className="hidden sm:inline">Leaderboard</span>
-          </Link>
-          {/* Near Me toggle — hidden if geolocation denied */}
-          {!(geo.error && !nearMeActive) && (
-            <button
-              onClick={toggleNearMe}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm transition-all border"
-              style={
-                nearMeActive && geo.enabled
-                  ? { background: "color-mix(in srgb, var(--accent-gold) 10%, transparent)", color: "var(--accent-gold)", borderColor: "color-mix(in srgb, var(--accent-gold) 30%, transparent)" }
-                  : { background: "var(--surface)", color: "var(--text-muted)", borderColor: "var(--border)" }
-              }
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ type: "spring", stiffness: 400, damping: 30 }}
+    >
+    <div className="max-w-5xl mx-auto px-4 py-6 space-y-6">
+      {/* Hero Search */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h1 className="font-sans text-3xl font-bold text-[var(--text-primary)]">Explore</h1>
+          <div className="flex items-center gap-2">
+            <Link
+              href="/leaderboard"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm border transition-colors"
+              style={{ background: "var(--surface)", color: "var(--text-muted)", borderColor: "var(--border)" }}
             >
-              {geo.loading ? (
-                <Loader2 size={14} className="animate-spin" />
-              ) : (
-                <Navigation size={14} />
-              )}
-              Near Me
+              <Trophy size={14} />
+              <span className="hidden sm:inline">Leaderboard</span>
+            </Link>
+            {/* View toggle */}
+            <div className="flex items-center gap-2 bg-[var(--surface)] border border-[var(--border)] rounded-xl p-1">
+              <button
+                onClick={() => setViewAndSync("list")}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-all"
+                style={view === "list"
+                  ? { background: "color-mix(in srgb, var(--accent-gold) 10%, transparent)", color: "var(--accent-gold)" }
+                  : { color: "var(--text-muted)" }
+                }
+              >
+                <List size={14} /> List
+              </button>
+              <button
+                onClick={() => setViewAndSync("map")}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-all"
+                style={view === "map"
+                  ? { background: "color-mix(in srgb, var(--accent-gold) 10%, transparent)", color: "var(--accent-gold)" }
+                  : { color: "var(--text-muted)" }
+                }
+              >
+                <Map size={14} /> Map
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Large search bar */}
+        <div className="relative">
+          <Search size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none" />
+          <input
+            ref={searchInputRef}
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search breweries, beers, or styles..."
+            className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-2xl pl-12 pr-12 py-4 text-lg text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent-gold)] transition-colors"
+          />
+          {searching && (
+            <Loader2 size={18} className="absolute right-4 top-1/2 -translate-y-1/2 animate-spin" style={{ color: "var(--accent-gold)" }} />
+          )}
+          {!searching && query.trim() && (
+            <button
+              onClick={() => { setQuery(""); searchInputRef.current?.focus(); }}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
+            >
+              <X size={18} />
             </button>
           )}
+        </div>
+
+        {/* Filter bar — collapsible below search */}
+        <div className="flex items-center gap-2 flex-wrap">
           {/* Filter toggle */}
           <button
             onClick={() => setShowFilters((v) => !v)}
-
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm transition-all border relative"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm transition-all border"
             style={
               showFilters || activeFilterCount > 0
                 ? { background: "color-mix(in srgb, var(--accent-gold) 10%, transparent)", color: "var(--accent-gold)", borderColor: "color-mix(in srgb, var(--accent-gold) 30%, transparent)" }
@@ -206,144 +261,209 @@ export function ExploreClient({ breweries: initialBreweries, hasBeerOfTheWeek = 
                 {activeFilterCount}
               </span>
             )}
+            {showFilters ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
           </button>
-          {/* View toggle */}
-          <div className="flex items-center gap-2 bg-[var(--surface)] border border-[var(--border)] rounded-xl p-1">
-            <button
-              onClick={() => setViewAndSync("list")}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-all"
-              style={view === "list"
-                ? { background: "color-mix(in srgb, var(--accent-gold) 10%, transparent)", color: "var(--accent-gold)" }
-                : { color: "var(--text-muted)" }
-              }
-            >
-              <List size={14} /> List
-            </button>
-            <button
-              onClick={() => setViewAndSync("map")}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-all"
-              style={view === "map"
-                ? { background: "color-mix(in srgb, var(--accent-gold) 10%, transparent)", color: "var(--accent-gold)" }
-                : { color: "var(--text-muted)" }
-              }
-            >
-              <Map size={14} /> Map
-            </button>
-          </div>
+
+          {/* Visit filter pills — inline, only when not searching */}
+          {!isSearching && view === "list" && (
+            <>
+              {(["all", "visited", "unvisited"] as VisitFilter[]).map((f) => {
+                const labels = {
+                  all: `All (${initialBreweries.length})`,
+                  visited: `Visited (${visitedCount})`,
+                  unvisited: `New to me (${unvisitedCount})`,
+                };
+                return (
+                  <button
+                    key={f}
+                    onClick={() => setVisitFilterAndSync(f)}
+                    className="px-3 py-1.5 rounded-xl text-sm transition-all border"
+                    style={
+                      visitFilter === f
+                        ? { background: "color-mix(in srgb, var(--accent-gold) 10%, transparent)", color: "var(--accent-gold)", borderColor: "color-mix(in srgb, var(--accent-gold) 30%, transparent)" }
+                        : { background: "var(--surface)", color: "var(--text-muted)", borderColor: "var(--border)" }
+                    }
+                  >
+                    {labels[f]}
+                  </button>
+                );
+              })}
+            </>
+          )}
+
+          {/* Geo location status */}
+          {geo.latitude && geo.longitude && !geo.error && (
+            <span className="flex items-center gap-1 text-xs text-[var(--text-muted)] ml-auto">
+              <Navigation size={10} style={{ color: "var(--accent-gold)" }} />
+              Sorting by distance
+            </span>
+          )}
         </div>
-      </div>
 
-      {/* Search */}
-      <div className="relative">
-        <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none" />
-        <input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search breweries by name or city..."
-          className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-2xl pl-11 pr-12 py-3.5 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent-gold)] transition-colors"
-        />
-        {searching && (
-          <Loader2 size={16} className="absolute right-4 top-1/2 -translate-y-1/2 animate-spin" style={{ color: "var(--accent-gold)" }} />
-        )}
-        {!searching && query.trim() && (
-          <button
-            onClick={() => setQuery("")}
-            className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
-          >
-            <X size={16} />
-          </button>
-        )}
-      </div>
-
-      {/* Advanced filters panel */}
-      <AnimatePresence>
-        {showFilters && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ type: "spring", stiffness: 400, damping: 30 }}
-            className="overflow-hidden"
-          >
-            <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-4 space-y-4">
-              {/* Brewery type */}
-              <div>
-                <p className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wide mb-2">Brewery Type</p>
-                <div className="flex flex-wrap gap-2">
-                  <FilterChip
-                    label="All Types"
-                    active={typeFilter === "all"}
-                    onClick={() => setTypeFilterAndSync("all")}
-                  />
-                  {BREWERY_TYPE_OPTIONS.map((opt) => (
+        {/* Advanced filters panel */}
+        <AnimatePresence>
+          {showFilters && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 400, damping: 30 }}
+              className="overflow-hidden"
+            >
+              <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-4 space-y-4">
+                {/* Brewery type */}
+                <div>
+                  <p className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wide mb-2">Brewery Type</p>
+                  <div className="flex flex-wrap gap-2">
                     <FilterChip
-                      key={opt.value}
-                      label={opt.label}
-                      active={typeFilter === opt.value}
-                      onClick={() => setTypeFilterAndSync(typeFilter === opt.value ? "all" : opt.value)}
+                      label="All Types"
+                      active={typeFilter === "all"}
+                      onClick={() => setTypeFilterAndSync("all")}
                     />
-                  ))}
+                    {BREWERY_TYPE_OPTIONS.map((opt) => (
+                      <FilterChip
+                        key={opt.value}
+                        label={opt.label}
+                        active={typeFilter === opt.value}
+                        onClick={() => setTypeFilterAndSync(typeFilter === opt.value ? "all" : opt.value)}
+                      />
+                    ))}
+                  </div>
                 </div>
-              </div>
 
-              {/* Special filters */}
-              <div>
-                <p className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wide mb-2">Special</p>
-                <div className="flex flex-wrap gap-2">
-                  <FilterChip
-                    label="Beer of the Week"
-                    active={botwFilter}
-                    onClick={() => setBotwFilterAndSync(!botwFilter)}
-                    icon={<Sparkles size={12} />}
-                  />
+                {/* Special filters */}
+                <div>
+                  <p className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wide mb-2">Special</p>
+                  <div className="flex flex-wrap gap-2">
+                    <FilterChip
+                      label="Beer of the Week"
+                      active={botwFilter}
+                      onClick={() => setBotwFilterAndSync(!botwFilter)}
+                      icon={<Sparkles size={12} />}
+                    />
+                  </div>
                 </div>
+
+                {activeFilterCount > 0 && (
+                  <button
+                    onClick={clearFiltersAndSync}
+                    className="text-xs hover:underline"
+                    style={{ color: "var(--accent-gold)" }}
+                  >
+                    Clear all filters
+                  </button>
+                )}
               </div>
-
-              {activeFilterCount > 0 && (
-                <button
-                  onClick={clearFiltersAndSync}
-                  className="text-xs hover:underline"
-                  style={{ color: "var(--accent-gold)" }}
-                >
-                  Clear all filters
-                </button>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Visit filter — only show when not searching */}
-      {!query.trim() && view === "list" && (
-        <div className="flex items-center gap-2">
-          {(["all", "visited", "unvisited"] as VisitFilter[]).map((f) => {
-            const labels = {
-              all: `All (${initialBreweries.length})`,
-              visited: `Visited (${visitedCount})`,
-              unvisited: `New to me (${unvisitedCount})`,
-            };
-            return (
-              <button
-                key={f}
-                onClick={() => setVisitFilterAndSync(f)}
-                className="px-3 py-1.5 rounded-xl text-sm transition-all border"
-                style={
-                  visitFilter === f
-                    ? { background: "color-mix(in srgb, var(--accent-gold) 10%, transparent)", color: "var(--accent-gold)", borderColor: "color-mix(in srgb, var(--accent-gold) 30%, transparent)" }
-                    : { background: "var(--surface)", color: "var(--text-muted)", borderColor: "var(--border)" }
-                }
-              >
-                {labels[f]}
-              </button>
-            );
-          })}
-        </div>
-      )}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
 
       {view === "map" ? (
         <BreweryMap breweries={filteredBreweries} className="h-[480px]" />
+      ) : isSearching ? (
+        /* Search results */
+        <div className="space-y-4">
+          {searching ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
+            </div>
+          ) : filteredBreweries.length === 0 ? (
+            <SearchEmptyState query={query} onClear={() => { setQuery(""); searchInputRef.current?.focus(); }} />
+          ) : (
+            <>
+              <p className="text-sm text-[var(--text-muted)]">
+                {filteredBreweries.length} result{filteredBreweries.length !== 1 ? "s" : ""} for &ldquo;{query}&rdquo;
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {filteredBreweries.map((b: any, i: number) => {
+                  const isExternal = !UUID_REGEX.test(b.id);
+                  return (
+                    <motion.div
+                      key={b.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: i * 0.04 }}
+                    >
+                      {isExternal ? (
+                        <div
+                          onClick={(e) => { e.preventDefault(); e.stopPropagation(); info("This brewery isn't on HopTrack yet -- check back soon!"); }}
+                          className="cursor-pointer [&_a]:pointer-events-none relative h-full"
+                        >
+                          <BreweryCard brewery={b} />
+                          <span
+                            className="absolute top-3 left-3 z-10 text-[10px] font-mono px-2 py-0.5 rounded-full"
+                            style={{
+                              background: "color-mix(in srgb, var(--text-muted) 15%, transparent)",
+                              color: "var(--text-muted)",
+                              border: "1px solid var(--border)",
+                            }}
+                          >
+                            Not on HopTrack yet
+                          </span>
+                        </div>
+                      ) : (
+                        <EnrichedBreweryCard
+                          brewery={b}
+                          followerCount={followerCounts[b.id]}
+                          hasEvent={hasUpcomingEvents.includes(b.id)}
+                          distance={b.id in distanceMap ? formatDistance(distanceMap[b.id]!) : undefined}
+                        />
+                      )}
+                    </motion.div>
+                  );
+                })}
+              </div>
+            </>
+          )}
+        </div>
       ) : (
-        <>
+        /* Discovery view — sections */
+        <div className="space-y-8">
+          {/* Near Me section */}
+          {nearMeBreweries.length > 0 && (
+            <section>
+              <div className="flex items-center gap-2 mb-3">
+                <Navigation size={16} style={{ color: "var(--accent-gold)" }} />
+                <h2 className="font-sans text-xl font-bold text-[var(--text-primary)]">Near Me</h2>
+              </div>
+              <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
+                {nearMeBreweries.map((b, i) => (
+                  <NearMeCard
+                    key={b.id}
+                    brewery={b}
+                    distance={formatDistance(distanceMap[b.id]!)}
+                    followerCount={followerCounts[b.id]}
+                    hasEvent={hasUpcomingEvents.includes(b.id)}
+                    index={i}
+                  />
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Recently Visited */}
+          {recentBreweries.length > 0 && (
+            <section>
+              <div className="flex items-center gap-2 mb-3">
+                <Clock size={16} style={{ color: "var(--accent-gold)" }} />
+                <h2 className="font-sans text-xl font-bold text-[var(--text-primary)]">Recently Visited</h2>
+              </div>
+              <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
+                {recentBreweries.map((b, i) => (
+                  <NearMeCard
+                    key={b.id}
+                    brewery={b}
+                    distance={b.id in distanceMap ? formatDistance(distanceMap[b.id]!) : undefined}
+                    followerCount={followerCounts[b.id]}
+                    hasEvent={hasUpcomingEvents.includes(b.id)}
+                    index={i}
+                  />
+                ))}
+              </div>
+            </section>
+          )}
+
           {/* Results count when filters active */}
           {activeFilterCount > 0 && (
             <p className="text-sm text-[var(--text-muted)]">
@@ -351,9 +471,15 @@ export function ExploreClient({ breweries: initialBreweries, hasBeerOfTheWeek = 
             </p>
           )}
 
-          {/* Discovery sections (no search) */}
-          {!query.trim() && (
-            <Section title={visitFilter === "all" ? "All Breweries" : visitFilter === "visited" ? "Visited" : "New to Me"} count={filteredBreweries.length}>
+          {/* All Breweries grid */}
+          <section>
+            <div className="flex items-center gap-2 mb-4">
+              <h2 className="font-sans text-xl font-bold text-[var(--text-primary)]">
+                {visitFilter === "all" ? "All Breweries" : visitFilter === "visited" ? "Visited" : "New to Me"}
+              </h2>
+              <span className="text-sm text-[var(--text-muted)]">({filteredBreweries.length})</span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {searching
                 ? Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)
                 : filteredBreweries.length === 0
@@ -368,101 +494,205 @@ export function ExploreClient({ breweries: initialBreweries, hasBeerOfTheWeek = 
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: i * 0.04 }}
-                      className="relative"
                     >
-                      <BreweryCard brewery={b} />
-                      {nearMeActive && geo.enabled && b.id in distanceMap && (
-                        <span
-                          className="absolute top-3 right-3 z-10 text-[10px] font-mono px-2 py-0.5 rounded-full"
-                          style={{
-                            background: "color-mix(in srgb, var(--accent-gold) 15%, transparent)",
-                            color: "var(--accent-gold)",
-                            border: "1px solid color-mix(in srgb, var(--accent-gold) 30%, transparent)",
-                          }}
-                        >
-                          {formatDistance(distanceMap[b.id]!)}
-                        </span>
-                      )}
+                      <EnrichedBreweryCard
+                        brewery={b}
+                        followerCount={followerCounts[b.id]}
+                        hasEvent={hasUpcomingEvents.includes(b.id)}
+                        distance={b.id in distanceMap ? formatDistance(distanceMap[b.id]!) : undefined}
+                      />
                     </motion.div>
                   ))
               }
-            </Section>
-          )}
-
-          {/* Search results */}
-          {query.trim() && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {searching
-                ? Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)
-                : breweries.length === 0
-                ? <p className="col-span-full text-center text-[var(--text-muted)] py-12">No breweries found for &ldquo;{query}&rdquo;</p>
-                : filteredBreweries.map((b: any, i: number) => {
-                    const isExternal = !UUID_REGEX.test(b.id);
-                    return (
-                      <motion.div
-                        key={b.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: i * 0.04 }}
-                        className="relative"
-                      >
-                        {isExternal ? (
-                          <div
-                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); info("This brewery isn't on HopTrack yet — check back soon!"); }}
-                            className="cursor-pointer [&_a]:pointer-events-none"
-                          >
-                            <BreweryCard brewery={b} />
-                            <span
-                              className="absolute top-3 left-3 z-10 text-[10px] font-mono px-2 py-0.5 rounded-full"
-                              style={{
-                                background: "color-mix(in srgb, var(--text-muted) 15%, transparent)",
-                                color: "var(--text-muted)",
-                                border: "1px solid var(--border)",
-                              }}
-                            >
-                              Not on HopTrack yet
-                            </span>
-                          </div>
-                        ) : (
-                          <BreweryCard brewery={b} />
-                        )}
-                        {nearMeActive && geo.enabled && b.id in distanceMap && (
-                          <span
-                            className="absolute top-3 right-3 z-10 text-[10px] font-mono px-2 py-0.5 rounded-full"
-                            style={{
-                              background: "color-mix(in srgb, var(--accent-gold) 15%, transparent)",
-                              color: "var(--accent-gold)",
-                              border: "1px solid color-mix(in srgb, var(--accent-gold) 30%, transparent)",
-                            }}
-                          >
-                            {formatDistance(distanceMap[b.id]!)}
-                          </span>
-                        )}
-                      </motion.div>
-                    );
-                  })
-              }
             </div>
+          </section>
+        </div>
+      )}
+    </div>
+    </motion.div>
+  );
+}
+
+/* ─── Enriched Brewery Card ────────────────────────────────────────────────── */
+/* Wraps BreweryCard with follower count, event badge, and distance overlay */
+
+function EnrichedBreweryCard({
+  brewery,
+  followerCount,
+  hasEvent,
+  distance,
+}: {
+  brewery: BreweryWithStats;
+  followerCount?: number;
+  hasEvent?: boolean;
+  distance?: string;
+}) {
+  // Ensure the event flag is set on the brewery object so BreweryCard renders the badge in the image area
+  const enrichedBrewery = hasEvent
+    ? { ...brewery, has_upcoming_events: true }
+    : brewery;
+
+  const hasStats = (followerCount && followerCount > 0) || distance;
+
+  return (
+    <div className="flex flex-col h-full">
+      <BreweryCard
+        brewery={enrichedBrewery as BreweryWithStats}
+        className={hasStats ? "flex-1 rounded-b-none border-b-0" : "flex-1"}
+      />
+      {/* Stats row — sits below the card, never overlaps content */}
+      {hasStats && (
+        <div className="flex items-center gap-2 px-4 py-2 border border-[var(--border)] rounded-b-2xl bg-[var(--surface)]">
+          {followerCount && followerCount > 0 && (
+            <span
+              className="flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded-full"
+              style={{
+                background: "color-mix(in srgb, var(--surface-2) 80%, transparent)",
+                color: "var(--text-muted)",
+                border: "1px solid var(--border)",
+              }}
+            >
+              <Users size={9} />
+              {followerCount}
+            </span>
           )}
-        </>
+          {distance && (
+            <span
+              className="ml-auto flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded-full"
+              style={{
+                background: "color-mix(in srgb, var(--accent-gold) 10%, transparent)",
+                color: "var(--accent-gold)",
+                border: "1px solid color-mix(in srgb, var(--accent-gold) 30%, transparent)",
+              }}
+            >
+              <Navigation size={9} />
+              {distance}
+            </span>
+          )}
+        </div>
       )}
     </div>
   );
 }
 
-function Section({ title, count, children }: { title: string; count: number; children: React.ReactNode }) {
+/* ─── Near Me / Recently Visited horizontal card ───────────────────────────── */
+
+function NearMeCard({
+  brewery,
+  distance,
+  followerCount,
+  hasEvent,
+  index,
+}: {
+  brewery: BreweryWithStats;
+  distance?: string;
+  followerCount?: number;
+  hasEvent?: boolean;
+  index: number;
+}) {
+  const coverSrc = brewery.cover_image_url || getBreweryPlaceholder(brewery.name);
+
   return (
-    <div>
-      <div className="flex items-center gap-2 mb-4">
-        <h2 className="font-display text-xl font-bold text-[var(--text-primary)]">{title}</h2>
-        <span className="text-sm text-[var(--text-muted)]">({count})</span>
+    <Link href={`/brewery/${brewery.id}`}>
+      <motion.div
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: index * 0.05 }}
+        className="flex-shrink-0 w-56 bg-[var(--surface)] border border-[var(--border)] rounded-2xl overflow-hidden hover:border-[color-mix(in_srgb,var(--accent-gold)_30%,transparent)] transition-colors group"
+      >
+        {/* Mini cover */}
+        <div className="h-24 w-full relative overflow-hidden">
+          <Image
+            src={coverSrc}
+            alt={brewery.name}
+            fill
+            className="object-cover group-hover:scale-105 transition-transform duration-500"
+            sizes="224px"
+          />
+          {distance && (
+            <span
+              className="absolute top-2 right-2 text-[10px] font-mono px-2 py-0.5 rounded-full"
+              style={{
+                background: "color-mix(in srgb, var(--accent-gold) 15%, var(--bg))",
+                color: "var(--accent-gold)",
+                border: "1px solid color-mix(in srgb, var(--accent-gold) 30%, transparent)",
+              }}
+            >
+              {distance}
+            </span>
+          )}
+          {hasEvent && (
+            <span
+              className="absolute top-2 left-2 flex items-center gap-0.5 text-[10px] font-mono px-1.5 py-0.5 rounded-full"
+              style={{
+                background: "color-mix(in srgb, #5B8DEF 15%, var(--bg))",
+                color: "#5B8DEF",
+                border: "1px solid color-mix(in srgb, #5B8DEF 30%, transparent)",
+              }}
+            >
+              <Calendar size={8} />
+            </span>
+          )}
+        </div>
+
+        {/* Info */}
+        <div className="p-3 space-y-1">
+          <h3 className="font-display font-semibold text-sm text-[var(--text-primary)] truncate group-hover:text-[var(--accent-gold)] transition-colors">
+            {brewery.name}
+          </h3>
+          <div className="flex items-center gap-1 text-xs text-[var(--text-muted)]">
+            <MapPin size={10} />
+            <span className="truncate">{brewery.city}{brewery.state ? `, ${brewery.state}` : ""}</span>
+          </div>
+          <div className="flex items-center gap-2 text-[10px] text-[var(--text-muted)]">
+            {followerCount && followerCount > 0 && (
+              <span className="flex items-center gap-0.5">
+                <Users size={9} /> {followerCount}
+              </span>
+            )}
+            {brewery.beer_count !== undefined && brewery.beer_count > 0 && (
+              <span>{brewery.beer_count} on tap</span>
+            )}
+          </div>
+        </div>
+      </motion.div>
+    </Link>
+  );
+}
+
+/* ─── Search Empty State ────────────────────────────────────────────────────── */
+
+function SearchEmptyState({ query, onClear }: { query: string; onClear: () => void }) {
+  return (
+    <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
+      <div
+        className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4"
+        style={{ background: "color-mix(in srgb, var(--accent-gold) 10%, transparent)" }}
+      >
+        <Search size={28} style={{ color: "var(--accent-gold)" }} />
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {children}
-      </div>
+      <h3 className="font-display text-xl font-bold text-[var(--text-primary)] mb-2">
+        No breweries found
+      </h3>
+      <p className="text-sm text-[var(--text-muted)] max-w-sm mb-4">
+        Nothing matched &ldquo;{query}&rdquo;. Try a different name, city, or style.
+      </p>
+      <button
+        onClick={onClear}
+        className="px-4 py-2 rounded-xl text-sm font-medium transition-colors border"
+        style={{
+          background: "color-mix(in srgb, var(--accent-gold) 10%, transparent)",
+          color: "var(--accent-gold)",
+          borderColor: "color-mix(in srgb, var(--accent-gold) 30%, transparent)",
+        }}
+      >
+        Clear search
+      </button>
     </div>
   );
 }
+
+/* ─── Filter Chip ───────────────────────────────────────────────────────────── */
 
 function FilterChip({ label, active, onClick, icon }: { label: string; active: boolean; onClick: () => void; icon?: React.ReactNode }) {
   return (

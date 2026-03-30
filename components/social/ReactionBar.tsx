@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useRef } from "react";
+import { motion } from "framer-motion";
 import { MessageCircle, Share2 } from "lucide-react";
 import { useToast } from "@/components/ui/Toast";
 
@@ -116,16 +117,22 @@ export function ReactionBar({
             color: hasReacted ? "var(--accent-amber, #c0583a)" : "var(--text-muted)",
           }}
         >
-          <span
-            style={{
-              display: "inline-block",
-              transform: animating === "beer" ? "scale(1.3)" : "scale(1)",
-              transition: "transform 0.2s ease",
-            }}
+          <motion.span
+            className="flex items-center gap-1.5"
+            whileTap={{ scale: 0.97 }}
+            transition={{ type: "spring", stiffness: 400, damping: 30 }}
           >
-            🍺
-          </span>
-          {beerCount > 0 && <span>{beerCount}</span>}
+            <span
+              style={{
+                display: "inline-block",
+                transform: animating === "beer" ? "scale(1.3)" : "scale(1)",
+                transition: "transform 0.2s ease",
+              }}
+            >
+              🍺
+            </span>
+            {beerCount > 0 && <span>{beerCount}</span>}
+          </motion.span>
           {/* Gold particle burst on cheers */}
           {particles.map((p) => (
             <span
@@ -170,7 +177,13 @@ export function ReactionBar({
           className={`flex items-center gap-1 text-[13px] transition-colors ${centered ? "" : "ml-auto"}`}
           style={{ color: "var(--text-muted)" }}
         >
-          <Share2 size={14} />
+          <motion.span
+            className="flex items-center"
+            whileTap={{ scale: 0.97 }}
+            transition={{ type: "spring", stiffness: 400, damping: 30 }}
+          >
+            <Share2 size={14} />
+          </motion.span>
         </button>
       )}
     </div>

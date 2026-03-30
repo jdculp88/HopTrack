@@ -1,6 +1,42 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
+// PATCH /api/beer-lists/[listId]/items — reorder items (body: { order: [{ id, position }] })
+export async function PATCH(
+  req: Request,
+  { params }: { params: Promise<{ listId: string }> },
+) {
+  const { listId } = await params;
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  // Verify ownership
+  const { data: list } = await supabase
+    .from("beer_lists")
+    .select("id")
+    .eq("id", listId)
+    .eq("user_id", user.id)
+    .single();
+  if (!list) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+  const body = await req.json();
+  const order: Array<{ id: string; position: number }> = body.order;
+  if (!Array.isArray(order)) return NextResponse.json({ error: "order array required" }, { status: 400 });
+
+  // Upsert positions — fire individual updates (small lists, acceptable perf)
+  const updates = order.map(({ id, position }) =>
+    supabase
+      .from("beer_list_items")
+      .update({ position })
+      .eq("id", id)
+      .eq("list_id", listId)
+  );
+  await Promise.all(updates);
+
+  return NextResponse.json({ ok: true });
+}
+
 // POST /api/beer-lists/[listId]/items — add beer to list
 export async function POST(
   req: Request,
@@ -12,7 +48,7 @@ export async function POST(
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   // Verify ownership
-  const { data: list } = await (supabase as any)
+  const { data: list } = await supabase
     .from("beer_lists")
     .select("id")
     .eq("id", listId)
@@ -25,7 +61,7 @@ export async function POST(
   if (!beer_id) return NextResponse.json({ error: "beer_id required" }, { status: 400 });
 
   // Get next position
-  const { data: items } = await (supabase as any)
+  const { data: items } = await supabase
     .from("beer_list_items")
     .select("position")
     .eq("list_id", listId)
@@ -33,7 +69,7 @@ export async function POST(
     .limit(1);
   const nextPos = items?.[0] ? items[0].position + 1 : 0;
 
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from("beer_list_items")
     .insert({ list_id: listId, beer_id, note: note?.trim() || null, position: nextPos })
     .select("*, beer:beers(id, name, style, abv, avg_rating)")
@@ -61,7 +97,7 @@ export async function DELETE(
   if (!itemId) return NextResponse.json({ error: "itemId required" }, { status: 400 });
 
   // Verify ownership via list
-  const { data: list } = await (supabase as any)
+  const { data: list } = await supabase
     .from("beer_lists")
     .select("id")
     .eq("id", listId)
@@ -69,7 +105,7 @@ export async function DELETE(
     .single();
   if (!list) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  const { error } = await (supabase as any)
+  const { error } = await supabase
     .from("beer_list_items")
     .delete()
     .eq("id", itemId)

@@ -33,7 +33,7 @@ interface SessionRecapSheetProps {
   breweryName: string
   beerLogs: BeerLog[]
   xpGained: number
-  newAchievements: any[]
+  newAchievements: Array<{ id: string; name: string; icon?: string; xp_reward: number }>
   onClose: () => void
   onShare?: () => void
 }
@@ -90,8 +90,15 @@ function GlassIcon({ glassType, instanceId, size = 36 }: { glassType?: string | 
   )
 }
 
+interface SparklePos {
+  top: string
+  left?: string
+  right?: string
+  delay: number
+}
+
 function Sparkles() {
-  const positions = [
+  const positions: SparklePos[] = [
     { top: '15%', left: '12%', delay: 0 },
     { top: '8%', right: '18%', delay: 0.4 },
     { top: '30%', left: '22%', delay: 0.8 },
@@ -108,8 +115,8 @@ function Sparkles() {
           className="absolute text-sm"
           style={{
             top: pos.top,
-            left: 'left' in pos ? pos.left : undefined,
-            right: 'right' in pos ? (pos as any).right : undefined,
+            left: pos.left,
+            right: pos.right,
             color: C.gold,
             animation: `recap-sparkle 2s ease-in-out infinite`,
             animationDelay: `${pos.delay}s`,
@@ -171,13 +178,13 @@ export default function SessionRecapSheet({
   const [sessionPhotos, setSessionPhotos] = useState<Array<{ id: string; photo_url: string }>>([])
   const [activePhotoIndex, setActivePhotoIndex] = useState(0)
 
-  const isBrewerySession = session && (session as any).context !== 'home' && (session as any).brewery_id
+  const isBrewerySession = session && session.context !== 'home' && session.brewery_id
   const isHomeSession = !isBrewerySession
   const allLogs = beerLogs ?? []
   const totalBeers = allLogs.reduce((sum, l) => sum + (l.quantity ?? 1), 0)
   const duration = session ? formatDuration(session.started_at, session.ended_at) : ''
   const dateStr = session ? formatSessionDate(session.started_at, session.ended_at) : ''
-  const uniqueStyles = Array.from(new Set(allLogs.map((l) => (l as any).beer?.style).filter(Boolean)))
+  const uniqueStyles = Array.from(new Set(allLogs.map((l) => l.beer?.style).filter(Boolean)))
   const newTries = allLogs.filter(l => !l.rating || l.rating === 0).length
 
   // XP breakdown
@@ -193,7 +200,7 @@ export default function SessionRecapSheet({
   ]
 
   // Level progress
-  const profile = session ? { xp: (session as any).xp_awarded ?? 0 } : null
+  const profile = session ? { xp: session.xp_awarded ?? 0 } : null
   const levelInfo = profile ? getLevelProgress(profile.xp) : null
 
   const getRating = (log: BeerLog) => recapRatings[log.id] ?? log.rating ?? 0
@@ -201,7 +208,7 @@ export default function SessionRecapSheet({
   // Fetch brewery review status + stats
   useEffect(() => {
     if (!isOpen || !isBrewerySession) return
-    const breweryId = (session as any).brewery_id
+    const breweryId = session!.brewery_id
 
     fetch(`/api/brewery/${breweryId}/reviews`)
       .then((r) => r.json())
@@ -222,7 +229,7 @@ export default function SessionRecapSheet({
   // Fetch per-beer history stats
   useEffect(() => {
     if (!isOpen || allLogs.length === 0) return
-    const beerIds = allLogs.map(l => (l as any).beer_id ?? (l as any).beer?.id).filter(Boolean)
+    const beerIds = allLogs.map(l => l.beer_id ?? l.beer?.id).filter(Boolean)
     if (beerIds.length === 0) return
 
     fetch(`/api/beer-logs/stats?beer_ids=${beerIds.join(',')}`)
@@ -298,7 +305,7 @@ export default function SessionRecapSheet({
   const handleBreweryReview = useCallback(async () => {
     if (!isBrewerySession || breweryRating === 0) return
     setBreweryReviewLoading(true)
-    const breweryId = (session as any).brewery_id
+    const breweryId = session!.brewery_id
     const res = await fetch(`/api/brewery/${breweryId}/reviews`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -315,7 +322,7 @@ export default function SessionRecapSheet({
     setTimeout(async () => {
       if (!isBrewerySession) return
       setBreweryReviewLoading(true)
-      const breweryId = (session as any).brewery_id
+      const breweryId = session!.brewery_id
       const res = await fetch(`/api/brewery/${breweryId}/reviews`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -630,12 +637,12 @@ export default function SessionRecapSheet({
                   {allLogs.map((log, i) => {
                     const rating = getRating(log)
                     const isDone = rating > 0
-                    const beerName = (log as any).beer?.name || 'Unknown beer'
-                    const beerStyle = (log as any).beer?.style
-                    const beerAbv = (log as any).beer?.abv
-                    const communityRating = (log as any).beer?.avg_rating
+                    const beerName = log.beer?.name || 'Unknown beer'
+                    const beerStyle = log.beer?.style
+                    const beerAbv = log.beer?.abv
+                    const communityRating = log.beer?.avg_rating
                     const logTime = new Date(log.logged_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
-                    const beerId = (log as any).beer_id ?? (log as any).beer?.id
+                    const beerId = log.beer_id ?? log.beer?.id
                     const history = beerId ? beerHistory[beerId] : null
 
                     return (
@@ -663,7 +670,7 @@ export default function SessionRecapSheet({
                               background: `linear-gradient(135deg, ${C.goldSoft}, ${C.accentSoft})`,
                             }}
                           >
-                            <GlassIcon glassType={(log as any).beer?.glass_type} instanceId={`recap-${log.id}`} size={22} />
+                            <GlassIcon glassType={log.beer?.glass_type} instanceId={`recap-${log.id}`} size={22} />
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="font-display font-semibold truncate" style={{ fontSize: 16, color: C.text1 }}>{beerName}</p>
@@ -846,7 +853,7 @@ export default function SessionRecapSheet({
                     Level <span style={{ fontWeight: 700, color: C.text1 }}>{levelInfo.current.level}</span> → <span style={{ fontWeight: 700, color: C.text1 }}>{levelInfo.next.level}</span>
                   </p>
                   <p style={{ fontSize: 12, color: C.text3 }}>
-                    {((levelInfo.current as any).xp ?? 0).toLocaleString()} / {((levelInfo.next as any).xp ?? 0).toLocaleString()} XP
+                    {levelInfo.current.xp_required.toLocaleString()} / {levelInfo.next.xp_required.toLocaleString()} XP
                   </p>
                 </div>
                 <div style={{ width: '100%', height: 8, borderRadius: 10, background: C.avatarBg, overflow: 'hidden' }}>

@@ -3,6 +3,35 @@ import { NextResponse } from "next/server";
 import { LEVELS } from "@/lib/xp";
 import { rateLimitResponse } from "@/lib/rate-limit";
 
+interface PintRewindSession {
+  id: string;
+  brewery_id: string | null;
+  context: string;
+  started_at: string;
+  ended_at: string | null;
+  xp_awarded: number;
+  brewery: { name: string } | null;
+}
+
+interface PintRewindBeerLog {
+  id: string;
+  beer_id: string | null;
+  rating: number | null;
+  quantity: number | null;
+  logged_at: string;
+  serving_style: string | null;
+  session_id?: string;
+  beer: { name: string; style: string | null } | null;
+}
+
+interface PintRewindProfile {
+  level: number;
+  xp: number;
+  total_checkins: number;
+  display_name: string | null;
+  username: string;
+}
+
 export async function GET(request: Request) {
   const limited = rateLimitResponse(request, "pint-rewind", { limit: 10, windowMs: 60 * 1000 });
   if (limited) return limited;
@@ -17,7 +46,7 @@ export async function GET(request: Request) {
     .select("id, brewery_id, context, started_at, ended_at, xp_awarded, brewery:breweries(name)")
     .eq("user_id", user.id)
     .eq("is_active", false)
-    .order("started_at", { ascending: false }) as any;
+    .order("started_at", { ascending: false }) as unknown as { data: PintRewindSession[] | null; error: { message: string } | null };
   if (sessionsError) return NextResponse.json({ error: sessionsError.message }, { status: 500 });
 
   // Fetch all user beer logs
@@ -25,7 +54,7 @@ export async function GET(request: Request) {
     .from("beer_logs")
     .select("id, beer_id, rating, quantity, logged_at, serving_style, beer:beers(name, style)")
     .eq("user_id", user.id)
-    .order("logged_at", { ascending: false }) as any;
+    .order("logged_at", { ascending: false }) as unknown as { data: PintRewindBeerLog[] | null; error: { message: string } | null };
   if (logsError) return NextResponse.json({ error: logsError.message }, { status: 500 });
 
   // Fetch user profile for level/xp
@@ -33,15 +62,15 @@ export async function GET(request: Request) {
     .from("profiles")
     .select("level, xp, total_checkins, display_name, username")
     .eq("id", user.id)
-    .single() as any;
+    .single() as unknown as { data: PintRewindProfile | null; error: { message: string } | null };
   if (profileError) return NextResponse.json({ error: profileError.message }, { status: 500 });
 
-  const allSessions = (sessions as any[]) ?? [];
-  const allLogs = (beerLogs as any[]) ?? [];
+  const allSessions: PintRewindSession[] = sessions ?? [];
+  const allLogs: PintRewindBeerLog[] = beerLogs ?? [];
 
   // ─── Beer Personality ─────────────────────────────────────────
   const styleCounts: Record<string, number> = {};
-  allLogs.forEach((l: any) => {
+  allLogs.forEach((l) => {
     if (l.beer?.style) styleCounts[l.beer.style] = (styleCounts[l.beer.style] ?? 0) + (l.quantity ?? 1);
   });
   const topStyle = Object.entries(styleCounts).sort((a, b) => b[1] - a[1])[0];
@@ -77,7 +106,7 @@ export async function GET(request: Request) {
 
   // ─── Signature Beer ───────────────────────────────────────────
   const beerCounts: Record<string, { name: string; count: number }> = {};
-  allLogs.forEach((l: any) => {
+  allLogs.forEach((l) => {
     if (!l.beer_id || !l.beer?.name) return;
     if (!beerCounts[l.beer_id]) beerCounts[l.beer_id] = { name: l.beer.name, count: 0 };
     beerCounts[l.beer_id].count += l.quantity ?? 1;
@@ -86,9 +115,9 @@ export async function GET(request: Request) {
 
   // ─── Brewery Loyalty ──────────────────────────────────────────
   const breweryCounts: Record<string, { name: string; count: number }> = {};
-  allSessions.forEach((s: any) => {
+  allSessions.forEach((s) => {
     if (!s.brewery_id || s.context === "home") return;
-    if (!breweryCounts[s.brewery_id]) breweryCounts[s.brewery_id] = { name: (s.brewery as any)?.name ?? "Unknown", count: 0 };
+    if (!breweryCounts[s.brewery_id]) breweryCounts[s.brewery_id] = { name: s.brewery?.name ?? "Unknown", count: 0 };
     breweryCounts[s.brewery_id].count++;
   });
   const topBrewery = Object.values(breweryCounts).sort((a, b) => b.count - a.count)[0] ?? null;
@@ -96,7 +125,7 @@ export async function GET(request: Request) {
   // ─── Legendary Session ────────────────────────────────────────
   // Find session with most beers logged
   const sessionBeerCounts: Record<string, number> = {};
-  allLogs.forEach((l: any) => {
+  allLogs.forEach((l) => {
     if (l.session_id) {
       sessionBeerCounts[l.session_id] = (sessionBeerCounts[l.session_id] ?? 0) + (l.quantity ?? 1);
     }
@@ -104,7 +133,7 @@ export async function GET(request: Request) {
   let legendarySession = null;
   if (Object.keys(sessionBeerCounts).length > 0) {
     const topSessionId = Object.entries(sessionBeerCounts).sort((a, b) => b[1] - a[1])[0];
-    const session = allSessions.find((s: any) => s.id === topSessionId[0]);
+    const session = allSessions.find((s) => s.id === topSessionId[0]);
     if (session) {
       const durationMs = session.ended_at
         ? new Date(session.ended_at).getTime() - new Date(session.started_at).getTime()
@@ -113,15 +142,15 @@ export async function GET(request: Request) {
       legendarySession = {
         beerCount: topSessionId[1],
         durationHours,
-        breweryName: (session.brewery as any)?.name ?? (session.context === "home" ? "Home" : "Unknown"),
+        breweryName: session.brewery?.name ?? (session.context === "home" ? "Home" : "Unknown"),
       };
     }
   }
 
   // ─── Rating Habits ────────────────────────────────────────────
-  const rated = allLogs.filter((l: any) => l.rating > 0);
+  const rated = allLogs.filter((l) => (l.rating ?? 0) > 0);
   const avgRating = rated.length > 0
-    ? Math.round((rated.reduce((a: number, l: any) => a + l.rating, 0) / rated.length) * 100) / 100
+    ? Math.round((rated.reduce((a: number, l) => a + (l.rating ?? 0), 0) / rated.length) * 100) / 100
     : null;
   let ratingPersonality = "The Silent Sipper";
   if (avgRating !== null) {
@@ -134,14 +163,14 @@ export async function GET(request: Request) {
   }
 
   // ─── Home Sessions ────────────────────────────────────────────
-  const homeSessions = allSessions.filter((s: any) => s.context === "home").length;
+  const homeSessions = allSessions.filter((s) => s.context === "home").length;
 
   // ─── The Scroll (totals) ──────────────────────────────────────
-  const totalBeers = allLogs.reduce((sum: number, l: any) => sum + (l.quantity ?? 1), 0);
+  const totalBeers = allLogs.reduce((sum: number, l) => sum + (l.quantity ?? 1), 0);
   const totalSessions = allSessions.length;
   const totalXp = profile?.xp ?? 0;
-  const uniqueBeers = new Set(allLogs.filter((l: any) => l.beer_id).map((l: any) => l.beer_id)).size;
-  const uniqueBreweries = new Set(allSessions.filter((s: any) => s.brewery_id).map((s: any) => s.brewery_id)).size;
+  const uniqueBeers = new Set(allLogs.filter((l) => l.beer_id).map((l) => l.beer_id)).size;
+  const uniqueBreweries = new Set(allSessions.filter((s) => s.brewery_id).map((s) => s.brewery_id)).size;
 
   // ─── Level ────────────────────────────────────────────────────
   const level = profile?.level ?? 1;

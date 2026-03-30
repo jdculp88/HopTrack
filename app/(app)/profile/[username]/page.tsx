@@ -10,6 +10,7 @@ import { AchievementsGrid } from "./AchievementsGrid";
 import { FriendButton } from "@/components/social/FriendButton";
 import { getLevelProgress } from "@/lib/xp";
 import { generateGradientFromString, formatABV } from "@/lib/utils";
+import { PageEnterWrapper } from "@/components/ui/PageEnterWrapper";
 
 export async function generateMetadata({ params }: { params: Promise<{ username: string }> }) {
   const { username } = await params;
@@ -72,7 +73,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
   // Favorite beer — most logged beer for this user
   const { data: favBeerRows } = await (supabase as any)
     .from("beer_logs")
-    .select("beer_id, quantity, beer:beers(*)")
+    .select("beer_id, quantity, rating, beer:beers(*)")
     .eq("user_id", profile.id) as any;
 
   const favBeer = (() => {
@@ -88,7 +89,33 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
     return Object.values(counts).sort((a, b) => b.count - a.count)[0] ?? null;
   })();
 
+  // Taste DNA — style distribution from beer logs
+  const styleDNA = (() => {
+    if (!favBeerRows || favBeerRows.length === 0) return [];
+    const styleMap: Record<string, { count: number; totalRating: number; ratedCount: number }> = {};
+    for (const row of favBeerRows as any[]) {
+      const style = row.beer?.style;
+      if (!style) continue;
+      if (!styleMap[style]) styleMap[style] = { count: 0, totalRating: 0, ratedCount: 0 };
+      styleMap[style].count += row.quantity ?? 1;
+      if (row.rating != null && row.rating > 0) {
+        styleMap[style].totalRating += row.rating;
+        styleMap[style].ratedCount++;
+      }
+    }
+    return Object.entries(styleMap)
+      .map(([style, data]) => ({
+        style,
+        count: data.count,
+        avgRating: data.ratedCount > 0 ? data.totalRating / data.ratedCount : null,
+      }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 6);
+  })();
+  const maxStyleCount = styleDNA.length > 0 ? styleDNA[0].count : 1;
+
   return (
+    <PageEnterWrapper>
     <div className="max-w-3xl mx-auto">
       {/* Hero Banner */}
       <div className="relative h-48 sm:h-64 mx-4 mt-4 rounded-2xl overflow-hidden">
@@ -126,7 +153,27 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
           )}
         </div>
 
-        {/* Level + XP */}
+        {/* Stats — prominent 4-card grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-4 text-center">
+            <p className="font-display text-3xl font-bold text-[var(--accent-gold)]">{profile.total_checkins}</p>
+            <p className="text-xs font-mono uppercase tracking-wider text-[var(--text-muted)] mt-1">Sessions</p>
+          </div>
+          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-4 text-center">
+            <p className="font-display text-3xl font-bold text-[var(--accent-gold)]">{profile.unique_beers}</p>
+            <p className="text-xs font-mono uppercase tracking-wider text-[var(--text-muted)] mt-1">Unique Beers</p>
+          </div>
+          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-4 text-center">
+            <p className="font-display text-3xl font-bold text-[var(--accent-gold)]">{profile.unique_breweries}</p>
+            <p className="text-xs font-mono uppercase tracking-wider text-[var(--text-muted)] mt-1">Breweries</p>
+          </div>
+          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-4 text-center">
+            <p className="font-display text-3xl font-bold text-[var(--accent-gold)]">{profile.xp?.toLocaleString() ?? 0}</p>
+            <p className="text-xs font-mono uppercase tracking-wider text-[var(--text-muted)] mt-1">Total XP</p>
+          </div>
+        </div>
+
+        {/* Level + XP Progress */}
         <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-4 mb-6 space-y-2">
           <div className="flex items-center justify-between">
             <div>
@@ -180,22 +227,6 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
           </p>
         )}
 
-        {/* Stats */}
-        <div className="grid grid-cols-3 gap-4 mb-8">
-          <div className="text-center bg-[var(--surface)] border border-[var(--border)] rounded-2xl py-5">
-            <p className="font-display text-3xl font-bold text-[var(--accent-gold)]">{profile.total_checkins}</p>
-            <p className="text-xs text-[var(--text-muted)] mt-1">Sessions</p>
-          </div>
-          <div className="text-center bg-[var(--surface)] border border-[var(--border)] rounded-2xl py-5">
-            <p className="font-display text-3xl font-bold text-[var(--accent-gold)]">{profile.unique_beers}</p>
-            <p className="text-xs text-[var(--text-muted)] mt-1">Unique Beers</p>
-          </div>
-          <div className="text-center bg-[var(--surface)] border border-[var(--border)] rounded-2xl py-5">
-            <p className="font-display text-3xl font-bold text-[var(--accent-gold)]">{profile.unique_breweries}</p>
-            <p className="text-xs text-[var(--text-muted)] mt-1">Breweries</p>
-          </div>
-        </div>
-
         {/* Beer Passport Link */}
         <Link
           href={`/profile/${username}/passport`}
@@ -211,12 +242,53 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
           <span className="text-[var(--text-muted)] text-sm">→</span>
         </Link>
 
+        {/* Taste DNA — horizontal bars showing style preferences */}
+        <div className="mb-8">
+          <h2 className="font-display text-xl font-bold text-[var(--text-primary)] mb-4">Taste DNA</h2>
+          {styleDNA.length > 0 ? (
+            <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-4 space-y-3">
+              {styleDNA.map((entry) => (
+                <div key={entry.style} className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-[var(--text-primary)]">{entry.style}</span>
+                    <div className="flex items-center gap-2">
+                      {entry.avgRating != null && (
+                        <span className="flex items-center gap-0.5 text-xs font-mono text-[var(--accent-gold)]">
+                          <Star size={10} className="fill-[var(--accent-gold)]" />
+                          {entry.avgRating.toFixed(1)}
+                        </span>
+                      )}
+                      <span className="text-xs font-mono text-[var(--text-muted)]">{entry.count}</span>
+                    </div>
+                  </div>
+                  <div className="h-2 bg-[var(--surface-2)] rounded-full overflow-hidden">
+                    <div
+                      className="h-full rounded-full"
+                      style={{
+                        background: "linear-gradient(to right, var(--accent-gold), var(--accent-amber))",
+                        width: `${Math.max(8, (entry.count / maxStyleCount) * 100)}%`,
+                        transition: "width 0.5s ease-out",
+                      }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-10 bg-[var(--surface)] rounded-2xl border border-[var(--border)]">
+              <p className="text-3xl mb-2">🧬</p>
+              <p className="font-display text-base text-[var(--text-primary)]">Your palate is a mystery</p>
+              <p className="text-sm text-[var(--text-secondary)] mt-1">Log a few beers and we&apos;ll map your taste preferences.</p>
+            </div>
+          )}
+        </div>
+
         {/* Want to Try (Wishlist) */}
         {isOwnProfile && (
           <div className="mb-8">
             <div className="flex items-center gap-2 mb-4">
-              <Bookmark size={16} className="text-[var(--accent-gold)]" />
-              <h2 className="font-display text-xl font-bold text-[var(--text-primary)]">Want to Try</h2>
+              <Bookmark size={18} className="text-[var(--accent-gold)]" />
+              <h2 className="font-display text-2xl font-bold text-[var(--text-primary)]">Want to Try</h2>
             </div>
             {(wishlist as any[]).length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -258,7 +330,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
 
         {/* Favorite Beer */}
         <div className="mb-8">
-          <h2 className="font-display text-xl font-bold text-[var(--text-primary)] mb-4">Favorite Beer</h2>
+          <h2 className="font-display text-2xl font-bold text-[var(--text-primary)] mb-4">Favorite Beer</h2>
           {favBeer ? (
             <Link href={`/beer/${favBeer.beer.id}`}>
               <div className="flex items-center gap-4 p-4 bg-[var(--surface)] border border-[var(--border)] hover:border-[var(--accent-gold)]/40 rounded-2xl transition-all group">
@@ -288,19 +360,15 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
                       </span>
                     </div>
                   )}
-                  <p className="text-xs text-[var(--text-muted)]">{favBeer.count}× checked in</p>
+                  <p className="text-xs text-[var(--text-muted)]">{favBeer.count}× poured</p>
                 </div>
               </div>
             </Link>
           ) : (
-            <div className="flex items-center gap-4 p-4 bg-[var(--surface)] border border-dashed border-[var(--border)] rounded-2xl">
-              <div className="w-14 h-14 rounded-2xl bg-[var(--surface-2)] flex items-center justify-center text-2xl opacity-40">
-                🍺
-              </div>
-              <div>
-                <p className="text-[var(--text-secondary)] text-sm">No favorite yet</p>
-                <p className="text-[var(--text-muted)] text-xs mt-0.5">Your most-checked-in beer will appear here</p>
-              </div>
+            <div className="text-center py-10 bg-[var(--surface)] rounded-2xl border border-[var(--border)]">
+              <p className="text-3xl mb-2">🍺</p>
+              <p className="font-display text-base text-[var(--text-primary)]">Still exploring the menu</p>
+              <p className="text-sm text-[var(--text-secondary)] mt-1">Your most-poured beer will earn its spot here.</p>
             </div>
           )}
         </div>
@@ -311,16 +379,12 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
             <AchievementsGrid achievements={userAchievements as any[]} />
           ) : (
             <div>
-              <h2 className="font-display text-xl font-bold text-[var(--text-primary)] mb-4">Achievements</h2>
+              <h2 className="font-display text-2xl font-bold text-[var(--text-primary)] mb-4">Achievements</h2>
               <Link href="/achievements">
-                <div className="flex items-center gap-4 p-4 bg-[var(--surface)] border border-dashed border-[var(--border)] hover:border-[var(--accent-gold)]/30 rounded-2xl transition-colors">
-                  <div className="w-10 h-10 rounded-xl bg-[var(--surface-2)] flex items-center justify-center text-lg opacity-40">
-                    🏆
-                  </div>
-                  <div>
-                    <p className="text-[var(--text-secondary)] text-sm font-medium">Start earning badges</p>
-                    <p className="text-[var(--text-muted)] text-xs mt-0.5">Log beers, visit breweries, and unlock achievements</p>
-                  </div>
+                <div className="text-center py-10 bg-[var(--surface)] rounded-2xl border border-[var(--border)] hover:border-[var(--accent-gold)]/30 transition-colors">
+                  <p className="text-3xl mb-2">🏆</p>
+                  <p className="font-display text-base text-[var(--text-primary)]">No badges yet</p>
+                  <p className="text-sm text-[var(--text-secondary)] mt-1">Log beers, visit breweries, and unlock achievements along the way.</p>
                 </div>
               </Link>
             </div>
@@ -329,7 +393,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
 
         {/* Top Breweries */}
         <div className="mb-8">
-          <h2 className="font-display text-xl font-bold text-[var(--text-primary)] mb-4">Favorite Breweries</h2>
+          <h2 className="font-display text-2xl font-bold text-[var(--text-primary)] mb-4">Favorite Breweries</h2>
           {topBreweries && topBreweries.length > 0 ? (
             <div className="space-y-3">
               {(topBreweries as any[]).map((visit) => (
@@ -353,14 +417,10 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
             </div>
           ) : (
             <Link href="/explore">
-              <div className="flex items-center gap-4 p-4 bg-[var(--surface)] border border-dashed border-[var(--border)] hover:border-[var(--accent-gold)]/30 rounded-2xl transition-colors">
-                <div className="w-10 h-10 rounded-xl bg-[var(--surface-2)] flex items-center justify-center text-lg opacity-40">
-                  🏠
-                </div>
-                <div>
-                  <p className="text-[var(--text-secondary)] text-sm font-medium">Visit breweries to see your favorites</p>
-                  <p className="text-[var(--text-muted)] text-xs mt-0.5">Your most-visited spots will appear here</p>
-                </div>
+              <div className="text-center py-10 bg-[var(--surface)] rounded-2xl border border-[var(--border)] hover:border-[var(--accent-gold)]/30 transition-colors">
+                <p className="text-3xl mb-2">🏠</p>
+                <p className="font-display text-base text-[var(--text-primary)]">No regular haunts yet</p>
+                <p className="text-sm text-[var(--text-secondary)] mt-1">Visit a few taprooms and your favorites will show up here.</p>
               </div>
             </Link>
           )}
@@ -368,7 +428,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
 
         {/* Beer Journal */}
         <div className="pb-8">
-          <h2 className="font-display text-xl font-bold text-[var(--text-primary)] mb-4">Beer Journal</h2>
+          <h2 className="font-display text-2xl font-bold text-[var(--text-primary)] mb-4">Beer Journal</h2>
           {recentLogs && recentLogs.length > 0 ? (
             <div className="space-y-3">
               {(recentLogs as any[]).map((log: any) => (
@@ -406,11 +466,14 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
             </div>
           ) : (
             <div className="text-center py-10 bg-[var(--surface)] rounded-2xl border border-[var(--border)]">
-              <p className="text-[var(--text-secondary)]">No beers logged yet.</p>
+              <p className="text-3xl mb-2">📓</p>
+              <p className="font-display text-base text-[var(--text-primary)]">The journal is empty</p>
+              <p className="text-sm text-[var(--text-secondary)] mt-1">Start a session to begin tracking your pours.</p>
             </div>
           )}
         </div>
       </div>
     </div>
+    </PageEnterWrapper>
   );
 }

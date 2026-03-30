@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HopTrack — Final Identity Spec</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Source+Code+Pro:wght@300;400;500;600&family=Lora:ital,wght@0,400;0,600;1,400;1,600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --cream: #F5F0E8;
+    --cream-mid: #EDE7D9;
+    --cream-dark: #DDD8CE;
+    --near-black: #1A1A1A;
+    --ink: #0E0C08;
+    --ink-2: #141208;
+    --gold: #C8962E;
+    --gold-dark: #A67820;
+    --gold-pale: #DFB558;
+    --warm-grey: #9A9189;
+    --warm-mid: #4A4540;
+  }
+  body {
+    background: var(--ink);
+    font-family: 'Lora', serif;
+    color: var(--cream);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── type ── */
+  .mono { font-family: 'Source Code Pro', monospace; }
+  .serif-i { font-family: 'Instrument Serif', serif; font-style: italic; }
+  .xs { font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase; }
+  .xxs { font-size: 8px; letter-spacing: 0.18em; text-transform: uppercase; }
+
+  /* ── layout ── */
+  .section { padding: 88px 64px; border-bottom: 1px solid #181410; }
+  .section.ink { background: var(--ink); }
+  .section.ink2 { background: var(--ink-2); }
+  .section.mid { background: #0A0806; }
+  .section.on-cream { background: var(--cream); color: var(--near-black); border-bottom: 1px solid var(--cream-mid); }
+
+  .sec-label {
+    font-family: 'Source Code Pro', monospace; font-size: 9px;
+    letter-spacing: 0.22em; text-transform: uppercase;
+    margin-bottom: 56px; display: flex; align-items: center; gap: 16px;
+  }
+  .sec-label.dk { color: #6A6050; }
+  .sec-label.dk::after { background: #2A2620; }
+  .sec-label.lt { color: #9A9189; }
+  .sec-label.lt::after { background: #DDD8CE; }
+  .sec-label::after { content:''; flex:1; height:1px; }
+
+  /* ── hero ── */
+  .hero {
+    padding: 120px 64px 108px;
+    display: flex; flex-direction: column; align-items: center; gap: 88px;
+    background: var(--ink); border-bottom: 1px solid #181410;
+    position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 560px 460px at 50% 42%, #C8962E08 0%, transparent 68%);
+    pointer-events: none;
+  }
+  /* paper grain */
+  .hero::after {
+    content: ''; position: absolute; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+    opacity: 0.016; pointer-events: none;
+  }
+  .caption {
+    font-family: 'Source Code Pro', monospace; font-size: 9px;
+    letter-spacing: 0.22em; text-transform: uppercase; color: #6A6050;
+    text-align: center; position: relative; z-index: 1;
+  }
+
+  /* ── color variant grid ── */
+  .var-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: #060402; }
+  .var-cell {
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; gap: 28px; padding: 72px 52px; min-height: 280px;
+  }
+  .var-cell.d1 { background: #080604; }
+  .var-cell.d2 { background: #0C0A06; }
+  .var-cell.cr { background: var(--cream); }
+  .var-label {
+    font-family: 'Source Code Pro', monospace; font-size: 9px;
+    letter-spacing: 0.18em; text-transform: uppercase; color: #6A6050;
+  }
+  .var-cell.cr .var-label { color: #9A9189; }
+
+  /* ── scale row ── */
+  .scale-row {
+    display: flex; align-items: flex-end; gap: 80px;
+    justify-content: center; flex-wrap: wrap; padding: 8px 0 32px;
+  }
+  .s-item { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+  .s-label { font-family: 'Source Code Pro', monospace; font-size: 9px; letter-spacing: 0.16em; color: #6A6050; }
+
+  /* ── menu card ── */
+  .menu-card {
+    background: var(--cream); max-width: 460px; margin: 0 auto;
+    box-shadow: 0 48px 120px #00000088, 0 8px 24px #00000055;
+    position: relative; overflow: hidden;
+  }
+  .menu-card::before {
+    content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.76' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity: 0.05;
+  }
+
+  /* ── usage grid ── */
+  .usage-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: #060402; }
+  .usage-cell {
+    background: #0A0806; padding: 36px 30px;
+    display: flex; flex-direction: column; gap: 14px;
+  }
+  .usage-cell h3 {
+    font-family: 'Playfair Display', serif; font-style: italic;
+    font-size: 14px; font-weight: 500; color: var(--cream);
+  }
+  .usage-cell p {
+    font-family: 'Lora', serif; font-size: 12px; line-height: 1.75; color: #8A8070;
+  }
+  .usage-cell .rule { color: var(--gold); font-family: 'Source Code Pro', monospace; font-size: 9px; letter-spacing: 0.16em; }
+
+  /* ── dont grid ── */
+  .dont-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: #060402; }
+  .dont-cell {
+    background: #0A0806; padding: 40px 28px 32px;
+    display: flex; flex-direction: column; align-items: center; gap: 20px;
+    position: relative;
+  }
+  .dont-cell::after {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    border: 1px solid #B0302022; pointer-events: none;
+  }
+  .dont-x-line {
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none;
+    overflow: hidden;
+  }
+  .dont-label {
+    font-family: 'Source Code Pro', monospace; font-size: 9px;
+    letter-spacing: 0.14em; text-transform: uppercase; color: #B03020; text-align: center;
+  }
+
+  /* ── wm comparison ── */
+  .wm-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: #060402; }
+  .wm-cell { background: #0A0806; padding: 60px 52px; display: flex; flex-direction: column; gap: 28px; }
+  .wm-tag { font-family: 'Source Code Pro', monospace; font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: #6A6050; }
+
+  /* ── compare strip ── */
+  .compare-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: #060402; }
+  .compare-cell { background: #0A0806; padding: 44px 36px; display: flex; flex-direction: column; gap: 20px; }
+  .compare-cell.chosen { background: #080602; border-top: 2px solid var(--gold); }
+
+  /* ── footer ── */
+  .footer {
+    padding: 48px 64px; background: #060402;
+    display: flex; justify-content: space-between; align-items: center;
+    border-top: 1px solid #141008;
+  }
+
+  /* ── draw animation (for the hero only) ── */
+  .draw { stroke-dasharray: 2400; stroke-dashoffset: 2400; animation: drawIn 3.2s cubic-bezier(0.4,0,0.2,1) 0.4s forwards; }
+  .draw-stem { stroke-dasharray: 200; stroke-dashoffset: 200; animation: drawIn 0.8s ease 3.2s forwards; }
+  @keyframes drawIn { to { stroke-dashoffset: 0; } }
+</style>
+</head>
+<body>
+
+<!--
+  ═══════════════════════════════════════════════════════════
+  THE MARK — MP-5 "The One" — by Morgan
+
+  One continuous stroke. Enters at the crown, traces the
+  outer hop shape wide to the right, loops back left and
+  down, then spirals inward with one single confident turn
+  before settling near center. The stem drops clean below.
+
+  Path from Morgan's file (verbatim, as designed):
+  M 100 12
+  C 138 12, 160 40, 158 72
+  C 156 100, 136 120, 108 130
+  C 100 132, 100 132, 100 132
+  C 100 132, 84 126, 72 114
+  C 56 98, 48 76, 52 56
+  C 56 38, 70 24, 90 20
+  C 100 18, 112 22, 120 30
+  C 134 44, 138 66, 128 82
+  C 118 98, 100 104, 86 98
+  C 74 92, 70 78, 76 68
+  C 82 58, 94 54, 104 60
+
+  Stem: M 100 132 L 100 180
+  Side shoot: M 100 164 C 110 166, 118 160, 122 152
+  ═══════════════════════════════════════════════════════════
+-->
+
+
+<!-- ── DOCUMENT HEADER ── -->
+<header style="background:#060402; padding:56px 64px 48px; border-bottom:1px solid #141008; display:flex; justify-content:space-between; align-items:flex-end;">
+  <div>
+    <p class="mono xs" style="color:#7A7060;">HopTrack Identity System</p>
+    <p class="mono" style="font-size:9px; letter-spacing:0.12em; color:#7A7060; margin-top:8px;">Final Specification · MP-5 "The One"</p>
+  </div>
+  <span style="font-family:'Source Code Pro',monospace; font-size:9px; letter-spacing:0.22em; text-transform:uppercase; border:1px solid #C8962E55; color:var(--gold); padding:7px 16px;">Final</span>
+</header>
+
+
+<!-- ── MORGAN'S CREDIT ── -->
+<div style="background:#080604; padding:0; border-bottom:1px solid #141008;">
+  <div style="display:grid; grid-template-columns:1fr 2px 1fr; min-height:180px;">
+
+    <!-- Left: credit block -->
+    <div style="padding:48px 64px; display:flex; flex-direction:column; justify-content:center; gap:16px;">
+      <p class="mono xs" style="color:var(--gold);">Mark designed by</p>
+      <p style="font-family:'Playfair Display',serif; font-style:italic; font-size:36px; font-weight:500; color:var(--cream); letter-spacing:-0.3px;">Morgan</p>
+      <p class="mono" style="font-size:9px; letter-spacing:0.14em; color:#7A7060;">HopTrack Product · MP-5</p>
+    </div>
+
+    <!-- Divider -->
+    <div style="background:#141008;"></div>
+
+    <!-- Right: Morgan's quote -->
+    <div style="padding:48px 64px; display:flex; align-items:center;">
+      <div>
+        <p style="font-family:'Instrument Serif',serif; font-style:italic; font-size:16px; line-height:1.85; color:#8A8070; max-width:520px;">
+          "This is the one. Not because it's the most clever or the most complex. Because it's the one where the line found exactly the right path and stopped looking. That's good design. That's good code. That's a good pour. Know when you've arrived."
+        </p>
+        <p class="mono" style="font-size:9px; letter-spacing:0.16em; color:#7A7060; margin-top:18px;">— Morgan</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     HERO — PRIMARY LOCKUP
+══════════════════════════════════════════ -->
+<div class="hero">
+  <span class="caption">MP-5 "The One" · Primary Lockup · Full Color on Dark</span>
+
+  <!-- HORIZONTAL LOCKUP — animated draw on load -->
+  <svg width="340" height="72" viewBox="0 0 340 72" fill="none" aria-label="HopTrack" style="position:relative; z-index:1;">
+    <!-- THE MARK — stroke-only, single path, Morgan's design -->
+    <g>
+      <path d="
+        M 36 6
+        C 49.4 6, 57.6 15.5, 57 25.9
+        C 56.4 35.4, 49.2 43.2, 38.9 46.8
+        C 36 47.8, 36 47.8, 36 47.8
+        C 36 47.8, 30.2 45.6, 25.9 41.0
+        C 20.2 35.3, 17.3 27.4, 18.7 20.2
+        C 20.2 13.7, 25.2 8.6, 32.4 7.2
+        C 36 6.5, 40.3 7.9, 43.2 10.8
+        C 48.2 15.8, 49.7 23.7, 46.1 29.5
+        C 42.4 35.3, 36 37.5, 30.9 35.3
+        C 26.6 33.3, 25.2 27.9, 27.4 24.2
+        C 29.5 20.8, 33.8 19.4, 37.4 21.5
+      " fill="none" stroke="#C8962E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"
+      class="draw"/>
+      <!-- stem -->
+      <path d="M 36 47.8 L 36 64" fill="none" stroke="#C8962E" stroke-width="2.0" stroke-linecap="round" class="draw-stem"/>
+      <!-- side shoot -->
+      <path d="M 36 58 C 39.6 58.7, 42.5 56.6, 43.9 53.4" fill="none" stroke="#C8962E" stroke-width="1.2" stroke-linecap="round" opacity="0.4" class="draw-stem"/>
+    </g>
+
+    <!-- WORDMARK -->
+    <text x="62" y="50"
+      font-family="'Playfair Display', Georgia, serif"
+      font-style="italic" font-size="42" font-weight="500"
+      fill="#F5F0E8" letter-spacing="-0.4">Hop<tspan font-weight="700">Track</tspan></text>
+    <line x1="62" y1="58" x2="338" y2="58" stroke="#C8962E" stroke-width="0.75" opacity="0.22"/>
+    <circle cx="338" cy="58" r="1.5" fill="#C8962E" opacity="0.38"/>
+  </svg>
+
+  <!-- SECONDARY LOCKUPS -->
+  <div style="display:flex; gap:80px; align-items:flex-start; position:relative; z-index:1; flex-wrap:wrap; justify-content:center;">
+
+    <!-- Stacked -->
+    <div style="display:flex; flex-direction:column; align-items:center; gap:14px;">
+      <span class="caption">Stacked</span>
+      <svg width="100" height="152" viewBox="0 0 200 200" fill="none">
+        <!-- mark scaled, center at 100,100 -->
+        <path d="
+          M 100 12 C 138 12, 160 40, 158 72 C 156 100, 136 120, 108 130
+          C 100 132, 100 132, 100 132 C 100 132, 84 126, 72 114
+          C 56 98, 48 76, 52 56 C 56 38, 70 24, 90 20 C 100 18, 112 22, 120 30
+          C 134 44, 138 66, 128 82 C 118 98, 100 104, 86 98
+          C 74 92, 70 78, 76 68 C 82 58, 94 54, 104 60
+        " fill="none" stroke="#C8962E" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M 100 132 L 100 162" fill="none" stroke="#C8962E" stroke-width="4.5" stroke-linecap="round"/>
+        <!-- wordmark text below mark -->
+        <text x="100" y="182"
+          font-family="'Playfair Display', Georgia, serif"
+          font-style="italic" font-size="22" font-weight="500"
+          fill="#F5F0E8" text-anchor="middle" letter-spacing="-0.2">Hop<tspan font-weight="700">Track</tspan></text>
+        <line x1="24" y1="188" x2="176" y2="188" stroke="#C8962E" stroke-width="0.75" opacity="0.2"/>
+      </svg>
+    </div>
+
+    <!-- Mark only -->
+    <div style="display:flex; flex-direction:column; align-items:center; gap:14px;">
+      <span class="caption">Mark only</span>
+      <svg width="64" height="80" viewBox="0 0 200 240" fill="none">
+        <path d="
+          M 100 12 C 138 12, 160 40, 158 72 C 156 100, 136 120, 108 130
+          C 100 132, 100 132, 100 132 C 100 132, 84 126, 72 114
+          C 56 98, 48 76, 52 56 C 56 38, 70 24, 90 20 C 100 18, 112 22, 120 30
+          C 134 44, 138 66, 128 82 C 118 98, 100 104, 86 98
+          C 74 92, 70 78, 76 68 C 82 58, 94 54, 104 60
+        " fill="none" stroke="#C8962E" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M 100 132 L 100 220" fill="none" stroke="#C8962E" stroke-width="5" stroke-linecap="round"/>
+        <path d="M 100 194 C 116 198, 128 190, 134 176" fill="none" stroke="#C8962E" stroke-width="3.2" stroke-linecap="round" opacity="0.4"/>
+      </svg>
+    </div>
+
+    <!-- Wordmark only -->
+    <div style="display:flex; flex-direction:column; align-items:center; gap:14px;">
+      <span class="caption">Wordmark only</span>
+      <svg width="230" height="60" viewBox="0 0 230 60" fill="none">
+        <text x="0" y="46"
+          font-family="'Playfair Display', Georgia, serif"
+          font-style="italic" font-size="44" font-weight="500"
+          fill="#F5F0E8" letter-spacing="-0.5">Hop<tspan font-weight="700">Track</tspan></text>
+        <line x1="0" y1="53" x2="229" y2="53" stroke="#C8962E" stroke-width="0.75" opacity="0.2"/>
+      </svg>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     COLOR VARIANTS
+══════════════════════════════════════════ -->
+<div style="background:#060402; border-bottom:1px solid #0E0A04;">
+  <div style="padding:72px 64px 52px;">
+    <div class="sec-label dk" style="margin-bottom:0;">02 — Color Variants</div>
+  </div>
+  <div class="var-grid">
+
+    <!-- Full color dark -->
+    <div class="var-cell d1">
+      <svg width="272" height="56" viewBox="0 0 340 72" fill="none">
+        <path d="M 36 6 C 49.4 6, 57.6 15.5, 57 25.9 C 56.4 35.4, 49.2 43.2, 38.9 46.8 C 36 47.8, 36 47.8, 36 47.8 C 36 47.8, 30.2 45.6, 25.9 41.0 C 20.2 35.3, 17.3 27.4, 18.7 20.2 C 20.2 13.7, 25.2 8.6, 32.4 7.2 C 36 6.5, 40.3 7.9, 43.2 10.8 C 48.2 15.8, 49.7 23.7, 46.1 29.5 C 42.4 35.3, 36 37.5, 30.9 35.3 C 26.6 33.3, 25.2 27.9, 27.4 24.2 C 29.5 20.8, 33.8 19.4, 37.4 21.5" fill="none" stroke="#C8962E" stroke-width="2.4" stroke-linecap="round"/>
+        <path d="M 36 47.8 L 36 64" fill="none" stroke="#C8962E" stroke-width="2.1" stroke-linecap="round"/>
+        <path d="M 36 58 C 39.6 58.7, 42.5 56.6, 43.9 53.4" fill="none" stroke="#C8962E" stroke-width="1.3" stroke-linecap="round" opacity="0.38"/>
+        <text x="62" y="47" font-family="'Playfair Display', Georgia, serif" font-style="italic" font-size="32" font-weight="500" fill="#F5F0E8" letter-spacing="-0.3">Hop<tspan font-weight="700">Track</tspan></text>
+        <line x1="62" y1="54" x2="270" y2="54" stroke="#C8962E" stroke-width="0.6" opacity="0.2"/>
+      </svg>
+      <span class="var-label">Full color · dark</span>
+    </div>
+
+    <!-- Dark on cream -->
+    <div class="var-cell cr">
+      <svg width="272" height="56" viewBox="0 0 340 72" fill="none">
+        <path d="M 36 6 C 49.4 6, 57.6 15.5, 57 25.9 C 56.4 35.4, 49.2 43.2, 38.9 46.8 C 36 47.8, 36 47.8, 36 47.8 C 36 47.8, 30.2 45.6, 25.9 41.0 C 20.2 35.3, 17.3 27.4, 18.7 20.2 C 20.2 13.7, 25.2 8.6, 32.4 7.2 C 36 6.5, 40.3 7.9, 43.2 10.8 C 48.2 15.8, 49.7 23.7, 46.1 29.5 C 42.4 35.3, 36 37.5, 30.9 35.3 C 26.6 33.3, 25.2 27.9, 27.4 24.2 C 29.5 20.8, 33.8 19.4, 37.4 21.5" fill="none" stroke="#A67820" stroke-width="2.4" stroke-linecap="round"/>
+        <path d="M 36 47.8 L 36 64" fill="none" stroke="#A67820" stroke-width="2.1" stroke-linecap="round"/>
+        <path d="M 36 58 C 39.6 58.7, 42.5 56.6, 43.9 53.4" fill="none" stroke="#A67820" stroke-width="1.3" stroke-linecap="round" opacity="0.38"/>
+        <text x="62" y="47" font-family="'Playfair Display', Georgia, serif" font-style="italic" font-size="32" font-weight="500" fill="#1A1A1A" letter-spacing="-0.3">Hop<tspan font-weight="700">Track</tspan></text>
+        <line x1="62" y1="54" x2="270" y2="54" stroke="#A67820" stroke-width="0.6" opacity="0.28"/>
+      </svg>
+      <span class="var-label">Dark on cream</span>
+    </div>
+
+    <!-- Gold mono -->
+    <div class="var-cell d2">
+      <svg width="272" height="56" viewBox="0 0 340 72" fill="none">
+        <path d="M 36 6 C 49.4 6, 57.6 15.5, 57 25.9 C 56.4 35.4, 49.2 43.2, 38.9 46.8 C 36 47.8, 36 47.8, 36 47.8 C 36 47.8, 30.2 45.6, 25.9 41.0 C 20.2 35.3, 17.3 27.4, 18.7 20.2 C 20.2 13.7, 25.2 8.6, 32.4 7.2 C 36 6.5, 40.3 7.9, 43.2 10.8 C 48.2 15.8, 49.7 23.7, 46.1 29.5 C 42.4 35.3, 36 37.5, 30.9 35.3 C 26.6 33.3, 25.2 27.9, 27.4 24.2 C 29.5 20.8, 33.8 19.4, 37.4 21.5" fill="none" stroke="#C8962E" stroke-width="2.4" stroke-linecap="round"/>
+        <path d="M 36 47.8 L 36 64" fill="none" stroke="#C8962E" stroke-width="2.1" stroke-linecap="round"/>
+        <text x="62" y="47" font-family="'Playfair Display', Georgia, serif" font-style="italic" font-size="32" font-weight="500" fill="#C8962E" letter-spacing="-0.3">Hop<tspan font-weight="700">Track</tspan></text>
+      </svg>
+      <span class="var-label">Gold on dark</span>
+    </div>
+
+    <!-- Mono white -->
+    <div class="var-cell d1">
+      <svg width="272" height="56" viewBox="0 0 340 72" fill="none">
+        <path d="M 36 6 C 49.4 6, 57.6 15.5, 57 25.9 C 56.4 35.4, 49.2 43.2, 38.9 46.8 C 36 47.8, 36 47.8, 36 47.8 C 36 47.8, 30.2 45.6, 25.9 41.0 C 20.2 35.3, 17.3 27.4, 18.7 20.2 C 20.2 13.7, 25.2 8.6, 32.4 7.2 C 36 6.5, 40.3 7.9, 43.2 10.8 C 48.2 15.8, 49.7 23.7, 46.1 29.5 C 42.4 35.3, 36 37.5, 30.9 35.3 C 26.6 33.3, 25.2 27.9, 27.4 24.2 C 29.5 20.8, 33.8 19.4, 37.4 21.5" fill="none" stroke="#F5F0E8" stroke-width="2.4" stroke-linecap="round"/>
+        <path d="M 36 47.8 L 36 64" fill="none" stroke="#F5F0E8" stroke-width="2.1" stroke-linecap="round"/>
+        <text x="62" y="47" font-family="'Playfair Display', Georgia, serif" font-style="italic" font-size="32" font-weight="500" fill="#F5F0E8" letter-spacing="-0.3">Hop<tspan font-weight="700">Track</tspan></text>
+      </svg>
+      <span class="var-label">Monochrome white</span>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     SCALE STUDY
+══════════════════════════════════════════ -->
+<div class="section ink">
+  <div class="sec-label dk">03 — Scale · 128px · 48px · 24px · 16px</div>
+  <div class="scale-row">
+
+    <!-- 128px -->
+    <div class="s-item">
+      <svg width="72" height="100" viewBox="0 0 200 260" fill="none">
+        <path d="M 100 12 C 138 12, 160 40, 158 72 C 156 100, 136 120, 108 130 C 100 132, 100 132, 100 132 C 100 132, 84 126, 72 114 C 56 98, 48 76, 52 56 C 56 38, 70 24, 90 20 C 100 18, 112 22, 120 30 C 134 44, 138 66, 128 82 C 118 98, 100 104, 86 98 C 74 92, 70 78, 76 68 C 82 58, 94 54, 104 60" fill="none" stroke="#C8962E" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M 100 132 L 100 230" fill="none" stroke="#C8962E" stroke-width="5" stroke-linecap="round"/>
+        <path d="M 100 204 C 116 208, 128 200, 134 186" fill="none" stroke="#C8962E" stroke-width="3" stroke-linecap="round" opacity="0.4"/>
+      </svg>
+      <span class="s-label">128px · full detail</span>
+    </div>
+
+    <!-- 48px -->
+    <div class="s-item">
+      <svg width="27" height="38" viewBox="0 0 200 260" fill="none">
+        <path d="M 100 12 C 138 12, 160 40, 158 72 C 156 100, 136 120, 108 130 C 100 132, 100 132, 100 132 C 100 132, 84 126, 72 114 C 56 98, 48 76, 52 56 C 56 38, 70 24, 90 20 C 100 18, 112 22, 120 30 C 134 44, 138 66, 128 82 C 118 98, 100 104, 86 98 C 74 92, 70 78, 76 68 C 82 58, 94 54, 104 60" fill="none" stroke="#C8962E" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M 100 132 L 100 230" fill="none" stroke="#C8962E" stroke-width="6.5" stroke-linecap="round"/>
+      </svg>
+      <span class="s-label">48px · app / nav</span>
+    </div>
+
+    <!-- 24px — simplified inner spiral visible as suggestion -->
+    <div class="s-item">
+      <svg width="14" height="19" viewBox="0 0 200 260" fill="none">
+        <path d="M 100 12 C 138 12, 160 40, 158 72 C 156 100, 136 120, 108 130 C 100 132, 100 132, 100 132 C 100 132, 84 126, 72 114 C 56 98, 48 76, 52 56 C 56 38, 70 24, 90 20 C 100 18, 112 22, 120 30 C 134 44, 138 66, 128 82 C 118 98, 100 104, 86 98 C 74 92, 70 78, 76 68 C 82 58, 94 54, 104 60" fill="none" stroke="#C8962E" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M 100 132 L 100 230" fill="none" stroke="#C8962E" stroke-width="9" stroke-linecap="round"/>
+      </svg>
+      <span class="s-label">24px · favicon</span>
+    </div>
+
+    <!-- 16px — outer spiral only, reads as teardrop/drop mark -->
+    <div class="s-item">
+      <svg width="10" height="14" viewBox="0 0 200 260" fill="none">
+        <!-- At 16px: outer loop + stem — the inner spiral becomes texture -->
+        <path d="M 100 12 C 138 12, 160 40, 158 72 C 156 100, 136 120, 108 130 C 100 132, 100 132, 100 132 C 100 132, 84 126, 72 114 C 56 98, 48 76, 52 56 C 56 38, 70 24, 90 20 C 100 18, 112 22, 120 30 C 134 44, 138 66, 128 82 C 118 98, 100 104, 86 98 C 74 92, 70 78, 76 68 C 82 58, 94 54, 104 60" fill="none" stroke="#C8962E" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M 100 132 L 100 230" fill="none" stroke="#C8962E" stroke-width="14" stroke-linecap="round"/>
+      </svg>
+      <span class="s-label">16px · minimum</span>
+    </div>
+
+    <!-- App icon -->
+    <div class="s-item">
+      <svg width="80" height="80" viewBox="0 0 80 80" fill="none" style="border-radius:18px; overflow:hidden;">
+        <rect width="80" height="80" fill="#111"/>
+        <!-- Mark scaled and centered in safe zone -->
+        <g transform="translate(40,40) scale(0.26) translate(-100,-120)">
+          <path d="M 100 12 C 138 12, 160 40, 158 72 C 156 100, 136 120, 108 130 C 100 132, 100 132, 100 132 C 100 132, 84 126, 72 114 C 56 98, 48 76, 52 56 C 56 38, 70 24, 90 20 C 100 18, 112 22, 120 30 C 134 44, 138 66, 128 82 C 118 98, 100 104, 86 98 C 74 92, 70 78, 76 68 C 82 58, 94 54, 104 60" fill="none" stroke="#C8962E" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M 100 132 L 100 210" fill="none" stroke="#C8962E" stroke-width="17" stroke-linecap="round"/>
+        </g>
+      </svg>
+      <span class="s-label">App icon · 80px</span>
+    </div>
+
+  </div>
+
+  <div style="margin-top:48px; padding-top:40px; border-top:1px solid #141008;">
+    <p style="font-family:'Lora',serif; font-size:13px; line-height:1.82; color:#8A8070; max-width:600px; font-style:italic;">
+      The mark is a single stroke — no fill, no separate paths. As stroke-width increases relative to the form at small sizes, the inner spiral naturally thickens into the outer loop creating a unified silhouette. It self-simplifies. No alternate small-size version needed.
+    </p>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     MARK CONCEPT
+══════════════════════════════════════════ -->
+<div class="section mid">
+  <div class="sec-label dk">04 — The Mark</div>
+  <div style="display:grid; grid-template-columns:240px 1fr; gap:88px; align-items:center;">
+
+    <div style="display:flex; justify-content:center;">
+      <svg width="180" height="240" viewBox="0 0 200 260" fill="none"
+           style="filter:drop-shadow(0 0 56px #C8962E12);">
+        <path d="M 100 12 C 138 12, 160 40, 158 72 C 156 100, 136 120, 108 130 C 100 132, 100 132, 100 132 C 100 132, 84 126, 72 114 C 56 98, 48 76, 52 56 C 56 38, 70 24, 90 20 C 100 18, 112 22, 120 30 C 134 44, 138 66, 128 82 C 118 98, 100 104, 86 98 C 74 92, 70 78, 76 68 C 82 58, 94 54, 104 60" fill="none" stroke="#C8962E" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M 100 132 L 100 230" fill="none" stroke="#C8962E" stroke-width="5" stroke-linecap="round"/>
+        <path d="M 100 204 C 116 208, 128 200, 134 186" fill="none" stroke="#C8962E" stroke-width="3" stroke-linecap="round" opacity="0.38"/>
+      </svg>
+    </div>
+
+    <div>
+      <h2 style="font-family:'Playfair Display',serif; font-style:italic; font-size:32px; font-weight:500; color:var(--cream); margin-bottom:24px; line-height:1.2;">One line.<br>One loop.<br>One hop.</h2>
+
+      <p style="font-family:'Lora',serif; font-size:14px; line-height:1.9; color:#8A8070; margin-bottom:18px;">The mark is a single continuous stroke. It enters at the crown, traces the outer hop silhouette wide to the right — establishing the full scale of the form — then loops back across and spirals inward with one confident, unhurried turn before settling near the center. The stem drops clean below.</p>
+
+      <p style="font-family:'Lora',serif; font-size:14px; line-height:1.9; color:#8A8070; margin-bottom:18px;">The line never crosses itself. It never doubles back. It knows exactly where it's going. That restraint — the decision to stop when it has said enough — is what makes it work as a mark rather than as an illustration.</p>
+
+      <p style="font-family:'Lora',serif; font-size:14px; line-height:1.9; color:#8A8070;">It is a hop. It is a tracking path. It is the signature of someone who understood both.</p>
+
+      <div style="margin-top:32px; padding-top:28px; border-top:1px solid #181208;">
+        <p class="mono xs" style="color:#7A7060; margin-bottom:10px;">Technical</p>
+        <p style="font-family:'Source Code Pro',monospace; font-size:11px; line-height:1.7; color:#7A7060;">SVG path · stroke-only · no fill · stroke-linecap: round · stroke-linejoin: round<br>Primary stroke-width: 5–6px at 200px viewBox · scales with transform</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     WORDMARK OPTIONS
+══════════════════════════════════════════ -->
+<div style="background:#060402; border-bottom:1px solid #0E0A04;">
+  <div style="padding:72px 64px 52px;">
+    <div class="sec-label dk" style="margin-bottom:0;">05 — Wordmark Options</div>
+  </div>
+  <div class="wm-grid">
+
+    <!-- Option A -->
+    <div class="wm-cell">
+      <span class="wm-tag">Option A · The Pour</span>
+      <svg width="300" height="64" viewBox="0 0 300 64" fill="none">
+        <text x="0" y="48"
+          font-family="'Playfair Display', Georgia, serif"
+          font-style="italic" font-size="46" font-weight="500"
+          fill="#F5F0E8" letter-spacing="-0.5">Hop<tspan font-weight="700">Track</tspan></text>
+        <line x1="0" y1="56" x2="298" y2="56" stroke="#C8962E" stroke-width="0.9" opacity="0.28"/>
+        <circle cx="298" cy="56" r="1.6" fill="#C8962E" opacity="0.42"/>
+      </svg>
+      <p style="font-family:'Lora',serif; font-size:13px; line-height:1.75; color:#8A8070;">Weight contrast — "Hop" at 500, "Track" at 700. Same italic, same face. The name resolves as one word with two registers. Gold rule and terminal dot: the pour hitting the glass.</p>
+    </div>
+
+    <!-- Option B -->
+    <div class="wm-cell">
+      <span class="wm-tag">Option B · Two Voice</span>
+      <svg width="300" height="72" viewBox="0 0 300 72" fill="none">
+        <text x="2" y="22"
+          font-family="'Playfair Display', Georgia, serif"
+          font-style="italic" font-size="13" font-weight="500"
+          fill="#9A9189" letter-spacing="0.16em">HOP</text>
+        <line x1="0" y1="29" x2="298" y2="29" stroke="#C8962E" stroke-width="0.75" opacity="0.24"/>
+        <text x="0" y="68"
+          font-family="'Playfair Display', Georgia, serif"
+          font-style="italic" font-size="50" font-weight="600"
+          fill="#F5F0E8" letter-spacing="-0.8">Track</text>
+      </svg>
+      <p style="font-family:'Lora',serif; font-size:13px; line-height:1.75; color:#8A8070;">"HOP" as a quiet category label — spaced, warm grey, italic. "Track" below as the confident identity. The rule between them holds the two voices apart. Mirrors the product's editorial two-register hierarchy.</p>
+    </div>
+
+  </div>
+
+  <!-- Both on cream -->
+  <div style="background:var(--cream); padding:56px 64px; border-top:1px solid #DDD8CE;">
+    <div class="sec-label lt" style="margin-bottom:44px;">Both options on cream</div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:56px;">
+      <div>
+        <p class="mono xxs" style="color:#9A9189; margin-bottom:16px;">Option A</p>
+        <svg width="280" height="52" viewBox="0 0 280 52" fill="none">
+          <text x="0" y="40"
+            font-family="'Playfair Display', Georgia, serif"
+            font-style="italic" font-size="40" font-weight="500"
+            fill="#1A1A1A" letter-spacing="-0.5">Hop<tspan font-weight="700">Track</tspan></text>
+          <line x1="0" y1="47" x2="278" y2="47" stroke="#A67820" stroke-width="0.8" opacity="0.3"/>
+          <circle cx="278" cy="47" r="1.4" fill="#A67820" opacity="0.4"/>
+        </svg>
+      </div>
+      <div>
+        <p class="mono xxs" style="color:#9A9189; margin-bottom:16px;">Option B</p>
+        <svg width="200" height="52" viewBox="0 0 200 52" fill="none">
+          <text x="1" y="14"
+            font-family="'Playfair Display', Georgia, serif"
+            font-style="italic" font-size="11" font-weight="500"
+            fill="#9A9189" letter-spacing="0.16em">HOP</text>
+          <line x1="0" y1="20" x2="198" y2="20" stroke="#A67820" stroke-width="0.6" opacity="0.28"/>
+          <text x="0" y="50"
+            font-family="'Playfair Display', Georgia, serif"
+            font-style="italic" font-size="42" font-weight="600"
+            fill="#1A1A1A" letter-spacing="-0.8">Track</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     COLOR SYSTEM
+══════════════════════════════════════════ -->
+<div class="section ink2">
+  <div class="sec-label dk">06 — Color System</div>
+  <div style="display:flex; gap:12px; flex-wrap:wrap;">
+
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <div style="width:108px; height:72px; background:#C8962E; border-radius:1px;"></div>
+      <p class="mono" style="font-size:10px; letter-spacing:0.08em; color:#7A7060;">Gold<br><span style="color:#7A7060;">#C8962E</span></p>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <div style="width:108px; height:72px; background:#A67820; border-radius:1px;"></div>
+      <p class="mono" style="font-size:10px; letter-spacing:0.08em; color:#7A7060;">Gold Dark<br><span style="color:#7A7060;">#A67820</span></p>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <div style="width:108px; height:72px; background:#DFB558; border-radius:1px;"></div>
+      <p class="mono" style="font-size:10px; letter-spacing:0.08em; color:#7A7060;">Gold Light<br><span style="color:#7A7060;">#DFB558</span></p>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <div style="width:108px; height:72px; background:#1A1A1A; border-radius:1px;"></div>
+      <p class="mono" style="font-size:10px; letter-spacing:0.08em; color:#7A7060;">Near Black<br><span style="color:#7A7060;">#1A1A1A</span></p>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <div style="width:108px; height:72px; background:#F5F0E8; border-radius:1px; border:1px solid #DDD8CE;"></div>
+      <p class="mono" style="font-size:10px; letter-spacing:0.08em; color:#7A7060;">Cream<br><span style="color:#7A7060;">#F5F0E8</span></p>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <div style="width:108px; height:72px; background:#9A9189; border-radius:1px;"></div>
+      <p class="mono" style="font-size:10px; letter-spacing:0.08em; color:#7A7060;">Warm Grey<br><span style="color:#7A7060;">#9A9189</span></p>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     TYPOGRAPHY
+══════════════════════════════════════════ -->
+<div class="section ink">
+  <div class="sec-label dk">07 — Typography</div>
+  <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:48px;">
+    <div>
+      <p class="mono xxs" style="color:#7A7060; margin-bottom:14px;">Wordmark / Display</p>
+      <p style="font-family:'Playfair Display',serif; font-style:italic; font-size:22px; font-weight:500; color:var(--cream);">Playfair Display</p>
+      <p style="font-family:'Playfair Display',serif; font-style:italic; font-size:13px; color:#7A7060; margin-top:6px;">Italic 500 + Bold 700<br>Aa Bb Cc — 0123456789</p>
+    </div>
+    <div>
+      <p class="mono xxs" style="color:#7A7060; margin-bottom:14px;">Data / Labels</p>
+      <p style="font-family:'Source Code Pro',monospace; font-size:18px; color:var(--cream);">Source Code Pro</p>
+      <p style="font-family:'Source Code Pro',monospace; font-size:12px; color:#7A7060; margin-top:6px;">Regular 400<br>Aa Bb Cc — 0123456789</p>
+    </div>
+    <div>
+      <p class="mono xxs" style="color:#7A7060; margin-bottom:14px;">Body</p>
+      <p style="font-family:'Lora',serif; font-size:18px; color:var(--cream);">Lora</p>
+      <p style="font-family:'Lora',serif; font-size:12px; color:#7A7060; margin-top:6px;">Regular 400 / Italic<br>Aa Bb Cc — 0123456789</p>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     USAGE GUIDE
+══════════════════════════════════════════ -->
+<div class="section mid">
+  <div class="sec-label dk">08 — Usage Guide</div>
+  <div class="usage-grid">
+    <div class="usage-cell">
+      <span class="usage-cell rule">Clear space</span>
+      <h3>Give it room</h3>
+      <p>Maintain clear space equal to the cap-height of the "H" in the wordmark on all four sides. The mark breathes — don't crowd it.</p>
+    </div>
+    <div class="usage-cell">
+      <span class="usage-cell rule">Minimum size</span>
+      <h3>Sizes</h3>
+      <p>Full lockup: 140px wide / 35mm print minimum. Mark alone: 24px minimum digital, 8mm print. Below 24px use a filled silhouette export.</p>
+    </div>
+    <div class="usage-cell">
+      <span class="usage-cell rule">Backgrounds</span>
+      <h3>Approved surfaces</h3>
+      <p>Full color on #1A1A1A and darker. Dark-on-cream on #F5F0E8 and #EDE7D9. Never on photographic backgrounds without a solid band.</p>
+    </div>
+    <div class="usage-cell">
+      <span class="usage-cell rule">Stroke weight</span>
+      <h3>Don't touch the line</h3>
+      <p>The stroke weight is part of the mark. Never reduce or increase it independently. Scale the mark as a whole — never resize the path alone.</p>
+    </div>
+    <div class="usage-cell">
+      <span class="usage-cell rule">Color</span>
+      <h3>Approved colors only</h3>
+      <p>Gold (#C8962E) on dark. Gold Dark (#A67820) on cream. White (#F5F0E8) monochrome on dark. Near-black (#1A1A1A) on cream. No gradients, no drop shadows.</p>
+    </div>
+    <div class="usage-cell">
+      <span class="usage-cell rule">File formats</span>
+      <h3>Export formats</h3>
+      <p>SVG for all digital use — it's a single path, transfers perfectly. PNG@3× for app contexts and email. Never scale a 1× PNG up. Never rasterize below 128px.</p>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     DON'TS
+══════════════════════════════════════════ -->
+<div class="section ink2">
+  <div class="sec-label dk">09 — What Not to Do</div>
+  <div class="dont-grid">
+
+    <!-- Don't: fill the stroke -->
+    <div class="dont-cell">
+      <svg width="80" height="100" viewBox="0 0 200 260" fill="none">
+        <path d="M 100 12 C 138 12, 160 40, 158 72 C 156 100, 136 120, 108 130 C 100 132, 100 132, 100 132 C 100 132, 84 126, 72 114 C 56 98, 48 76, 52 56 C 56 38, 70 24, 90 20 C 100 18, 112 22, 120 30 C 134 44, 138 66, 128 82 C 118 98, 100 104, 86 98 C 74 92, 70 78, 76 68 C 82 58, 94 54, 104 60" fill="#C8962E" stroke="#C8962E" stroke-width="5.5" stroke-linecap="round"/>
+        <path d="M 100 132 L 100 220" fill="none" stroke="#C8962E" stroke-width="5" stroke-linecap="round"/>
+      </svg>
+      <svg width="80" height="8" viewBox="0 0 80 8"><line x1="0" y1="4" x2="80" y2="4" stroke="#B03020" stroke-width="1.5"/><line x1="0" y1="0" x2="80" y2="8" stroke="#B03020" stroke-width="1.5"/></svg>
+      <span class="dont-label">Don't fill the stroke</span>
+    </div>
+
+    <!-- Don't: rotate -->
+    <div class="dont-cell">
+      <svg width="80" height="100" viewBox="0 0 200 260" fill="none">
+        <g transform="rotate(25 100 130)">
+          <path d="M 100 12 C 138 12, 160 40, 158 72 C 156 100, 136 120, 108 130 C 100 132, 100 132, 100 132 C 100 132, 84 126, 72 114 C 56 98, 48 76, 52 56 C 56 38, 70 24, 90 20 C 100 18, 112 22, 120 30 C 134 44, 138 66, 128 82 C 118 98, 100 104, 86 98 C 74 92, 70 78, 76 68 C 82 58, 94 54, 104 60" fill="none" stroke="#C8962E" stroke-width="5.5" stroke-linecap="round"/>
+          <path d="M 100 132 L 100 220" fill="none" stroke="#C8962E" stroke-width="5" stroke-linecap="round"/>
+        </g>
+      </svg>
+      <svg width="80" height="8" viewBox="0 0 80 8"><line x1="0" y1="4" x2="80" y2="4" stroke="#B03020" stroke-width="1.5"/><line x1="0" y1="0" x2="80" y2="8" stroke="#B03020" stroke-width="1.5"/></svg>
+      <span class="dont-label">Don't rotate</span>
+    </div>
+
+    <!-- Don't: wrong color -->
+    <div class="dont-cell">
+      <svg width="80" height="100" viewBox="0 0 200 260" fill="none">
+        <path d="M 100 12 C 138 12, 160 40, 158 72 C 156 100, 136 120, 108 130 C 100 132, 100 132, 100 132 C 100 132, 84 126, 72 114 C 56 98, 48 76, 52 56 C 56 38, 70 24, 90 20 C 100 18, 112 22, 120 30 C 134 44, 138 66, 128 82 C 118 98, 100 104, 86 98 C 74 92, 70 78, 76 68 C 82 58, 94 54, 104 60" fill="none" stroke="#3A7BD5" stroke-width="5.5" stroke-linecap="round"/>
+        <path d="M 100 132 L 100 220" fill="none" stroke="#3A7BD5" stroke-width="5" stroke-linecap="round"/>
+      </svg>
+      <svg width="80" height="8" viewBox="0 0 80 8"><line x1="0" y1="4" x2="80" y2="4" stroke="#B03020" stroke-width="1.5"/><line x1="0" y1="0" x2="80" y2="8" stroke="#B03020" stroke-width="1.5"/></svg>
+      <span class="dont-label">Don't use off-brand colors</span>
+    </div>
+
+    <!-- Don't: stretch -->
+    <div class="dont-cell">
+      <svg width="80" height="100" viewBox="0 0 200 260" fill="none">
+        <g transform="scale(1.5, 0.65) translate(-33, 30)">
+          <path d="M 100 12 C 138 12, 160 40, 158 72 C 156 100, 136 120, 108 130 C 100 132, 100 132, 100 132 C 100 132, 84 126, 72 114 C 56 98, 48 76, 52 56 C 56 38, 70 24, 90 20 C 100 18, 112 22, 120 30 C 134 44, 138 66, 128 82 C 118 98, 100 104, 86 98 C 74 92, 70 78, 76 68 C 82 58, 94 54, 104 60" fill="none" stroke="#C8962E" stroke-width="5.5" stroke-linecap="round"/>
+          <path d="M 100 132 L 100 220" fill="none" stroke="#C8962E" stroke-width="5" stroke-linecap="round"/>
+        </g>
+      </svg>
+      <svg width="80" height="8" viewBox="0 0 80 8"><line x1="0" y1="4" x2="80" y2="4" stroke="#B03020" stroke-width="1.5"/><line x1="0" y1="0" x2="80" y2="8" stroke="#B03020" stroke-width="1.5"/></svg>
+      <span class="dont-label">Don't stretch or distort</span>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     IN CONTEXT — MENU CARD
+══════════════════════════════════════════ -->
+<div class="section ink">
+  <div class="sec-label dk">10 — In Context · Tap List Card</div>
+
+  <div class="menu-card">
+    <div style="height:3px; background:#C8962E; position:relative; z-index:2;"></div>
+    <div style="margin:18px; border:1px solid #DDD8CE; padding:38px 34px 46px; position:relative; z-index:2;">
+
+      <div style="text-align:center; margin-bottom:30px;">
+        <p style="font-family:'Source Code Pro',monospace; font-size:7.5px; letter-spacing:0.3em; text-transform:uppercase; color:#9A9189; margin-bottom:8px;">Est. 2019 · Asheville, NC</p>
+        <p style="font-family:'Playfair Display',serif; font-style:italic; font-size:24px; font-weight:600; color:#1A1A1A;">Ridgeline Brewing Co.</p>
+        <div style="margin:12px auto 0; width:44px; height:1px; background:#C8962E; opacity:0.38;"></div>
+      </div>
+
+      <p style="font-family:'Source Code Pro',monospace; font-size:7.5px; letter-spacing:0.28em; text-transform:uppercase; color:#9A9189; margin-bottom:18px; text-align:center;">On Tap Today</p>
+
+      <div style="display:flex; flex-direction:column;">
+        <div style="display:flex; justify-content:space-between; align-items:baseline; padding:12px 0; border-bottom:1px solid #EDE7D9;">
+          <div>
+            <p style="font-family:'Playfair Display',serif; font-style:italic; font-size:14px; font-weight:500; color:#1A1A1A;">Cloudline IPA</p>
+            <p style="font-family:'Lora',serif; font-size:11px; color:#9A9189; margin-top:2px;">West Coast · Citra, Mosaic · 6.8%</p>
+          </div>
+          <p style="font-family:'Playfair Display',serif; font-size:14px; color:#1A1A1A;">$7</p>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:baseline; padding:12px 0; border-bottom:1px solid #EDE7D9;">
+          <div>
+            <p style="font-family:'Playfair Display',serif; font-style:italic; font-size:14px; font-weight:500; color:#1A1A1A;">Blue Ridge Saison</p>
+            <p style="font-family:'Lora',serif; font-size:11px; color:#9A9189; margin-top:2px;">Farmhouse · Spiced, Dry · 5.2%</p>
+          </div>
+          <p style="font-family:'Playfair Display',serif; font-size:14px; color:#1A1A1A;">$6</p>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:baseline; padding:12px 0; border-bottom:1px solid #EDE7D9;">
+          <div>
+            <p style="font-family:'Playfair Display',serif; font-style:italic; font-size:14px; font-weight:500; color:#1A1A1A;">Midnight Stout</p>
+            <p style="font-family:'Lora',serif; font-size:11px; color:#9A9189; margin-top:2px;">Imperial · Coffee, Dark Chocolate · 9.1%</p>
+          </div>
+          <p style="font-family:'Playfair Display',serif; font-size:14px; color:#1A1A1A;">$8</p>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:baseline; padding:12px 0;">
+          <div>
+            <p style="font-family:'Playfair Display',serif; font-style:italic; font-size:14px; font-weight:500; color:#1A1A1A;">Summit Wheat</p>
+            <p style="font-family:'Lora',serif; font-size:11px; color:#9A9189; margin-top:2px;">American Wheat · Citrus, Light · 4.4%</p>
+          </div>
+          <p style="font-family:'Playfair Display',serif; font-size:14px; color:#1A1A1A;">$5</p>
+        </div>
+      </div>
+
+      <div style="margin-top:32px; padding-top:26px; border-top:1px solid #EDE7D9; display:flex; justify-content:space-between; align-items:flex-end;">
+        <!-- QR -->
+        <div style="display:flex; flex-direction:column; gap:9px;">
+          <div style="width:50px; height:50px; background:#EDE7D9; display:grid; grid-template-columns:repeat(6,1fr); gap:2px; padding:4px; border-radius:1px;">
+            <div style="background:#1A1A1A; grid-column:1/3; grid-row:1/3;"></div>
+            <div style="background:#1A1A1A; grid-column:4/6; grid-row:1/3;"></div>
+            <div style="background:#1A1A1A; grid-column:1/3; grid-row:4/6;"></div>
+            <div style="background:#1A1A1A; grid-column:4; grid-row:4;"></div>
+            <div style="background:#1A1A1A; grid-column:6; grid-row:5;"></div>
+          </div>
+          <p style="font-family:'Source Code Pro',monospace; font-size:7px; letter-spacing:0.18em; color:#9A9189; text-transform:uppercase;">Rate this beer</p>
+        </div>
+
+        <!-- THE MAKER'S MARK — Morgan's MP-5 in the corner -->
+        <div style="display:flex; flex-direction:column; align-items:flex-end; gap:7px;">
+          <svg width="108" height="26" viewBox="0 0 280 64" fill="none">
+            <g transform="scale(0.44) translate(0, 4)">
+              <path d="M 36 6 C 49.4 6, 57.6 15.5, 57 25.9 C 56.4 35.4, 49.2 43.2, 38.9 46.8 C 36 47.8, 36 47.8, 36 47.8 C 36 47.8, 30.2 45.6, 25.9 41 C 20.2 35.3, 17.3 27.4, 18.7 20.2 C 20.2 13.7, 25.2 8.6, 32.4 7.2 C 36 6.5, 40.3 7.9, 43.2 10.8 C 48.2 15.8, 49.7 23.7, 46.1 29.5 C 42.4 35.3, 36 37.5, 30.9 35.3 C 26.6 33.3, 25.2 27.9, 27.4 24.2 C 29.5 20.8, 33.8 19.4, 37.4 21.5" fill="none" stroke="#A67820" stroke-width="4.8" stroke-linecap="round"/>
+              <path d="M 36 47.8 L 36 64" fill="none" stroke="#A67820" stroke-width="4.4" stroke-linecap="round"/>
+            </g>
+            <text x="38" y="20"
+              font-family="'Playfair Display', Georgia, serif"
+              font-style="italic" font-size="22" font-weight="500"
+              fill="#1A1A1A" letter-spacing="-0.3">Hop<tspan font-weight="700">Track</tspan></text>
+          </svg>
+          <p style="font-family:'Source Code Pro',monospace; font-size:7px; letter-spacing:0.18em; color:#9A9189; text-transform:uppercase;">Tap list by HopTrack</p>
+        </div>
+      </div>
+
+    </div>
+    <div style="height:2px; background:#C8962E; opacity:0.3; position:relative; z-index:2;"></div>
+  </div>
+
+  <p class="mono xxs" style="color:#7A7060; text-align:center; margin-top:28px; letter-spacing:0.2em;">The maker's mark — bottom corner of a printed tap list</p>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     APP CONTEXT
+══════════════════════════════════════════ -->
+<div class="section mid">
+  <div class="sec-label dk">11 — In Context · App & Digital</div>
+  <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:20px;">
+
+    <!-- Mobile nav -->
+    <div>
+      <p class="mono xxs" style="color:#7A7060; margin-bottom:16px;">Mobile nav bar</p>
+      <div style="background:#0D0C08; border:1px solid #1A1810; border-radius:14px; padding:16px 20px; display:flex; align-items:center; justify-content:space-between;">
+        <svg width="22" height="30" viewBox="0 0 200 260" fill="none">
+          <path d="M 100 12 C 138 12, 160 40, 158 72 C 156 100, 136 120, 108 130 C 100 132, 100 132, 100 132 C 100 132, 84 126, 72 114 C 56 98, 48 76, 52 56 C 56 38, 70 24, 90 20 C 100 18, 112 22, 120 30 C 134 44, 138 66, 128 82 C 118 98, 100 104, 86 98 C 74 92, 70 78, 76 68 C 82 58, 94 54, 104 60" fill="none" stroke="#C8962E" stroke-width="11" stroke-linecap="round"/>
+          <path d="M 100 132 L 100 230" fill="none" stroke="#C8962E" stroke-width="10" stroke-linecap="round"/>
+        </svg>
+        <div style="display:flex; gap:18px;">
+          <div style="width:3px; height:3px; background:#222; border-radius:50%;"></div>
+          <div style="width:3px; height:3px; background:#222; border-radius:50%;"></div>
+          <div style="width:3px; height:3px; background:#222; border-radius:50%;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- App icon display -->
+    <div>
+      <p class="mono xxs" style="color:#7A7060; margin-bottom:16px;">App icon</p>
+      <div style="display:flex; gap:14px; align-items:center;">
+        <svg width="80" height="80" viewBox="0 0 80 80" fill="none" style="border-radius:18px; overflow:hidden; flex-shrink:0;">
+          <rect width="80" height="80" fill="#111"/>
+          <g transform="translate(40,38) scale(0.26) translate(-100,-120)">
+            <path d="M 100 12 C 138 12, 160 40, 158 72 C 156 100, 136 120, 108 130 C 100 132, 100 132, 100 132 C 100 132, 84 126, 72 114 C 56 98, 48 76, 52 56 C 56 38, 70 24, 90 20 C 100 18, 112 22, 120 30 C 134 44, 138 66, 128 82 C 118 98, 100 104, 86 98 C 74 92, 70 78, 76 68 C 82 58, 94 54, 104 60" fill="none" stroke="#C8962E" stroke-width="18" stroke-linecap="round"/>
+            <path d="M 100 132 L 100 210" fill="none" stroke="#C8962E" stroke-width="17" stroke-linecap="round"/>
+          </g>
+        </svg>
+        <svg width="56" height="56" viewBox="0 0 80 80" fill="none" style="border-radius:13px; overflow:hidden; flex-shrink:0;">
+          <rect width="80" height="80" fill="#111"/>
+          <g transform="translate(40,38) scale(0.26) translate(-100,-120)">
+            <path d="M 100 12 C 138 12, 160 40, 158 72 C 156 100, 136 120, 108 130 C 100 132, 100 132, 100 132 C 100 132, 84 126, 72 114 C 56 98, 48 76, 52 56 C 56 38, 70 24, 90 20 C 100 18, 112 22, 120 30 C 134 44, 138 66, 128 82 C 118 98, 100 104, 86 98 C 74 92, 70 78, 76 68 C 82 58, 94 54, 104 60" fill="none" stroke="#C8962E" stroke-width="18" stroke-linecap="round"/>
+            <path d="M 100 132 L 100 210" fill="none" stroke="#C8962E" stroke-width="17" stroke-linecap="round"/>
+          </g>
+        </svg>
+        <svg width="36" height="36" viewBox="0 0 80 80" fill="none" style="border-radius:8px; overflow:hidden; flex-shrink:0;">
+          <rect width="80" height="80" fill="#111"/>
+          <g transform="translate(40,38) scale(0.26) translate(-100,-120)">
+            <path d="M 100 12 C 138 12, 160 40, 158 72 C 156 100, 136 120, 108 130 C 100 132, 100 132, 100 132 C 100 132, 84 126, 72 114 C 56 98, 48 76, 52 56 C 56 38, 70 24, 90 20 C 100 18, 112 22, 120 30 C 134 44, 138 66, 128 82 C 118 98, 100 104, 86 98 C 74 92, 70 78, 76 68 C 82 58, 94 54, 104 60" fill="none" stroke="#C8962E" stroke-width="18" stroke-linecap="round"/>
+            <path d="M 100 132 L 100 210" fill="none" stroke="#C8962E" stroke-width="17" stroke-linecap="round"/>
+          </g>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Stamp / merch -->
+    <div>
+      <p class="mono xxs" style="color:#7A7060; margin-bottom:16px;">Stamp / merch seal</p>
+      <div style="display:flex; gap:16px; align-items:center;">
+        <!-- Dark circle stamp -->
+        <div style="width:80px; height:80px; border-radius:50%; background:#1A1A1A; border:2px solid #C8962E; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+          <svg width="40" height="52" viewBox="0 0 200 260" fill="none">
+            <path d="M 100 12 C 138 12, 160 40, 158 72 C 156 100, 136 120, 108 130 C 100 132, 100 132, 100 132 C 100 132, 84 126, 72 114 C 56 98, 48 76, 52 56 C 56 38, 70 24, 90 20 C 100 18, 112 22, 120 30 C 134 44, 138 66, 128 82 C 118 98, 100 104, 86 98 C 74 92, 70 78, 76 68 C 82 58, 94 54, 104 60" fill="none" stroke="#C8962E" stroke-width="7" stroke-linecap="round"/>
+            <path d="M 100 132 L 100 224" fill="none" stroke="#C8962E" stroke-width="6.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <!-- Cream circle stamp -->
+        <div style="width:64px; height:64px; border-radius:50%; background:#F5F0E8; border:2px solid #1A1A1A; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+          <svg width="32" height="42" viewBox="0 0 200 260" fill="none">
+            <path d="M 100 12 C 138 12, 160 40, 158 72 C 156 100, 136 120, 108 130 C 100 132, 100 132, 100 132 C 100 132, 84 126, 72 114 C 56 98, 48 76, 52 56 C 56 38, 70 24, 90 20 C 100 18, 112 22, 120 30 C 134 44, 138 66, 128 82 C 118 98, 100 104, 86 98 C 74 92, 70 78, 76 68 C 82 58, 94 54, 104 60" fill="none" stroke="#1A1A1A" stroke-width="7" stroke-linecap="round"/>
+            <path d="M 100 132 L 100 224" fill="none" stroke="#1A1A1A" stroke-width="6.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <!-- Gold circle stamp -->
+        <div style="width:48px; height:48px; border-radius:50%; background:#C8962E; border:2px solid #1A1A1A; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+          <svg width="24" height="32" viewBox="0 0 200 260" fill="none">
+            <path d="M 100 12 C 138 12, 160 40, 158 72 C 156 100, 136 120, 108 130 C 100 132, 100 132, 100 132 C 100 132, 84 126, 72 114 C 56 98, 48 76, 52 56 C 56 38, 70 24, 90 20 C 100 18, 112 22, 120 30 C 134 44, 138 66, 128 82 C 118 98, 100 104, 86 98 C 74 92, 70 78, 76 68 C 82 58, 94 54, 104 60" fill="none" stroke="#1A1A1A" stroke-width="8" stroke-linecap="round"/>
+            <path d="M 100 132 L 100 224" fill="none" stroke="#1A1A1A" stroke-width="7.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     FOOTER / CREDIT
+══════════════════════════════════════════ -->
+<footer class="footer">
+  <div style="display:flex; align-items:center; gap:24px;">
+    <svg width="22" height="30" viewBox="0 0 200 260" fill="none">
+      <path d="M 100 12 C 138 12, 160 40, 158 72 C 156 100, 136 120, 108 130 C 100 132, 100 132, 100 132 C 100 132, 84 126, 72 114 C 56 98, 48 76, 52 56 C 56 38, 70 24, 90 20 C 100 18, 112 22, 120 30 C 134 44, 138 66, 128 82 C 118 98, 100 104, 86 98 C 74 92, 70 78, 76 68 C 82 58, 94 54, 104 60" fill="none" stroke="#C8962E" stroke-width="8" stroke-linecap="round" opacity="0.5"/>
+      <path d="M 100 132 L 100 224" fill="none" stroke="#C8962E" stroke-width="7.5" stroke-linecap="round" opacity="0.5"/>
+    </svg>
+    <div>
+      <p class="mono xxs" style="color:#7A7060;">HopTrack · Final Identity Spec</p>
+      <p class="mono" style="font-size:9px; letter-spacing:0.1em; color:#6A6050; margin-top:5px;">Mark by Morgan · Spec compiled by Claude</p>
+    </div>
+  </div>
+  <div style="text-align:right;">
+    <p class="mono xxs" style="color:#7A7060;">MP-5 "The One"</p>
+    <p class="mono" style="font-size:9px; letter-spacing:0.1em; color:#6A6050; margin-top:5px;">One line. One loop. One hop. Done.</p>
+  </div>
+</footer>
+
+</body>
+</html>

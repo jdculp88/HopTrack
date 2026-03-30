@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/service";
 
 export async function GET(_request: NextRequest) {
   try {
@@ -14,18 +15,25 @@ export async function GET(_request: NextRequest) {
     }
 
     // Verify superadmin
-    const { data: profile } = (await supabase
+    const { data: profile } = await supabase
       .from("profiles")
       .select("is_superadmin")
       .eq("id", user.id)
-      .single()) as any;
+      .single();
 
     if (!profile?.is_superadmin) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
+    // Use service role client for stats queries — bypasses RLS so counts are accurate
+    const service = createServiceClient();
+
     const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
     const oneMonthAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+
+    // Service client returns untyped query builders (no codegen schema); cast count
+    // responses to a minimal shape rather than `as any`.
+    type CountResult = Promise<{ count: number | null; data: null; error: null }>;
 
     const [
       { count: totalUsers },
@@ -41,18 +49,18 @@ export async function GET(_request: NextRequest) {
       { count: sessionsThisWeek },
       { count: sessionsThisMonth },
     ] = await Promise.all([
-      supabase.from("profiles").select("id", { count: "exact", head: true }) as any,
-      supabase.from("breweries").select("id", { count: "exact", head: true }) as any,
-      (supabase as any).from("sessions").select("id", { count: "exact", head: true }).eq("is_active", false) as any,
-      supabase.from("beers").select("id", { count: "exact", head: true }) as any,
-      supabase.from("brewery_claims").select("id", { count: "exact", head: true }).eq("status", "pending") as any,
-      supabase.from("brewery_claims").select("id", { count: "exact", head: true }).eq("status", "approved") as any,
-      supabase.from("brewery_claims").select("id", { count: "exact", head: true }).eq("status", "rejected") as any,
-      supabase.from("brewery_accounts").select("id", { count: "exact", head: true }).eq("verified", true) as any,
-      supabase.from("profiles").select("id", { count: "exact", head: true }).gte("created_at", oneWeekAgo) as any,
-      supabase.from("profiles").select("id", { count: "exact", head: true }).gte("created_at", oneMonthAgo) as any,
-      (supabase as any).from("sessions").select("id", { count: "exact", head: true }).eq("is_active", false).gte("started_at", oneWeekAgo) as any,
-      (supabase as any).from("sessions").select("id", { count: "exact", head: true }).eq("is_active", false).gte("started_at", oneMonthAgo) as any,
+      service.from("profiles").select("id", { count: "exact", head: true }) as unknown as CountResult,
+      service.from("breweries").select("id", { count: "exact", head: true }) as unknown as CountResult,
+      service.from("sessions").select("id", { count: "exact", head: true }).eq("is_active", false) as unknown as CountResult,
+      service.from("beers").select("id", { count: "exact", head: true }) as unknown as CountResult,
+      service.from("brewery_claims").select("id", { count: "exact", head: true }).eq("status", "pending") as unknown as CountResult,
+      service.from("brewery_claims").select("id", { count: "exact", head: true }).eq("status", "approved") as unknown as CountResult,
+      service.from("brewery_claims").select("id", { count: "exact", head: true }).eq("status", "rejected") as unknown as CountResult,
+      service.from("brewery_accounts").select("id", { count: "exact", head: true }).eq("verified", true) as unknown as CountResult,
+      service.from("profiles").select("id", { count: "exact", head: true }).gte("created_at", oneWeekAgo) as unknown as CountResult,
+      service.from("profiles").select("id", { count: "exact", head: true }).gte("created_at", oneMonthAgo) as unknown as CountResult,
+      service.from("sessions").select("id", { count: "exact", head: true }).eq("is_active", false).gte("started_at", oneWeekAgo) as unknown as CountResult,
+      service.from("sessions").select("id", { count: "exact", head: true }).eq("is_active", false).gte("started_at", oneMonthAgo) as unknown as CountResult,
     ]);
 
     return NextResponse.json({

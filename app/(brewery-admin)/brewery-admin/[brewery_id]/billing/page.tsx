@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { notFound, redirect } from "next/navigation";
 import { BillingClient } from "./BillingClient";
@@ -16,8 +17,15 @@ export default async function BillingPage({ params }: { params: Promise<{ brewer
   if (!account) redirect("/brewery-admin");
 
   const { data: brewery } = await supabase
-    .from("breweries").select("*").eq("id", brewery_id).single() as any;
+    .from("breweries")
+    .select("id, name, created_at, subscription_tier, stripe_customer_id, trial_ends_at")
+    .eq("id", brewery_id)
+    .single() as any;
   if (!brewery) notFound();
 
-  return <BillingClient brewery={brewery as any} />;
+  return (
+    <Suspense fallback={<div className="p-6" />}>
+      <BillingClient brewery={brewery as any} />
+    </Suspense>
+  );
 }

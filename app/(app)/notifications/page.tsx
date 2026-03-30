@@ -16,12 +16,5 @@ export default async function NotificationsPage() {
     .order("created_at", { ascending: false })
     .limit(50);
 
-  // Mark all as read
-  await (supabase as any)
-    .from("notifications")
-    .update({ read: true })
-    .eq("user_id", user.id)
-    .eq("read", false);
-
   return <NotificationsClient notifications={(notifications as any[]) ?? []} />;
 }

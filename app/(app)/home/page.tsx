@@ -72,8 +72,8 @@ export default async function HomePage() {
         .from("brewery_reviews")
         .select(`
           id, rating, comment, created_at,
-          profile:profiles!user_id(id, username, display_name, avatar_url),
-          brewery:breweries!brewery_id(id, name, city, state)
+          profile:profiles(id, username, display_name, avatar_url),
+          brewery:breweries(id, name, city, state)
         `)
         .in("user_id", friendIds.slice(0, 50))
         .gte("created_at", oneWeekAgo)

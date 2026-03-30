@@ -88,6 +88,8 @@ export function useSession() {
       })
       const data = await res.json()
       if (!res.ok) { setError(data.error || 'Failed to log beer'); return null }
+      // Haptic confirmation on beer log success
+      if (typeof navigator !== 'undefined') navigator.vibrate?.(30)
       return data.beerLog
     } catch {
       setError('Network error')

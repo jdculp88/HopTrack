@@ -36,15 +36,52 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "stop_count must be between 2 and 5" }, { status: 400 });
   }
 
+  interface NearbyBrewery {
+    id: string;
+    name: string;
+    city: string | null;
+    state: string | null;
+    latitude: number | null;
+    longitude: number | null;
+    brewery_type: string | null;
+    hop_route_eligible: boolean | null;
+    hop_route_offer: string | null;
+    vibe_tags: string[] | null;
+  }
+
+  interface TapBeer {
+    id: string;
+    name: string;
+    style: string | null;
+    brewery_id: string;
+  }
+
+  interface BeerLogWithStyle {
+    rating: number | null;
+    beer: { style: string | null } | null; // supabase join shape
+  }
+
+  interface FriendshipRow {
+    requester_id: string;
+    addressee_id: string;
+  }
+
+  interface FriendSession {
+    user_id: string;
+    brewery_id: string;
+    brewery: { name: string } | null; // supabase join shape
+    profile: { display_name: string | null; username: string } | null; // supabase join shape
+  }
+
   // 1. Fetch nearby breweries (within ~25 miles)
-  const { data: allBreweries } = await (supabase as any)
+  const { data: allBreweries } = await supabase
     .from("breweries")
     .select("id, name, city, state, latitude, longitude, brewery_type, hop_route_eligible, hop_route_offer, vibe_tags")
     .not("latitude", "is", null)
     .not("longitude", "is", null);
 
   const radiusMiles = transport === "walking" ? 1.5 : transport === "rideshare" ? 10 : 25;
-  const nearbyBreweries = ((allBreweries ?? []) as any[])
+  const nearbyBreweries = ((allBreweries ?? []) as NearbyBrewery[])
     .filter((b) => {
       if (!b.latitude || !b.longitude) return false;
       const dist = haversineDistance(location.lat, location.lng, b.latitude, b.longitude);
@@ -60,30 +97,30 @@ export async function POST(request: Request) {
   }
 
   // Fetch top beers for each brewery
-  const breweryIds = nearbyBreweries.map((b: any) => b.id);
-  const { data: beers } = await (supabase as any)
+  const breweryIds = nearbyBreweries.map((b) => b.id);
+  const { data: beers } = await supabase
     .from("beers")
     .select("id, name, style, brewery_id")
     .in("brewery_id", breweryIds)
-    .eq("is_on_tap", true);
+    .eq("is_on_tap" as never, true);
 
-  const beersByBrewery = new Map<string, any[]>();
-  for (const beer of beers ?? []) {
+  const beersByBrewery = new Map<string, TapBeer[]>();
+  for (const beer of (beers ?? []) as TapBeer[]) {
     const arr = beersByBrewery.get(beer.brewery_id) ?? [];
     arr.push(beer);
     beersByBrewery.set(beer.brewery_id, arr);
   }
 
   // 2. Fetch user's Taste DNA
-  const { data: beerLogs } = await (supabase as any)
+  const { data: beerLogs } = await supabase
     .from("beer_logs")
     .select("rating, beer:beers(style)")
     .eq("user_id", user.id)
     .not("rating", "is", null);
 
   const styleMap = new Map<string, { total: number; count: number }>();
-  for (const log of beerLogs ?? []) {
-    const style = (log.beer as any)?.style;
+  for (const log of (beerLogs ?? []) as BeerLogWithStyle[]) {
+    const style = log.beer?.style;
     if (!style || !log.rating) continue;
     const existing = styleMap.get(style) ?? { total: 0, count: 0 };
     styleMap.set(style, { total: existing.total + log.rating, count: existing.count + 1 });
@@ -94,19 +131,19 @@ export async function POST(request: Request) {
 
   // 3. Fetch social context (friend check-ins last 90 days)
   const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
-  const { data: friendships } = await (supabase as any)
+  const { data: friendships } = await supabase
     .from("friendships")
     .select("requester_id, addressee_id")
     .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`)
     .eq("status", "accepted");
 
-  const friendIds = ((friendships ?? []) as any[]).map((f: any) =>
+  const friendIds = ((friendships ?? []) as FriendshipRow[]).map((f) =>
     f.requester_id === user.id ? f.addressee_id : f.requester_id
   );
 
   const social_context: HopRouteInput["social_context"] = [];
   if (friendIds.length > 0) {
-    const { data: friendSessions } = await (supabase as any)
+    const { data: friendSessions } = await supabase
       .from("sessions")
       .select("user_id, brewery_id, brewery:breweries(name), profile:profiles!sessions_user_id_fkey(display_name, username)")
       .in("user_id", friendIds)
@@ -114,11 +151,11 @@ export async function POST(request: Request) {
       .gte("started_at", ninetyDaysAgo);
 
     const socialMap = new Map<string, { brewery_name: string; friend_name: string; count: number }>();
-    for (const s of friendSessions ?? []) {
+    for (const s of (friendSessions ?? []) as FriendSession[]) {
       const key = `${s.user_id}:${s.brewery_id}`;
       const existing = socialMap.get(key);
-      const friendName = (s.profile as any)?.display_name || (s.profile as any)?.username || "A friend";
-      const breweryName = (s.brewery as any)?.name ?? "a brewery";
+      const friendName = s.profile?.display_name || s.profile?.username || "A friend";
+      const breweryName = s.brewery?.name ?? "a brewery";
       if (existing) {
         existing.count++;
       } else {
@@ -141,7 +178,7 @@ export async function POST(request: Request) {
     transport,
     taste_dna,
     social_context,
-    breweries: nearbyBreweries.map((b: any) => ({
+    breweries: nearbyBreweries.map((b) => ({
       id: b.id,
       name: b.name,
       city: b.city,
@@ -151,7 +188,7 @@ export async function POST(request: Request) {
       brewery_type: b.brewery_type,
       is_sponsored: b.hop_route_eligible ?? false,
       vibe_tags: b.vibe_tags ?? [],
-      top_beers: (beersByBrewery.get(b.id) ?? []).slice(0, 5).map((beer: any) => ({
+      top_beers: (beersByBrewery.get(b.id) ?? []).slice(0, 5).map((beer) => ({
         id: beer.id,
         name: beer.name,
         style: beer.style,
@@ -160,8 +197,6 @@ export async function POST(request: Request) {
   };
 
   const { system, user: userMsg } = buildHopRoutePrompt(hopRouteInput);
-
-  console.log(`[HopRoute] ${nearbyBreweries.length} breweries found near ${location.city}, ${beers?.length ?? 0} beers on tap`);
 
   let aiOutput: HopRouteOutput;
   try {
@@ -185,8 +220,8 @@ export async function POST(request: Request) {
   aiOutput.stops = enforceMaxOneSponsoredStop(aiOutput.stops);
 
   // 5. Persist to database
-  const { data: route, error: routeErr } = await (supabase as any)
-    .from("hop_routes")
+  const { data: route, error: routeErr } = await supabase
+    .from("hop_routes" as never)
     .insert({
       user_id: user.id,
       title: aiOutput.title,
@@ -206,12 +241,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Failed to save route" }, { status: 500 });
   }
 
+  const routeRow = route as { id: string };
+
   // Insert stops
   for (const stop of aiOutput.stops) {
-    const { data: stopRow, error: stopErr } = await (supabase as any)
-      .from("hop_route_stops")
+    const { data: stopRow, error: stopErr } = await supabase
+      .from("hop_route_stops" as never)
       .insert({
-        route_id: route.id,
+        route_id: routeRow.id,
         brewery_id: stop.brewery_id,
         stop_order: stop.stop_order,
         arrival_time: stop.arrival_time,
@@ -226,11 +263,13 @@ export async function POST(request: Request) {
 
     if (stopErr || !stopRow) continue;
 
+    const stopRowTyped = stopRow as { id: string };
+
     // Insert recommended beers
     if (stop.recommended_beers?.length > 0) {
-      await (supabase as any).from("hop_route_stop_beers").insert(
+      await supabase.from("hop_route_stop_beers" as never).insert(
         stop.recommended_beers.map((b) => ({
-          stop_id: stopRow.id,
+          stop_id: stopRowTyped.id,
           beer_id: b.beer_id || null,
           beer_name: b.name,
           reason_text: b.reason,
@@ -239,5 +278,5 @@ export async function POST(request: Request) {
     }
   }
 
-  return NextResponse.json({ route_id: route.id, title: aiOutput.title }, { status: 201 });
+  return NextResponse.json({ route_id: routeRow.id, title: aiOutput.title }, { status: 201 });
 }
