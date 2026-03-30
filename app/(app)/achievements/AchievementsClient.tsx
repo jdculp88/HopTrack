@@ -66,7 +66,7 @@ export function AchievementsClient({ achievements, totalEarned, total }: Achieve
       </div>
 
       {/* Progress bar */}
-      <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-5 space-y-3">
+      <div className="card-bg-stats rounded-2xl p-5 space-y-3" style={{ border: "1px solid var(--border)" }}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Trophy size={18} className="text-[var(--accent-gold)]" />
@@ -88,7 +88,7 @@ export function AchievementsClient({ achievements, totalEarned, total }: Achieve
             const tierAchievements = achievements.filter((a) => a.tier === tier);
             const tierEarned = tierAchievements.filter((a) => a.earned).length;
             const colors: Record<AchievementTier, string> = {
-              bronze: "#CD7F32", silver: "#C0C0C0", gold: "#FFD700", platinum: "#E5E4E2",
+              bronze: "var(--badge-bronze)", silver: "var(--badge-silver)", gold: "var(--badge-gold)", platinum: "#8BAABF",
             };
             return (
               <div key={tier} className="text-center">

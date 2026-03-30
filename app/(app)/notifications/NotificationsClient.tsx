@@ -427,7 +427,7 @@ function GroupedNotification({
         onClick={onToggle}
         className={`w-full flex items-start gap-4 p-4 rounded-2xl border transition-colors text-left ${
           group.hasUnread
-            ? "bg-[var(--surface)] border-[var(--accent-gold)]/20"
+            ? "card-bg-notification border-[var(--accent-gold)]/20"
             : "bg-[var(--surface)]/50 border-[var(--border)]"
         }`}
       >
@@ -567,7 +567,7 @@ function SingleNotification({
       transition={{ type: "spring", stiffness: 400, damping: 30 }}
       className={`relative group flex items-start gap-4 p-4 rounded-2xl border transition-colors ${
         !n.read
-          ? "bg-[var(--surface)] border-[var(--accent-gold)]/20"
+          ? "card-bg-notification border-[var(--accent-gold)]/20"
           : "bg-[var(--surface)]/50 border-[var(--border)]"
       }`}
     >

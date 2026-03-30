@@ -4,6 +4,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { Star, Sparkles } from "lucide-react";
 import { BeerStyleBadge } from "@/components/ui/BeerStyleBadge";
+import { getStyleFamily } from "@/lib/beerStyleColors";
 
 interface RecommendedBeer {
   id: string;
@@ -48,11 +49,9 @@ export function RecommendationsScroll({ beers }: { beers: RecommendedBeer[] }) {
           >
             <Link href={`/beer/${beer.id}`}>
               <div
-                className="w-[160px] p-3 rounded-xl h-full transition-all"
-                style={{
-                  background: "var(--surface-warm)",
-                  border: "1px solid var(--surface-warm-border)",
-                }}
+                className="card-bg-reco w-[160px] p-3 rounded-xl h-full transition-all"
+                data-style={getStyleFamily(beer.style)}
+                style={{ border: "1px solid var(--surface-warm-border)" }}
               >
                 <p
                   className="font-display font-bold text-sm truncate mb-1"

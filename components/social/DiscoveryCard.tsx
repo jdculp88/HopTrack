@@ -6,6 +6,7 @@ import { TrendingUp, Calendar } from 'lucide-react'
 import { StarRating } from '@/components/ui/StarRating'
 import { UserAvatar } from '@/components/ui/UserAvatar'
 import { useToast } from '@/components/ui/Toast'
+import { getStyleFamily, getStyleVars } from '@/lib/beerStyleColors'
 
 export interface BreweryReviewItem {
   id: string
@@ -76,32 +77,34 @@ export function TrendingCard({ reviews, index = 0 }: { reviews: TrendingReview[]
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 + i * 0.05, duration: 0.25 }}
-            className="rounded-xl p-3.5 flex-shrink-0 relative overflow-hidden"
+            className="card-bg-reco rounded-xl p-3.5 flex-shrink-0"
+            data-style={getStyleFamily(review.beer?.style)}
             style={{
-              background: 'var(--surface-warm)',
               border: '1px solid var(--surface-warm-border)',
               minWidth: 150,
               maxWidth: 170,
             }}
           >
-            <div className="absolute -top-2 -right-2 w-10 h-10 rounded-full pointer-events-none" style={{ background: 'var(--accent-gold)', opacity: 0.06 }} />
             <p className="font-display text-sm font-semibold leading-tight truncate" style={{ color: 'var(--text-primary)' }}>
               {review.beer?.name || 'Unknown'}
             </p>
             <p className="text-[11px] mt-1 truncate" style={{ color: 'var(--text-muted)' }}>
               {review.profile?.display_name?.split(' ')[0] || 'Someone'}
             </p>
-            {review.beer?.style && (
-              <span
-                className="inline-block mt-2 text-[10px] font-mono px-2 py-0.5 rounded-full"
-                style={{
-                  background: 'color-mix(in srgb, var(--accent-gold) 10%, transparent)',
-                  color: 'var(--accent-gold)',
-                }}
-              >
-                {review.beer.style}
-              </span>
-            )}
+            {review.beer?.style && (() => {
+              const sv = getStyleVars(review.beer.style)
+              return (
+                <span
+                  className="inline-block mt-2 text-[10px] font-mono px-2 py-0.5 rounded-full"
+                  style={{
+                    background: `color-mix(in srgb, ${sv.primary} 12%, transparent)`,
+                    color: sv.primary,
+                  }}
+                >
+                  {review.beer.style}
+                </span>
+              )
+            })()}
             <div className="mt-2">
               <StarRating value={review.rating} readonly size="sm" />
             </div>
@@ -129,11 +132,9 @@ export function BreweryReviewCard({ review, index = 0 }: { review: BreweryReview
     >
       <Link href={`/brewery/${review.brewery.id}`}>
         <div
-          className="rounded-xl px-4 py-3 flex items-center gap-3 relative overflow-hidden"
-          style={{ background: 'var(--surface-warm)', border: '1px solid var(--surface-warm-border)' }}
+          className="rounded-xl px-4 py-3 flex items-center gap-3"
+          style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
         >
-          <div className="absolute -top-3 -right-3 w-14 h-14 rounded-full pointer-events-none" style={{ background: 'var(--accent-gold)', opacity: 0.05 }} />
-          <div className="absolute bottom-1 right-12 w-4 h-4 rounded-full pointer-events-none" style={{ background: 'var(--accent-amber)', opacity: 0.07 }} />
           <UserAvatar
             profile={{
               id: review.profile.id,
@@ -174,11 +175,8 @@ export function EventCard({ event, index = 0 }: { event: EventItem; index?: numb
     >
       <Link href={`/brewery/${event.brewery.id}`}>
         <div
-          className="rounded-xl px-4 py-3 flex items-center gap-3 relative overflow-hidden"
-          style={{ background: 'var(--surface-warm)', border: '1px solid var(--surface-warm-border)' }}
+          className="card-bg-notification rounded-xl px-4 py-3 flex items-center gap-3"
         >
-          <div className="absolute -top-3 -right-2 w-12 h-12 rounded-full pointer-events-none" style={{ background: 'var(--accent-gold)', opacity: 0.06 }} />
-          <div className="absolute bottom-1 left-12 w-4 h-4 rounded-full pointer-events-none" style={{ background: 'var(--accent-amber)', opacity: 0.06 }} />
           <div
             className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
             style={{ background: 'color-mix(in srgb, var(--accent-gold) 12%, transparent)' }}
@@ -210,12 +208,6 @@ export interface SeasonalBeer {
   badge: 'Limited' | 'Seasonal'
 }
 
-const SEASONAL_BUBBLE_POS = [
-  "absolute -top-2 -right-2",
-  "absolute -top-3 right-2",
-  "absolute top-1 -right-3",
-] as const;
-
 export function SeasonalBeersScroll({ beers }: { beers: SeasonalBeer[] }) {
   if (beers.length === 0) return null
 
@@ -235,15 +227,14 @@ export function SeasonalBeersScroll({ beers }: { beers: SeasonalBeer[] }) {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.05, duration: 0.25 }}
-            className="rounded-xl p-3.5 flex-shrink-0 relative"
+            className="card-bg-seasonal rounded-xl p-3.5 flex-shrink-0"
             style={{
-              background: 'var(--surface-warm)',
               border: '1px solid var(--surface-warm-border)',
               minWidth: 140,
               maxWidth: 160,
-            }}
+              "--seasonal-color": getStyleVars(beer.style).primary,
+            } as React.CSSProperties}
           >
-            <div className={`${SEASONAL_BUBBLE_POS[i % 3]} w-10 h-10 rounded-full pointer-events-none`} style={{ background: 'var(--accent-gold)', opacity: 0.07 }} />
             <span
               className="absolute top-2 right-2 text-[9px] font-mono font-bold px-2 py-0.5 rounded-md"
               style={{
@@ -265,15 +256,20 @@ export function SeasonalBeersScroll({ beers }: { beers: SeasonalBeer[] }) {
             <p className="text-[11px] mt-1 truncate" style={{ color: 'var(--text-muted)' }}>
               {beer.brewery}
             </p>
-            <span
-              className="inline-block mt-2 text-[10px] font-mono px-2 py-0.5 rounded-full"
-              style={{
-                background: 'color-mix(in srgb, var(--accent-gold) 10%, transparent)',
-                color: 'var(--accent-gold)',
-              }}
-            >
-              {beer.style}
-            </span>
+            {(() => {
+              const sv = getStyleVars(beer.style)
+              return (
+                <span
+                  className="inline-block mt-2 text-[10px] font-mono px-2 py-0.5 rounded-full"
+                  style={{
+                    background: `color-mix(in srgb, ${sv.primary} 12%, transparent)`,
+                    color: sv.primary,
+                  }}
+                >
+                  {beer.style}
+                </span>
+              )
+            })()}
           </motion.div>
         ))}
       </div>

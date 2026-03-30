@@ -66,11 +66,11 @@ export function DrinkingNow() {
           <span className="relative flex-shrink-0">
             <span
               className="w-2.5 h-2.5 rounded-full block"
-              style={{ background: "var(--accent-gold)" }}
+              style={{ background: "var(--live-green)" }}
             />
             <span
               className="absolute inset-0 w-2.5 h-2.5 rounded-full animate-pulse"
-              style={{ background: "var(--accent-gold)", opacity: 0.5 }}
+              style={{ background: "var(--live-green)", opacity: 0.5 }}
             />
           </span>
           <h2 className="font-display font-bold text-sm" style={{ color: "var(--text-primary)" }}>
@@ -106,18 +106,15 @@ export function DrinkingNow() {
                   aria-label={`View ${f.displayName.split(" ")[0]}'s session`}
                   onClick={() => router.push(href)}
                   onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); router.push(href); } }}
-                  className="flex flex-col items-center gap-2 p-3 rounded-2xl border transition-all flex-shrink-0 w-[140px] cursor-pointer"
-                  style={{
-                    background: "var(--surface)",
-                    borderColor: "var(--border)",
-                  }}
+                  className="card-bg-live flex flex-col items-center gap-2 p-3 rounded-2xl border transition-all flex-shrink-0 w-[140px] cursor-pointer"
+                  style={{ borderColor: "var(--border)" }}
                 >
                     {/* Avatar with subtle pulse ring */}
                     <div className="relative">
                       <div
                         className="absolute -inset-1 rounded-full animate-pulse"
                         style={{
-                          background: "color-mix(in srgb, var(--accent-gold) 15%, transparent)",
+                          background: "color-mix(in srgb, var(--live-green) 15%, transparent)",
                           animationDuration: "3s",
                         }}
                       />
@@ -134,7 +131,7 @@ export function DrinkingNow() {
                       <span
                         className="absolute bottom-0 right-0 w-3 h-3 rounded-full border-2"
                         style={{
-                          background: "var(--accent-gold)",
+                          background: "var(--live-green)",
                           borderColor: "var(--surface)",
                         }}
                       />
@@ -165,8 +162,8 @@ export function DrinkingNow() {
 
                     {/* Beer count + elapsed */}
                     <div className="flex items-center gap-1.5">
-                      <Beer size={10} style={{ color: "var(--accent-gold)" }} />
-                      <span className="text-[10px] font-mono font-semibold" style={{ color: "var(--accent-gold)" }}>
+                      <Beer size={10} style={{ color: "var(--live-green)" }} />
+                      <span className="text-[10px] font-mono font-semibold" style={{ color: "var(--live-green)" }}>
                         {f.beerCount}
                       </span>
                       <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>

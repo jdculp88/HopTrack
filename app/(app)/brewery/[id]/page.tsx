@@ -285,9 +285,9 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
 
         {/* Friends Here Now — prominent position at top when friends are present */}
         {friendsHere.length > 0 && (
-          <div className="bg-[var(--surface)] border border-[var(--accent-gold)]/20 rounded-2xl p-4">
+          <div className="card-bg-live border border-[var(--accent-gold)]/20 rounded-2xl p-4">
             <div className="flex items-center gap-2 mb-3">
-              <span className="w-2.5 h-2.5 rounded-full animate-pulse flex-shrink-0" style={{ background: "var(--accent-gold)" }} />
+              <span className="w-2.5 h-2.5 rounded-full animate-pulse flex-shrink-0" style={{ background: "var(--live-green)" }} />
               <h2 className="font-display text-xl font-bold text-[var(--text-primary)]">Friends Here Now</h2>
               <span className="text-xs font-mono text-[var(--accent-gold)] ml-auto">{friendsHere.length} drinking</span>
             </div>
@@ -311,12 +311,12 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
                           : (s.profile?.display_name ?? s.profile?.username ?? "?")[0].toUpperCase()
                         }
                       </div>
-                      <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full border-2" style={{ background: "var(--accent-gold)", borderColor: "var(--surface)" }} />
+                      <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full border-2" style={{ background: "var(--live-green)", borderColor: "var(--surface)" }} />
                     </div>
                     <p className="text-xs font-medium text-center truncate w-full" style={{ color: "var(--text-primary)" }}>
                       {(s.profile?.display_name ?? s.profile?.username ?? "Friend").split(" ")[0]}
                     </p>
-                    <p className="text-[10px] font-mono text-center" style={{ color: "var(--accent-gold)" }}>
+                    <p className="text-[10px] font-mono text-center" style={{ color: "var(--live-green)" }}>
                       {beerCount} pours · {elapsed}
                     </p>
                   </Link>
@@ -335,7 +335,7 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
           role="region"
           aria-label="Brewery statistics"
         >
-          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-4 flex flex-col gap-1">
+          <div className="card-bg-stats border border-[var(--border)] rounded-2xl p-4 flex flex-col gap-1">
             <div className="flex items-center gap-1.5 text-[var(--text-muted)]">
               <CheckCheck size={13} />
               <span className="text-xs font-mono uppercase tracking-wider">Visits</span>
@@ -345,7 +345,7 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
             </p>
           </div>
 
-          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-4 flex flex-col gap-1">
+          <div className="card-bg-stats border border-[var(--border)] rounded-2xl p-4 flex flex-col gap-1">
             <div className="flex items-center gap-1.5 text-[var(--text-muted)]">
               <Users size={13} />
               <span className="text-xs font-mono uppercase tracking-wider">Visitors</span>
@@ -355,7 +355,7 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
             </p>
           </div>
 
-          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-4 flex flex-col gap-1">
+          <div className="card-bg-stats border border-[var(--border)] rounded-2xl p-4 flex flex-col gap-1">
             <div className="flex items-center gap-1.5 text-[var(--text-muted)]">
               <Star size={13} />
               <span className="text-xs font-mono uppercase tracking-wider">Avg Rating</span>
@@ -370,7 +370,7 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
             )}
           </div>
 
-          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-4 flex flex-col gap-1 col-span-2 sm:col-span-1">
+          <div className="card-bg-stats border border-[var(--border)] rounded-2xl p-4 flex flex-col gap-1 col-span-2 sm:col-span-1">
             <div className="flex items-center gap-1.5 text-[var(--text-muted)]">
               <TrendingUp size={13} />
               <span className="text-xs font-mono uppercase tracking-wider">Top Beer</span>
@@ -384,7 +384,7 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
             )}
           </div>
 
-          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-4 flex flex-col gap-1">
+          <div className="card-bg-stats border border-[var(--border)] rounded-2xl p-4 flex flex-col gap-1">
             <div className="flex items-center gap-1.5 text-[var(--text-muted)]">
               <Beer size={13} />
               <span className="text-xs font-mono uppercase tracking-wider">On Tap</span>
@@ -398,7 +398,7 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
         {/* Beer of the Week */}
         {featuredBeer && (
           <Link href={`/beer/${featuredBeer.id}`}>
-            <div className="flex items-center gap-4 p-4 bg-[var(--surface)] border border-[var(--accent-gold)]/30 rounded-2xl transition-all hover:border-[var(--accent-gold)]/60 group">
+            <div className="card-bg-featured flex items-center gap-4 p-4 border border-[var(--accent-gold)]/30 rounded-2xl transition-all hover:border-[var(--accent-gold)]/60 group">
               <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
                 style={{ background: "linear-gradient(135deg, var(--accent-gold) 0%, var(--accent-amber) 100%)" }}>
                 <Award size={22} className="text-[var(--bg)]" />
@@ -459,7 +459,7 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
                 const dateStr = new Date(event.event_date).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
                 const timeStr = event.start_time ? `${event.start_time}${event.end_time ? ` – ${event.end_time}` : ""}` : null;
                 return (
-                  <div key={event.id} className="flex items-center gap-4 p-4 rounded-2xl border bg-[var(--surface)] border-[var(--border)]">
+                  <div key={event.id} className="card-bg-notification flex items-center gap-4 p-4 rounded-2xl border border-[var(--border)]">
                     <div className="w-10 h-10 rounded-xl flex items-center justify-center text-lg flex-shrink-0"
                       style={{ background: "color-mix(in srgb, var(--accent-gold) 10%, transparent)" }}>
                       {emoji}

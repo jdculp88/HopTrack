@@ -473,7 +473,31 @@ input, select, textarea { font-size: max(16px, 1em); }
   50%       { box-shadow: 0 0 14px color-mix(in srgb, var(--live-green) 65%, transparent); }
 }
 
-/* ── 3. STREAK — Flame warmth from left ─────────────────────────────────── */
+/* ── 3. STATS / YOUR NUMBERS — Subtle grid lines ────────────────────────── */
+.card-bg-stats {
+  position: relative;
+  overflow: hidden;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 23%,
+      color-mix(in srgb, var(--accent-amber) 3%, transparent) 23%,
+      color-mix(in srgb, var(--accent-amber) 3%, transparent) 23.5%,
+      transparent 23.5%
+    ),
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 48%,
+      color-mix(in srgb, var(--accent-amber) 3%, transparent) 48%,
+      color-mix(in srgb, var(--accent-amber) 3%, transparent) 49%,
+      transparent 49%
+    ),
+    var(--surface);
+}
+
+/* ── 5. STREAK — Flame warmth from left ─────────────────────────────────── */
 .card-bg-streak {
   position: relative;
   overflow: hidden;

@@ -10,6 +10,7 @@ import { UserAvatar } from "@/components/ui/UserAvatar";
 import { generateGradientFromString, formatABV } from "@/lib/utils";
 import { BeerReviewSection } from "@/components/beer/BeerReviewSection";
 import { getSimilarBeers } from "@/lib/recommendations";
+import { getStyleFamily } from "@/lib/beerStyleColors";
 import type { Beer } from "@/types/database";
 
 // Supabase join shapes for tables not in generated types
@@ -169,7 +170,7 @@ export default async function BeerPage({ params }: { params: Promise<{ id: strin
           <div className="grid grid-cols-2 gap-3">
             {similarBeers.map((similar) => (
               <Link key={similar.id} href={`/beer/${similar.id}`}>
-                <div className="p-3 rounded-xl bg-[var(--surface)] border border-[var(--border)] hover:border-[var(--accent-gold)]/30 transition-all">
+                <div className="card-bg-reco p-3 rounded-xl border border-[var(--border)] hover:border-[var(--accent-gold)]/30 transition-all" data-style={getStyleFamily(similar.style)}>
                   <p className="font-display font-bold text-sm truncate text-[var(--text-primary)]">{similar.name}</p>
                   {similar.brewery && (
                     <p className="text-[10px] truncate text-[var(--text-muted)] mt-0.5">{similar.brewery.name}</p>

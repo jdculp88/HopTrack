@@ -382,11 +382,7 @@ export function FriendsClient({
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
-                className="rounded-2xl p-4 space-y-3"
-                style={{
-                  background: "color-mix(in srgb, var(--accent-gold) 5%, var(--surface))",
-                  border: "1px solid color-mix(in srgb, var(--accent-gold) 20%, transparent)",
-                }}
+                className="card-bg-notification rounded-2xl p-4 space-y-3"
               >
                 <div className="flex items-center gap-2">
                   <div

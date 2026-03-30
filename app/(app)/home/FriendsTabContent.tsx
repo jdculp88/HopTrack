@@ -55,14 +55,10 @@ export function FriendsTabContent({
     <>
       {/* Compact context bar: avatar + friend count + live pulse */}
       <div
-        className="rounded-2xl px-4 py-3 relative overflow-hidden"
-        style={{ background: "var(--surface-warm)", border: "1px solid var(--surface-warm-border)" }}
+        className="card-bg-stats rounded-2xl px-4 py-3"
+        style={{ border: "1px solid var(--surface-warm-border)" }}
       >
-        {/* Bubble decorations */}
-        <div className="absolute -top-4 -right-4 w-16 h-16 rounded-full pointer-events-none" style={{ background: "var(--accent-gold)", opacity: 0.06 }} />
-        <div className="absolute bottom-1 left-8 w-5 h-5 rounded-full pointer-events-none" style={{ background: "var(--accent-amber)", opacity: 0.07 }} />
-
-        <div className="flex items-center justify-between gap-3 relative z-10">
+        <div className="flex items-center justify-between gap-3">
           {/* Left: avatar + name */}
           {profile && (
             <Link href={`/profile/${profile.username}`} className="flex items-center gap-2.5 min-w-0">

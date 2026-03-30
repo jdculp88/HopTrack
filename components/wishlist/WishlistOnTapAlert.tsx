@@ -36,11 +36,7 @@ export function WishlistOnTapAlert({ count }: WishlistOnTapAlertProps) {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: -8, scale: 0.98 }}
           transition={{ type: "spring", stiffness: 400, damping: 30 }}
-          className="rounded-2xl overflow-hidden"
-          style={{
-            background: "linear-gradient(135deg, color-mix(in srgb, var(--accent-gold) 15%, var(--surface)), color-mix(in srgb, var(--accent-gold) 8%, var(--surface)))",
-            border: "1px solid color-mix(in srgb, var(--accent-gold) 35%, transparent)",
-          }}
+          className="card-bg-notification rounded-2xl overflow-hidden"
         >
           <div className="flex items-center gap-3 p-4">
             <div

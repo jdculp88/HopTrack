@@ -9,6 +9,7 @@ import { BeerDNACard } from "@/components/profile/BeerDNACard";
 import { SessionCard } from "@/components/social/SessionCard";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import { getLevelProgress } from "@/lib/xp";
+import { getStyleVars } from "@/lib/beerStyleColors";
 import { FeedCardSkeletons, FeedEndMessage } from "./FeedPaginationUI";
 import type { Profile, Session } from "@/types/database";
 import type { StyleDNAEntry, WishlistItem, UserAchievement } from "./HomeFeed";
@@ -84,28 +85,6 @@ export function YouTabContent({
           />
         )}
 
-        {/* Bubble decorations */}
-        <div
-          className="absolute -top-5 -right-5 w-24 h-24 rounded-full pointer-events-none"
-          style={{ background: "var(--accent-gold)", opacity: 0.07 }}
-        />
-        <div
-          className="absolute top-4 right-12 w-6 h-6 rounded-full pointer-events-none"
-          style={{ background: "var(--accent-amber)", opacity: 0.09 }}
-        />
-        <div
-          className="absolute bottom-4 -left-4 w-16 h-16 rounded-full pointer-events-none"
-          style={{ background: "var(--accent-gold)", opacity: 0.05 }}
-        />
-        <div
-          className="absolute bottom-8 w-4 h-4 rounded-full pointer-events-none"
-          style={{ left: "33.333%", background: "var(--accent-gold)", opacity: 0.10 }}
-        />
-        <div
-          className="absolute -right-3 w-10 h-10 rounded-full pointer-events-none"
-          style={{ top: "50%", transform: "translateY(-50%)", background: "var(--accent-amber)", opacity: 0.06 }}
-        />
-
         {/* Content */}
         <div className="relative z-10">
           <div className="flex items-center gap-4 mb-4">
@@ -146,15 +125,11 @@ export function YouTabContent({
         </div>
       </motion.div>
 
-      {/* Stats card — BeerDNA warm treatment */}
+      {/* Stats card — grid lines treatment */}
       <div
-        className="rounded-2xl p-4 relative overflow-hidden"
-        style={{ background: "var(--surface-warm)", border: "1px solid var(--surface-warm-border)" }}
+        className="card-bg-stats rounded-2xl p-4"
+        style={{ border: "1px solid var(--surface-warm-border)" }}
       >
-        {/* Bubble decorations */}
-        <div className="absolute -top-4 -right-4 w-20 h-20 rounded-full pointer-events-none" style={{ background: "var(--accent-gold)", opacity: 0.06 }} />
-        <div className="absolute bottom-3 left-12 w-8 h-8 rounded-full pointer-events-none" style={{ background: "var(--accent-amber)", opacity: 0.07 }} />
-        <div className="absolute top-1/2 -right-6 w-12 h-12 rounded-full pointer-events-none" style={{ background: "var(--accent-gold)", opacity: 0.05, transform: "translateY(-50%)" }} />
         <p className="text-[10px] font-mono uppercase tracking-widest mb-3 relative z-10" style={{ color: "var(--text-muted)" }}>
           Your Numbers
         </p>
@@ -183,68 +158,55 @@ export function YouTabContent({
       {/* Activity Heatmap */}
       {activityHeatmap && activityHeatmap.length > 0 && (
         <div
-          className="rounded-2xl p-4 relative overflow-hidden"
-          style={{ background: "var(--surface-warm)", border: "1px solid var(--surface-warm-border)" }}
+          className="card-bg-stats rounded-2xl p-4"
+          style={{ border: "1px solid var(--surface-warm-border)" }}
         >
-          {/* Bubble decorations */}
-          <div className="absolute -top-3 -right-3 w-16 h-16 rounded-full pointer-events-none" style={{ background: "var(--accent-gold)", opacity: 0.06 }} />
-          <div className="absolute bottom-4 left-8 w-6 h-6 rounded-full pointer-events-none" style={{ background: "var(--accent-amber)", opacity: 0.08 }} />
-          <p className="text-[10px] font-mono uppercase tracking-widest mb-3 relative z-10" style={{ color: "var(--text-muted)" }}>
+          <p className="text-[10px] font-mono uppercase tracking-widest mb-3" style={{ color: "var(--text-muted)" }}>
             Activity
           </p>
-          <div className="relative z-10">
-            <ActivityHeatmap data={activityHeatmap} compact />
-          </div>
+          <ActivityHeatmap data={activityHeatmap} compact />
         </div>
       )}
 
-      {/* Taste DNA — BeerDNA warm treatment */}
+      {/* Taste DNA — blended color wash treatment */}
       {styleDNA && styleDNA.length >= 3 && (
         <div
-          className="rounded-2xl p-5 space-y-3 relative overflow-hidden"
-          style={{ background: "var(--surface-warm)", border: "1px solid var(--surface-warm-border)" }}
+          className="card-bg-taste-dna rounded-2xl p-5 space-y-3"
+          style={{ border: "1px solid var(--surface-warm-border)" }}
         >
-          {/* Bubble decorations */}
-          <div className="absolute -top-6 -right-6 w-24 h-24 rounded-full pointer-events-none" style={{ background: "var(--accent-gold)", opacity: 0.07 }} />
-          <div className="absolute bottom-4 w-8 h-8 rounded-full pointer-events-none" style={{ left: "25%", background: "var(--accent-amber)", opacity: 0.06 }} />
-          <div className="absolute top-8 -left-2 w-5 h-5 rounded-full pointer-events-none" style={{ background: "var(--accent-gold)", opacity: 0.08 }} />
           <div className="relative z-10 space-y-3">
-          <div className="flex items-center justify-between">
-            <p className="text-[10px] font-mono uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
-              Taste DNA
-            </p>
-            <span className="text-[10px] font-mono" style={{ color: "var(--text-muted)" }}>
-              {styleDNA.reduce((s, e) => s + e.count, 0)} beers logged
-            </span>
-          </div>
-          <div className="space-y-3">
-            {styleDNA.slice(0, 5).map((entry, i) => (
-              <div key={entry.style}>
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
-                    {entry.style}
-                  </span>
-                  <span className="text-[10px] font-mono" style={{ color: "var(--text-muted)" }}>
-                    {entry.count} {entry.count === 1 ? "beer" : "beers"}
-                    {entry.avgRating ? ` · ★ ${entry.avgRating.toFixed(1)}` : ""}
-                  </span>
+            <div className="flex items-center justify-between">
+              <p className="text-[10px] font-mono uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
+                Taste DNA
+              </p>
+              <span className="text-[10px] font-mono" style={{ color: "var(--text-muted)" }}>
+                {styleDNA.reduce((s, e) => s + e.count, 0)} beers logged
+              </span>
+            </div>
+            <div className="space-y-3">
+              {styleDNA.slice(0, 5).map((entry, i) => (
+                <div key={entry.style}>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
+                      {entry.style}
+                    </span>
+                    <span className="text-[10px] font-mono" style={{ color: "var(--text-muted)" }}>
+                      {entry.count} {entry.count === 1 ? "beer" : "beers"}
+                      {entry.avgRating ? ` · ★ ${entry.avgRating.toFixed(1)}` : ""}
+                    </span>
+                  </div>
+                  <div className="h-2 rounded-full overflow-hidden" style={{ background: "color-mix(in srgb, var(--accent-gold) 12%, var(--surface-2))" }}>
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${(entry.count / maxStyleCount) * 100}%` }}
+                      transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: i * 0.06 }}
+                      className="h-full rounded-full"
+                      style={{ background: getStyleVars(entry.style).primary }}
+                    />
+                  </div>
                 </div>
-                <div className="h-2 rounded-full overflow-hidden" style={{ background: "color-mix(in srgb, var(--accent-gold) 12%, var(--surface-2))" }}>
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${(entry.count / maxStyleCount) * 100}%` }}
-                    transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: i * 0.06 }}
-                    className="h-full rounded-full"
-                    style={{
-                      background: i === 0
-                        ? "linear-gradient(to right, var(--accent-gold), var(--accent-amber))"
-                        : "color-mix(in srgb, var(--accent-gold) 55%, transparent)",
-                    }}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
           </div>
         </div>
       )}
@@ -267,15 +229,12 @@ export function YouTabContent({
         <BeerDNACard styleDNA={styleDNA} username={profile.username} />
       )}
 
-      {/* Recent achievements */}
+      {/* Recent achievements — radiating arcs treatment */}
       {userAchievements && userAchievements.length > 0 && (
         <div
-          className="rounded-2xl p-4 space-y-3 relative overflow-hidden"
-          style={{ background: "var(--surface-warm)", border: "1px solid var(--surface-warm-border)" }}
+          className="card-bg-achievement rounded-2xl p-4 space-y-3"
+          style={{ border: "1px solid var(--surface-warm-border)" }}
         >
-          {/* Bubble decorations */}
-          <div className="absolute -top-4 -right-4 w-[72px] h-[72px] rounded-full pointer-events-none" style={{ background: "var(--accent-gold)", opacity: 0.06 }} />
-          <div className="absolute bottom-3 left-6 w-6 h-6 rounded-full pointer-events-none" style={{ background: "var(--accent-amber)", opacity: 0.07 }} />
           <div className="flex items-center justify-between relative z-10">
             <p className="text-[10px] font-mono uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
               Recent Achievements
@@ -284,7 +243,7 @@ export function YouTabContent({
               View All
             </Link>
           </div>
-          <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide relative z-10">
+          <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide">
             {userAchievements.map((ua) => (
               <div key={ua.id} className="flex flex-col items-center gap-1.5 flex-shrink-0 w-16">
                 <div

@@ -237,8 +237,8 @@ export function BeerListsClient({ userId, initialLists }: BeerListsClientProps) 
           return (
             <div
               key={list.id}
-              className="rounded-2xl border overflow-hidden transition-all"
-              style={{ background: "var(--surface)", borderColor: "var(--border)" }}
+              className="card-bg-collection rounded-2xl border overflow-hidden transition-all"
+              style={{ borderColor: "var(--border)" }}
             >
               {/* Card header */}
               <div className="flex items-center px-4 py-3 gap-2">

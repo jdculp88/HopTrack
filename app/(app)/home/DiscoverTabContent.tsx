@@ -98,12 +98,8 @@ export function DiscoverTabContent({
           whileHover={{ scale: 1.01 }}
           whileTap={{ scale: 0.99 }}
           transition={{ type: "spring", stiffness: 400, damping: 30 }}
-          className="relative overflow-hidden rounded-2xl p-5 border"
-          style={{
-            background:
-              "linear-gradient(135deg, color-mix(in srgb, var(--accent-gold) 12%, transparent), color-mix(in srgb, var(--accent-amber) 6%, transparent))",
-            borderColor: "color-mix(in srgb, var(--accent-gold) 30%, transparent)",
-          }}
+          className="card-bg-hoproute rounded-2xl p-5 border"
+          style={{ borderColor: "color-mix(in srgb, var(--accent-gold) 30%, transparent)" }}
         >
           <div className="flex items-center justify-between gap-4">
             <div className="space-y-1">
