@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { Heart } from 'lucide-react'
 import { formatRelativeTime } from '@/lib/dates'
+import { EmojiPulse } from '@/components/social/EmojiPulse'
 
 export interface NewFavoriteItem {
   id: string
@@ -69,6 +70,7 @@ export function NewFavoriteCard({
         <p className="text-[10px] font-mono mt-1" style={{ color: 'var(--text-muted)' }}>
           {favorite.breweryName} · {formatRelativeTime(favorite.createdAt)}
         </p>
+        <EmojiPulse itemKey={`favorite-${favorite.id}`} />
       </div>
     </motion.div>
   )

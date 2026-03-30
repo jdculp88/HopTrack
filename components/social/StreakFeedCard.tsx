@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { Flame } from "lucide-react";
+import { EmojiPulse } from "@/components/social/EmojiPulse";
 
 export interface StreakData {
   profileId: string;
@@ -87,6 +88,7 @@ export function StreakFeedCard({
         >
           {streak.currentStreak} sessions in a row
         </p>
+        <EmojiPulse itemKey={`streak-${streak.profileId}-${streak.currentStreak}`} />
       </div>
     </motion.div>
   );

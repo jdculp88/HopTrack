@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { type LucideIcon, Zap, Flame, Users, Map, Trophy, GlassWater, Star, Beer } from "lucide-react";
 import { formatRelativeTime } from "@/lib/dates";
 import { AchievementCelebration } from "@/components/achievements/AchievementCelebration";
+import { EmojiPulse } from "@/components/social/EmojiPulse";
 
 function isNewAchievement(earnedAt: string): boolean {
   return Date.now() - new Date(earnedAt).getTime() < 5 * 60 * 1000;
@@ -148,6 +149,7 @@ export function AchievementFeedCard({
             {formatRelativeTime(achievement.earned_at)}
           </span>
         </div>
+        <EmojiPulse itemKey={`achievement-${achievement.achievement.id}`} />
       </div>
     </motion.div>
   );
