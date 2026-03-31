@@ -3,6 +3,27 @@ import { withSentryConfig } from "@sentry/nextjs";
 
 const nextConfig: NextConfig = {
   reactStrictMode: false,
+  async headers() {
+    return [
+      {
+        // Allow embed pages to be iframed on any domain
+        source: "/embed/:path*",
+        headers: [
+          { key: "X-Frame-Options", value: "ALLOWALL" },
+          { key: "Content-Security-Policy", value: "frame-ancestors *" },
+        ],
+      },
+      {
+        // CORS for public API
+        source: "/api/public/:path*",
+        headers: [
+          { key: "Access-Control-Allow-Origin", value: "*" },
+          { key: "Access-Control-Allow-Methods", value: "GET, OPTIONS" },
+          { key: "Access-Control-Allow-Headers", value: "Content-Type" },
+        ],
+      },
+    ];
+  },
   images: {
     remotePatterns: [
       {

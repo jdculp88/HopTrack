@@ -25,14 +25,14 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  // Verify access
+  // Verify access — use maybeSingle to avoid PostgREST error on 0 rows
   const { data: account } = await supabase
     .from("brewery_accounts")
-    .select("role, verified, subscription_tier")
+    .select("role, verified")
     .eq("user_id", user.id)
     .eq("brewery_id", brewery_id)
-    .single() as any;
-  if (!account) redirect("/brewery-admin");
+    .maybeSingle() as any;
+  if (!account) redirect("/brewery-admin/claim");
 
   // ── Fetch all data in parallel ─────────────────────────────────────────────
   const now = new Date();
@@ -227,7 +227,7 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
     loyaltyVisitsByWeek.push(weekCount);
   }
 
-  const subscriptionTier = (account as any)?.subscription_tier ?? "free";
+  const subscriptionTier = (brewery as any)?.subscription_tier ?? "free";
 
   // ── Build activity feed ────────────────────────────────────────────────────
   const activityItems: ActivityItem[] = [];

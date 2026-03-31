@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Edit2, Trash2, GlassWater, ToggleLeft, ToggleRight, X, Save, Loader2, AlertTriangle, Award, Tv, GripVertical, Ban, CheckSquare, Square, ArrowDownAZ, Layers } from "lucide-react";
+import { Plus, Edit2, Trash2, GlassWater, ToggleLeft, ToggleRight, X, Save, Loader2, AlertTriangle, Award, Tv, GripVertical, Ban, CheckSquare, Square, ArrowDownAZ, Layers, Code2 } from "lucide-react";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragOverlay, type DragEndEvent, type DragStartEvent } from "@dnd-kit/core";
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -395,6 +395,13 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <a
+            href={`/brewery-admin/${breweryId}/embed`}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all active:scale-95 border min-h-[44px] no-underline"
+            style={{ borderColor: "var(--border)", color: "var(--text-secondary)", background: "var(--surface)" }}
+          >
+            <Code2 size={16} /> <span className="hidden sm:inline">Embed</span>
+          </a>
           <button
             onClick={() => window.open(`/brewery-admin/${breweryId}/board`, "_blank")}
             className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all active:scale-95 border min-h-[44px]"

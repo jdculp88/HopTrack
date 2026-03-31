@@ -14,7 +14,6 @@ import { BreweryCard, getBreweryPlaceholder } from "@/components/brewery/Brewery
 import { SkeletonCard } from "@/components/ui/SkeletonLoader";
 import { useToast } from "@/components/ui/Toast";
 import type { BreweryWithStats, BreweryType } from "@/types/database";
-import { searchBreweries, mapOpenBreweryToDb } from "@/lib/openbrewerydb";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { haversineDistance, formatDistance } from "@/lib/geo";
 
@@ -145,26 +144,9 @@ export function ExploreClient({
       const dbData = await dbRes.json();
       const dbResults = dbData.breweries ?? [];
 
-      if (dbResults.length >= 5) {
-        // Our DB has enough results — use them
-        setBreweries(dbResults.map((b: any) => ({ ...b, created_at: b.created_at ?? "" })));
-      } else {
-        // Supplement with Open Brewery DB for broader coverage
-        const raw = await searchBreweries(query, 20);
-        const externalResults = raw.map((r) => ({ ...mapOpenBreweryToDb(r), id: r.id, created_at: "" } as any));
-        // Merge: DB results first, then external (deduped by name+city to catch MI vs Michigan)
-        const dbKeys = new Set(dbResults.map((b: any) =>
-          `${(b.name || "").toLowerCase()}|${(b.city || "").toLowerCase()}`
-        ));
-        const merged = [
-          ...dbResults,
-          ...externalResults.filter((b: any) => {
-            const key = `${(b.name || "").toLowerCase()}|${(b.city || "").toLowerCase()}`;
-            return !dbKeys.has(key);
-          }),
-        ];
-        setBreweries(merged);
-      }
+      // Server API already supplements with Open Brewery DB, upserts, and re-fetches
+      // — always use DB results which have correct internal UUIDs for routing
+      setBreweries(dbResults.map((b: any) => ({ ...b, created_at: b.created_at ?? "" })));
       setSearching(false);
     }, 300);
     return () => clearTimeout(t);

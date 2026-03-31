@@ -85,6 +85,7 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${playfair.variable} ${jetbrainsMono.variable}`}
+      data-scroll-behavior="smooth"
     >
       <head>
         {/* Fontshare — Satoshi (primary) + General Sans (display) */}
