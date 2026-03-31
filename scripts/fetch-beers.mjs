@@ -391,8 +391,9 @@ function generateSQL(beers, styleCounts) {
   lines.push(`-- Existing beers (from migration 043) are preserved via name+brewery uniqueness.`);
   lines.push(``);
 
-  // Group beers by brewery for efficiency
+  // Group beers by brewery for efficiency, deduplicating by beer name
   const byBrewery = new Map();
+  let dupeCount = 0;
   beers.forEach((beer) => {
     const key = `${beer.breweryName}|${beer.breweryCity}|${beer.breweryState}`;
     if (!byBrewery.has(key)) {
@@ -401,10 +402,20 @@ function generateSQL(beers, styleCounts) {
         city: beer.breweryCity,
         state: beer.breweryState,
         beers: [],
+        _seen: new Set(),
       });
     }
-    byBrewery.get(key).beers.push(beer);
+    const group = byBrewery.get(key);
+    const beerKey = beer.name.toLowerCase().trim();
+    if (group._seen.has(beerKey)) {
+      dupeCount++;
+      return; // Skip duplicate beer at same brewery
+    }
+    group._seen.add(beerKey);
+    group.beers.push(beer);
   });
+
+  console.log(`🔄 Duplicates removed: ${dupeCount}`);
 
   lines.push(`-- ${byBrewery.size} unique breweries with beer data`);
   lines.push(``);

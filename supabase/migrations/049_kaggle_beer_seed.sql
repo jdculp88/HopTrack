@@ -102,7 +102,7 @@ BEGIN
     ON CONFLICT DO NOTHING;
   END IF;
 
-  -- ── 21st Amendment Brewery (San Francisco, CA) — 20 beers ──
+  -- ── 21st Amendment Brewery (San Francisco, CA) — 19 beers ──
   SELECT id INTO v_brewery_id FROM breweries
     WHERE LOWER(name) = LOWER('21st Amendment Brewery') AND LOWER(city) = LOWER('San Francisco') AND state = 'CA'
     LIMIT 1;
@@ -116,7 +116,6 @@ BEGIN
       (gen_random_uuid(), v_brewery_id, 'Fireside Chat', 'Amber', 0.079, 45, true, true),
       (gen_random_uuid(), v_brewery_id, 'Marooned On Hog Island', 'Stout', 0.079, NULL, true, true),
       (gen_random_uuid(), v_brewery_id, 'Bitter American', 'Pale Ale', 0.044, 42, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Hell or High Watermelon Wheat (2009)', 'Sour', 0.049, 17, true, true),
       (gen_random_uuid(), v_brewery_id, 'Hell or High Watermelon Wheat (2009)', 'Sour', 0.049, 17, true, true),
       (gen_random_uuid(), v_brewery_id, '21st Amendment Watermelon Wheat Beer (2006)', 'Sour', 0.049, 17, true, true),
       (gen_random_uuid(), v_brewery_id, '21st Amendment IPA (2006)', 'IPA', 0.07, 70, true, true),
@@ -371,7 +370,7 @@ BEGIN
     ON CONFLICT DO NOTHING;
   END IF;
 
-  -- ── Anderson Valley Brewing Company (Boonville, CA) — 18 beers ──
+  -- ── Anderson Valley Brewing Company (Boonville, CA) — 17 beers ──
   SELECT id INTO v_brewery_id FROM breweries
     WHERE LOWER(name) = LOWER('Anderson Valley Brewing Company') AND LOWER(city) = LOWER('Boonville') AND state = 'CA'
     LIMIT 1;
@@ -387,7 +386,6 @@ BEGIN
       (gen_random_uuid(), v_brewery_id, 'Summer Solstice', 'Cream Ale', 0.056, 4, true, true),
       (gen_random_uuid(), v_brewery_id, 'Hop Ottin'' IPA', 'IPA', 0.07, 80, true, true),
       (gen_random_uuid(), v_brewery_id, 'Boont Amber Ale', 'Amber', 0.058, 15, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Barney Flats Oatmeal Stout', 'Oatmeal Stout', 0.057, 13, true, true),
       (gen_random_uuid(), v_brewery_id, 'El Steinber Dark Lager', 'Lager', 0.055, 25, true, true),
       (gen_random_uuid(), v_brewery_id, 'Boont Amber Ale (2010)', 'Amber', 0.058, 15, true, true),
       (gen_random_uuid(), v_brewery_id, 'Summer Solstice Cerveza Crema (2009)', 'Cream Ale', 0.056, 4, true, true),
@@ -813,7 +811,7 @@ BEGIN
     ON CONFLICT DO NOTHING;
   END IF;
 
-  -- ── Bell's Brewery (Kalamazoo, MI) — 6 beers ──
+  -- ── Bell's Brewery (Kalamazoo, MI) — 5 beers ──
   SELECT id INTO v_brewery_id FROM breweries
     WHERE LOWER(name) = LOWER('Bell''s Brewery') AND LOWER(city) = LOWER('Kalamazoo') AND state = 'MI'
     LIMIT 1;
@@ -824,7 +822,6 @@ BEGIN
       (gen_random_uuid(), v_brewery_id, 'Oberon', 'Wheat', 0.058, NULL, true, true),
       (gen_random_uuid(), v_brewery_id, 'Smitten', 'Wheat', 0.06, NULL, true, true),
       (gen_random_uuid(), v_brewery_id, 'Winter White', 'Witbier', 0.05, NULL, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Oberon', 'Wheat', 0.058, NULL, true, true),
       (gen_random_uuid(), v_brewery_id, 'Two Hearted', 'IPA', 0.07, NULL, true, true),
       (gen_random_uuid(), v_brewery_id, 'Best Brown', 'Brown Ale', 0.058, NULL, true, true)
     ON CONFLICT DO NOTHING;
@@ -1120,7 +1117,7 @@ BEGIN
     ON CONFLICT DO NOTHING;
   END IF;
 
-  -- ── Blue Blood Brewing Company (Lincoln, NE) — 14 beers ──
+  -- ── Blue Blood Brewing Company (Lincoln, NE) — 12 beers ──
   SELECT id INTO v_brewery_id FROM breweries
     WHERE LOWER(name) = LOWER('Blue Blood Brewing Company') AND LOWER(city) = LOWER('Lincoln') AND state = 'NE'
     LIMIT 1;
@@ -1138,8 +1135,6 @@ BEGIN
       (gen_random_uuid(), v_brewery_id, '467 Ethan''s Stout', 'Stout', 0.05, NULL, true, true),
       (gen_random_uuid(), v_brewery_id, '1335 Wicked Snout', 'Saison', 0.064, NULL, true, true),
       (gen_random_uuid(), v_brewery_id, '543 Skull Creek Fresh Hopped Pale Ale', 'Pale Ale', 0.045, NULL, true, true),
-      (gen_random_uuid(), v_brewery_id, '1327 Pod''s ESB', 'Amber', 0.056, 37, true, true),
-      (gen_random_uuid(), v_brewery_id, '1327 Pod''s ESB', 'Amber', 0.056, 37, true, true),
       (gen_random_uuid(), v_brewery_id, '1327 Pod''s ESB', 'Amber', 0.056, 37, true, true),
       (gen_random_uuid(), v_brewery_id, '834 Happy As Ale', 'Pale Ale', 0.046, 35, true, true)
     ON CONFLICT DO NOTHING;
@@ -1270,7 +1265,7 @@ BEGIN
     ON CONFLICT DO NOTHING;
   END IF;
 
-  -- ── Bonfire Brewing Company (Eagle, CO) — 19 beers ──
+  -- ── Bonfire Brewing Company (Eagle, CO) — 18 beers ──
   SELECT id INTO v_brewery_id FROM breweries
     WHERE LOWER(name) = LOWER('Bonfire Brewing Company') AND LOWER(city) = LOWER('Eagle') AND state = 'CO'
     LIMIT 1;
@@ -1295,8 +1290,7 @@ BEGIN
       (gen_random_uuid(), v_brewery_id, 'Awry Rye Pale Ale', 'Pale Ale', 0.058, NULL, true, true),
       (gen_random_uuid(), v_brewery_id, 'Demshitz Brown Ale', 'Brown Ale', 0.058, NULL, true, true),
       (gen_random_uuid(), v_brewery_id, 'Wood Splitter Pilsner (2012)', 'Pilsner', 0.048, NULL, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Brush Creek Blonde', 'Blonde Ale', 0.048, NULL, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Firestarter India Pale Ale', 'IPA', 0.066, 72, true, true)
+      (gen_random_uuid(), v_brewery_id, 'Brush Creek Blonde', 'Blonde Ale', 0.048, NULL, true, true)
     ON CONFLICT DO NOTHING;
   END IF;
 
@@ -1312,7 +1306,7 @@ BEGIN
     ON CONFLICT DO NOTHING;
   END IF;
 
-  -- ── Boston Beer Company (Boston, MA) — 9 beers ──
+  -- ── Boston Beer Company (Boston, MA) — 7 beers ──
   SELECT id INTO v_brewery_id FROM breweries
     WHERE LOWER(name) = LOWER('Boston Beer Company') AND LOWER(city) = LOWER('Boston') AND state = 'MA'
     LIMIT 1;
@@ -1325,10 +1319,8 @@ BEGIN
       (gen_random_uuid(), v_brewery_id, 'Cold Snap', 'Witbier', 0.055, NULL, true, true),
       (gen_random_uuid(), v_brewery_id, 'Samuel Adams Winter Lager', 'Lager', 0.056, NULL, true, true),
       (gen_random_uuid(), v_brewery_id, 'Boston Lager', 'Lager', 0.049, 30, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Boston Lager', 'Lager', 0.049, 30, true, true),
       (gen_random_uuid(), v_brewery_id, 'Samuel Adams Octoberfest', 'Oktoberfest', 0.053, 15, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Samuel Adams Summer Ale', 'Wheat', 0.053, 7, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Boston Lager', 'Lager', 0.049, 30, true, true)
+      (gen_random_uuid(), v_brewery_id, 'Samuel Adams Summer Ale', 'Wheat', 0.053, 7, true, true)
     ON CONFLICT DO NOTHING;
   END IF;
 
@@ -1372,7 +1364,7 @@ BEGIN
     ON CONFLICT DO NOTHING;
   END IF;
 
-  -- ── Bozeman Brewing Company (Bozeman, MT) — 5 beers ──
+  -- ── Bozeman Brewing Company (Bozeman, MT) — 4 beers ──
   SELECT id INTO v_brewery_id FROM breweries
     WHERE LOWER(name) = LOWER('Bozeman Brewing Company') AND LOWER(city) = LOWER('Bozeman') AND state = 'MT'
     LIMIT 1;
@@ -1381,7 +1373,6 @@ BEGIN
     INSERT INTO beers (id, brewery_id, name, style, abv, ibu, is_active, is_on_tap)
     VALUES
       (gen_random_uuid(), v_brewery_id, 'Plum St. Porter', 'Porter', 0.06, 52, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Plum St. Porter', 'Porter', 0.057, 52, true, true),
       (gen_random_uuid(), v_brewery_id, 'Bozone HopZone IPA', 'IPA', 0.07, 80, true, true),
       (gen_random_uuid(), v_brewery_id, 'Bozone Hefe Weizen', 'Hefeweizen', 0.06, 25, true, true),
       (gen_random_uuid(), v_brewery_id, 'Bozone Select Amber Ale', 'Amber', 0.055, NULL, true, true)
@@ -1579,7 +1570,7 @@ BEGIN
     ON CONFLICT DO NOTHING;
   END IF;
 
-  -- ── Brooklyn Brewery (Brooklyn, NY) — 6 beers ──
+  -- ── Brooklyn Brewery (Brooklyn, NY) — 5 beers ──
   SELECT id INTO v_brewery_id FROM breweries
     WHERE LOWER(name) = LOWER('Brooklyn Brewery') AND LOWER(city) = LOWER('Brooklyn') AND state = 'NY'
     LIMIT 1;
@@ -1589,7 +1580,6 @@ BEGIN
     VALUES
       (gen_random_uuid(), v_brewery_id, 'East India Pale Ale', 'IPA', 0.068, 47, true, true),
       (gen_random_uuid(), v_brewery_id, 'Brooklyn Summer Ale', 'Amber', 0.045, NULL, true, true),
-      (gen_random_uuid(), v_brewery_id, 'East India Pale Ale', 'IPA', 0.068, 47, true, true),
       (gen_random_uuid(), v_brewery_id, 'Brooklyn Summer Ale (2011)', 'Amber', 0.045, NULL, true, true),
       (gen_random_uuid(), v_brewery_id, 'Brooklyn Lager (16 oz.)', 'Lager', 0.052, NULL, true, true),
       (gen_random_uuid(), v_brewery_id, 'Brooklyn Lager (12 oz.)', 'Lager', 0.052, NULL, true, true)
@@ -1652,7 +1642,7 @@ BEGIN
     ON CONFLICT DO NOTHING;
   END IF;
 
-  -- ── Burn 'Em Brewing (Michigan City, IN) — 11 beers ──
+  -- ── Burn 'Em Brewing (Michigan City, IN) — 10 beers ──
   SELECT id INTO v_brewery_id FROM breweries
     WHERE LOWER(name) = LOWER('Burn ''Em Brewing') AND LOWER(city) = LOWER('Michigan City') AND state = 'IN'
     LIMIT 1;
@@ -1669,8 +1659,7 @@ BEGIN
       (gen_random_uuid(), v_brewery_id, 'Coconoats', 'Wheat', 0.065, NULL, true, true),
       (gen_random_uuid(), v_brewery_id, 'Joey Wheat', 'Wheat', 0.068, 16, true, true),
       (gen_random_uuid(), v_brewery_id, '3:33 Black IPA', 'IPA', 0.072, 86, true, true),
-      (gen_random_uuid(), v_brewery_id, 'MCA', 'IPA', 0.068, NULL, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Pale Alement', 'Pale Ale', 0.055, 40, true, true)
+      (gen_random_uuid(), v_brewery_id, 'MCA', 'IPA', 0.068, NULL, true, true)
     ON CONFLICT DO NOTHING;
   END IF;
 
@@ -1829,7 +1818,7 @@ BEGIN
     ON CONFLICT DO NOTHING;
   END IF;
 
-  -- ── Capital Brewery (Middleton, WI) — 11 beers ──
+  -- ── Capital Brewery (Middleton, WI) — 10 beers ──
   SELECT id INTO v_brewery_id FROM breweries
     WHERE LOWER(name) = LOWER('Capital Brewery') AND LOWER(city) = LOWER('Middleton') AND state = 'WI'
     LIMIT 1;
@@ -1841,7 +1830,6 @@ BEGIN
       (gen_random_uuid(), v_brewery_id, 'Wisconsin Amber', 'Lager', 0.052, 28, true, true),
       (gen_random_uuid(), v_brewery_id, 'Lake House', 'Helles', 0.046, 18, true, true),
       (gen_random_uuid(), v_brewery_id, 'Ghost Ship White IPA', 'IPA', 0.056, 55, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Lake House', 'Helles', 0.046, 18, true, true),
       (gen_random_uuid(), v_brewery_id, 'Mutiny IPA', 'IPA', 0.062, 70, true, true),
       (gen_random_uuid(), v_brewery_id, 'Wisconsin Amber (1998)', 'Lager', 0.052, NULL, true, true),
       (gen_random_uuid(), v_brewery_id, 'Island Wheat', 'Wheat', 0.042, NULL, true, true),
@@ -1894,7 +1882,7 @@ BEGIN
     ON CONFLICT DO NOTHING;
   END IF;
 
-  -- ── Catawba Brewing Company (Morganton, NC) — 7 beers ──
+  -- ── Catawba Brewing Company (Morganton, NC) — 5 beers ──
   SELECT id INTO v_brewery_id FROM breweries
     WHERE LOWER(name) = LOWER('Catawba Brewing Company') AND LOWER(city) = LOWER('Morganton') AND state = 'NC'
     LIMIT 1;
@@ -1906,8 +1894,6 @@ BEGIN
       (gen_random_uuid(), v_brewery_id, 'Firewater India Pale Ale', 'IPA', 0.052, NULL, true, true),
       (gen_random_uuid(), v_brewery_id, 'White Zombie Ale', 'Witbier', 0.047, NULL, true, true),
       (gen_random_uuid(), v_brewery_id, 'King Winterbolt Winter Ale', 'Amber', 0.07, NULL, true, true),
-      (gen_random_uuid(), v_brewery_id, 'White Zombie Ale', 'Witbier', 0.047, NULL, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Firewater India Pale Ale', 'IPA', 0.052, NULL, true, true),
       (gen_random_uuid(), v_brewery_id, 'Farmer Ted''s Farmhouse Cream Ale', 'Cream Ale', 0.056, NULL, true, true)
     ON CONFLICT DO NOTHING;
   END IF;
@@ -1967,7 +1953,7 @@ BEGIN
     ON CONFLICT DO NOTHING;
   END IF;
 
-  -- ── Center of the Universe Brewing C... (Ashland, VA) — 4 beers ──
+  -- ── Center of the Universe Brewing C... (Ashland, VA) — 3 beers ──
   SELECT id INTO v_brewery_id FROM breweries
     WHERE LOWER(name) = LOWER('Center of the Universe Brewing C...') AND LOWER(city) = LOWER('Ashland') AND state = 'VA'
     LIMIT 1;
@@ -1977,7 +1963,6 @@ BEGIN
     VALUES
       (gen_random_uuid(), v_brewery_id, 'Main St. Virginia Ale', 'Amber', 0.05, 40, true, true),
       (gen_random_uuid(), v_brewery_id, 'Chin Music Amber Lager', 'Lager', 0.045, 24, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Main St. Virginia Ale', 'Amber', 0.05, 40, true, true),
       (gen_random_uuid(), v_brewery_id, 'Ray Ray’s Pale Ale', 'Pale Ale', 0.052, 42, true, true)
     ON CONFLICT DO NOTHING;
   END IF;
@@ -2078,7 +2063,7 @@ BEGIN
     ON CONFLICT DO NOTHING;
   END IF;
 
-  -- ── Cigar City Brewing Company (Tampa, FL) — 25 beers ──
+  -- ── Cigar City Brewing Company (Tampa, FL) — 24 beers ──
   SELECT id INTO v_brewery_id FROM breweries
     WHERE LOWER(name) = LOWER('Cigar City Brewing Company') AND LOWER(city) = LOWER('Tampa') AND state = 'FL'
     LIMIT 1;
@@ -2105,7 +2090,6 @@ BEGIN
       (gen_random_uuid(), v_brewery_id, 'Jai Alai IPA Aged on White Oak', 'IPA', 0.075, 70, true, true),
       (gen_random_uuid(), v_brewery_id, 'José Martí American Porter', 'Porter', 0.08, 65, true, true),
       (gen_random_uuid(), v_brewery_id, 'Invasion Pale Ale', 'Pale Ale', 0.05, NULL, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Maduro Brown Ale', 'Brown Ale', 0.055, 25, true, true),
       (gen_random_uuid(), v_brewery_id, 'Maduro Brown Ale', 'Brown Ale', 0.055, 25, true, true),
       (gen_random_uuid(), v_brewery_id, 'Hotter Than Helles Lager', 'Helles', 0.05, NULL, true, true),
       (gen_random_uuid(), v_brewery_id, 'Tocobaga Red Ale', 'Amber', 0.072, 75, true, true),
@@ -3111,7 +3095,7 @@ BEGIN
     ON CONFLICT DO NOTHING;
   END IF;
 
-  -- ── Four Peaks Brewing Company (Tempe, AZ) — 6 beers ──
+  -- ── Four Peaks Brewing Company (Tempe, AZ) — 5 beers ──
   SELECT id INTO v_brewery_id FROM breweries
     WHERE LOWER(name) = LOWER('Four Peaks Brewing Company') AND LOWER(city) = LOWER('Tempe') AND state = 'AZ'
     LIMIT 1;
@@ -3123,8 +3107,7 @@ BEGIN
       (gen_random_uuid(), v_brewery_id, 'Pumpkin Porter', 'Porter', 0.051, NULL, true, true),
       (gen_random_uuid(), v_brewery_id, 'Four Peaks Peach Ale', 'Sour', 0.042, 9, true, true),
       (gen_random_uuid(), v_brewery_id, 'Hop Knot IPA', 'IPA', 0.067, 47, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Kilt Lifter Scottish-Style Ale (2009)', 'Amber', 0.06, 21, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Sunbru Kölsch', 'Kölsch', 0.052, NULL, true, true)
+      (gen_random_uuid(), v_brewery_id, 'Kilt Lifter Scottish-Style Ale (2009)', 'Amber', 0.06, 21, true, true)
     ON CONFLICT DO NOTHING;
   END IF;
 
@@ -3257,7 +3240,7 @@ BEGIN
     ON CONFLICT DO NOTHING;
   END IF;
 
-  -- ── Golden Road Brewing (Los Angeles, CA) — 15 beers ──
+  -- ── Golden Road Brewing (Los Angeles, CA) — 14 beers ──
   SELECT id INTO v_brewery_id FROM breweries
     WHERE LOWER(name) = LOWER('Golden Road Brewing') AND LOWER(city) = LOWER('Los Angeles') AND state = 'CA'
     LIMIT 1;
@@ -3273,7 +3256,6 @@ BEGIN
       (gen_random_uuid(), v_brewery_id, 'Point the Way IPA', 'IPA', 0.059, 60, true, true),
       (gen_random_uuid(), v_brewery_id, 'Golden Road Hefeweizen', 'Hefeweizen', 0.046, 15, true, true),
       (gen_random_uuid(), v_brewery_id, 'Heal the Bay IPA', 'IPA', 0.068, 65, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Point the Way IPA', 'IPA', 0.059, 60, true, true),
       (gen_random_uuid(), v_brewery_id, 'Cabrillo Kölsch', 'Kölsch', 0.05, NULL, true, true),
       (gen_random_uuid(), v_brewery_id, 'Get Up Offa That Brown', 'Brown Ale', 0.055, 20, true, true),
       (gen_random_uuid(), v_brewery_id, 'Burning Bush Smoked IPA', 'IPA', 0.08, 70, true, true),
@@ -3348,7 +3330,7 @@ BEGIN
     ON CONFLICT DO NOTHING;
   END IF;
 
-  -- ── Goose Island Brewing Company (Chicago, IL) — 5 beers ──
+  -- ── Goose Island Brewing Company (Chicago, IL) — 3 beers ──
   SELECT id INTO v_brewery_id FROM breweries
     WHERE LOWER(name) = LOWER('Goose Island Brewing Company') AND LOWER(city) = LOWER('Chicago') AND state = 'IL'
     LIMIT 1;
@@ -3357,8 +3339,6 @@ BEGIN
     INSERT INTO beers (id, brewery_id, name, style, abv, ibu, is_active, is_on_tap)
     VALUES
       (gen_random_uuid(), v_brewery_id, '312 Urban Pale Ale', 'Pale Ale', 0.054, 30, true, true),
-      (gen_random_uuid(), v_brewery_id, '312 Urban Pale Ale', 'Pale Ale', 0.054, 30, true, true),
-      (gen_random_uuid(), v_brewery_id, '312 Urban Wheat Ale', 'Wheat', 0.042, 18, true, true),
       (gen_random_uuid(), v_brewery_id, '312 Urban Wheat Ale', 'Wheat', 0.042, 18, true, true),
       (gen_random_uuid(), v_brewery_id, '312 Urban Wheat Ale (2012)', 'Wheat', 0.042, 20, true, true)
     ON CONFLICT DO NOTHING;
@@ -3706,7 +3686,7 @@ BEGIN
     ON CONFLICT DO NOTHING;
   END IF;
 
-  -- ── Hawai'i Nui Brewing Co. (Hilo, HI) — 5 beers ──
+  -- ── Hawai'i Nui Brewing Co. (Hilo, HI) — 4 beers ──
   SELECT id INTO v_brewery_id FROM breweries
     WHERE LOWER(name) = LOWER('Hawai''i Nui Brewing Co.') AND LOWER(city) = LOWER('Hilo') AND state = 'HI'
     LIMIT 1;
@@ -3716,7 +3696,6 @@ BEGIN
     VALUES
       (gen_random_uuid(), v_brewery_id, 'Kaua''i Golden Ale', 'Blonde Ale', 0.049, NULL, true, true),
       (gen_random_uuid(), v_brewery_id, 'Sunset Amber', 'Pale Ale', 0.054, NULL, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Hapa Brown Ale', 'Brown Ale', 0.064, NULL, true, true),
       (gen_random_uuid(), v_brewery_id, 'Hapa Brown Ale', 'Brown Ale', 0.064, NULL, true, true),
       (gen_random_uuid(), v_brewery_id, 'Southern Cross', 'Flanders Red', 0.083, NULL, true, true)
     ON CONFLICT DO NOTHING;
@@ -3879,7 +3858,7 @@ BEGIN
     ON CONFLICT DO NOTHING;
   END IF;
 
-  -- ── Hopworks Urban Brewery (Portland, OR) — 22 beers ──
+  -- ── Hopworks Urban Brewery (Portland, OR) — 11 beers ──
   SELECT id INTO v_brewery_id FROM breweries
     WHERE LOWER(name) = LOWER('Hopworks Urban Brewery') AND LOWER(city) = LOWER('Portland') AND state = 'OR'
     LIMIT 1;
@@ -3888,17 +3867,6 @@ BEGIN
     INSERT INTO beers (id, brewery_id, name, style, abv, ibu, is_active, is_on_tap)
     VALUES
       (gen_random_uuid(), v_brewery_id, 'Totally Radler', 'Lager', 0.027, 21, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Nonstop Hef Hop', 'Wheat', 0.039, 20, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Nonstop Hef Hop', 'Wheat', 0.039, 20, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Nonstop Hef Hop', 'Wheat', 0.039, 20, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Nonstop Hef Hop', 'Wheat', 0.039, 20, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Nonstop Hef Hop', 'Wheat', 0.039, 20, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Nonstop Hef Hop', 'Wheat', 0.039, 20, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Nonstop Hef Hop', 'Wheat', 0.039, 20, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Nonstop Hef Hop', 'Wheat', 0.039, 20, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Nonstop Hef Hop', 'Wheat', 0.039, 20, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Nonstop Hef Hop', 'Wheat', 0.039, 20, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Nonstop Hef Hop', 'Wheat', 0.039, 20, true, true),
       (gen_random_uuid(), v_brewery_id, 'Nonstop Hef Hop', 'Wheat', 0.039, 20, true, true),
       (gen_random_uuid(), v_brewery_id, 'Rise Up Red', 'Amber', 0.058, 60, true, true),
       (gen_random_uuid(), v_brewery_id, 'Survival Stout', 'Stout', 0.058, 35, true, true),
@@ -4248,7 +4216,7 @@ BEGIN
     ON CONFLICT DO NOTHING;
   END IF;
 
-  -- ── Kona Brewing Company (Kona, HI) — 4 beers ──
+  -- ── Kona Brewing Company (Kona, HI) — 1 beers ──
   SELECT id INTO v_brewery_id FROM breweries
     WHERE LOWER(name) = LOWER('Kona Brewing Company') AND LOWER(city) = LOWER('Kona') AND state = 'HI'
     LIMIT 1;
@@ -4256,9 +4224,6 @@ BEGIN
   IF v_brewery_id IS NOT NULL THEN
     INSERT INTO beers (id, brewery_id, name, style, abv, ibu, is_active, is_on_tap)
     VALUES
-      (gen_random_uuid(), v_brewery_id, 'Longboard Island Lager', 'Lager', 0.046, 18, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Longboard Island Lager', 'Lager', 0.046, 18, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Longboard Island Lager', 'Lager', 0.046, 18, true, true),
       (gen_random_uuid(), v_brewery_id, 'Longboard Island Lager', 'Lager', 0.046, 18, true, true)
     ON CONFLICT DO NOTHING;
   END IF;
@@ -4583,7 +4548,7 @@ BEGIN
     ON CONFLICT DO NOTHING;
   END IF;
 
-  -- ── Magic Hat Brewing Company (South Burlington, VT) — 3 beers ──
+  -- ── Magic Hat Brewing Company (South Burlington, VT) — 2 beers ──
   SELECT id INTO v_brewery_id FROM breweries
     WHERE LOWER(name) = LOWER('Magic Hat Brewing Company') AND LOWER(city) = LOWER('South Burlington') AND state = 'VT'
     LIMIT 1;
@@ -4592,8 +4557,7 @@ BEGIN
     INSERT INTO beers (id, brewery_id, name, style, abv, ibu, is_active, is_on_tap)
     VALUES
       (gen_random_uuid(), v_brewery_id, '#9', 'Sour', 0.051, 20, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Elder Betty', 'Hefeweizen', 0.055, 13, true, true),
-      (gen_random_uuid(), v_brewery_id, '#9', 'Sour', 0.051, 20, true, true)
+      (gen_random_uuid(), v_brewery_id, 'Elder Betty', 'Hefeweizen', 0.055, 13, true, true)
     ON CONFLICT DO NOTHING;
   END IF;
 
@@ -4677,7 +4641,7 @@ BEGIN
     ON CONFLICT DO NOTHING;
   END IF;
 
-  -- ── Martin House Brewing Company (Fort Worth, TX) — 8 beers ──
+  -- ── Martin House Brewing Company (Fort Worth, TX) — 7 beers ──
   SELECT id INTO v_brewery_id FROM breweries
     WHERE LOWER(name) = LOWER('Martin House Brewing Company') AND LOWER(city) = LOWER('Fort Worth') AND state = 'TX'
     LIMIT 1;
@@ -4689,14 +4653,13 @@ BEGIN
       (gen_random_uuid(), v_brewery_id, 'Pretzel Stout', 'Stout', 0.065, 47, true, true),
       (gen_random_uuid(), v_brewery_id, 'Rubberneck Red', 'Amber', 0.05, 35, true, true),
       (gen_random_uuid(), v_brewery_id, 'The Imperial Texan', 'Double IPA', 0.08, NULL, true, true),
-      (gen_random_uuid(), v_brewery_id, 'The Imperial Texan', 'Double IPA', 0.08, NULL, true, true),
       (gen_random_uuid(), v_brewery_id, 'Day Break 4-Grain Breakfast Beer', 'Wheat', 0.05, NULL, true, true),
       (gen_random_uuid(), v_brewery_id, 'River House Saison', 'Saison', 0.05, NULL, true, true),
       (gen_random_uuid(), v_brewery_id, 'There Will Be Stout', 'Stout', 0.065, NULL, true, true)
     ON CONFLICT DO NOTHING;
   END IF;
 
-  -- ── Matt Brewing Company (Utica, NY) — 13 beers ──
+  -- ── Matt Brewing Company (Utica, NY) — 12 beers ──
   SELECT id INTO v_brewery_id FROM breweries
     WHERE LOWER(name) = LOWER('Matt Brewing Company') AND LOWER(city) = LOWER('Utica') AND state = 'NY'
     LIMIT 1;
@@ -4706,7 +4669,6 @@ BEGIN
     VALUES
       (gen_random_uuid(), v_brewery_id, 'Our Legacy IPA', 'IPA', 0.065, 60, true, true),
       (gen_random_uuid(), v_brewery_id, 'Saranac Shandy', 'Lager', 0.042, NULL, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Our Legacy IPA', 'IPA', 0.065, 60, true, true),
       (gen_random_uuid(), v_brewery_id, 'Saranac Golden Pilsener (2003)', 'Pilsner', 0.051, NULL, true, true),
       (gen_random_uuid(), v_brewery_id, 'Saranac Adirondack Light (2002)', 'Lager', 0.045, NULL, true, true),
       (gen_random_uuid(), v_brewery_id, 'DAX Light (1998)', 'Lager', 0.045, NULL, true, true),
@@ -4757,7 +4719,7 @@ BEGIN
     ON CONFLICT DO NOTHING;
   END IF;
 
-  -- ── Mehana Brewing Co. (Hilo, HI) — 6 beers ──
+  -- ── Mehana Brewing Co. (Hilo, HI) — 5 beers ──
   SELECT id INTO v_brewery_id FROM breweries
     WHERE LOWER(name) = LOWER('Mehana Brewing Co.') AND LOWER(city) = LOWER('Hilo') AND state = 'HI'
     LIMIT 1;
@@ -4765,7 +4727,6 @@ BEGIN
   IF v_brewery_id IS NOT NULL THEN
     INSERT INTO beers (id, brewery_id, name, style, abv, ibu, is_active, is_on_tap)
     VALUES
-      (gen_random_uuid(), v_brewery_id, 'Tsunami IPA', 'IPA', 0.072, 75, true, true),
       (gen_random_uuid(), v_brewery_id, 'Tsunami IPA', 'IPA', 0.072, 75, true, true),
       (gen_random_uuid(), v_brewery_id, 'Humpback Blonde Ale', 'Blonde Ale', 0.042, 22, true, true),
       (gen_random_uuid(), v_brewery_id, 'Hawaiian Crow Porter', 'Porter', 0.052, 27, true, true),
@@ -4898,7 +4859,7 @@ BEGIN
     ON CONFLICT DO NOTHING;
   END IF;
 
-  -- ── Minhas Craft Brewery (Monroe, WI) — 13 beers ──
+  -- ── Minhas Craft Brewery (Monroe, WI) — 10 beers ──
   SELECT id INTO v_brewery_id FROM breweries
     WHERE LOWER(name) = LOWER('Minhas Craft Brewery') AND LOWER(city) = LOWER('Monroe') AND state = 'WI'
     LIMIT 1;
@@ -4911,14 +4872,11 @@ BEGIN
       (gen_random_uuid(), v_brewery_id, 'Minhas Light (2012)', 'Lager', 0.04, NULL, true, true),
       (gen_random_uuid(), v_brewery_id, 'Huber', 'Lager', 0.05, NULL, true, true),
       (gen_random_uuid(), v_brewery_id, 'Clear Creek Ice', 'Lager', 0.062, NULL, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Clear Creek Ice', 'Lager', 0.062, NULL, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Mountain Crest', 'Lager', 0.055, NULL, true, true),
       (gen_random_uuid(), v_brewery_id, 'Mountain Crest', 'Lager', 0.055, NULL, true, true),
       (gen_random_uuid(), v_brewery_id, 'Mountain Creek (2013)', 'Lager', 0.055, NULL, true, true),
       (gen_random_uuid(), v_brewery_id, 'Boxer', 'Lager', 0.05, NULL, true, true),
       (gen_random_uuid(), v_brewery_id, 'Boxer Light', 'Lager', 0.042, NULL, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Boxer Ice', 'Lager', 0.055, NULL, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Boxer', 'Lager', 0.05, NULL, true, true)
+      (gen_random_uuid(), v_brewery_id, 'Boxer Ice', 'Lager', 0.055, NULL, true, true)
     ON CONFLICT DO NOTHING;
   END IF;
 
@@ -5133,7 +5091,7 @@ BEGIN
     ON CONFLICT DO NOTHING;
   END IF;
 
-  -- ── Narragansett Brewing Company (Providence, RI) — 10 beers ──
+  -- ── Narragansett Brewing Company (Providence, RI) — 9 beers ──
   SELECT id INTO v_brewery_id FROM breweries
     WHERE LOWER(name) = LOWER('Narragansett Brewing Company') AND LOWER(city) = LOWER('Providence') AND state = 'RI'
     LIMIT 1;
@@ -5147,7 +5105,6 @@ BEGIN
       (gen_random_uuid(), v_brewery_id, 'Narragansett Bohemian Pilsner', 'Pilsner', 0.086, 35, true, true),
       (gen_random_uuid(), v_brewery_id, 'Narragansett Summer Ale', 'Wheat', 0.042, 24, true, true),
       (gen_random_uuid(), v_brewery_id, 'Narragansett Cream Ale', 'Cream Ale', 0.05, 22, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Narragansett Summer Ale', 'Wheat', 0.042, 24, true, true),
       (gen_random_uuid(), v_brewery_id, 'Narragansett Porter', 'Porter', 0.07, 22, true, true),
       (gen_random_uuid(), v_brewery_id, 'Narragansett Bock', 'Lager', 0.065, 32, true, true),
       (gen_random_uuid(), v_brewery_id, 'Narragansett Fest Lager', 'Oktoberfest', 0.055, 15, true, true)
@@ -5200,7 +5157,7 @@ BEGIN
     ON CONFLICT DO NOTHING;
   END IF;
 
-  -- ── New Belgium Brewing Company (Fort Collins, CO) — 17 beers ──
+  -- ── New Belgium Brewing Company (Fort Collins, CO) — 14 beers ──
   SELECT id INTO v_brewery_id FROM breweries
     WHERE LOWER(name) = LOWER('New Belgium Brewing Company') AND LOWER(city) = LOWER('Fort Collins') AND state = 'CO'
     LIMIT 1;
@@ -5219,9 +5176,6 @@ BEGIN
       (gen_random_uuid(), v_brewery_id, 'Fat Tire Amber Ale', 'Amber', 0.052, 18, true, true),
       (gen_random_uuid(), v_brewery_id, 'Shift (1)', 'Lager', 0.05, 29, true, true),
       (gen_random_uuid(), v_brewery_id, 'Fat Tire Amber Ale (2011)', 'Amber', 0.052, 18, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Shift', 'Lager', 0.05, 29, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Ranger IPA', 'IPA', 0.065, 70, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Fat Tire Amber Ale', 'Amber', 0.052, 18, true, true),
       (gen_random_uuid(), v_brewery_id, 'Ranger IPA (Current)', 'IPA', 0.065, 70, true, true),
       (gen_random_uuid(), v_brewery_id, 'Sunshine Wheat Beer (2009)', 'Wheat', 0.048, NULL, true, true),
       (gen_random_uuid(), v_brewery_id, 'Fat Tire Amber Ale (2008)', 'Amber', 0.052, 18, true, true)
@@ -5572,7 +5526,7 @@ BEGIN
     ON CONFLICT DO NOTHING;
   END IF;
 
-  -- ── Oskar Blues Brewery (Longmont, CO) — 31 beers ──
+  -- ── Oskar Blues Brewery (Longmont, CO) — 26 beers ──
   SELECT id INTO v_brewery_id FROM breweries
     WHERE LOWER(name) = LOWER('Oskar Blues Brewery') AND LOWER(city) = LOWER('Longmont') AND state = 'CO'
     LIMIT 1;
@@ -5587,11 +5541,8 @@ BEGIN
       (gen_random_uuid(), v_brewery_id, 'One Nut Brown', 'Brown Ale', 0.05, NULL, true, true),
       (gen_random_uuid(), v_brewery_id, 'Birth IPA', 'IPA', NULL, NULL, true, true),
       (gen_random_uuid(), v_brewery_id, 'Dale''s Pale Ale', 'Pale Ale', 0.065, 65, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Dale''s Pale Ale', 'Pale Ale', 0.065, 65, true, true),
       (gen_random_uuid(), v_brewery_id, 'Mama''s Little Yella Pils', 'Pilsner', 0.053, 35, true, true),
       (gen_random_uuid(), v_brewery_id, 'oSKAr the G''Rauch', 'IPA', 0.085, NULL, true, true),
-      (gen_random_uuid(), v_brewery_id, 'oSKAr the G''Rauch', 'IPA', 0.085, NULL, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Dale''s Pale Ale', 'Pale Ale', 0.065, 65, true, true),
       (gen_random_uuid(), v_brewery_id, 'The Deuce', 'Brown Ale', 0.07, NULL, true, true),
       (gen_random_uuid(), v_brewery_id, 'Dale''s Pale Ale (10 Year Anniversary)', 'Pale Ale', 0.065, 65, true, true),
       (gen_random_uuid(), v_brewery_id, 'Dale''s Pale Ale (2012)', 'Pale Ale', 0.065, 65, true, true),
@@ -5606,11 +5557,9 @@ BEGIN
       (gen_random_uuid(), v_brewery_id, 'One Hit Wonder', 'Double IPA', 0.09, 60, true, true),
       (gen_random_uuid(), v_brewery_id, 'G''KNIGHT (12 oz.)', 'Double IPA', 0.087, 85, true, true),
       (gen_random_uuid(), v_brewery_id, 'Ten Fidy Imperial Stout', 'Imperial Stout', 0.099, 98, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Mama''s Little Yella Pils', 'Pilsner', 0.053, 35, true, true),
       (gen_random_uuid(), v_brewery_id, 'GUBNA Imperial IPA', 'Double IPA', 0.099, 100, true, true),
       (gen_random_uuid(), v_brewery_id, 'Old Chub', 'Amber', 0.08, 35, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Gordon Ale (2009)', 'Double IPA', 0.087, 85, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Dale''s Pale Ale', 'Pale Ale', 0.065, 65, true, true)
+      (gen_random_uuid(), v_brewery_id, 'Gordon Ale (2009)', 'Double IPA', 0.087, 85, true, true)
     ON CONFLICT DO NOTHING;
   END IF;
 
@@ -5638,7 +5587,7 @@ BEGIN
     ON CONFLICT DO NOTHING;
   END IF;
 
-  -- ── Oskar Blues Brewery (North Carol... (Brevard, NC) — 6 beers ──
+  -- ── Oskar Blues Brewery (North Carol... (Brevard, NC) — 5 beers ──
   SELECT id INTO v_brewery_id FROM breweries
     WHERE LOWER(name) = LOWER('Oskar Blues Brewery (North Carol...') AND LOWER(city) = LOWER('Brevard') AND state = 'NC'
     LIMIT 1;
@@ -5650,7 +5599,6 @@ BEGIN
       (gen_random_uuid(), v_brewery_id, 'Ten Fidy', 'Imperial Stout', 0.099, 98, true, true),
       (gen_random_uuid(), v_brewery_id, 'Deviant Dale''s IPA', 'Double IPA', 0.08, 85, true, true),
       (gen_random_uuid(), v_brewery_id, 'Old Chub', 'Amber', 0.08, 35, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Dale''s Pale Ale', 'Pale Ale', 0.065, 65, true, true),
       (gen_random_uuid(), v_brewery_id, 'Dale''s Pale Ale', 'Pale Ale', 0.065, 65, true, true)
     ON CONFLICT DO NOTHING;
   END IF;
@@ -5985,7 +5933,7 @@ BEGIN
     ON CONFLICT DO NOTHING;
   END IF;
 
-  -- ── Pug Ryan's Brewery (Dillon, CO) — 7 beers ──
+  -- ── Pug Ryan's Brewery (Dillon, CO) — 6 beers ──
   SELECT id INTO v_brewery_id FROM breweries
     WHERE LOWER(name) = LOWER('Pug Ryan''s Brewery') AND LOWER(city) = LOWER('Dillon') AND state = 'CO'
     LIMIT 1;
@@ -5998,8 +5946,7 @@ BEGIN
       (gen_random_uuid(), v_brewery_id, 'Dead Eye Dunkel', 'Lager', 0.06, 15, true, true),
       (gen_random_uuid(), v_brewery_id, 'Peacemaker Pilsner', 'Pilsner', 0.058, 21, true, true),
       (gen_random_uuid(), v_brewery_id, 'Over the Rail Pale Ale', 'Pale Ale', 0.057, 68, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Pallavicini Pilsner (2009)', 'Pilsner', 0.058, 21, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Morning Wood Wheat (Current)', 'Wheat', 0.059, 14, true, true)
+      (gen_random_uuid(), v_brewery_id, 'Pallavicini Pilsner (2009)', 'Pilsner', 0.058, 21, true, true)
     ON CONFLICT DO NOTHING;
   END IF;
 
@@ -6091,7 +6038,7 @@ BEGIN
     ON CONFLICT DO NOTHING;
   END IF;
 
-  -- ── Redhook Brewery (Woodinville, WA) — 3 beers ──
+  -- ── Redhook Brewery (Woodinville, WA) — 2 beers ──
   SELECT id INTO v_brewery_id FROM breweries
     WHERE LOWER(name) = LOWER('Redhook Brewery') AND LOWER(city) = LOWER('Woodinville') AND state = 'WA'
     LIMIT 1;
@@ -6099,7 +6046,6 @@ BEGIN
   IF v_brewery_id IS NOT NULL THEN
     INSERT INTO beers (id, brewery_id, name, style, abv, ibu, is_active, is_on_tap)
     VALUES
-      (gen_random_uuid(), v_brewery_id, 'Long Hammer IPA', 'IPA', 0.065, 44, true, true),
       (gen_random_uuid(), v_brewery_id, 'Long Hammer IPA', 'IPA', 0.065, 44, true, true),
       (gen_random_uuid(), v_brewery_id, 'Copper Hook (2011)', 'Amber', 0.058, 27, true, true)
     ON CONFLICT DO NOTHING;
@@ -6134,7 +6080,7 @@ BEGIN
     ON CONFLICT DO NOTHING;
   END IF;
 
-  -- ── Revolution Brewing (Paonia, CO) — 8 beers ──
+  -- ── Revolution Brewing (Paonia, CO) — 7 beers ──
   SELECT id INTO v_brewery_id FROM breweries
     WHERE LOWER(name) = LOWER('Revolution Brewing') AND LOWER(city) = LOWER('Paonia') AND state = 'CO'
     LIMIT 1;
@@ -6148,8 +6094,7 @@ BEGIN
       (gen_random_uuid(), v_brewery_id, 'Miner''s Gold', 'Blonde Ale', 0.05, NULL, true, true),
       (gen_random_uuid(), v_brewery_id, 'Vienna Lager', 'Lager', 0.046, NULL, true, true),
       (gen_random_uuid(), v_brewery_id, 'Jessie''s Garage', 'Pale Ale', 0.056, NULL, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Colorado Red Ale', 'Amber', 0.062, NULL, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Miner''s Gold', 'Blonde Ale', NULL, NULL, true, true)
+      (gen_random_uuid(), v_brewery_id, 'Colorado Red Ale', 'Amber', 0.062, NULL, true, true)
     ON CONFLICT DO NOTHING;
   END IF;
 
@@ -6280,7 +6225,7 @@ BEGIN
     ON CONFLICT DO NOTHING;
   END IF;
 
-  -- ── Rochester Mills Brewing Company (Rochester, MI) — 7 beers ──
+  -- ── Rochester Mills Brewing Company (Rochester, MI) — 6 beers ──
   SELECT id INTO v_brewery_id FROM breweries
     WHERE LOWER(name) = LOWER('Rochester Mills Brewing Company') AND LOWER(city) = LOWER('Rochester') AND state = 'MI'
     LIMIT 1;
@@ -6293,8 +6238,7 @@ BEGIN
       (gen_random_uuid(), v_brewery_id, 'Lazy Daze Lager', 'Lager', 0.055, NULL, true, true),
       (gen_random_uuid(), v_brewery_id, 'Rochester Red Ale', 'Amber', 0.059, NULL, true, true),
       (gen_random_uuid(), v_brewery_id, 'Milkshake Stout', 'Milk Stout', 0.05, NULL, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Cornerstone IPA', 'IPA', 0.07, NULL, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Lazy Daze Lager', 'Lager', 0.055, NULL, true, true)
+      (gen_random_uuid(), v_brewery_id, 'Cornerstone IPA', 'IPA', 0.07, NULL, true, true)
     ON CONFLICT DO NOTHING;
   END IF;
 
@@ -6342,7 +6286,7 @@ BEGIN
     ON CONFLICT DO NOTHING;
   END IF;
 
-  -- ── Ruhstaller Beer Company (Sacramento, CA) — 5 beers ──
+  -- ── Ruhstaller Beer Company (Sacramento, CA) — 4 beers ──
   SELECT id INTO v_brewery_id FROM breweries
     WHERE LOWER(name) = LOWER('Ruhstaller Beer Company') AND LOWER(city) = LOWER('Sacramento') AND state = 'CA'
     LIMIT 1;
@@ -6353,7 +6297,6 @@ BEGIN
       (gen_random_uuid(), v_brewery_id, '1881 California Red', 'Amber', 0.056, 35, true, true),
       (gen_random_uuid(), v_brewery_id, 'CAPT Black IPA', 'American Black Ale', 0.073, 55, true, true),
       (gen_random_uuid(), v_brewery_id, 'Ruhstaller''s Gilt Edge Lager Beer', 'Lager', 0.048, 42, true, true),
-      (gen_random_uuid(), v_brewery_id, 'CAPT Black IPA', 'American Black Ale', 0.073, 55, true, true),
       (gen_random_uuid(), v_brewery_id, '1881 California Red Ale', 'Amber', 0.056, 35, true, true)
     ON CONFLICT DO NOTHING;
   END IF;
@@ -6569,7 +6512,7 @@ BEGIN
     ON CONFLICT DO NOTHING;
   END IF;
 
-  -- ── Sierra Nevada Brewing Company (Chico, CA) — 9 beers ──
+  -- ── Sierra Nevada Brewing Company (Chico, CA) — 7 beers ──
   SELECT id INTO v_brewery_id FROM breweries
     WHERE LOWER(name) = LOWER('Sierra Nevada Brewing Company') AND LOWER(city) = LOWER('Chico') AND state = 'CA'
     LIMIT 1;
@@ -6583,9 +6526,7 @@ BEGIN
       (gen_random_uuid(), v_brewery_id, 'CANfusion Rye Bock', 'Wheat', 0.06, NULL, true, true),
       (gen_random_uuid(), v_brewery_id, 'Sierra Nevada Pale Ale', 'Pale Ale', 0.056, 37, true, true),
       (gen_random_uuid(), v_brewery_id, 'Old Chico Crystal Wheat', 'Wheat', 0.048, 26, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Summerfest', 'Pilsner', 0.05, 28, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Torpedo', 'IPA', 0.072, 65, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Sierra Nevada Pale Ale', 'Pale Ale', 0.056, 37, true, true)
+      (gen_random_uuid(), v_brewery_id, 'Summerfest', 'Pilsner', 0.05, 28, true, true)
     ON CONFLICT DO NOTHING;
   END IF;
 
@@ -6638,7 +6579,7 @@ BEGIN
     ON CONFLICT DO NOTHING;
   END IF;
 
-  -- ── Ska Brewing Company (Durango, CO) — 12 beers ──
+  -- ── Ska Brewing Company (Durango, CO) — 11 beers ──
   SELECT id INTO v_brewery_id FROM breweries
     WHERE LOWER(name) = LOWER('Ska Brewing Company') AND LOWER(city) = LOWER('Durango') AND state = 'CO'
     LIMIT 1;
@@ -6656,8 +6597,7 @@ BEGIN
       (gen_random_uuid(), v_brewery_id, 'Mexican Logger', 'Lager', 0.042, 18, true, true),
       (gen_random_uuid(), v_brewery_id, 'True Blonde Ale', 'Blonde Ale', 0.053, NULL, true, true),
       (gen_random_uuid(), v_brewery_id, 'Euphoria Pale Ale', 'Pale Ale', 0.061, NULL, true, true),
-      (gen_random_uuid(), v_brewery_id, 'ESB Special Ale', 'Amber', 0.057, 58, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Modus Hoperandi', 'IPA', 0.068, 65, true, true)
+      (gen_random_uuid(), v_brewery_id, 'ESB Special Ale', 'Amber', 0.057, 58, true, true)
     ON CONFLICT DO NOTHING;
   END IF;
 
@@ -6766,7 +6706,7 @@ BEGIN
     ON CONFLICT DO NOTHING;
   END IF;
 
-  -- ── Sockeye Brewing Company (Boise, ID) — 17 beers ──
+  -- ── Sockeye Brewing Company (Boise, ID) — 15 beers ──
   SELECT id INTO v_brewery_id FROM breweries
     WHERE LOWER(name) = LOWER('Sockeye Brewing Company') AND LOWER(city) = LOWER('Boise') AND state = 'ID'
     LIMIT 1;
@@ -6776,7 +6716,6 @@ BEGIN
     VALUES
       (gen_random_uuid(), v_brewery_id, 'Thanksgiving Ale', 'Kölsch', 0.05, NULL, true, true),
       (gen_random_uuid(), v_brewery_id, 'Double Dagger Imperial IPA', 'Double IPA', 0.092, NULL, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Dagger Falls IPA', 'IPA', 0.063, 100, true, true),
       (gen_random_uuid(), v_brewery_id, 'Dagger Falls IPA', 'IPA', 0.063, 100, true, true),
       (gen_random_uuid(), v_brewery_id, 'Socktoberfest', 'Oktoberfest', 0.06, NULL, true, true),
       (gen_random_uuid(), v_brewery_id, 'Hopnoxious Imperial IPA', 'Double IPA', 0.079, NULL, true, true),
@@ -6789,8 +6728,7 @@ BEGIN
       (gen_random_uuid(), v_brewery_id, 'Hell-Diver Pale Ale', 'Pale Ale', 0.052, 32, true, true),
       (gen_random_uuid(), v_brewery_id, 'Woolybugger Wheat', 'Wheat', 0.046, 12, true, true),
       (gen_random_uuid(), v_brewery_id, 'Power House Porter', 'Porter', 0.057, NULL, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Winterfest', 'Red Ale', 0.084, 90, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Dagger Falls IPA', 'IPA', 0.063, 100, true, true)
+      (gen_random_uuid(), v_brewery_id, 'Winterfest', 'Red Ale', 0.084, 90, true, true)
     ON CONFLICT DO NOTHING;
   END IF;
 
@@ -6834,7 +6772,7 @@ BEGIN
     ON CONFLICT DO NOTHING;
   END IF;
 
-  -- ── Southern Prohibition Brewing Com... (Hattiesburg, MS) — 9 beers ──
+  -- ── Southern Prohibition Brewing Com... (Hattiesburg, MS) — 7 beers ──
   SELECT id INTO v_brewery_id FROM breweries
     WHERE LOWER(name) = LOWER('Southern Prohibition Brewing Com...') AND LOWER(city) = LOWER('Hattiesburg') AND state = 'MS'
     LIMIT 1;
@@ -6848,13 +6786,11 @@ BEGIN
       (gen_random_uuid(), v_brewery_id, 'Devil''s Harvest Extra Pale Ale', 'Pale Ale', 0.058, 60, true, true),
       (gen_random_uuid(), v_brewery_id, 'Suzy B Dirty Blonde Ale', 'Blonde Ale', 0.05, 20, true, true),
       (gen_random_uuid(), v_brewery_id, 'Mississippi Fire Ant', 'Amber', 0.08, 80, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Hipster Breakfast', 'Oatmeal Stout', 0.058, 40, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Suzy B Dirty Blonde Ale', 'Blonde Ale', 0.05, 20, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Devil''s Harvest Extra Pale Ale', 'Pale Ale', 0.058, 60, true, true)
+      (gen_random_uuid(), v_brewery_id, 'Hipster Breakfast', 'Oatmeal Stout', 0.058, 40, true, true)
     ON CONFLICT DO NOTHING;
   END IF;
 
-  -- ── Southern Star Brewing Company (Conroe, TX) — 14 beers ──
+  -- ── Southern Star Brewing Company (Conroe, TX) — 12 beers ──
   SELECT id INTO v_brewery_id FROM breweries
     WHERE LOWER(name) = LOWER('Southern Star Brewing Company') AND LOWER(city) = LOWER('Conroe') AND state = 'TX'
     LIMIT 1;
@@ -6873,9 +6809,7 @@ BEGIN
       (gen_random_uuid(), v_brewery_id, 'PRO-AM (2012) (2012)', 'Double IPA', 0.099, 100, true, true),
       (gen_random_uuid(), v_brewery_id, 'Walloon (2014)', 'Saison', 0.055, NULL, true, true),
       (gen_random_uuid(), v_brewery_id, 'Le Mort Vivant (2011)', 'Saison', 0.069, 23, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Buried Hatchet Stout', 'Stout', 0.083, 50, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Pine Belt Pale Ale', 'Pale Ale', 0.065, 45, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Bombshell Blonde', 'Blonde Ale', 0.05, 20, true, true)
+      (gen_random_uuid(), v_brewery_id, 'Buried Hatchet Stout', 'Stout', 0.083, 50, true, true)
     ON CONFLICT DO NOTHING;
   END IF;
 
@@ -6903,7 +6837,7 @@ BEGIN
     ON CONFLICT DO NOTHING;
   END IF;
 
-  -- ── Spiteful Brewing Company (Chicago, IL) — 12 beers ──
+  -- ── Spiteful Brewing Company (Chicago, IL) — 11 beers ──
   SELECT id INTO v_brewery_id FROM breweries
     WHERE LOWER(name) = LOWER('Spiteful Brewing Company') AND LOWER(city) = LOWER('Chicago') AND state = 'IL'
     LIMIT 1;
@@ -6917,7 +6851,6 @@ BEGIN
       (gen_random_uuid(), v_brewery_id, 'Working for the Weekend', 'Double IPA', 0.079, NULL, true, true),
       (gen_random_uuid(), v_brewery_id, 'Angry Adam', 'Amber', 0.06, NULL, true, true),
       (gen_random_uuid(), v_brewery_id, 'Freedom Fries', 'Stout', 0.055, NULL, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Bitter Biker Double IPA', 'Double IPA', 0.096, NULL, true, true),
       (gen_random_uuid(), v_brewery_id, 'Ghost Bike Pale Ale', 'Pale Ale', 0.073, NULL, true, true),
       (gen_random_uuid(), v_brewery_id, 'Spiteful IPA', 'IPA', 0.062, NULL, true, true),
       (gen_random_uuid(), v_brewery_id, 'Alley Time', 'Pale Ale', 0.06, NULL, true, true),
@@ -6926,7 +6859,7 @@ BEGIN
     ON CONFLICT DO NOTHING;
   END IF;
 
-  -- ── Sprecher Brewing Company (Glendale, WI) — 2 beers ──
+  -- ── Sprecher Brewing Company (Glendale, WI) — 1 beers ──
   SELECT id INTO v_brewery_id FROM breweries
     WHERE LOWER(name) = LOWER('Sprecher Brewing Company') AND LOWER(city) = LOWER('Glendale') AND state = 'WI'
     LIMIT 1;
@@ -6934,7 +6867,6 @@ BEGIN
   IF v_brewery_id IS NOT NULL THEN
     INSERT INTO beers (id, brewery_id, name, style, abv, ibu, is_active, is_on_tap)
     VALUES
-      (gen_random_uuid(), v_brewery_id, 'Special Amber', 'Lager', 0.05, 22, true, true),
       (gen_random_uuid(), v_brewery_id, 'Special Amber', 'Lager', 0.05, 22, true, true)
     ON CONFLICT DO NOTHING;
   END IF;
@@ -6951,7 +6883,7 @@ BEGIN
     ON CONFLICT DO NOTHING;
   END IF;
 
-  -- ── Starr Hill Brewery (Crozet, VA) — 4 beers ──
+  -- ── Starr Hill Brewery (Crozet, VA) — 3 beers ──
   SELECT id INTO v_brewery_id FROM breweries
     WHERE LOWER(name) = LOWER('Starr Hill Brewery') AND LOWER(city) = LOWER('Crozet') AND state = 'VA'
     LIMIT 1;
@@ -6961,8 +6893,7 @@ BEGIN
     VALUES
       (gen_random_uuid(), v_brewery_id, 'Starr Pils', 'Pilsner', 0.042, 20, true, true),
       (gen_random_uuid(), v_brewery_id, 'Northern Lights India Pale Ale', 'IPA', 0.065, 52, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Festie', 'Oktoberfest', 0.048, 12, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Northern Lights India Pale Ale', 'IPA', 0.065, 52, true, true)
+      (gen_random_uuid(), v_brewery_id, 'Festie', 'Oktoberfest', 0.048, 12, true, true)
     ON CONFLICT DO NOTHING;
   END IF;
 
@@ -6981,7 +6912,7 @@ BEGIN
     ON CONFLICT DO NOTHING;
   END IF;
 
-  -- ── Stevens Point Brewery (Stevens Point, WI) — 22 beers ──
+  -- ── Stevens Point Brewery (Stevens Point, WI) — 18 beers ──
   SELECT id INTO v_brewery_id FROM breweries
     WHERE LOWER(name) = LOWER('Stevens Point Brewery') AND LOWER(city) = LOWER('Stevens Point') AND state = 'WI'
     LIMIT 1;
@@ -6992,7 +6923,6 @@ BEGIN
       (gen_random_uuid(), v_brewery_id, 'Point Special (Current)', 'Lager', 0.047, 9, true, true),
       (gen_random_uuid(), v_brewery_id, 'Point Special', 'Lager', 0.047, 9, true, true),
       (gen_random_uuid(), v_brewery_id, 'Point Cascade Pale Ale (2013)', 'Pale Ale', 0.054, 33, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Point Special', 'Lager', 0.047, 9, true, true),
       (gen_random_uuid(), v_brewery_id, 'Onyx Black Ale', 'American Black Ale', 0.052, 9, true, true),
       (gen_random_uuid(), v_brewery_id, 'Beyond The Pale IPA', 'IPA', 0.063, 64, true, true),
       (gen_random_uuid(), v_brewery_id, 'Point Special (2013)', 'Lager', 0.047, 9, true, true),
@@ -7001,16 +6931,13 @@ BEGIN
       (gen_random_uuid(), v_brewery_id, 'St. Benedict''s Winter Ale', 'Amber', 0.062, NULL, true, true),
       (gen_random_uuid(), v_brewery_id, 'Point Oktoberfest', 'Oktoberfest', 0.057, 15, true, true),
       (gen_random_uuid(), v_brewery_id, 'Point Nude Beach Summer Wheat', 'Wheat', 0.052, 7, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Point Nude Beach Summer Wheat', 'Wheat', 0.05, 7, true, true),
       (gen_random_uuid(), v_brewery_id, 'Point Nude Beach Summer Wheat (2011)', 'Wheat', 0.05, 7, true, true),
       (gen_random_uuid(), v_brewery_id, 'Drop Dead Blonde', 'Blonde Ale', 0.035, NULL, true, true),
       (gen_random_uuid(), v_brewery_id, 'Three Kings Ale', 'Kölsch', 0.049, 13, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Point Oktoberfest', 'Oktoberfest', 0.057, 15, true, true),
       (gen_random_uuid(), v_brewery_id, '2012 Black Ale', 'Brown Ale', 0.054, 32, true, true),
       (gen_random_uuid(), v_brewery_id, 'Point Nude Beach Summer Wheat (2010)', 'Wheat', 0.05, 7, true, true),
       (gen_random_uuid(), v_brewery_id, 'Point Cascade Pale Ale', 'Pale Ale', 0.054, 33, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Point Amber Classic', 'Lager', 0.047, 14, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Point Special Lager', 'Lager', 0.047, 9, true, true)
+      (gen_random_uuid(), v_brewery_id, 'Point Amber Classic', 'Lager', 0.047, 14, true, true)
     ON CONFLICT DO NOTHING;
   END IF;
 
@@ -7026,7 +6953,7 @@ BEGIN
     ON CONFLICT DO NOTHING;
   END IF;
 
-  -- ── Stillwater Artisanal Ales (Baltimore, MD) — 3 beers ──
+  -- ── Stillwater Artisanal Ales (Baltimore, MD) — 2 beers ──
   SELECT id INTO v_brewery_id FROM breweries
     WHERE LOWER(name) = LOWER('Stillwater Artisanal Ales') AND LOWER(city) = LOWER('Baltimore') AND state = 'MD'
     LIMIT 1;
@@ -7034,7 +6961,6 @@ BEGIN
   IF v_brewery_id IS NOT NULL THEN
     INSERT INTO beers (id, brewery_id, name, style, abv, ibu, is_active, is_on_tap)
     VALUES
-      (gen_random_uuid(), v_brewery_id, 'Brontide', 'American Black Ale', 0.05, NULL, true, true),
       (gen_random_uuid(), v_brewery_id, 'Brontide', 'American Black Ale', 0.05, NULL, true, true),
       (gen_random_uuid(), v_brewery_id, 'Classique', 'Saison', 0.045, NULL, true, true)
     ON CONFLICT DO NOTHING;
@@ -7236,7 +7162,7 @@ BEGIN
     ON CONFLICT DO NOTHING;
   END IF;
 
-  -- ── TailGate Beer (San Diego, CA) — 8 beers ──
+  -- ── TailGate Beer (San Diego, CA) — 5 beers ──
   SELECT id INTO v_brewery_id FROM breweries
     WHERE LOWER(name) = LOWER('TailGate Beer') AND LOWER(city) = LOWER('San Diego') AND state = 'CA'
     LIMIT 1;
@@ -7247,15 +7173,12 @@ BEGIN
       (gen_random_uuid(), v_brewery_id, 'Dodgy Knight Imperial IPA', 'Double IPA', 0.08, 95, true, true),
       (gen_random_uuid(), v_brewery_id, 'TailGate Saison', 'Saison', 0.05, NULL, true, true),
       (gen_random_uuid(), v_brewery_id, 'TailGate IPA', 'IPA', 0.05, 44, true, true),
-      (gen_random_uuid(), v_brewery_id, 'TailGate IPA', 'IPA', 0.05, 44, true, true),
       (gen_random_uuid(), v_brewery_id, 'TailGate Hefeweizen', 'Hefeweizen', 0.049, 28, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Blacktop Blonde', 'Blonde Ale', 0.05, 19, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Blacktop Blonde', 'Blonde Ale', 0.05, 19, true, true),
-      (gen_random_uuid(), v_brewery_id, 'TailGate Hefeweizen', 'Hefeweizen', 0.049, 28, true, true)
+      (gen_random_uuid(), v_brewery_id, 'Blacktop Blonde', 'Blonde Ale', 0.05, 19, true, true)
     ON CONFLICT DO NOTHING;
   END IF;
 
-  -- ── Tallgrass Brewing Company (Manhattan, KS) — 18 beers ──
+  -- ── Tallgrass Brewing Company (Manhattan, KS) — 17 beers ──
   SELECT id INTO v_brewery_id FROM breweries
     WHERE LOWER(name) = LOWER('Tallgrass Brewing Company') AND LOWER(city) = LOWER('Manhattan') AND state = 'KS'
     LIMIT 1;
@@ -7275,7 +7198,6 @@ BEGIN
       (gen_random_uuid(), v_brewery_id, 'Halcyon Unfiltered Wheat', 'Wheat', 0.05, 20, true, true),
       (gen_random_uuid(), v_brewery_id, '8-Bit Pale Ale', 'Pale Ale', 0.052, NULL, true, true),
       (gen_random_uuid(), v_brewery_id, 'Velvet Rooster', 'Belgian Tripel', 0.085, NULL, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Halcyon Unfiltered Wheat', 'Wheat', 0.05, 20, true, true),
       (gen_random_uuid(), v_brewery_id, 'Köld Lager (2010)', 'Pilsner', 0.05, 16, true, true),
       (gen_random_uuid(), v_brewery_id, 'Oasis (2010)', 'Double IPA', 0.072, 93, true, true),
       (gen_random_uuid(), v_brewery_id, 'Tallgrass Ale', 'Brown Ale', 0.044, 22, true, true),
@@ -7391,7 +7313,7 @@ BEGIN
     ON CONFLICT DO NOTHING;
   END IF;
 
-  -- ── The Alchemist (Waterbury, VT) — 6 beers ──
+  -- ── The Alchemist (Waterbury, VT) — 5 beers ──
   SELECT id INTO v_brewery_id FROM breweries
     WHERE LOWER(name) = LOWER('The Alchemist') AND LOWER(city) = LOWER('Waterbury') AND state = 'VT'
     LIMIT 1;
@@ -7403,7 +7325,6 @@ BEGIN
       (gen_random_uuid(), v_brewery_id, 'The Crusher', 'Double IPA', 0.096, NULL, true, true),
       (gen_random_uuid(), v_brewery_id, 'Beelzebub', 'Imperial Stout', 0.08, NULL, true, true),
       (gen_random_uuid(), v_brewery_id, 'Focal Banger', 'IPA', 0.07, NULL, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Heady Topper', 'Double IPA', 0.08, 120, true, true),
       (gen_random_uuid(), v_brewery_id, 'Heady Topper', 'Double IPA', 0.08, 120, true, true)
     ON CONFLICT DO NOTHING;
   END IF;
@@ -7974,7 +7895,7 @@ BEGIN
     ON CONFLICT DO NOTHING;
   END IF;
 
-  -- ── Utah Brewers Cooperative (Salt Lake City, UT) — 8 beers ──
+  -- ── Utah Brewers Cooperative (Salt Lake City, UT) — 7 beers ──
   SELECT id INTO v_brewery_id FROM breweries
     WHERE LOWER(name) = LOWER('Utah Brewers Cooperative') AND LOWER(city) = LOWER('Salt Lake City') AND state = 'UT'
     LIMIT 1;
@@ -7988,8 +7909,7 @@ BEGIN
       (gen_random_uuid(), v_brewery_id, 'Wasatch Ghostrider White IPA', 'IPA', 0.06, NULL, true, true),
       (gen_random_uuid(), v_brewery_id, 'Wasatch Ghostrider White IPA (2014)', 'IPA', 0.06, NULL, true, true),
       (gen_random_uuid(), v_brewery_id, 'Wasatch Apricot Hefeweizen', 'Sour', 0.04, NULL, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Squatters Hop Rising Double IPA (2014)', 'Double IPA', 0.09, 75, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Squatters Full Suspension Pale Ale', 'Pale Ale', 0.04, NULL, true, true)
+      (gen_random_uuid(), v_brewery_id, 'Squatters Hop Rising Double IPA (2014)', 'Double IPA', 0.09, 75, true, true)
     ON CONFLICT DO NOTHING;
   END IF;
 
@@ -8022,7 +7942,7 @@ BEGIN
     ON CONFLICT DO NOTHING;
   END IF;
 
-  -- ── Wachusett Brewing Company (Westminster, MA) — 11 beers ──
+  -- ── Wachusett Brewing Company (Westminster, MA) — 10 beers ──
   SELECT id INTO v_brewery_id FROM breweries
     WHERE LOWER(name) = LOWER('Wachusett Brewing Company') AND LOWER(city) = LOWER('Westminster') AND state = 'MA'
     LIMIT 1;
@@ -8039,8 +7959,7 @@ BEGIN
       (gen_random_uuid(), v_brewery_id, 'Country Pale Ale', 'Pale Ale', 0.051, 17, true, true),
       (gen_random_uuid(), v_brewery_id, 'Wachusett Light IPA (2013)', 'IPA', 0.04, 37, true, true),
       (gen_random_uuid(), v_brewery_id, 'Pumpkan', 'Amber', 0.052, 20, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Wachusett Blueberry Ale', 'Sour', 0.045, 10, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Green Monsta IPA', 'IPA', 0.06, 55, true, true)
+      (gen_random_uuid(), v_brewery_id, 'Wachusett Blueberry Ale', 'Sour', 0.045, 10, true, true)
     ON CONFLICT DO NOTHING;
   END IF;
 
@@ -8174,7 +8093,7 @@ BEGIN
     ON CONFLICT DO NOTHING;
   END IF;
 
-  -- ── Wild Onion Brewing Company (Lake Barrington, IL) — 10 beers ──
+  -- ── Wild Onion Brewing Company (Lake Barrington, IL) — 9 beers ──
   SELECT id INTO v_brewery_id FROM breweries
     WHERE LOWER(name) = LOWER('Wild Onion Brewing Company') AND LOWER(city) = LOWER('Lake Barrington') AND state = 'IL'
     LIMIT 1;
@@ -8186,7 +8105,6 @@ BEGIN
       (gen_random_uuid(), v_brewery_id, 'Pumpkin Ale', 'Amber', 0.045, NULL, true, true),
       (gen_random_uuid(), v_brewery_id, 'Big Bowl Blonde Ale', 'Brown Ale', 0.05, NULL, true, true),
       (gen_random_uuid(), v_brewery_id, 'Phat Chance', 'Blonde Ale', 0.052, 27, true, true),
-      (gen_random_uuid(), v_brewery_id, 'Hop Slayer Double IPA (2011)', 'Double IPA', 0.082, 100, true, true),
       (gen_random_uuid(), v_brewery_id, 'Hop Slayer Double IPA (2011)', 'Double IPA', 0.082, 100, true, true),
       (gen_random_uuid(), v_brewery_id, 'Wild Onion Summer Wit', 'Witbier', 0.042, 13, true, true),
       (gen_random_uuid(), v_brewery_id, 'Jack Stout', 'Oatmeal Stout', 0.06, 23, true, true),
@@ -8381,6 +8299,6 @@ END $$;
 
 -- ── Summary ──
 -- Breweries with beer data: 541
--- Total beers: 2361
+-- Total beers: 2279
 -- Note: Only beers whose brewery exists in our DB (migration 048) will be inserted.
 -- Brewery owners can always add/update their own beers after claiming.
