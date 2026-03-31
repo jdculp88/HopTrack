@@ -245,6 +245,7 @@ scripts/supabase-setup.mjs    — One-time setup script
 
 **Current Sprint:** Sprint 74 — TBD
 **Last completed:** Sprint 73 — Shore It Up (10-sprint arc) ✅ — Tech debt, documentation, folder organization
+**Retro (64-73):** `docs/retros/sprint-64-73-retro.md`
 **10-sprint plan (64-73):** `docs/plans/sprint-64-73-master-plan.md`
 **Sprint history (1-40):** `docs/sprint-history.md`
 **Sprint history (64-73):** `docs/sprint-history.md` (appended)
