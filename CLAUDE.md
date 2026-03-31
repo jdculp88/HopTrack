@@ -243,11 +243,11 @@ scripts/supabase-setup.mjs    — One-time setup script
 
 ## 🗺️ Where We Are
 
-**Current Sprint:** Sprint 77 — TBD
-**Last completed:** Sprint 76 — The Safety Net ✅ — CI/CD pipeline + staging environment docs
-**Retro (76):** `docs/retros/sprint-76-retro.md` (facilitated by Quinn)
+**Current Sprint:** Sprint 78 — TBD
+**Last completed:** Sprint 77 — The Countdown ✅ — Vitest (39 tests), launch checklist burndown (44%→56%), cookie consent, JSON-LD, business formation guide
+**Retro (77):** `docs/retros/sprint-77-retro.md` (facilitated by Drew)
+**Sprint plan (77):** `docs/plans/sprint-77-plan.md`
 **Sprint plan (76):** `docs/plans/sprint-76-plan.md`
-**Sprint plan (75):** `docs/plans/sprint-75-plan.md`
 **Roadmap research:** `docs/plans/roadmap-research-2026-q2.md` — 30 features, 20 REQs (REQ-069/070 added), 4 sprint arcs (through Sprint 96)
 **Sprint plan (74):** `docs/plans/sprint-74-plan.md`
 **Retro (64-73):** `docs/retros/sprint-64-73-retro.md`
@@ -441,6 +441,43 @@ Migration state (001-041): all applied — see `docs/sprint-history.md#migration
 - `docs/requirements/REQ-069-enhanced-kpis-analytics.md` — NEW: Enhanced KPIs requirement (queued)
 - `docs/requirements/REQ-070-brewery-menu-uploads.md` — NEW: Menu uploads requirement (queued)
 - No new migrations
+
+---
+
+### Sprint 77 — The Countdown ✅ (2026-03-31)
+**Theme:** Unit test framework + launch checklist burndown
+**Arc:** Launch or Bust (Sprints 75-78)
+
+**Goal 1: Unit Test Framework + Critical Path Coverage (F-006)** — Vitest configured (`vitest.config.ts`), 39 unit tests across 4 files: `lib/__tests__/xp.test.ts` (19 tests — levels, progression, boundaries), `lib/__tests__/stripe.test.ts` (12 tests — prices, tiers, config), `lib/__tests__/email.test.ts` (4 tests — sendEmail fallback, config), `lib/__tests__/email-triggers.test.ts` (4 tests — exports, triggers, error handling). Vitest added to CI pipeline (hard-fail before build). `npm run test` and `npm run test:watch` scripts added.
+
+**Goal 2: Launch Checklist Burndown** — Checklist audited: 19 stale items corrected (cancel flow, billing portal, Delete Account, OG images, email infra, onboarding wizard — all previously shipped but unmarked). Launch readiness jumped from 44% → 56%. Cookie consent banner shipped (`components/ui/CookieConsent.tsx` — privacy-first, auto-decline, AnimatePresence slide-up, localStorage persistence). JSON-LD structured data on brewery pages (Brewery schema with address, geo, phone, aggregateRating). `.env.production.example` created. Auth rate limit audit completed (`/api/auth/welcome` rate-limited at 5/min). Launch day ops documented (`docs/launch-day-ops.md` — T-24h checklist, incident runbook, rollback strategy, on-call rotation).
+
+**Key changes from Sprint 77:**
+- `vitest.config.ts` — NEW: Vitest config (jsdom, `@/` alias, test patterns)
+- `lib/__tests__/xp.test.ts` — NEW: 19 tests (SESSION_XP, LEVELS, getLevelFromXP, getNextLevel, getLevelProgress)
+- `lib/__tests__/stripe.test.ts` — NEW: 12 tests (STRIPE_PRICES, TIER_INFO, isStripeConfigured)
+- `lib/__tests__/email.test.ts` — NEW: 4 tests (sendEmail fallback, isEmailConfigured)
+- `lib/__tests__/email-triggers.test.ts` — NEW: 4 tests (exports, onPasswordReset, onUserSignUp)
+- `components/ui/CookieConsent.tsx` — NEW: privacy-first cookie consent with AnimatePresence
+- `app/layout.tsx` — UPDATED: CookieConsent added to layout
+- `app/(app)/brewery/[id]/page.tsx` — UPDATED: JSON-LD Brewery schema, expanded generateMetadata query
+- `app/api/auth/welcome/route.ts` — UPDATED: rate limiting added (5/min)
+- `.github/workflows/ci.yml` — UPDATED: Vitest step added (hard-fail before build)
+- `.env.production.example` — NEW: all production env vars documented
+- `docs/launch-day-ops.md` — NEW: launch day timeline, incident runbook, rollback strategy
+- `docs/launch-checklist.md` — UPDATED: full audit, 44%→56%, stale items corrected
+- `docs/plans/sprint-77-plan.md` — NEW: sprint plan
+- `docs/retros/sprint-77-retro.md` — NEW: retro (facilitated by Drew)
+- `docs/sales/business-formation-guide.md` — NEW: LLC formation guide for Joshua (NC recommended, $125 + afternoon)
+- No new migrations
+
+**Joshua's decisions (Sprint 77):**
+- Business entity: learning process (Taylor wrote guide)
+- Stripe: blocked on LLC
+- Apple Developer: deferred (web-first)
+- Staging Supabase: paid tier provisioned
+- Launch date: no date set (wants product confidence)
+- First brewery: waiting on overall confidence
 
 ---
 

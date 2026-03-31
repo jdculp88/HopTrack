@@ -54,11 +54,16 @@ export const revalidate = 60; // 1-minute ISR — mix of public data + auth-gate
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createClient();
-  const { data } = await supabase.from("breweries").select("name, city, state").eq("id", id).single();
+  const { data } = await supabase
+    .from("breweries")
+    .select("name, city, state, street, postal_code, country, phone, website_url, description, latitude, longitude, brewery_type")
+    .eq("id", id)
+    .single();
   if (!data) return { title: "Brewery" };
   const title = `${data.name} · ${data.city}, ${data.state}`;
   const cityParam = [data.city, data.state].filter(Boolean).join(", ");
   const ogImage = `/og?type=brewery&brewery=${encodeURIComponent(data.name)}&city=${encodeURIComponent(cityParam)}`;
+
   return {
     title,
     openGraph: {
@@ -206,7 +211,55 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
 
   const gradient = generateGradientFromString(brewery.name);
 
+  // JSON-LD structured data — Brewery (LocalBusiness subtype)
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Brewery",
+    name: brewery.name,
+    ...(brewery.description && { description: brewery.description }),
+    ...(brewery.street && {
+      address: {
+        "@type": "PostalAddress",
+        streetAddress: brewery.street,
+        addressLocality: brewery.city,
+        addressRegion: brewery.state,
+        ...(brewery.postal_code && { postalCode: brewery.postal_code }),
+        addressCountry: brewery.country || "US",
+      },
+    }),
+    ...(!brewery.street && brewery.city && {
+      address: {
+        "@type": "PostalAddress",
+        addressLocality: brewery.city,
+        addressRegion: brewery.state,
+        addressCountry: brewery.country || "US",
+      },
+    }),
+    ...(brewery.latitude && brewery.longitude && {
+      geo: {
+        "@type": "GeoCoordinates",
+        latitude: brewery.latitude,
+        longitude: brewery.longitude,
+      },
+    }),
+    ...(brewery.phone && { telephone: brewery.phone }),
+    ...(brewery.website_url && { url: brewery.website_url }),
+    ...(avgRating && {
+      aggregateRating: {
+        "@type": "AggregateRating",
+        ratingValue: avgRating.toFixed(1),
+        ratingCount: ratingsWithValue.length,
+        bestRating: 5,
+      },
+    }),
+  };
+
   return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
     <div className="max-w-4xl mx-auto">
       {/* Hero */}
       <div className="relative h-72 sm:h-96">
@@ -534,5 +587,6 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
         )}
       </div>
     </div>
+    </>
   );
 }

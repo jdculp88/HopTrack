@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { MotionConfig } from "framer-motion";
 import Script from "next/script";
+import { CookieConsent } from "@/components/ui/CookieConsent";
 
 // Kept for The Board (editorial menu aesthetic)
 const playfair = Playfair_Display({
@@ -97,6 +98,7 @@ export default function RootLayout({
         <MotionConfig reducedMotion="user">
           <ThemeProvider>
             {children}
+            <CookieConsent />
           </ThemeProvider>
         </MotionConfig>
         <Script
