@@ -12,7 +12,7 @@ export async function GET(req: Request) {
   if (!breweryId) return NextResponse.json({ error: "brewery_id required" }, { status: 400 });
 
   // Get user's wishlist beer IDs
-  const { data: wishlist } = await (supabase as any)
+  const { data: wishlist } = await supabase
     .from("wishlist")
     .select("beer_id")
     .eq("user_id", user.id);
@@ -24,7 +24,7 @@ export async function GET(req: Request) {
   const wishlistBeerIds = wishlist.map((w: any) => w.beer_id);
 
   // Get beers at this brewery that are on the wishlist and not 86'd
-  const { data: matches } = await (supabase as any)
+  const { data: matches } = await supabase
     .from("beers")
     .select("id, name, style, abv")
     .eq("brewery_id", breweryId)

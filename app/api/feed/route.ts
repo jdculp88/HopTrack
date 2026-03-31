@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
       .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`)
       .eq("status", "accepted");
 
-    const friendIds = ((friendships ?? []) as FriendshipRow[]).map((f) =>
+    const friendIds = ((friendships ?? []) as unknown as FriendshipRow[]).map((f) =>
       f.requester_id === user.id ? f.addressee_id : f.requester_id
     );
     userIds = [user.id, ...friendIds];
@@ -99,18 +99,18 @@ export async function GET(request: NextRequest) {
         .in("session_id", sessionIds),
     ]);
 
-    for (const r of (countsRes.data ?? []) as ReactionRow[]) {
+    for (const r of (countsRes.data ?? []) as unknown as ReactionRow[]) {
       if (!reactionCounts[r.session_id]) reactionCounts[r.session_id] = {};
       reactionCounts[r.session_id][r.type] =
         (reactionCounts[r.session_id][r.type] ?? 0) + 1;
     }
 
-    for (const r of (userReactionsRes.data ?? []) as ReactionRow[]) {
+    for (const r of (userReactionsRes.data ?? []) as unknown as ReactionRow[]) {
       if (!userReactions[r.session_id]) userReactions[r.session_id] = [];
       userReactions[r.session_id].push(r.type);
     }
 
-    for (const c of (commentsRes.data ?? []) as CommentRow[]) {
+    for (const c of (commentsRes.data ?? []) as unknown as CommentRow[]) {
       commentCounts[c.session_id] = (commentCounts[c.session_id] ?? 0) + 1;
     }
   }

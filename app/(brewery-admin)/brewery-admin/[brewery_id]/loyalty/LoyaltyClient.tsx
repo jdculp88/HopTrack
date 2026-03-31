@@ -64,11 +64,11 @@ export function LoyaltyClient({ breweryId, initialPrograms, initialPromotions, b
     };
 
     if (editingProgram) {
-      const { data } = await (supabase as any)
+      const { data } = await supabase
         .from("loyalty_programs").update(payload).eq("id", editingProgram.id).select().single();
       if (data) setPrograms(p => p.map(x => x.id === editingProgram.id ? { ...x, ...data } : x));
     } else {
-      const { data } = await (supabase as any)
+      const { data } = await supabase
         .from("loyalty_programs").insert({ ...payload, is_active: true }).select().single();
       if (data) setPrograms(p => [data, ...p]);
     }
@@ -82,7 +82,7 @@ export function LoyaltyClient({ breweryId, initialPrograms, initialPromotions, b
   async function savePromo() {
     if (!promoForm.title.trim()) return;
     setSavingPromo(true);
-    const { data } = await (supabase as any).from("promotions").insert({
+    const { data } = await supabase.from("promotions").insert({
       brewery_id: breweryId,
       title: promoForm.title,
       description: promoForm.description || null,
@@ -101,21 +101,21 @@ export function LoyaltyClient({ breweryId, initialPrograms, initialPromotions, b
   async function toggleProgram(prog: any) {
     const newVal = !prog.is_active;
     setPrograms(p => p.map(x => x.id === prog.id ? { ...x, is_active: newVal } : x));
-    const { error } = await (supabase as any).from("loyalty_programs").update({ is_active: newVal }).eq("id", prog.id);
+    const { error } = await supabase.from("loyalty_programs").update({ is_active: newVal }).eq("id", prog.id);
     if (error) setPrograms(p => p.map(x => x.id === prog.id ? { ...x, is_active: prog.is_active } : x));
   }
 
   async function togglePromo(promo: any) {
     const newVal = !promo.is_active;
     setPromotions(p => p.map(x => x.id === promo.id ? { ...x, is_active: newVal } : x));
-    const { error } = await (supabase as any).from("promotions").update({ is_active: newVal }).eq("id", promo.id);
+    const { error } = await supabase.from("promotions").update({ is_active: newVal }).eq("id", promo.id);
     if (error) setPromotions(p => p.map(x => x.id === promo.id ? { ...x, is_active: promo.is_active } : x));
   }
 
   async function deletePromo(id: string) {
     setDeletingPromoId(id);
     setConfirmDeletePromoId(null);
-    await (supabase as any).from("promotions").delete().eq("id", id);
+    await supabase.from("promotions").delete().eq("id", id);
     setPromotions(p => p.filter(x => x.id !== id));
     setDeletingPromoId(null);
   }

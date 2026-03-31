@@ -12,7 +12,7 @@ export async function GET(
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { data: reviews, error } = await (supabase as any)
+  const { data: reviews, error } = await supabase
     .from("beer_reviews")
     .select("id, rating, comment, created_at, updated_at, user_id, profile:profiles!user_id(username, display_name, avatar_url)")
     .eq("beer_id", beer_id)
@@ -54,7 +54,7 @@ export async function POST(
     return NextResponse.json({ error: "Rating must be between 1 and 5" }, { status: 400 });
   }
 
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from("beer_reviews")
     .upsert(
       {
@@ -84,7 +84,7 @@ export async function DELETE(
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { error } = await (supabase as any)
+  const { error } = await supabase
     .from("beer_reviews")
     .delete()
     .eq("user_id", user.id)

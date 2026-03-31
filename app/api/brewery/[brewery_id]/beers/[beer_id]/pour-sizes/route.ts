@@ -13,12 +13,12 @@ export async function GET(
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { data: account } = await (supabase as any)
+  const { data: account } = await supabase
     .from("brewery_accounts").select("role")
     .eq("user_id", user.id).eq("brewery_id", brewery_id).single();
   if (!account) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from("beer_pour_sizes")
     .select("*")
     .eq("beer_id", beer_id)
@@ -41,13 +41,13 @@ export async function POST(
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { data: account } = await (supabase as any)
+  const { data: account } = await supabase
     .from("brewery_accounts").select("role")
     .eq("user_id", user.id).eq("brewery_id", brewery_id).single();
   if (!account) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   // Verify beer belongs to this brewery
-  const { data: beer } = await (supabase as any)
+  const { data: beer } = await supabase
     .from("beers").select("id").eq("id", beer_id).eq("brewery_id", brewery_id).single();
   if (!beer) return NextResponse.json({ error: "Beer not found" }, { status: 404 });
 
@@ -59,7 +59,7 @@ export async function POST(
   }>;
 
   // Delete existing, then insert new
-  await (supabase as any).from("beer_pour_sizes").delete().eq("beer_id", beer_id);
+  await supabase.from("beer_pour_sizes").delete().eq("beer_id", beer_id);
 
   if (sizes.length > 0) {
     const rows = sizes.map((s, i) => ({
@@ -69,12 +69,12 @@ export async function POST(
       price: s.price,
       display_order: i,
     }));
-    const { error } = await (supabase as any).from("beer_pour_sizes").insert(rows);
+    const { error } = await supabase.from("beer_pour_sizes").insert(rows);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
   // Return updated list
-  const { data } = await (supabase as any)
+  const { data } = await supabase
     .from("beer_pour_sizes")
     .select("*")
     .eq("beer_id", beer_id)

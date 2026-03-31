@@ -12,7 +12,7 @@ export async function POST(request: Request) {
   }
 
   // Upsert — if same endpoint exists for this user, update keys
-  const { data: existing } = await (supabase as any)
+  const { data: existing } = await supabase
     .from('push_subscriptions')
     .select('id')
     .eq('user_id', user.id)
@@ -20,7 +20,7 @@ export async function POST(request: Request) {
     .maybeSingle()
 
   if (existing) {
-    const { error } = await (supabase as any)
+    const { error } = await supabase
       .from('push_subscriptions')
       .update({
         p256dh: subscription.keys.p256dh,
@@ -29,7 +29,7 @@ export async function POST(request: Request) {
       .eq('id', existing.id)
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   } else {
-    const { error } = await (supabase as any)
+    const { error } = await supabase
       .from('push_subscriptions')
       .insert({
         user_id: user.id,
@@ -53,7 +53,7 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ error: 'endpoint required' }, { status: 400 })
   }
 
-  await (supabase as any)
+  await supabase
     .from('push_subscriptions')
     .delete()
     .eq('user_id', user.id)

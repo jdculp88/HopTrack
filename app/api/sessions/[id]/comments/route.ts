@@ -14,7 +14,7 @@ export async function GET(
 
   // Fetch comments (no profile join — session_comments FKs to auth.users, not profiles,
   // so PostgREST can't reliably resolve profiles!user_id)
-  const { data: comments, error } = await (supabase as any)
+  const { data: comments, error } = await supabase
     .from("session_comments")
     .select("id, session_id, user_id, body, created_at")
     .eq("session_id", sessionId)
@@ -25,7 +25,7 @@ export async function GET(
 
   // Fetch profiles for all comment authors in one query
   const userIds = [...new Set(comments.map((c: any) => c.user_id))];
-  const { data: profiles } = await (supabase as any)
+  const { data: profiles } = await supabase
     .from("profiles")
     .select("id, username, display_name, avatar_url")
     .in("id", userIds);
@@ -62,7 +62,7 @@ export async function POST(
   }
 
   // Insert the comment (no profile join — session_comments FKs to auth.users, not profiles)
-  const { data: comment, error } = await (supabase as any)
+  const { data: comment, error } = await supabase
     .from("session_comments")
     .insert({ session_id: sessionId, user_id: user.id, body: body.trim() })
     .select("id, session_id, user_id, body, created_at")
@@ -71,7 +71,7 @@ export async function POST(
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
   // Attach the commenter's profile
-  const { data: commenterProfileData } = await (supabase as any)
+  const { data: commenterProfileData } = await supabase
     .from("profiles")
     .select("id, username, display_name, avatar_url")
     .eq("id", user.id)
@@ -80,7 +80,7 @@ export async function POST(
   const enrichedComment = { ...comment, profile: commenterProfileData ?? null };
 
   // Notify the session owner (if not self-commenting)
-  const { data: session } = await (supabase as any)
+  const { data: session } = await supabase
     .from("sessions")
     .select("user_id, brewery_id")
     .eq("id", sessionId)
@@ -91,7 +91,7 @@ export async function POST(
     const commenterName = commenterProfileData?.display_name || commenterProfileData?.username || "Someone";
 
     // Create in-app notification
-    await (supabase as any)
+    await supabase
       .from("notifications")
       .insert({
         user_id: session.user_id,
@@ -102,7 +102,7 @@ export async function POST(
       });
 
     // Send push notification (respects user preferences)
-    const { data: ownerPrefs } = await (supabase as any)
+    const { data: ownerPrefs } = await supabase
       .from("profiles")
       .select("notification_preferences")
       .eq("id", session.user_id)
@@ -122,7 +122,7 @@ export async function POST(
   const mentionRegex = /@([a-zA-Z0-9_]+)/g;
   const mentions = [...body.matchAll(mentionRegex)].map((m: any) => m[1]);
   if (mentions.length > 0) {
-    const { data: mentionedUsers } = await (supabase as any)
+    const { data: mentionedUsers } = await supabase
       .from("profiles")
       .select("id, username")
       .in("username", mentions);
@@ -135,7 +135,7 @@ export async function POST(
 
     if (toNotify.length > 0) {
       // Batch-insert all mention notifications in one query
-      await (supabase as any).from("notifications").insert(
+      await supabase.from("notifications").insert(
         toNotify.map((mentioned) => ({
           user_id: mentioned.id,
           type: "mention",

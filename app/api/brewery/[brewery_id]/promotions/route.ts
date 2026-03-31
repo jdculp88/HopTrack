@@ -14,7 +14,7 @@ export async function PATCH(
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   // Verify admin access
-  const { data: account } = await (supabase as any)
+  const { data: account } = await supabase
     .from("brewery_accounts")
     .select("role")
     .eq("user_id", user.id)
@@ -35,7 +35,7 @@ export async function PATCH(
     return NextResponse.json({ error: "No valid fields to update" }, { status: 400 });
   }
 
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from("breweries")
     .update(updates)
     .eq("id", brewery_id)

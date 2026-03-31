@@ -16,7 +16,7 @@ export async function GET(request: Request) {
   }
 
   // Query all logs for these beers by this user (excluding current session if needed)
-  const { data: logs } = await (supabase as any)
+  const { data: logs } = await supabase
     .from('beer_logs')
     .select('beer_id, rating, logged_at')
     .eq('user_id', user.id)

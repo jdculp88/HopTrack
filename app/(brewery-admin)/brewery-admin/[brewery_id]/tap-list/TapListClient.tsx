@@ -153,7 +153,7 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
 
     // Fetch existing pour sizes
     setLoadingPourSizes(true);
-    const { data } = await (supabase as any)
+    const { data } = await supabase
       .from("beer_pour_sizes")
       .select("*")
       .eq("beer_id", beer.id)
@@ -197,12 +197,12 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
     let savedBeerId: string;
 
     if (editingBeer) {
-      const { data, error } = await (supabase as any).from("beers").update(payload).eq("id", editingBeer.id).select().single();
+      const { data, error } = await supabase.from("beers").update(payload).eq("id", editingBeer.id).select().single();
       if (error) { setSaveError("Couldn't save changes. Please try again."); setSaving(false); return; }
       if (data) setBeers(prev => prev.map(b => b.id === editingBeer.id ? { ...b, ...data } : b));
       savedBeerId = editingBeer.id;
     } else {
-      const { data, error } = await (supabase as any).from("beers").insert(payload).select().single();
+      const { data, error } = await supabase.from("beers").insert(payload).select().single();
       if (error) { setSaveError("Couldn't add beer. Please try again."); setSaving(false); return; }
       if (data) setBeers(prev => [...prev, data]);
       savedBeerId = (data as any).id;
@@ -210,9 +210,9 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
 
     // Save pour sizes — delete existing, insert new
     const validSizes = pourSizes.filter(s => s.label.trim() && s.price && !isNaN(parseFloat(s.price)));
-    await (supabase as any).from("beer_pour_sizes").delete().eq("beer_id", savedBeerId);
+    await supabase.from("beer_pour_sizes").delete().eq("beer_id", savedBeerId);
     if (validSizes.length > 0) {
-      await (supabase as any).from("beer_pour_sizes").insert(
+      await supabase.from("beer_pour_sizes").insert(
         validSizes.map((s, i) => ({
           beer_id: savedBeerId,
           label: s.label.trim(),
@@ -231,7 +231,7 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
   async function toggleTap(beer: Beer) {
     const newVal = !beer.is_on_tap;
     setBeers(prev => prev.map(b => b.id === beer.id ? { ...b, is_on_tap: newVal } : b));
-    const { error } = await (supabase as any).from("beers").update({ is_on_tap: newVal }).eq("id", beer.id);
+    const { error } = await supabase.from("beers").update({ is_on_tap: newVal }).eq("id", beer.id);
     // Roll back optimistic update on failure
     if (error) setBeers(prev => prev.map(b => b.id === beer.id ? { ...b, is_on_tap: beer.is_on_tap } : b));
   }
@@ -261,7 +261,7 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
   async function toggle86d(beer: Beer) {
     const newVal = !beer.is_86d;
     setBeers(prev => prev.map(b => b.id === beer.id ? { ...b, is_86d: newVal } : b));
-    const { error } = await (supabase as any).from("beers").update({ is_86d: newVal }).eq("id", beer.id);
+    const { error } = await supabase.from("beers").update({ is_86d: newVal }).eq("id", beer.id);
     if (error) setBeers(prev => prev.map(b => b.id === beer.id ? { ...b, is_86d: beer.is_86d } : b));
     else toastSuccess(newVal ? `${beer.name} marked as 86'd` : `${beer.name} back in stock`);
   }
@@ -285,7 +285,7 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
     // Persist new order
     const updates = reordered.map((b, i) => ({ id: b.id, display_order: i }));
     for (const u of updates) {
-      await (supabase as any).from("beers").update({ display_order: u.display_order }).eq("id", u.id);
+      await supabase.from("beers").update({ display_order: u.display_order }).eq("id", u.id);
     }
   }
 
@@ -327,7 +327,7 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
     setBeers(prev => prev.map(b => ids.includes(b.id) ? { ...b, is_86d: mark } : b));
 
     await Promise.all(ids.map(id =>
-      (supabase as any).from("beers").update({ is_86d: mark }).eq("id", id)
+      supabase.from("beers").update({ is_86d: mark }).eq("id", id)
     ));
 
     toastSuccess(mark ? `${ids.length} beer${ids.length !== 1 ? "s" : ""} marked as 86'd` : `${ids.length} beer${ids.length !== 1 ? "s" : ""} back in stock`);
@@ -342,7 +342,7 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
     const ids = Array.from(selectedIds);
 
     await Promise.all(ids.map(id =>
-      (supabase as any).from("beers").delete().eq("id", id)
+      supabase.from("beers").delete().eq("id", id)
     ));
 
     setBeers(prev => prev.filter(b => !ids.includes(b.id)));
@@ -362,7 +362,7 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
     setBeers(sorted);
     // Persist new order
     sorted.forEach(async (b, i) => {
-      await (supabase as any).from("beers").update({ display_order: i }).eq("id", b.id);
+      await supabase.from("beers").update({ display_order: i }).eq("id", b.id);
     });
     toastSuccess("Beers sorted by style");
   }
@@ -371,7 +371,7 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
     const sorted = [...beers].sort((a, b) => a.name.localeCompare(b.name));
     setBeers(sorted);
     sorted.forEach(async (b, i) => {
-      await (supabase as any).from("beers").update({ display_order: i }).eq("id", b.id);
+      await supabase.from("beers").update({ display_order: i }).eq("id", b.id);
     });
     toastSuccess("Beers sorted alphabetically");
   }
@@ -379,7 +379,7 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
   async function handleDelete(beer: Beer) {
     setDeletingId(beer.id);
     setConfirmDeleteId(null);
-    await (supabase as any).from("beers").delete().eq("id", beer.id);
+    await supabase.from("beers").delete().eq("id", beer.id);
     setBeers(prev => prev.filter(b => b.id !== beer.id));
     setDeletingId(null);
   }

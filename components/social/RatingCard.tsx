@@ -31,7 +31,7 @@ export function RatingCard({ rating: review, index = 0 }: { rating: FriendRating
           username: review.profile.username,
           display_name: review.profile.display_name,
           avatar_url: review.profile.avatar_url,
-        } as any}
+        }}
         size="sm"
       />
       <div className="flex-1 min-w-0">

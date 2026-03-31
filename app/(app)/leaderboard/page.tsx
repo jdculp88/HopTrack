@@ -10,7 +10,7 @@ export default async function LeaderboardPage() {
   if (!user) redirect("/login");
 
   // Fetch all-time top 20
-  const { data: profiles } = await (supabase as any)
+  const { data: profiles } = await supabase
     .from("profiles")
     .select("id, username, display_name, avatar_url, xp")
     .order("xp", { ascending: false })
@@ -28,7 +28,7 @@ export default async function LeaderboardPage() {
   monthStart.setDate(1);
   monthStart.setHours(0, 0, 0, 0);
 
-  const { data: monthSessions } = await (supabase as any)
+  const { data: monthSessions } = await supabase
     .from("sessions")
     .select("user_id, xp_earned, profile:profiles!sessions_user_id_fkey(id, username, display_name, avatar_url, xp)")
     .eq("is_active", false)

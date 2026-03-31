@@ -59,6 +59,116 @@ export interface Database {
         Insert: ReactionInsert;
         Update: ReactionUpdate;
       };
+      sessions: {
+        Row: Session;
+        Insert: SessionInsert;
+        Update: SessionUpdate;
+      };
+      beer_logs: {
+        Row: BeerLog;
+        Insert: BeerLogInsert;
+        Update: BeerLogUpdate;
+      };
+      session_comments: {
+        Row: SessionComment;
+        Insert: SessionCommentInsert;
+        Update: Partial<SessionComment>;
+      };
+      session_participants: {
+        Row: SessionParticipant;
+        Insert: SessionParticipantInsert;
+        Update: Partial<SessionParticipant>;
+      };
+      session_photos: {
+        Row: SessionPhoto;
+        Insert: SessionPhotoInsert;
+        Update: Partial<SessionPhoto>;
+      };
+      beer_lists: {
+        Row: BeerList;
+        Insert: BeerListInsert;
+        Update: BeerListUpdate;
+      };
+      beer_list_items: {
+        Row: BeerListItem;
+        Insert: BeerListItemInsert;
+        Update: Partial<BeerListItem>;
+      };
+      brewery_follows: {
+        Row: BreweryFollow;
+        Insert: BreweryFollowInsert;
+        Update: Partial<BreweryFollow>;
+      };
+      referral_codes: {
+        Row: ReferralCode;
+        Insert: Omit<ReferralCode, "id" | "created_at"> & { id?: string };
+        Update: Partial<ReferralCode>;
+      };
+      referral_uses: {
+        Row: ReferralUse;
+        Insert: Omit<ReferralUse, "id" | "created_at"> & { id?: string };
+        Update: Partial<ReferralUse>;
+      };
+      beer_reviews: {
+        Row: BeerReview;
+        Insert: BeerReviewInsert;
+        Update: BeerReviewUpdate;
+      };
+      brewery_reviews: {
+        Row: BreweryReview;
+        Insert: BreweryReviewInsert;
+        Update: BreweryReviewUpdate;
+      };
+      push_subscriptions: {
+        Row: PushSubscription;
+        Insert: PushSubscriptionInsert;
+        Update: Partial<PushSubscription>;
+      };
+      brewery_accounts: {
+        Row: BreweryAccount;
+        Insert: Omit<BreweryAccount, "id" | "created_at"> & { id?: string };
+        Update: Partial<BreweryAccount>;
+      };
+      brewery_claims: {
+        Row: BreweryClaim;
+        Insert: Omit<BreweryClaim, "id" | "created_at"> & { id?: string };
+        Update: Partial<BreweryClaim>;
+      };
+      brewery_events: {
+        Row: BreweryEvent;
+        Insert: Omit<BreweryEvent, "id" | "created_at"> & { id?: string };
+        Update: Partial<BreweryEvent>;
+      };
+      pour_sizes: {
+        Row: PourSize;
+        Insert: Omit<PourSize, "id"> & { id?: string };
+        Update: Partial<PourSize>;
+      };
+      hop_routes: {
+        Row: HopRoute;
+        Insert: Omit<HopRoute, "id" | "created_at"> & { id?: string };
+        Update: Partial<HopRoute>;
+      };
+      hop_route_stops: {
+        Row: HopRouteStop;
+        Insert: Omit<HopRouteStop, "id"> & { id?: string };
+        Update: Partial<HopRouteStop>;
+      };
+      hop_route_stop_beers: {
+        Row: HopRouteStopBeer;
+        Insert: Omit<HopRouteStopBeer, "id"> & { id?: string };
+        Update: Partial<HopRouteStopBeer>;
+      };
+      loyalty_programs: {
+        Row: LoyaltyProgram;
+        Insert: Omit<LoyaltyProgram, "id" | "created_at"> & { id?: string };
+        Update: Partial<LoyaltyProgram>;
+      };
+      loyalty_redemptions: {
+        Row: LoyaltyRedemption;
+        Insert: Omit<LoyaltyRedemption, "id" | "created_at"> & { id?: string };
+        Update: Partial<LoyaltyRedemption>;
+      };
     };
   };
 }
@@ -392,6 +502,81 @@ export interface BeerLog {
 }
 
 // ─── Enriched / Joined Types ──────────────────────────────────────────────────
+export type SessionInsert = Omit<Session, "id" | "created_at" | "started_at" | "brewery" | "beer_logs" | "profile" | "session_photos"> & { id?: string };
+export type SessionUpdate = Partial<Omit<Session, "brewery" | "beer_logs" | "profile" | "session_photos">>;
+
+export type BeerLogInsert = Omit<BeerLog, "id" | "logged_at" | "beer"> & { id?: string };
+export type BeerLogUpdate = Partial<Omit<BeerLog, "beer">>;
+
+// ─── Beer Reviews ───────────────────────────────────────────────────────────
+export interface BeerReview {
+  id: string;
+  user_id: string;
+  beer_id: string;
+  rating: number;
+  comment: string | null;
+  created_at: string;
+  updated_at: string;
+  // joined fields
+  profile?: { id: string; username: string; display_name: string | null; avatar_url: string | null };
+}
+export type BeerReviewInsert = Omit<BeerReview, "id" | "created_at" | "updated_at" | "profile"> & { id?: string };
+export type BeerReviewUpdate = Partial<BeerReviewInsert>;
+
+// ─── Brewery Reviews ────────────────────────────────────────────────────────
+export interface BreweryReview {
+  id: string;
+  user_id: string;
+  brewery_id: string;
+  rating: number;
+  comment: string | null;
+  owner_response: string | null;
+  responded_at: string | null;
+  created_at: string;
+  updated_at: string;
+  // joined fields
+  profile?: { id: string; username: string; display_name: string | null; avatar_url: string | null };
+}
+export type BreweryReviewInsert = Omit<BreweryReview, "id" | "created_at" | "updated_at" | "profile" | "owner_response" | "responded_at"> & { id?: string };
+export type BreweryReviewUpdate = Partial<BreweryReviewInsert>;
+
+// ─── Push Subscriptions ─────────────────────────────────────────────────────
+export interface PushSubscription {
+  id: string;
+  user_id: string;
+  endpoint: string;
+  keys: Json;
+  created_at: string;
+}
+export type PushSubscriptionInsert = Omit<PushSubscription, "id" | "created_at"> & { id?: string };
+
+// ─── Brewery Accounts ───────────────────────────────────────────────────────
+export interface BreweryAccount {
+  id: string;
+  user_id: string;
+  brewery_id: string;
+  role: "owner" | "manager" | "staff";
+  stripe_customer_id: string | null;
+  subscription_tier: "free" | "tap" | "cask" | "barrel";
+  subscription_status: "active" | "trialing" | "past_due" | "canceled" | null;
+  trial_ends_at: string | null;
+  created_at: string;
+}
+
+// ─── Brewery Claims ─────────────────────────────────────────────────────────
+export interface BreweryClaim {
+  id: string;
+  user_id: string;
+  brewery_id: string;
+  status: "pending" | "approved" | "rejected";
+  proof_url: string | null;
+  notes: string | null;
+  reviewed_by: string | null;
+  reviewed_at: string | null;
+  created_at: string;
+}
+
+// ─── Enriched / Joined Types ──────────────────────────────────────────────────
 export interface BeerWithBrewery extends Beer {
   brewery: Brewery;
   on_wishlist?: boolean;
@@ -494,3 +679,94 @@ export interface SessionPhoto {
   created_at: string;
 }
 export type SessionPhotoInsert = Omit<SessionPhoto, "id" | "created_at"> & { id?: string };
+
+// ─── Brewery Events ─────────────────────────────────────────────────────────
+export interface BreweryEvent {
+  id: string;
+  brewery_id: string;
+  title: string;
+  description: string | null;
+  event_date: string;
+  start_time: string | null;
+  end_time: string | null;
+  event_type: string | null;
+  is_active: boolean;
+  created_at: string;
+}
+
+// ─── Pour Sizes ─────────────────────────────────────────────────────────────
+export interface PourSize {
+  id: string;
+  beer_id: string;
+  brewery_id: string;
+  size_name: string;
+  size_oz: number;
+  price: number;
+}
+
+// ─── HopRoute ───────────────────────────────────────────────────────────────
+export type HopRouteStatus = "draft" | "active" | "completed" | "cancelled";
+
+export interface HopRoute {
+  id: string;
+  user_id: string;
+  name: string;
+  city: string;
+  state: string | null;
+  vibe_tags: string[] | null;
+  status: HopRouteStatus;
+  total_stops: number;
+  completed_stops: number;
+  created_at: string;
+}
+
+export interface HopRouteStop {
+  id: string;
+  route_id: string;
+  brewery_id: string;
+  stop_order: number;
+  reason: string | null;
+  is_completed: boolean;
+  // joined fields
+  brewery?: BrewerySummaryJoin;
+  hop_route_stop_beers?: HopRouteStopBeer[];
+}
+
+interface BrewerySummaryJoin {
+  id: string;
+  name: string;
+  city: string | null;
+  state: string | null;
+  latitude: number | null;
+  longitude: number | null;
+}
+
+export interface HopRouteStopBeer {
+  id: string;
+  stop_id: string;
+  beer_id: string;
+  recommendation_reason: string | null;
+  // joined fields
+  beer?: { id: string; name: string; style: string | null; abv: number | null };
+}
+
+// ─── Loyalty ────────────────────────────────────────────────────────────────
+export interface LoyaltyProgram {
+  id: string;
+  brewery_id: string;
+  name: string;
+  description: string | null;
+  reward_type: string;
+  visits_required: number;
+  reward_description: string | null;
+  is_active: boolean;
+  created_at: string;
+}
+
+export interface LoyaltyRedemption {
+  id: string;
+  program_id: string;
+  user_id: string;
+  redeemed_at: string;
+  created_at: string;
+}

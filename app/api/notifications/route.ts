@@ -7,7 +7,7 @@ export async function PATCH() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { error } = await (supabase as any)
+  const { error } = await supabase
     .from("notifications")
     .update({ read: true })
     .eq("user_id", user.id)

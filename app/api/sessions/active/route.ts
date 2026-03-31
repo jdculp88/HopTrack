@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { data: session, error } = await (supabase as any)
+  const { data: session, error } = await supabase
     .from('sessions')
     .select(`
       *,
@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
     .maybeSingle()
 
   if (error) {
-    console.error('Error fetching active session:', error)
+    console.error('[sessions/active] Error fetching active session:', error)
     return NextResponse.json({ error: 'Failed to fetch active session' }, { status: 500 })
   }
 
@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
     const startedAt = new Date(session.started_at)
     const sixHoursAgo = new Date(Date.now() - 6 * 60 * 60 * 1000)
     if (startedAt < sixHoursAgo) {
-      await (supabase as any)
+      await supabase
         .from('sessions')
         .update({ is_active: false, ended_at: new Date().toISOString() })
         .eq('id', session.id)

@@ -4,11 +4,12 @@ import { getLevelFromXP } from "@/lib/xp";
 
 interface UserAvatarProps {
   profile: {
-    display_name: string;
+    display_name: string | null;
     avatar_url?: string | null;
     level?: number;
     xp?: number;
     username?: string;
+    id?: string;
   };
   size?: "xs" | "sm" | "md" | "lg" | "xl";
   showLevel?: boolean;
@@ -26,7 +27,8 @@ const SIZES = {
 export function UserAvatar({ profile, size = "md", showLevel = false, className }: UserAvatarProps) {
   const s = SIZES[size];
   const level = profile.level ?? (profile.xp !== undefined ? getLevelFromXP(profile.xp).level : 1);
-  const gradient = generateGradientFromString(profile.display_name + (profile.username ?? ""));
+  const displayName = profile.display_name ?? profile.username ?? "?";
+  const gradient = generateGradientFromString(displayName + (profile.username ?? ""));
 
   return (
     <div className={cn("relative inline-flex flex-shrink-0", className)}>
@@ -42,12 +44,12 @@ export function UserAvatar({ profile, size = "md", showLevel = false, className 
           /* eslint-disable-next-line @next/next/no-img-element */
           <img
             src={profile.avatar_url}
-            alt={profile.display_name}
+            alt={displayName}
             className="w-full h-full object-cover rounded-full"
           />
         ) : (
           <span className={cn("font-display font-bold text-white/90", s.text)}>
-            {getInitials(profile.display_name)}
+            {getInitials(displayName)}
           </span>
         )}
       </div>

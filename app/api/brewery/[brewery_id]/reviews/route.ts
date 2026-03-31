@@ -12,7 +12,7 @@ export async function GET(
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { data: reviews, error } = await (supabase as any)
+  const { data: reviews, error } = await supabase
     .from("brewery_reviews")
     .select("id, rating, comment, created_at, updated_at, user_id, owner_response, responded_at, profile:profiles!user_id(username, display_name, avatar_url)")
     .eq("brewery_id", brewery_id)
@@ -55,7 +55,7 @@ export async function POST(
   }
 
   // Upsert — one review per user per brewery
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from("brewery_reviews")
     .upsert(
       {
@@ -85,7 +85,7 @@ export async function DELETE(
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { error } = await (supabase as any)
+  const { error } = await supabase
     .from("brewery_reviews")
     .delete()
     .eq("user_id", user.id)

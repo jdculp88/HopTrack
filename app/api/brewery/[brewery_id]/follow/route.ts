@@ -12,7 +12,7 @@ export async function GET(
   const { data: { user } } = await supabase.auth.getUser();
 
   // Follow count (public)
-  const { count } = await (supabase as any)
+  const { count } = await supabase
     .from("brewery_follows")
     .select("id", { count: "exact", head: true })
     .eq("brewery_id", brewery_id);
@@ -20,7 +20,7 @@ export async function GET(
   // User's follow status
   let isFollowing = false;
   if (user) {
-    const { data } = await (supabase as any)
+    const { data } = await supabase
       .from("brewery_follows")
       .select("id")
       .eq("user_id", user.id)
@@ -45,7 +45,7 @@ export async function POST(
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { error } = await (supabase as any)
+  const { error } = await supabase
     .from("brewery_follows")
     .insert({ user_id: user.id, brewery_id });
 
@@ -69,7 +69,7 @@ export async function DELETE(
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  await (supabase as any)
+  await supabase
     .from("brewery_follows")
     .delete()
     .eq("user_id", user.id)

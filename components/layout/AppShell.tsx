@@ -6,12 +6,12 @@ import { AnimatePresence } from "framer-motion";
 import { AppNav } from "@/components/layout/AppNav";
 import { createClient } from "@/lib/supabase/client";
 import { ToastProvider } from "@/components/ui/Toast";
-import ActiveSessionBanner from "@/components/checkin/ActiveSessionBanner";
-import CheckinEntryDrawer from "@/components/checkin/CheckinEntryDrawer";
-import TapWallSheet from "@/components/checkin/TapWallSheet";
+import ActiveSessionBanner from "@/components/session/ActiveSessionBanner";
+import CheckinEntryDrawer from "@/components/session/CheckinEntryDrawer";
+import TapWallSheet from "@/components/session/TapWallSheet";
 import dynamic from "next/dynamic";
-const SessionRecapSheet = dynamic(() => import("@/components/checkin/SessionRecapSheet"), { ssr: false });
-import { SessionShareCard } from "@/components/checkin/SessionShareCard";
+const SessionRecapSheet = dynamic(() => import("@/components/session/SessionRecapSheet"), { ssr: false });
+import { SessionShareCard } from "@/components/session/SessionShareCard";
 import { PushOptIn } from "@/components/push/PushOptIn";
 import { WelcomeFlow, isOnboardingComplete } from "@/components/onboarding/WelcomeFlow";
 import type { Session, Brewery } from "@/types/database";
@@ -84,13 +84,13 @@ export function AppShell({ children, username, unreadNotifications = 0 }: AppShe
     async function fetchAndOpen() {
       try {
         const supabase = createClient();
-        const { data: brewery } = await (supabase as any)
+        const { data: brewery } = await supabase
           .from('breweries')
           .select('id, name, city, state, brewery_type')
           .eq('id', breweryId)
           .maybeSingle();
         if (brewery) {
-          setPreselectedBrewery(brewery);
+          setPreselectedBrewery(brewery as any);
           setCheckinOpen(true);
         }
       } catch {

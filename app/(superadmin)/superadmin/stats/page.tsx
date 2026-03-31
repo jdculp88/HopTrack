@@ -22,15 +22,15 @@ export default async function PlatformStatsPage() {
     supabase.from("profiles").select("id", { count: "exact", head: true }) as any,
     supabase.from("breweries").select("id", { count: "exact", head: true }) as any,
     supabase.from("beers").select("id", { count: "exact", head: true }) as any,
-    (supabase as any).from("sessions").select("id", { count: "exact", head: true }).eq("is_active", false) as any,
-    (supabase as any).from("sessions").select("id", { count: "exact", head: true }).eq("is_active", false).gte("started_at", thirtyDaysAgo) as any,
-    (supabase as any).from("sessions").select("id", { count: "exact", head: true }).eq("is_active", false).gte("started_at", sevenDaysAgo) as any,
+    supabase.from("sessions").select("id", { count: "exact", head: true }).eq("is_active", false) as any,
+    supabase.from("sessions").select("id", { count: "exact", head: true }).eq("is_active", false).gte("started_at", thirtyDaysAgo) as any,
+    supabase.from("sessions").select("id", { count: "exact", head: true }).eq("is_active", false).gte("started_at", sevenDaysAgo) as any,
     supabase.from("profiles").select("id", { count: "exact", head: true }).gte("created_at", thirtyDaysAgo) as any,
     supabase.from("brewery_accounts").select("id", { count: "exact", head: true }).eq("verified", true) as any,
   ]);
 
   // Top breweries by sessions
-  const { data: topBreweriesRaw } = await (supabase as any)
+  const { data: topBreweriesRaw } = await supabase
     .from("sessions")
     .select("brewery_id, brewery:breweries(name, city, state)")
     .eq("is_active", false)
@@ -55,7 +55,7 @@ export default async function PlatformStatsPage() {
     .slice(0, 10);
 
   // Top beers by beer_logs
-  const { data: topBeersRaw } = await (supabase as any)
+  const { data: topBeersRaw } = await supabase
     .from("beer_logs")
     .select("beer_id, quantity, beer:beers(name, style)")
     .limit(500) as any;

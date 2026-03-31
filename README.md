@@ -1,36 +1,120 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# HopTrack
 
-## Getting Started
+**Track Every Pour.** A craft beer check-in and loyalty platform for drinkers and breweries.
 
-First, run the development server:
+- **Consumer app** — check in beers, earn XP, unlock achievements, follow friends, discover breweries
+- **Brewery dashboard** — manage tap lists, loyalty programs, promotions, analytics, customer messaging
+
+## Tech Stack
+
+- **Framework:** Next.js 16.2.1 (App Router)
+- **Styling:** Tailwind CSS v4 (CSS-first config)
+- **Database:** Supabase (Postgres + Auth + Storage + Realtime)
+- **Payments:** Stripe (Tap $49/mo, Cask $149/mo, Barrel custom)
+- **AI:** Anthropic Claude (HopRoute brewery route generation)
+- **Animation:** Framer Motion
+- **Testing:** Playwright (E2E)
+- **Language:** TypeScript (strict mode)
+
+## Quick Start
 
 ```bash
+# 1. Clone and install
+git clone <repo-url> && cd hoptrack
+npm install
+
+# 2. Set up environment
+cp .env.local.example .env.local
+# Fill in your Supabase, Stripe, and Anthropic keys
+
+# 3. Apply database migrations
+npm run db:migrate
+
+# 4. Run the dev server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Environment Variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+See `.env.local.example` for the full list. Required:
 
-## Learn More
+| Variable | Description |
+|----------|-------------|
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anonymous key |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key (server-side only) |
 
-To learn more about Next.js, take a look at the following resources:
+Optional (features degrade gracefully without these):
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Variable | Feature |
+|----------|---------|
+| `STRIPE_SECRET_KEY` | Brewery billing |
+| `ANTHROPIC_API_KEY` | HopRoute AI generation |
+| `NEXT_PUBLIC_VAPID_PUBLIC_KEY` | Web push notifications |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Project Structure
 
-## Deploy on Vercel
+```
+app/
+  (app)/              Consumer app routes
+  (brewery-admin)/    Brewery owner dashboard
+  (superadmin)/       Platform admin
+  (auth)/             Login/signup
+  api/                55 API endpoints
+components/
+  session/            Session flow (banner, drawer, recap, tap wall)
+  social/             Feed cards, ratings, comments
+  brewery/            Brewery-specific components
+  beer/               Beer cards, reviews
+  ui/                 Base components (Modal, Toast, Skeleton, etc.)
+  layout/             AppShell, AppNav
+lib/
+  supabase/           Client, server, service role clients
+  queries/            Feed queries
+  achievements/       Achievement evaluation logic
+  xp/                 XP and leveling system
+  animation.ts        Shared spring configs
+  beerStyleColors.ts  Style-to-color mapping
+types/
+  database.ts         Supabase schema types
+  supabase-helpers.ts Common join shapes
+supabase/
+  migrations/         Database migrations (001-047)
+  functions/          Edge Functions
+docs/
+  roadmap.md          Product roadmap (source of truth)
+  plans/              Sprint plans
+  retros/             Sprint retrospectives
+  sales/              GTM, pricing, pitch docs
+  brand/              Brand guide, App Store plan
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Scripts
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start dev server |
+| `npm run build` | Production build |
+| `npm run db:migrate` | Apply Supabase migrations |
+| `npm run db:types` | Regenerate TypeScript types from schema |
+| `npm run test:e2e` | Run Playwright E2E tests |
+| `npm run setup` | One-time Supabase setup (storage buckets, etc.) |
+
+## Architecture
+
+- **Route groups:** `(app)`, `(auth)`, `(brewery-admin)`, `(superadmin)`
+- **Auth:** Supabase Auth with JWT, RLS policies on all tables
+- **Real-time:** Supabase Realtime for The Board (TV display)
+- **Styling:** CSS variables (`var(--surface)`, `var(--accent-gold)`, etc.) — dark mode default
+- **Fonts:** Playfair Display (headings), DM Sans (body), JetBrains Mono (stats)
+- **Routing:** `proxy.ts` handles auth redirects (no middleware.ts)
+
+## Team
+
+Built by the HopTrack product team. See `CLAUDE.md` for the full team roster and conventions.
+
+## License
+
+Private. All rights reserved.

@@ -22,7 +22,7 @@ export async function GET(request: Request) {
     monthStart.setDate(1);
     monthStart.setHours(0, 0, 0, 0);
 
-    const { data: rows, error } = await (supabase as any)
+    const { data: rows, error } = await supabase
       .from("sessions")
       .select("user_id, xp_earned, profile:profiles!sessions_user_id_fkey(id, username, display_name, avatar_url, xp)")
       .eq("is_active", false)
@@ -53,7 +53,7 @@ export async function GET(request: Request) {
   }
 
   // All-time: top 20 by total XP on profiles table
-  const { data: profiles, error } = await (supabase as any)
+  const { data: profiles, error } = await supabase
     .from("profiles")
     .select("id, username, display_name, avatar_url, xp")
     .order("xp", { ascending: false })

@@ -143,7 +143,7 @@ export async function POST(request: Request) {
     .eq("id", user.id);
 
   // Reward the referrer: +250 XP (atomic via RPC — no race condition)
-  await (supabase as any).rpc("increment_xp", { p_user_id: codeRow.user_id, p_xp_amount: 250 }); // supabase join shape
+  await supabase.rpc("increment_xp", { p_user_id: codeRow.user_id, p_xp_amount: 250 }); // supabase join shape
 
   // Notify the referrer
   const { data: newUserProfile } = await supabase

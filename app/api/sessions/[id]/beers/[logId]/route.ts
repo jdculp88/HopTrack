@@ -19,7 +19,7 @@ export async function PATCH(
   }
 
   // Verify ownership
-  const { data: log } = await (supabase as any)
+  const { data: log } = await supabase
     .from('beer_logs')
     .select('id, user_id, session_id')
     .eq('id', logId)
@@ -35,7 +35,7 @@ export async function PATCH(
   if (rating !== undefined) updates.rating = rating
   if (comment !== undefined) updates.comment = comment || null
 
-  const { data: updated, error } = await (supabase as any)
+  const { data: updated, error } = await supabase
     .from('beer_logs')
     .update(updates)
     .eq('id', logId)

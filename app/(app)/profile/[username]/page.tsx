@@ -47,7 +47,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
     .order("earned_at", { ascending: false });
 
   // Recent beer logs (Beer Journal)
-  const { data: recentLogs } = await (supabase as any)
+  const { data: recentLogs } = await supabase
     .from("beer_logs")
     .select("id, beer_id, rating, quantity, flavor_tags, serving_style, comment, logged_at, beer:beers(id, name, style, abv, cover_image_url, brewery_id, brewery:breweries(name)), session:sessions(brewery_id, brewery:breweries(name, city, state))")
     .eq("user_id", profile.id)
@@ -64,7 +64,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
 
   // Wishlist (own profile only)
   const wishlist = isOwnProfile
-    ? (await (supabase as any)
+    ? (await supabase
         .from("wishlist")
         .select("*, beer:beers(id, name, style, abv, brewery_id, brewery:breweries(name))")
         .eq("user_id", profile.id)
@@ -73,7 +73,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
     : [];
 
   // Favorite beer — most logged beer for this user
-  const { data: favBeerRows } = await (supabase as any)
+  const { data: favBeerRows } = await supabase
     .from("beer_logs")
     .select("beer_id, quantity, rating, beer:beers(*)")
     .eq("user_id", profile.id) as any;

@@ -27,7 +27,7 @@ export async function POST(
   const { beer_id } = await request.json();
 
   // Clear all featured beers for this brewery first
-  await (supabase as any)
+  await supabase
     .from("beers")
     .update({ is_featured: false })
     .eq("brewery_id", brewery_id)
@@ -35,7 +35,7 @@ export async function POST(
 
   // If a beer_id was provided, set it as featured
   if (beer_id) {
-    const { error } = await (supabase as any)
+    const { error } = await supabase
       .from("beers")
       .update({ is_featured: true })
       .eq("id", beer_id)

@@ -16,7 +16,7 @@ export async function POST(request: Request) {
   }
 
   // Toggle: remove if already exists, add if not
-  const { data: existing } = await (supabase as any)
+  const { data: existing } = await supabase
     .from("reactions")
     .select("id")
     .eq("user_id", user.id)
@@ -25,14 +25,14 @@ export async function POST(request: Request) {
     .single();
 
   if (existing) {
-    await (supabase as any).from("reactions").delete().eq("id", existing.id);
+    await supabase.from("reactions").delete().eq("id", existing.id);
     return NextResponse.json({ action: "removed" });
   }
 
   const insertData: Record<string, any> = { user_id: user.id, session_id, type };
   if (beer_log_id) insertData.beer_log_id = beer_log_id;
 
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from("reactions")
     .insert(insertData)
     .select()

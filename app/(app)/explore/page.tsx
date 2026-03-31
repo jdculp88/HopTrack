@@ -28,7 +28,7 @@ export default async function ExplorePage() {
   const visitedIds = new Set((visits as any[] ?? []).map((v: any) => v.brewery_id));
 
   // Brewery IDs that have a Beer of the Week (is_featured = true)
-  const { data: featuredBeers } = await (supabase as any)
+  const { data: featuredBeers } = await supabase
     .from("beers")
     .select("brewery_id")
     .eq("is_featured", true)
@@ -38,7 +38,7 @@ export default async function ExplorePage() {
 
   // Brewery IDs with upcoming events
   const today = new Date().toISOString().split("T")[0];
-  const { data: upcomingEventBreweries } = await (supabase as any)
+  const { data: upcomingEventBreweries } = await supabase
     .from("brewery_events")
     .select("brewery_id")
     .eq("is_active", true)
@@ -47,7 +47,7 @@ export default async function ExplorePage() {
   const eventBreweryIds = [...new Set((upcomingEventBreweries ?? []).map((e: any) => e.brewery_id))] as string[];
 
   // Follower counts per brewery
-  const { data: followCounts } = await (supabase as any)
+  const { data: followCounts } = await supabase
     .from("brewery_follows")
     .select("brewery_id");
 

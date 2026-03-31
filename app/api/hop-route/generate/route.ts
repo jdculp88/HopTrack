@@ -81,7 +81,7 @@ export async function POST(request: Request) {
     .not("longitude", "is", null);
 
   const radiusMiles = transport === "walking" ? 1.5 : transport === "rideshare" ? 10 : 25;
-  const nearbyBreweries = ((allBreweries ?? []) as NearbyBrewery[])
+  const nearbyBreweries = ((allBreweries ?? []) as unknown as NearbyBrewery[])
     .filter((b) => {
       if (!b.latitude || !b.longitude) return false;
       const dist = haversineDistance(location.lat, location.lng, b.latitude, b.longitude);
@@ -105,7 +105,7 @@ export async function POST(request: Request) {
     .eq("is_on_tap" as never, true);
 
   const beersByBrewery = new Map<string, TapBeer[]>();
-  for (const beer of (beers ?? []) as TapBeer[]) {
+  for (const beer of (beers ?? []) as unknown as TapBeer[]) {
     const arr = beersByBrewery.get(beer.brewery_id) ?? [];
     arr.push(beer);
     beersByBrewery.set(beer.brewery_id, arr);
@@ -119,7 +119,7 @@ export async function POST(request: Request) {
     .not("rating", "is", null);
 
   const styleMap = new Map<string, { total: number; count: number }>();
-  for (const log of (beerLogs ?? []) as BeerLogWithStyle[]) {
+  for (const log of (beerLogs ?? []) as unknown as BeerLogWithStyle[]) {
     const style = log.beer?.style;
     if (!style || !log.rating) continue;
     const existing = styleMap.get(style) ?? { total: 0, count: 0 };
@@ -137,7 +137,7 @@ export async function POST(request: Request) {
     .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`)
     .eq("status", "accepted");
 
-  const friendIds = ((friendships ?? []) as FriendshipRow[]).map((f) =>
+  const friendIds = ((friendships ?? []) as unknown as FriendshipRow[]).map((f) =>
     f.requester_id === user.id ? f.addressee_id : f.requester_id
   );
 
@@ -151,7 +151,7 @@ export async function POST(request: Request) {
       .gte("started_at", ninetyDaysAgo);
 
     const socialMap = new Map<string, { brewery_name: string; friend_name: string; count: number }>();
-    for (const s of (friendSessions ?? []) as FriendSession[]) {
+    for (const s of (friendSessions ?? []) as unknown as FriendSession[]) {
       const key = `${s.user_id}:${s.brewery_id}`;
       const existing = socialMap.get(key);
       const friendName = s.profile?.display_name || s.profile?.username || "A friend";

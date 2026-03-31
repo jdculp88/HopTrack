@@ -21,13 +21,13 @@ export async function POST(request: NextRequest) {
   }
 
   // Close any existing active session for this user before starting a new one
-  await (supabase as any)
+  await supabase
     .from('sessions')
     .update({ is_active: false, ended_at: new Date().toISOString() })
     .eq('user_id', user.id)
     .eq('is_active', true)
 
-  const { data: session, error } = await (supabase as any)
+  const { data: session, error } = await supabase
     .from('sessions')
     .insert({
       user_id: user.id,
@@ -40,19 +40,19 @@ export async function POST(request: NextRequest) {
     .single()
 
   if (error) {
-    console.error('Error creating session:', error)
+    console.error('[sessions] Error creating session:', error)
     return NextResponse.json({ error: 'Failed to create session' }, { status: 500 })
   }
 
   // Increment profile total_checkins — fetch current value then update
-  const { data: profile } = await (supabase as any)
+  const { data: profile } = await supabase
     .from('profiles')
     .select('total_checkins')
     .eq('id', user.id)
     .single()
 
   if (profile) {
-    await (supabase as any)
+    await supabase
       .from('profiles')
       .update({ total_checkins: (profile.total_checkins || 0) + 1 })
       .eq('id', user.id)
@@ -77,7 +77,7 @@ export async function GET(request: NextRequest) {
   const limit = parseInt(searchParams.get('limit') || '20')
   const cursor = searchParams.get('cursor')
 
-  let query = (supabase as any)
+  let query = supabase
     .from('sessions')
     .select(`
       *,
@@ -98,7 +98,7 @@ export async function GET(request: NextRequest) {
   const { data: sessions, error } = await query
 
   if (error) {
-    console.error('Error fetching sessions:', error)
+    console.error('[sessions] Error fetching sessions:', error)
     return NextResponse.json({ error: 'Failed to fetch sessions' }, { status: 500 })
   }
 

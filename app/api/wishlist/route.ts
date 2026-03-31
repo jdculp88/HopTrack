@@ -11,7 +11,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "beer_id required" }, { status: 400 });
   }
 
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from("wishlist")
     .upsert({ user_id: user.id, beer_id }, { onConflict: "user_id,beer_id" })
     .select()
@@ -32,7 +32,7 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ error: "beer_id required" }, { status: 400 });
   }
 
-  const { error } = await (supabase as any)
+  const { error } = await supabase
     .from("wishlist")
     .delete()
     .eq("user_id", user.id)

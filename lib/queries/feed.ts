@@ -308,11 +308,11 @@ export async function fetchCommunityContent(
     ]);
 
     return {
-      featuredBeers: featuredBeersRes.data ?? [],
-      topReviews: topReviewsRes.data ?? [],
-      breweryReviews: breweryReviewsRes.data ?? [],
-      friendRatings: friendRatingsRes.data ?? [],
-      upcomingEvents: upcomingEventsRes.data ?? [],
+      featuredBeers: (featuredBeersRes.data ?? []) as any,
+      topReviews: (topReviewsRes.data ?? []) as any,
+      breweryReviews: (breweryReviewsRes.data ?? []) as any,
+      friendRatings: (friendRatingsRes.data ?? []) as any,
+      upcomingEvents: (upcomingEventsRes.data ?? []) as any,
       newBreweries: newBreweriesRes.data ?? [],
     };
   } catch {
@@ -373,7 +373,7 @@ export async function fetchSocialData(
 
     // Compute style distribution for Taste DNA
     type StyleLogRow = { rating: number | null; beer: { style: string | null } | null };
-    const styleLogs = (styleLogsRes.data ?? []) as StyleLogRow[];
+    const styleLogs = (styleLogsRes.data ?? []) as unknown as StyleLogRow[];
     const styleMap: Record<
       string,
       { count: number; totalRating: number; ratedCount: number }
@@ -400,9 +400,9 @@ export async function fetchSocialData(
       .slice(0, 8);
 
     return {
-      friendAchievements: friendAchievementsRes.data ?? [],
-      userAchievements: userAchievementsRes.data ?? [],
-      wishlist: wishlistRes.data ?? [],
+      friendAchievements: (friendAchievementsRes.data ?? []) as any,
+      userAchievements: (userAchievementsRes.data ?? []) as any,
+      wishlist: (wishlistRes.data ?? []) as any,
       styleDNA,
     };
   } catch {
@@ -517,7 +517,7 @@ export async function fetchFriendActivity(
       profile: { id: string; username: string; display_name: string | null; avatar_url: string | null } | null;
     };
     const newFavorites: NewFavoriteItem[] = (
-      (newFavoritesRes.data ?? []) as NewFavoriteRow[]
+      (newFavoritesRes.data ?? []) as unknown as NewFavoriteRow[]
     )
       .filter((r) => r.profile && r.beer)
       .map((r) => ({
@@ -595,7 +595,7 @@ export async function fetchActivityHeatmap(
 
     type HeatmapLogRow = { logged_at: string; quantity: number | null; beer: { style: string | null } | null };
     const dayMap = new Map<string, { count: number; styleCount: Map<string, number> }>();
-    for (const log of logs as HeatmapLogRow[]) {
+    for (const log of logs as unknown as HeatmapLogRow[]) {
       const date = new Date(log.logged_at).toISOString().split("T")[0];
       const existing = dayMap.get(date) ?? { count: 0, styleCount: new Map<string, number>() };
       existing.count += log.quantity ?? 1;

@@ -217,15 +217,24 @@ Brilliant product instincts, trusts the team completely, types fast and sometime
 app/(app)/                    — Consumer app
 app/(brewery-admin)/          — Brewery owner dashboard
 app/(superadmin)/             — Platform admin
-app/api/                      — API routes
+app/api/                      — 57 API endpoints
+components/session/           — Session flow (was checkin/, renamed S64)
 components/                   — Shared components
 lib/                          — Utils, Supabase clients, XP logic
 lib/glassware.ts              — 20 glass SVGs, PourSize interface, getGlassSvgContent()
-supabase/migrations/          — DB migrations (run in order)
+lib/beerStyleColors.ts        — 26 styles → 6 color families
+types/database.ts             — Supabase schema types (all tables registered)
+types/supabase-helpers.ts     — Common join shapes (S65)
+supabase/migrations/          — DB migrations (run in order, see README.md)
 supabase/functions/           — Edge Functions
 docs/roadmap.md               — SOURCE OF TRUTH for what we're building
+docs/API-REFERENCE.md         — All 57 endpoints documented (S68)
+docs/ARCHITECTURE.md          — Full system map (S69)
+docs/plans/                   — Sprint plans (S12-73)
 docs/retros/                  — Sprint retros and roasts 🍺
 docs/sales/                   — GTM, pitch guide, pricing, target breweries (Taylor owns)
+docs/brand/                   — Brand guide, Apple app plan
+docs/archive/                 — Stale docs preserved for reference
 scripts/supabase-setup.mjs    — One-time setup script
 .env.local.example            — Env template (copy to .env.local)
 ```
@@ -234,10 +243,11 @@ scripts/supabase-setup.mjs    — One-time setup script
 
 ## 🗺️ Where We Are
 
-**Current Sprint:** Sprint 64 — TBD
-**Last completed:** Sprint 63 — Still Warm. Now With Range. ✅ — Beer style color system, semantic card backgrounds, topo theme, passport revamp
-**10-sprint plan:** `docs/roadmap.md`
+**Current Sprint:** Sprint 74 — TBD
+**Last completed:** Sprint 73 — Shore It Up (10-sprint arc) ✅ — Tech debt, documentation, folder organization
+**10-sprint plan (64-73):** `docs/plans/sprint-64-73-master-plan.md`
 **Sprint history (1-40):** `docs/sprint-history.md`
+**Sprint history (64-73):** `docs/sprint-history.md` (appended)
 
 ### Key design decisions (still active from Sprint 11):
 - Marketing pages use hardcoded `C` color constants (not CSS vars)
@@ -378,6 +388,30 @@ Migration state (001-041): all applied — see `docs/sprint-history.md#migration
 - `AchievementFeedCard` — `role="article"` + `aria-label` added
 - `SessionCard` — `role="article"` + `aria-label` + `whileInView` scroll reveal added
 - 6 public API routes — `Cache-Control: public` headers on 200 GET responses
+
+### Sprints 64-73 — Shore It Up ✅ (2026-03-30)
+**Theme:** Tech debt, documentation finalization, folder/file organization. 10-sprint housekeeping arc.
+
+**Phase 1 — Clean House (64-66):** `components/checkin/` → `components/session/` (dead code deleted, 7 files moved). Console.log standardized. 20+ stale docs deleted. `docs/` restructured into `plans/`, `archive/`, `brand/`. Database type extended with 24 table registrations. `(supabase as any)` eliminated from 63 files. `.env.local.example` updated.
+
+**Phase 2 — Document Everything (67-70):** Comprehensive `README.md`, `CONTRIBUTING.md`, `supabase/migrations/README.md`. `docs/API-REFERENCE.md` (57 endpoints). `docs/ARCHITECTURE.md` (full system map). `docs/requirements/README.md` (all REQs audited). `docs/roadmap.md` updated.
+
+**Phase 3 — Harden (71-73):** Remaining Database types added (BreweryEvent, PourSize, HopRoute, Loyalty). Build errors fixed across 8 files. `npm run build` passes clean. Sprint history + CLAUDE.md updated.
+
+**Key changes from Sprints 64-73:**
+- `components/checkin/` → `components/session/` (all imports updated)
+- `types/database.ts` — 24 tables registered in Database interface (was 10)
+- `types/supabase-helpers.ts` — NEW: ProfileSummary, BeerSummary, BrewerySummary, SessionWithJoins, ApiSuccess/ApiError
+- `docs/plans/` — 22 sprint plans consolidated from root
+- `docs/archive/` — stale docs preserved
+- `docs/brand/` — brand-guide.md + apple-app-plan.md (from strategy/)
+- `docs/API-REFERENCE.md` — all 57 endpoints
+- `docs/ARCHITECTURE.md` — full system map
+- `docs/requirements/README.md` — all REQs indexed with status
+- `README.md` — comprehensive setup guide (replaces boilerplate)
+- `CONTRIBUTING.md` — workflow, code style, review owners
+- `supabase/migrations/README.md` — naming, applying, rollback docs
+- `UserAvatar` — accepts nullable `display_name` + optional `id`
 
 ### Revenue Targets
 - Tap tier: $49/mo

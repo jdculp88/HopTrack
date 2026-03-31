@@ -45,13 +45,13 @@ export default async function HomePage() {
   // Wishlist on-tap count — how many wishlisted beers are currently on tap anywhere
   const wishlistOnTapCount = await (async () => {
     try {
-      const { data: wl } = await (supabase as any)
+      const { data: wl } = await supabase
         .from("wishlist")
         .select("beer_id")
         .eq("user_id", user.id);
       if (!wl || wl.length === 0) return 0;
       const beerIds = wl.map((w: any) => w.beer_id);
-      const { count } = await (supabase as any)
+      const { count } = await supabase
         .from("beers")
         .select("id", { count: "exact", head: true })
         .in("id", beerIds)
@@ -68,7 +68,7 @@ export default async function HomePage() {
   const friendBreweryReviews = await (async () => {
     if (friendIds.length === 0) return [];
     try {
-      const { data: breweryReviewsData } = await (supabase as any)
+      const { data: breweryReviewsData } = await supabase
         .from("brewery_reviews")
         .select(`
           id, rating, comment, created_at,
@@ -97,7 +97,7 @@ export default async function HomePage() {
   // Friend active HopRoutes — "join them" cards
   const friendActiveRoutesData: FriendActiveRoute[] = [];
   if (friendIds.length > 0) {
-    const { data: activeRoutes } = await (supabase as any)
+    const { data: activeRoutes } = await supabase
       .from("hop_routes")
       .select(`
         id, title, status, stop_count, started_at,
@@ -109,14 +109,15 @@ export default async function HomePage() {
       .order("started_at", { ascending: false })
       .limit(3);
 
-    for (const r of (activeRoutes ?? [])) {
+    for (const r of (activeRoutes ?? []) as any[]) {
       if (!r.profile || !r.title) continue;
       const stops = r.hop_route_stops ?? [];
       const checkedIn = stops.filter((s: any) => s.checked_in).length;
+      const profile = Array.isArray(r.profile) ? r.profile[0] : r.profile;
       friendActiveRoutesData.push({
         routeId: r.id,
-        friendName: r.profile.display_name || r.profile.username,
-        friendUsername: r.profile.username,
+        friendName: profile.display_name || profile.username,
+        friendUsername: profile.username,
         routeTitle: r.title,
         currentStop: checkedIn,
         totalStops: r.stop_count ?? stops.length,
@@ -128,15 +129,14 @@ export default async function HomePage() {
   const [recommendations, activityHeatmap, pastRoutesResult] = await Promise.all([
     getRecommendations(user.id).catch(() => []),
     fetchActivityHeatmap(supabase, user.id),
-    (supabase as any)
+    supabase
       .from("hop_routes")
       .select("id, title, location_city, completed_at, hop_route_stops(brewery:breweries(name))")
       .eq("user_id", user.id)
       .eq("status", "completed")
       .order("completed_at", { ascending: false })
       .limit(3)
-      .then(({ data }: { data: unknown }) => data ?? [])
-      .catch(() => []),
+      .then(({ data }: { data: unknown }) => data ?? []),
   ]);
 
   const pastRoutes = pastRoutesResult as Array<{
@@ -182,16 +182,16 @@ export default async function HomePage() {
       currentUserId={user.id}
       communityContent={{
         featuredBeers: community.featuredBeers,
-        topReviews: community.topReviews,
-        breweryReviews: community.breweryReviews,
+        topReviews: community.topReviews as any,
+        breweryReviews: community.breweryReviews as any,
         upcomingEvents: community.upcomingEvents,
         newBreweries: community.newBreweries,
         seasonalBeers,
         curatedCollections,
       }}
-      friendRatings={community.friendRatings}
-      friendAchievements={social.friendAchievements}
-      userAchievements={social.userAchievements}
+      friendRatings={community.friendRatings as any}
+      friendAchievements={social.friendAchievements as any}
+      userAchievements={social.userAchievements as any}
       wishlist={social.wishlist}
       styleDNA={social.styleDNA}
       friendCount={friendIds.length}

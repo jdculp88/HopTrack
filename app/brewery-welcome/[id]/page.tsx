@@ -13,7 +13,7 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   const supabase = await createClient();
-  const { data: brewery } = await (supabase as any)
+  const { data: brewery } = await supabase
     .from("breweries").select("name, city, state").eq("id", id).maybeSingle();
   if (!brewery) return { title: "Brewery — HopTrack" };
   return {
@@ -29,7 +29,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function BreweryWelcomePage({ params }: Props) {
   const { id } = await params;
   const supabase = await createClient();
-  const { data: brewery } = await (supabase as any)
+  const { data: brewery } = await supabase
     .from("breweries")
     .select("id, name, city, state, brewery_type")
     .eq("id", id)
@@ -37,7 +37,7 @@ export default async function BreweryWelcomePage({ params }: Props) {
 
   if (!brewery) notFound();
 
-  const { data: onTapBeers } = await (supabase as any)
+  const { data: onTapBeers } = await supabase
     .from("beers")
     .select("name, style, abv")
     .eq("brewery_id", id)

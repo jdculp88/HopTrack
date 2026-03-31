@@ -126,11 +126,11 @@ export function EventsClient({ breweryId, initialEvents }: EventsClientProps) {
     };
 
     if (editingEvent) {
-      const { data } = await (supabase as any)
+      const { data } = await supabase
         .from("brewery_events").update(payload).eq("id", editingEvent.id).select().single();
       if (data) setEvents(prev => prev.map(e => e.id === editingEvent.id ? { ...e, ...data } : e));
     } else {
-      const { data } = await (supabase as any)
+      const { data } = await supabase
         .from("brewery_events").insert({ ...payload, is_active: true }).select().single();
       if (data) setEvents(prev => [...prev, data].sort((a, b) => a.event_date.localeCompare(b.event_date)));
     }
@@ -145,14 +145,14 @@ export function EventsClient({ breweryId, initialEvents }: EventsClientProps) {
   async function toggleEvent(event: any) {
     const newVal = !event.is_active;
     setEvents(prev => prev.map(e => e.id === event.id ? { ...e, is_active: newVal } : e));
-    const { error } = await (supabase as any).from("brewery_events").update({ is_active: newVal }).eq("id", event.id);
+    const { error } = await supabase.from("brewery_events").update({ is_active: newVal }).eq("id", event.id);
     if (error) setEvents(prev => prev.map(e => e.id === event.id ? { ...e, is_active: event.is_active } : e));
   }
 
   async function deleteEvent(id: string) {
     setDeletingId(id);
     setConfirmDeleteId(null);
-    await (supabase as any).from("brewery_events").delete().eq("id", id);
+    await supabase.from("brewery_events").delete().eq("id", id);
     setEvents(prev => prev.filter(e => e.id !== id));
     setDeletingId(null);
   }

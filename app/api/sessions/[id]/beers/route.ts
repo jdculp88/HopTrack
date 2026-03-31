@@ -14,7 +14,7 @@ export async function GET(
   const { id: sessionId } = await params
 
   // Fetch all beer logs for this session
-  const { data: beerLogs, error } = await (supabase as any)
+  const { data: beerLogs, error } = await supabase
     .from('beer_logs')
     .select('*')
     .eq('session_id', sessionId)
@@ -45,7 +45,7 @@ export async function POST(
   const { beer_id, brewery_id, rating, flavor_tags, serving_style, comment, photo_url } = body
 
   // Verify the session belongs to this user and is active
-  const { data: session } = await (supabase as any)
+  const { data: session } = await supabase
     .from('sessions')
     .select('id, is_active, brewery_id, context')
     .eq('id', sessionId)
@@ -59,7 +59,7 @@ export async function POST(
     return NextResponse.json({ error: 'Session is no longer active' }, { status: 400 })
   }
 
-  const { data: beerLog, error } = await (supabase as any)
+  const { data: beerLog, error } = await supabase
     .from('beer_logs')
     .insert({
       session_id: sessionId,
@@ -76,13 +76,13 @@ export async function POST(
     .single()
 
   if (error) {
-    console.error('Error logging beer:', error)
+    console.error('[sessions/beers] Error logging beer:', error)
     return NextResponse.json({ error: 'Failed to log beer' }, { status: 500 })
   }
 
   // Auto-remove from wishlist if this beer was wishlisted
   if (beer_id) {
-    await (supabase as any)
+    await supabase
       .from('wishlist')
       .delete()
       .eq('user_id', user.id)

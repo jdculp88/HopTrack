@@ -29,7 +29,7 @@ export async function GET() {
   // Fetch active sessions for those friends (share_to_feed = true means they're ok sharing)
   const sixHoursAgo = new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString();
 
-  const { data: sessions } = await (supabase as any)
+  const { data: sessions } = await supabase
     .from("sessions")
     .select(`
       id,

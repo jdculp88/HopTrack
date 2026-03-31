@@ -20,7 +20,7 @@ export default async function BoardPage({ params }: { params: Promise<{ brewery_
     .from("breweries").select("id, name, cover_image_url")
     .eq("id", brewery_id).single() as any;
 
-  const { data: beers } = await (supabase as any)
+  const { data: beers } = await supabase
     .from("beers").select("*")
     .eq("brewery_id", brewery_id)
     .eq("is_on_tap", true)
@@ -31,7 +31,7 @@ export default async function BoardPage({ params }: { params: Promise<{ brewery_
   const beerIds = ((beers as any[]) ?? []).map((b: any) => b.id as string);
   const pourSizesMap: Record<string, PourSize[]> = {};
   if (beerIds.length > 0) {
-    const { data: allPourSizes } = await (supabase as any)
+    const { data: allPourSizes } = await supabase
       .from("beer_pour_sizes")
       .select("*")
       .in("beer_id", beerIds)
@@ -45,7 +45,7 @@ export default async function BoardPage({ params }: { params: Promise<{ brewery_
     }
   }
 
-  const { data: events } = await (supabase as any)
+  const { data: events } = await supabase
     .from("brewery_events").select("id, title, event_date, start_time")
     .eq("brewery_id", brewery_id)
     .eq("is_active", true)
@@ -54,18 +54,18 @@ export default async function BoardPage({ params }: { params: Promise<{ brewery_
     .limit(4) as any;
 
   // ── Brewery-level stats ──────────────────────────────────────────────────
-  const { count: totalPours } = await (supabase as any)
+  const { count: totalPours } = await supabase
     .from("beer_logs")
     .select("id", { count: "exact", head: true })
     .eq("brewery_id", brewery_id) as any;
 
-  const { count: uniqueVisitors } = await (supabase as any)
+  const { count: uniqueVisitors } = await supabase
     .from("sessions")
     .select("user_id", { count: "exact", head: true })
     .eq("brewery_id", brewery_id) as any;
 
   // ── Per-beer logs: quantity, rating, user ────────────────────────────────
-  const { data: beerLogStats } = await (supabase as any)
+  const { data: beerLogStats } = await supabase
     .from("beer_logs")
     .select("beer_id, user_id, quantity, rating")
     .eq("brewery_id", brewery_id) as any;
@@ -112,7 +112,7 @@ export default async function BoardPage({ params }: { params: Promise<{ brewery_
   const fanUserIds = [...new Set(Object.values(beerFanUserIds))];
   const fanProfiles: Record<string, string> = {};
   if (fanUserIds.length > 0) {
-    const { data: profiles } = await (supabase as any)
+    const { data: profiles } = await supabase
       .from("profiles")
       .select("id, display_name, username")
       .in("id", fanUserIds) as any;

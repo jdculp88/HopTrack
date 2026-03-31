@@ -9,7 +9,7 @@ import { BookMarked, Lock, ArrowLeft, Edit2 } from "lucide-react";
 export async function generateMetadata({ params }: { params: Promise<{ username: string; listId: string }> }) {
   const { listId } = await params;
   const supabase = await createClient();
-  const { data } = await (supabase as any).from("beer_lists").select("title").eq("id", listId).single();
+  const { data } = await supabase.from("beer_lists").select("title").eq("id", listId).single();
   return { title: data?.title ?? "Beer List" };
 }
 
@@ -25,13 +25,13 @@ export default async function BeerListPage({
   } = await supabase.auth.getUser();
 
   // Fetch the list
-  const { data: list } = await (supabase as any)
+  const { data: list } = await supabase
     .from("beer_lists")
     .select(
       "id, title, description, is_public, user_id, created_at, items:beer_list_items(id, beer_id, position, note, beer:beers(id, name, style, abv, avg_rating, brewery:breweries(name))), profile:profiles!user_id(id, username, display_name, avatar_url)"
     )
     .eq("id", listId)
-    .single();
+    .single() as any;
 
   if (!list) notFound();
 

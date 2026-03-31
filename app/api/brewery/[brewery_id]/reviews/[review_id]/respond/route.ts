@@ -12,7 +12,7 @@ export async function PATCH(
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   // Verify the user is an owner or manager of this brewery
-  const { data: account } = await (supabase as any)
+  const { data: account } = await supabase
     .from("brewery_accounts")
     .select("role")
     .eq("user_id", user.id)
@@ -31,7 +31,7 @@ export async function PATCH(
   }
 
   // Update the review with owner response
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from("brewery_reviews")
     .update({
       owner_response: owner_response.trim(),
@@ -59,7 +59,7 @@ export async function DELETE(
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   // Verify brewery admin
-  const { data: account } = await (supabase as any)
+  const { data: account } = await supabase
     .from("brewery_accounts")
     .select("role")
     .eq("user_id", user.id)
@@ -71,7 +71,7 @@ export async function DELETE(
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const { error } = await (supabase as any)
+  const { error } = await supabase
     .from("brewery_reviews")
     .update({ owner_response: null, responded_at: null })
     .eq("id", review_id)

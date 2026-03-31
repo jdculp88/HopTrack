@@ -702,9 +702,9 @@ export default function SessionRecapSheet({
                             </span>
                             <span style={{ fontSize: 10, color: C.text3, marginTop: 1, letterSpacing: 0.3 }}>your avg</span>
                           </div>
-                          {communityRating > 0 && (
+                          {(communityRating ?? 0) > 0 && (
                             <div className="flex flex-col">
-                              <span style={{ fontSize: 14, fontWeight: 700, color: C.text1 }}>{communityRating.toFixed(1)} ★</span>
+                              <span style={{ fontSize: 14, fontWeight: 700, color: C.text1 }}>{communityRating!.toFixed(1)} ★</span>
                               <span style={{ fontSize: 10, color: C.text3, marginTop: 1, letterSpacing: 0.3 }}>community</span>
                             </div>
                           )}

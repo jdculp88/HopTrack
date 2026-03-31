@@ -21,7 +21,7 @@ export async function PATCH(
     return NextResponse.json({ error: "No fields to update" }, { status: 400 });
   }
 
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from("sessions")
     .update(updates)
     .eq("id", id)

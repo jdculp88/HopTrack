@@ -91,7 +91,7 @@ export async function getRecommendations(userId: string): Promise<RecommendedBee
     if (triedIds.has(beer.id)) continue;
     if (recommendations.length >= 10) break;
 
-    const styleRank = topStyles.indexOf(beer.style);
+    const styleRank = topStyles.indexOf(beer.style!);
     const reason =
       styleRank === 0
         ? `Because you love ${beer.style}`

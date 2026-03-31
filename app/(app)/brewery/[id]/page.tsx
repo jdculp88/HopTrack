@@ -8,7 +8,7 @@ import { BeerCard } from "@/components/beer/BeerCard";
 import { BeerStyleBadge } from "@/components/ui/BeerStyleBadge";
 import { LeaderboardRow } from "@/components/social/LeaderboardRow";
 import { generateGradientFromString } from "@/lib/utils";
-import BreweryCheckinButton from "@/components/checkin/BreweryCheckinButton";
+import BreweryCheckinButton from "@/components/session/BreweryCheckinButton";
 import { BreweryReview } from "@/components/brewery/BreweryReview";
 import { BreweryRatingHeader } from "@/components/brewery/BreweryRatingHeader";
 import { FollowBreweryButton } from "@/components/brewery/FollowBreweryButton";
@@ -117,7 +117,7 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
   );
   let friendsHere: ActiveFriendSession[] = [];
   if (friendIds.length > 0) {
-    const { data: activeSessions } = await (supabase as any) // supabase join shape
+    const { data: activeSessions } = await supabase // supabase join shape
       .from("sessions")
       .select(`
         id, user_id, started_at,
@@ -128,7 +128,7 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
       .eq("brewery_id", id)
       .eq("is_active", true)
       .gte("started_at", sixHoursAgo);
-    friendsHere = ((activeSessions ?? []) as ActiveFriendSession[]).filter((s) => {
+    friendsHere = ((activeSessions ?? []) as unknown as ActiveFriendSession[]).filter((s) => {
       const prefs = s.profile?.notification_preferences ?? {};
       return prefs.share_live !== false;
     });
@@ -141,11 +141,11 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
     .eq("brewery_id", id)
     .order("total_visits", { ascending: false })
     .limit(10);
-  const topVisitors = (topVisitorsRaw ?? []) as TopVisitor[];
+  const topVisitors = (topVisitorsRaw ?? []) as unknown as TopVisitor[];
 
   // REQ-015: Enhanced brewery stats from sessions + beer_logs
   // 1. Total sessions + unique visitors
-  const { data: brewerySessionsRaw } = await (supabase as any) // supabase join shape
+  const { data: brewerySessionsRaw } = await supabase // supabase join shape
     .from("sessions")
     .select("user_id")
     .eq("brewery_id", id)
@@ -155,11 +155,11 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
   const uniqueVisitors = new Set(brewerySessions.map((s) => s.user_id)).size;
 
   // Avg rating from beer_logs
-  const { data: breweryLogsRaw } = await (supabase as any) // supabase join shape
+  const { data: breweryLogsRaw } = await supabase // supabase join shape
     .from("beer_logs")
     .select("beer_id, rating, quantity, beer:beers(name)")
     .eq("brewery_id", id);
-  const breweryLogs = (breweryLogsRaw ?? []) as BreweryBeerLog[];
+  const breweryLogs = (breweryLogsRaw ?? []) as unknown as BreweryBeerLog[];
   const ratingsWithValue = breweryLogs.filter((l) => l.rating != null && l.rating > 0);
   const avgRating =
     ratingsWithValue.length > 0
@@ -187,7 +187,7 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
 
   // Upcoming events
   const today = new Date().toISOString().split("T")[0];
-  const { data: upcomingEventsRaw } = await (supabase as any) // supabase join shape
+  const { data: upcomingEventsRaw } = await supabase // supabase join shape
     .from("brewery_events")
     .select("id, title, event_date, start_time, end_time, event_type, description")
     .eq("brewery_id", id)
@@ -195,7 +195,7 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
     .gte("event_date", today)
     .order("event_date", { ascending: true })
     .limit(5);
-  const upcomingEvents = (upcomingEventsRaw ?? []) as BreweryEvent[]; // supabase join shape
+  const upcomingEvents = (upcomingEventsRaw ?? []) as unknown as BreweryEvent[]; // supabase join shape
 
   // Check if brewery has any admin accounts (for claim CTA)
   const { count: adminCount } = await supabase

@@ -230,7 +230,7 @@ export function BeerReviewSection({ beerId, currentUserId }: BeerReviewSectionPr
               style={{ background: "var(--surface)", borderColor: "var(--border)" }}
             >
               <div className="flex items-start gap-3">
-                <UserAvatar profile={review.profile as any} size="sm" />
+                <UserAvatar profile={review.profile ?? { display_name: null, avatar_url: null }} size="sm" />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <span className="font-sans font-semibold text-sm" style={{ color: "var(--text-primary)" }}>

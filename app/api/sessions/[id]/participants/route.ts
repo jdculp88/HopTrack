@@ -14,7 +14,7 @@ export async function GET(
   } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { data: participants, error } = await (supabase as any)
+  const { data: participants, error } = await supabase
     .from("session_participants")
     .select("id, session_id, user_id, invited_by, status, created_at")
     .eq("session_id", sessionId)
@@ -25,7 +25,7 @@ export async function GET(
 
   // Enrich with profiles
   const userIds = [...new Set(participants.map((p: any) => p.user_id))];
-  const { data: profiles } = await (supabase as any)
+  const { data: profiles } = await supabase
     .from("profiles")
     .select("id, username, display_name, avatar_url")
     .in("id", userIds);
@@ -53,7 +53,7 @@ export async function POST(
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   // Verify session ownership
-  const { data: session } = await (supabase as any)
+  const { data: session } = await supabase
     .from("sessions")
     .select("user_id, brewery_id, brewery:breweries(name)")
     .eq("id", sessionId)
@@ -69,7 +69,7 @@ export async function POST(
     return NextResponse.json({ error: "You cannot invite yourself" }, { status: 400 });
 
   // Verify accepted friendship — can only invite friends (S38-003)
-  const { data: friendship } = await (supabase as any)
+  const { data: friendship } = await supabase
     .from("friendships")
     .select("id, status")
     .or(
@@ -82,7 +82,7 @@ export async function POST(
     return NextResponse.json({ error: "You can only invite friends to your session" }, { status: 403 });
   }
 
-  const { data: participant, error } = await (supabase as any)
+  const { data: participant, error } = await supabase
     .from("session_participants")
     .insert({ session_id: sessionId, user_id: inviteeId, invited_by: user.id })
     .select("id, session_id, user_id, invited_by, status, created_at")
@@ -95,19 +95,19 @@ export async function POST(
   }
 
   // Notify the invitee
-  const { data: inviterProfile } = await (supabase as any)
+  const { data: inviterProfile } = await supabase
     .from("profiles")
     .select("display_name, username")
     .eq("id", user.id)
     .single();
 
   const inviterName = inviterProfile?.display_name || inviterProfile?.username || "Someone";
-  const breweryName = session.brewery?.name ?? null;
+  const breweryName = (session.brewery as any)?.name ?? null;
   const notifBody = breweryName
     ? `${inviterName} invited you to their session at ${breweryName}`
     : `${inviterName} invited you to their home session`;
 
-  await (supabase as any).from("notifications").insert({
+  await supabase.from("notifications").insert({
     user_id: inviteeId,
     type: "group_invite",
     title: "You're invited! 🍺",
@@ -140,7 +140,7 @@ export async function DELETE(
   const targetUserId = searchParams.get("user_id") || user.id;
 
   // Can remove self, or session owner can remove anyone
-  const { data: session } = await (supabase as any)
+  const { data: session } = await supabase
     .from("sessions")
     .select("user_id")
     .eq("id", sessionId)
@@ -151,7 +151,7 @@ export async function DELETE(
     return NextResponse.json({ error: "Not authorized to remove this participant" }, { status: 403 });
   }
 
-  const { error } = await (supabase as any)
+  const { error } = await supabase
     .from("session_participants")
     .delete()
     .eq("session_id", sessionId)

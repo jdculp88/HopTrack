@@ -16,7 +16,7 @@ export async function GET(
   const userId = url.searchParams.get("userId") || user.id;
 
   // Fetch all sessions at this brewery for this user
-  const { data: sessions, error: sessionsError } = await (supabase as any)
+  const { data: sessions, error: sessionsError } = await supabase
     .from("sessions")
     .select("id, started_at, ended_at")
     .eq("brewery_id", brewery_id)
@@ -42,7 +42,7 @@ export async function GET(
   }
 
   // Fetch all beer_logs at this brewery for this user to find most-ordered beer
-  const { data: beerLogs, error: logsError } = await (supabase as any)
+  const { data: beerLogs, error: logsError } = await supabase
     .from("beer_logs")
     .select("beer_id, quantity, beer:beers!beer_id(name)")
     .eq("brewery_id", brewery_id)
@@ -59,7 +59,7 @@ export async function GET(
   for (const log of allLogs) {
     const beerId = log.beer_id;
     if (!beerId) continue;
-    const beerName = log.beer?.name || "Unknown";
+    const beerName = (log.beer as any)?.name || "Unknown";
     if (!beerCounts[beerId]) {
       beerCounts[beerId] = { name: beerName, count: 0 };
     }
@@ -75,7 +75,7 @@ export async function GET(
   }
 
   // Visitor rank
-  const { data: allVisits } = await (supabase as any)
+  const { data: allVisits } = await supabase
     .from("brewery_visits")
     .select("user_id, total_visits")
     .eq("brewery_id", brewery_id)

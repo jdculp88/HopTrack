@@ -1,5 +1,8 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+// Database type exists at @/types/database but Supabase's .select() inference
+// doesn't handle partial columns or complex joins — returns 'never'.
+// Revisit adding Database generic when Supabase TS SDK improves.
 
 export async function createClient() {
   const cookieStore = await cookies();

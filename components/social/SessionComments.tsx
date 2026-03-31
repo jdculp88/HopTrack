@@ -122,7 +122,7 @@ export function SessionComments({ sessionId, currentUserId, sessionOwnerId }: Se
           {previewComments.map((comment) => (
             <div key={comment.id} className="flex items-start gap-2">
               <UserAvatar
-                profile={comment.profile as any ?? { id: comment.user_id, username: "?", display_name: null, avatar_url: null }}
+                profile={comment.profile ?? { id: comment.user_id, username: "?", display_name: null, avatar_url: null }}
                 size="xs"
               />
               <div className="flex-1 min-w-0">
@@ -177,7 +177,7 @@ export function SessionComments({ sessionId, currentUserId, sessionOwnerId }: Se
                   className="flex items-start gap-2 group"
                 >
                   <UserAvatar
-                    profile={comment.profile as any ?? { id: comment.user_id, username: "?", display_name: null, avatar_url: null }}
+                    profile={comment.profile ?? { id: comment.user_id, username: "?", display_name: null, avatar_url: null }}
                     size="xs"
                   />
                   <div className="flex-1 min-w-0">

@@ -124,7 +124,7 @@ export function DrinkingNow() {
                           username: f.username ?? "",
                           display_name: f.displayName,
                           avatar_url: f.avatarUrl,
-                        } as any}
+                        }}
                         size="md"
                       />
                       {/* Live dot */}

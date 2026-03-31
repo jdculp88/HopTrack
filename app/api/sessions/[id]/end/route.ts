@@ -18,7 +18,7 @@ export async function PATCH(
   const { id: sessionId } = await params
 
   // Get session with beer logs
-  const { data: session, error: sessionError } = await (supabase as any)
+  const { data: session, error: sessionError } = await supabase
     .from('sessions')
     .select(`
       *,
@@ -49,7 +49,7 @@ export async function PATCH(
   // First visit bonus only applies to brewery sessions
   let isFirstVisit = false
   if (!isHomeSession && session.brewery_id) {
-    const { data: existingSessions } = await (supabase as any)
+    const { data: existingSessions } = await supabase
       .from('sessions')
       .select('id')
       .eq('user_id', user.id)
@@ -62,7 +62,7 @@ export async function PATCH(
   }
 
   // End the session
-  const { error: endError } = await (supabase as any)
+  const { error: endError } = await supabase
     .from('sessions')
     .update({
       is_active: false,
@@ -76,14 +76,14 @@ export async function PATCH(
   }
 
   // Clean up pending participants (S38-010) — accepted ones stay for history
-  await (supabase as any)
+  await supabase
     .from('session_participants')
     .delete()
     .eq('session_id', sessionId)
     .eq('status', 'pending')
 
   // Streak calculation (with grace period)
-  const { data: profile } = await (supabase as any)
+  const { data: profile } = await supabase
     .from('profiles')
     .select('xp, level, current_streak, longest_streak, last_session_date, streak_grace_used_at')
     .eq('id', user.id)
@@ -132,7 +132,7 @@ export async function PATCH(
   const newXp = (profile?.xp || 0) + xpGained
   const newLevel = getLevelFromXP(newXp).level
 
-  const { data: rpcResult, error: rpcError } = await (supabase as any)
+  const { data: rpcResult, error: rpcError } = await supabase
     .rpc('increment_xp', {
       p_user_id: user.id,
       p_xp_amount: xpGained,
@@ -145,14 +145,14 @@ export async function PATCH(
   if (rpcError) {
     const updates: any = { xp: newXp, level: newLevel }
     if (isFirstVisit && !isHomeSession) {
-      updates.unique_breweries = (profile?.unique_breweries || 0) + 1
+      updates.unique_breweries = ((profile as any)?.unique_breweries || 0) + 1
     }
     if (streakUpdates) {
       updates.current_streak = streakUpdates.current_streak
       updates.longest_streak = Math.max(profile?.longest_streak || 0, streakUpdates.current_streak)
       updates.last_session_date = streakUpdates.last_session_date
     }
-    await (supabase as any).from('profiles').update(updates).eq('id', user.id)
+    await supabase.from('profiles').update(updates).eq('id', user.id)
   }
 
   // ─── Achievement checks (batched) ────────────────────────────────────
@@ -160,9 +160,9 @@ export async function PATCH(
 
   // Batch: fetch session count + user's existing achievements + all achievements in one round
   const [sessionsCountRes, existingAchievementsRes, allAchievementsRes] = await Promise.all([
-    (supabase as any).from('sessions').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
-    (supabase as any).from('user_achievements').select('achievement_id').eq('user_id', user.id),
-    (supabase as any).from('achievements').select('id, key, name, description, icon, xp_reward, tier'),
+    supabase.from('sessions').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
+    supabase.from('user_achievements').select('achievement_id').eq('user_id', user.id),
+    supabase.from('achievements').select('id, key, name, description, icon, xp_reward, tier'),
   ])
 
   const sessionCount = sessionsCountRes.count || 0
@@ -200,7 +200,7 @@ export async function PATCH(
   const sessionBeerIds = beerLogs.map((b: any) => b.beer_id).filter(Boolean)
 
   if (sessionBeerIds.length > 0) {
-    const { data: allUserLogs } = await (supabase as any)
+    const { data: allUserLogs } = await supabase
       .from('beer_logs')
       .select('beer:beers(style)')
       .eq('user_id', user.id)
@@ -240,18 +240,18 @@ export async function PATCH(
 
   // Batch insert all new achievements
   if (achievementsToInsert.length > 0) {
-    await (supabase as any).from('user_achievements').insert(achievementsToInsert)
+    await supabase.from('user_achievements').insert(achievementsToInsert)
   }
 
   // ─── Notify friends ──────────────────────────────────────────────────
   if (session.share_to_feed) {
     // Batch: fetch user profile + brewery name + friendships in parallel
     const [userProfileRes, breweryRes, friendshipsRes] = await Promise.all([
-      (supabase as any).from('profiles').select('display_name, username').eq('id', user.id).single(),
+      supabase.from('profiles').select('display_name, username').eq('id', user.id).single(),
       session.brewery_id
-        ? (supabase as any).from('breweries').select('name').eq('id', session.brewery_id).single()
+        ? supabase.from('breweries').select('name').eq('id', session.brewery_id).single()
         : Promise.resolve({ data: null }),
-      (supabase as any)
+      supabase
         .from('friendships')
         .select('requester_id, addressee_id')
         .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`)
@@ -279,10 +279,10 @@ export async function PATCH(
       }))
 
       // Insert all notifications (fire and forget)
-      ;(supabase as any).from('notifications').insert(notifications).then(() => {})
+      ;supabase.from('notifications').insert(notifications).then(() => {})
 
       // Batch: fetch all friend push preferences + subscriptions
-      const { data: friendProfiles } = await (supabase as any)
+      const { data: friendProfiles } = await supabase
         .from('profiles')
         .select('id, notification_preferences')
         .in('id', friendIds)
@@ -305,7 +305,7 @@ export async function PATCH(
   }
 
   // Fetch the completed session for the recap
-  const { data: completedSession } = await (supabase as any)
+  const { data: completedSession } = await supabase
     .from('sessions')
     .select(`
       *,

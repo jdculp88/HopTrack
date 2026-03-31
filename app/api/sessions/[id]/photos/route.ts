@@ -10,7 +10,7 @@ export async function GET(
   const { id } = await params;
   const supabase = await createClient();
 
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from("session_photos")
     .select("id, photo_url, created_at, user_id")
     .eq("session_id", id)
@@ -34,7 +34,7 @@ export async function POST(
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   // Check session belongs to user
-  const { data: session } = await (supabase as any)
+  const { data: session } = await supabase
     .from("sessions")
     .select("id, user_id")
     .eq("id", id)
@@ -45,7 +45,7 @@ export async function POST(
   }
 
   // Check photo limit (5 per session)
-  const { count } = await (supabase as any)
+  const { count } = await supabase
     .from("session_photos")
     .select("id", { count: "exact", head: true })
     .eq("session_id", id);
@@ -59,7 +59,7 @@ export async function POST(
     return NextResponse.json({ error: "photo_url required" }, { status: 400 });
   }
 
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from("session_photos")
     .insert({ session_id: id, user_id: user.id, photo_url })
     .select()
@@ -82,7 +82,7 @@ export async function DELETE(
   const { photoId } = await req.json();
   if (!photoId) return NextResponse.json({ error: "photoId required" }, { status: 400 });
 
-  await (supabase as any)
+  await supabase
     .from("session_photos")
     .delete()
     .eq("id", photoId)

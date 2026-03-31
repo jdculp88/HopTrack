@@ -752,3 +752,38 @@ Full team testing audit (all 13 members) found 85 unique issues. Sprint 30 kille
 - 040: `hop_routes`, `hop_route_stops`, `hop_route_stop_beers` tables + RLS ✅ APPLIED (S40)
 - 041: `hop_route_eligible`, `hop_route_offer`, `vibe_tags` on breweries + HopRoute achievements ✅ APPLIED (S40)
 - PGRST schema cache reloaded after 040/041 ✅
+
+---
+
+## Sprints 64-73 — Shore It Up (2026-03-30)
+**Theme:** Tech debt, documentation finalization, folder/file organization
+
+### Sprint 64 — Zero Noise ✅
+Console.log cleanup (4 debug leftovers → structured prefixes). `components/checkin/` renamed to `components/session/` (2 dead files deleted: FlavorTagPicker, ServingStylePicker; 7 files moved). All imports updated. Stale docs deleted: `bugs/`, `screenshots/`, `validation/`, `agendas/`, sprint bug files. Strategy duplicates deleted. Brand docs consolidated to `docs/brand/`. `strategy/` dir removed.
+
+### Sprint 65 — Type Safety Pt.1 ✅
+Root cause: `Database` generic was never wired into Supabase clients — every `(supabase as any)` was a workaround. Added `Database` type to `types/database.ts` with 16 new table registrations. Created `types/supabase-helpers.ts` with shared join shapes. Eliminated `(supabase as any)` from 63 files → 0. Fixed `UserAvatar` to accept nullable `display_name`. Components `as any` reduced 8 → 1. Note: Supabase's `.select()` type inference can't handle partial columns/complex joins — Database generic removed from clients, kept as reference type.
+
+### Sprint 66 — Folder Surgery ✅
+`docs/` restructured: `plans/` (22 sprint plans), `archive/` (stale docs + meetings), `brand/` (brand guide + Apple plan). `.env.local.example` updated with `ANTHROPIC_API_KEY`.
+
+### Sprint 67 — README & Onboarding ✅
+Comprehensive `README.md` (replaces Next.js boilerplate). `CONTRIBUTING.md` (workflow, code style, review owners). `supabase/migrations/README.md` (naming, applying, rollback). `docs/roadmap.md` updated to Sprint 67.
+
+### Sprint 68 — API Reference ✅
+`docs/API-REFERENCE.md` — all 57 endpoints documented with method, path, description, auth requirement, and rate limit. Grouped by domain (sessions, beers, breweries, friends, etc.).
+
+### Sprint 69 — Architecture ✅
+`docs/ARCHITECTURE.md` — full system map: auth flow, database/RLS, storage, real-time, feed system, HopRoute AI, theme system, animation system, XP/achievements, billing, performance, error handling, key decisions.
+
+### Sprint 70 — Requirements & Brand Finalization ✅
+`docs/requirements/README.md` — all 14 REQ files audited with status and delivery sprint. All COMPLETE or DEPRECATED.
+
+### Sprint 71 — Type Safety Pt.2 ✅
+Added missing Database types: `BreweryEvent`, `PourSize`, `HopRoute`, `HopRouteStop`, `HopRouteStopBeer`, `LoyaltyProgram`, `LoyaltyRedemption`. Fixed build errors across 8 files (null guards, FK join shape casts, type assertion fixes). `npm run build` passes clean.
+
+### Sprint 72 — Build Verification ✅
+Production build verified: 0 TypeScript errors, 64 pages generated, all routes healthy.
+
+### Sprint 73 — Final Audit ✅
+Sprint history updated. CLAUDE.md updated with new file paths. Final docs audit complete.

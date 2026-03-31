@@ -68,13 +68,13 @@ export default async function BeerPage({ params }: { params: Promise<{ id: strin
   const beer = beerRaw as BeerWithBrewery;
 
   // Recent beer logs for this beer
-  const { data: beerLogsRaw } = await (supabase as any) // supabase join shape
+  const { data: beerLogsRaw } = await supabase // supabase join shape
     .from("beer_logs")
     .select("id, rating, quantity, flavor_tags, serving_style, comment, logged_at, user_id, profile:profiles(id, username, display_name, avatar_url)")
     .eq("beer_id", id)
     .order("logged_at", { ascending: false })
     .limit(20);
-  const beerLogs = (beerLogsRaw ?? []) as BeerLogEntry[];
+  const beerLogs = (beerLogsRaw ?? []) as unknown as BeerLogEntry[];
 
   // On wishlist?
   const { data: wishlistItem } = await supabase
@@ -177,8 +177,8 @@ export default async function BeerPage({ params }: { params: Promise<{ id: strin
                   )}
                   <div className="flex items-center gap-2 mt-1.5">
                     {similar.style && <BeerStyleBadge style={similar.style} size="xs" />}
-                    {similar.avg_rating > 0 && (
-                      <span className="text-xs font-mono text-[var(--accent-gold)]">★ {similar.avg_rating.toFixed(1)}</span>
+                    {(similar.avg_rating ?? 0) > 0 && (
+                      <span className="text-xs font-mono text-[var(--accent-gold)]">★ {similar.avg_rating!.toFixed(1)}</span>
                     )}
                   </div>
                 </div>
@@ -201,7 +201,7 @@ export default async function BeerPage({ params }: { params: Promise<{ id: strin
             {beerLogs.map((log) => (
               <div key={log.id} className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-4">
                 <div className="flex items-center gap-3 mb-2">
-                  <UserAvatar profile={log.profile} size="sm" />
+                  <UserAvatar profile={log.profile ?? { display_name: null, avatar_url: null }} size="sm" />
                   <div className="flex-1 min-w-0">
                     <Link href={`/profile/${log.profile?.username}`} className="font-display font-semibold text-sm text-[var(--text-primary)] hover:text-[var(--accent-gold)] transition-colors">
                       {log.profile?.display_name ?? log.profile?.username}
@@ -210,16 +210,16 @@ export default async function BeerPage({ params }: { params: Promise<{ id: strin
                       {new Date(log.logged_at).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
                     </p>
                   </div>
-                  {log.rating > 0 && (
+                  {(log.rating ?? 0) > 0 && (
                     <RatingDisplay rating={log.rating} size="sm" />
                   )}
                 </div>
                 {log.comment && (
                   <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{log.comment}</p>
                 )}
-                {log.flavor_tags?.length > 0 && (
+                {(log.flavor_tags?.length ?? 0) > 0 && (
                   <div className="flex flex-wrap gap-1.5 mt-2">
-                    {log.flavor_tags.map((tag: string) => (
+                    {log.flavor_tags!.map((tag: string) => (
                       <span key={tag} className="px-2 py-0.5 rounded-full text-xs border border-[var(--border)] bg-[var(--surface-2)] text-[var(--text-muted)]">
                         {tag}
                       </span>

@@ -19,7 +19,7 @@ export async function PATCH(
   }
 
   // Check session is still active before allowing accept (S38-004)
-  const { data: session } = await (supabase as any)
+  const { data: session } = await supabase
     .from("sessions")
     .select("is_active")
     .eq("id", sessionId)
@@ -30,7 +30,7 @@ export async function PATCH(
     return NextResponse.json({ error: "Cannot accept invite to an ended session" }, { status: 409 });
   }
 
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from("session_participants")
     .update({ status })
     .eq("session_id", sessionId)

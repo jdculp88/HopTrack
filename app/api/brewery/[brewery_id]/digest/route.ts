@@ -26,7 +26,7 @@ export async function GET(
   const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString();
 
   // Sessions this week
-  const { data: sessions } = await (supabase as any)
+  const { data: sessions } = await supabase
     .from("sessions")
     .select("id, user_id, started_at")
     .eq("brewery_id", brewery_id)
@@ -37,7 +37,7 @@ export async function GET(
   const uniqueVisitors = new Set((sessions ?? []).map((s: any) => s.user_id)).size;
 
   // Beer logs this week
-  const { data: beerLogs } = await (supabase as any)
+  const { data: beerLogs } = await supabase
     .from("beer_logs")
     .select("beer_id, quantity, beer:beers(name)")
     .eq("brewery_id", brewery_id)
@@ -54,14 +54,14 @@ export async function GET(
   const topBeer = Object.values(beerCounts).sort((a, b) => b.count - a.count)[0] ?? null;
 
   // New followers this week
-  const { count: newFollowers } = await (supabase as any)
+  const { count: newFollowers } = await supabase
     .from("brewery_follows")
     .select("id", { count: "exact", head: true })
     .eq("brewery_id", brewery_id)
     .gte("created_at", weekAgo);
 
   // Brewery name
-  const { data: brewery } = await (supabase as any)
+  const { data: brewery } = await supabase
     .from("breweries")
     .select("name")
     .eq("id", brewery_id)

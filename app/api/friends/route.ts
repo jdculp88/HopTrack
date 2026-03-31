@@ -60,7 +60,7 @@ export async function POST(request: Request) {
   const { data: requesterProfile } = await supabase
     .from("profiles").select("display_name, username").eq("id", user.id).single() as any;
   const name = requesterProfile?.display_name || requesterProfile?.username || "Someone";
-  await (supabase as any).from("notifications").insert({
+  await supabase.from("notifications").insert({
     user_id: addressee_id,
     type: "friend_request",
     title: "Friend request",

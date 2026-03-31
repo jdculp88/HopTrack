@@ -9,7 +9,7 @@ export async function GET(
   const { listId } = await params;
   const supabase = await createClient();
 
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from("beer_lists")
     .select("*, items:beer_list_items(id, beer_id, position, note, beer:beers(id, name, style, abv, avg_rating)), profile:profiles!user_id(username, display_name, avatar_url)")
     .eq("id", listId)
@@ -36,7 +36,7 @@ export async function PATCH(
   if (body.is_public !== undefined) updates.is_public = body.is_public;
   updates.updated_at = new Date().toISOString();
 
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from("beer_lists")
     .update(updates)
     .eq("id", listId)
@@ -58,7 +58,7 @@ export async function DELETE(
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { error } = await (supabase as any)
+  const { error } = await supabase
     .from("beer_lists")
     .delete()
     .eq("id", listId)

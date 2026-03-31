@@ -11,7 +11,7 @@ export async function DELETE(
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   // RLS handles authorization (own comment or session owner)
-  const { error } = await (supabase as any)
+  const { error } = await supabase
     .from("session_comments")
     .delete()
     .eq("id", commentId);

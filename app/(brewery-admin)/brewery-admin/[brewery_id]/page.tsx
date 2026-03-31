@@ -104,7 +104,7 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
       .eq("is_active", true) as any,
 
     // Recent reviews for activity feed
-    (supabase as any)
+    supabase
       .from("brewery_reviews")
       .select("id, rating, comment, created_at, profile:profiles!user_id(display_name, username)")
       .eq("brewery_id", brewery_id)
@@ -112,7 +112,7 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
       .limit(5),
 
     // Recent followers for activity feed
-    (supabase as any)
+    supabase
       .from("brewery_follows")
       .select("id, created_at, profile:profiles!user_id(display_name, username)")
       .eq("brewery_id", brewery_id)
@@ -121,12 +121,12 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
   ]);
 
   // Follower counts (separate queries for count)
-  const { count: totalFollowerCount } = await (supabase as any)
+  const { count: totalFollowerCount } = await supabase
     .from("brewery_follows")
     .select("id", { count: "exact", head: true })
     .eq("brewery_id", brewery_id);
 
-  const { count: todayNewFollowers } = await (supabase as any)
+  const { count: todayNewFollowers } = await supabase
     .from("brewery_follows")
     .select("id", { count: "exact", head: true })
     .eq("brewery_id", brewery_id)

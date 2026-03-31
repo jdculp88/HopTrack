@@ -10,7 +10,7 @@ export default async function HopRoutePage({ params }: { params: Promise<{ route
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const { data: route, error } = await (supabase as any)
+  const { data: route, error } = await supabase
     .from("hop_routes")
     .select(`
       id, title, location_city, stop_count, group_size, vibe, transport, status,
@@ -30,5 +30,5 @@ export default async function HopRoutePage({ params }: { params: Promise<{ route
 
   if (error || !route) notFound();
 
-  return <HopRouteCardClient route={route} userId={user.id} />;
+  return <HopRouteCardClient route={route as any} userId={user.id} />;
 }

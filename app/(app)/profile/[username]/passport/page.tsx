@@ -24,7 +24,7 @@ export default async function PassportPage({ params }: { params: Promise<{ usern
   if (!profile) notFound();
 
   // Fetch all beer logs with beer + brewery joins
-  const { data: beerLogs } = await (supabase as any)
+  const { data: beerLogs } = await supabase
     .from("beer_logs")
     .select("beer_id, rating, logged_at, quantity, beer:beers(id, name, style, abv, brewery_id, brewery:breweries(id, name))")
     .eq("user_id", profile.id)

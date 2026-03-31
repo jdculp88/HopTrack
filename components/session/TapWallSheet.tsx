@@ -7,7 +7,7 @@ import { UserAvatar } from '@/components/ui/UserAvatar'
 import { FullScreenDrawer } from '@/components/ui/Modal'
 import { Skeleton } from '@/components/ui/SkeletonLoader'
 import { useSession } from '@/hooks/useSession'
-import QuickRatingSheet from '@/components/checkin/QuickRatingSheet'
+import QuickRatingSheet from '@/components/session/QuickRatingSheet'
 import { formatABV } from '@/lib/utils'
 import type { Session, BeerLog } from '@/types/database'
 

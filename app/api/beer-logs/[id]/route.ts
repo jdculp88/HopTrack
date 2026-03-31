@@ -26,7 +26,7 @@ export async function PATCH(
     return NextResponse.json({ error: 'No valid fields to update' }, { status: 400 })
   }
 
-  const { data: beerLog, error } = await (supabase as any)
+  const { data: beerLog, error } = await supabase
     .from('beer_logs')
     .update(allowedUpdates)
     .eq('id', id)
@@ -35,7 +35,7 @@ export async function PATCH(
     .single()
 
   if (error) {
-    console.error('Error updating beer log:', error)
+    console.error('[beer-logs] Error updating beer log:', error)
     return NextResponse.json({ error: 'Failed to update beer log' }, { status: 500 })
   }
 
@@ -53,7 +53,7 @@ export async function DELETE(
 
   const { id } = await params
 
-  const { error } = await (supabase as any)
+  const { error } = await supabase
     .from('beer_logs')
     .delete()
     .eq('id', id)

@@ -11,7 +11,7 @@ export async function GET(req: Request) {
 
   if (!userId) return NextResponse.json({ error: "userId required" }, { status: 400 });
 
-  let query = (supabase as any)
+  let query = supabase
     .from("beer_lists")
     .select("*, items:beer_list_items(id, beer_id, position, note, beer:beers(id, name, style, abv, avg_rating))")
     .eq("user_id", userId)
@@ -39,7 +39,7 @@ export async function POST(req: Request) {
 
   if (!title?.trim()) return NextResponse.json({ error: "Title required" }, { status: 400 });
 
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from("beer_lists")
     .insert({ user_id: user.id, title: title.trim(), description: description?.trim() || null, is_public: is_public ?? true })
     .select()

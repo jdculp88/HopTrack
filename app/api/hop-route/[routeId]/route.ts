@@ -13,7 +13,7 @@ export async function GET(
   } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { data: route, error } = await (supabase as any)
+  const { data: route, error } = await supabase
     .from("hop_routes")
     .select(`
       id, title, location_city, location_lat, location_lng,

@@ -1,9 +1,42 @@
 # HopTrack Product Roadmap
 **Last updated:** 2026-03-30
 **PM:** Morgan
-**Current Sprint:** Sprint 41 — Crystal Clear (starting)
+**Current Sprint:** Sprint 67 — README & Onboarding (active)
 
-> This is a living document -- updated every sprint. For completed sprints 1-12, see `docs/roadmap-archive.md`.
+> This is a living document -- updated every sprint. For completed sprints 1-12, see `docs/roadmap-archive.md`. For sprint plans, see `docs/plans/`. For the Shore It Up master plan (Sprints 64-73), see `docs/plans/sprint-64-73-master-plan.md`.
+
+---
+
+## Sprints 64-66 -- Phase 1: Clean House (COMPLETE)
+**Theme:** Remove dead code, fix types, clean logs, organize folders
+
+Sprint 64 (Zero Noise): 4 console.log debug leftovers standardized, `components/checkin/` renamed to `components/session/` (2 dead files deleted, 7 moved), 20+ stale docs deleted, brand docs consolidated to `docs/brand/`, strategy/ removed.
+
+Sprint 65 (Type Safety Pt.1): Wired `Database` generic into all 3 Supabase clients (root cause of all `(supabase as any)` casts), 16 new table types registered in Database interface, `types/supabase-helpers.ts` created, `(supabase as any)` eliminated from 63 files (→ 0), `UserAvatar` made null-safe, components `as any` reduced from 8 → 1.
+
+Sprint 66 (Folder Surgery): `docs/` restructured — `plans/`, `archive/`, `brand/` dirs created, 22 sprint plans moved, stale docs archived. `.env.local.example` updated with `ANTHROPIC_API_KEY`.
+
+---
+
+## Sprints 67-70 -- Phase 2: Document Everything (IN PROGRESS)
+
+Sprint 67 (README & Onboarding): Comprehensive README.md, CONTRIBUTING.md, supabase/migrations/README.md, roadmap update.
+
+Sprint 68 (API Reference): All 55 endpoints documented.
+
+Sprint 69 (Architecture): System map — auth, RLS, feed, HopRoute AI, theme, animation.
+
+Sprint 70 (Requirements & Brand): Close every REQ, finalize brand guide, update sales docs.
+
+---
+
+## Sprints 71-73 -- Phase 3: Harden & Ship (PLANNED)
+
+Sprint 71 (Type Safety Pt.2): Remaining `as any` → near zero, clean `tsc` build.
+
+Sprint 72 (Test & Performance): E2E coverage, memoization, build optimization.
+
+Sprint 73 (Final Audit): TODO grep, launch checklist update, CLAUDE.md update, 10-sprint retro.
 
 ---
 

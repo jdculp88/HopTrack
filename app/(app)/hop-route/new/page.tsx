@@ -10,7 +10,7 @@ export default async function HopRouteNewPage() {
   if (!user) redirect("/login");
 
   // Pre-load taste DNA for auto-population
-  const { data: beerLogs } = await (supabase as any)
+  const { data: beerLogs } = await supabase
     .from("beer_logs")
     .select("rating, beer:beers(style)")
     .eq("user_id", user.id)

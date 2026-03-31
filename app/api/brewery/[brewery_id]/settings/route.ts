@@ -14,7 +14,7 @@ export async function PATCH(
   }
 
   // Verify the user belongs to this brewery (owner or manager only)
-  const { data: account } = await (supabase as any)
+  const { data: account } = await supabase
     .from("brewery_accounts")
     .select("role")
     .eq("user_id", user.id)
@@ -33,7 +33,7 @@ export async function PATCH(
     return NextResponse.json({ error: "Name and city are required" }, { status: 400 });
   }
 
-  const { error } = await (supabase as any)
+  const { error } = await supabase
     .from("breweries")
     .update({
       name: name.trim(),

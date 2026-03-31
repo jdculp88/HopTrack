@@ -12,7 +12,7 @@ export default async function BeerListsPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const { data: lists } = await (supabase as any)
+  const { data: lists } = await supabase
     .from("beer_lists")
     .select(
       "id, title, description, is_public, created_at, items:beer_list_items(id, beer_id, position, note, beer:beers(id, name, style, abv, avg_rating))"
@@ -23,7 +23,7 @@ export default async function BeerListsPage() {
   return (
     <BeerListsClient
       userId={user.id}
-      initialLists={(lists ?? []) as BeerList[]}
+      initialLists={(lists ?? []) as unknown as BeerList[]}
     />
   );
 }

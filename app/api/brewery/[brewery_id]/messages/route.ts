@@ -83,7 +83,7 @@ export async function POST(
   let inserted = 0;
   for (let i = 0; i < notifications.length; i += 100) {
     const batch = notifications.slice(i, i + 100);
-    const { error } = await (supabase as any).from("notifications").insert(batch);
+    const { error } = await supabase.from("notifications").insert(batch);
     if (error) {
       console.error("Failed to insert notification batch:", error.message);
     } else {

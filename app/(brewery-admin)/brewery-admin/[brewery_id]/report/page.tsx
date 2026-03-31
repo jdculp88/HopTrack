@@ -10,7 +10,7 @@ export default async function ReportPage({ params }: { params: Promise<{ brewery
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const { data: account } = await (supabase as any)
+  const { data: account } = await supabase
     .from("brewery_accounts")
     .select("role")
     .eq("user_id", user.id)
@@ -18,7 +18,7 @@ export default async function ReportPage({ params }: { params: Promise<{ brewery
     .single();
   if (!account) redirect("/brewery-admin");
 
-  const { data: brewery } = await (supabase as any)
+  const { data: brewery } = await supabase
     .from("breweries")
     .select("id, name, city, state, cover_image_url")
     .eq("id", brewery_id)
@@ -30,21 +30,21 @@ export default async function ReportPage({ params }: { params: Promise<{ brewery
   const since30 = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
   const since7 = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
 
-  const { data: sessions90 } = await (supabase as any)
+  const { data: sessions90 } = await supabase
     .from("sessions")
     .select("id, user_id, started_at, ended_at")
     .eq("brewery_id", brewery_id)
     .eq("is_active", false)
     .gte("started_at", since90);
 
-  const { data: beerLogs90 } = await (supabase as any)
+  const { data: beerLogs90 } = await supabase
     .from("beer_logs")
     .select("id, beer_id, rating, quantity, logged_at, user_id, beer:beers(id, name, style)")
     .eq("brewery_id", brewery_id)
     .gte("logged_at", since90);
 
   // Top customers (by session count)
-  const { data: topCustomerProfiles } = await (supabase as any)
+  const { data: topCustomerProfiles } = await supabase
     .from("profiles")
     .select("id, username, display_name, avatar_url")
     .in(

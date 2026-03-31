@@ -40,7 +40,7 @@ export default async function BrewerySessionsPage({
   const { data: brewery } = await supabase
     .from("breweries").select("name").eq("id", brewery_id).single() as any;
 
-  const { data: sessions, count } = await (supabase as any)
+  const { data: sessions, count } = await supabase
     .from("sessions")
     .select("*, profile:profiles(display_name, username, avatar_url), beer_logs(id, beer_id, rating, quantity, beer:beers(name))", { count: "exact" })
     .eq("brewery_id", brewery_id)

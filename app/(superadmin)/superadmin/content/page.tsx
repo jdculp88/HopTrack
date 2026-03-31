@@ -9,7 +9,7 @@ export default async function ContentPage() {
   // Pull some basic stats to make the page useful even as a placeholder
   const [{ count: totalCheckins }, { count: totalBeers }, { count: totalBreweries }] =
     await Promise.all([
-      (supabase as any).from("sessions").select("id", { count: "exact", head: true }).eq("is_active", false) as any,
+      supabase.from("sessions").select("id", { count: "exact", head: true }).eq("is_active", false) as any,
       supabase.from("beers").select("id", { count: "exact", head: true }) as any,
       supabase.from("breweries").select("id", { count: "exact", head: true }) as any,
     ]);

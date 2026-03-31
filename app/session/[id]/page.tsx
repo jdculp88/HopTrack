@@ -9,7 +9,7 @@ interface Props {
 
 async function getSession(id: string) {
   const supabase = await createClient();
-  const { data: session } = await (supabase as any)
+  const { data: session } = await supabase
     .from("sessions")
     .select(`
       *,
