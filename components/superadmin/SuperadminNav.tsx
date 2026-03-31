@@ -11,6 +11,7 @@ import {
   BarChart2,
   ShieldAlert,
   LogOut,
+  Bot,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
@@ -24,9 +25,10 @@ interface NavItem {
 
 interface SuperadminNavProps {
   pendingClaimsCount: number;
+  pendingBarbackCount?: number;
 }
 
-export function SuperadminNav({ pendingClaimsCount }: SuperadminNavProps) {
+export function SuperadminNav({ pendingClaimsCount, pendingBarbackCount = 0 }: SuperadminNavProps) {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -41,6 +43,7 @@ export function SuperadminNav({ pendingClaimsCount }: SuperadminNavProps) {
     { href: "/superadmin/users",     label: "Users",          icon: Users },
     { href: "/superadmin/breweries", label: "Breweries",      icon: Beer },
     { href: "/superadmin/claims",    label: "Claims Queue",   icon: ClipboardCheck, badge: pendingClaimsCount },
+    { href: "/superadmin/barback",   label: "The Barback",    icon: Bot, badge: pendingBarbackCount },
     { href: "/superadmin/content",   label: "Content",        icon: FileText },
     { href: "/superadmin/stats",     label: "Platform Stats", icon: BarChart2 },
   ];

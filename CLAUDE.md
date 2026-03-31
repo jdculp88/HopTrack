@@ -243,8 +243,9 @@ scripts/supabase-setup.mjs    — One-time setup script
 
 ## 🗺️ Where We Are
 
-**Current Sprint:** Sprint 79 — TBD
-**Last completed:** Sprint 78 — The Database ✅ — 7,177 breweries (Open Brewery DB), 2,361 beers (Kaggle), city/state/zip search, Explore pagination, Reviews fix, CI lint fix
+**Current Sprint:** Sprint 80 — TBD
+**Last completed:** Sprint 79 — Brewery Value + The Barback Pilot ✅ — Weekly digest emails (F-007), ROI dashboard card (F-010), The Barback AI crawler pilot (Charlotte NC, 50 breweries, REQ-071)
+**Sprint plan (79):** `docs/plans/sprint-79-plan.md`
 **Retro (78):** `docs/retros/sprint-78-retro.md` (facilitated by Morgan)
 **Sprint plan (78):** `docs/plans/sprint-78-plan.md`
 **Retro (77):** `docs/retros/sprint-77-retro.md` (facilitated by Drew)
@@ -480,6 +481,42 @@ Migration state (001-041): all applied — see `docs/sprint-history.md#migration
 - Staging Supabase: paid tier provisioned
 - Launch date: no date set (wants product confidence)
 - First brewery: waiting on overall confidence
+
+---
+
+### Sprint 79 — Brewery Value + The Barback Pilot ✅ (2026-03-31)
+**Theme:** Show brewery owners ROI + pilot AI beer data crawler
+**Arc:** Stick Around (Sprints 79-84)
+
+**Goal 1: Weekly Digest Emails (F-007)** — Automated weekly email to brewery owners. Stats: visits, visitsTrend (WoW %), uniqueVisitors, beersLogged, topBeer, loyaltyRedemptions, newFollowers. `calculateDigestStats()` shared function in digest API route. Cron endpoint `/api/cron/weekly-digest` secured by CRON_SECRET. GitHub Actions weekly schedule (Monday 9am ET). `onWeeklyDigest()` trigger added to `lib/email-triggers.ts`.
+
+**Goal 2: ROI Dashboard Card (F-010)** — `ROIDashboardCard` server component on brewery dashboard. Shows loyalty-driven ROI: hero number (ROI multiple like "3.2x" for paid tiers, dollar estimate for free), 4-week mini sparkline, 3-stat grid (repeat visits / est. revenue / vs last week), calculation explainer tooltip. `lib/roi.ts` with `calculateROI()` and `formatROIMessage()`. Handles all edge cases (no loyalty program, no data, free tier).
+
+**Goal 3: The Barback — AI Beer Crawler Pilot (REQ-071)** — Foundation for AI-powered brewery website crawling. Pilot: 50 unclaimed Charlotte NC metro breweries.
+
+- Migration 051: `crawl_sources` (per-brewery config), `crawl_jobs` (orchestration), `crawled_beers` (staging). Provenance columns on `beers` (source, source_url, last_verified_at) and `breweries` (data_source, last_crawled_at, crawl_beer_count). Sprint 78 Kaggle beers tagged `source = 'seed'`. RLS: superadmin-only on all Barback tables.
+- `scripts/barback-crawl.mjs`: Node.js crawl pipeline — query crawl_sources → robots.txt check → HTTP fetch (10s timeout) → SHA-256 dedup → HTML cleaning (regex strip) → Claude Haiku extraction → stage to crawled_beers → update crawl_sources/crawl_jobs. Charlotte metro hardcoded (14 cities). Circuit breaker (3 failures → disable). 2s rate limit. `HopTrack-Barback/1.0` User-Agent.
+- Superadmin review UI: `/superadmin/barback/` with overview stats, pending review table (approve/reject/edit per beer, batch approve high-confidence), crawl history log. API: `/api/superadmin/barback/review` (PATCH individual, POST batch).
+- The Barback rules: ONLY crawl unclaimed breweries (verified = false). Claimed = owner manages. Future: Barrel-tier "AI Managed" premium feature.
+
+**Key changes from Sprint 79:**
+- `lib/roi.ts` — NEW: `calculateROI()`, `formatROIMessage()`, ROIData interface
+- `components/brewery-admin/ROIDashboardCard.tsx` — NEW: server component, MiniSparkline, 3 render states
+- `app/(brewery-admin)/brewery-admin/[brewery_id]/page.tsx` — UPDATED: ROI card wired in, subscription_tier fetched
+- `app/api/brewery/[brewery_id]/digest/route.ts` — NEW: digest stats API + shared `calculateDigestStats()`
+- `app/api/cron/weekly-digest/route.ts` — NEW: cron endpoint for batch digest emails
+- `lib/email-triggers.ts` — UPDATED: `onWeeklyDigest()` added
+- `.github/workflows/weekly-digest.yml` — NEW: Monday 9am ET cron
+- `supabase/migrations/051_barback_schema.sql` — NEW: 3 tables + provenance columns + seed tagging
+- `scripts/barback-crawl.mjs` — NEW: AI crawl pipeline (Charlotte pilot)
+- `app/(superadmin)/superadmin/barback/page.tsx` — NEW: Barback admin overview
+- `app/(superadmin)/superadmin/barback/BarbackClient.tsx` — NEW: review UI with approve/reject/batch
+- `app/api/superadmin/barback/review/route.ts` — NEW: review actions API
+- `docs/requirements/REQ-071-the-barback-ai-beer-crawler.md` — NEW: comprehensive crawler requirements (Sam)
+- `docs/plans/barback-architecture.md` — NEW: architectural analysis (Jordan)
+- `docs/plans/sprint-79-plan.md` — NEW: sprint plan
+- `.env.local.example` — UPDATED: CRON_SECRET added
+- No new beer/brewery data — schema + tooling only
 
 ---
 

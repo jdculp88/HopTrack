@@ -26,14 +26,20 @@ export default async function SuperadminLayout({
 
   if (!profile?.is_superadmin) redirect("/home");
 
-  const { count: pendingClaimsCount } = (await supabase
-    .from("brewery_claims")
-    .select("id", { count: "exact", head: true })
-    .eq("status", "pending")) as any;
+  const [{ count: pendingClaimsCount }, { count: pendingBarbackCount }] = await Promise.all([
+    supabase
+      .from("brewery_claims")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "pending") as any,
+    supabase
+      .from("crawled_beers")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "pending") as any,
+  ]);
 
   return (
     <div className="min-h-screen flex" style={{ background: "var(--bg)" }}>
-      <SuperadminNav pendingClaimsCount={pendingClaimsCount ?? 0} />
+      <SuperadminNav pendingClaimsCount={pendingClaimsCount ?? 0} pendingBarbackCount={pendingBarbackCount ?? 0} />
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top bar */}
         <header

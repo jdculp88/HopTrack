@@ -1,7 +1,7 @@
 # HopTrack Product Roadmap
 **Last updated:** 2026-03-31
 **PM:** Morgan
-**Current Sprint:** Sprint 79 — TBD
+**Current Sprint:** Sprint 79 — Brewery Value + The Barback Pilot
 
 > This is a living document -- updated every sprint. For completed sprints 1-12, see `docs/roadmap-archive.md`. For sprint plans, see `docs/plans/`. For the Shore It Up master plan (Sprints 64-73), see `docs/plans/sprint-64-73-master-plan.md`. For the Q2 2026 roadmap research (30 features, 18 REQs, 4 sprint arcs), see `docs/plans/roadmap-research-2026-q2.md`.
 
@@ -81,6 +81,19 @@ Vitest configured (39 unit tests across 4 files). Vitest added to CI. Cookie con
 **Plan:** `docs/plans/sprint-78-plan.md` | **Retro:** `docs/retros/sprint-78-retro.md`
 
 7,177 US breweries seeded from Open Brewery DB (all 50 states + DC, 5,513 with GPS). 2,361 beers from Kaggle Beer Study (541 breweries matched, 26 canonical styles). Explore page upgraded (200 initial + Load More pagination). Search by name, city, state, or zip code. Duplicate Reviews heading fixed. CI lint fixed (no-explicit-any disabled). Beer deduplication (migration 050). Reusable fetch scripts in `scripts/`.
+
+---
+
+## Sprint 79 — Brewery Value + The Barback Pilot (COMPLETE ✅)
+**Theme:** Show brewery owners ROI + pilot AI beer data crawler
+**Arc:** Stick Around (Sprints 79-84)
+**Plan:** `docs/plans/sprint-79-plan.md`
+
+**F-007: Weekly Digest Emails** — Automated weekly email to brewery owners with check-ins, top beers, loyalty redemptions, new followers, week-over-week comparison. Cron endpoint (`/api/cron/weekly-digest`) secured by CRON_SECRET, GitHub Actions weekly schedule (Monday 9am ET). `onWeeklyDigest()` trigger added. Shared `calculateDigestStats()` function.
+
+**F-010: ROI Dashboard Card** — `ROIDashboardCard` server component on brewery dashboard showing loyalty-driven ROI. Hero number (ROI multiple for paid tiers, dollar estimate for free), 4-week sparkline, 3-stat grid (repeat visits / est. revenue / trend). `lib/roi.ts` calculation engine. Handles all edge cases (no loyalty program, no data, free tier).
+
+**The Barback — AI Beer Crawler Pilot** — Foundation for AI-powered brewery website crawling. Migration 051: `crawl_sources`, `crawl_jobs`, `crawled_beers` tables + provenance columns on `beers`/`breweries`. `scripts/barback-crawl.mjs`: fetches brewery websites, strips HTML, sends to Claude Haiku for structured beer extraction, stages results for manual review. Charlotte NC metro pilot (50 breweries). Superadmin review UI at `/superadmin/barback/` with approve/reject/batch controls. robots.txt compliance, SHA-256 dedup, 2s rate limiting, circuit breaker. REQ-071 written (Sam), architecture doc written (Jordan).
 
 ---
 

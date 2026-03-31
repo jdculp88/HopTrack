@@ -8,6 +8,7 @@ import {
 import { formatRelativeTime } from "@/lib/dates";
 import BreweryOnboardingCard from "@/components/brewery-admin/BreweryOnboardingCard";
 import { OnboardingWizard } from "@/components/brewery-admin/onboarding/OnboardingWizard";
+import ROIDashboardCard from "@/components/brewery-admin/ROIDashboardCard";
 import { Sparkline, ActiveSessionsCounter, RecentActivityFeed } from "./DashboardClient";
 import type { ActivityItem } from "./DashboardClient";
 
@@ -27,7 +28,7 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
   // Verify access
   const { data: account } = await supabase
     .from("brewery_accounts")
-    .select("role, verified")
+    .select("role, verified, subscription_tier")
     .eq("user_id", user.id)
     .eq("brewery_id", brewery_id)
     .single() as any;
@@ -49,6 +50,7 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
     { data: activeSessions },
     { data: recentReviews },
     { data: recentFollowers },
+    { data: loyaltyProgramsForROI },
   ] = await Promise.all([
     supabase.from("breweries").select("*").eq("id", brewery_id).single() as any,
     supabase.from("beers").select("*").eq("brewery_id", brewery_id) as any,
@@ -119,6 +121,13 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
       .eq("brewery_id", brewery_id)
       .order("created_at", { ascending: false })
       .limit(5),
+
+    // Loyalty redemptions this month (for ROI card)
+    supabase
+      .from("loyalty_programs")
+      .select("id")
+      .eq("brewery_id", brewery_id)
+      .eq("is_active", true) as any,
   ]);
 
   // Follower counts (separate queries for count)
@@ -198,6 +207,27 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
   const hasLoyalty = !!loyaltyProgram;
   const hasLogo = !!(brewery as any)?.logo_url;
   const showWizard = !hasBeers && !hasLogo;
+
+  // ── ROI card data ──────────────────────────────────────────────────
+  // Count sessions where a loyalty stamp was earned this month
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+  const loyaltyVisitsThisMonth = sessions.filter((s: any) => {
+    return new Date(s.started_at) >= new Date(monthStart);
+  }).length;
+
+  // Last 4 weeks of visit counts (for sparkline)
+  const loyaltyVisitsByWeek: number[] = [];
+  for (let w = 3; w >= 0; w--) {
+    const weekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - (w + 1) * 7);
+    const weekEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() - w * 7);
+    const weekCount = sessions.filter((s: any) => {
+      const d = new Date(s.started_at);
+      return d >= weekStart && d < weekEnd;
+    }).length;
+    loyaltyVisitsByWeek.push(weekCount);
+  }
+
+  const subscriptionTier = (account as any)?.subscription_tier ?? "free";
 
   // ── Build activity feed ────────────────────────────────────────────────────
   const activityItems: ActivityItem[] = [];
@@ -525,6 +555,14 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
 
         {/* ── Right Column ────────────────────────────────────────────── */}
         <div className="space-y-6">
+
+          {/* ROI Card */}
+          <ROIDashboardCard
+            loyaltyVisitsThisMonth={loyaltyVisitsThisMonth}
+            loyaltyVisitsByWeek={loyaltyVisitsByWeek}
+            subscriptionTier={subscriptionTier}
+            hasLoyaltyProgram={hasLoyalty}
+          />
 
           {/* Quick Actions — Grid */}
           <div>

@@ -9,6 +9,7 @@ import {
   trialWarningEmail,
   trialExpiredEmail,
   passwordResetEmail,
+  weeklyDigestEmail,
 } from "@/lib/email-templates";
 import { createClient } from "@/lib/supabase/server";
 
@@ -175,6 +176,71 @@ export async function onTrialExpired(breweryId: string) {
     });
   } catch (err: any) {
     console.error("[email-trigger] onTrialExpired failed:", err.message);
+  }
+}
+
+// ── Weekly digest (called by cron or manually per brewery) ──
+
+export async function onWeeklyDigest(breweryId: string) {
+  try {
+    const supabase = await createClient();
+
+    // Fetch brewery
+    const { data: brewery } = await supabase
+      .from("breweries")
+      .select("name")
+      .eq("id", breweryId)
+      .single() as any;
+
+    if (!brewery) {
+      console.warn("[email-trigger] onWeeklyDigest: brewery not found", breweryId);
+      return;
+    }
+
+    // Find owner via brewery_accounts
+    const { data: accounts } = await supabase
+      .from("brewery_accounts")
+      .select("user_id, role")
+      .eq("brewery_id", breweryId)
+      .eq("role", "owner") as any;
+
+    if (!accounts?.length) {
+      console.warn("[email-trigger] onWeeklyDigest: no owner for brewery", breweryId);
+      return;
+    }
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("display_name, email")
+      .eq("id", accounts[0].user_id)
+      .single() as any;
+
+    if (!profile?.email) {
+      console.warn("[email-trigger] onWeeklyDigest: no email for owner of brewery", breweryId);
+      return;
+    }
+
+    // Calculate stats (import dynamically to avoid circular deps)
+    const { calculateDigestStats } = await import(
+      "@/app/api/brewery/[brewery_id]/digest/route"
+    );
+    const { stats } = await calculateDigestStats(breweryId);
+
+    const template = weeklyDigestEmail({
+      breweryName: brewery.name,
+      ownerName: profile.display_name || "Brewmaster",
+      breweryId,
+      stats,
+    });
+
+    await sendEmail({
+      to: profile.email,
+      subject: template.subject,
+      html: template.html,
+      text: template.text,
+    });
+  } catch (err: any) {
+    console.error("[email-trigger] onWeeklyDigest failed:", err.message);
   }
 }
 
