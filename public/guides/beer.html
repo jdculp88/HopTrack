@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Art of Beer Glassware</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Source+Code+Pro:wght@400;600&family=Lora:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #F5F0E8;
+    --dark: #1a1a1a;
+    --gold: #C8962E;
+    --gold-light: #D4A843;
+    --amber: #B8860B;
+    --muted: #8a8276;
+    --border: #e0d8cc;
+    --card-bg: rgba(255,252,245,0.6);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--cream);
+    color: var(--dark);
+    font-family: 'Lora', Georgia, serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 999;
+  }
+
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 30px 60px;
+  }
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid var(--dark);
+  }
+
+  .logo-area {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .logo-badge {
+    width: 52px;
+    height: 52px;
+    background: var(--dark);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .logo-badge svg {
+    width: 30px;
+    height: 36px;
+  }
+
+  .page-title {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: clamp(26px, 5vw, 48px);
+    font-weight: 400;
+    line-height: 1;
+    letter-spacing: -0.5px;
+  }
+
+  .glass-count {
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  .glass-count .label {
+    font-family: 'Source Code Pro', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--gold);
+    text-transform: uppercase;
+  }
+
+  .glass-count .number {
+    font-family: 'Playfair Display', serif;
+    font-size: 42px;
+    color: var(--gold);
+    line-height: 1;
+  }
+
+  .intro-text {
+    font-family: 'Lora', serif;
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.7;
+    max-width: 680px;
+    padding: 20px 0 10px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 0;
+  }
+
+  .glass-card {
+    border-bottom: 1px solid var(--border);
+    padding: 28px 0;
+    animation: fadeUp 0.5s ease both;
+  }
+
+  .glass-card:last-child { border-bottom: none; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .glass-card:nth-child(1) { animation-delay: 0.05s; }
+  .glass-card:nth-child(2) { animation-delay: 0.1s; }
+  .glass-card:nth-child(3) { animation-delay: 0.15s; }
+  .glass-card:nth-child(4) { animation-delay: 0.2s; }
+  .glass-card:nth-child(5) { animation-delay: 0.25s; }
+  .glass-card:nth-child(6) { animation-delay: 0.3s; }
+  .glass-card:nth-child(7) { animation-delay: 0.35s; }
+  .glass-card:nth-child(8) { animation-delay: 0.4s; }
+  .glass-card:nth-child(9) { animation-delay: 0.45s; }
+  .glass-card:nth-child(10) { animation-delay: 0.5s; }
+  .glass-card:nth-child(11) { animation-delay: 0.55s; }
+  .glass-card:nth-child(12) { animation-delay: 0.6s; }
+  .glass-card:nth-child(13) { animation-delay: 0.65s; }
+  .glass-card:nth-child(14) { animation-delay: 0.7s; }
+  .glass-card:nth-child(15) { animation-delay: 0.75s; }
+  .glass-card:nth-child(16) { animation-delay: 0.8s; }
+  .glass-card:nth-child(17) { animation-delay: 0.85s; }
+  .glass-card:nth-child(18) { animation-delay: 0.9s; }
+  .glass-card:nth-child(19) { animation-delay: 0.95s; }
+  .glass-card:nth-child(20) { animation-delay: 1.0s; }
+
+  .glass-top-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+  }
+
+  .glass-illustration {
+    flex-shrink: 0;
+    width: 70px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .glass-illustration svg {
+    width: 60px;
+    height: 86px;
+    filter: drop-shadow(0 2px 6px rgba(0,0,0,0.1));
+  }
+
+  .glass-type-label {
+    font-family: 'Source Code Pro', monospace;
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: center;
+  }
+
+  .glass-info { flex: 1; min-width: 0; }
+
+  .glass-name {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(24px, 4vw, 36px);
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 4px;
+    letter-spacing: -0.3px;
+  }
+
+  .glass-aka {
+    font-family: 'Source Code Pro', monospace;
+    font-size: 12px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  .glass-desc {
+    font-family: 'Lora', serif;
+    font-size: 14px;
+    color: #555;
+    line-height: 1.6;
+    margin-bottom: 12px;
+    max-width: 560px;
+  }
+
+  .best-for-label {
+    font-family: 'Source Code Pro', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 8px;
+  }
+
+  .best-for-label::before { content: '★ '; }
+
+  .beer-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .beer-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 6px 12px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    cursor: default;
+  }
+
+  .beer-tag:hover {
+    border-color: var(--gold-light);
+    box-shadow: 0 2px 8px rgba(200,150,46,0.12);
+  }
+
+  .beer-tag-text {
+    font-family: 'Source Code Pro', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+    line-height: 1.2;
+  }
+
+  .footer-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--dark);
+    color: var(--cream);
+    padding: 12px 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Source Code Pro', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    z-index: 100;
+    gap: 20px;
+  }
+
+  .footer-bar .gold { color: var(--gold); }
+
+  @media (max-width: 600px) {
+    .container { padding: 24px 16px 80px; }
+    .glass-top-row { gap: 12px; }
+    .glass-illustration { width: 50px; }
+    .glass-illustration svg { width: 44px; height: 64px; }
+    .beer-tags { gap: 4px; }
+    .beer-tag { padding: 4px 8px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <div class="logo-area">
+      <div class="logo-badge">
+        <svg viewBox="0 0 40 48" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 42 C10 30, 8 20, 12 10 Q13 6, 20 4 Q27 6, 28 10 C32 20, 30 30, 28 42 Z" fill="none" stroke="#C8962E" stroke-width="2"/>
+          <path d="M12 10 C15 7, 18 6, 20 8 C22 6, 25 7, 28 10" fill="#C8962E" opacity="0.3"/>
+          <circle cx="20" cy="26" r="3" fill="none" stroke="#C8962E" stroke-width="1" opacity="0.5"/>
+        </svg>
+      </div>
+      <div class="page-title">The Art of Beer Glassware</div>
+    </div>
+    <div class="glass-count">
+      <div class="label">Glasses</div>
+      <div class="number">20</div>
+    </div>
+  </header>
+
+  <div class="intro-text">
+    The right glass doesn't just hold your beer — it shapes the aroma, controls the head, and channels every sip to the right part of your palate. Here's every glass a beer lover should know.
+  </div>
+
+  <div class="glass-list">
+
+    <!-- 1. Shaker Pint -->
+    <div class="glass-card">
+      <div class="glass-top-row">
+        <div class="glass-illustration">
+          <svg viewBox="0 0 80 120" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="beer1" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#E8A832" stop-opacity="0.85"/>
+                <stop offset="100%" stop-color="#C08020" stop-opacity="0.95"/>
+              </linearGradient>
+              <linearGradient id="f1" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#FFF8E7"/>
+                <stop offset="100%" stop-color="#F5E6C0"/>
+              </linearGradient>
+            </defs>
+            <path d="M22 24 L18 100 L62 100 L58 24 Z" fill="url(#beer1)" stroke="#b8962e" stroke-width="1" opacity="0.9"/>
+            <path d="M22 24 C26 20, 30 19, 34 21 C38 18, 46 18, 50 21 C54 19, 58 22, 58 24 Z" fill="url(#f1)" stroke="#ddd3b8" stroke-width="0.8"/>
+            <path d="M22 24 L18 100 L62 100 L58 24" fill="none" stroke="#a08060" stroke-width="1.5"/>
+            <rect x="18" y="100" width="44" height="3" rx="1" fill="#a08060" opacity="0.4"/>
+            <rect x="24" y="30" width="3" height="62" rx="1.5" fill="white" opacity="0.06"/>
+          </svg>
+          <span class="glass-type-label">16 oz</span>
+        </div>
+        <div class="glass-info">
+          <div class="glass-name">Shaker Pint</div>
+          <div class="glass-aka">American Pint · The Workhorse</div>
+          <div class="glass-desc">The most common glass in American bars. A simple, straight-sided cone — easy to stack, easy to clean, universally practical. Won't concentrate aromas, but gets the job done for everyday drinking.</div>
+          <div class="best-for-label">Best Served With</div>
+          <div class="beer-tags">
+            <div class="beer-tag"><span class="beer-tag-text">Pale Ale</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Amber Ale</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Lager</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Stout</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Porter</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Brown Ale</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Nonic Pint -->
+    <div class="glass-card">
+      <div class="glass-top-row">
+        <div class="glass-illustration">
+          <svg viewBox="0 0 80 120" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="beer2" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#D4883E" stop-opacity="0.85"/>
+                <stop offset="100%" stop-color="#A8601A" stop-opacity="0.95"/>
+              </linearGradient>
+              <linearGradient id="f2" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#FFF5E0"/>
+                <stop offset="100%" stop-color="#F0DDB8"/>
+              </linearGradient>
+            </defs>
+            <path d="M23 24 L20 65 Q19 72, 22 76 Q25 80, 22 84 L20 100 L60 100 L58 84 Q55 80, 58 76 Q61 72, 60 65 L57 24 Z" fill="url(#beer2)" stroke="#a07030" stroke-width="1" opacity="0.9"/>
+            <path d="M23 24 C27 20, 31 19, 35 21 C39 18, 47 18, 51 21 C55 19, 57 22, 57 24 Z" fill="url(#f2)" stroke="#d4c4a0" stroke-width="0.8"/>
+            <path d="M23 24 L20 65 Q19 72, 22 76 Q25 80, 22 84 L20 100 L60 100 L58 84 Q55 80, 58 76 Q61 72, 60 65 L57 24" fill="none" stroke="#a07030" stroke-width="1.5"/>
+            <rect x="20" y="100" width="40" height="3" rx="1" fill="#a07030" opacity="0.4"/>
+            <rect x="25" y="30" width="3" height="32" rx="1.5" fill="white" opacity="0.06"/>
+          </svg>
+          <span class="glass-type-label">20 oz</span>
+        </div>
+        <div class="glass-info">
+          <div class="glass-name">Nonic Pint</div>
+          <div class="glass-aka">English Pint · Imperial Pint</div>
+          <div class="glass-desc">The British standard. That distinctive bulge near the rim prevents chipping, makes it easy to grip, and allows glasses to nest without sticking. A proper 20-ounce imperial pint.</div>
+          <div class="best-for-label">Best Served With</div>
+          <div class="beer-tags">
+            <div class="beer-tag"><span class="beer-tag-text">ESB</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Bitter</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Mild</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">English IPA</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Stout</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Brown Ale</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Tulip -->
+    <div class="glass-card">
+      <div class="glass-top-row">
+        <div class="glass-illustration">
+          <svg viewBox="0 0 80 120" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="beer3" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#C87030" stop-opacity="0.85"/>
+                <stop offset="100%" stop-color="#8A4818" stop-opacity="0.95"/>
+              </linearGradient>
+              <linearGradient id="f3" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#FFF8EE"/>
+                <stop offset="100%" stop-color="#F0DDBB"/>
+              </linearGradient>
+            </defs>
+            <path d="M22 26 Q18 50, 22 65 Q26 75, 34 78 L34 90 L26 92 L26 95 L54 95 L54 92 L46 90 L46 78 Q54 75, 58 65 Q62 50, 58 26 Z" fill="url(#beer3)" stroke="#906040" stroke-width="1" opacity="0.9"/>
+            <path d="M22 26 C25 22, 30 20, 35 22 C38 19, 44 19, 48 22 C52 20, 56 23, 58 26 Z" fill="url(#f3)" stroke="#d0c0a0" stroke-width="0.8"/>
+            <path d="M22 26 Q18 50, 22 65 Q26 75, 34 78 L34 90 L26 92 L26 95 L54 95 L54 92 L46 90 L46 78 Q54 75, 58 65 Q62 50, 58 26" fill="none" stroke="#906040" stroke-width="1.5"/>
+            <rect x="24" y="32" width="3" height="30" rx="1.5" fill="white" opacity="0.06"/>
+          </svg>
+          <span class="glass-type-label">12 oz</span>
+        </div>
+        <div class="glass-info">
+          <div class="glass-name">Tulip</div>
+          <div class="glass-aka">Belgian Tulip</div>
+          <div class="glass-desc">The sommelier's choice for strong ales. The bulbous body captures and circulates aromas while the flared lip helps maintain a thick, lasting head. Elegant and functional.</div>
+          <div class="best-for-label">Best Served With</div>
+          <div class="beer-tags">
+            <div class="beer-tag"><span class="beer-tag-text">Belgian Strong</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Saison</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Scotch Ale</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Sour Ale</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Double IPA</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Barleywine</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. Snifter -->
+    <div class="glass-card">
+      <div class="glass-top-row">
+        <div class="glass-illustration">
+          <svg viewBox="0 0 80 120" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="beer4" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#3D2216" stop-opacity="0.9"/>
+                <stop offset="100%" stop-color="#1A0E08" stop-opacity="1"/>
+              </linearGradient>
+              <linearGradient id="f4" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#F5ECD8"/>
+                <stop offset="100%" stop-color="#E8D5B0"/>
+              </linearGradient>
+            </defs>
+            <path d="M28 30 Q16 50, 18 65 Q20 78, 34 80 L34 92 L24 94 L24 97 L56 97 L56 94 L46 92 L46 80 Q60 78, 62 65 Q64 50, 52 30 Z" fill="url(#beer4)" stroke="#4a3020" stroke-width="1"/>
+            <path d="M28 30 C32 27, 36 26, 40 28 C44 26, 48 27, 52 30 Z" fill="url(#f4)" stroke="#c0a080" stroke-width="0.8"/>
+            <path d="M28 30 Q16 50, 18 65 Q20 78, 34 80 L34 92 L24 94 L24 97 L56 97 L56 94 L46 92 L46 80 Q60 78, 62 65 Q64 50, 52 30" fill="none" stroke="#4a3020" stroke-width="1.5"/>
+            <rect x="22" y="38" width="3" height="28" rx="1.5" fill="white" opacity="0.05"/>
+          </svg>
+          <span class="glass-type-label">8–12 oz</span>
+        </div>
+        <div class="glass-info">
+          <div class="glass-name">Snifter</div>
+          <div class="glass-aka">Brandy Snifter · Cognac Glass</div>
+          <div class="glass-desc">Borrowed from the spirits world. The wide bowl is made for swirling and warming with your hand, concentrating complex aromatics. The tapered mouth traps every nuance of malt and barrel character.</div>
+          <div class="best-for-label">Best Served With</div>
+          <div class="beer-tags">
+            <div class="beer-tag"><span class="beer-tag-text">Barleywine</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Imperial Stout</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Belgian Dark</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Old Ale</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Barrel-Aged</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Eisbock</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. Weizen -->
+    <div class="glass-card">
+      <div class="glass-top-row">
+        <div class="glass-illustration">
+          <svg viewBox="0 0 80 120" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="beer5" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#F2D06B" stop-opacity="0.75"/>
+                <stop offset="100%" stop-color="#D4A835" stop-opacity="0.9"/>
+              </linearGradient>
+              <linearGradient id="f5" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#FFFEF5"/>
+                <stop offset="100%" stop-color="#F8EFD5"/>
+              </linearGradient>
+            </defs>
+            <path d="M30 16 Q22 30, 24 55 Q22 75, 20 85 L20 100 L60 100 L60 85 Q58 75, 56 55 Q58 30, 50 16 Z" fill="url(#beer5)" stroke="#c4a040" stroke-width="1" opacity="0.9"/>
+            <path d="M30 16 C33 13, 37 12, 40 14 C43 12, 47 13, 50 16 Z" fill="url(#f5)" stroke="#ddd0a8" stroke-width="0.8"/>
+            <path d="M30 16 Q22 30, 24 55 Q22 75, 20 85 L20 100 L60 100 L60 85 Q58 75, 56 55 Q58 30, 50 16" fill="none" stroke="#c4a040" stroke-width="1.5"/>
+            <rect x="20" y="100" width="40" height="3" rx="1" fill="#c4a040" opacity="0.35"/>
+            <circle cx="35" cy="70" r="1.5" fill="white" opacity="0.12"/>
+            <circle cx="42" cy="80" r="1" fill="white" opacity="0.1"/>
+            <circle cx="38" cy="60" r="1.2" fill="white" opacity="0.08"/>
+            <circle cx="45" cy="90" r="1.3" fill="white" opacity="0.1"/>
+            <rect x="26" y="24" width="3" height="55" rx="1.5" fill="white" opacity="0.06"/>
+          </svg>
+          <span class="glass-type-label">16.9 oz</span>
+        </div>
+        <div class="glass-info">
+          <div class="glass-name">Weizen Glass</div>
+          <div class="glass-aka">Wheat Beer Glass · Weißbierglas</div>
+          <div class="glass-desc">Tall, curvaceous, and distinctly Bavarian. The wide top showcases the pillowy foam wheat beers are known for, while the narrow waist traps banana and clove yeast aromas. Holds a standard half-liter pour.</div>
+          <div class="best-for-label">Best Served With</div>
+          <div class="beer-tags">
+            <div class="beer-tag"><span class="beer-tag-text">Hefeweizen</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Dunkelweizen</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Kristallweizen</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Weizenbock</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Witbier</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. Pilsner Glass -->
+    <div class="glass-card">
+      <div class="glass-top-row">
+        <div class="glass-illustration">
+          <svg viewBox="0 0 80 120" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="beer6" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#F5CE62" stop-opacity="0.8"/>
+                <stop offset="100%" stop-color="#E0B030" stop-opacity="0.9"/>
+              </linearGradient>
+              <linearGradient id="f6" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#FFFFF0"/>
+                <stop offset="100%" stop-color="#F8F0D8"/>
+              </linearGradient>
+            </defs>
+            <path d="M32 18 L22 98 L58 98 L48 18 Z" fill="url(#beer6)" stroke="#c8a840" stroke-width="1" opacity="0.9"/>
+            <path d="M32 18 C35 15, 38 14, 40 16 C42 14, 45 15, 48 18 Z" fill="url(#f6)" stroke="#ddd0a8" stroke-width="0.8"/>
+            <path d="M32 18 L22 98 L58 98 L48 18" fill="none" stroke="#c8a840" stroke-width="1.5"/>
+            <rect x="22" y="98" width="36" height="3" rx="1" fill="#c8a840" opacity="0.35"/>
+            <rect x="30" y="24" width="2" height="65" rx="1" fill="white" opacity="0.07"/>
+            <circle cx="38" cy="85" r="0.8" fill="white" opacity="0.15"/>
+            <circle cx="40" cy="72" r="0.7" fill="white" opacity="0.12"/>
+            <circle cx="39" cy="60" r="0.6" fill="white" opacity="0.1"/>
+            <circle cx="41" cy="48" r="0.5" fill="white" opacity="0.08"/>
+          </svg>
+          <span class="glass-type-label">12 oz</span>
+        </div>
+        <div class="glass-info">
+          <div class="glass-name">Pilsner Glass</div>
+          <div class="glass-aka">Pilsner Flute</div>
+          <div class="glass-desc">Tall, slim, and tapered to a narrow base. Designed to showcase the brilliant golden clarity and lively carbonation of a well-made pilsner. The slender shape maintains the crisp, refreshing temperature.</div>
+          <div class="best-for-label">Best Served With</div>
+          <div class="beer-tags">
+            <div class="beer-tag"><span class="beer-tag-text">Pilsner</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Lager</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Helles</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Japanese Rice Lager</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Blonde Ale</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7. Goblet / Chalice -->
+    <div class="glass-card">
+      <div class="glass-top-row">
+        <div class="glass-illustration">
+          <svg viewBox="0 0 80 120" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="beer7" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#C87838" stop-opacity="0.85"/>
+                <stop offset="100%" stop-color="#8A4A18" stop-opacity="0.95"/>
+              </linearGradient>
+              <linearGradient id="f7" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#FFF8EA"/>
+                <stop offset="100%" stop-color="#F0DDB0"/>
+              </linearGradient>
+            </defs>
+            <path d="M16 24 Q14 50, 18 62 Q22 72, 34 74 L34 88 L22 90 Q20 92, 20 94 L60 94 Q60 92, 58 90 L46 88 L46 74 Q58 72, 62 62 Q66 50, 64 24 Z" fill="url(#beer7)" stroke="#906840" stroke-width="1" opacity="0.9"/>
+            <path d="M16 24 C20 20, 26 18, 32 20 C36 17, 44 17, 48 20 C54 18, 60 20, 64 24 Z" fill="url(#f7)" stroke="#d4c0a0" stroke-width="0.8"/>
+            <path d="M16 24 Q14 50, 18 62 Q22 72, 34 74 L34 88 L22 90 Q20 92, 20 94 L60 94 Q60 92, 58 90 L46 88 L46 74 Q58 72, 62 62 Q66 50, 64 24" fill="none" stroke="#906840" stroke-width="1.5"/>
+            <rect x="20" y="30" width="3" height="28" rx="1.5" fill="white" opacity="0.06"/>
+          </svg>
+          <span class="glass-type-label">13 oz</span>
+        </div>
+        <div class="glass-info">
+          <div class="glass-name">Goblet & Chalice</div>
+          <div class="glass-aka">Trappist Glass · Abbey Glass</div>
+          <div class="glass-desc">Monastic grandeur in glass form. The wide, open bowl invites deep sips and allows complex Belgian aromas to bloom. Chalices are thicker-walled and heavier; goblets more delicate. Some have an etched bottom to nucleate carbonation.</div>
+          <div class="best-for-label">Best Served With</div>
+          <div class="beer-tags">
+            <div class="beer-tag"><span class="beer-tag-text">Belgian Dubbel</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Tripel</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Quad</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Belgian Strong</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Trappist Ale</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 8. IPA Glass -->
+    <div class="glass-card">
+      <div class="glass-top-row">
+        <div class="glass-illustration">
+          <svg viewBox="0 0 80 120" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="beer8" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#E8A832" stop-opacity="0.8"/>
+                <stop offset="100%" stop-color="#C88020" stop-opacity="0.95"/>
+              </linearGradient>
+              <linearGradient id="f8" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#FFF8E4"/>
+                <stop offset="100%" stop-color="#F0E0B8"/>
+              </linearGradient>
+            </defs>
+            <path d="M26 18 Q30 28, 28 42 Q24 55, 22 65 Q20 78, 24 85 L24 95 L56 95 L56 85 Q60 78, 58 65 Q56 55, 52 42 Q50 28, 54 18 Z" fill="url(#beer8)" stroke="#b88830" stroke-width="1" opacity="0.9"/>
+            <path d="M26 18 C30 14, 34 13, 40 15 C46 13, 50 14, 54 18 Z" fill="url(#f8)" stroke="#d4c4a0" stroke-width="0.8"/>
+            <path d="M26 18 Q30 28, 28 42 Q24 55, 22 65 Q20 78, 24 85 L24 95 L56 95 L56 85 Q60 78, 58 65 Q56 55, 52 42 Q50 28, 54 18" fill="none" stroke="#b88830" stroke-width="1.5"/>
+            <rect x="24" y="95" width="32" height="3" rx="1" fill="#b88830" opacity="0.35"/>
+            <line x1="28" y1="85" x2="52" y2="85" stroke="#b88830" stroke-width="0.5" opacity="0.3"/>
+            <line x1="27" y1="88" x2="53" y2="88" stroke="#b88830" stroke-width="0.5" opacity="0.25"/>
+            <line x1="26" y1="91" x2="54" y2="91" stroke="#b88830" stroke-width="0.5" opacity="0.2"/>
+            <rect x="28" y="24" width="3" height="35" rx="1.5" fill="white" opacity="0.06"/>
+          </svg>
+          <span class="glass-type-label">19 oz</span>
+        </div>
+        <div class="glass-info">
+          <div class="glass-name">IPA Glass</div>
+          <div class="glass-aka">Spiegelau IPA Glass</div>
+          <div class="glass-desc">Purpose-built by Spiegelau and Dogfish Head to amplify hop-forward beers. The ridged base agitates the beer as you drink, releasing waves of hop aroma. The angular bowl channels volatiles straight to your nose.</div>
+          <div class="best-for-label">Best Served With</div>
+          <div class="beer-tags">
+            <div class="beer-tag"><span class="beer-tag-text">IPA</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Double IPA</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Hazy IPA</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Session IPA</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Pale Ale</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 9. Stange -->
+    <div class="glass-card">
+      <div class="glass-top-row">
+        <div class="glass-illustration">
+          <svg viewBox="0 0 80 120" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="beer9" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#F0C55A" stop-opacity="0.82"/>
+                <stop offset="100%" stop-color="#D4A830" stop-opacity="0.92"/>
+              </linearGradient>
+              <linearGradient id="f9" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#FFFFF2"/>
+                <stop offset="100%" stop-color="#F8F0D0"/>
+              </linearGradient>
+            </defs>
+            <rect x="28" y="22" width="24" height="78" rx="2" fill="url(#beer9)" stroke="#c0a030" stroke-width="1" opacity="0.9"/>
+            <path d="M28 22 C32 19, 36 18, 40 20 C44 18, 48 19, 52 22 Z" fill="url(#f9)" stroke="#ddd0a8" stroke-width="0.8"/>
+            <rect x="28" y="22" width="24" height="78" rx="2" fill="none" stroke="#c0a030" stroke-width="1.5"/>
+            <rect x="28" y="100" width="24" height="3" rx="1" fill="#c0a030" opacity="0.35"/>
+            <rect x="30" y="28" width="2" height="65" rx="1" fill="white" opacity="0.06"/>
+            <circle cx="40" cy="88" r="0.6" fill="white" opacity="0.12"/>
+            <circle cx="39" cy="76" r="0.5" fill="white" opacity="0.1"/>
+            <circle cx="41" cy="64" r="0.4" fill="white" opacity="0.08"/>
+          </svg>
+          <span class="glass-type-label">6.5 oz</span>
+        </div>
+        <div class="glass-info">
+          <div class="glass-name">Stange</div>
+          <div class="glass-aka">Stick Glass · Kölsch Glass</div>
+          <div class="glass-desc">German for "stick" — a slim, straight cylinder traditional to Cologne. The small size ensures the delicate Kölsch stays cold and fresh, as servers bring rounds on a circular tray called a Kranz.</div>
+          <div class="best-for-label">Best Served With</div>
+          <div class="beer-tags">
+            <div class="beer-tag"><span class="beer-tag-text">Kölsch</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Altbier</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Gose</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Delicate Lager</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 10. Mug / Stein -->
+    <div class="glass-card">
+      <div class="glass-top-row">
+        <div class="glass-illustration">
+          <svg viewBox="0 0 80 120" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="beer10" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#E8B838" stop-opacity="0.85"/>
+                <stop offset="100%" stop-color="#C89828" stop-opacity="0.95"/>
+              </linearGradient>
+              <linearGradient id="f10" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#FFF8E0"/>
+                <stop offset="100%" stop-color="#F0E0B8"/>
+              </linearGradient>
+            </defs>
+            <rect x="14" y="24" width="36" height="76" rx="3" fill="url(#beer10)" stroke="#a88830" stroke-width="1.5" opacity="0.9"/>
+            <path d="M14 24 C18 20, 24 19, 30 21 C36 19, 42 20, 50 24 Z" fill="url(#f10)" stroke="#d4c4a0" stroke-width="0.8"/>
+            <rect x="14" y="24" width="36" height="76" rx="3" fill="none" stroke="#a88830" stroke-width="1.8"/>
+            <rect x="14" y="100" width="36" height="3" rx="1" fill="#a88830" opacity="0.4"/>
+            <path d="M50 36 Q64 38, 66 55 Q66 72, 50 76" fill="none" stroke="#a88830" stroke-width="3.5" stroke-linecap="round"/>
+            <path d="M50 36 Q62 37, 64 55 Q64 71, 50 76" fill="none" stroke="#c8a840" stroke-width="1.5" stroke-linecap="round"/>
+            <rect x="18" y="30" width="3" height="62" rx="1.5" fill="white" opacity="0.06"/>
+          </svg>
+          <span class="glass-type-label">12–34 oz</span>
+        </div>
+        <div class="glass-info">
+          <div class="glass-name">Mug & Stein</div>
+          <div class="glass-aka">Beer Mug · Maßkrug · Seidel</div>
+          <div class="glass-desc">Built for the beer hall. Thick walls insulate your beer from warm hands, the sturdy handle makes toasting easy, and the wide opening means you can drink in earnest. A German Maßkrug holds a full liter.</div>
+          <div class="best-for-label">Best Served With</div>
+          <div class="beer-tags">
+            <div class="beer-tag"><span class="beer-tag-text">Märzen</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Oktoberfest</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Dunkel</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Amber Lager</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">English Bitter</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Bock</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 11. Flute -->
+    <div class="glass-card">
+      <div class="glass-top-row">
+        <div class="glass-illustration">
+          <svg viewBox="0 0 80 120" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="beer11" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#F0D878" stop-opacity="0.7"/>
+                <stop offset="100%" stop-color="#E0C048" stop-opacity="0.85"/>
+              </linearGradient>
+              <linearGradient id="f11" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#FFFFF5"/>
+                <stop offset="100%" stop-color="#F8F0D8"/>
+              </linearGradient>
+            </defs>
+            <path d="M32 14 L30 65 Q30 72, 36 74 L36 88 L28 90 L28 93 L52 93 L52 90 L44 88 L44 74 Q50 72, 50 65 L48 14 Z" fill="url(#beer11)" stroke="#c8b040" stroke-width="1" opacity="0.9"/>
+            <path d="M32 14 C35 12, 38 11, 40 13 C42 11, 45 12, 48 14 Z" fill="url(#f11)" stroke="#ddd5b0" stroke-width="0.8"/>
+            <path d="M32 14 L30 65 Q30 72, 36 74 L36 88 L28 90 L28 93 L52 93 L52 90 L44 88 L44 74 Q50 72, 50 65 L48 14" fill="none" stroke="#c8b040" stroke-width="1.5"/>
+            <circle cx="39" cy="62" r="0.6" fill="white" opacity="0.15"/>
+            <circle cx="41" cy="52" r="0.5" fill="white" opacity="0.12"/>
+            <circle cx="40" cy="42" r="0.5" fill="white" opacity="0.1"/>
+            <circle cx="38" cy="32" r="0.4" fill="white" opacity="0.08"/>
+            <rect x="33" y="20" width="2" height="42" rx="1" fill="white" opacity="0.06"/>
+          </svg>
+          <span class="glass-type-label">6–10 oz</span>
+        </div>
+        <div class="glass-info">
+          <div class="glass-name">Flute</div>
+          <div class="glass-aka">Beer Flute · Champagne-Style</div>
+          <div class="glass-desc">Borrowed from the wine world for beers that sparkle. The narrow profile preserves delicate carbonation and presents a gorgeous stream of rising bubbles. Keeps effervescent styles crisp and lively.</div>
+          <div class="best-for-label">Best Served With</div>
+          <div class="beer-tags">
+            <div class="beer-tag"><span class="beer-tag-text">Lambic</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Fruit Lambic</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Gueuze</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Bière de Champagne</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Vienna Lager</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 12. Teku -->
+    <div class="glass-card">
+      <div class="glass-top-row">
+        <div class="glass-illustration">
+          <svg viewBox="0 0 80 120" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="beer12" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#E0A030" stop-opacity="0.82"/>
+                <stop offset="100%" stop-color="#B87828" stop-opacity="0.94"/>
+              </linearGradient>
+              <linearGradient id="f12" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#FFF8E8"/>
+                <stop offset="100%" stop-color="#F0E0C0"/>
+              </linearGradient>
+            </defs>
+            <path d="M28 20 Q20 40, 22 52 Q24 60, 30 64 Q34 66, 36 70 L36 84 L26 86 L26 89 L54 89 L54 86 L44 84 L44 70 Q46 66, 50 64 Q56 60, 58 52 Q60 40, 52 20 Z" fill="url(#beer12)" stroke="#a87828" stroke-width="1" opacity="0.9"/>
+            <path d="M28 20 C32 16, 36 15, 40 17 C44 15, 48 16, 52 20 Z" fill="url(#f12)" stroke="#d0bfa0" stroke-width="0.8"/>
+            <path d="M28 20 Q20 40, 22 52 Q24 60, 30 64 Q34 66, 36 70 L36 84 L26 86 L26 89 L54 89 L54 86 L44 84 L44 70 Q46 66, 50 64 Q56 60, 58 52 Q60 40, 52 20" fill="none" stroke="#a87828" stroke-width="1.5"/>
+            <rect x="24" y="28" width="2.5" height="24" rx="1.2" fill="white" opacity="0.06"/>
+          </svg>
+          <span class="glass-type-label">11.2 oz</span>
+        </div>
+        <div class="glass-info">
+          <div class="glass-name">Teku</div>
+          <div class="glass-aka">Universal Craft Glass</div>
+          <div class="glass-desc">The craft beer world's darling. Designed by an Italian sensory expert and a brewer, the angular bowl concentrates aroma, the flared lip delivers beer precisely, and the stem keeps hand warmth away. Works with nearly anything.</div>
+          <div class="best-for-label">Best Served With</div>
+          <div class="beer-tags">
+            <div class="beer-tag"><span class="beer-tag-text">Any Craft Beer</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">IPA</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Sour</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Belgian</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Stout</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Saison</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 13. Thistle -->
+    <div class="glass-card">
+      <div class="glass-top-row">
+        <div class="glass-illustration">
+          <svg viewBox="0 0 80 120" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="beer13" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#A06030" stop-opacity="0.88"/>
+                <stop offset="100%" stop-color="#6A3818" stop-opacity="0.96"/>
+              </linearGradient>
+              <linearGradient id="f13" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#FFF5E5"/>
+                <stop offset="100%" stop-color="#E8D5B0"/>
+              </linearGradient>
+            </defs>
+            <path d="M24 18 Q20 35, 24 50 Q28 60, 32 65 Q36 70, 36 76 L36 88 L28 90 L28 93 L52 93 L52 90 L44 88 L44 76 Q44 70, 48 65 Q52 60, 56 50 Q60 35, 56 18 Z" fill="url(#beer13)" stroke="#785030" stroke-width="1" opacity="0.9"/>
+            <path d="M24 18 C28 14, 33 13, 38 15 C43 13, 48 14, 52 16 C55 15, 56 17, 56 18 Z" fill="url(#f13)" stroke="#c8b090" stroke-width="0.8"/>
+            <path d="M24 18 Q20 35, 24 50 Q28 60, 32 65 Q36 70, 36 76 L36 88 L28 90 L28 93 L52 93 L52 90 L44 88 L44 76 Q44 70, 48 65 Q52 60, 56 50 Q60 35, 56 18" fill="none" stroke="#785030" stroke-width="1.5"/>
+            <rect x="26" y="24" width="2.5" height="26" rx="1.2" fill="white" opacity="0.05"/>
+          </svg>
+          <span class="glass-type-label">10–15 oz</span>
+        </div>
+        <div class="glass-info">
+          <div class="glass-name">Thistle</div>
+          <div class="glass-aka">Scottish Ale Glass</div>
+          <div class="glass-desc">Shaped like the flower of Scotland — a taller, more elongated cousin of the tulip. The stretched bowl lets rich, malty Scotch ales breathe and concentrate their caramel and toffee notes before you sip.</div>
+          <div class="best-for-label">Best Served With</div>
+          <div class="beer-tags">
+            <div class="beer-tag"><span class="beer-tag-text">Scotch Ale</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Wee Heavy</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Scottish Export</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Strong Ale</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 14. Oversized Wine Glass -->
+    <div class="glass-card">
+      <div class="glass-top-row">
+        <div class="glass-illustration">
+          <svg viewBox="0 0 80 120" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="beer14" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#C86030" stop-opacity="0.6"/>
+                <stop offset="100%" stop-color="#A04020" stop-opacity="0.85"/>
+              </linearGradient>
+              <linearGradient id="f14" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#FFF8F0"/>
+                <stop offset="100%" stop-color="#F0DCC0"/>
+              </linearGradient>
+            </defs>
+            <path d="M24 28 Q18 45, 22 58 Q26 68, 36 70 L36 90 L26 92 L26 95 L54 95 L54 92 L44 90 L44 70 Q54 68, 58 58 Q62 45, 56 28 Z" fill="url(#beer14)" stroke="#905838" stroke-width="1" opacity="0.9"/>
+            <path d="M24 28 C28 24, 33 23, 38 25 C43 23, 48 24, 52 26 C55 25, 56 27, 56 28 Z" fill="url(#f14)" stroke="#d0b8a0" stroke-width="0.8"/>
+            <path d="M24 28 Q18 45, 22 58 Q26 68, 36 70 L36 90 L26 92 L26 95 L54 95 L54 92 L44 90 L44 70 Q54 68, 58 58 Q62 45, 56 28" fill="none" stroke="#905838" stroke-width="1.5"/>
+            <rect x="22" y="35" width="2.5" height="22" rx="1.2" fill="white" opacity="0.06"/>
+          </svg>
+          <span class="glass-type-label">12–22 oz</span>
+        </div>
+        <div class="glass-info">
+          <div class="glass-name">Oversized Wine Glass</div>
+          <div class="glass-aka">Red Wine Glass · Balloon</div>
+          <div class="glass-desc">Many wild ales and sours deserve the treatment of a fine wine. The generous bowl offers massive surface area for swirling and aeration, coaxing out funky brett notes, tart fruit, and oak complexity.</div>
+          <div class="best-for-label">Best Served With</div>
+          <div class="beer-tags">
+            <div class="beer-tag"><span class="beer-tag-text">Wild Ale</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Flanders Red</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Oud Bruin</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Barrel-Aged Sour</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Saison</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 15. Willi Becher -->
+    <div class="glass-card">
+      <div class="glass-top-row">
+        <div class="glass-illustration">
+          <svg viewBox="0 0 80 120" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="beer15" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#E8B838" stop-opacity="0.82"/>
+                <stop offset="100%" stop-color="#C89828" stop-opacity="0.94"/>
+              </linearGradient>
+              <linearGradient id="f15" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#FFFAE8"/>
+                <stop offset="100%" stop-color="#F0E0C0"/>
+              </linearGradient>
+            </defs>
+            <path d="M24 24 L20 80 Q20 90, 22 95 L22 100 L58 100 L58 95 Q60 90, 60 80 L56 24 Z" fill="url(#beer15)" stroke="#b09030" stroke-width="1" opacity="0.9"/>
+            <path d="M24 24 C28 21, 33 20, 38 22 C43 20, 48 21, 52 22 C55 21, 56 23, 56 24 Z" fill="url(#f15)" stroke="#d4c8a8" stroke-width="0.8"/>
+            <path d="M24 24 L20 80 Q20 90, 22 95 L22 100 L58 100 L58 95 Q60 90, 60 80 L56 24" fill="none" stroke="#b09030" stroke-width="1.5"/>
+            <rect x="22" y="100" width="36" height="3" rx="1" fill="#b09030" opacity="0.35"/>
+            <rect x="24" y="30" width="3" height="56" rx="1.5" fill="white" opacity="0.06"/>
+          </svg>
+          <span class="glass-type-label">16.9 oz</span>
+        </div>
+        <div class="glass-info">
+          <div class="glass-name">Willi Becher</div>
+          <div class="glass-aka">Standard German Glass</div>
+          <div class="glass-desc">Germany's go-to beer glass — a gentle taper from mid-body to the rim concentrates aroma without being fussy. Practical and elegant, it's a half-liter workhorse found in virtually every German bar and biergarten.</div>
+          <div class="best-for-label">Best Served With</div>
+          <div class="beer-tags">
+            <div class="beer-tag"><span class="beer-tag-text">German Pilsner</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Helles</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Märzen</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Dortmunder</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Schwarzbier</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 16. Dimple Mug -->
+    <div class="glass-card">
+      <div class="glass-top-row">
+        <div class="glass-illustration">
+          <svg viewBox="0 0 80 120" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="beer16" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#D4A038" stop-opacity="0.82"/>
+                <stop offset="100%" stop-color="#B88828" stop-opacity="0.94"/>
+              </linearGradient>
+              <linearGradient id="f16" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#FFF8E0"/>
+                <stop offset="100%" stop-color="#F0E0B8"/>
+              </linearGradient>
+            </defs>
+            <rect x="14" y="24" width="36" height="76" rx="3" fill="url(#beer16)" stroke="#a88830" stroke-width="1.5" opacity="0.9"/>
+            <path d="M14 24 C18 20, 24 19, 30 21 C36 19, 42 20, 50 24 Z" fill="url(#f16)" stroke="#d4c4a0" stroke-width="0.8"/>
+            <rect x="14" y="24" width="36" height="76" rx="3" fill="none" stroke="#a88830" stroke-width="1.8"/>
+            <rect x="14" y="100" width="36" height="3" rx="1" fill="#a88830" opacity="0.4"/>
+            <path d="M50 36 Q64 38, 66 55 Q66 72, 50 76" fill="none" stroke="#a88830" stroke-width="3.5" stroke-linecap="round"/>
+            <path d="M50 36 Q62 37, 64 55 Q64 71, 50 76" fill="none" stroke="#c8a840" stroke-width="1.5" stroke-linecap="round"/>
+            <circle cx="24" cy="42" r="5" fill="none" stroke="white" stroke-width="0.5" opacity="0.1"/>
+            <circle cx="36" cy="42" r="5" fill="none" stroke="white" stroke-width="0.5" opacity="0.1"/>
+            <circle cx="24" cy="56" r="5" fill="none" stroke="white" stroke-width="0.5" opacity="0.1"/>
+            <circle cx="36" cy="56" r="5" fill="none" stroke="white" stroke-width="0.5" opacity="0.1"/>
+            <circle cx="24" cy="70" r="5" fill="none" stroke="white" stroke-width="0.5" opacity="0.1"/>
+            <circle cx="36" cy="70" r="5" fill="none" stroke="white" stroke-width="0.5" opacity="0.1"/>
+            <circle cx="24" cy="84" r="5" fill="none" stroke="white" stroke-width="0.5" opacity="0.1"/>
+            <circle cx="36" cy="84" r="5" fill="none" stroke="white" stroke-width="0.5" opacity="0.1"/>
+          </svg>
+          <span class="glass-type-label">20 oz</span>
+        </div>
+        <div class="glass-info">
+          <div class="glass-name">Dimple Mug</div>
+          <div class="glass-aka">Jug · Dimpled Pint Mug</div>
+          <div class="glass-desc">A classic of British pub culture with its distinctive raised dimple pattern. The thick, faceted glass catches light beautifully and insulates your beer. Heavy, satisfying, and practically indestructible.</div>
+          <div class="best-for-label">Best Served With</div>
+          <div class="beer-tags">
+            <div class="beer-tag"><span class="beer-tag-text">Bitter</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Mild</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">English Ale</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Cask Ale</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Porter</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 17. Pokal -->
+    <div class="glass-card">
+      <div class="glass-top-row">
+        <div class="glass-illustration">
+          <svg viewBox="0 0 80 120" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="beer17" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#F0C858" stop-opacity="0.8"/>
+                <stop offset="100%" stop-color="#D4A830" stop-opacity="0.92"/>
+              </linearGradient>
+              <linearGradient id="f17" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#FFFFF2"/>
+                <stop offset="100%" stop-color="#F8F0D5"/>
+              </linearGradient>
+            </defs>
+            <path d="M28 20 L24 62 Q24 68, 34 70 L34 84 L26 86 L26 89 L54 89 L54 86 L46 84 L46 70 Q56 68, 56 62 L52 20 Z" fill="url(#beer17)" stroke="#c0a040" stroke-width="1" opacity="0.9"/>
+            <path d="M28 20 C32 17, 36 16, 40 18 C44 16, 48 17, 52 20 Z" fill="url(#f17)" stroke="#ddd0a8" stroke-width="0.8"/>
+            <path d="M28 20 L24 62 Q24 68, 34 70 L34 84 L26 86 L26 89 L54 89 L54 86 L46 84 L46 70 Q56 68, 56 62 L52 20" fill="none" stroke="#c0a040" stroke-width="1.5"/>
+            <rect x="30" y="26" width="2" height="36" rx="1" fill="white" opacity="0.06"/>
+            <circle cx="40" cy="58" r="0.6" fill="white" opacity="0.12"/>
+            <circle cx="39" cy="48" r="0.5" fill="white" opacity="0.1"/>
+          </svg>
+          <span class="glass-type-label">12 oz</span>
+        </div>
+        <div class="glass-info">
+          <div class="glass-name">Pokal</div>
+          <div class="glass-aka">European Lager Glass</div>
+          <div class="glass-desc">A tapered bowl mounted on a short stem — think of it as a pilsner glass with a foot. The stem keeps the beer cold, the tapered body showcases clarity and carbonation, and the base adds stability and formality.</div>
+          <div class="best-for-label">Best Served With</div>
+          <div class="beer-tags">
+            <div class="beer-tag"><span class="beer-tag-text">Pilsner</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Bock</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Doppelbock</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Vienna Lager</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Maibock</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 18. Yard Glass -->
+    <div class="glass-card">
+      <div class="glass-top-row">
+        <div class="glass-illustration">
+          <svg viewBox="0 0 80 120" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="beer18" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#E8B030" stop-opacity="0.8"/>
+                <stop offset="100%" stop-color="#C89020" stop-opacity="0.92"/>
+              </linearGradient>
+              <linearGradient id="f18" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#FFFAE0"/>
+                <stop offset="100%" stop-color="#F0E0C0"/>
+              </linearGradient>
+            </defs>
+            <path d="M34 10 L36 70 Q36 76, 34 80 Q28 90, 28 96 Q28 104, 40 106 Q52 104, 52 96 Q52 90, 46 80 Q44 76, 44 70 L46 10 Z" fill="url(#beer18)" stroke="#b89030" stroke-width="1" opacity="0.9"/>
+            <path d="M34 10 C36 8, 38 7, 40 9 C42 7, 44 8, 46 10 Z" fill="url(#f18)" stroke="#d4c4a0" stroke-width="0.8"/>
+            <path d="M34 10 L36 70 Q36 76, 34 80 Q28 90, 28 96 Q28 104, 40 106 Q52 104, 52 96 Q52 90, 46 80 Q44 76, 44 70 L46 10" fill="none" stroke="#b89030" stroke-width="1.5"/>
+            <rect x="36" y="16" width="2" height="50" rx="1" fill="white" opacity="0.06"/>
+          </svg>
+          <span class="glass-type-label">~48 oz</span>
+        </div>
+        <div class="glass-info">
+          <div class="glass-name">Yard Glass</div>
+          <div class="glass-aka">Yard of Ale · Half Yard</div>
+          <div class="glass-desc">Three feet of beer-filled spectacle. The long neck feeds into a bulb at the bottom, creating an air-lock challenge as you drink — too fast and you'll wear the last third. More ceremony than sensory tool.</div>
+          <div class="best-for-label">Best Served With</div>
+          <div class="beer-tags">
+            <div class="beer-tag"><span class="beer-tag-text">English Ale</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Mild</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Lager</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Pub Challenge</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 19. Boot Glass -->
+    <div class="glass-card">
+      <div class="glass-top-row">
+        <div class="glass-illustration">
+          <svg viewBox="0 0 80 120" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="beer19" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#E0B030" stop-opacity="0.82"/>
+                <stop offset="100%" stop-color="#C09020" stop-opacity="0.94"/>
+              </linearGradient>
+              <linearGradient id="f19" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#FFFAE8"/>
+                <stop offset="100%" stop-color="#F0E0C0"/>
+              </linearGradient>
+            </defs>
+            <path d="M26 14 L24 75 Q24 82, 22 86 L16 90 Q12 92, 12 98 Q12 104, 20 106 L56 106 Q62 104, 62 98 L62 92 Q58 86, 54 84 L50 82 L50 14 Z" fill="url(#beer19)" stroke="#a88830" stroke-width="1" opacity="0.9"/>
+            <path d="M26 14 C30 11, 34 10, 38 12 C42 10, 46 11, 50 14 Z" fill="url(#f19)" stroke="#d4c4a0" stroke-width="0.8"/>
+            <path d="M26 14 L24 75 Q24 82, 22 86 L16 90 Q12 92, 12 98 Q12 104, 20 106 L56 106 Q62 104, 62 98 L62 92 Q58 86, 54 84 L50 82 L50 14" fill="none" stroke="#a88830" stroke-width="1.5"/>
+            <rect x="28" y="20" width="3" height="55" rx="1.5" fill="white" opacity="0.05"/>
+          </svg>
+          <span class="glass-type-label">34–68 oz</span>
+        </div>
+        <div class="glass-info">
+          <div class="glass-name">Boot Glass</div>
+          <div class="glass-aka">Das Boot · Bierstiefel</div>
+          <div class="glass-desc">A German drinking tradition shaped like a cavalry boot. The toe creates an air-lock trick — point it the wrong way and you get a face full of foam. Passed around the table, the last to finish buys the next round.</div>
+          <div class="best-for-label">Best Served With</div>
+          <div class="beer-tags">
+            <div class="beer-tag"><span class="beer-tag-text">German Lager</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Helles</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Pilsner</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Wheat Beer</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Party Beer</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 20. Sam Adams Perfect Pint -->
+    <div class="glass-card">
+      <div class="glass-top-row">
+        <div class="glass-illustration">
+          <svg viewBox="0 0 80 120" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="beer20" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#D4903A" stop-opacity="0.85"/>
+                <stop offset="100%" stop-color="#A86820" stop-opacity="0.95"/>
+              </linearGradient>
+              <linearGradient id="f20" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#FFF8EA"/>
+                <stop offset="100%" stop-color="#F0DDB8"/>
+              </linearGradient>
+            </defs>
+            <path d="M24 22 Q22 45, 20 65 Q18 80, 20 90 L20 100 L60 100 L60 90 Q62 80, 60 65 Q58 45, 56 22 Z" fill="url(#beer20)" stroke="#a07030" stroke-width="1" opacity="0.9"/>
+            <path d="M24 22 C27 19, 31 18, 36 20 C40 17, 46 17, 50 20 C54 18, 56 20, 56 22 Z" fill="url(#f20)" stroke="#d4c0a0" stroke-width="0.8"/>
+            <path d="M24 22 Q22 45, 20 65 Q18 80, 20 90 L20 100 L60 100 L60 90 Q62 80, 60 65 Q58 45, 56 22" fill="none" stroke="#a07030" stroke-width="1.5"/>
+            <rect x="20" y="100" width="40" height="3" rx="1" fill="#a07030" opacity="0.35"/>
+            <circle cx="40" cy="94" r="3" fill="none" stroke="white" stroke-width="0.5" opacity="0.12"/>
+            <circle cx="40" cy="94" r="1.5" fill="white" opacity="0.08"/>
+            <circle cx="40" cy="86" r="0.5" fill="white" opacity="0.1"/>
+            <circle cx="40" cy="80" r="0.4" fill="white" opacity="0.08"/>
+            <rect x="24" y="28" width="3" height="55" rx="1.5" fill="white" opacity="0.06"/>
+          </svg>
+          <span class="glass-type-label">16 oz</span>
+        </div>
+        <div class="glass-info">
+          <div class="glass-name">Sam Adams Perfect Pint</div>
+          <div class="glass-aka">Boston Lager Glass</div>
+          <div class="glass-desc">Engineered with sensory scientists — a slight outward lip delivers beer to the front of the tongue, thin walls transfer cold, and a laser-etched nucleation point at the base keeps a steady stream of bubbles and a lasting head.</div>
+          <div class="best-for-label">Best Served With</div>
+          <div class="beer-tags">
+            <div class="beer-tag"><span class="beer-tag-text">Boston Lager</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Amber Lager</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Pale Ale</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Vienna Lager</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Amber Ale</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="footer-bar">
+  <span>🍺 <span class="gold">20</span> glass styles · The right glass makes the beer</span>
+  <span style="letter-spacing:2px;" class="gold">THE ART OF GLASSWARE</span>
+</div>
+
+</body>
+</html>

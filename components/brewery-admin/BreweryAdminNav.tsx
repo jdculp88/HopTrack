@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, List, BarChart2, Gift, Settings, ChevronDown, ExternalLink, Rewind, LogOut, Calendar, QrCode, CreditCard, Users, FileText, Beer, Mail, Trophy } from "lucide-react";
+import { LayoutDashboard, List, BarChart2, Gift, Settings, ChevronDown, ExternalLink, Rewind, LogOut, Calendar, QrCode, CreditCard, Users, FileText, Beer, Mail, Trophy, BookOpen } from "lucide-react";
 import { HopMark } from "@/components/ui/HopMark";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
@@ -23,6 +23,7 @@ const NAV_ITEMS = [
   { href: "/pint-rewind",   label: "Pint Rewind",  icon: Rewind },
   { href: "/settings",      label: "Settings",     icon: Settings },
   { href: "/billing",       label: "Billing",      icon: CreditCard },
+  { href: "/resources",     label: "Resources",    icon: BookOpen },
 ];
 
 export function BreweryAdminNav({ accounts }: { accounts: any[] }) {

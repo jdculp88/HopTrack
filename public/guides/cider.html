@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Art of Cider Glassware</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Source+Code+Pro:wght@400;600&family=Lora:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #F5F0E8;
+    --dark: #1a1a1a;
+    --gold: #C8962E;
+    --gold-light: #D4A843;
+    --amber: #B8860B;
+    --muted: #8a8276;
+    --border: #e0d8cc;
+    --card-bg: rgba(255,252,245,0.6);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--cream); color: var(--dark); font-family: 'Lora', Georgia, serif; min-height: 100vh; overflow-x: hidden; }
+  body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E"); pointer-events: none; z-index: 999; }
+  .container { max-width: 900px; margin: 0 auto; padding: 40px 30px 60px; }
+  header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; padding-bottom: 20px; border-bottom: 2px solid var(--dark); }
+  .logo-area { display: flex; align-items: center; gap: 16px; }
+  .logo-badge { width: 52px; height: 52px; background: var(--dark); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .page-title { font-family: 'Playfair Display', serif; font-style: italic; font-size: clamp(26px, 5vw, 48px); font-weight: 400; line-height: 1; letter-spacing: -0.5px; }
+  .glass-count { text-align: right; flex-shrink: 0; }
+  .glass-count .label { font-family: 'Source Code Pro', monospace; font-size: 11px; letter-spacing: 3px; color: var(--gold); text-transform: uppercase; }
+  .glass-count .number { font-family: 'Playfair Display', serif; font-size: 42px; color: var(--gold); line-height: 1; }
+  .intro-text { font-family: 'Lora', serif; font-size: 14px; color: var(--muted); line-height: 1.7; max-width: 680px; padding: 20px 0 10px; border-bottom: 1px solid var(--border); }
+  .glass-card { border-bottom: 1px solid var(--border); padding: 28px 0; animation: fadeUp 0.5s ease both; }
+  .glass-card:last-child { border-bottom: none; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  .glass-card:nth-child(1){animation-delay:.05s}.glass-card:nth-child(2){animation-delay:.1s}.glass-card:nth-child(3){animation-delay:.15s}.glass-card:nth-child(4){animation-delay:.2s}.glass-card:nth-child(5){animation-delay:.25s}.glass-card:nth-child(6){animation-delay:.3s}.glass-card:nth-child(7){animation-delay:.35s}.glass-card:nth-child(8){animation-delay:.4s}.glass-card:nth-child(9){animation-delay:.45s}.glass-card:nth-child(10){animation-delay:.5s}
+  .glass-top-row { display: flex; align-items: flex-start; gap: 20px; }
+  .glass-illustration { flex-shrink: 0; width: 70px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .glass-illustration svg { width: 60px; height: 86px; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.1)); }
+  .glass-type-label { font-family: 'Source Code Pro', monospace; font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); text-align: center; }
+  .glass-info { flex: 1; min-width: 0; }
+  .glass-name { font-family: 'Playfair Display', serif; font-size: clamp(24px, 4vw, 36px); font-weight: 700; line-height: 1.1; margin-bottom: 4px; letter-spacing: -0.3px; }
+  .glass-aka { font-family: 'Source Code Pro', monospace; font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+  .glass-desc { font-family: 'Lora', serif; font-size: 14px; color: #555; line-height: 1.6; margin-bottom: 12px; max-width: 560px; }
+  .best-for-label { font-family: 'Source Code Pro', monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--gold); margin-bottom: 8px; }
+  .best-for-label::before { content: '★ '; }
+  .beer-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .beer-tag { display: inline-flex; align-items: center; background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 6px 12px; transition: border-color 0.2s, box-shadow 0.2s; cursor: default; }
+  .beer-tag:hover { border-color: var(--gold-light); box-shadow: 0 2px 8px rgba(200,150,46,0.12); }
+  .beer-tag-text { font-family: 'Source Code Pro', monospace; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); line-height: 1.2; }
+  .footer-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--dark); color: var(--cream); padding: 12px 30px; display: flex; align-items: center; justify-content: center; font-family: 'Source Code Pro', monospace; font-size: 11px; letter-spacing: 1px; z-index: 100; gap: 20px; }
+  .footer-bar .gold { color: var(--gold); }
+  @media (max-width: 600px) { .container { padding: 24px 16px 80px; } .glass-top-row { gap: 12px; } .glass-illustration { width: 50px; } .glass-illustration svg { width: 44px; height: 64px; } }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div class="logo-area">
+      <div class="logo-badge">
+        <svg viewBox="0 0 40 48" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="20" cy="18" r="10" fill="none" stroke="#C8962E" stroke-width="1.8"/>
+          <path d="M20 28 L20 38" stroke="#C8962E" stroke-width="2"/>
+          <path d="M16 18 Q18 14, 20 16 Q22 14, 24 18" fill="none" stroke="#C8962E" stroke-width="1" opacity="0.6"/>
+          <ellipse cx="20" cy="12" rx="3" ry="2" fill="#C8962E" opacity="0.25"/>
+          <path d="M14 40 L26 40" stroke="#C8962E" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="page-title">The Art of Cider Glassware</div>
+    </div>
+    <div class="glass-count">
+      <div class="label">Glasses</div>
+      <div class="number">10</div>
+    </div>
+  </header>
+  <div class="intro-text">
+    Cider has shaken off the pint-glass-only reputation. From bone-dry Basque sidra to tannic English farmhouse, the right vessel unlocks fruit, funk, and effervescence you'd otherwise miss entirely.
+  </div>
+  <div class="glass-list">
+
+    <!-- 1. Pint Glass -->
+    <div class="glass-card">
+      <div class="glass-top-row">
+        <div class="glass-illustration">
+          <svg viewBox="0 0 80 120" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="c1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#E8C84A" stop-opacity="0.7"/><stop offset="100%" stop-color="#C8A030" stop-opacity="0.85"/></linearGradient>
+              <linearGradient id="cf1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FFFFF0"/><stop offset="100%" stop-color="#F8F0D0"/></linearGradient>
+            </defs>
+            <path d="M22 24 L18 100 L62 100 L58 24 Z" fill="url(#c1)" stroke="#b09030" stroke-width="1" opacity="0.9"/>
+            <path d="M22 24 C26 21, 34 20, 40 22 C46 20, 54 21, 58 24 Z" fill="url(#cf1)" stroke="#d4c8a0" stroke-width="0.8"/>
+            <path d="M22 24 L18 100 L62 100 L58 24" fill="none" stroke="#a08050" stroke-width="1.5"/>
+            <rect x="18" y="100" width="44" height="3" rx="1" fill="#a08050" opacity="0.4"/>
+            <circle cx="38" cy="75" r="1" fill="white" opacity="0.12"/>
+            <circle cx="44" cy="60" r="0.8" fill="white" opacity="0.1"/>
+            <rect x="24" y="30" width="3" height="62" rx="1.5" fill="white" opacity="0.06"/>
+          </svg>
+          <span class="glass-type-label">16 oz</span>
+        </div>
+        <div class="glass-info">
+          <div class="glass-name">Pint Glass</div>
+          <div class="glass-aka">Shaker Pint · The Standard</div>
+          <div class="glass-desc">The default pour in most taprooms. Simple and practical — it won't showcase delicate aromatics, but it handles high-volume pours of session ciders perfectly well.</div>
+          <div class="best-for-label">Best Served With</div>
+          <div class="beer-tags">
+            <div class="beer-tag"><span class="beer-tag-text">Dry Cider</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">English Cider</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Session Cider</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Pub Draft</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Wine Glass -->
+    <div class="glass-card">
+      <div class="glass-top-row">
+        <div class="glass-illustration">
+          <svg viewBox="0 0 80 120" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="c2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#E8C050" stop-opacity="0.6"/><stop offset="100%" stop-color="#D0A028" stop-opacity="0.8"/></linearGradient>
+              <linearGradient id="cf2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FFFFF5"/><stop offset="100%" stop-color="#F5EDD0"/></linearGradient>
+            </defs>
+            <path d="M24 28 Q18 45, 22 58 Q26 68, 36 70 L36 90 L26 92 L26 95 L54 95 L54 92 L44 90 L44 70 Q54 68, 58 58 Q62 45, 56 28 Z" fill="url(#c2)" stroke="#a08838" stroke-width="1" opacity="0.9"/>
+            <path d="M24 28 C28 24, 33 23, 40 25 C47 23, 52 24, 56 28 Z" fill="url(#cf2)" stroke="#d0c0a0" stroke-width="0.8"/>
+            <path d="M24 28 Q18 45, 22 58 Q26 68, 36 70 L36 90 L26 92 L26 95 L54 95 L54 92 L44 90 L44 70 Q54 68, 58 58 Q62 45, 56 28" fill="none" stroke="#a08838" stroke-width="1.5"/>
+            <rect x="24" y="34" width="2.5" height="22" rx="1.2" fill="white" opacity="0.06"/>
+          </svg>
+          <span class="glass-type-label">12–15 oz</span>
+        </div>
+        <div class="glass-info">
+          <div class="glass-name">White Wine Glass</div>
+          <div class="glass-aka">All-Purpose Wine Glass</div>
+          <div class="glass-desc">The craft cider world's preferred vessel. The tapered bowl concentrates orchard fruit aromas — apple blossom, pear, quince — while the stem keeps your hand from warming the drink. Elegant without being pretentious.</div>
+          <div class="best-for-label">Best Served With</div>
+          <div class="beer-tags">
+            <div class="beer-tag"><span class="beer-tag-text">Heritage Cider</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Single Variety</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Dry Craft Cider</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Perry</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Still Cider</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Champagne Flute -->
+    <div class="glass-card">
+      <div class="glass-top-row">
+        <div class="glass-illustration">
+          <svg viewBox="0 0 80 120" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="c3" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#F0D870" stop-opacity="0.65"/><stop offset="100%" stop-color="#E0C048" stop-opacity="0.8"/></linearGradient>
+              <linearGradient id="cf3" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FFFFF8"/><stop offset="100%" stop-color="#F8F0D8"/></linearGradient>
+            </defs>
+            <path d="M32 14 L30 65 Q30 72, 36 74 L36 88 L28 90 L28 93 L52 93 L52 90 L44 88 L44 74 Q50 72, 50 65 L48 14 Z" fill="url(#c3)" stroke="#c0a838" stroke-width="1" opacity="0.9"/>
+            <path d="M32 14 C36 11, 40 10, 44 12 C46 11, 48 13, 48 14 Z" fill="url(#cf3)" stroke="#d8d0b0" stroke-width="0.8"/>
+            <path d="M32 14 L30 65 Q30 72, 36 74 L36 88 L28 90 L28 93 L52 93 L52 90 L44 88 L44 74 Q50 72, 50 65 L48 14" fill="none" stroke="#c0a838" stroke-width="1.5"/>
+            <circle cx="39" cy="60" r="0.5" fill="white" opacity="0.15"/>
+            <circle cx="41" cy="48" r="0.4" fill="white" opacity="0.12"/>
+            <circle cx="40" cy="36" r="0.4" fill="white" opacity="0.1"/>
+            <circle cx="38" cy="25" r="0.3" fill="white" opacity="0.08"/>
+            <rect x="34" y="18" width="2" height="44" rx="1" fill="white" opacity="0.06"/>
+          </svg>
+          <span class="glass-type-label">6–8 oz</span>
+        </div>
+        <div class="glass-info">
+          <div class="glass-name">Champagne Flute</div>
+          <div class="glass-aka">Sparkling Flute</div>
+          <div class="glass-desc">The narrow column preserves fine carbonation and sends a beautiful bead of bubbles upward. Perfect for méthode champenoise ciders and elegant sparkling pours where effervescence is the star.</div>
+          <div class="best-for-label">Best Served With</div>
+          <div class="beer-tags">
+            <div class="beer-tag"><span class="beer-tag-text">Sparkling Cider</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Méthode Champenoise</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Pét-Nat Cider</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Brut Cider</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. Tumbler / Sidra Glass -->
+    <div class="glass-card">
+      <div class="glass-top-row">
+        <div class="glass-illustration">
+          <svg viewBox="0 0 80 120" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="c4" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#E0C848" stop-opacity="0.7"/><stop offset="100%" stop-color="#C8A830" stop-opacity="0.85"/></linearGradient>
+            </defs>
+            <!-- Wide, short tumbler -->
+            <path d="M20 36 L18 100 L62 100 L60 36 Z" fill="url(#c4)" stroke="#b0a040" stroke-width="1" opacity="0.9"/>
+            <path d="M20 36 L18 100 L62 100 L60 36" fill="none" stroke="#a09038" stroke-width="1.5"/>
+            <rect x="18" y="100" width="44" height="3" rx="1" fill="#a09038" opacity="0.4"/>
+            <rect x="24" y="42" width="3" height="50" rx="1.5" fill="white" opacity="0.06"/>
+            <!-- Splashing effect at top (sidra pour) -->
+            <circle cx="34" cy="40" r="1.5" fill="white" opacity="0.15"/>
+            <circle cx="42" cy="38" r="1" fill="white" opacity="0.12"/>
+            <circle cx="50" cy="41" r="0.8" fill="white" opacity="0.1"/>
+          </svg>
+          <span class="glass-type-label">6 oz</span>
+        </div>
+        <div class="glass-info">
+          <div class="glass-name">Sidra Glass</div>
+          <div class="glass-aka">Vaso de Sidra · Basque Tumbler</div>
+          <div class="glass-desc">A wide-mouth tumbler used in Asturias and Basque Country. Cider is poured from height (escanciar) to aerate and awaken the flat, still sidra — you drink the splash quickly before it settles. Ritual and glass are inseparable.</div>
+          <div class="best-for-label">Best Served With</div>
+          <div class="beer-tags">
+            <div class="beer-tag"><span class="beer-tag-text">Sidra Natural</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Basque Cider</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Asturian Cider</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Still Farmhouse</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. Tulip Glass -->
+    <div class="glass-card">
+      <div class="glass-top-row">
+        <div class="glass-illustration">
+          <svg viewBox="0 0 80 120" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="c5" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#D4A838" stop-opacity="0.75"/><stop offset="100%" stop-color="#B88828" stop-opacity="0.9"/></linearGradient>
+              <linearGradient id="cf5" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FFF8EE"/><stop offset="100%" stop-color="#F0DDBB"/></linearGradient>
+            </defs>
+            <path d="M22 26 Q18 50, 22 65 Q26 75, 34 78 L34 90 L26 92 L26 95 L54 95 L54 92 L46 90 L46 78 Q54 75, 58 65 Q62 50, 58 26 Z" fill="url(#c5)" stroke="#907040" stroke-width="1" opacity="0.9"/>
+            <path d="M22 26 C25 22, 30 20, 35 22 C38 19, 44 19, 48 22 C52 20, 56 23, 58 26 Z" fill="url(#cf5)" stroke="#d0c0a0" stroke-width="0.8"/>
+            <path d="M22 26 Q18 50, 22 65 Q26 75, 34 78 L34 90 L26 92 L26 95 L54 95 L54 92 L46 90 L46 78 Q54 75, 58 65 Q62 50, 58 26" fill="none" stroke="#907040" stroke-width="1.5"/>
+            <rect x="24" y="32" width="3" height="30" rx="1.5" fill="white" opacity="0.06"/>
+          </svg>
+          <span class="glass-type-label">12 oz</span>
+        </div>
+        <div class="glass-info">
+          <div class="glass-name">Tulip Glass</div>
+          <div class="glass-aka">Belgian Tulip</div>
+          <div class="glass-desc">The flared lip and rounded bowl do double duty — trapping orchard aromatics inside the bowl while supporting a persistent mousse on top. Ideal for complex ciders that reward contemplation.</div>
+          <div class="best-for-label">Best Served With</div>
+          <div class="beer-tags">
+            <div class="beer-tag"><span class="beer-tag-text">Wild Fermented</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Funky Farmhouse</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Hopped Cider</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Barrel-Aged</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Tannic Heritage</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. Goblet -->
+    <div class="glass-card">
+      <div class="glass-top-row">
+        <div class="glass-illustration">
+          <svg viewBox="0 0 80 120" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="c6" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#C89028" stop-opacity="0.8"/><stop offset="100%" stop-color="#A07018" stop-opacity="0.95"/></linearGradient>
+              <linearGradient id="cf6" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FFF8E0"/><stop offset="100%" stop-color="#F0DDB0"/></linearGradient>
+            </defs>
+            <path d="M16 24 Q14 50, 18 62 Q22 72, 34 74 L34 88 L22 90 Q20 92, 20 94 L60 94 Q60 92, 58 90 L46 88 L46 74 Q58 72, 62 62 Q66 50, 64 24 Z" fill="url(#c6)" stroke="#907038" stroke-width="1" opacity="0.9"/>
+            <path d="M16 24 C20 20, 28 18, 36 20 C44 18, 52 20, 56 22 C60 20, 64 23, 64 24 Z" fill="url(#cf6)" stroke="#d4c0a0" stroke-width="0.8"/>
+            <path d="M16 24 Q14 50, 18 62 Q22 72, 34 74 L34 88 L22 90 Q20 92, 20 94 L60 94 Q60 92, 58 90 L46 88 L46 74 Q58 72, 62 62 Q66 50, 64 24" fill="none" stroke="#907038" stroke-width="1.5"/>
+            <rect x="20" y="30" width="3" height="28" rx="1.5" fill="white" opacity="0.06"/>
+          </svg>
+          <span class="glass-type-label">10–13 oz</span>
+        </div>
+        <div class="glass-info">
+          <div class="glass-name">Goblet</div>
+          <div class="glass-aka">Chalice · Oversized Stemware</div>
+          <div class="glass-desc">The wide, open bowl allows generous swirling and lets oxidative and dessert ciders open up fully. The thick stem adds a ceremonial weight that suits special-occasion pours like ice ciders and aged reserves.</div>
+          <div class="best-for-label">Best Served With</div>
+          <div class="beer-tags">
+            <div class="beer-tag"><span class="beer-tag-text">Ice Cider</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Pommeau</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Aged Cider</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Dessert Cider</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Keeved Cider</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7. Copa / Balloon -->
+    <div class="glass-card">
+      <div class="glass-top-row">
+        <div class="glass-illustration">
+          <svg viewBox="0 0 80 120" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="c7" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#E8C048" stop-opacity="0.55"/><stop offset="100%" stop-color="#D0A830" stop-opacity="0.78"/></linearGradient>
+              <linearGradient id="cf7" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FFFFF5"/><stop offset="100%" stop-color="#F5EDD5"/></linearGradient>
+            </defs>
+            <!-- Large balloon shape -->
+            <path d="M18 30 Q12 48, 16 62 Q20 74, 34 76 L34 90 L26 92 L26 95 L54 95 L54 92 L46 90 L46 76 Q60 74, 64 62 Q68 48, 62 30 Z" fill="url(#c7)" stroke="#a09038" stroke-width="1" opacity="0.9"/>
+            <path d="M18 30 C22 26, 28 24, 36 26 C44 24, 52 26, 56 28 C60 26, 62 29, 62 30 Z" fill="url(#cf7)" stroke="#d0c4a0" stroke-width="0.8"/>
+            <path d="M18 30 Q12 48, 16 62 Q20 74, 34 76 L34 90 L26 92 L26 95 L54 95 L54 92 L46 90 L46 76 Q60 74, 64 62 Q68 48, 62 30" fill="none" stroke="#a09038" stroke-width="1.5"/>
+            <rect x="20" y="36" width="2.5" height="24" rx="1.2" fill="white" opacity="0.06"/>
+          </svg>
+          <span class="glass-type-label">16–22 oz</span>
+        </div>
+        <div class="glass-info">
+          <div class="glass-name">Copa / Balloon Glass</div>
+          <div class="glass-aka">Gin Balloon · Spanish Copa</div>
+          <div class="glass-desc">The oversized bowl gives aromatic ciders room to breathe, making it ideal for ciders infused with botanicals, fruit, or spices. Increasingly popular as a serving vessel for cider cocktails and Spanish-style gin-and-cider pours.</div>
+          <div class="best-for-label">Best Served With</div>
+          <div class="beer-tags">
+            <div class="beer-tag"><span class="beer-tag-text">Botanical Cider</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Fruit Cider</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Rosé Cider</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Cider Cocktails</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Spiced Cider</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 8. Bolée -->
+    <div class="glass-card">
+      <div class="glass-top-row">
+        <div class="glass-illustration">
+          <svg viewBox="0 0 80 120" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="c8" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#D8B840" stop-opacity="0.72"/><stop offset="100%" stop-color="#C0A028" stop-opacity="0.88"/></linearGradient>
+            </defs>
+            <!-- Bolée: small ceramic-like bowl, no stem, round -->
+            <path d="M20 40 Q16 60, 18 75 Q20 88, 30 92 L50 92 Q60 88, 62 75 Q64 60, 60 40 Z" fill="url(#c8)" stroke="#a09030" stroke-width="1.5" opacity="0.9"/>
+            <path d="M20 40 C24 36, 32 34, 40 36 C48 34, 56 36, 60 40 Z" fill="#F5EDD5" stroke="#c8b880" stroke-width="0.8"/>
+            <path d="M20 40 Q16 60, 18 75 Q20 88, 30 92 L50 92 Q60 88, 62 75 Q64 60, 60 40" fill="none" stroke="#a09030" stroke-width="1.5"/>
+            <rect x="30" y="92" width="20" height="3" rx="1" fill="#a09030" opacity="0.3"/>
+            <rect x="24" y="46" width="3" height="30" rx="1.5" fill="white" opacity="0.06"/>
+          </svg>
+          <span class="glass-type-label">6 oz</span>
+        </div>
+        <div class="glass-info">
+          <div class="glass-name">Bolée</div>
+          <div class="glass-aka">Breton Cider Bowl · Tasse à Cidre</div>
+          <div class="glass-desc">The traditional small ceramic or earthenware bowl of Brittany, France. Humble and handleless, it keeps the focus on the cider itself — often rustic, tannic, and bracingly dry. The wide mouth lets you inhale orchard air with every sip.</div>
+          <div class="best-for-label">Best Served With</div>
+          <div class="beer-tags">
+            <div class="beer-tag"><span class="beer-tag-text">Cidre Brut</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Cidre Doux</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Breton Farmhouse</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Norman Cider</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 9. Snifter -->
+    <div class="glass-card">
+      <div class="glass-top-row">
+        <div class="glass-illustration">
+          <svg viewBox="0 0 80 120" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="c9" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#C89028" stop-opacity="0.82"/><stop offset="100%" stop-color="#906818" stop-opacity="0.96"/></linearGradient>
+              <linearGradient id="cf9" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FFF5E5"/><stop offset="100%" stop-color="#E8D5B0"/></linearGradient>
+            </defs>
+            <path d="M28 30 Q16 50, 18 65 Q20 78, 34 80 L34 92 L24 94 L24 97 L56 97 L56 94 L46 92 L46 80 Q60 78, 62 65 Q64 50, 52 30 Z" fill="url(#c9)" stroke="#785028" stroke-width="1"/>
+            <path d="M28 30 C32 27, 36 26, 40 28 C44 26, 48 27, 52 30 Z" fill="url(#cf9)" stroke="#c0a080" stroke-width="0.8"/>
+            <path d="M28 30 Q16 50, 18 65 Q20 78, 34 80 L34 92 L24 94 L24 97 L56 97 L56 94 L46 92 L46 80 Q60 78, 62 65 Q64 50, 52 30" fill="none" stroke="#785028" stroke-width="1.5"/>
+            <rect x="22" y="38" width="3" height="28" rx="1.5" fill="white" opacity="0.05"/>
+          </svg>
+          <span class="glass-type-label">8 oz</span>
+        </div>
+        <div class="glass-info">
+          <div class="glass-name">Snifter</div>
+          <div class="glass-aka">Brandy Snifter</div>
+          <div class="glass-desc">Ideal for sipping Calvados-influenced ciders and barrel-aged expressions. Cup the wide bowl to gently warm the cider, releasing caramel, oak, and baked apple notes that the narrow mouth concentrates into every nosing.</div>
+          <div class="best-for-label">Best Served With</div>
+          <div class="beer-tags">
+            <div class="beer-tag"><span class="beer-tag-text">Barrel-Aged Cider</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Calvados-Style</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Apple Brandy</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">High-ABV Cider</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 10. Mason Jar -->
+    <div class="glass-card">
+      <div class="glass-top-row">
+        <div class="glass-illustration">
+          <svg viewBox="0 0 80 120" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="c10" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#E0C040" stop-opacity="0.7"/><stop offset="100%" stop-color="#C8A828" stop-opacity="0.88"/></linearGradient>
+            </defs>
+            <!-- Mason jar: straight sides, threaded neck, slightly narrower top -->
+            <path d="M24 30 L22 100 L58 100 L56 30 Z" fill="url(#c10)" stroke="#a89838" stroke-width="1" opacity="0.9"/>
+            <rect x="26" y="24" width="28" height="6" rx="1" fill="none" stroke="#a89838" stroke-width="1.5"/>
+            <!-- Thread lines -->
+            <line x1="26" y1="26" x2="54" y2="26" stroke="#a89838" stroke-width="0.5" opacity="0.4"/>
+            <line x1="26" y1="28" x2="54" y2="28" stroke="#a89838" stroke-width="0.5" opacity="0.4"/>
+            <path d="M24 30 L22 100 L58 100 L56 30" fill="none" stroke="#a89838" stroke-width="1.5"/>
+            <rect x="22" y="100" width="36" height="3" rx="1" fill="#a89838" opacity="0.35"/>
+            <rect x="26" y="36" width="3" height="56" rx="1.5" fill="white" opacity="0.06"/>
+          </svg>
+          <span class="glass-type-label">16 oz</span>
+        </div>
+        <div class="glass-info">
+          <div class="glass-name">Mason Jar</div>
+          <div class="glass-aka">Preserving Jar · Ball Jar</div>
+          <div class="glass-desc">The unofficial glass of American farmstead cider. Unpretentious and nostalgic — it says "we pressed these apples ourselves." Won't do much for aroma, but it's part of the taproom identity for cideries that lean into rustic charm.</div>
+          <div class="best-for-label">Best Served With</div>
+          <div class="beer-tags">
+            <div class="beer-tag"><span class="beer-tag-text">Farmstead Cider</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Sweet Cider</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Unfiltered</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Rustic Pour</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Cider Shandy</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+<div class="footer-bar">
+  <span>🍏 <span class="gold">10</span> glass styles · From orchard to glass</span>
+  <span style="letter-spacing:2px;" class="gold">CIDER GLASSWARE</span>
+</div>
+</body>
+</html>

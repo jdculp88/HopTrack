@@ -10,7 +10,8 @@ import { useToast } from "@/components/ui/Toast";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import { BeerStyleBadge } from "@/components/ui/BeerStyleBadge";
-import type { BeerStyle } from "@/types/database";
+import type { BeerStyle, ItemType } from "@/types/database";
+import { ITEM_TYPE_LABELS, ITEM_TYPE_EMOJI } from "@/types/database";
 import { GLASS_TYPES, getGlassSvgContent } from "@/lib/glassware";
 
 const STYLES: BeerStyle[] = [
@@ -35,7 +36,56 @@ interface Beer {
   total_checkins: number;
   price_per_pint: number | null;
   glass_type: string | null;
+  item_type: ItemType;
+  category: string | null;
 }
+
+// Food items are managed via menu PDF/image upload in Settings — not as tap list items
+const ITEM_TYPES: { value: ItemType; label: string; emoji: string }[] = [
+  { value: "beer", label: "Beer", emoji: "🍺" },
+  { value: "cider", label: "Cider", emoji: "🍏" },
+  { value: "wine", label: "Wine", emoji: "🍷" },
+  { value: "cocktail", label: "Cocktail", emoji: "🍹" },
+  { value: "na_beverage", label: "Non-Alcoholic", emoji: "🥤" },
+];
+
+// Which fields are relevant per item type
+function showStyleField(t: ItemType) { return t === "beer"; }
+function showAbvField(t: ItemType) { return t !== "food" && t !== "na_beverage"; }
+function showIbuField(t: ItemType) { return t === "beer"; }
+
+// Default glass type per item type
+const DEFAULT_GLASS: Partial<Record<ItemType, string>> = {
+  wine: "wine_glass",
+  beer: "shaker_pint",
+};
+
+// Glasses appropriate per drink type (based on glassware guides)
+const GLASSES_BY_TYPE: Record<ItemType, string[]> = {
+  beer: [
+    // All 20 glasses available for beer
+    "shaker_pint", "nonic_pint", "tulip", "snifter", "weizen_glass", "pilsner_glass",
+    "goblet_chalice", "ipa_glass", "stange", "mug_stein", "flute", "teku", "thistle",
+    "wine_glass", "willi_becher", "dimple_mug", "pokal", "yard_glass", "boot_glass", "sam_adams_pint",
+  ],
+  cider: [
+    // Pint Glass, White Wine Glass, Champagne Flute, Tulip, Goblet/Chalice, Snifter
+    "shaker_pint", "nonic_pint", "wine_glass", "flute", "tulip", "goblet_chalice", "snifter",
+  ],
+  wine: [
+    // Wine Glass variants, Champagne Flute, Goblet, Snifter, Tulip
+    "wine_glass", "flute", "goblet_chalice", "snifter", "tulip",
+  ],
+  cocktail: [
+    // Coupe→tulip, Rocks→mug_stein, Highball→pilsner, Hurricane→goblet, Glencairn→snifter, Copper Mug→mug_stein
+    "wine_glass", "tulip", "flute", "mug_stein", "shaker_pint", "pilsner_glass", "goblet_chalice", "snifter",
+  ],
+  na_beverage: [
+    // Coffee Mug→mug_stein, Highball→pilsner/shaker, Water Goblet→goblet, Coupe→tulip
+    "shaker_pint", "mug_stein", "pilsner_glass", "goblet_chalice", "tulip", "wine_glass", "flute",
+  ],
+  food: [],
+};
 
 interface PourSizeRow {
   id?: string;
@@ -59,7 +109,7 @@ interface TapListClientProps {
   initialBeers: Beer[];
 }
 
-const emptyBeer = { name: "", style: "IPA" as BeerStyle, abv: "", ibu: "", description: "", price: "" };
+const emptyBeer = { name: "", style: "IPA" as BeerStyle, abv: "", ibu: "", description: "", price: "", itemType: "beer" as ItemType, category: "" };
 
 function validateNumericFields(form: typeof emptyBeer): Record<string, string> {
   const errors: Record<string, string> = {};
@@ -106,6 +156,7 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
     const i = initialFormRef.current;
     return f.name !== i.name || f.style !== i.style || f.abv !== i.abv ||
       f.ibu !== i.ibu || f.description !== i.description || f.price !== i.price ||
+      f.itemType !== i.itemType || f.category !== i.category ||
       pourSizes.length > 0;
   }
 
@@ -140,7 +191,7 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
   }
 
   async function openEdit(beer: Beer) {
-    const f = { name: beer.name, style: (beer.style as BeerStyle) ?? "IPA", abv: beer.abv?.toString() ?? "", ibu: beer.ibu?.toString() ?? "", description: beer.description ?? "", price: beer.price_per_pint?.toString() ?? "" };
+    const f = { name: beer.name, style: (beer.style as BeerStyle) ?? "IPA", abv: beer.abv?.toString() ?? "", ibu: beer.ibu?.toString() ?? "", description: beer.description ?? "", price: beer.price_per_pint?.toString() ?? "", itemType: beer.item_type ?? "beer" as ItemType, category: beer.category ?? "" };
     initialFormRef.current = f;
     setForm(f);
     setGlassType(beer.glass_type ?? null);
@@ -182,15 +233,18 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
 
     // When editing, preserve the existing is_on_tap value — never overwrite it.
     // When adding a new beer, default to on tap.
+    const itemType = form.itemType;
     const payload = {
       brewery_id: breweryId,
       name: form.name.trim(),
-      style: form.style,
-      abv: form.abv ? parseFloat(form.abv as string) : null,
-      ibu: form.ibu ? parseInt(form.ibu as string) : null,
+      style: showStyleField(itemType) ? form.style : null,
+      abv: showAbvField(itemType) && form.abv ? parseFloat(form.abv as string) : null,
+      ibu: showIbuField(itemType) && form.ibu ? parseInt(form.ibu as string) : null,
       description: (form.description as string).trim() || null,
       price_per_pint: form.price ? parseFloat(form.price as string) : null,
-      glass_type: glassType ?? null,
+      glass_type: glassType ?? DEFAULT_GLASS[itemType] ?? null,
+      item_type: itemType,
+      category: (form.category as string).trim() || null,
       ...(editingBeer ? {} : { is_on_tap: true }),
     };
 
@@ -389,9 +443,9 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
         <div>
-          <h1 className="font-display text-2xl sm:text-3xl font-bold" style={{ color: "var(--text-primary)" }}>Tap List</h1>
+          <h1 className="font-display text-2xl sm:text-3xl font-bold" style={{ color: "var(--text-primary)" }}>Menu</h1>
           <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
-            {onTapCount} on tap · {beers.length} total beers
+            {onTapCount} on tap · {beers.length} total items
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -412,7 +466,7 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
           <button onClick={openAdd}
             className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all active:scale-95 min-h-[44px]"
             style={{ background: "var(--accent-gold)", color: "var(--bg)" }}>
-            <Plus size={16} /> Add Beer
+            <Plus size={16} /> Add Item
           </button>
         </div>
       </div>
@@ -607,7 +661,7 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
               {filter === "on_tap" ? "The taps are dry" : filter === "off_tap" ? "Everything's flowing — nothing off tap!" : "The menu is empty"}
             </p>
             <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
-              {filter === "all" && "Add your first beer and let the pours begin."}
+              {filter === "all" && "Add your first item and let the pours begin."}
               {filter === "on_tap" && "Toggle a beer on tap to see it here."}
             </p>
           </div>
@@ -638,7 +692,7 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
                 </div>
                 <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 text-lg"
                   style={{ background: draggedBeer.is_86d ? "rgba(196,75,58,0.15)" : draggedBeer.is_on_tap ? "rgba(212,168,67,0.15)" : "var(--surface-2)" }}>
-                  {draggedBeer.is_86d ? "❌" : "🍺"}
+                  {draggedBeer.is_86d ? "❌" : (ITEM_TYPE_EMOJI[draggedBeer.item_type] ?? "🍺")}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-display font-semibold" style={{ color: "var(--text-primary)" }}>{draggedBeer.name}</p>
@@ -668,7 +722,7 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
 
               <div className="flex items-center justify-between mb-5">
                 <h2 className="font-display text-xl font-bold" style={{ color: "var(--text-primary)" }}>
-                  {editingBeer ? "Edit Beer" : "Add Beer"}
+                  {editingBeer ? `Edit ${ITEM_TYPE_LABELS[form.itemType] || "Item"}` : `Add ${ITEM_TYPE_LABELS[form.itemType] || "Item"}`}
                 </h2>
                 <button onClick={closeForm} style={{ color: "var(--text-muted)" }}>
                   <X size={20} />
@@ -704,74 +758,129 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
               </AnimatePresence>
 
               <div className="space-y-4">
+                {/* Item Type Selector */}
                 <div>
-                  <label className="text-xs font-mono uppercase tracking-wider block mb-1.5" style={{ color: "var(--text-muted)" }}>Beer Name *</label>
+                  <label className="text-xs font-mono uppercase tracking-wider block mb-2" style={{ color: "var(--text-muted)" }}>Item Type</label>
+                  <div className="flex flex-wrap gap-2">
+                    {ITEM_TYPES.map(t => {
+                      const isSelected = form.itemType === t.value;
+                      return (
+                        <button
+                          key={t.value}
+                          type="button"
+                          onClick={() => {
+                            setForm(f => ({ ...f, itemType: t.value }));
+                            // Reset glass if it's not valid for the new type
+                            setGlassType(prev => prev && GLASSES_BY_TYPE[t.value]?.includes(prev) ? prev : DEFAULT_GLASS[t.value] ?? null);
+                          }}
+                          className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all border"
+                          style={{
+                            background: isSelected ? "rgba(212,168,67,0.12)" : "var(--surface-2)",
+                            borderColor: isSelected ? "var(--accent-gold)" : "var(--border)",
+                            color: isSelected ? "var(--accent-gold)" : "var(--text-secondary)",
+                          }}
+                        >
+                          <span>{t.emoji}</span> {t.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-xs font-mono uppercase tracking-wider block mb-1.5" style={{ color: "var(--text-muted)" }}>
+                    {form.itemType === "beer" ? "Beer Name" : ITEM_TYPE_LABELS[form.itemType] + " Name"} *
+                  </label>
                   <input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-                    placeholder="e.g. Sunset IPA"
+                    placeholder={form.itemType === "beer" ? "e.g. Sunset IPA" : form.itemType === "wine" ? "e.g. Pinot Noir" : form.itemType === "cocktail" ? "e.g. Paloma" : form.itemType === "food" ? "e.g. Bavarian Pretzel" : "e.g. Sparkling Water"}
                     className="w-full px-4 py-2.5 rounded-xl border text-sm focus:outline-none"
                     style={{ background: "var(--surface-2)", borderColor: "var(--border)", color: "var(--text-primary)" }} />
                 </div>
 
-                <div>
-                  <label className="text-xs font-mono uppercase tracking-wider block mb-1.5" style={{ color: "var(--text-muted)" }}>Style</label>
-                  <select value={form.style} onChange={e => setForm(f => ({ ...f, style: e.target.value as BeerStyle }))}
-                    className="w-full px-4 py-2.5 rounded-xl border text-sm focus:outline-none"
-                    style={{ background: "var(--surface-2)", borderColor: "var(--border)", color: "var(--text-primary)" }}>
-                    {STYLES.map(s => <option key={s} value={s}>{s}</option>)}
-                  </select>
-                </div>
+                {/* Category (for non-beer items like "Red Wine", "Appetizers") */}
+                {form.itemType !== "beer" && (
+                  <div>
+                    <label className="text-xs font-mono uppercase tracking-wider block mb-1.5" style={{ color: "var(--text-muted)" }}>
+                      Category <span style={{ fontWeight: 400, textTransform: "none", letterSpacing: 0 }}>(optional — e.g. &quot;Red Wine&quot;, &quot;Appetizers&quot;)</span>
+                    </label>
+                    <input value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))}
+                      placeholder={form.itemType === "wine" ? "e.g. Red, White, Rosé" : form.itemType === "food" ? "e.g. Appetizers, Mains" : ""}
+                      className="w-full px-4 py-2.5 rounded-xl border text-sm focus:outline-none"
+                      style={{ background: "var(--surface-2)", borderColor: "var(--border)", color: "var(--text-primary)" }} />
+                  </div>
+                )}
+
+                {/* Style — only for beer */}
+                {showStyleField(form.itemType) && (
+                  <div>
+                    <label className="text-xs font-mono uppercase tracking-wider block mb-1.5" style={{ color: "var(--text-muted)" }}>Style</label>
+                    <select value={form.style} onChange={e => setForm(f => ({ ...f, style: e.target.value as BeerStyle }))}
+                      className="w-full px-4 py-2.5 rounded-xl border text-sm focus:outline-none"
+                      style={{ background: "var(--surface-2)", borderColor: "var(--border)", color: "var(--text-primary)" }}>
+                      {STYLES.map(s => <option key={s} value={s}>{s}</option>)}
+                    </select>
+                  </div>
+                )}
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  <div>
-                    <label className="text-xs font-mono uppercase tracking-wider block mb-1.5" style={{ color: "var(--text-muted)" }}>ABV %</label>
-                    <input
-                      type="number"
-                      step="0.1"
-                      min="0"
-                      max="100"
-                      value={form.abv}
-                      onChange={e => {
-                        setForm(f => ({ ...f, abv: e.target.value }));
-                        const errs = validateNumericFields({ ...form, abv: e.target.value });
-                        setFieldErrors(prev => ({ ...prev, abv: errs.abv ?? "" }));
-                      }}
-                      placeholder="5.5"
-                      className="w-full px-4 py-2.5 rounded-xl border text-sm focus:outline-none"
-                      style={{
-                        background: "var(--surface-2)",
-                        borderColor: fieldErrors.abv ? "var(--danger)" : "var(--border)",
-                        color: "var(--text-primary)",
-                      }}
-                    />
-                    {fieldErrors.abv && (
-                      <p className="text-xs mt-1" style={{ color: "var(--danger)" }}>{fieldErrors.abv}</p>
-                    )}
-                  </div>
-                  <div>
-                    <label className="text-xs font-mono uppercase tracking-wider block mb-1.5" style={{ color: "var(--text-muted)" }}>IBU</label>
-                    <input
-                      type="number"
-                      step="1"
-                      min="0"
-                      max="200"
-                      value={form.ibu}
-                      onChange={e => {
-                        setForm(f => ({ ...f, ibu: e.target.value }));
-                        const errs = validateNumericFields({ ...form, ibu: e.target.value });
-                        setFieldErrors(prev => ({ ...prev, ibu: errs.ibu ?? "" }));
-                      }}
-                      placeholder="45"
-                      className="w-full px-4 py-2.5 rounded-xl border text-sm focus:outline-none"
-                      style={{
-                        background: "var(--surface-2)",
-                        borderColor: fieldErrors.ibu ? "var(--danger)" : "var(--border)",
-                        color: "var(--text-primary)",
-                      }}
-                    />
-                    {fieldErrors.ibu && (
-                      <p className="text-xs mt-1" style={{ color: "var(--danger)" }}>{fieldErrors.ibu}</p>
-                    )}
-                  </div>
+                  {/* ABV — for beer, cider, wine, cocktail */}
+                  {showAbvField(form.itemType) && (
+                    <div>
+                      <label className="text-xs font-mono uppercase tracking-wider block mb-1.5" style={{ color: "var(--text-muted)" }}>ABV %</label>
+                      <input
+                        type="number"
+                        step="0.1"
+                        min="0"
+                        max="100"
+                        value={form.abv}
+                        onChange={e => {
+                          setForm(f => ({ ...f, abv: e.target.value }));
+                          const errs = validateNumericFields({ ...form, abv: e.target.value });
+                          setFieldErrors(prev => ({ ...prev, abv: errs.abv ?? "" }));
+                        }}
+                        placeholder="5.5"
+                        className="w-full px-4 py-2.5 rounded-xl border text-sm focus:outline-none"
+                        style={{
+                          background: "var(--surface-2)",
+                          borderColor: fieldErrors.abv ? "var(--danger)" : "var(--border)",
+                          color: "var(--text-primary)",
+                        }}
+                      />
+                      {fieldErrors.abv && (
+                        <p className="text-xs mt-1" style={{ color: "var(--danger)" }}>{fieldErrors.abv}</p>
+                      )}
+                    </div>
+                  )}
+
+                  {/* IBU — beer only */}
+                  {showIbuField(form.itemType) && (
+                    <div>
+                      <label className="text-xs font-mono uppercase tracking-wider block mb-1.5" style={{ color: "var(--text-muted)" }}>IBU</label>
+                      <input
+                        type="number"
+                        step="1"
+                        min="0"
+                        max="200"
+                        value={form.ibu}
+                        onChange={e => {
+                          setForm(f => ({ ...f, ibu: e.target.value }));
+                          const errs = validateNumericFields({ ...form, ibu: e.target.value });
+                          setFieldErrors(prev => ({ ...prev, ibu: errs.ibu ?? "" }));
+                        }}
+                        placeholder="45"
+                        className="w-full px-4 py-2.5 rounded-xl border text-sm focus:outline-none"
+                        style={{
+                          background: "var(--surface-2)",
+                          borderColor: fieldErrors.ibu ? "var(--danger)" : "var(--border)",
+                          color: "var(--text-primary)",
+                        }}
+                      />
+                      {fieldErrors.ibu && (
+                        <p className="text-xs mt-1" style={{ color: "var(--danger)" }}>{fieldErrors.ibu}</p>
+                      )}
+                    </div>
+                  )}
+
                   <div>
                     <label className="text-xs font-mono uppercase tracking-wider block mb-1.5" style={{ color: "var(--text-muted)" }}>Price $</label>
                     <input
@@ -814,7 +923,7 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
                     Glass Type <span style={{ color: "var(--text-muted)", fontWeight: 400, textTransform: "none", letterSpacing: 0 }}>(shows on The Board)</span>
                   </label>
                   <div className="grid gap-2" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(72px, 1fr))" }}>
-                    {GLASS_TYPES.map(glass => {
+                    {GLASS_TYPES.filter(g => GLASSES_BY_TYPE[form.itemType]?.includes(g.key)).map(glass => {
                       const isSelected = glassType === glass.key;
                       const svgHtml = getGlassSvgContent(glass, `picker-${glass.key}`);
                       return (
@@ -984,7 +1093,7 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
                 <button onClick={handleSave} disabled={saving || !form.name.trim() || Object.values(fieldErrors).some(Boolean)}
                   className="flex-1 py-3 rounded-xl text-sm font-semibold transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                   style={{ background: "var(--accent-gold)", color: "var(--bg)" }}>
-                  {saving ? <><Loader2 size={16} className="animate-spin" />Saving...</> : <><Save size={16} />{editingBeer ? "Save Changes" : "Add Beer"}</>}
+                  {saving ? <><Loader2 size={16} className="animate-spin" />Saving...</> : <><Save size={16} />{editingBeer ? "Save Changes" : `Add ${ITEM_TYPE_LABELS[form.itemType] || "Item"}`}</>}
                 </button>
               </div>
             </motion.div>
@@ -1089,7 +1198,7 @@ function SortableBeerItem({ beer, confirmDeleteId, deletingId, batchMode, isSele
         {/* Icon */}
         <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 text-lg"
           style={{ background: beer.is_86d ? "rgba(196,75,58,0.15)" : beer.is_on_tap ? "rgba(212,168,67,0.15)" : "var(--surface-2)" }}>
-          {beer.is_86d ? "❌" : "🍺"}
+          {beer.is_86d ? "❌" : (ITEM_TYPE_EMOJI[beer.item_type] ?? "🍺")}
         </div>
 
         {/* Info */}
@@ -1119,9 +1228,15 @@ function SortableBeerItem({ beer, confirmDeleteId, deletingId, batchMode, isSele
             )}
           </div>
           <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-            <BeerStyleBadge style={beer.style as BeerStyle} size="xs" />
-            {beer.abv && <span className="text-xs font-mono" style={{ color: "var(--text-muted)" }}>{beer.abv}% ABV</span>}
-            {beer.ibu && <span className="text-xs font-mono" style={{ color: "var(--text-muted)" }}>{beer.ibu} IBU</span>}
+            {beer.item_type === "beer" && beer.style ? (
+              <BeerStyleBadge style={beer.style as BeerStyle} size="xs" />
+            ) : beer.item_type !== "beer" ? (
+              <span className="text-xs px-1.5 py-0.5 rounded font-medium" style={{ background: "rgba(212,168,67,0.1)", color: "var(--accent-gold)" }}>
+                {ITEM_TYPE_LABELS[beer.item_type] ?? beer.item_type}{beer.category ? ` · ${beer.category}` : ""}
+              </span>
+            ) : null}
+            {beer.abv != null && beer.abv > 0 && <span className="text-xs font-mono" style={{ color: "var(--text-muted)" }}>{beer.abv}% ABV</span>}
+            {beer.ibu != null && beer.ibu > 0 && <span className="text-xs font-mono" style={{ color: "var(--text-muted)" }}>{beer.ibu} IBU</span>}
             {beer.price_per_pint != null && <span className="text-xs font-mono" style={{ color: "var(--accent-gold)" }}>${beer.price_per_pint}</span>}
             {beer.avg_rating && <span className="text-xs font-mono" style={{ color: "var(--accent-gold)" }}>★ {beer.avg_rating.toFixed(1)}</span>}
             {beer.total_checkins > 0 && <span className="text-xs" style={{ color: "var(--text-muted)" }}>{beer.total_checkins} pours</span>}
