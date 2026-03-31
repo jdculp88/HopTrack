@@ -243,9 +243,10 @@ scripts/supabase-setup.mjs    — One-time setup script
 
 ## 🗺️ Where We Are
 
-**Current Sprint:** Sprint 76 — TBD
-**Last completed:** Sprint 75 — Revenue Plumbing ✅ — Stripe billing completion + email infrastructure
-**Retro (75):** TBD
+**Current Sprint:** Sprint 77 — TBD
+**Last completed:** Sprint 76 — The Safety Net ✅ — CI/CD pipeline + staging environment docs
+**Retro (76):** `docs/retros/sprint-76-retro.md` (facilitated by Quinn)
+**Sprint plan (76):** `docs/plans/sprint-76-plan.md`
 **Sprint plan (75):** `docs/plans/sprint-75-plan.md`
 **Roadmap research:** `docs/plans/roadmap-research-2026-q2.md` — 30 features, 20 REQs (REQ-069/070 added), 4 sprint arcs (through Sprint 96)
 **Sprint plan (74):** `docs/plans/sprint-74-plan.md`
@@ -440,6 +441,30 @@ Migration state (001-041): all applied — see `docs/sprint-history.md#migration
 - `docs/requirements/REQ-069-enhanced-kpis-analytics.md` — NEW: Enhanced KPIs requirement (queued)
 - `docs/requirements/REQ-070-brewery-menu-uploads.md` — NEW: Menu uploads requirement (queued)
 - No new migrations
+
+---
+
+### Sprint 76 — The Safety Net ✅ (2026-03-31)
+**Theme:** CI/CD pipeline + staging environment documentation
+**Arc:** Launch or Bust (Sprints 75-78)
+
+**Goal 1: GitHub Actions CI/CD (F-004)** — `.github/workflows/ci.yml` runs on push to `main`: lint, type check, build, Playwright E2E (soft-fail with `continue-on-error` until CI Supabase instance is configured). `.github/workflows/staging.yml` runs on push to `staging`: lint, type check, build (no E2E). Node 22, npm cache. Dummy Supabase env vars for build. Playwright report uploaded as artifact.
+
+**Goal 2: Staging Environment (F-005)** — `docs/staging-environment.md` comprehensive setup guide: Supabase project setup, env vars, migrations (`npm run db:migrate:staging`), seeding (14 seed files), Vercel preview deployments, workflow diagram. README.md updated with CI badge.
+
+**Key changes from Sprint 76:**
+- `.github/workflows/ci.yml` — NEW: CI pipeline (lint + type check + build + E2E soft-fail)
+- `.github/workflows/staging.yml` — NEW: Staging CI pipeline (lint + type check + build)
+- `docs/staging-environment.md` — NEW: Full staging environment setup guide
+- `docs/plans/sprint-76-plan.md` — NEW: Sprint plan
+- `README.md` — UPDATED: CI badge added
+- No new migrations
+
+**Sprint 76 honest notes:**
+- E2E is `continue-on-error: true` — decorative in CI until a real Supabase instance is wired
+- Staging is documented but not provisioned (requires Supabase dashboard + free/paid decision)
+- No unit tests yet (Vitest flagged for Sprint 77)
+- Retro facilitated by Quinn (first time) — `docs/retros/sprint-76-retro.md`
 
 ---
 

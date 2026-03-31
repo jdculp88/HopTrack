@@ -1,5 +1,7 @@
 # HopTrack
 
+![CI](https://github.com/hoptrack/hoptrack/actions/workflows/ci.yml/badge.svg)
+
 **Track Every Pour.** A craft beer check-in and loyalty platform for drinkers and breweries.
 
 - **Consumer app** — check in beers, earn XP, unlock achievements, follow friends, discover breweries
