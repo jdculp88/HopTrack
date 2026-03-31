@@ -21,7 +21,7 @@ export async function GET(request: Request) {
       .from("breweries")
       .select("*")
       .not("latitude", "is", null)
-      .limit(50);
+      .limit(500);
 
     // Simple distance filter (rough)
     const latN = parseFloat(lat);
@@ -52,18 +52,40 @@ export async function GET(request: Request) {
   }
 
   if (q) {
-    // Search: check DB first
-    const { data: dbResults } = await supabase
-      .from("breweries")
-      .select("*")
-      .ilike("name", `%${q}%`)
-      .limit(limit);
+    // Smart search: match name, city, state, OR zip code
+    // Try zip code first (5 digits)
+    const isZip = /^\d{5}/.test(q.trim());
 
-    if (dbResults && dbResults.length >= 5) {
+    let dbResults: any[] = [];
+
+    if (isZip) {
+      const { data } = await supabase
+        .from("breweries")
+        .select("*")
+        .ilike("postal_code", `${q.trim().slice(0, 5)}%`)
+        .limit(limit);
+      dbResults = data ?? [];
+    }
+
+    // If not a zip or zip returned few results, search by name + city + state
+    if (!isZip || dbResults.length < 3) {
+      const { data: nameResults } = await supabase
+        .from("breweries")
+        .select("*")
+        .or(`name.ilike.%${q}%,city.ilike.%${q}%,state.ilike.%${q}%`)
+        .limit(limit);
+
+      // Merge and deduplicate
+      const existingIds = new Set(dbResults.map((b: any) => b.id));
+      const newResults = (nameResults ?? []).filter((b: any) => !existingIds.has(b.id));
+      dbResults = [...dbResults, ...newResults].slice(0, limit);
+    }
+
+    if (dbResults.length >= 5) {
       return NextResponse.json({ breweries: dbResults }, { headers: { 'Cache-Control': 'public, max-age=60, stale-while-revalidate=120' } });
     }
 
-    // Supplement with Open Brewery DB
+    // Supplement with Open Brewery DB for broader coverage
     const raw = await searchBreweries(q, limit);
     const mapped = raw.map(mapOpenBreweryToDb);
 
@@ -77,7 +99,7 @@ export async function GET(request: Request) {
     const { data: merged } = await supabase
       .from("breweries")
       .select("*")
-      .ilike("name", `%${q}%`)
+      .or(`name.ilike.%${q}%,city.ilike.%${q}%,state.ilike.%${q}%,postal_code.ilike.${q.trim().slice(0, 5)}%`)
       .limit(limit);
 
     return NextResponse.json({ breweries: merged ?? [] }, { headers: { 'Cache-Control': 'public, max-age=60, stale-while-revalidate=120' } });

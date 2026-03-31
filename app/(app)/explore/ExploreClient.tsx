@@ -40,6 +40,7 @@ interface ExploreClientProps {
   hasUpcomingEvents?: string[];
   followerCounts?: Record<string, number>;
   recentBreweryIds?: string[];
+  totalBreweryCount?: number;
 }
 
 type ViewMode = "list" | "map";
@@ -62,6 +63,7 @@ export function ExploreClient({
   hasUpcomingEvents = [],
   followerCounts = {},
   recentBreweryIds = [],
+  totalBreweryCount = 0,
 }: ExploreClientProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -78,6 +80,9 @@ export function ExploreClient({
   const enriched = initialBreweries.map(b => ({ ...b, has_upcoming_events: hasUpcomingEvents.includes(b.id) }));
   const [breweries, setBreweries] = useState<BreweryWithStats[]>(enriched);
   const [searching, setSearching] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [offset, setOffset] = useState(initialBreweries.length);
+  const [hasMore, setHasMore] = useState(initialBreweries.length < totalBreweryCount);
   const geo = useGeolocation();
 
   const activeFilterCount = (typeFilter !== "all" ? 1 : 0) + (botwFilter ? 1 : 0);
@@ -135,8 +140,26 @@ export function ExploreClient({
     pushParams({ q: query });
     const t = setTimeout(async () => {
       setSearching(true);
-      const raw = await searchBreweries(query, 20);
-      setBreweries(raw.map((r) => ({ ...mapOpenBreweryToDb(r), id: r.id, created_at: "" } as any)));
+      // Search our own DB first (supports name, city, state, zip)
+      const dbRes = await fetch(`/api/breweries?q=${encodeURIComponent(query)}&limit=50`);
+      const dbData = await dbRes.json();
+      const dbResults = dbData.breweries ?? [];
+
+      if (dbResults.length >= 5) {
+        // Our DB has enough results — use them
+        setBreweries(dbResults.map((b: any) => ({ ...b, created_at: b.created_at ?? "" })));
+      } else {
+        // Supplement with Open Brewery DB for broader coverage
+        const raw = await searchBreweries(query, 20);
+        const externalResults = raw.map((r) => ({ ...mapOpenBreweryToDb(r), id: r.id, created_at: "" } as any));
+        // Merge: DB results first, then external (deduped)
+        const dbIds = new Set(dbResults.map((b: any) => b.id));
+        const merged = [
+          ...dbResults,
+          ...externalResults.filter((b: any) => !dbIds.has(b.id)),
+        ];
+        setBreweries(merged);
+      }
       setSearching(false);
     }, 300);
     return () => clearTimeout(t);
@@ -146,6 +169,30 @@ export function ExploreClient({
   useEffect(() => {
     geo.requestLocation();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Load more breweries from API
+  const loadMore = useCallback(async () => {
+    setLoadingMore(true);
+    try {
+      const res = await fetch(`/api/breweries/browse?offset=${offset}&limit=200`);
+      const data = await res.json();
+      const more = (data.breweries ?? []) as BreweryWithStats[];
+      if (more.length === 0) {
+        setHasMore(false);
+      } else {
+        setBreweries((prev) => {
+          const existingIds = new Set(prev.map((b) => b.id));
+          const deduped = more.filter((b) => !existingIds.has(b.id));
+          return [...prev, ...deduped];
+        });
+        setOffset((prev) => prev + more.length);
+        if (offset + more.length >= totalBreweryCount) setHasMore(false);
+      }
+    } catch {
+      // Silently fail — user can retry
+    }
+    setLoadingMore(false);
+  }, [offset, totalBreweryCount]);
 
   // Apply all filters
   const filteredBreweries = breweries
@@ -226,7 +273,7 @@ export function ExploreClient({
             ref={searchInputRef}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search breweries, beers, or styles..."
+            placeholder="Search by name, city, state, or zip code..."
             className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-2xl pl-12 pr-12 py-4 text-lg text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent-gold)] transition-colors"
           />
           {searching && (
@@ -493,7 +540,7 @@ export function ExploreClient({
                       key={b.id}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: i * 0.04 }}
+                      transition={{ delay: Math.min(i, 20) * 0.04 }}
                     >
                       <EnrichedBreweryCard
                         brewery={b}
@@ -505,6 +552,35 @@ export function ExploreClient({
                   ))
               }
             </div>
+            {/* Load More — only shown when not searching and more breweries exist */}
+            {!isSearching && hasMore && (
+              <div className="flex justify-center pt-6">
+                <button
+                  onClick={loadMore}
+                  disabled={loadingMore}
+                  className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-medium transition-all border"
+                  style={{
+                    background: "color-mix(in srgb, var(--accent-gold) 10%, transparent)",
+                    color: "var(--accent-gold)",
+                    borderColor: "color-mix(in srgb, var(--accent-gold) 30%, transparent)",
+                  }}
+                >
+                  {loadingMore ? (
+                    <>
+                      <Loader2 size={16} className="animate-spin" />
+                      Loading...
+                    </>
+                  ) : (
+                    <>Load More Breweries</>
+                  )}
+                </button>
+              </div>
+            )}
+            {!isSearching && !hasMore && filteredBreweries.length > 0 && totalBreweryCount > 200 && (
+              <p className="text-center text-xs text-[var(--text-muted)] pt-4">
+                Showing all {filteredBreweries.length.toLocaleString()} breweries
+              </p>
+            )}
           </section>
         </div>
       )}

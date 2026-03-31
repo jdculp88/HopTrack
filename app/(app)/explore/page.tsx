@@ -11,13 +11,20 @@ export default async function ExplorePage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  // Fetch breweries for the list view (initial load)
+  // Fetch breweries for the list view (initial load — 200 for good "Near Me" coverage)
   const { data: breweriesRaw } = await supabase
     .from("breweries")
     .select("*")
     .not("latitude", "is", null)
-    .limit(50);
+    .order("name")
+    .limit(200);
   const breweries = breweriesRaw as any[];
+
+  // Total count for pagination
+  const { count: totalBreweryCount } = await supabase
+    .from("breweries")
+    .select("*", { count: "exact", head: true })
+    .not("latitude", "is", null);
 
   // User's visited brewery IDs
   const { data: visits } = await supabase
@@ -86,6 +93,7 @@ export default async function ExplorePage() {
         hasUpcomingEvents={eventBreweryIds}
         followerCounts={followerCountMap}
         recentBreweryIds={recentBreweryIds}
+        totalBreweryCount={totalBreweryCount ?? 0}
       />
     </Suspense>
   );

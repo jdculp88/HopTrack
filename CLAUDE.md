@@ -243,8 +243,9 @@ scripts/supabase-setup.mjs    — One-time setup script
 
 ## 🗺️ Where We Are
 
-**Current Sprint:** Sprint 78 — TBD
+**Current Sprint:** Sprint 78 — The Database
 **Last completed:** Sprint 77 — The Countdown ✅ — Vitest (39 tests), launch checklist burndown (44%→56%), cookie consent, JSON-LD, business formation guide
+**Sprint plan (78):** `docs/plans/sprint-78-plan.md`
 **Retro (77):** `docs/retros/sprint-77-retro.md` (facilitated by Drew)
 **Sprint plan (77):** `docs/plans/sprint-77-plan.md`
 **Sprint plan (76):** `docs/plans/sprint-76-plan.md`
@@ -478,6 +479,31 @@ Migration state (001-041): all applied — see `docs/sprint-history.md#migration
 - Staging Supabase: paid tier provisioned
 - Launch date: no date set (wants product confidence)
 - First brewery: waiting on overall confidence
+
+---
+
+### Sprint 78 — The Database (2026-03-31)
+**Theme:** Seed database with real US brewery and beer data for launch
+**Arc:** Launch or Bust (Sprints 75-78)
+
+**Goal 1: US Brewery Seed (Open Brewery DB)** — `scripts/fetch-breweries.mjs` pulls all US breweries from Open Brewery DB API, filters to active types, generates migration 048. **7,177 active breweries** across all 50 states + DC. Types: micro (4,156), brewpub (2,428), regional (213), contract (184), large (73), proprietor (68), taproom (34), nano (19), bar (2). 5,513 with GPS coordinates (HopRoute eligible). Top 5: CA (804), CO (401), WA (388), NY (382), MI (354). `ON CONFLICT (external_id) DO NOTHING` preserves existing curated data.
+
+**Goal 2: US Beer Catalog (Kaggle Beer Study)** — `scripts/fetch-beers.mjs` pulls brewery + beer CSVs from GitHub, matches beers to our breweries by name+city+state, maps 80+ Kaggle styles to our 26 canonical styles, generates migration 049. **2,361 beers** across 541 breweries. Top styles: IPA (466), Pale Ale (257), Amber (232), Lager (181), Wheat (116), Blonde Ale (108), Double IPA (105). Beers only insert if their brewery exists in our DB (safe join).
+
+**Key changes from Sprint 78:**
+- `scripts/fetch-breweries.mjs` — NEW: Open Brewery DB API fetcher + SQL generator
+- `scripts/fetch-beers.mjs` — NEW: Kaggle Beer Study CSV fetcher + style mapper + SQL generator
+- `supabase/migrations/048_open_brewery_db_seed.sql` — NEW: 7,177 US breweries (2.08 MB)
+- `supabase/migrations/049_kaggle_beer_seed.sql` — NEW: 2,361 beers matched to breweries (0.43 MB)
+- `docs/plans/sprint-78-plan.md` — NEW: Sprint plan
+- No schema changes — data-only migrations
+
+**What this enables:**
+- Search works at launch — users find their local brewery
+- HopRoute works nationwide — 5,513 GPS-enabled breweries
+- Claim funnel is live — 7,177 listings → owners claim → paid tier
+- Beer check-ins are real — 2,361 beers to find and log
+- More beer data welcome — Joshua sourcing additional catalogs (migration 050+)
 
 ---
 

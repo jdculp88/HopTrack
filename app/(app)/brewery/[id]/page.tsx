@@ -536,9 +536,8 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
           )}
         </div>
 
-        {/* Brewery Reviews — full list */}
+        {/* Brewery Reviews — full list (heading is inside BreweryReview component) */}
         <div>
-          <h2 className="font-display text-2xl font-bold text-[var(--text-primary)] mb-3">Reviews</h2>
           <BreweryReview breweryId={id} currentUserId={user.id} />
         </div>
 
