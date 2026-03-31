@@ -243,7 +243,9 @@ scripts/supabase-setup.mjs    — One-time setup script
 
 ## 🗺️ Where We Are
 
-**Current Sprint:** Sprint 80 — TBD
+**Current Sprint:** Sprint 81 — TBD
+**Last completed:** Sprint 80 — The Untappd Killer ✅ — Embeddable beer menu widget, public API, embed script, brewery profile redesign, Heist Brewery seeded (35 beers), P0 redirect loop fix, Explore link fix
+**Retro (80):** `docs/retros/sprint-80-retro.md`
 **Last completed:** Sprint 79 — Brewery Value + The Barback Pilot ✅ — Weekly digest emails (F-007), ROI dashboard card (F-010), The Barback AI crawler pilot (Charlotte NC, 50 breweries, REQ-071)
 **Sprint plan (79):** `docs/plans/sprint-79-plan.md`
 **Retro (78):** `docs/retros/sprint-78-retro.md` (facilitated by Morgan)
