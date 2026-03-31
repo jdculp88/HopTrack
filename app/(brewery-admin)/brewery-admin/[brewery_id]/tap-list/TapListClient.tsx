@@ -60,29 +60,42 @@ const DEFAULT_GLASS: Partial<Record<ItemType, string>> = {
   beer: "shaker_pint",
 };
 
-// Glasses appropriate per drink type (based on glassware guides)
+// Glasses appropriate per drink type — exact one-for-one matches from guide, in guide order
 const GLASSES_BY_TYPE: Record<ItemType, string[]> = {
   beer: [
-    // All 20 glasses available for beer
+    // 20 glasses from beer guide, in guide order
     "shaker_pint", "nonic_pint", "tulip", "snifter", "weizen_glass", "pilsner_glass",
     "goblet_chalice", "ipa_glass", "stange", "mug_stein", "flute", "teku", "thistle",
     "wine_glass", "willi_becher", "dimple_mug", "pokal", "yard_glass", "boot_glass", "sam_adams_pint",
   ],
   cider: [
-    // Pint Glass, White Wine Glass, Champagne Flute, Tulip, Goblet/Chalice, Snifter
-    "shaker_pint", "nonic_pint", "wine_glass", "flute", "tulip", "goblet_chalice", "snifter",
+    // 10 glasses from cider guide, in guide order:
+    // Pint Glass, White Wine Glass, Champagne Flute, Sidra Glass, Tulip Glass,
+    // Goblet, Copa/Balloon Glass, Bolée, Snifter, Mason Jar
+    "shaker_pint", "white_wine_glass", "flute", "sidra_glass", "tulip",
+    "goblet_chalice", "copa_balloon", "bolee", "snifter", "mason_jar",
   ],
   wine: [
-    // Wine Glass variants, Champagne Flute, Goblet, Snifter, Tulip
-    "wine_glass", "flute", "goblet_chalice", "snifter", "tulip",
+    // 12 glasses from wine guide, in guide order:
+    // Bordeaux, Burgundy, White Wine, Sauvignon Blanc, Champagne Flute, Champagne Coupe,
+    // Rosé, Port, Copita, Universal Wine, Stemless Wine, Riesling
+    "bordeaux_glass", "burgundy_glass", "white_wine_glass", "sauvignon_blanc_glass",
+    "flute", "champagne_coupe", "rose_glass", "port_glass", "copita",
+    "universal_wine_glass", "stemless_wine_glass", "riesling_glass",
   ],
   cocktail: [
-    // Coupe→tulip, Rocks→mug_stein, Highball→pilsner, Hurricane→goblet, Glencairn→snifter, Copper Mug→mug_stein
-    "wine_glass", "tulip", "flute", "mug_stein", "shaker_pint", "pilsner_glass", "goblet_chalice", "snifter",
+    // 12 glasses from cocktail guide, in guide order:
+    // Coupe, Martini, Rocks, Highball, Nick & Nora, Copper Mug,
+    // Hurricane, Margarita, Julep Cup, Glencairn, Tiki Mug, Shot Glass
+    "champagne_coupe", "martini_glass", "rocks_glass", "highball", "nick_nora", "copper_mug",
+    "hurricane", "margarita_glass", "julep_cup", "glencairn", "tiki_mug", "shot_glass",
   ],
   na_beverage: [
-    // Coffee Mug→mug_stein, Highball→pilsner/shaker, Water Goblet→goblet, Coupe→tulip
-    "shaker_pint", "mug_stein", "pilsner_glass", "goblet_chalice", "tulip", "wine_glass", "flute",
+    // 10 glasses from NA beverage guide, in guide order:
+    // Coffee Mug, Espresso Cup, Latte Glass, Teacup & Saucer, Highball,
+    // Rocks Glass, Coupe, Water Goblet, Juice Glass, Yunomi
+    "coffee_mug", "espresso_cup", "latte_glass", "teacup", "highball",
+    "rocks_glass", "champagne_coupe", "water_goblet", "juice_glass", "yunomi",
   ],
   food: [],
 };
