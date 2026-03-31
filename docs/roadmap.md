@@ -1,7 +1,7 @@
 # HopTrack Product Roadmap
 **Last updated:** 2026-03-31
 **PM:** Morgan
-**Current Sprint:** Sprint 76 — TBD
+**Current Sprint:** Sprint 79 — TBD
 
 > This is a living document -- updated every sprint. For completed sprints 1-12, see `docs/roadmap-archive.md`. For sprint plans, see `docs/plans/`. For the Shore It Up master plan (Sprints 64-73), see `docs/plans/sprint-64-73-master-plan.md`. For the Q2 2026 roadmap research (30 features, 18 REQs, 4 sprint arcs), see `docs/plans/roadmap-research-2026-q2.md`.
 
@@ -54,6 +54,44 @@ Brewery Onboarding Wizard (4-step: Logo → Beers → Loyalty → Board Preview)
 **Plan:** `docs/plans/sprint-75-plan.md`
 
 Complete Stripe Billing: annual pricing toggle (Tap $470/yr, Cask $1,430/yr — 20% savings), in-app cancel/downgrade UI with AnimatePresence confirmation, webhook hardening (payment_failed, invoice.paid, trial_will_end events). Email Infrastructure: Resend integration with dev-mode fallback, 6 branded email templates (welcome, brewery-welcome, trial-warning, trial-expired, password-reset, weekly-digest), drip trigger system wired to sign-up + brewery claim + password reset flows. REQ-069 (Enhanced KPIs) and REQ-070 (Menu Uploads) queued as future requirements.
+
+---
+
+## Sprint 76 -- The Safety Net (COMPLETE ✅)
+**Theme:** CI/CD pipeline + staging environment documentation
+**Arc:** Launch or Bust (Sprints 75-78)
+**Plan:** `docs/plans/sprint-76-plan.md` | **Retro:** `docs/retros/sprint-76-retro.md`
+
+GitHub Actions CI/CD (lint + type check + build + E2E soft-fail). Staging environment documentation. Node 22, npm cache.
+
+---
+
+## Sprint 77 -- The Countdown (COMPLETE ✅)
+**Theme:** Unit test framework + launch checklist burndown
+**Arc:** Launch or Bust (Sprints 75-78)
+**Plan:** `docs/plans/sprint-77-plan.md` | **Retro:** `docs/retros/sprint-77-retro.md`
+
+Vitest configured (39 unit tests across 4 files). Vitest added to CI. Cookie consent banner. JSON-LD structured data on brewery pages. Launch checklist audited (44%→56%). Auth rate limit audit. Launch day ops documented. Business formation guide.
+
+---
+
+## Sprint 78 -- The Database (COMPLETE ✅)
+**Theme:** Seed database with real US brewery and beer data
+**Arc:** Launch or Bust (Sprints 75-78)
+**Plan:** `docs/plans/sprint-78-plan.md` | **Retro:** `docs/retros/sprint-78-retro.md`
+
+7,177 US breweries seeded from Open Brewery DB (all 50 states + DC, 5,513 with GPS). 2,361 beers from Kaggle Beer Study (541 breweries matched, 26 canonical styles). Explore page upgraded (200 initial + Load More pagination). Search by name, city, state, or zip code. Duplicate Reviews heading fixed. CI lint fixed (no-explicit-any disabled). Beer deduplication (migration 050). Reusable fetch scripts in `scripts/`.
+
+---
+
+## Backlog
+
+| # | Item | Notes | Source |
+|---|------|-------|--------|
+| BL-001 | Deduplication logic (beers + breweries) | Prevent future duplicates at DB level — unique constraint on (brewery_id, LOWER(name)) for beers, (LOWER(name), city, state) for breweries | Sprint 78 |
+| BL-002 | Closed brewery memorial mode | Closed breweries stay visible with their history (beers, reviews, sessions) but are clearly marked closed. Restrict all edits unless reopened. "Remember what they offered." | Sprint 78 |
+| BL-003 | Incomplete beer data handling | Flag beers with suspect data (e.g., 0.1% ABV). Show "Brewery needs to add details" badge. Encourage owners to claim and update. | Sprint 78 |
+| BL-004 | Lint cleanup pass | 74 pre-existing lint errors (unescaped entities, React hooks issues). Not blocking but CI shows failures. | Sprint 78 |
 
 ---
 
@@ -253,7 +291,7 @@ Referrals, group sessions V1, HopTrack Report page, beer list URLs. Migrations 0
 | Full Web Push (VAPID keys + push) | COMPLETE (S16) |
 | Supabase Storage buckets + RLS | COMPLETE (S23) |
 | Realtime subscriptions (TV display) | COMPLETE (S16) |
-| 43 migrations applied (001-043) | COMPLETE (S41) |
+| 50 migrations applied (001-050) | COMPLETE (S78) |
 | Rate limiting (in-memory, 6 endpoints) | COMPLETE (S38) |
 | Supabase type generation | Planned (S44) |
 | Staging Supabase project | Planned (S49) |
@@ -261,7 +299,10 @@ Referrals, group sessions V1, HopTrack Report page, beer list URLs. Migrations 0
 | Email (Resend integration) | Planned (S43) |
 | Stripe billing integration | COMPLETE (S46+S75) |
 | Email infrastructure (Resend) | COMPLETE (S75) |
-| CI/CD (GitHub Actions) | Planned (S76) |
+| CI/CD (GitHub Actions) | COMPLETE (S76) |
+| Vitest unit tests (39 tests) | COMPLETE (S77) |
+| US brewery seed (7,177 from Open Brewery DB) | COMPLETE (S78) |
+| US beer seed (2,361 from Kaggle) | COMPLETE (S78) |
 
 ---
 
