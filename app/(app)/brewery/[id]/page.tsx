@@ -12,6 +12,7 @@ import BreweryCheckinButton from "@/components/session/BreweryCheckinButton";
 import { BreweryReview } from "@/components/brewery/BreweryReview";
 import { BreweryRatingHeader } from "@/components/brewery/BreweryRatingHeader";
 import { FollowBreweryButton } from "@/components/brewery/FollowBreweryButton";
+import { BreweryChallenges } from "@/components/brewery/BreweryChallenges";
 
 // Supabase join shapes for tables not in generated types
 interface ActiveFriendSession {
@@ -201,6 +202,29 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
     .order("event_date", { ascending: true })
     .limit(5);
   const upcomingEvents = (upcomingEventsRaw ?? []) as unknown as BreweryEvent[]; // supabase join shape
+
+  // Active challenges for this brewery
+  const { data: challengesRaw } = await (supabase
+    .from("challenges")
+    .select("id, name, description, icon, challenge_type, target_value, reward_description, reward_xp, ends_at")
+    .eq("brewery_id", id)
+    .eq("is_active", true)
+    .order("created_at", { ascending: false }) as any);
+  const activeChallenges = (challengesRaw ?? []).filter((c: any) =>
+    !c.ends_at || new Date(c.ends_at) >= new Date()
+  );
+
+  // User's challenge participations at this brewery
+  let myParticipations: any[] = [];
+  if (activeChallenges.length > 0) {
+    const challengeIds = activeChallenges.map((c: any) => c.id);
+    const { data: participationsRaw } = await (supabase
+      .from("challenge_participants")
+      .select("id, current_progress, completed_at, challenge:challenges(id, name, description, icon, challenge_type, target_value, reward_description, reward_xp, ends_at)")
+      .eq("user_id", user.id)
+      .in("challenge_id", challengeIds) as any);
+    myParticipations = participationsRaw ?? [];
+  }
 
   // Check if brewery has any admin accounts (for claim CTA)
   const { count: adminCount } = await supabase
@@ -497,6 +521,14 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
             </div>
           )}
         </div>
+
+        {/* Challenges */}
+        {activeChallenges.length > 0 && (
+          <BreweryChallenges
+            challenges={activeChallenges}
+            myParticipations={myParticipations}
+          />
+        )}
 
         {/* Upcoming Events */}
         <div>

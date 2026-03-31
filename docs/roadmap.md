@@ -1,7 +1,7 @@
 # HopTrack Product Roadmap
 **Last updated:** 2026-03-31
 **PM:** Morgan
-**Current Sprint:** Sprint 79 — Brewery Value + The Barback Pilot
+**Current Sprint:** Sprint 81 — The Challenge
 
 > This is a living document -- updated every sprint. For completed sprints 1-12, see `docs/roadmap-archive.md`. For sprint plans, see `docs/plans/`. For the Shore It Up master plan (Sprints 64-73), see `docs/plans/sprint-64-73-master-plan.md`. For the Q2 2026 roadmap research (30 features, 18 REQs, 4 sprint arcs), see `docs/plans/roadmap-research-2026-q2.md`.
 
@@ -94,6 +94,42 @@ Vitest configured (39 unit tests across 4 files). Vitest added to CI. Cookie con
 **F-010: ROI Dashboard Card** — `ROIDashboardCard` server component on brewery dashboard showing loyalty-driven ROI. Hero number (ROI multiple for paid tiers, dollar estimate for free), 4-week sparkline, 3-stat grid (repeat visits / est. revenue / trend). `lib/roi.ts` calculation engine. Handles all edge cases (no loyalty program, no data, free tier).
 
 **The Barback — AI Beer Crawler Pilot** — Foundation for AI-powered brewery website crawling. Migration 051: `crawl_sources`, `crawl_jobs`, `crawled_beers` tables + provenance columns on `beers`/`breweries`. `scripts/barback-crawl.mjs`: fetches brewery websites, strips HTML, sends to Claude Haiku for structured beer extraction, stages results for manual review. Charlotte NC metro pilot (50 breweries). Superadmin review UI at `/superadmin/barback/` with approve/reject/batch controls. robots.txt compliance, SHA-256 dedup, 2s rate limiting, circuit breaker. REQ-071 written (Sam), architecture doc written (Jordan).
+
+---
+
+## Sprint 81 — The Challenge ✅ (2026-03-31)
+**Theme:** Brewery-created challenges that drive repeat visits
+**Arc:** Stick Around (Sprints 79-84)
+
+**Challenges System (F-009)** — Full-stack brewery challenge platform. Brewery admins create challenges (4 types: beer_count, specific_beers, visit_streak, style_variety) with rewards (XP + loyalty stamps + custom description). Consumers join challenges from the brewery detail page, progress tracked automatically on every session end. Challenge completions surface in the Friends feed.
+
+- Migration 054: `challenges` + `challenge_participants` tables, RLS on both (public read for active challenges, brewery-admin write, user-owned progress).
+- Brewery admin `/challenges/` page: list with live stats (participants, completions), inline create/edit form with icon picker + type selector + beer picker (for specific_beers), pause/activate/delete with AnimatePresence confirmation.
+- Consumer brewery detail: `BreweryChallenges` section with progress bars, completion badges, `ChallengeDetailDrawer` slide-up with join CTA.
+- Session-end API wired: auto-advances all active user challenges at session close. Handles beer_count (cumulative distinct beers), specific_beers (subset match), visit_streak (total visits), style_variety (cumulative distinct styles). Awards XP + loyalty stamps on completion.
+- Feed: `ChallengeFeedCard` for friend completions in Friends tab. `fetchFriendChallengeCompletions()` in `lib/queries/feed.ts`. `FeedItem` union extended with `challenge_completion` type.
+- Vitest: 29/29 tests passing (`lib/__tests__/challenges.test.ts`) — validation, progress %, completion detection, type labels, reward formatting.
+- Nav: Challenges added to `BreweryAdminNav` (Trophy icon).
+- API: 5 routes — `GET/POST/PATCH/DELETE /api/brewery/[brewery_id]/challenges`, `GET /api/brewery/[brewery_id]/challenges/participants`, `POST /api/challenges/join`, `GET /api/challenges/my-challenges`.
+
+**Key changes from Sprint 81:**
+- `supabase/migrations/054_challenges_system.sql` — NEW: challenges + challenge_participants tables, indexes, RLS
+- `app/api/brewery/[brewery_id]/challenges/route.ts` — NEW: CRUD (GET/POST/PATCH/DELETE)
+- `app/api/brewery/[brewery_id]/challenges/participants/route.ts` — NEW: participant stats
+- `app/api/challenges/join/route.ts` — NEW: consumer join
+- `app/api/challenges/my-challenges/route.ts` — NEW: user's challenge list
+- `app/api/sessions/[id]/end/route.ts` — UPDATED: challenge progress tracking wired in, `completedChallenges` in response
+- `app/(brewery-admin)/brewery-admin/[brewery_id]/challenges/page.tsx` — NEW: server page
+- `app/(brewery-admin)/brewery-admin/[brewery_id]/challenges/ChallengesClient.tsx` — NEW: full admin UI
+- `components/brewery-admin/BreweryAdminNav.tsx` — UPDATED: Challenges nav item added
+- `components/brewery/BreweryChallenges.tsx` — NEW: consumer challenge section + detail drawer
+- `app/(app)/brewery/[id]/page.tsx` — UPDATED: challenge data fetch + BreweryChallenges section
+- `components/social/ChallengeFeedCard.tsx` — NEW: friend completion feed card
+- `lib/queries/feed.ts` — UPDATED: `fetchFriendChallengeCompletions()` added
+- `app/(app)/home/FeedItemCard.tsx` — UPDATED: `challenge_completion` type + render
+- `app/(app)/home/HomeFeed.tsx` — UPDATED: friendChallengeCompletions prop + feed assembly
+- `app/(app)/home/page.tsx` — UPDATED: fetchFriendChallengeCompletions wired in
+- `lib/__tests__/challenges.test.ts` — NEW: 29 tests (validation, progress, completion, labels, rewards)
 
 ---
 

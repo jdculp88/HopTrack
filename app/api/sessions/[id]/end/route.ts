@@ -304,6 +304,172 @@ export async function PATCH(
     }
   }
 
+  // ─── Challenge progress tracking ────────────────────────────────────
+  const completedChallenges: any[] = []
+
+  if (!isHomeSession && session.brewery_id) {
+    // Get user's active challenges at this brewery
+    const { data: activeParticipations } = await (supabase
+      .from("challenge_participants")
+      .select(`
+        id,
+        current_progress,
+        challenge:challenges(
+          id,
+          challenge_type,
+          target_value,
+          target_beer_ids,
+          reward_xp,
+          reward_loyalty_stamps,
+          name,
+          icon
+        )
+      `)
+      .eq("user_id", user.id)
+      .is("completed_at", null) as any)
+
+    const participations = (activeParticipations ?? []).filter(
+      (p: any) => p.challenge?.brewery_id === session.brewery_id || true
+    )
+
+    if (participations.length > 0) {
+      // Gather session data needed for progress checks
+      const sessionBeerIdsSet = new Set(beerLogs.map((b: any) => b.beer_id).filter(Boolean))
+
+      // Fetch unique styles logged this session (for style_variety type)
+      let sessionStyles: string[] = []
+      if (sessionBeerIdsSet.size > 0) {
+        const { data: sessionBeers } = await (supabase
+          .from("beers")
+          .select("id, style")
+          .in("id", [...sessionBeerIdsSet]) as any)
+        sessionStyles = (sessionBeers ?? []).map((b: any) => b.style).filter(Boolean)
+      }
+
+      // Fetch user's all-time visit count to this brewery (for visit_streak)
+      const { count: visitCount } = await supabase
+        .from("sessions")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("brewery_id", session.brewery_id)
+        .eq("is_active", false) as any
+
+      // Fetch user's all-time unique styles at this brewery (for style_variety)
+      const { data: allBreweryLogs } = await (supabase
+        .from("beer_logs")
+        .select("beer:beers(style)")
+        .eq("user_id", user.id)
+        .eq("brewery_id", session.brewery_id) as any)
+      const allBreweryStyles = new Set(
+        (allBreweryLogs ?? []).map((l: any) => (l.beer as any)?.style).filter(Boolean)
+      )
+
+      // Fetch distinct beers user has logged at this brewery (for beer_count and specific_beers)
+      const { data: allBreweryBeerLogs } = await (supabase
+        .from("beer_logs")
+        .select("beer_id")
+        .eq("user_id", user.id)
+        .eq("brewery_id", session.brewery_id)
+        .not("beer_id", "is", null) as any)
+      const allBreweryBeerIds = new Set((allBreweryBeerLogs ?? []).map((l: any) => l.beer_id))
+
+      for (const participation of participations) {
+        const challenge = participation.challenge as any
+        if (!challenge) continue
+
+        let newProgress = participation.current_progress
+
+        switch (challenge.challenge_type) {
+          case "beer_count":
+            // Count distinct beers logged at this brewery (cumulative)
+            newProgress = allBreweryBeerIds.size
+            break
+
+          case "specific_beers":
+            // Count how many target beers the user has tried
+            if (challenge.target_beer_ids?.length > 0) {
+              const tried = (challenge.target_beer_ids as string[]).filter((id: string) =>
+                allBreweryBeerIds.has(id)
+              )
+              newProgress = tried.length
+            }
+            break
+
+          case "visit_streak":
+            // Total visits to this brewery
+            newProgress = (visitCount ?? 0)
+            break
+
+          case "style_variety":
+            // Unique styles tried at this brewery
+            newProgress = allBreweryStyles.size
+            break
+        }
+
+        if (newProgress <= participation.current_progress) continue
+
+        const isCompleted = newProgress >= challenge.target_value
+        const updatePayload: any = { current_progress: newProgress }
+        if (isCompleted) {
+          updatePayload.completed_at = new Date().toISOString()
+        }
+
+        await supabase
+          .from("challenge_participants")
+          .update(updatePayload)
+          .eq("id", participation.id)
+
+        if (isCompleted) {
+          // Award challenge XP
+          if (challenge.reward_xp > 0) {
+            const challengeNewXp = (profile?.xp || 0) + xpGained + challenge.reward_xp
+            const challengeNewLevel = getLevelFromXP(challengeNewXp).level
+            await supabase.rpc("increment_xp", {
+              p_user_id: user.id,
+              p_xp_amount: challenge.reward_xp,
+              p_new_level: challengeNewLevel,
+              p_is_first_visit: false,
+              p_streak_updates: null,
+            }).then(() => {})
+          }
+
+          // Award loyalty stamps if configured
+          if (challenge.reward_loyalty_stamps > 0) {
+            const { data: loyaltyProgram } = await (supabase
+              .from("loyalty_programs")
+              .select("id")
+              .eq("brewery_id", session.brewery_id)
+              .eq("is_active", true)
+              .single() as any)
+
+            if (loyaltyProgram) {
+              const { data: existingCard } = await (supabase
+                .from("loyalty_cards")
+                .select("id, stamps")
+                .eq("user_id", user.id)
+                .eq("program_id", loyaltyProgram.id)
+                .single() as any)
+
+              if (existingCard) {
+                await supabase
+                  .from("loyalty_cards")
+                  .update({ stamps: existingCard.stamps + challenge.reward_loyalty_stamps })
+                  .eq("id", existingCard.id)
+              }
+            }
+          }
+
+          completedChallenges.push({
+            id: challenge.id,
+            name: challenge.name,
+            icon: challenge.icon,
+            reward_xp: challenge.reward_xp,
+          })
+        }
+      }
+    }
+  }
+
   // Fetch the completed session for the recap
   const { data: completedSession } = await supabase
     .from('sessions')
@@ -319,6 +485,7 @@ export async function PATCH(
     isFirstVisit,
     beerCount,
     newAchievements,
+    completedChallenges,
     sessionId,
     session: completedSession ?? null,
     beerLogs: completedSession?.beer_logs ?? [],

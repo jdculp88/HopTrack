@@ -619,6 +619,67 @@ export async function fetchActivityHeatmap(
   }
 }
 
+/**
+ * Friend challenge completions for the Friends feed tab.
+ */
+export interface FriendChallengeCompletion {
+  id: string;
+  completedAt: string;
+  userId: string;
+  username: string;
+  displayName: string;
+  avatarUrl: string | null;
+  challengeName: string;
+  challengeIcon: string;
+  rewardXp: number;
+  rewardDescription: string | null;
+  breweryName: string;
+  breweryId: string;
+}
+
+export async function fetchFriendChallengeCompletions(
+  supabase: SupabaseClient,
+  friendIds: string[]
+): Promise<FriendChallengeCompletion[]> {
+  if (friendIds.length === 0) return [];
+
+  try {
+    const { data } = await supabase
+      .from("challenge_participants")
+      .select(`
+        id,
+        completed_at,
+        user_id,
+        challenge:challenges(id, name, icon, reward_xp, reward_description, brewery:breweries(id, name)),
+        profile:profiles(id, username, display_name, avatar_url)
+      `)
+      .in("user_id", friendIds)
+      .not("completed_at", "is", null)
+      .gte("completed_at", ONE_WEEK_AGO())
+      .order("completed_at", { ascending: false })
+      .limit(10) as any;
+
+    return ((data ?? []) as any[])
+      .filter((p: any) => p.challenge && p.profile)
+      .map((p: any) => ({
+        id: p.id,
+        completedAt: p.completed_at,
+        userId: p.profile.id,
+        username: p.profile.username,
+        displayName: p.profile.display_name ?? p.profile.username,
+        avatarUrl: p.profile.avatar_url,
+        challengeName: p.challenge.name,
+        challengeIcon: p.challenge.icon,
+        rewardXp: p.challenge.reward_xp,
+        rewardDescription: p.challenge.reward_description,
+        breweryName: p.challenge.brewery?.name ?? "Unknown Brewery",
+        breweryId: p.challenge.brewery?.id ?? "",
+      }));
+  } catch {
+    return [];
+  }
+}
+
 export async function fetchFriendIds(
   supabase: SupabaseClient,
   userId: string
