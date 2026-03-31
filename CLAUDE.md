@@ -243,7 +243,10 @@ scripts/supabase-setup.mjs    — One-time setup script
 
 ## 🗺️ Where We Are
 
-**Current Sprint:** Sprint 82 — TBD
+**Current Sprint:** Sprint 83 — TBD
+**Last completed:** Sprint 82 — The Full Menu ✅ — Non-beer tap list items (F-011 Phase 1: cider/wine/cocktail/NA), food pivot (menu image upload in Settings), HopRoute location autocomplete (F-030), Challenge feed card fixes + ChallengeMilestoneFeedCard, glass library 20→53 (one-for-one from 5 guides), glass picker filtered by type, Resources section in brewery admin, REQ-072 documented
+**Retro (82):** `docs/retros/sprint-82-retro.md`
+**Sprint plan (82):** `docs/plans/sprint-82-plan.md`
 **Last completed:** Sprint 81 — The Challenge ✅ — Brewery challenge system end-to-end (4 types, admin CRUD, consumer progress tracking, feed card, 29 tests), migration 054 live, Taylor facilitated retro (first time)
 **Retro (81):** `docs/retros/sprint-81-retro.md`
 **Sprint plan (81):** `docs/plans/sprint-81-plan.md`
