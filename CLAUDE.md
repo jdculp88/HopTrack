@@ -234,8 +234,8 @@ scripts/supabase-setup.mjs    — One-time setup script
 
 ## 🗺️ Where We Are
 
-**Current Sprint:** Sprint 63 — TBD
-**Last completed:** Sprint 62 — Feed Revival ✅ — New card types, warm treatment, FK fix
+**Current Sprint:** Sprint 64 — TBD
+**Last completed:** Sprint 63 — Still Warm. Now With Range. ✅ — Beer style color system, semantic card backgrounds, topo theme, passport revamp
 **10-sprint plan:** `docs/roadmap.md`
 **Sprint history (1-40):** `docs/sprint-history.md`
 
@@ -343,9 +343,21 @@ Migration state (001-041): all applied — see `docs/sprint-history.md#migration
 **Sprint 59 — Speed Run** — `Cache-Control` headers added to 6 public GET endpoints (`leaderboard` 5min, `breweries`/`beers`/`reviews` 1min, `hop-route` 1hr)
 **Sprint 60 — Ship Shape** — Delete Account implemented (inline `DELETE` confirmation, cascade-delete API using service role, `admin.deleteUser`), OG image route `/og/route.tsx` (edge runtime, 1200×630, home + brewery variants), wired into `layout.tsx` and `brewery/[id]` generateMetadata
 
-### Sprints 61–62 ✅
+### Sprints 61–63 ✅
 **Sprint 61 — Font & Feed Fix** — DM Sans body font (replaced Instrument Sans), feed sessions filter fixed (`.neq("share_to_feed", false)`), Playfair restored on card names
 **Sprint 62 — Feed Revival** — `BreweryRatingFeedCard`, `HopRouteCTACard`, `EmojiPulse` (new card types); card visual variety system (counter/spotlight/route-invite/pill); bubble decoration system (`index % 4`); warm card treatment across all 3 tabs; seeds 012–014 (live friends, brewery reviews, active HopRoute); migration 046 (HopRoute friend SELECT RLS); migration 047 (critical: re-pointed `beer_reviews`+`brewery_reviews` `user_id` FK from `auth.users` → `public.profiles` so PostgREST can resolve `profile:profiles(...)` embedded joins)
+**Sprint 63 — Still Warm. Now With Range.** — Beer style color system (`lib/beerStyleColors.ts`, 26 styles → 6 families); 11 semantic card background CSS classes (`card-bg-stats/live/featured/hoproute/reco/collection/notification/achievement/social/streak/taste-dna`); full site-wide card-bg rollout (feed cards, profile, brewery/beer detail, discover); Taste DNA duplicate removed + `BeerDNACard` promoted with dynamic color wash (`--dna-c1/c2/c3`); Beer Passport full revamp (style-colored stamps, sort control, animated count, 5-star badge); topographic theme across all HopRoute + location UI; merged stats card (profile, passport, You tab); style-colored icon areas (Want to Try, Favorite Beer, Beer Journal); Favorite Breweries → topo; HopRoute new page full topo treatment
+
+**Key architectural changes from Sprints 61–63:**
+- `lib/beerStyleColors.ts` — NEW: 26 `BeerStyle` values → 6 color families; exports `getStyleFamily()` + `getStyleVars()` → `{ primary, light, soft }` CSS var strings
+- 11 `card-bg-*` CSS classes in `globals.css` — semantic backgrounds via `::before`/`::after` pseudo-elements, zero DOM nodes
+- `card-bg-hoproute` — topographic diagonal lines + dashed waypoint circles; applied to all HopRoute + location UI
+- `card-bg-reco[data-style="ipa|stout|sour|porter|lager|saison"]` — style-tinted diagonal gradient on recommendation/beer cards
+- `card-bg-taste-dna` — reads `--dna-c1/c2/c3` custom props set inline from user's actual top 3 styles
+- `BeerDNACard` — fully themed with CSS vars (dark/light adaptive), dynamic color wash from top-3 styleDNA
+- `PassportGrid` — full rewrite: `card-bg-stats` header, style-colored filter pills, sort control, `card-bg-reco` stamp cards with style-tinted image areas
+- Profile + YouTabContent stats — 4 separate cards → 1 merged `card-bg-stats` card, semi-transparent inner cells
+- All HopRoute files — topo treatment: `HopRouteFeedCard`, `HopRouteNewClient`, `HopRouteCardClient`, `HopRouteShareCard`
 
 **Key architectural changes from Sprints 61–62:**
 - `BreweryRatingFeedCard` — `components/social/BreweryRatingFeedCard.tsx`, accent-bar + MapPin + EmojiPulse
