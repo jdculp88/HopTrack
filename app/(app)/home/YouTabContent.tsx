@@ -4,6 +4,7 @@ import { useMemo, type RefObject } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Beer, MapPin, Flame, Route } from "lucide-react";
+import { getStyleFamily, getStyleVars } from "@/lib/beerStyleColors";
 import { ActivityHeatmap } from "@/components/profile/ActivityHeatmap";
 import { BeerDNACard } from "@/components/profile/BeerDNACard";
 import { SessionCard } from "@/components/social/SessionCard";
@@ -130,25 +131,23 @@ export function YouTabContent({
         <p className="text-[10px] font-mono uppercase tracking-widest mb-3 relative z-10" style={{ color: "var(--text-muted)" }}>
           Your Numbers
         </p>
-        <div className="grid grid-cols-2 gap-x-6 gap-y-3">
-          {[
-            { label: "Sessions", value: profile.total_checkins, icon: <Beer size={13} style={{ color: "var(--accent-gold)" }} /> },
-            { label: "Unique Beers", value: profile.unique_beers ?? 0, icon: <MapPin size={13} style={{ color: "var(--accent-gold)" }} /> },
-            { label: "Breweries", value: visitedBreweries.length || (profile.unique_breweries ?? 0), icon: <MapPin size={13} style={{ color: "var(--accent-gold)" }} /> },
-            { label: "Day Streak", value: profile.current_streak ?? 0, icon: <Flame size={13} style={{ color: "var(--accent-amber)" }} /> },
-          ].map((stat) => (
-            <div key={stat.label} className="flex items-center justify-between relative z-10">
-              <div className="flex items-center gap-1.5">
-                {stat.icon}
-                <span className="text-[11px] font-mono" style={{ color: "var(--text-muted)" }}>
-                  {stat.label}
-                </span>
-              </div>
-              <span className="text-base font-bold font-mono" style={{ color: "var(--text-primary)" }}>
-                {stat.value}
-              </span>
-            </div>
-          ))}
+        <div className="grid grid-cols-4 gap-2 relative z-10">
+          <div className="text-center bg-[var(--surface-2)] rounded-2xl py-3 px-1">
+            <p className="font-mono font-bold text-xl leading-none" style={{ color: "var(--accent-gold)" }}>{profile.total_checkins}</p>
+            <p className="text-[10px] text-[var(--text-muted)] mt-1 font-mono uppercase tracking-wide">Sessions</p>
+          </div>
+          <div className="text-center bg-[var(--surface-2)] rounded-2xl py-3 px-1">
+            <p className="font-mono font-bold text-xl leading-none" style={{ color: "var(--accent-gold)" }}>{profile.unique_beers ?? 0}</p>
+            <p className="text-[10px] text-[var(--text-muted)] mt-1 font-mono uppercase tracking-wide">Unique Beers</p>
+          </div>
+          <div className="text-center bg-[var(--surface-2)] rounded-2xl py-3 px-1">
+            <p className="font-mono font-bold text-xl leading-none" style={{ color: "var(--accent-gold)" }}>{visitedBreweries.length || (profile.unique_breweries ?? 0)}</p>
+            <p className="text-[10px] text-[var(--text-muted)] mt-1 font-mono uppercase tracking-wide">Breweries</p>
+          </div>
+          <div className="text-center bg-[var(--surface-2)] rounded-2xl py-3 px-1">
+            <p className="font-mono font-bold text-xl leading-none" style={{ color: (profile.current_streak ?? 0) > 0 ? "var(--accent-amber)" : "var(--accent-gold)" }}>{profile.current_streak ?? 0}</p>
+            <p className="text-[10px] text-[var(--text-muted)] mt-1 font-mono uppercase tracking-wide">Day Streak</p>
+          </div>
         </div>
       </div>
 
@@ -221,12 +220,13 @@ export function YouTabContent({
               item.beer ? (
                 <Link key={item.id} href={`/beer/${item.beer.id}`}>
                   <div
-                    className="flex items-center gap-3 p-3 rounded-xl"
-                    style={{ background: "var(--surface-warm)", border: "1px solid var(--surface-warm-border)" }}
+                    className="card-bg-reco flex items-center gap-3 p-3 rounded-xl transition-colors"
+                    data-style={getStyleFamily(item.beer.style)}
+                    style={{ border: "1px solid var(--border)" }}
                   >
                     <div
                       className="w-8 h-8 rounded-lg flex items-center justify-center text-lg flex-shrink-0"
-                      style={{ background: "color-mix(in srgb, var(--accent-gold) 8%, transparent)" }}
+                      style={{ background: `linear-gradient(135deg, ${getStyleVars(item.beer.style).light}, ${getStyleVars(item.beer.style).soft ?? getStyleVars(item.beer.style).light})` }}
                     >
                       🍺
                     </div>
@@ -267,8 +267,8 @@ export function YouTabContent({
             {visitedBreweries.slice(0, 6).map((b) => (
               <Link key={b.id} href={`/brewery/${b.id}`}>
                 <div
-                  className="p-3 rounded-xl"
-                  style={{ background: "var(--surface-warm)", border: "1px solid var(--surface-warm-border)" }}
+                  className="card-bg-hoproute p-3 rounded-xl transition-colors"
+                  style={{ border: "1px solid color-mix(in srgb, var(--accent-amber) 20%, var(--border))" }}
                 >
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-base">🍻</span>
@@ -313,8 +313,8 @@ export function YouTabContent({
                 <motion.div
                   whileHover={{ x: 2 }}
                   transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                  className="flex items-center gap-3 p-3 rounded-xl transition-colors"
-                  style={{ background: "var(--surface-warm)", border: "1px solid var(--surface-warm-border)" }}
+                  className="card-bg-hoproute flex items-center gap-3 p-3 rounded-xl transition-colors"
+                  style={{ border: "1px solid color-mix(in srgb, var(--accent-amber) 20%, var(--border))" }}
                 >
                   <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "color-mix(in srgb, var(--accent-gold) 12%, transparent)", color: "var(--accent-gold)" }}>
                     🗺️
@@ -340,7 +340,7 @@ export function YouTabContent({
       {/* Plan HopRoute CTA if no past routes */}
       {(!pastRoutes || pastRoutes.length === 0) && (
         <Link href="/hop-route/new">
-          <div className="flex items-center gap-3 p-4 rounded-2xl border border-dashed transition-colors" style={{ borderColor: "color-mix(in srgb, var(--accent-gold) 30%, transparent)" }}>
+          <div className="card-bg-hoproute flex items-center gap-3 p-4 rounded-2xl border transition-colors" style={{ borderColor: "color-mix(in srgb, var(--accent-amber) 35%, var(--border))" }}>
             <span className="text-2xl">🗺️</span>
             <div>
               <p className="text-sm font-semibold text-[var(--text-primary)]">Plan a HopRoute</p>

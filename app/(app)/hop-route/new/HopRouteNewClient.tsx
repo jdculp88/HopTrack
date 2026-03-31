@@ -180,7 +180,7 @@ export function HopRouteNewClient({ tasteDna }: HopRouteNewClientProps) {
           <div
             key={s}
             className="h-1 flex-1 rounded-full transition-all duration-300"
-            style={{ background: s <= step ? "var(--accent-gold)" : "var(--border)" }}
+            style={{ background: s <= step ? "var(--accent-amber)" : "var(--border)" }}
           />
         ))}
       </div>
@@ -194,7 +194,8 @@ export function HopRouteNewClient({ tasteDna }: HopRouteNewClientProps) {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
             transition={{ type: "spring", stiffness: 400, damping: 30 }}
-            className="space-y-5"
+            className="card-bg-hoproute rounded-2xl p-5 space-y-5"
+            style={{ border: "1px solid color-mix(in srgb, var(--accent-amber) 25%, var(--border))" }}
           >
             <h2 className="font-display text-xl font-bold text-[var(--text-primary)] flex items-center gap-2">
               <MapPin size={18} className="text-[var(--accent-gold)]" /> Where & When
@@ -271,7 +272,8 @@ export function HopRouteNewClient({ tasteDna }: HopRouteNewClientProps) {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
             transition={{ type: "spring", stiffness: 400, damping: 30 }}
-            className="space-y-5"
+            className="card-bg-hoproute rounded-2xl p-5 space-y-5"
+            style={{ border: "1px solid color-mix(in srgb, var(--accent-amber) 25%, var(--border))" }}
           >
             <h2 className="font-display text-xl font-bold text-[var(--text-primary)] flex items-center gap-2">
               <Zap size={18} className="text-[var(--accent-gold)]" /> Your Preferences
@@ -386,7 +388,8 @@ export function HopRouteNewClient({ tasteDna }: HopRouteNewClientProps) {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
             transition={{ type: "spring", stiffness: 400, damping: 30 }}
-            className="space-y-5"
+            className="card-bg-hoproute rounded-2xl p-5 space-y-5"
+            style={{ border: "1px solid color-mix(in srgb, var(--accent-amber) 25%, var(--border))" }}
           >
             <h2 className="font-display text-xl font-bold text-[var(--text-primary)] flex items-center gap-2">
               <Beer size={18} className="text-[var(--accent-gold)]" /> Your Taste DNA

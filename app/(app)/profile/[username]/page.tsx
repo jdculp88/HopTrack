@@ -10,7 +10,7 @@ import { AchievementsGrid } from "./AchievementsGrid";
 import { FriendButton } from "@/components/social/FriendButton";
 import { getLevelProgress } from "@/lib/xp";
 import { generateGradientFromString, formatABV } from "@/lib/utils";
-import { getStyleFamily } from "@/lib/beerStyleColors";
+import { getStyleFamily, getStyleVars } from "@/lib/beerStyleColors";
 import { BeerDNACard } from "@/components/profile/BeerDNACard";
 import { PageEnterWrapper } from "@/components/ui/PageEnterWrapper";
 
@@ -153,23 +153,27 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
           )}
         </div>
 
-        {/* Stats — prominent 4-card grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-          <div className="card-bg-stats border border-[var(--border)] rounded-2xl p-4 text-center">
-            <p className="font-display text-3xl font-bold text-[var(--accent-gold)]">{profile.total_checkins}</p>
-            <p className="text-xs font-mono uppercase tracking-wider text-[var(--text-muted)] mt-1">Sessions</p>
-          </div>
-          <div className="card-bg-stats border border-[var(--border)] rounded-2xl p-4 text-center">
-            <p className="font-display text-3xl font-bold text-[var(--accent-gold)]">{profile.unique_beers}</p>
-            <p className="text-xs font-mono uppercase tracking-wider text-[var(--text-muted)] mt-1">Unique Beers</p>
-          </div>
-          <div className="card-bg-stats border border-[var(--border)] rounded-2xl p-4 text-center">
-            <p className="font-display text-3xl font-bold text-[var(--accent-gold)]">{profile.unique_breweries}</p>
-            <p className="text-xs font-mono uppercase tracking-wider text-[var(--text-muted)] mt-1">Breweries</p>
-          </div>
-          <div className="card-bg-stats border border-[var(--border)] rounded-2xl p-4 text-center">
-            <p className="font-display text-3xl font-bold text-[var(--accent-gold)]">{profile.xp?.toLocaleString() ?? 0}</p>
-            <p className="text-xs font-mono uppercase tracking-wider text-[var(--text-muted)] mt-1">Total XP</p>
+        {/* Stats — single merged card */}
+        <div className="card-bg-stats border border-[var(--border)] rounded-2xl p-4 mb-6">
+          <div className="grid grid-cols-4 gap-2">
+            <div className="text-center bg-[var(--surface-2)] rounded-2xl py-3 px-1">
+              <p className="font-mono font-bold text-xl leading-none text-[var(--accent-gold)]">{profile.total_checkins}</p>
+              <p className="text-[10px] text-[var(--text-muted)] mt-1 font-mono uppercase tracking-wide">Sessions</p>
+            </div>
+            <div className="text-center bg-[var(--surface-2)] rounded-2xl py-3 px-1">
+              <p className="font-mono font-bold text-xl leading-none text-[var(--accent-gold)]">{profile.unique_beers}</p>
+              <p className="text-[10px] text-[var(--text-muted)] mt-1 font-mono uppercase tracking-wide">Unique Beers</p>
+            </div>
+            <div className="text-center bg-[var(--surface-2)] rounded-2xl py-3 px-1">
+              <p className="font-mono font-bold text-xl leading-none text-[var(--accent-gold)]">{profile.unique_breweries}</p>
+              <p className="text-[10px] text-[var(--text-muted)] mt-1 font-mono uppercase tracking-wide">Breweries</p>
+            </div>
+            <div className="text-center bg-[var(--surface-2)] rounded-2xl py-3 px-1">
+              <p className="font-mono font-bold text-xl leading-none" style={{ color: ((profile as any).current_streak ?? 0) > 0 ? "var(--accent-amber)" : "var(--accent-gold)" }}>
+                {(profile as any).current_streak ?? 0}
+              </p>
+              <p className="text-[10px] text-[var(--text-muted)] mt-1 font-mono uppercase tracking-wide">Day Streak</p>
+            </div>
           </div>
         </div>
 
@@ -263,7 +267,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
                     <div className="card-bg-reco flex items-center gap-3 p-3 border border-[var(--border)] hover:border-[var(--accent-gold)]/30 rounded-2xl transition-colors" data-style={getStyleFamily(item.beer?.style)}>
                       <div
                         className="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center text-lg"
-                        style={{ background: generateGradientFromString(item.beer?.name ?? "") }}
+                        style={{ background: `linear-gradient(135deg, ${getStyleVars(item.beer?.style).light}, ${getStyleVars(item.beer?.style).soft ?? getStyleVars(item.beer?.style).light})` }}
                       >
                         🍺
                       </div>
@@ -299,10 +303,10 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
           <h2 className="font-display text-2xl font-bold text-[var(--text-primary)] mb-4">Favorite Beer</h2>
           {favBeer ? (
             <Link href={`/beer/${favBeer.beer.id}`}>
-              <div className="card-bg-featured flex items-center gap-4 p-4 border border-[var(--border)] hover:border-[var(--accent-gold)]/40 rounded-2xl transition-all group">
+              <div className="card-bg-reco flex items-center gap-4 p-4 border border-[var(--border)] hover:border-[var(--accent-gold)]/40 rounded-2xl transition-all group" data-style={getStyleFamily(favBeer.beer.style)}>
                 <div
                   className="w-14 h-14 rounded-2xl flex-shrink-0 flex items-center justify-center text-2xl"
-                  style={{ background: generateGradientFromString(favBeer.beer.name ?? "") }}
+                  style={{ background: `linear-gradient(135deg, ${getStyleVars(favBeer.beer.style).light}, ${getStyleVars(favBeer.beer.style).soft ?? getStyleVars(favBeer.beer.style).light})` }}
                 >
                   🍺
                 </div>
@@ -364,7 +368,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
             <div className="space-y-3">
               {(topBreweries as any[]).map((visit) => (
                 <Link key={visit.id} href={`/brewery/${visit.brewery_id}`}>
-                  <div className="card-bg-collection flex items-center gap-3 p-3 border border-[var(--border)] hover:border-[var(--accent-gold)]/30 rounded-2xl transition-colors">
+                  <div className="card-bg-hoproute flex items-center gap-3 p-3 border border-[var(--border)] hover:border-[var(--accent-amber)]/40 rounded-2xl transition-colors">
                     <div
                       className="w-12 h-12 rounded-xl flex-shrink-0"
                       style={{ background: generateGradientFromString(visit.brewery?.name ?? "") }}
@@ -402,7 +406,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
                   <div className="card-bg-reco flex items-center gap-3 p-3 border border-[var(--border)] hover:border-[var(--accent-gold)]/30 rounded-2xl transition-colors" data-style={getStyleFamily(log.beer?.style)}>
                     <div
                       className="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center text-lg"
-                      style={{ background: generateGradientFromString(log.beer?.name ?? "") }}
+                      style={{ background: `linear-gradient(135deg, ${getStyleVars(log.beer?.style).light}, ${getStyleVars(log.beer?.style).soft ?? getStyleVars(log.beer?.style).light})` }}
                     >
                       🍺
                     </div>
