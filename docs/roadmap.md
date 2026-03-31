@@ -1,7 +1,7 @@
 # HopTrack Product Roadmap
 **Last updated:** 2026-03-31
 **PM:** Morgan
-**Current Sprint:** Sprint 75 — TBD
+**Current Sprint:** Sprint 76 — TBD
 
 > This is a living document -- updated every sprint. For completed sprints 1-12, see `docs/roadmap-archive.md`. For sprint plans, see `docs/plans/`. For the Shore It Up master plan (Sprints 64-73), see `docs/plans/sprint-64-73-master-plan.md`. For the Q2 2026 roadmap research (30 features, 18 REQs, 4 sprint arcs), see `docs/plans/roadmap-research-2026-q2.md`.
 
@@ -45,6 +45,15 @@ Sprint 73 (Final Audit): Sprint history + CLAUDE.md updated, 10-sprint retro del
 **Plan:** `docs/plans/sprint-74-plan.md` | **Retro:** `docs/retros/sprint-74-retro.md`
 
 Brewery Onboarding Wizard (4-step: Logo → Beers → Loyalty → Board Preview). Auto-shows for freshly claimed breweries. Push notification wiring — Messages API fires Web Push via `sendPushToUser()`. Rate limited (5/hr). Push count shown in toast feedback. Also produced: comprehensive Q2 2026 roadmap research (30 features, 18 REQs, 4 sprint arcs through Sprint 96).
+
+---
+
+## Sprint 75 -- Revenue Plumbing (COMPLETE ✅)
+**Theme:** Complete Stripe billing + email infrastructure
+**Arc:** Launch or Bust (Sprints 75-78)
+**Plan:** `docs/plans/sprint-75-plan.md`
+
+Complete Stripe Billing: annual pricing toggle (Tap $470/yr, Cask $1,430/yr — 20% savings), in-app cancel/downgrade UI with AnimatePresence confirmation, webhook hardening (payment_failed, invoice.paid, trial_will_end events). Email Infrastructure: Resend integration with dev-mode fallback, 6 branded email templates (welcome, brewery-welcome, trial-warning, trial-expired, password-reset, weekly-digest), drip trigger system wired to sign-up + brewery claim + password reset flows. REQ-069 (Enhanced KPIs) and REQ-070 (Menu Uploads) queued as future requirements.
 
 ---
 
@@ -250,8 +259,9 @@ Referrals, group sessions V1, HopTrack Report page, beer list URLs. Migrations 0
 | Staging Supabase project | Planned (S49) |
 | Supabase Edge Functions (session-end) | Planned (S44) |
 | Email (Resend integration) | Planned (S43) |
-| Stripe billing integration | Planned (S46) |
-| CI/CD (GitHub Actions) | Planned (S44) |
+| Stripe billing integration | COMPLETE (S46+S75) |
+| Email infrastructure (Resend) | COMPLETE (S75) |
+| CI/CD (GitHub Actions) | Planned (S76) |
 
 ---
 
@@ -337,7 +347,10 @@ Referrals, group sessions V1, HopTrack Report page, beer list URLs. Migrations 0
 | REQ-049 | Beer Lists (tables) | COMPLETE | S37 |
 | REQ-050 | @ Mentions | COMPLETE | S37 |
 
-**Score:** 48 of 50 requirements COMPLETE. 2 IN PROGRESS (PWA TestFlight, staging infra).
+| REQ-069 | Enhanced KPIs & Analytics (Drinker + Brewery) | QUEUED | Stick Around (79-84) |
+| REQ-070 | Non-Beer Menu Uploads for Breweries | QUEUED | Launch or Bust (75-78) / Stick Around (79-84) |
+
+**Score:** 48 of 52 requirements COMPLETE. 2 IN PROGRESS (PWA TestFlight, staging infra). 2 QUEUED (REQ-069, REQ-070).
 
 ---
 

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { onBreweryClaim } from "@/lib/email-triggers";
 
 export async function POST(request: NextRequest) {
   try {
@@ -123,6 +124,11 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       );
     }
+
+    // Fire brewery welcome email (non-blocking)
+    onBreweryClaim(breweryId, user.id).catch((err) =>
+      console.error("[brewery-claims] Email trigger failed:", err)
+    );
 
     return NextResponse.json({ brewery_id: breweryId }, { status: 201 });
   } catch (err) {

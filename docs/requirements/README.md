@@ -1,5 +1,5 @@
 # Requirements Index
-**Last updated:** 2026-03-30 (Sprint 70)
+**Last updated:** 2026-03-31 (Sprint 74)
 **Audited by:** Sam + Sage
 
 All requirements below are COMPLETE and shipped. These documents are preserved as historical reference for the design decisions and acceptance criteria behind each feature.
@@ -20,6 +20,13 @@ All requirements below are COMPLETE and shipped. These documents are preserved a
 | REQ-012 | Beer Wishlist | Sprint 13 | COMPLETE |
 | REQ-013 | Beer Passport | Sprint 63 | COMPLETE (revamped) |
 | REQ-025 | Sessions & Tap Wall | Sprint 16 | COMPLETE |
+
+### Queued
+
+| REQ | Feature | Sprint Target | Status |
+|-----|---------|--------------|--------|
+| REQ-069 | Enhanced KPIs & Analytics (Drinker + Brewery) | Stick Around (79-84) | QUEUED |
+| REQ-070 | Non-Beer Menu Uploads for Breweries | Launch or Bust (75-78) / Stick Around (79-84) | QUEUED |
 
 ### Notes
 - REQ-011 (check-in flow) was superseded by the Sessions system (REQ-025). The `checkins` table was dropped in migration 015.

@@ -111,14 +111,15 @@ export default function SignupPage() {
       return;
     }
 
-    // Redeem referral code if one was in the URL
+    // Fire-and-forget: welcome email + referral redemption
+    fetch("/api/auth/welcome", { method: "POST" }).catch(() => {});
     const refCode = searchParams.get("ref");
     if (refCode) {
       fetch("/api/referrals", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ code: refCode }),
-      }).catch(() => {}); // fire-and-forget, don't block signup flow
+      }).catch(() => {});
     }
 
     router.push("/home");

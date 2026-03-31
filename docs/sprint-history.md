@@ -787,3 +787,15 @@ Production build verified: 0 TypeScript errors, 64 pages generated, all routes h
 
 ### Sprint 73 — Final Audit ✅
 Sprint history updated. CLAUDE.md updated with new file paths. Final docs audit complete.
+
+### Sprint 74 — First Impressions ✅
+Brewery onboarding wizard (4-step: Logo → Beers → Loyalty → Board Preview). Push notification wiring — Messages API fires Web Push. Rate limited (5/hr). Q2 2026 roadmap research produced (30 features, 18 REQs, 4 sprint arcs through Sprint 96).
+
+### Sprint 75 — Revenue Plumbing ✅
+**Arc:** Launch or Bust (Sprints 75-78)
+
+Complete Stripe Billing: annual pricing toggle (Tap $470/yr, Cask $1,430/yr — 20% savings), monthly/annual billing interval on BillingClient, in-app cancel/downgrade UI with AnimatePresence inline confirmation (cancel at period end), new `/api/billing/cancel` endpoint, webhook hardened with `invoice.payment_failed`, `invoice.paid`, `customer.subscription.trial_will_end`. `STRIPE_PRICES` expanded to per-interval keys. `TIER_INFO` expanded with annual pricing details.
+
+Email Infrastructure: `lib/email.ts` — Resend integration with dev-mode console.log fallback. `lib/email-templates/index.ts` — 6 branded email templates (welcome, brewery-welcome, trial-warning, trial-expired, password-reset, weekly-digest). `lib/email-triggers.ts` — 5 trigger functions: `onUserSignUp()`, `onBreweryClaim()`, `onTrialWarning()`, `onTrialExpired()`, `onPasswordReset()`. Welcome email wired to sign-up via `/api/auth/welcome`. Brewery welcome wired to claim flow. Password reset template ready for wiring.
+
+Also queued: REQ-069 (Enhanced KPIs & Analytics) and REQ-070 (Non-Beer Menu Uploads) — requirements documented, no code.

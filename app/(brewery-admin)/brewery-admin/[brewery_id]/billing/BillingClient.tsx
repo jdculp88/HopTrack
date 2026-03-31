@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Crown, Building2, Rocket, Settings, AlertTriangle, Zap } from "lucide-react";
+import { Check, Crown, Building2, Rocket, Settings, AlertTriangle, Zap, X } from "lucide-react";
 import { useToast } from "@/components/ui/Toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSearchParams } from "next/navigation";
+import { TIER_INFO } from "@/lib/stripe";
 
 interface Brewery {
   id: string;
@@ -15,11 +16,12 @@ interface Brewery {
   trial_ends_at?: string | null;
 }
 
+type BillingInterval = "monthly" | "annual";
+
 const TIERS = [
   {
+    key: "tap" as const,
     name: "Tap",
-    price: "$49",
-    period: "/mo",
     tagline: "For getting started",
     icon: Rocket,
     features: [
@@ -32,9 +34,8 @@ const TIERS = [
     popular: false,
   },
   {
+    key: "cask" as const,
     name: "Cask",
-    price: "$149",
-    period: "/mo",
     tagline: "For growing breweries",
     icon: Crown,
     features: [
@@ -48,9 +49,8 @@ const TIERS = [
     popular: true,
   },
   {
+    key: "barrel" as const,
     name: "Barrel",
-    price: "Custom",
-    period: "",
     tagline: "For multi-location",
     icon: Building2,
     features: [
@@ -69,6 +69,9 @@ export function BillingClient({ brewery }: { brewery: Brewery }) {
   const searchParams = useSearchParams();
   const [loadingTier, setLoadingTier] = useState<string | null>(null);
   const [loadingPortal, setLoadingPortal] = useState(false);
+  const [billingInterval, setBillingInterval] = useState<BillingInterval>("monthly");
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [cancelLoading, setCancelLoading] = useState(false);
 
   // Determine subscription state
   const isSubscribed = !!brewery.stripe_customer_id &&
@@ -94,8 +97,17 @@ export function BillingClient({ brewery }: { brewery: Brewery }) {
   const wasCancelled = searchParams.get("cancelled") === "1";
   const isDemo = searchParams.get("demo") === "1";
 
+  function getPriceDisplay(tierKey: "tap" | "cask" | "barrel") {
+    const info = TIER_INFO[tierKey];
+    if (tierKey === "barrel") return { price: "Custom", period: "" };
+    if (billingInterval === "annual") {
+      return { price: info.annualMonthlyDisplay, period: "/mo", badge: `Save ${info.savings}`, totalLabel: `Billed ${info.annualDisplay}` };
+    }
+    return { price: info.monthlyDisplay.replace("/mo", ""), period: "/mo" };
+  }
+
   async function handleSelectPlan(tier: typeof TIERS[number]) {
-    if (tier.name === "Barrel") {
+    if (tier.key === "barrel") {
       window.location.href =
         "mailto:hello@hoptrack.beer?subject=HopTrack Barrel Plan Inquiry&body=I'm interested in the Barrel plan for " +
         encodeURIComponent(brewery.name);
@@ -107,7 +119,11 @@ export function BillingClient({ brewery }: { brewery: Brewery }) {
       const res = await fetch("/api/billing/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ brewery_id: brewery.id, tier: tier.name.toLowerCase() }),
+        body: JSON.stringify({
+          brewery_id: brewery.id,
+          tier: tier.key,
+          interval: billingInterval,
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed");
@@ -137,6 +153,27 @@ export function BillingClient({ brewery }: { brewery: Brewery }) {
       toastError(err.message || "Could not open billing portal");
     } finally {
       setLoadingPortal(false);
+    }
+  }
+
+  async function handleCancelSubscription() {
+    setCancelLoading(true);
+    try {
+      const res = await fetch("/api/billing/cancel", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ brewery_id: brewery.id }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed");
+      success("Subscription cancelled. You'll have access until the end of your billing period.");
+      setShowCancelConfirm(false);
+      // Reload to reflect new state
+      window.location.reload();
+    } catch (err: any) {
+      toastError(err.message || "Could not cancel subscription");
+    } finally {
+      setCancelLoading(false);
     }
   }
 
@@ -175,7 +212,7 @@ export function BillingClient({ brewery }: { brewery: Brewery }) {
           >
             <Check size={18} style={{ color: "var(--accent-gold)" }} />
             <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
-              You&apos;re subscribed! Welcome to HopTrack. 🍺
+              You&apos;re subscribed! Welcome to HopTrack.
             </p>
           </motion.div>
         )}
@@ -204,7 +241,7 @@ export function BillingClient({ brewery }: { brewery: Brewery }) {
         )}
       </AnimatePresence>
 
-      {/* Trial urgency banner (≤5 days) */}
+      {/* Trial urgency banner (<=5 days) */}
       <AnimatePresence>
         {isTrialUrgent && (
           <motion.div
@@ -224,11 +261,13 @@ export function BillingClient({ brewery }: { brewery: Brewery }) {
             `}</style>
             <Zap size={20} style={{ color: "var(--accent-gold)", flexShrink: 0 }} />
             <p className="text-sm font-semibold flex-1" style={{ color: "var(--text-primary)" }}>
-              ⚡ {daysRemaining} {daysRemaining === 1 ? "day" : "days"} left in your trial — upgrade now to keep access
+              {daysRemaining} {daysRemaining === 1 ? "day" : "days"} left in your trial — upgrade now to keep access
             </p>
             <button
-              onClick={handleManageSubscription}
-              disabled={loadingPortal}
+              onClick={() => {
+                const el = document.getElementById("billing-tiers");
+                el?.scrollIntoView({ behavior: "smooth" });
+              }}
               className="px-4 py-2 rounded-xl text-xs font-bold shrink-0"
               style={{ background: "var(--accent-gold)", color: "var(--bg)" }}
             >
@@ -243,7 +282,7 @@ export function BillingClient({ brewery }: { brewery: Brewery }) {
         <motion.div
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
-          className="rounded-2xl border p-5"
+          className="rounded-2xl border p-5 space-y-4"
           style={{
             borderColor: "var(--accent-gold)",
             background: "color-mix(in srgb, var(--accent-gold) 8%, transparent)",
@@ -259,28 +298,87 @@ export function BillingClient({ brewery }: { brewery: Brewery }) {
               </div>
               <div>
                 <p className="font-semibold text-sm" style={{ color: "var(--text-primary)" }}>
-                  Active subscription — {TIERS.find(t => t.name.toLowerCase() === brewery.subscription_tier)?.name ?? brewery.subscription_tier} plan
+                  Active subscription — {TIERS.find(t => t.key === brewery.subscription_tier)?.name ?? brewery.subscription_tier} plan
                 </p>
                 <p className="text-xs" style={{ color: "var(--text-muted)" }}>
                   All features unlocked.
                 </p>
               </div>
             </div>
-            <button
-              onClick={handleManageSubscription}
-              disabled={loadingPortal}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold shrink-0 transition-opacity hover:opacity-80 disabled:opacity-50"
-              style={{ background: "var(--accent-gold)", color: "var(--bg)" }}
-            >
-              <Settings size={14} />
-              {loadingPortal ? "Opening…" : "Manage Subscription"}
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleManageSubscription}
+                disabled={loadingPortal}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold shrink-0 transition-opacity hover:opacity-80 disabled:opacity-50"
+                style={{ background: "var(--accent-gold)", color: "var(--bg)" }}
+              >
+                <Settings size={14} />
+                {loadingPortal ? "Opening…" : "Manage"}
+              </button>
+            </div>
+          </div>
+
+          {/* Inline cancel */}
+          <div className="pt-2 border-t" style={{ borderColor: "color-mix(in srgb, var(--accent-gold) 20%, transparent)" }}>
+            <AnimatePresence mode="wait">
+              {!showCancelConfirm ? (
+                <motion.button
+                  key="cancel-trigger"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  onClick={() => setShowCancelConfirm(true)}
+                  className="text-xs transition-opacity hover:opacity-80"
+                  style={{ color: "var(--text-muted)" }}
+                >
+                  Cancel subscription
+                </motion.button>
+              ) : (
+                <motion.div
+                  key="cancel-confirm"
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="space-y-3"
+                >
+                  <div className="flex items-start gap-2">
+                    <AlertTriangle size={16} className="flex-shrink-0 mt-0.5" style={{ color: "var(--danger)" }} />
+                    <div>
+                      <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
+                        Cancel your subscription?
+                      </p>
+                      <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>
+                        You&apos;ll keep access until the end of your current billing period. After that, your brewery will switch to read-only mode. You can resubscribe anytime.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={handleCancelSubscription}
+                      disabled={cancelLoading}
+                      className="px-4 py-2 rounded-xl text-xs font-semibold transition-opacity hover:opacity-90 disabled:opacity-50"
+                      style={{ background: "var(--danger)", color: "#fff" }}
+                    >
+                      {cancelLoading ? "Cancelling…" : "Yes, Cancel"}
+                    </button>
+                    <button
+                      onClick={() => setShowCancelConfirm(false)}
+                      className="px-4 py-2 rounded-xl text-xs font-medium transition-opacity hover:opacity-80"
+                      style={{ color: "var(--text-muted)" }}
+                    >
+                      <X size={14} className="inline mr-1" />
+                      Keep My Plan
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </motion.div>
       )}
 
       {/* Trial active banner */}
-      {isTrialActive && (
+      {isTrialActive && !isTrialUrgent && (
         <motion.div
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
@@ -329,10 +427,51 @@ export function BillingClient({ brewery }: { brewery: Brewery }) {
         </motion.div>
       )}
 
+      {/* Billing interval toggle */}
+      <div id="billing-tiers" className="flex items-center justify-center gap-1">
+        <div
+          className="flex items-center rounded-xl p-1"
+          style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
+        >
+          <button
+            onClick={() => setBillingInterval("monthly")}
+            className="px-4 py-2 rounded-lg text-sm font-medium transition-all"
+            style={{
+              background: billingInterval === "monthly" ? "var(--accent-gold)" : "transparent",
+              color: billingInterval === "monthly" ? "var(--bg)" : "var(--text-muted)",
+            }}
+          >
+            Monthly
+          </button>
+          <button
+            onClick={() => setBillingInterval("annual")}
+            className="px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2"
+            style={{
+              background: billingInterval === "annual" ? "var(--accent-gold)" : "transparent",
+              color: billingInterval === "annual" ? "var(--bg)" : "var(--text-muted)",
+            }}
+          >
+            Annual
+            <span
+              className="px-1.5 py-0.5 rounded text-[10px] font-bold"
+              style={{
+                background: billingInterval === "annual"
+                  ? "color-mix(in srgb, var(--bg) 20%, transparent)"
+                  : "color-mix(in srgb, var(--accent-gold) 15%, transparent)",
+                color: billingInterval === "annual" ? "var(--bg)" : "var(--accent-gold)",
+              }}
+            >
+              SAVE 20%
+            </span>
+          </button>
+        </div>
+      </div>
+
       {/* Tier cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {TIERS.map((tier) => {
           const Icon = tier.icon;
+          const priceDisplay = getPriceDisplay(tier.key);
           return (
             <motion.div
               key={tier.name}
@@ -384,12 +523,25 @@ export function BillingClient({ brewery }: { brewery: Brewery }) {
               {/* Price */}
               <div className="mb-6">
                 <span className="text-3xl font-bold" style={{ color: "var(--text-primary)" }}>
-                  {tier.price}
+                  {priceDisplay.price}
                 </span>
-                {tier.period && (
+                {priceDisplay.period && (
                   <span className="text-sm" style={{ color: "var(--text-muted)" }}>
-                    {tier.period}
+                    {priceDisplay.period}
                   </span>
+                )}
+                {"badge" in priceDisplay && priceDisplay.badge && (
+                  <span
+                    className="ml-2 px-2 py-0.5 rounded-full text-[10px] font-bold align-middle"
+                    style={{ background: "color-mix(in srgb, var(--accent-gold) 15%, transparent)", color: "var(--accent-gold)" }}
+                  >
+                    {priceDisplay.badge}
+                  </span>
+                )}
+                {"totalLabel" in priceDisplay && priceDisplay.totalLabel && (
+                  <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>
+                    {priceDisplay.totalLabel}
+                  </p>
                 )}
               </div>
 
@@ -413,7 +565,7 @@ export function BillingClient({ brewery }: { brewery: Brewery }) {
                 disabled={loadingTier === tier.name}
                 className="w-full py-3 rounded-xl font-semibold text-sm transition-opacity hover:opacity-90 disabled:opacity-60"
                 style={
-                  tier.name === "Barrel"
+                  tier.key === "barrel"
                     ? {
                         background: "transparent",
                         color: "var(--accent-gold)",
@@ -442,7 +594,7 @@ export function BillingClient({ brewery }: { brewery: Brewery }) {
         </h3>
         <p className="text-sm" style={{ color: "var(--text-muted)" }}>
           All plans include a 14-day free trial. No credit card required to get started.
-          Need help choosing?{" "}
+          Switch between monthly and annual billing anytime.{" "}
           <a
             href="mailto:hello@hoptrack.beer"
             className="font-medium underline"
@@ -452,19 +604,6 @@ export function BillingClient({ brewery }: { brewery: Brewery }) {
           </a>
           .
         </p>
-        {isSubscribed && (
-          <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-            Want to switch to a lower plan?{" "}
-            <a
-              href={`mailto:hello@hoptrack.beer?subject=Plan Downgrade Request — ${encodeURIComponent(brewery.name)}&body=Hi HopTrack team,%0A%0AI'd like to downgrade my plan for ${encodeURIComponent(brewery.name)}.%0A%0ACurrent plan: ${brewery.subscription_tier ?? "unknown"}%0ARequested plan: `}
-              className="font-medium underline"
-              style={{ color: "var(--accent-gold)" }}
-            >
-              Contact us to downgrade
-            </a>
-            .
-          </p>
-        )}
       </div>
     </div>
   );

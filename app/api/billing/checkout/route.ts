@@ -4,10 +4,18 @@ import { getStripe, STRIPE_PRICES, isStripeConfigured } from "@/lib/stripe";
 
 export async function POST(req: NextRequest) {
   try {
-    const { brewery_id, tier } = await req.json() as { brewery_id: string; tier: "tap" | "cask" };
+    const { brewery_id, tier, interval = "monthly" } = await req.json() as {
+      brewery_id: string;
+      tier: "tap" | "cask";
+      interval?: "monthly" | "annual";
+    };
 
     if (!brewery_id || !tier || !["tap", "cask"].includes(tier)) {
       return NextResponse.json({ error: "Invalid request" }, { status: 400 });
+    }
+
+    if (!["monthly", "annual"].includes(interval)) {
+      return NextResponse.json({ error: "Invalid billing interval" }, { status: 400 });
     }
 
     // Auth guard — must be brewery admin
@@ -45,15 +53,19 @@ export async function POST(req: NextRequest) {
     const stripe = getStripe();
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://app.hoptrack.beer";
 
+    // Select the correct price ID based on tier + interval
+    const priceKey = `${tier}_${interval}` as keyof typeof STRIPE_PRICES;
+    const priceId = STRIPE_PRICES[priceKey];
+
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
       payment_method_types: ["card"],
-      line_items: [{ price: STRIPE_PRICES[tier], quantity: 1 }],
+      line_items: [{ price: priceId, quantity: 1 }],
       customer: brewery?.stripe_customer_id || undefined,
       customer_email: !brewery?.stripe_customer_id ? user.email : undefined,
-      metadata: { brewery_id, user_id: user.id, tier },
+      metadata: { brewery_id, user_id: user.id, tier, interval },
       subscription_data: {
-        metadata: { brewery_id, tier },
+        metadata: { brewery_id, tier, interval },
         trial_period_days: 0, // trial already tracked via brewery.created_at
       },
       success_url: `${baseUrl}/brewery-admin/${brewery_id}/billing?success=1`,

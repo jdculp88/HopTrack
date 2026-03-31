@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
         if (!brewery_id) break;
 
         const tier = sub.metadata?.tier;
-        const isActive = sub.status === "active";
+        const isActive = sub.status === "active" || sub.status === "trialing";
 
         await supabase
           .from("breweries")
@@ -84,6 +84,54 @@ export async function POST(req: NextRequest) {
           .eq("id", brewery_id);
 
         console.info(`[webhook] Brewery ${brewery_id} subscription cancelled — downgraded to free`);
+        break;
+      }
+
+      case "invoice.payment_failed": {
+        const invoice = event.data.object;
+        const sub_id = invoice.subscription;
+
+        if (!sub_id) break;
+
+        // Look up brewery by stripe_customer_id
+        const { data: brewery } = await supabase
+          .from("breweries")
+          .select("id, name")
+          .eq("stripe_customer_id", invoice.customer)
+          .single() as any;
+
+        if (brewery) {
+          console.warn(`[webhook] Payment failed for brewery ${brewery.id} (${brewery.name}). Attempt: ${invoice.attempt_count}`);
+          // Stripe handles retries automatically. After final retry fails,
+          // subscription.deleted event will fire and we downgrade then.
+        }
+        break;
+      }
+
+      case "invoice.paid": {
+        const invoice = event.data.object;
+
+        // Confirm payment — ensure tier is still active
+        const { data: brewery } = await supabase
+          .from("breweries")
+          .select("id, subscription_tier")
+          .eq("stripe_customer_id", invoice.customer)
+          .single() as any;
+
+        if (brewery) {
+          console.info(`[webhook] Invoice paid for brewery ${brewery.id}. Tier: ${brewery.subscription_tier}`);
+        }
+        break;
+      }
+
+      case "customer.subscription.trial_will_end": {
+        const sub = event.data.object;
+        const brewery_id = sub.metadata?.brewery_id;
+
+        if (brewery_id) {
+          console.info(`[webhook] Trial ending soon for brewery ${brewery_id}`);
+          // Future: trigger trial warning email via email-triggers.ts
+        }
         break;
       }
 

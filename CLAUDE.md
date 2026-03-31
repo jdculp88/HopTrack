@@ -217,7 +217,7 @@ Brilliant product instincts, trusts the team completely, types fast and sometime
 app/(app)/                    — Consumer app
 app/(brewery-admin)/          — Brewery owner dashboard
 app/(superadmin)/             — Platform admin
-app/api/                      — 57 API endpoints
+app/api/                      — 59 API endpoints
 components/session/           — Session flow (was checkin/, renamed S64)
 components/                   — Shared components
 lib/                          — Utils, Supabase clients, XP logic
@@ -243,10 +243,11 @@ scripts/supabase-setup.mjs    — One-time setup script
 
 ## 🗺️ Where We Are
 
-**Current Sprint:** Sprint 75 — TBD
-**Last completed:** Sprint 74 — First Impressions ✅ — Brewery onboarding wizard + push notification wiring
-**Retro (74):** `docs/retros/sprint-74-retro.md`
-**Roadmap research:** `docs/plans/roadmap-research-2026-q2.md` — 30 features, 18 REQs, 4 sprint arcs (through Sprint 96)
+**Current Sprint:** Sprint 76 — TBD
+**Last completed:** Sprint 75 — Revenue Plumbing ✅ — Stripe billing completion + email infrastructure
+**Retro (75):** TBD
+**Sprint plan (75):** `docs/plans/sprint-75-plan.md`
+**Roadmap research:** `docs/plans/roadmap-research-2026-q2.md` — 30 features, 20 REQs (REQ-069/070 added), 4 sprint arcs (through Sprint 96)
 **Sprint plan (74):** `docs/plans/sprint-74-plan.md`
 **Retro (64-73):** `docs/retros/sprint-64-73-retro.md`
 **10-sprint plan (64-73):** `docs/plans/sprint-64-73-master-plan.md`
@@ -414,6 +415,33 @@ Migration state (001-041): all applied — see `docs/sprint-history.md#migration
 **Also produced this sprint:**
 - `docs/plans/roadmap-research-2026-q2.md` — Comprehensive Q2 2026 roadmap research: competitive analysis (Untappd, 10+ competitors), 30 feature proposals (F-001–F-030), 18 REQs queued (REQ-051–REQ-068), 4 sprint arcs mapped through Sprint 96
 - `docs/plans/sprint-74-plan.md` — Sprint plan
+
+### Sprint 75 — Revenue Plumbing ✅ (2026-03-31)
+**Theme:** Complete Stripe billing + email infrastructure
+**Arc:** Launch or Bust (Sprints 75-78)
+
+**Goal 1: Complete Stripe Billing (F-001)** — Annual billing option (Tap $470/yr, Cask $1,430/yr — 20% savings). Monthly/annual toggle on BillingClient. In-app subscription cancel with inline AnimatePresence confirmation (cancel at period end, not immediate). New `/api/billing/cancel` endpoint. Webhook hardened with `invoice.payment_failed`, `invoice.paid`, `customer.subscription.trial_will_end` events. `STRIPE_PRICES` expanded to per-interval keys (`tap_monthly`, `tap_annual`, etc.). `TIER_INFO` expanded with annual pricing details.
+
+**Goal 2: Email Infrastructure (F-002)** — Resend integration via `lib/email.ts` with `sendEmail()` (falls back to console.log when `RESEND_API_KEY` absent). 6 email templates in `lib/email-templates/index.ts`: welcome, brewery-welcome, trial-warning, trial-expired, password-reset, weekly-digest. All templates use HopTrack brand (dark bg, gold accents, Playfair Display headers). Drip trigger system in `lib/email-triggers.ts`: `onUserSignUp()`, `onBreweryClaim()`, `onTrialWarning()`, `onTrialExpired()`, `onPasswordReset()`. Sign-up wired via `/api/auth/welcome` endpoint. Brewery claim flow wired directly.
+
+**Key changes from Sprint 75:**
+- `lib/stripe.ts` — UPDATED: `STRIPE_PRICES` expanded to 4 keys (monthly + annual per tier), `TIER_INFO` expanded with annual pricing details
+- `lib/email.ts` — NEW: Resend email service layer with dev-mode console.log fallback
+- `lib/email-templates/index.ts` — NEW: 6 branded email templates (HTML)
+- `lib/email-triggers.ts` — NEW: 5 trigger functions wired to auth/claim/trial/reset flows
+- `app/api/billing/cancel/route.ts` — NEW: in-app subscription cancellation (cancel at period end)
+- `app/api/billing/checkout/route.ts` — UPDATED: supports `interval` param (monthly/annual)
+- `app/api/billing/webhook/route.ts` — UPDATED: handles `invoice.payment_failed`, `invoice.paid`, `customer.subscription.trial_will_end`
+- `app/api/auth/welcome/route.ts` — NEW: fires welcome email after sign-up
+- `app/(brewery-admin)/.../billing/BillingClient.tsx` — UPDATED: monthly/annual toggle, inline cancel/downgrade with AnimatePresence
+- `app/(auth)/signup/page.tsx` — UPDATED: fires welcome email on sign-up
+- `app/api/brewery-claims/route.ts` — UPDATED: fires brewery welcome email on claim
+- `.env.local.example` — UPDATED: Resend env vars, expanded Stripe price ID vars
+- `docs/requirements/REQ-069-enhanced-kpis-analytics.md` — NEW: Enhanced KPIs requirement (queued)
+- `docs/requirements/REQ-070-brewery-menu-uploads.md` — NEW: Menu uploads requirement (queued)
+- No new migrations
+
+---
 
 ### Sprints 64-73 — Shore It Up ✅ (2026-03-30)
 **Theme:** Tech debt, documentation finalization, folder/file organization. 10-sprint housekeeping arc.
