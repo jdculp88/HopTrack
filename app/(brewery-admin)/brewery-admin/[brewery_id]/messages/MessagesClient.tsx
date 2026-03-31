@@ -79,7 +79,10 @@ export function MessagesClient({ breweryId, breweryName, customers }: MessagesCl
       }
 
       const data = await res.json();
-      success(`Message sent to ${data.count} customer${data.count !== 1 ? "s" : ""}!`);
+      const pushInfo = data.push_count > 0
+        ? ` (${data.push_count} push notification${data.push_count !== 1 ? "s" : ""} sent)`
+        : "";
+      success(`Message sent to ${data.count} customer${data.count !== 1 ? "s" : ""}!${pushInfo}`);
       setSent(true);
       setSubject("");
       setBody("");

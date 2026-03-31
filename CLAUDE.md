@@ -243,8 +243,11 @@ scripts/supabase-setup.mjs    — One-time setup script
 
 ## 🗺️ Where We Are
 
-**Current Sprint:** Sprint 74 — TBD
-**Last completed:** Sprint 73 — Shore It Up (10-sprint arc) ✅ — Tech debt, documentation, folder organization
+**Current Sprint:** Sprint 75 — TBD
+**Last completed:** Sprint 74 — First Impressions ✅ — Brewery onboarding wizard + push notification wiring
+**Retro (74):** `docs/retros/sprint-74-retro.md`
+**Roadmap research:** `docs/plans/roadmap-research-2026-q2.md` — 30 features, 18 REQs, 4 sprint arcs (through Sprint 96)
+**Sprint plan (74):** `docs/plans/sprint-74-plan.md`
 **Retro (64-73):** `docs/retros/sprint-64-73-retro.md`
 **10-sprint plan (64-73):** `docs/plans/sprint-64-73-master-plan.md`
 **Sprint history (1-40):** `docs/sprint-history.md`
@@ -389,6 +392,28 @@ Migration state (001-041): all applied — see `docs/sprint-history.md#migration
 - `AchievementFeedCard` — `role="article"` + `aria-label` added
 - `SessionCard` — `role="article"` + `aria-label` + `whileInView` scroll reveal added
 - 6 public API routes — `Cache-Control: public` headers on 200 GET responses
+
+### Sprint 74 — First Impressions ✅ (2026-03-31)
+**Theme:** Brewery onboarding wizard + push notification wiring
+
+**Goal 1: Brewery Onboarding Wizard** — 4-step guided setup (Logo → Beers → Loyalty → Board Preview). Auto-shows on first dashboard visit for freshly claimed breweries (0 beers + no logo). AnimatePresence step transitions, progress saved to localStorage, mobile-first. Each step is an isolated component under `components/brewery-admin/onboarding/`.
+
+**Goal 2: Push Notification Wiring** — `sendPushToUser()` from `lib/push.ts` (Sprint 14) wired into Messages API. Brewery sends message → customers get in-app notification AND Web Push. Rate limited (5/hr per brewery). Push count returned in API response and shown in toast feedback.
+
+**Key changes from Sprint 74:**
+- `components/brewery-admin/onboarding/OnboardingWizard.tsx` — NEW: wizard shell with stepper, step transitions, localStorage persistence
+- `components/brewery-admin/onboarding/OnboardingStepLogo.tsx` — NEW: logo upload via ImageUpload component
+- `components/brewery-admin/onboarding/OnboardingStepBeers.tsx` — NEW: inline beer entry with 16 style pills, batch save
+- `components/brewery-admin/onboarding/OnboardingStepLoyalty.tsx` — NEW: loyalty toggle, stamp count, reward presets
+- `components/brewery-admin/onboarding/OnboardingStepPreview.tsx` — NEW: setup summary + Board/public page links
+- `app/api/brewery/[brewery_id]/messages/route.ts` — Push wiring added, rate limiting (5/hr), push_count in response
+- `app/(brewery-admin)/brewery-admin/[brewery_id]/messages/MessagesClient.tsx` — Toast shows push delivery count
+- `app/(brewery-admin)/brewery-admin/[brewery_id]/page.tsx` — Wizard auto-shows for fresh claims
+- No new migrations — all existing tables
+
+**Also produced this sprint:**
+- `docs/plans/roadmap-research-2026-q2.md` — Comprehensive Q2 2026 roadmap research: competitive analysis (Untappd, 10+ competitors), 30 feature proposals (F-001–F-030), 18 REQs queued (REQ-051–REQ-068), 4 sprint arcs mapped through Sprint 96
+- `docs/plans/sprint-74-plan.md` — Sprint plan
 
 ### Sprints 64-73 — Shore It Up ✅ (2026-03-30)
 **Theme:** Tech debt, documentation finalization, folder/file organization. 10-sprint housekeeping arc.

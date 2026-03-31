@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { sendPushToUser } from "@/lib/push";
+import type { PushPayload } from "@/lib/push";
 
 type Tier = "all" | "vip" | "power_user" | "regular" | "new";
 
@@ -26,6 +28,22 @@ export async function POST(
 
   if (!subject?.trim() || !messageBody?.trim()) {
     return NextResponse.json({ error: "Subject and body are required" }, { status: 400 });
+  }
+
+  // Rate limit: max 5 sends per brewery per hour
+  const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+  const { count: recentSendCount } = await supabase
+    .from("notifications")
+    .select("id", { count: "exact", head: true })
+    .eq("type", "brewery_message")
+    .gte("created_at", oneHourAgo)
+    .contains("data", { brewery_id } as any);
+
+  if ((recentSendCount ?? 0) >= 5) {
+    return NextResponse.json(
+      { error: "Rate limit exceeded. Max 5 messages per hour." },
+      { status: 429, headers: { "X-RateLimit-Remaining": "0" } }
+    );
   }
 
   // Fetch brewery name
@@ -91,5 +109,24 @@ export async function POST(
     }
   }
 
-  return NextResponse.json({ success: true, count: inserted });
+  // Fire Web Push notifications for users with push subscriptions
+  let pushCount = 0;
+  const pushPayload: PushPayload = {
+    title: subject.trim(),
+    body: `${breweryName}: ${messageBody.trim()}`,
+    tag: `brewery-message-${brewery_id}`,
+    data: { url: `/brewery/${brewery_id}` },
+  };
+
+  // Send push in batches — don't let one failure break the loop
+  for (const userId of targetUsers) {
+    try {
+      const sent = await sendPushToUser(supabase, userId, pushPayload);
+      pushCount += sent;
+    } catch (err) {
+      console.error(`[push] Failed for user ${userId}:`, (err as Error).message);
+    }
+  }
+
+  return NextResponse.json({ success: true, count: inserted, push_count: pushCount });
 }

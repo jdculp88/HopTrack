@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { formatRelativeTime } from "@/lib/dates";
 import BreweryOnboardingCard from "@/components/brewery-admin/BreweryOnboardingCard";
+import { OnboardingWizard } from "@/components/brewery-admin/onboarding/OnboardingWizard";
 import { Sparkline, ActiveSessionsCounter, RecentActivityFeed } from "./DashboardClient";
 import type { ActivityItem } from "./DashboardClient";
 
@@ -195,6 +196,8 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
   // Onboarding
   const hasBeers = totalBeerCount > 0;
   const hasLoyalty = !!loyaltyProgram;
+  const hasLogo = !!(brewery as any)?.logo_url;
+  const showWizard = !hasBeers && !hasLogo;
 
   // ── Build activity feed ────────────────────────────────────────────────────
   const activityItems: ActivityItem[] = [];
@@ -251,6 +254,14 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
 
   return (
     <div className="p-6 lg:p-8 max-w-6xl mx-auto pt-16 lg:pt-8">
+
+      {/* Onboarding Wizard — shows for freshly claimed breweries */}
+      {showWizard && (
+        <OnboardingWizard
+          breweryId={brewery_id}
+          breweryName={(brewery as any)?.name ?? "Your Brewery"}
+        />
+      )}
 
       {/* Header */}
       <div className="mb-6">

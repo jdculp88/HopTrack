@@ -1,9 +1,9 @@
 # HopTrack Product Roadmap
-**Last updated:** 2026-03-30
+**Last updated:** 2026-03-31
 **PM:** Morgan
-**Current Sprint:** Sprint 67 — README & Onboarding (active)
+**Current Sprint:** Sprint 75 — TBD
 
-> This is a living document -- updated every sprint. For completed sprints 1-12, see `docs/roadmap-archive.md`. For sprint plans, see `docs/plans/`. For the Shore It Up master plan (Sprints 64-73), see `docs/plans/sprint-64-73-master-plan.md`.
+> This is a living document -- updated every sprint. For completed sprints 1-12, see `docs/roadmap-archive.md`. For sprint plans, see `docs/plans/`. For the Shore It Up master plan (Sprints 64-73), see `docs/plans/sprint-64-73-master-plan.md`. For the Q2 2026 roadmap research (30 features, 18 REQs, 4 sprint arcs), see `docs/plans/roadmap-research-2026-q2.md`.
 
 ---
 
@@ -18,11 +18,11 @@ Sprint 66 (Folder Surgery): `docs/` restructured — `plans/`, `archive/`, `bran
 
 ---
 
-## Sprints 67-70 -- Phase 2: Document Everything (IN PROGRESS)
+## Sprints 67-70 -- Phase 2: Document Everything (COMPLETE)
 
 Sprint 67 (README & Onboarding): Comprehensive README.md, CONTRIBUTING.md, supabase/migrations/README.md, roadmap update.
 
-Sprint 68 (API Reference): All 55 endpoints documented.
+Sprint 68 (API Reference): All 57 endpoints documented.
 
 Sprint 69 (Architecture): System map — auth, RLS, feed, HopRoute AI, theme, animation.
 
@@ -30,13 +30,33 @@ Sprint 70 (Requirements & Brand): Close every REQ, finalize brand guide, update 
 
 ---
 
-## Sprints 71-73 -- Phase 3: Harden & Ship (PLANNED)
+## Sprints 71-73 -- Phase 3: Harden & Ship (COMPLETE)
 
-Sprint 71 (Type Safety Pt.2): Remaining `as any` → near zero, clean `tsc` build.
+Sprint 71 (Type Safety Pt.2): Remaining Database types added. Build errors fixed across 8 files.
 
-Sprint 72 (Test & Performance): E2E coverage, memoization, build optimization.
+Sprint 72 (Test & Performance): `npm run build` passes clean. 64 pages, 0 errors.
 
-Sprint 73 (Final Audit): TODO grep, launch checklist update, CLAUDE.md update, 10-sprint retro.
+Sprint 73 (Final Audit): Sprint history + CLAUDE.md updated, 10-sprint retro delivered.
+
+---
+
+## Sprint 74 -- First Impressions (COMPLETE ✅)
+**Theme:** Brewery onboarding wizard + push notification wiring
+**Plan:** `docs/plans/sprint-74-plan.md` | **Retro:** `docs/retros/sprint-74-retro.md`
+
+Brewery Onboarding Wizard (4-step: Logo → Beers → Loyalty → Board Preview). Auto-shows for freshly claimed breweries. Push notification wiring — Messages API fires Web Push via `sendPushToUser()`. Rate limited (5/hr). Push count shown in toast feedback. Also produced: comprehensive Q2 2026 roadmap research (30 features, 18 REQs, 4 sprint arcs through Sprint 96).
+
+---
+
+## Q2 2026 Roadmap — Sprint Arcs (PLANNED)
+**Research:** `docs/plans/roadmap-research-2026-q2.md`
+
+| Arc | Sprints | Theme | Key Features |
+|-----|---------|-------|-------------|
+| Launch or Bust | 75-78 | Revenue plumbing, first brewery | Stripe billing stub, email infra stub, CI/CD, staging, launch prep |
+| Stick Around | 79-84 | Retention | Weekly digests, ROI dashboard, challenges, Wrapped, smart push, HopRoute autocomplete |
+| Open the Pipes | 85-90 | Integrations | POS (Toast/Square), barcode scanning, CRM, public API |
+| The Flywheel | 91-96 | Revenue flywheel | Sponsored challenges, mug clubs, ad engine, promotion hub, multi-location |
 
 ---
 
