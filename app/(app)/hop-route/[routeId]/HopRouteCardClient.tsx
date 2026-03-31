@@ -127,7 +127,7 @@ export function HopRouteCardClient({ route: initialRoute, userId }: HopRouteCard
   return (
     <div className="max-w-lg mx-auto px-4 py-6 space-y-4">
       {/* Header */}
-      <div className="space-y-2">
+      <div className="card-bg-hoproute rounded-2xl p-4 border space-y-2" style={{ borderColor: "color-mix(in srgb, var(--accent-amber) 25%, var(--border))" }}>
         <div className="flex items-start justify-between gap-3">
           <div>
             <h1 className="font-display text-3xl font-bold text-[var(--text-primary)]">{route.title}</h1>
@@ -395,17 +395,17 @@ export function HopRouteCardClient({ route: initialRoute, userId }: HopRouteCard
       </div>
 
       {/* Footer actions */}
-      <div className="flex gap-2 pt-2">
+      <div className="card-bg-hoproute flex gap-2 p-3 rounded-2xl border" style={{ borderColor: "color-mix(in srgb, var(--accent-amber) 25%, var(--border))" }}>
         <Link
           href="/hop-route/new"
-          className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-medium border transition-colors"
+          className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium border transition-colors"
           style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--text-secondary)" }}
         >
           Plan Another Route
         </Link>
         <button
           onClick={() => setShowShare(true)}
-          className="px-4 py-3 rounded-xl text-sm font-medium border transition-colors"
+          className="px-4 py-2.5 rounded-xl text-sm font-medium border transition-colors"
           style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--text-muted)" }}
         >
           <Share2 size={16} />

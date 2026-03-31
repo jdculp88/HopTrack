@@ -44,8 +44,8 @@ export function HopRouteFeedCard({ route, index, currentUserId }: HopRouteFeedCa
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.03, duration: 0.28 }}
-      className="rounded-2xl border overflow-hidden"
-      style={{ background: "var(--surface)", borderColor: "var(--border)" }}
+      className="card-bg-hoproute rounded-2xl border overflow-hidden"
+      style={{ borderColor: "color-mix(in srgb, var(--accent-amber) 20%, var(--border))" }}
     >
       {/* Header */}
       <div className="p-4 pb-3 flex items-center gap-3">

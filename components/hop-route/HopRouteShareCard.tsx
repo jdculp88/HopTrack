@@ -75,7 +75,7 @@ export function HopRouteShareCard({ route, stops, onClose, onCopied }: HopRouteS
         <div
           ref={cardRef}
           style={{
-            background: C.bg,
+            background: `repeating-linear-gradient(165deg, transparent, transparent 18px, rgba(196,145,58,0.04) 18px, rgba(196,145,58,0.04) 19px), radial-gradient(ellipse at 70% 50%, rgba(196,145,58,0.07) 0%, transparent 55%), ${C.bg}`,
             borderRadius: 20,
             padding: 24,
             fontFamily: "'DM Sans', sans-serif",

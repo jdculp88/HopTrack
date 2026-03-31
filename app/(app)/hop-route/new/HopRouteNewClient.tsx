@@ -166,8 +166,8 @@ export function HopRouteNewClient({ tasteDna }: HopRouteNewClientProps) {
       {/* Header */}
       <div className="space-y-1">
         <div className="flex items-center gap-2">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: "color-mix(in srgb, var(--accent-gold) 15%, transparent)", color: "var(--accent-gold)" }}>
-            <Beer size={20} />
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: "color-mix(in srgb, var(--accent-amber) 15%, transparent)", color: "var(--accent-amber)" }}>
+            <Navigation size={20} />
           </div>
           <h1 className="font-display text-3xl font-bold text-[var(--text-primary)]">HopRoute</h1>
         </div>
@@ -409,14 +409,14 @@ export function HopRouteNewClient({ tasteDna }: HopRouteNewClientProps) {
                 ))}
               </div>
             ) : (
-              <div className="p-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] text-center">
+              <div className="card-bg-hoproute p-4 rounded-2xl border text-center" style={{ borderColor: "var(--border)" }}>
                 <p className="text-sm text-[var(--text-secondary)]">No taste history yet.</p>
                 <p className="text-xs text-[var(--text-muted)] mt-1">We&apos;ll suggest crowd-pleasers for your first HopRoute.</p>
               </div>
             )}
 
             {/* Summary */}
-            <div className="p-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] space-y-1.5">
+            <div className="card-bg-hoproute p-4 rounded-2xl border space-y-1.5" style={{ borderColor: "color-mix(in srgb, var(--accent-amber) 25%, var(--border))" }}>
               <p className="text-xs font-mono text-[var(--text-muted)] uppercase tracking-wide">Your Route</p>
               <p className="text-sm text-[var(--text-primary)]">📍 {city}</p>
               <p className="text-sm text-[var(--text-primary)]">🍺 {stopCount} stops · {GROUP_OPTIONS.find(g => g.value === groupSize)?.label}</p>
