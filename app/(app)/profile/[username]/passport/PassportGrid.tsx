@@ -91,7 +91,7 @@ export function PassportGrid({ stamps, totalBeers, totalStyles, totalBreweries }
             { label: "Breweries", value: totalBreweries },
             { label: "Avg ★", value: avgRating != null ? avgRating.toFixed(1) : "—" },
           ].map(({ label, value }) => (
-            <div key={label} className="text-center bg-[var(--surface-2)] rounded-2xl py-3 px-1">
+            <div key={label} className="text-center rounded-2xl py-3 px-1" style={{ background: "color-mix(in srgb, var(--surface-2) 55%, transparent)" }}>
               <p className="font-mono font-bold text-[var(--accent-gold)] text-xl leading-none">{value}</p>
               <p className="text-[10px] text-[var(--text-muted)] mt-1 font-mono uppercase tracking-wide">{label}</p>
             </div>

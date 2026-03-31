@@ -156,19 +156,19 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
         {/* Stats — single merged card */}
         <div className="card-bg-stats border border-[var(--border)] rounded-2xl p-4 mb-6">
           <div className="grid grid-cols-4 gap-2">
-            <div className="text-center bg-[var(--surface-2)] rounded-2xl py-3 px-1">
+            <div className="text-center rounded-2xl py-3 px-1" style={{ background: "color-mix(in srgb, var(--surface-2) 55%, transparent)" }}>
               <p className="font-mono font-bold text-xl leading-none text-[var(--accent-gold)]">{profile.total_checkins}</p>
               <p className="text-[10px] text-[var(--text-muted)] mt-1 font-mono uppercase tracking-wide">Sessions</p>
             </div>
-            <div className="text-center bg-[var(--surface-2)] rounded-2xl py-3 px-1">
+            <div className="text-center rounded-2xl py-3 px-1" style={{ background: "color-mix(in srgb, var(--surface-2) 55%, transparent)" }}>
               <p className="font-mono font-bold text-xl leading-none text-[var(--accent-gold)]">{profile.unique_beers}</p>
               <p className="text-[10px] text-[var(--text-muted)] mt-1 font-mono uppercase tracking-wide">Unique Beers</p>
             </div>
-            <div className="text-center bg-[var(--surface-2)] rounded-2xl py-3 px-1">
+            <div className="text-center rounded-2xl py-3 px-1" style={{ background: "color-mix(in srgb, var(--surface-2) 55%, transparent)" }}>
               <p className="font-mono font-bold text-xl leading-none text-[var(--accent-gold)]">{profile.unique_breweries}</p>
               <p className="text-[10px] text-[var(--text-muted)] mt-1 font-mono uppercase tracking-wide">Breweries</p>
             </div>
-            <div className="text-center bg-[var(--surface-2)] rounded-2xl py-3 px-1">
+            <div className="text-center rounded-2xl py-3 px-1" style={{ background: "color-mix(in srgb, var(--surface-2) 55%, transparent)" }}>
               <p className="font-mono font-bold text-xl leading-none" style={{ color: ((profile as any).current_streak ?? 0) > 0 ? "var(--accent-amber)" : "var(--accent-gold)" }}>
                 {(profile as any).current_streak ?? 0}
               </p>

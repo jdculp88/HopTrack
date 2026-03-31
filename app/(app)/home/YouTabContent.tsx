@@ -132,19 +132,19 @@ export function YouTabContent({
           Your Numbers
         </p>
         <div className="grid grid-cols-4 gap-2 relative z-10">
-          <div className="text-center bg-[var(--surface-2)] rounded-2xl py-3 px-1">
+          <div className="text-center rounded-2xl py-3 px-1" style={{ background: "color-mix(in srgb, var(--surface-2) 55%, transparent)" }}>
             <p className="font-mono font-bold text-xl leading-none" style={{ color: "var(--accent-gold)" }}>{profile.total_checkins}</p>
             <p className="text-[10px] text-[var(--text-muted)] mt-1 font-mono uppercase tracking-wide">Sessions</p>
           </div>
-          <div className="text-center bg-[var(--surface-2)] rounded-2xl py-3 px-1">
+          <div className="text-center rounded-2xl py-3 px-1" style={{ background: "color-mix(in srgb, var(--surface-2) 55%, transparent)" }}>
             <p className="font-mono font-bold text-xl leading-none" style={{ color: "var(--accent-gold)" }}>{profile.unique_beers ?? 0}</p>
             <p className="text-[10px] text-[var(--text-muted)] mt-1 font-mono uppercase tracking-wide">Unique Beers</p>
           </div>
-          <div className="text-center bg-[var(--surface-2)] rounded-2xl py-3 px-1">
+          <div className="text-center rounded-2xl py-3 px-1" style={{ background: "color-mix(in srgb, var(--surface-2) 55%, transparent)" }}>
             <p className="font-mono font-bold text-xl leading-none" style={{ color: "var(--accent-gold)" }}>{visitedBreweries.length || (profile.unique_breweries ?? 0)}</p>
             <p className="text-[10px] text-[var(--text-muted)] mt-1 font-mono uppercase tracking-wide">Breweries</p>
           </div>
-          <div className="text-center bg-[var(--surface-2)] rounded-2xl py-3 px-1">
+          <div className="text-center rounded-2xl py-3 px-1" style={{ background: "color-mix(in srgb, var(--surface-2) 55%, transparent)" }}>
             <p className="font-mono font-bold text-xl leading-none" style={{ color: (profile.current_streak ?? 0) > 0 ? "var(--accent-amber)" : "var(--accent-gold)" }}>{profile.current_streak ?? 0}</p>
             <p className="text-[10px] text-[var(--text-muted)] mt-1 font-mono uppercase tracking-wide">Day Streak</p>
           </div>
