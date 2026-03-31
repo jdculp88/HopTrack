@@ -152,11 +152,16 @@ export function ExploreClient({
         // Supplement with Open Brewery DB for broader coverage
         const raw = await searchBreweries(query, 20);
         const externalResults = raw.map((r) => ({ ...mapOpenBreweryToDb(r), id: r.id, created_at: "" } as any));
-        // Merge: DB results first, then external (deduped)
-        const dbIds = new Set(dbResults.map((b: any) => b.id));
+        // Merge: DB results first, then external (deduped by name+city to catch MI vs Michigan)
+        const dbKeys = new Set(dbResults.map((b: any) =>
+          `${(b.name || "").toLowerCase()}|${(b.city || "").toLowerCase()}`
+        ));
         const merged = [
           ...dbResults,
-          ...externalResults.filter((b: any) => !dbIds.has(b.id)),
+          ...externalResults.filter((b: any) => {
+            const key = `${(b.name || "").toLowerCase()}|${(b.city || "").toLowerCase()}`;
+            return !dbKeys.has(key);
+          }),
         ];
         setBreweries(merged);
       }

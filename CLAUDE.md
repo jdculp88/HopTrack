@@ -243,8 +243,9 @@ scripts/supabase-setup.mjs    — One-time setup script
 
 ## 🗺️ Where We Are
 
-**Current Sprint:** Sprint 78 — The Database
-**Last completed:** Sprint 77 — The Countdown ✅ — Vitest (39 tests), launch checklist burndown (44%→56%), cookie consent, JSON-LD, business formation guide
+**Current Sprint:** Sprint 79 — TBD
+**Last completed:** Sprint 78 — The Database ✅ — 7,177 breweries (Open Brewery DB), 2,361 beers (Kaggle), city/state/zip search, Explore pagination, Reviews fix, CI lint fix
+**Retro (78):** `docs/retros/sprint-78-retro.md` (facilitated by Morgan)
 **Sprint plan (78):** `docs/plans/sprint-78-plan.md`
 **Retro (77):** `docs/retros/sprint-77-retro.md` (facilitated by Drew)
 **Sprint plan (77):** `docs/plans/sprint-77-plan.md`
@@ -482,7 +483,7 @@ Migration state (001-041): all applied — see `docs/sprint-history.md#migration
 
 ---
 
-### Sprint 78 — The Database (2026-03-31)
+### Sprint 78 — The Database ✅ (2026-03-31)
 **Theme:** Seed database with real US brewery and beer data for launch
 **Arc:** Launch or Bust (Sprints 75-78)
 
