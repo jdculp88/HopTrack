@@ -920,7 +920,7 @@ function BeerCard({
                 onDec={onDecrement}
                 incrementing={incrementing}
                 decrementing={decrementing}
-                primaryHex={hex.primary}
+                primaryHex="#D4A843"
               />
             ) : (
               <button
@@ -928,9 +928,8 @@ function BeerCard({
                 disabled={loading}
                 className="px-3 py-1.5 rounded-xl text-xs font-semibold transition-all disabled:opacity-60 flex items-center gap-1"
                 style={{
-                  background: hex.primary,
-                  color: '#fff',
-                  boxShadow: `0 2px 6px ${hex.primary}28`,
+                  background: 'var(--accent-gold)',
+                  color: 'var(--bg)',
                 }}
               >
                 {loading ? <Loader2 size={12} className="animate-spin" /> : "I'm having this"}

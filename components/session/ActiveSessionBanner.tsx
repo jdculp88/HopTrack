@@ -72,7 +72,7 @@ export default function ActiveSessionBanner({ session, breweryName, beerLogs = [
               {/* Live indicator */}
               <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-green-400 border border-black/20 animate-pulse" />
             </div>
-            <div className="min-w-0">
+            <div className="flex-1 min-w-0 overflow-hidden">
               <p className="text-xs font-semibold text-black/80 leading-none mb-0.5 font-mono uppercase tracking-wide">
                 Active Session
               </p>

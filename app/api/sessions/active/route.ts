@@ -13,7 +13,8 @@ export async function GET(_request: NextRequest) {
       *,
       brewery:breweries(id, name, city, state),
       beer_logs(
-        id, beer_id, rating, flavor_tags, serving_style, comment, photo_url, logged_at
+        id, beer_id, quantity, rating, flavor_tags, serving_style, comment, photo_url, logged_at,
+        beer:beers(id, name, style, abv)
       )
     `)
     .eq('user_id', user.id)
