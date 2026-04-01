@@ -24,10 +24,10 @@ export async function GET(request: Request) {
 
     const { data: rows, error } = await supabase
       .from("sessions")
-      .select("user_id, xp_earned, profile:profiles!sessions_user_id_fkey(id, username, display_name, avatar_url, xp)")
+      .select("user_id, xp_awarded, profile:profiles!sessions_user_id_fkey(id, username, display_name, avatar_url, xp)")
       .eq("is_active", false)
       .gte("ended_at", monthStart.toISOString())
-      .not("xp_earned", "is", null);
+      .gt("xp_awarded", 0);
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
@@ -37,9 +37,9 @@ export async function GET(request: Request) {
       const uid = row.user_id;
       const existing = xpMap.get(uid);
       if (existing) {
-        existing.xp += row.xp_earned ?? 0;
+        existing.xp += (row as any).xp_awarded ?? 0;
       } else {
-        xpMap.set(uid, { xp: row.xp_earned ?? 0, profile: row.profile });
+        xpMap.set(uid, { xp: (row as any).xp_awarded ?? 0, profile: row.profile });
       }
     }
 

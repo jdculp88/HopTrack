@@ -19,9 +19,9 @@
 
 | # | Area | Issue | File(s) | Fix Sprint |
 |---|------|-------|---------|------------|
-| 1 | Brewery Admin | **ActiveSessionsCounter never updates** — polls endpoint but ignores response. "Active Now" KPI frozen at SSR value. | `DashboardClient.tsx:56-68` | 92 |
-| 2 | Brewery Admin | **Embed page missing auth check** — any logged-in user can access any brewery's embed config. | `embed/page.tsx` | 92 |
-| 3 | Brewery Admin | **`motion.button` violations** — 2 instances of banned pattern. | `ApiKeyManager.tsx:211`, `BillingClient.tsx:325` | 92 |
+| 1 | Brewery Admin | **ActiveSessionsCounter never updates** — polls endpoint but ignores response. "Active Now" KPI frozen at SSR value. | `DashboardClient.tsx:56-68` | 92 ✅ |
+| 2 | Brewery Admin | **Embed page missing auth check** — any logged-in user can access any brewery's embed config. | `embed/page.tsx` | 92 ✅ |
+| 3 | Brewery Admin | **`motion.button` violations** — 2 instances of banned pattern. | `ApiKeyManager.tsx:211`, `BillingClient.tsx:325` | 92 ✅ |
 
 ---
 
@@ -29,18 +29,18 @@
 
 | # | Area | Issue | File(s) | Fix Sprint |
 |---|------|-------|---------|------------|
-| 4 | Consumer | **Hardcoded fake data in Discover** — seasonal beers + curated collections use fake brewery names/IDs | `home/page.tsx:164-178` | 92 |
-| 5 | Consumer | **6 curated collection cards all "Coming soon"** — prominent section with zero value | `DiscoveryCard.tsx:352` | 92 |
-| 6 | Consumer | **Beer list Edit button links to profile** instead of list editor | `lists/[username]/[listId]/page.tsx:104-115` | 92 |
-| 7 | Consumer | **Broken notification link** — `/profile/achievements` doesn't exist, should be `/achievements` | `NotificationsClient.tsx:726` | 92 |
-| 8 | Brewery Admin | **Missing toasts on Loyalty mutations** — 6 operations complete silently | `LoyaltyClient.tsx` | 92 |
-| 9 | Brewery Admin | **Missing toasts on Events mutations** — 4 operations complete silently | `EventsClient.tsx` | 92 |
+| 4 | Consumer | **Hardcoded fake data in Discover** — seasonal beers + curated collections use fake brewery names/IDs | `home/page.tsx:164-178` | 92 ✅ |
+| 5 | Consumer | **6 curated collection cards all "Coming soon"** — prominent section with zero value | `DiscoveryCard.tsx:352` | 92 ✅ |
+| 6 | Consumer | **Beer list Edit button links to profile** instead of list editor | `lists/[username]/[listId]/page.tsx:104-115` | 92 ✅ |
+| 7 | Consumer | **Broken notification link** — `/profile/achievements` doesn't exist, should be `/achievements` | `NotificationsClient.tsx:726` | 92 ✅ |
+| 8 | Brewery Admin | **Missing toasts on Loyalty mutations** — 6 operations complete silently | `LoyaltyClient.tsx` | 92 ✅ |
+| 9 | Brewery Admin | **Missing toasts on Events mutations** — 4 operations complete silently | `EventsClient.tsx` | 92 ✅ |
 | 10 | Brewery Admin | **Silent delete failures** — Events, Loyalty, Tap List delete operations don't check DB result | `EventsClient.tsx`, `LoyaltyClient.tsx`, `TapListClient.tsx` | 93 |
 | 11 | Brewery Admin | **Drag-sort sends N individual updates** — 30 beers = 30 sequential DB calls, no error handling | `TapListClient.tsx:340-357` | 93 |
-| 12 | API | **5 GET endpoints missing auth** — `/api/beers`, `/api/breweries`, `/api/breweries/browse`, `/api/sessions/[id]/photos`, `/api/beers/barcode/[code]` | Various | 92 |
+| 12 | API | **5 GET endpoints missing auth** — `/api/beers`, `/api/breweries`, `/api/breweries/browse`, `/api/sessions/[id]/photos`, `/api/beers/barcode/[code]` | Various | 92 ✅ |
 | 13 | API | **Missing rate limits on 11+ mutation endpoints** | Various | 93 |
-| 14 | API | **Leaderboard monthly XP query may use wrong column** — `xp_earned` vs `xp_awarded` | `leaderboard/route.ts:27` | 92 |
-| 15 | Brewery Admin | **3 pages missing loading.tsx** — challenges, embed, customer profile detail | 3 dirs | 92 |
+| 14 | API | **Leaderboard monthly XP query may use wrong column** — `xp_earned` vs `xp_awarded` | `leaderboard/route.ts:27` | 92 ✅ |
+| 15 | Brewery Admin | **3 pages missing loading.tsx** — challenges, embed, customer profile detail | 3 dirs | 92 ✅ |
 
 ---
 
@@ -48,13 +48,13 @@
 
 | # | Area | Issue | Fix Sprint |
 |---|------|-------|------------|
-| 16 | Consumer | Non-interactive seasonal beer cards in Discover | 92 |
+| 16 | Consumer | Non-interactive seasonal beer cards in Discover | 92 ✅ |
 | 17 | API | Inconsistent response envelopes (v1 vs internal routes) | 94 |
 | 18 | Brewery Admin | 4 pages not in sidebar nav (Sessions, Embed, Board, POS Sync) | 93 |
 | 19 | Brewery Admin | OnboardingCard `hasQr`/`hasShared` always false | 93 |
-| 20 | Brewery Admin | Promotions page missing mobile top padding (`pt-16`) | 92 |
-| 21 | Brewery Admin | Events delete no success toast | 92 |
-| 22 | Brewery Admin | Embed + Challenges pages missing metadata export | 92 |
+| 20 | Brewery Admin | Promotions page missing mobile top padding (`pt-16`) | 92 ✅ |
+| 21 | Brewery Admin | Events delete no success toast | 92 ✅ |
+| 22 | Brewery Admin | Embed + Challenges pages missing metadata export | 92 ✅ |
 | 23 | Accessibility | Missing skip-to-content links in brewery admin + superadmin | 93 |
 | 24 | Accessibility | Missing `id="main-content"` on admin `<main>` elements | 93 |
 | 25 | Accessibility | Icon-only close button missing aria-label in Loyalty | 93 |

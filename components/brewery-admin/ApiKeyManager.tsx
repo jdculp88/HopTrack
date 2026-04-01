@@ -208,17 +208,20 @@ export function ApiKeyManager({ breweryId }: { breweryId: string }) {
                     </button>
                   </motion.div>
                 ) : (
-                  <motion.button
+                  <motion.div
                     key="trash"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    onClick={() => setRevokeConfirm(key.id)}
-                    className="p-2 rounded-lg transition-colors hover:opacity-80"
-                    style={{ color: "var(--text-muted)" }}
                   >
-                    <Trash2 size={14} />
-                  </motion.button>
+                    <button
+                      onClick={() => setRevokeConfirm(key.id)}
+                      className="p-2 rounded-lg transition-colors hover:opacity-80"
+                      style={{ color: "var(--text-muted)" }}
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </motion.div>
                 )}
               </AnimatePresence>
             </div>

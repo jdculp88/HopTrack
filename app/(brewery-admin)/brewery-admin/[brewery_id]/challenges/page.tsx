@@ -2,6 +2,8 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { ChallengesClient } from "./ChallengesClient";
 
+export const metadata = { title: "Challenges — HopTrack" };
+
 export default async function ChallengesPage({
   params,
 }: {

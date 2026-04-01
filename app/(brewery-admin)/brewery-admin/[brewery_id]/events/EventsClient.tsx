@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Calendar, Plus, X, Save, Loader2, Trash2, AlertTriangle, ToggleLeft, ToggleRight, Clock } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { useToast } from "@/components/ui/Toast";
 import { formatDate } from "@/lib/dates";
 
 function getNowDatetimeLocal() {
@@ -39,6 +40,7 @@ interface EventsClientProps {
 }
 
 export function EventsClient({ breweryId, initialEvents }: EventsClientProps) {
+  const { success, error: showError } = useToast();
   const [events, setEvents] = useState(initialEvents);
   const [showForm, setShowForm] = useState(false);
   const [editingEvent, setEditingEvent] = useState<any | null>(null);
@@ -126,13 +128,15 @@ export function EventsClient({ breweryId, initialEvents }: EventsClientProps) {
     };
 
     if (editingEvent) {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("brewery_events").update(payload).eq("id", editingEvent.id).select().single();
-      if (data) setEvents(prev => prev.map(e => e.id === editingEvent.id ? { ...e, ...data } : e));
+      if (error) { showError("Failed to save event"); }
+      else if (data) { setEvents(prev => prev.map(e => e.id === editingEvent.id ? { ...e, ...data } : e)); success("Event updated"); }
     } else {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("brewery_events").insert({ ...payload, is_active: true }).select().single();
-      if (data) setEvents(prev => [...prev, data].sort((a, b) => a.event_date.localeCompare(b.event_date)));
+      if (error) { showError("Failed to create event"); }
+      else if (data) { setEvents(prev => [...prev, data].sort((a, b) => a.event_date.localeCompare(b.event_date))); success("Event created"); }
     }
 
     setSaving(false);
@@ -146,14 +150,24 @@ export function EventsClient({ breweryId, initialEvents }: EventsClientProps) {
     const newVal = !event.is_active;
     setEvents(prev => prev.map(e => e.id === event.id ? { ...e, is_active: newVal } : e));
     const { error } = await supabase.from("brewery_events").update({ is_active: newVal }).eq("id", event.id);
-    if (error) setEvents(prev => prev.map(e => e.id === event.id ? { ...e, is_active: event.is_active } : e));
+    if (error) {
+      setEvents(prev => prev.map(e => e.id === event.id ? { ...e, is_active: event.is_active } : e));
+      showError("Failed to update event");
+    } else {
+      success(newVal ? "Event activated" : "Event paused");
+    }
   }
 
   async function deleteEvent(id: string) {
     setDeletingId(id);
     setConfirmDeleteId(null);
-    await supabase.from("brewery_events").delete().eq("id", id);
-    setEvents(prev => prev.filter(e => e.id !== id));
+    const { error } = await supabase.from("brewery_events").delete().eq("id", id);
+    if (error) {
+      showError("Failed to delete event");
+    } else {
+      setEvents(prev => prev.filter(e => e.id !== id));
+      success("Event deleted");
+    }
     setDeletingId(null);
   }
 

@@ -160,22 +160,21 @@ export default async function HomePage() {
   const { reactionCounts, userReactions, commentCounts } =
     await fetchReactionData(supabase, user.id, allSessionIds);
 
-  // Editorial content — Seasonal & Limited + Curated Collections (Jamie owns)
-  const seasonalBeers = [
-    { id: "s1", name: "Spring Saison", brewery: "River Bend Ales", style: "Saison", badge: "Seasonal" as const },
-    { id: "s2", name: "Cherry Blossom Sour", brewery: "Mountain Ridge Brewing", style: "Sour", badge: "Limited" as const },
-    { id: "s3", name: "Citrus Wheat", brewery: "Smoky Barrel Craft Co.", style: "Wheat", badge: "Seasonal" as const },
-    { id: "s4", name: "Double Barrel Imp. Stout", brewery: "Smoky Barrel Craft Co.", style: "Stout", badge: "Limited" as const },
-  ];
+  // Recently added beers (real data, replaces hardcoded seasonal beers)
+  const { data: recentBeers } = await supabase
+    .from("beers")
+    .select("id, name, style, brewery:breweries(name)")
+    .eq("is_active", true)
+    .order("created_at", { ascending: false })
+    .limit(4) as any;
 
-  const curatedCollections = [
-    { id: "c1", title: "New England IPA Essentials", count: 12, emoji: "🍺", description: "Hazy, juicy, and endlessly crushable", tagColor: "gold" as const },
-    { id: "c2", title: "The Dark Side", count: 18, emoji: "🌑", description: "Stouts, porters, and midnight sippers", tagColor: "dark" as const },
-    { id: "c3", title: "Sour Power", count: 9, emoji: "🍋", description: "Tart, funky, and unapologetically weird", tagColor: "amber" as const },
-    { id: "c4", title: "Session Crushers", count: 15, emoji: "🏃", description: "Under 5% ABV and dangerously drinkable", tagColor: "green" as const },
-    { id: "c5", title: "Barrel-Aged Beasts", count: 7, emoji: "🛢️", description: "Big, boozy, and worth every calorie", tagColor: "gold" as const },
-    { id: "c6", title: "Lager Renaissance", count: 11, emoji: "🌾", description: "Crispy, clean, and back in style", tagColor: "amber" as const },
-  ];
+  const seasonalBeers = (recentBeers ?? []).map((b: any) => ({
+    id: b.id,
+    name: b.name,
+    brewery: b.brewery?.name ?? "Unknown Brewery",
+    style: b.style ?? "Beer",
+    badge: "New" as const,
+  }));
 
   return (
     <HomeFeed
@@ -191,7 +190,6 @@ export default async function HomePage() {
         upcomingEvents: community.upcomingEvents,
         newBreweries: community.newBreweries,
         seasonalBeers,
-        curatedCollections,
       }}
       friendRatings={community.friendRatings as any}
       friendAchievements={social.friendAchievements as any}

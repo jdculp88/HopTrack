@@ -11,14 +11,16 @@ export async function GET(
 ) {
   const { code } = await params;
 
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return Response.json({ data: null, error: { message: "Unauthorized" } }, { status: 401 });
+
   if (!code || code.length < 8 || code.length > 14) {
     return Response.json(
       { data: null, error: { message: "Invalid barcode. Expected 8-14 digit UPC/EAN." } },
       { status: 400 }
     );
   }
-
-  const supabase = await createClient();
 
   // Look up beer by barcode
   const { data: beer, error } = await supabase

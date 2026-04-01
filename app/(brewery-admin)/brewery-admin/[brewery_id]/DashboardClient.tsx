@@ -56,12 +56,13 @@ export function ActiveSessionsCounter({ breweryId, initialCount }: ActiveSession
   useEffect(() => {
     const interval = setInterval(async () => {
       try {
-        const res = await fetch(`/api/brewery/${breweryId}/customers/export?active_only=true`, {
-          method: "HEAD",
-        });
-        // Fall back to just re-rendering with same count since we don't have a lightweight active-count endpoint
+        const res = await fetch(`/api/brewery/${breweryId}/active-sessions`);
+        if (res.ok) {
+          const { count: c } = await res.json();
+          if (typeof c === "number") setCount(c);
+        }
       } catch {
-        // ignore
+        // ignore — keep showing last known count
       }
     }, 60_000);
     return () => clearInterval(interval);

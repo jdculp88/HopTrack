@@ -205,7 +205,7 @@ export interface SeasonalBeer {
   name: string
   brewery: string
   style: string
-  badge: 'Limited' | 'Seasonal'
+  badge: 'Limited' | 'Seasonal' | 'New'
 }
 
 export function SeasonalBeersScroll({ beers }: { beers: SeasonalBeer[] }) {
@@ -218,7 +218,7 @@ export function SeasonalBeersScroll({ beers }: { beers: SeasonalBeer[] }) {
       transition={{ duration: 0.3 }}
     >
       <p className="text-[10px] font-mono uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)' }}>
-        Seasonal & Limited
+        New & Noteworthy
       </p>
       <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide">
         {beers.map((beer, i) => (

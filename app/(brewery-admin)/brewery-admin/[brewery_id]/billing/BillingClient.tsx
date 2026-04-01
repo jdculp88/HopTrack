@@ -322,17 +322,20 @@ export function BillingClient({ brewery }: { brewery: Brewery }) {
           <div className="pt-2 border-t" style={{ borderColor: "color-mix(in srgb, var(--accent-gold) 20%, transparent)" }}>
             <AnimatePresence mode="wait">
               {!showCancelConfirm ? (
-                <motion.button
+                <motion.div
                   key="cancel-trigger"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  onClick={() => setShowCancelConfirm(true)}
-                  className="text-xs transition-opacity hover:opacity-80"
-                  style={{ color: "var(--text-muted)" }}
                 >
-                  Cancel subscription
-                </motion.button>
+                  <button
+                    onClick={() => setShowCancelConfirm(true)}
+                    className="text-xs transition-opacity hover:opacity-80"
+                    style={{ color: "var(--text-muted)" }}
+                  >
+                    Cancel subscription
+                  </button>
+                </motion.div>
               ) : (
                 <motion.div
                   key="cancel-confirm"

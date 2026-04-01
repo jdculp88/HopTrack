@@ -52,7 +52,7 @@ export function PromotionsClient({ brewery }: PromotionsClientProps) {
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+    <div className="max-w-2xl mx-auto px-4 sm:px-6 py-6 pt-16 lg:pt-8 space-y-6">
       <div className="flex items-center gap-3">
         <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: "color-mix(in srgb, var(--accent-gold) 15%, transparent)", color: "var(--accent-gold)" }}>
           <Beer size={20} />

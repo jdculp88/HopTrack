@@ -102,7 +102,7 @@ export default async function BeerListPage({
               )}
               {isOwner && (
                 <Link
-                  href={`/profile/${username}`}
+                  href={`/beer-lists/${listId}`}
                   className="inline-flex items-center gap-1 text-xs px-3 py-1.5 rounded-xl transition-colors"
                   style={{
                     background: "var(--surface-2)",

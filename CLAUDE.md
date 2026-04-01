@@ -246,9 +246,11 @@ scripts/supabase-setup.mjs    — One-time setup script
 
 ## 🗺️ Where We Are
 
-**Current Sprint:** Sprint 91 — The Spotlight 🎯
-**Arc:** The Flywheel (Sprint 1 of 6)
-**Sprint plan (91):** `docs/plans/sprint-91-plan.md` — Sponsored challenges: migration 060 (is_sponsored, cover_image_url, geo_radius_km, impressions, joins_from_discovery), creation UI with tier gating (Cask/Barrel), discovery (Challenges Near You in Discover, /api/challenges/nearby with haversine geo), analytics (impression tracking, join source tracking, conversion rate). Deep QA/BA audit: 83 API routes, 40+ pages — 3 P0s, 12 P1s, 15+ P2s queued for Sprints 92-94. Audit report: `docs/plans/qa-audit-sprint-91.md`.
+**Current Sprint:** Sprint 92 — The Audit Fix 🔧
+**Arc:** The Flywheel (Sprint 2 of 6)
+**Sprint plan (92):** `docs/plans/sprint-92-plan.md` — QA audit burndown: 3 P0s (ActiveSessionsCounter polling fix, embed auth check, motion.button violations), 9 P1s (fake Discover data → real DB queries, curated collections removed, beer list Edit link, notification link, Loyalty/Events toasts, 3 loading.tsx, 5 API auth checks, leaderboard xp_awarded fix), 4 P2 quick wins (promotions padding, metadata exports). 16 bugs fixed, 0 remaining P0s. Audit report: `docs/plans/qa-audit-sprint-91.md`.
+**Last completed:** Sprint 91 — The Spotlight ✅ — Sponsored challenges (migration 060, creation UI with tier gating, discovery with haversine geo, analytics). Deep QA/BA audit: 83 API routes, 40+ pages.
+**Retro (91):** `docs/retros/sprint-91-retro.md` (facilitated by Sage)
 **Last completed:** Sprint 90 — The Close-Out ✅ — Arc close-out: API v1 polish, CRM threshold fix, REQ-072 audit. Open the Pipes arc CLOSED.
 **Retro (90):** `docs/retros/sprint-90-retro.md` (arc retro included)
 **Retro (89):** `docs/retros/sprint-89-retro.md`

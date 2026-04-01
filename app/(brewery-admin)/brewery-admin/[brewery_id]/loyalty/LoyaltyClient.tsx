@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Award, Tag, ToggleLeft, ToggleRight, X, Save, Loader2, Trash2, Edit2, AlertTriangle, QrCode, Users, Stamp, Gift, TrendingUp } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/components/ui/Toast";
 import { LoyaltyQRModal } from "@/components/loyalty/LoyaltyQRModal";
 import { formatDate } from "@/lib/dates";
 
@@ -21,6 +22,7 @@ const emptyProgram = { name: "The Hop Club", description: "", stamps_required: "
 const emptyPromo = { title: "", description: "", discount_type: "percent" as const, discount_value: "", ends_at: "", beer_id: "" };
 
 export function LoyaltyClient({ breweryId, initialPrograms, initialPromotions, beers, loyaltyCards, recentRedemptions }: LoyaltyClientProps) {
+  const { success, error: showError } = useToast();
   const [programs, setPrograms] = useState(initialPrograms);
   const [promotions, setPromotions] = useState(initialPromotions);
   const [showProgramForm, setShowProgramForm] = useState(false);
@@ -64,13 +66,15 @@ export function LoyaltyClient({ breweryId, initialPrograms, initialPromotions, b
     };
 
     if (editingProgram) {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("loyalty_programs").update(payload).eq("id", editingProgram.id).select().single();
-      if (data) setPrograms(p => p.map(x => x.id === editingProgram.id ? { ...x, ...data } : x));
+      if (error) { showError("Failed to save program"); }
+      else if (data) { setPrograms(p => p.map(x => x.id === editingProgram.id ? { ...x, ...data } : x)); success("Program updated"); }
     } else {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("loyalty_programs").insert({ ...payload, is_active: true }).select().single();
-      if (data) setPrograms(p => [data, ...p]);
+      if (error) { showError("Failed to create program"); }
+      else if (data) { setPrograms(p => [data, ...p]); success("Program created"); }
     }
 
     setSavingProgram(false);
@@ -82,7 +86,7 @@ export function LoyaltyClient({ breweryId, initialPrograms, initialPromotions, b
   async function savePromo() {
     if (!promoForm.title.trim()) return;
     setSavingPromo(true);
-    const { data } = await supabase.from("promotions").insert({
+    const { data, error } = await supabase.from("promotions").insert({
       brewery_id: breweryId,
       title: promoForm.title,
       description: promoForm.description || null,
@@ -92,7 +96,8 @@ export function LoyaltyClient({ breweryId, initialPrograms, initialPromotions, b
       beer_id: promoForm.beer_id || null,
       is_active: true,
     }).select().single();
-    if (data) setPromotions(p => [data, ...p]);
+    if (error) { showError("Failed to create promotion"); }
+    else if (data) { setPromotions(p => [data, ...p]); success("Promotion created"); }
     setSavingPromo(false);
     setShowPromoForm(false);
     setPromoForm(emptyPromo);
@@ -102,21 +107,36 @@ export function LoyaltyClient({ breweryId, initialPrograms, initialPromotions, b
     const newVal = !prog.is_active;
     setPrograms(p => p.map(x => x.id === prog.id ? { ...x, is_active: newVal } : x));
     const { error } = await supabase.from("loyalty_programs").update({ is_active: newVal }).eq("id", prog.id);
-    if (error) setPrograms(p => p.map(x => x.id === prog.id ? { ...x, is_active: prog.is_active } : x));
+    if (error) {
+      setPrograms(p => p.map(x => x.id === prog.id ? { ...x, is_active: prog.is_active } : x));
+      showError("Failed to update program");
+    } else {
+      success(newVal ? "Program activated" : "Program paused");
+    }
   }
 
   async function togglePromo(promo: any) {
     const newVal = !promo.is_active;
     setPromotions(p => p.map(x => x.id === promo.id ? { ...x, is_active: newVal } : x));
     const { error } = await supabase.from("promotions").update({ is_active: newVal }).eq("id", promo.id);
-    if (error) setPromotions(p => p.map(x => x.id === promo.id ? { ...x, is_active: promo.is_active } : x));
+    if (error) {
+      setPromotions(p => p.map(x => x.id === promo.id ? { ...x, is_active: promo.is_active } : x));
+      showError("Failed to update promotion");
+    } else {
+      success(newVal ? "Promotion activated" : "Promotion paused");
+    }
   }
 
   async function deletePromo(id: string) {
     setDeletingPromoId(id);
     setConfirmDeletePromoId(null);
-    await supabase.from("promotions").delete().eq("id", id);
-    setPromotions(p => p.filter(x => x.id !== id));
+    const { error } = await supabase.from("promotions").delete().eq("id", id);
+    if (error) {
+      showError("Failed to delete promotion");
+    } else {
+      setPromotions(p => p.filter(x => x.id !== id));
+      success("Promotion deleted");
+    }
     setDeletingPromoId(null);
   }
 

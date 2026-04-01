@@ -723,7 +723,7 @@ function SingleNotification({
           {/* Achievement unlocked — View Achievements */}
           {n.type === "achievement_unlocked" && (
             <Link
-              href="/profile/achievements"
+              href="/achievements"
               className="inline-flex items-center gap-1.5 text-xs font-mono text-[var(--text-muted)] hover:text-[var(--accent-gold)] transition-colors"
             >
               <ExternalLink size={11} /> View Achievements
