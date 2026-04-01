@@ -1,8 +1,8 @@
 # HopTrack Product Roadmap
 **Last updated:** 2026-04-01
 **PM:** Morgan
-**Current Sprint:** Sprint 89 — The Rolodex 📇
-**Last completed:** Sprint 88 — The Monitor ✅
+**Current Sprint:** Sprint 90 — The Close-Out 🔐
+**Last completed:** Sprint 89 — The Rolodex ✅
 
 > This is a living document -- updated every sprint. For completed sprints 1-12, see `docs/roadmap-archive.md`. For sprint plans, see `docs/plans/`. For the Shore It Up master plan (Sprints 64-73), see `docs/plans/sprint-64-73-master-plan.md`. For the Q2 2026 roadmap research (30 features, 18 REQs, 4 sprint arcs), see `docs/plans/roadmap-research-2026-q2.md`.
 
@@ -311,6 +311,51 @@ Vitest configured (39 unit tests across 4 files). Vitest added to CI. Cookie con
 
 ---
 
+## Sprint 90 — The Close-Out 🔐 (2026-04-01)
+**Theme:** Arc close-out — polish, research, documentation
+**Arc:** Open the Pipes (Sprint 6 of 6 — FINAL)
+**Plan:** `docs/plans/sprint-90-plan.md`
+
+**Goal 1: API v1 Polish** — Jordan's audit found 4 issues in the api-keys management endpoint (`/api/v1/brewery/[brewery_id]/api-keys/`): missing CORS preflight handler, GET/PATCH using `NextResponse.json()` instead of standardized `apiResponse()`/`apiError()` helpers, GET/PATCH missing rate limiting. All 4 fixed. Endpoint now matches the envelope format (`{ data, meta, error }`) used by all other v1 routes.
+
+**Goal 2: CRM Tier Threshold Fix** — CSV export (`/api/brewery/[brewery_id]/customers/export/`) was using hardcoded thresholds (VIP ≥30, Power ≥15, Regular ≥5) that didn't match `lib/crm.ts` (VIP ≥10, Power ≥5, Regular ≥2). Fixed: export now imports `computeSegment()` and `getSegmentById()` from lib/crm.ts — single source of truth.
+
+**Goal 3: Multi-Location Research (REQ-072 Audit)** — Reviewed REQ-072 (Multi-Location Brewery Support). Document is comprehensive: full data model (brewery_brands + brand_accounts tables), permission inheritance, billing model ($149 base + $29-49/location), consumer brand pages, 12 acceptance criteria, 6-8 sprint estimate. No gaps found — ready for The Flywheel arc.
+
+**Goal 4: Arc Close-Out** — Roadmap updated. Open the Pipes arc summary documented. The Flywheel arc (Sprints 91-96) previewed.
+
+**Key changes from Sprint 90:**
+- `app/api/v1/brewery/[brewery_id]/api-keys/route.ts` — UPDATED: CORS handler, apiResponse/apiError envelope, rate limiting on GET/PATCH
+- `app/api/brewery/[brewery_id]/customers/export/route.ts` — UPDATED: uses lib/crm.ts for segment thresholds
+- `docs/roadmap.md` — UPDATED: Sprint 90 + arc summary
+- No new migrations
+
+### Open the Pipes Arc Summary (Sprints 85-90) ✅
+
+**6 sprints. 0 carryover. Arc complete.**
+
+| Sprint | Name | Delivered |
+|--------|------|-----------|
+| 85 | The Pipeline | Public API v1 (7 endpoints, API keys, rate limiting, CORS, docs) |
+| 86 | The Connector | POS foundation (schema, AES-256-GCM encryption, webhooks, Settings UI, tier gating) |
+| 87 | The Sync Engine | POS sync engine (reconciliation, auto-mapper ≥80%, Toast+Square adapters, 33 tests) |
+| 88 | The Monitor | POS visibility (dashboard card, sync log page with filters, alert banner, quick action) |
+| 89 | The Rolodex | Brewery CRM (customer profiles, engagement scoring, segments, barcode scanning pilot) |
+| 90 | The Close-Out | API polish, CRM threshold fix, multi-location research, arc documentation |
+
+**Arc exit criteria met:**
+- ✅ Public API documented and live (Sprint 85)
+- ✅ POS engine built and ready — OAuth pending partner approval (Sprints 86-88)
+- ✅ Barcode scanning piloted (Sprint 89)
+- ✅ Brewery CRM shipped (Sprint 89 — bonus)
+- ✅ Multi-location research complete — REQ-072 ready (Sprint 90)
+
+**Migrations this arc:** 057 (api_keys), 058 (POS schema), 059 (beer barcode)
+
+**Next arc:** The Flywheel (Sprints 91-96) — Sponsored challenges, ad engine, mug clubs, multi-location. Revenue flywheel.
+
+---
+
 ## Backlog
 
 | # | Item | Notes | Source |
@@ -330,7 +375,7 @@ Vitest configured (39 unit tests across 4 files). Vitest added to CI. Cookie con
 |-----|---------|-------|-------------|
 | Launch or Bust | 75-78 | Revenue plumbing, first brewery | Stripe billing stub, email infra stub, CI/CD, staging, launch prep |
 | Stick Around | 79-84 | Retention | Weekly digests, ROI dashboard, challenges, Wrapped, smart push, HopRoute autocomplete |
-| Open the Pipes | 85-90 | Integrations | POS (Toast/Square), barcode scanning, CRM, public API |
+| Open the Pipes | 85-90 | Integrations ✅ | POS (Toast/Square), barcode scanning, CRM, public API |
 | The Flywheel | 91-96 | Revenue flywheel | Sponsored challenges, mug clubs, ad engine, promotion hub, multi-location |
 
 ---

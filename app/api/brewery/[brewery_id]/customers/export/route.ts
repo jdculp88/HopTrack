@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { computeSegment, getSegmentById } from "@/lib/crm";
 
 // GET /api/brewery/[brewery_id]/customers/export
 // Streams CSV download of customer data for brewery owners
@@ -94,11 +95,9 @@ export async function GET(
         if (count > maxCount) { maxCount = count; favBeer = beer; }
       }
 
-      // Determine tier
-      let tier = "";
-      if (u.visits >= 30) tier = "VIP";
-      else if (u.visits >= 15) tier = "Power User";
-      else if (u.visits >= 5) tier = "Regular";
+      // Determine tier — uses CRM single source of truth
+      const segment = computeSegment(u.visits);
+      const tier = getSegmentById(segment).label;
 
       const lastVisit = new Date(u.last_visit).toISOString().split("T")[0];
 
