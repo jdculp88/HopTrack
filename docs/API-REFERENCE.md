@@ -1,6 +1,6 @@
 # HopTrack API Reference
-**Last updated:** 2026-04-01 (Sprint 91)
-**Total endpoints:** 66
+**Last updated:** 2026-04-01 (Sprint 103)
+**Total endpoints:** 98+
 **Auth:** Supabase JWT (via cookie). All endpoints require auth unless noted.
 **Rate limiting:** Applied via `rateLimitResponse()` in `lib/rate-limit.ts`.
 
@@ -189,6 +189,79 @@ Rate limits return `429` with:
 ```
 
 Limits are per-IP, configured in `lib/rate-limit.ts`.
+
+## POS Integration (9 endpoints)
+
+| Method | Path | Description | Rate Limit |
+|--------|------|-------------|------------|
+| POST | `/api/pos/connect/[provider]` | Initiate POS OAuth connection (Toast/Square) | - |
+| POST | `/api/pos/disconnect/[provider]` | Disconnect POS provider | - |
+| POST | `/api/pos/callback/[provider]` | OAuth callback handler | - |
+| GET | `/api/pos/status` | Get POS connection status for brewery | - |
+| POST | `/api/pos/sync/[provider]` | Manual sync trigger | - |
+| GET | `/api/pos/sync-logs` | Fetch sync history | - |
+| POST | `/api/pos/webhook/toast` | Toast POS webhook receiver | HMAC verified |
+| POST | `/api/pos/webhook/square` | Square POS webhook receiver | HMAC verified |
+| GET/POST | `/api/pos/mapping` | Beer mapping management | - |
+
+## Ads & Ad Engine (5 endpoints)
+
+| Method | Path | Description | Rate Limit |
+|--------|------|-------------|------------|
+| GET | `/api/ads/feed` | Fetch geo-targeted ads for consumer feed | - |
+| POST | `/api/ads/impression` | Record ad impression | - |
+| POST | `/api/ads/click` | Record ad click | - |
+| GET/POST | `/api/brewery/[id]/ads` | Brewery ad CRUD (list + create) | - |
+| GET/PATCH/DELETE | `/api/brewery/[id]/ads/[ad_id]` | Individual ad management | - |
+
+## Mug Clubs (3 endpoints)
+
+| Method | Path | Description | Rate Limit |
+|--------|------|-------------|------------|
+| GET/POST | `/api/brewery/[id]/mug-clubs` | List/create mug clubs | - |
+| GET/PATCH/DELETE | `/api/brewery/[id]/mug-clubs/[clubId]` | Individual club management | - |
+| GET/POST | `/api/brewery/[id]/mug-clubs/[clubId]/members` | Member management | - |
+
+## Redemptions (2 endpoints)
+
+| Method | Path | Description | Rate Limit |
+|--------|------|-------------|------------|
+| POST | `/api/redemptions/generate` | Generate 6-char redemption code (5-min expiry) | 5/min |
+| POST | `/api/brewery/[id]/redemptions/confirm` | Staff confirms redemption code | 10/min |
+
+## Promotions (2 endpoints)
+
+| Method | Path | Description | Rate Limit |
+|--------|------|-------------|------------|
+| GET/POST | `/api/brewery/[id]/promotions` | Brewery promotions CRUD | - |
+| GET | `/api/brewery/[id]/promotions/summary` | Promotion analytics summary | - |
+
+## Event RSVPs (1 endpoint)
+
+| Method | Path | Description | Rate Limit |
+|--------|------|-------------|------------|
+| GET/POST/DELETE | `/api/events/[event_id]/rsvp` | RSVP management (going/interested) | - |
+
+## Smart Triggers (1 endpoint)
+
+| Method | Path | Description | Rate Limit |
+|--------|------|-------------|------------|
+| POST | `/api/beers/[beer_id]/on-tap` | Fire wishlist-on-tap smart notification | - |
+
+## Wrapped & Digest (2 endpoints)
+
+| Method | Path | Description | Rate Limit |
+|--------|------|-------------|------------|
+| GET | `/api/wrapped` | HopTrack Wrapped year-in-review stats | - |
+| POST | `/api/cron/weekly-digest` | Cron: batch weekly digest emails | CRON_SECRET |
+
+## Auth (1 endpoint)
+
+| Method | Path | Description | Rate Limit |
+|--------|------|-------------|------------|
+| POST | `/api/auth/welcome` | Fire welcome email after signup | 5/min |
+
+---
 
 ## Routing
 
