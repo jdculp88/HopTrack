@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { sendPushToUser } from '@/lib/push'
+import { triggerFriendSession } from '@/lib/smart-triggers'
 import { rateLimitResponse } from '@/lib/rate-limit'
 
 // POST /api/sessions — start a new session (check-in at brewery or home)
@@ -175,5 +176,11 @@ async function notifyFriendsSessionStarted(
       tag: `friend-session-start-${sessionId}`,
       data: { url: breweryId ? `/brewery/${breweryId}` : `/profile/${myProfile?.username}` },
     })
+  }
+
+  // Smart trigger: friend session (F-019) — uses frequency caps + dedup
+  if (breweryId && breweryName) {
+    triggerFriendSession(supabase, userId, displayName, breweryId, breweryName)
+      .catch((err) => console.warn("[smart-trigger] friend_session error:", err))
   }
 }

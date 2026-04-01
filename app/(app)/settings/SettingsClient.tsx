@@ -19,7 +19,10 @@ interface SettingsClientProps {
 
 const inputCls = "w-full bg-[var(--surface-2)] border border-[var(--border)] rounded-xl px-4 py-3 text-[var(--text-primary)] text-sm outline-none transition-colors focus:border-[var(--accent-gold)] placeholder:text-[var(--text-muted)]";
 
-const DEFAULT_PREFS = { friend_activity: true, achievements: true, weekly_stats: true, share_live: true };
+const DEFAULT_PREFS = {
+  friend_activity: true, achievements: true, weekly_stats: true, share_live: true,
+  smart_wishlist_on_tap: true, smart_friend_session: true, smart_loyalty_nudge: true,
+};
 
 export function SettingsClient({ profile, userEmail }: SettingsClientProps) {
   const router = useRouter();
@@ -433,8 +436,29 @@ export function SettingsClient({ profile, userEmail }: SettingsClientProps) {
             value={notifPrefs.weekly_stats}
             onChange={(v) => handleNotifToggle("weekly_stats", v)}
           />
+          <p className="text-[10px] font-mono uppercase tracking-wide text-[var(--accent-gold)] pt-3 mt-2 border-t border-[var(--border)]">
+            Smart Notifications
+          </p>
+          <ToggleRow
+            label="Wishlist On Tap"
+            description="Get notified when a wishlisted beer goes on tap nearby"
+            value={notifPrefs.smart_wishlist_on_tap}
+            onChange={(v) => handleNotifToggle("smart_wishlist_on_tap", v)}
+          />
+          <ToggleRow
+            label="Friend Sessions"
+            description="Get notified when a friend starts drinking"
+            value={notifPrefs.smart_friend_session}
+            onChange={(v) => handleNotifToggle("smart_friend_session", v)}
+          />
+          <ToggleRow
+            label="Loyalty Reminders"
+            description="Get reminded when you're close to earning a reward"
+            value={notifPrefs.smart_loyalty_nudge}
+            onChange={(v) => handleNotifToggle("smart_loyalty_nudge", v)}
+          />
           <p className="text-xs text-[var(--text-muted)] pt-3 mt-2 border-t border-[var(--border)]">
-            Push notifications are delivered when the app is closed. In-app notifications are always on.
+            Push notifications are delivered when the app is closed. Smart notifications are limited to 3 per day. In-app notifications are always on.
           </p>
         </div>
       </Section>

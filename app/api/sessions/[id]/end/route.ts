@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getLevelFromXP, SESSION_XP } from '@/lib/xp'
 import { sendPushToUser } from '@/lib/push'
+import { triggerLoyaltyNudge } from '@/lib/smart-triggers'
 import { rateLimitResponse } from '@/lib/rate-limit'
 
 export async function PATCH(
@@ -479,6 +480,19 @@ export async function PATCH(
     `)
     .eq('id', sessionId)
     .single()
+
+  // Smart trigger: loyalty nudge (F-019) — check if user is close to a reward
+  if (session.brewery_id) {
+    const { data: breweryInfo } = await (supabase
+      .from("breweries")
+      .select("name")
+      .eq("id", session.brewery_id)
+      .single() as any);
+    if (breweryInfo?.name) {
+      triggerLoyaltyNudge(supabase, user.id, session.brewery_id, breweryInfo.name)
+        .catch((err) => console.warn("[smart-trigger] loyalty_nudge error:", err));
+    }
+  }
 
   return NextResponse.json({
     xpGained,
