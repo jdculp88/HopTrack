@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { AppShell } from "@/components/layout/AppShell";
+import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
@@ -25,8 +26,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const username = profile?.username ?? user.email?.split("@")[0] ?? "me";
 
   return (
-    <AppShell username={username} unreadNotifications={unreadCount ?? 0}>
-      {children}
-    </AppShell>
+    <ErrorBoundary context="AppLayout">
+      <AppShell username={username} unreadNotifications={unreadCount ?? 0}>
+        {children}
+      </AppShell>
+    </ErrorBoundary>
   );
 }
