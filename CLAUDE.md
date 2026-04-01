@@ -248,9 +248,11 @@ scripts/supabase-setup.mjs    — One-time setup script
 
 ## 🗺️ Where We Are
 
-**Current Sprint:** Sprint 94 — TBD
-**Arc:** The Flywheel (Sprint 4 of 6)
-**Sprint plan (94):** `docs/plans/sprint-94-plan.md` — mug clubs + P2 polish
+**Current Sprint:** Sprint 95 — The Hub
+**Arc:** The Flywheel (Sprint 5 of 6)
+**Sprint plan (95):** `docs/plans/sprint-95-plan.md` — Promotion Hub (F-029), HopRoute config relocation, BL-006 queued
+**Last completed:** Sprint 94 — The Club ✅ — Digital mug clubs (F-020), ad feed wiring, security RLS fix, lint 223→0, 149→206 tests.
+**Retro (94):** `docs/retros/sprint-94-retro.md` (facilitated by Morgan)
 **Last completed:** Sprint 93 — The Hardening ✅ — Full QA audit close-out (30/30 items), ad engine foundation (F-028: migration 061, 7 endpoints, feed card, admin UI), 11 endpoints rate-limited, TapList data integrity fixes, Wrapped/PintRewind SSR, skip-to-content a11y.
 **Retro (93):** `docs/retros/sprint-93-retro.md` (facilitated by Morgan)
 **Last completed:** Sprint 92 — The Audit Fix ✅ — 16 bugs fixed (3 P0s, 9 P1s, 4 P2s), zero P0s remaining. Audit report: `docs/plans/qa-audit-sprint-91.md`.

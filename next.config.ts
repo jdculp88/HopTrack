@@ -3,6 +3,14 @@ import { withSentryConfig } from "@sentry/nextjs";
 
 const nextConfig: NextConfig = {
   reactStrictMode: false,
+  experimental: {
+    // Disable client-side Router Cache so navigations always fetch fresh server data.
+    // Without this, Next.js caches RSC payloads and pages appear stale until hard refresh.
+    staleTimes: {
+      dynamic: 0,
+      static: 0,
+    },
+  },
   async headers() {
     return [
       {

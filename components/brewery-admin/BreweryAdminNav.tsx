@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, List, BarChart2, Gift, Settings, ChevronDown, ExternalLink, Rewind, LogOut, Calendar, QrCode, CreditCard, Users, FileText, Beer, Mail, Trophy, BookOpen, Activity, Code2, Tv, RefreshCw, Megaphone, Crown } from "lucide-react";
+import { LayoutDashboard, List, BarChart2, Gift, Settings, ChevronDown, ExternalLink, Rewind, LogOut, Calendar, QrCode, CreditCard, Users, FileText, Mail, Trophy, BookOpen, Activity, Code2, Tv, RefreshCw, Megaphone, Crown } from "lucide-react";
 import { HopMark } from "@/components/ui/HopMark";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
@@ -21,11 +21,11 @@ const NAV_ITEMS = [
   { href: "/qr",            label: "Table Tent",   icon: QrCode },
   { href: "/report",        label: "Report",       icon: FileText },
   { href: "/sessions",      label: "Sessions",     icon: Activity },
-  { href: "/promotions",    label: "Promotions",   icon: Beer },
+  { href: "/promotions",    label: "Promo Hub",    icon: Megaphone },
+  { href: "/ads",           label: "Ad Campaigns", icon: Megaphone },
   { href: "/embed",         label: "Embed",        icon: Code2 },
   { href: "/board",         label: "Board",        icon: Tv },
   { href: "/pos-sync",      label: "POS Sync",     icon: RefreshCw },
-  { href: "/ads",           label: "Ad Campaigns", icon: Megaphone },
   { href: "/pint-rewind",   label: "Pint Rewind",  icon: Rewind },
   { href: "/settings",      label: "Settings",     icon: Settings },
   { href: "/billing",       label: "Billing",      icon: CreditCard },

@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { Save, Loader2, UtensilsCrossed, Key, Plug, Unplug, RefreshCw, ArrowUpRight, Lock, ChevronDown, ChevronUp, X } from "lucide-react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { Save, Loader2, UtensilsCrossed, Key, Plug, Unplug, RefreshCw, ArrowUpRight, Lock, ChevronDown, ChevronUp, X, Sparkles, Tag, ToggleLeft, ToggleRight } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useToast } from "@/components/ui/Toast";
 import { ImageUpload } from "@/components/ui/ImageUpload";
@@ -179,6 +179,11 @@ export function BrewerySettingsClient({ brewery, role, subscriptionTier = "free"
         </div>
       )}
 
+      {/* HopRoute & Discovery */}
+      {(role === "owner" || role === "manager") && (
+        <HopRouteSettingsSection brewery={brewery} />
+      )}
+
       {/* POS Integration */}
       {(role === "owner" || role === "manager") && (
         <PosSettingsSection breweryId={brewery.id} subscriptionTier={subscriptionTier} />
@@ -200,6 +205,136 @@ export function BrewerySettingsClient({ brewery, role, subscriptionTier = "free"
           </button>
         </div>
       )}
+    </div>
+  );
+}
+
+// ─── HopRoute & Discovery Section ────────────────────────────────────────────
+
+const VIBE_PRESETS = ["rooftop", "dog-friendly", "live music", "outdoor", "lively", "chill", "food", "waterfront", "barrel-aged", "sports bar", "family-friendly", "late night"];
+
+function HopRouteSettingsSection({ brewery }: { brewery: any }) {
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const [eligible, setEligible] = useState(brewery?.hop_route_eligible ?? false);
+  const [offer, setOffer] = useState(brewery?.hop_route_offer ?? "");
+  const [vibeTags, setVibeTags] = useState<string[]>(brewery?.vibe_tags ?? []);
+  const [saving, setSaving] = useState(false);
+  const { success, error: showError } = useToast();
+
+  useEffect(() => {
+    if (window.location.hash === "#hoproute" && sectionRef.current) {
+      sectionRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, []);
+
+  function toggleVibe(tag: string) {
+    setVibeTags(prev => prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]);
+  }
+
+  async function handleSave() {
+    setSaving(true);
+    try {
+      const res = await fetch(`/api/brewery/${brewery.id}/promotions`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ hop_route_eligible: eligible, hop_route_offer: offer, vibe_tags: vibeTags }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        showError(data.error ?? "Failed to save");
+        return;
+      }
+      success("HopRoute settings saved!");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div ref={sectionRef} id="hoproute" className="mt-6 rounded-2xl border p-6 space-y-5" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
+      <div className="flex items-center gap-2 mb-1">
+        <Sparkles size={18} style={{ color: "var(--accent-gold)" }} />
+        <h3 className="font-display font-bold text-lg" style={{ color: "var(--text-primary)" }}>HopRoute & Discovery</h3>
+      </div>
+      <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+        Control how your brewery appears in AI-generated HopRoute crawl plans.
+      </p>
+
+      {/* Eligibility Toggle */}
+      <div className="flex items-start justify-between gap-4">
+        <div className="space-y-1">
+          <h4 className="font-semibold text-sm" style={{ color: "var(--text-primary)" }}>Eligible for HopRoute Placement</h4>
+          <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+            When enabled, your brewery will be weighted slightly higher in AI-generated routes for users near you.
+          </p>
+        </div>
+        <button
+          onClick={() => setEligible(!eligible)}
+          className="flex-shrink-0 transition-colors"
+          style={{ color: eligible ? "var(--accent-gold)" : "var(--text-muted)" }}
+        >
+          {eligible ? <ToggleRight size={36} /> : <ToggleLeft size={36} />}
+        </button>
+      </div>
+
+      {/* Offer Text */}
+      <div className="space-y-1.5">
+        <label className="text-xs font-mono uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
+          Active offer for HopRoute visitors (optional)
+        </label>
+        <input
+          type="text"
+          placeholder="e.g. First pint free for HopRoute visitors!"
+          maxLength={120}
+          value={offer}
+          onChange={(e) => setOffer(e.target.value)}
+          disabled={!eligible}
+          className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-colors disabled:opacity-40"
+          style={{ background: "var(--surface-2)", border: "1px solid var(--border)", color: "var(--text-primary)" }}
+        />
+        <p className="text-[10px]" style={{ color: "var(--text-muted)" }}>{offer.length}/120</p>
+      </div>
+
+      {/* Vibe Tags */}
+      <div className="space-y-2">
+        <div className="flex items-center gap-1.5">
+          <Tag size={12} style={{ color: "var(--accent-gold)" }} />
+          <label className="text-xs font-mono uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
+            Vibe Tags
+          </label>
+        </div>
+        <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+          Help the AI match you to the right routes.
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {VIBE_PRESETS.map((tag) => (
+            <button
+              key={tag}
+              onClick={() => toggleVibe(tag)}
+              className="px-3 py-1.5 rounded-full text-xs font-mono border transition-all"
+              style={
+                vibeTags.includes(tag)
+                  ? { background: "color-mix(in srgb, var(--accent-gold) 15%, transparent)", borderColor: "color-mix(in srgb, var(--accent-gold) 30%, transparent)", color: "var(--accent-gold)" }
+                  : { background: "var(--surface-2)", borderColor: "var(--border)", color: "var(--text-muted)" }
+              }
+            >
+              {tag}
+            </button>
+          ))}
+        </div>
+        {vibeTags.length > 0 && (
+          <p className="text-[10px]" style={{ color: "var(--text-muted)" }}>Selected: {vibeTags.join(", ")}</p>
+        )}
+      </div>
+
+      <button
+        onClick={handleSave}
+        disabled={saving}
+        className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-60"
+        style={{ background: "var(--accent-gold)", color: "var(--bg)" }}
+      >
+        {saving ? <><Loader2 size={14} className="animate-spin" /> Saving...</> : <><Save size={14} /> Save HopRoute Settings</>}
+      </button>
     </div>
   );
 }

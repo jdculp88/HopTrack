@@ -1,8 +1,8 @@
 # HopTrack Product Roadmap
 **Last updated:** 2026-04-01
 **PM:** Morgan
-**Current Sprint:** Sprint 94 — TBD
-**Last completed:** Sprint 93 — The Hardening ✅
+**Current Sprint:** Sprint 95 — The Hub
+**Last completed:** Sprint 94 — The Club ✅
 
 > This is a living document -- updated every sprint. For completed sprints 1-12, see `docs/roadmap-archive.md`. For sprint plans, see `docs/plans/`. For the Shore It Up master plan (Sprints 64-73), see `docs/plans/sprint-64-73-master-plan.md`. For the Q2 2026 roadmap research (30 features, 18 REQs, 4 sprint arcs), see `docs/plans/roadmap-research-2026-q2.md`.
 
@@ -459,6 +459,7 @@ Vitest configured (39 unit tests across 4 files). Vitest added to CI. Cookie con
 | BL-003 | Incomplete beer data handling | Flag beers with suspect data (e.g., 0.1% ABV). Show "Brewery needs to add details" badge. Encourage owners to claim and update. | Sprint 78 |
 | BL-004 | Lint cleanup pass | 74 pre-existing lint errors (unescaped entities, React hooks issues). Not blocking but CI shows failures. | Sprint 78 |
 | BL-005 | Menu upload save fails (PGRST204) | PostgREST schema cache not picking up `menu_image_url` column on `breweries` (migration 055). Bucket created (056), column exists, but `NOTIFY pgrst` not clearing cache. May need Supabase project restart or support ticket. Upload works, save doesn't. | Sprint 84 |
+| BL-006 | Event Ticketing / RSVP | Add RSVP tracking, capacity limits, and potentially ticket sales to existing Events system (Sprint 16). Builds on existing `brewery_events` table + CRUD. Could include waitlists, QR check-in at door. | Sprint 95 |
 
 ---
 
