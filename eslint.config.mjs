@@ -7,9 +7,10 @@ const eslintConfig = defineConfig([
   ...nextTs,
   {
     rules: {
-      // Project convention: `as any` is required for Supabase join shapes
-      // where PostgREST types don't match runtime data (see CLAUDE.md)
-      "@typescript-eslint/no-explicit-any": "off",
+      // Warn on `as any` — use types/db-joins.ts for Supabase join shapes instead.
+      // A small number of legitimate casts remain (Supabase auth admin API, edge cases).
+      // If you must use `as any`, add an eslint-disable comment explaining why.
+      "@typescript-eslint/no-explicit-any": "warn",
       // Project convention: `_`-prefixed variables are intentionally unused
       "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_", "caughtErrorsIgnorePattern": "^_" }],
     },
