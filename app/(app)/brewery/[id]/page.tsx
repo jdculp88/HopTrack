@@ -16,6 +16,8 @@ import { FollowBreweryButton } from "@/components/brewery/FollowBreweryButton";
 import { BreweryChallenges } from "@/components/brewery/BreweryChallenges";
 import { MugClubSection } from "@/components/brewery/MugClubSection";
 import { LoyaltyStampCard } from "@/components/loyalty/LoyaltyStampCard";
+import { ClosedBreweryBanner } from "@/components/brewery/ClosedBreweryBanner";
+import { EventRSVPButton } from "@/components/events/EventRSVPButton";
 
 // Supabase join shapes for tables not in generated types
 interface ActiveFriendSession {
@@ -274,6 +276,22 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
     }
   }
 
+  // Event RSVPs for current user
+  const eventIds = (upcomingEvents ?? []).map((e: any) => e.id);
+  const myEventRsvps: Record<string, { status: string }> = {};
+  if (eventIds.length > 0) {
+    const { data: rsvpsRaw } = await (supabase
+      .from("event_rsvps")
+      .select("event_id, status")
+      .eq("user_id", user.id)
+      .in("event_id", eventIds) as any);
+    for (const rsvp of (rsvpsRaw ?? []) as any[]) {
+      myEventRsvps[rsvp.event_id] = { status: rsvp.status };
+    }
+  }
+
+  const isClosed = brewery.brewery_type === "closed";
+
   // Check if brewery has any admin accounts (for claim CTA)
   const { count: adminCount } = await supabase
     .from("brewery_accounts")
@@ -387,6 +405,9 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
       </div>
 
       <div className="px-4 sm:px-6 py-6 space-y-8">
+        {/* Closed Brewery Banner */}
+        {isClosed && <ClosedBreweryBanner breweryName={brewery.name} />}
+
         {/* Info */}
         <div className="flex flex-wrap gap-4 text-sm">
           {brewery.website_url && (
@@ -723,6 +744,14 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
                       <div className="flex items-center gap-3 text-xs text-[var(--text-muted)] mt-0.5">
                         <span className="flex items-center gap-1"><Calendar size={11} />{dateStr}</span>
                         {timeStr && <span className="flex items-center gap-1"><Clock size={11} />{timeStr}</span>}
+                      </div>
+                      <div className="mt-2">
+                        <EventRSVPButton
+                          eventId={event.id}
+                          initialStatus={(myEventRsvps[event.id]?.status as "going" | "interested") ?? null}
+                          goingCount={0}
+                          interestedCount={0}
+                        />
                       </div>
                     </div>
                   </div>

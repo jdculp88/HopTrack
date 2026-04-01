@@ -219,6 +219,11 @@ export interface Database {
         Insert: Omit<RedemptionCode, "id" | "created_at" | "expires_at" | "confirmed_at" | "confirmed_by" | "status"> & { id?: string; status?: string };
         Update: Partial<RedemptionCode>;
       };
+      event_rsvps: {
+        Row: EventRsvp;
+        Insert: Omit<EventRsvp, "id" | "created_at"> & { id?: string };
+        Update: Partial<EventRsvp>;
+      };
     };
   };
 }
@@ -1010,6 +1015,16 @@ export interface MugClubMember {
   // joined fields
   profile?: { id: string; username: string; display_name: string | null; avatar_url: string | null };
   mug_club?: MugClub;
+}
+
+export type EventRsvpStatus = "going" | "interested";
+
+export interface EventRsvp {
+  id: string;
+  event_id: string;
+  user_id: string;
+  status: EventRsvpStatus;
+  created_at: string;
 }
 
 export interface RedemptionCode {

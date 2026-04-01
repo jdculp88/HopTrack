@@ -12,6 +12,7 @@ import { generateGradientFromString, formatABV } from "@/lib/utils";
 import { getStyleFamily, getStyleVars } from "@/lib/beerStyleColors";
 import { BeerDNACard } from "@/components/profile/BeerDNACard";
 import { PageEnterWrapper } from "@/components/ui/PageEnterWrapper";
+import { MugClubMemberships } from "@/components/profile/MugClubMemberships";
 
 export async function generateMetadata({ params }: { params: Promise<{ username: string }> }) {
   const { username } = await params;
@@ -89,6 +90,13 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
     }
     return Object.values(counts).sort((a, b) => b.count - a.count)[0] ?? null;
   })();
+
+  // Mug club memberships
+  const { data: mugClubMemberships } = await (supabase
+    .from("mug_club_members")
+    .select("id, status, joined_at, expires_at, mug_club:mug_clubs(id, name, brewery_id, annual_fee, perks), brewery:mug_clubs!inner(brewery:breweries(id, name, city, state))")
+    .eq("user_id", profile.id)
+    .eq("status", "active") as any);
 
   // Taste DNA — style distribution from beer logs
   const styleDNA = (() => {
@@ -359,6 +367,13 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
             </div>
           )}
         </div>
+
+        {/* Mug Club Memberships */}
+        {mugClubMemberships && mugClubMemberships.length > 0 && (
+          <div className="mb-8">
+            <MugClubMemberships memberships={mugClubMemberships as any[]} />
+          </div>
+        )}
 
         {/* Top Breweries */}
         <div className="mb-8">
