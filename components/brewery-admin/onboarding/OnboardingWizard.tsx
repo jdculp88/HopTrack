@@ -93,9 +93,9 @@ export function OnboardingWizard({ breweryId, breweryName }: OnboardingWizardPro
   const isLastStep = currentStep === STEPS.length - 1;
 
   const slideVariants = {
-    enter: (dir: number) => ({ x: dir > 0 ? 80 : -80, opacity: 0 }),
+    enter: (dir: number) => ({ x: dir > 0 ? 40 : -40, opacity: 0 }),
     center: { x: 0, opacity: 1 },
-    exit: (dir: number) => ({ x: dir > 0 ? -80 : 80, opacity: 0 }),
+    exit: (dir: number) => ({ x: dir > 0 ? -40 : 40, opacity: 0 }),
   };
 
   return (
@@ -161,7 +161,7 @@ export function OnboardingWizard({ breweryId, breweryName }: OnboardingWizardPro
               initial="enter"
               animate="center"
               exit="exit"
-              transition={{ type: "spring", stiffness: 400, damping: 35 }}
+              transition={{ duration: 0.15, ease: [0.4, 0, 0.2, 1] }}
             >
               {currentStep === 0 && (
                 <OnboardingStepLogo

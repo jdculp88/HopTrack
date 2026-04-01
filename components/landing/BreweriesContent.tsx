@@ -15,11 +15,11 @@
 
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import {
   ArrowRight, Check, BarChart2, Gift, List,
-  Smartphone, Zap, HeartHandshake, ArrowUpRight,
+  Smartphone, Zap, HeartHandshake, ArrowUpRight, ChevronDown,
 } from "lucide-react";
 import { HopMark } from "@/components/ui/HopMark";
 import { useEffect, useState } from "react";
@@ -198,6 +198,80 @@ const FEATURES = [
   { icon: HeartHandshake, title: "Built With Operators", body: "Designed alongside real brewery owners. If it doesn't work on a busy Friday night, we fix it." },
 ];
 
+const FAQ_ITEMS = [
+  {
+    q: "Do I need to install any hardware?",
+    a: "No hardware required. HopTrack runs entirely in the browser — update your tap list from a phone, tablet, or desktop. Your customers check in using their own devices.",
+  },
+  {
+    q: "How long does setup take?",
+    a: "Most breweries are live within 20 minutes. Claim your brewery, upload your logo, add your beers, and you're done. Our onboarding wizard walks you through every step.",
+  },
+  {
+    q: "Can I edit my loyalty program after launch?",
+    a: "Yes — always. Change the stamp count, the reward, or the redemption rules any time without reprinting anything. Your customers see the updated program instantly.",
+  },
+  {
+    q: "What happens when my 14-day trial ends?",
+    a: "Your dashboard switches to read-only mode. All your data is preserved — subscribe to pick up exactly where you left off. No data is ever deleted.",
+  },
+  {
+    q: "Do you integrate with our POS system?",
+    a: "Yes on Cask and Barrel tiers. HopTrack connects to Toast and Square to auto-sync your tap list when kegs kick. OAuth and webhook integrations — no manual data entry.",
+  },
+  {
+    q: "Is there a long-term contract?",
+    a: "No long-term contracts. Monthly plans cancel any time. Annual plans save 20% and are billed once per year.",
+  },
+];
+
+function FaqItem({ q, a }: { q: string; a: string }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="border-b" style={{ borderColor: C.border }}>
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="w-full flex items-center justify-between py-5 text-left gap-4 font-sans"
+        aria-expanded={open}
+      >
+        <span className="font-semibold text-base" style={{ color: C.text }}>{q}</span>
+        <motion.span
+          animate={{ rotate: open ? 180 : 0 }}
+          transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+          className="flex-shrink-0"
+          style={{ color: C.gold }}
+        >
+          <ChevronDown size={18} />
+        </motion.span>
+      </button>
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            key="answer"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.22, ease: [0.4, 0, 0.2, 1] }}
+            className="overflow-hidden"
+          >
+            <p className="pb-5 text-sm leading-relaxed font-sans" style={{ color: C.textMuted }}>{a}</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+function FaqSection() {
+  return (
+    <div>
+      {FAQ_ITEMS.map((item) => (
+        <FaqItem key={item.q} q={item.q} a={item.a} />
+      ))}
+    </div>
+  );
+}
+
 export default function BreweriesContent() {
   return (
     <div className="min-h-screen font-sans" style={{ backgroundColor: C.cream, color: C.text }}>
@@ -218,7 +292,7 @@ export default function BreweriesContent() {
               </motion.div>
               <motion.div variants={{ hidden: { opacity: 0, y: 28 }, show: { opacity: 1, y: 0, transition: { duration: 0.65, ease: EASE } } }}>
                 <h1 className="font-display font-bold leading-[0.9] tracking-tight" style={{ fontSize: "clamp(36px, 8vw, 96px)", color: C.text }}>
-                  Your regulars<br /><span className="italic" style={{ color: C.gold }}>deserve better</span><br />than a punch card.
+                  Replace your<br /><span className="italic" style={{ color: C.gold }}>punch card.</span><br />Own your loyalty.
                 </h1>
               </motion.div>
               <motion.p variants={{ hidden: { opacity: 0, y: 28 }, show: { opacity: 1, y: 0, transition: { duration: 0.65, ease: EASE } } }} className="text-lg leading-relaxed max-w-[400px] font-sans" style={{ color: C.textMuted }}>
@@ -246,9 +320,9 @@ export default function BreweriesContent() {
         <section className="py-12 px-6 lg:px-10">
           <div className="max-w-7xl mx-auto flex flex-wrap items-baseline gap-x-6 sm:gap-x-10 gap-y-4 sm:gap-y-5">
             {[
-              { value: "20 min", label: "average setup time" },
+              { value: "7,000+", label: "breweries listed" },
               { value: "$49", label: "starting per month" },
-              { value: "Day 1", label: "live analytics" },
+              { value: "20 min", label: "average setup time" },
             ].map((s, i) => (
               <div key={s.label} className="flex items-baseline gap-3">
                 <span className="font-display font-bold leading-none" style={{ fontSize: "clamp(32px, 4vw, 52px)", color: C.text }}>{s.value}</span>
@@ -396,6 +470,21 @@ export default function BreweriesContent() {
               <p className="text-xs font-mono mt-5 text-center" style={{ color: C.creamSubtle }}>No long-term contracts · Cancel any time</p>
             </ScrollReveal>
           </div>
+        </div>
+      </section>
+
+      <PourConnector />
+
+      {/* ── FAQ ────────────────────────────────────────────────────────────── */}
+      <section className="py-16 px-6 lg:px-10" id="faq">
+        <div className="max-w-3xl mx-auto">
+          <ScrollReveal className="mb-12 text-center">
+            <span className="text-[11px] font-mono uppercase tracking-[0.22em]" style={{ color: C.gold }}>FAQ</span>
+            <h2 className="font-display font-bold leading-[0.95] tracking-tight mt-3" style={{ fontSize: "clamp(28px, 4vw, 44px)", color: C.text }}>
+              Common questions.
+            </h2>
+          </ScrollReveal>
+          <FaqSection />
         </div>
       </section>
 

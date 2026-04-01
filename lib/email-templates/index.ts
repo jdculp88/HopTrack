@@ -10,37 +10,40 @@ const BRAND = {
   font: "'DM Sans', -apple-system, sans-serif",
 };
 
-function layout(title: string, body: string): string {
+function layout(title: string, body: string, preheader?: string): string {
   return `<!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
   <title>${title}</title>
 </head>
 <body style="margin:0;padding:0;background:${BRAND.bg};color:${BRAND.text};font-family:${BRAND.font};">
+  ${preheader ? `<!-- Preheader (hidden preview text) --><span style="display:none;max-height:0;overflow:hidden;mso-hide:all;">${preheader}&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;</span>` : ""}
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;margin:0 auto;padding:40px 20px;">
     <tr><td>
       <!-- Header -->
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
         <tr><td style="padding-bottom:32px;text-align:center;">
-          <span style="font-family:'Playfair Display',Georgia,serif;font-size:24px;font-weight:700;color:${BRAND.gold};">HopTrack</span>
+          <span style="font-family:'Playfair Display',Georgia,serif;font-size:26px;font-weight:700;color:${BRAND.gold};letter-spacing:-0.5px;">HopTrack</span>
+          <p style="margin:4px 0 0;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:${BRAND.muted};font-family:monospace;">Track Every Pour</p>
         </td></tr>
       </table>
       <!-- Body -->
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${BRAND.surface};border-radius:16px;border:1px solid #2A2825;">
-        <tr><td style="padding:32px;">
+        <tr><td style="padding:36px 32px;">
           ${body}
         </td></tr>
       </table>
       <!-- Footer -->
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
-        <tr><td style="padding-top:24px;text-align:center;">
+        <tr><td style="padding-top:28px;text-align:center;">
           <p style="margin:0;font-size:12px;color:${BRAND.muted};">
-            HopTrack — Track Every Pour
+            HopTrack · <a href="https://app.hoptrack.beer" style="color:${BRAND.gold};text-decoration:none;">app.hoptrack.beer</a>
           </p>
-          <p style="margin:4px 0 0;font-size:11px;color:${BRAND.muted};">
-            <a href="https://app.hoptrack.beer" style="color:${BRAND.gold};text-decoration:none;">app.hoptrack.beer</a>
+          <p style="margin:8px 0 0;font-size:11px;color:${BRAND.muted};">
+            <a href="https://app.hoptrack.beer/settings/notifications" style="color:${BRAND.muted};text-decoration:underline;">Unsubscribe</a> &nbsp;·&nbsp; <a href="https://app.hoptrack.beer/privacy" style="color:${BRAND.muted};text-decoration:underline;">Privacy Policy</a>
           </p>
         </td></tr>
       </table>
@@ -64,7 +67,9 @@ export function welcomeEmail(params: { displayName: string }) {
   const { displayName } = params;
   const firstName = displayName.split(" ")[0] || "there";
 
-  const html = layout("Welcome to HopTrack", `
+  const html = layout(
+    "Welcome to HopTrack",
+    `
     <h1 style="margin:0 0 16px;font-family:'Playfair Display',Georgia,serif;font-size:22px;color:${BRAND.text};">
       Welcome, ${firstName}!
     </h1>
@@ -81,7 +86,9 @@ export function welcomeEmail(params: { displayName: string }) {
     <p style="margin:0;font-size:13px;color:${BRAND.muted};">
       Cheers to new adventures.
     </p>
-  `);
+  `,
+    "Welcome to HopTrack — start logging your craft beer journey today."
+  );
 
   return {
     subject: `Welcome to HopTrack, ${firstName}!`,
@@ -96,7 +103,9 @@ export function breweryWelcomeEmail(params: { breweryName: string; ownerName: st
   const { breweryName, ownerName, breweryId } = params;
   const firstName = ownerName.split(" ")[0] || "there";
 
-  const html = layout(`Welcome to HopTrack — ${breweryName}`, `
+  const html = layout(
+    `Welcome to HopTrack — ${breweryName}`,
+    `
     <h1 style="margin:0 0 16px;font-family:'Playfair Display',Georgia,serif;font-size:22px;color:${BRAND.text};">
       Welcome aboard, ${firstName}!
     </h1>
@@ -116,7 +125,9 @@ export function breweryWelcomeEmail(params: { breweryName: string; ownerName: st
     <p style="margin:0;font-size:13px;color:${BRAND.muted};">
       Questions? Reply to this email or reach us at hello@hoptrack.beer.
     </p>
-  `);
+  `,
+    `${breweryName} is live — your 14-day free trial has started.`
+  );
 
   return {
     subject: `${breweryName} is live on HopTrack!`,
@@ -131,7 +142,9 @@ export function trialWarningEmail(params: { breweryName: string; ownerName: stri
   const { breweryName, ownerName, daysLeft, breweryId } = params;
   const firstName = ownerName.split(" ")[0] || "there";
 
-  const html = layout(`${daysLeft} days left on your trial`, `
+  const html = layout(
+    `${daysLeft} days left on your trial`,
+    `
     <h1 style="margin:0 0 16px;font-family:'Playfair Display',Georgia,serif;font-size:22px;color:${BRAND.text};">
       ${daysLeft} days left, ${firstName}
     </h1>
@@ -145,7 +158,9 @@ export function trialWarningEmail(params: { breweryName: string; ownerName: stri
     <p style="margin:0;font-size:13px;color:${BRAND.muted};">
       Plans start at $49/mo. Save 20% with annual billing.
     </p>
-  `);
+  `,
+    `${daysLeft} days left on your free trial — subscribe to keep ${breweryName} running.`
+  );
 
   return {
     subject: `${daysLeft} days left on your HopTrack trial`,
@@ -160,7 +175,9 @@ export function trialExpiredEmail(params: { breweryName: string; ownerName: stri
   const { breweryName, ownerName, breweryId } = params;
   const firstName = ownerName.split(" ")[0] || "there";
 
-  const html = layout("Your trial has ended", `
+  const html = layout(
+    "Your trial has ended",
+    `
     <h1 style="margin:0 0 16px;font-family:'Playfair Display',Georgia,serif;font-size:22px;color:${BRAND.text};">
       Trial ended, ${firstName}
     </h1>
@@ -174,7 +191,9 @@ export function trialExpiredEmail(params: { breweryName: string; ownerName: stri
     <p style="margin:0;font-size:13px;color:${BRAND.muted};">
       Need more time? Reply to this email and we'll work something out.
     </p>
-  `);
+  `,
+    `Your HopTrack trial has ended — all your data is safe and ready to reactivate.`
+  );
 
   return {
     subject: `Your HopTrack trial for ${breweryName} has ended`,
@@ -188,7 +207,9 @@ export function trialExpiredEmail(params: { breweryName: string; ownerName: stri
 export function passwordResetEmail(params: { resetUrl: string }) {
   const { resetUrl } = params;
 
-  const html = layout("Reset your password", `
+  const html = layout(
+    "Reset your password",
+    `
     <h1 style="margin:0 0 16px;font-family:'Playfair Display',Georgia,serif;font-size:22px;color:${BRAND.text};">
       Reset your password
     </h1>
@@ -199,7 +220,9 @@ export function passwordResetEmail(params: { resetUrl: string }) {
     <p style="margin:0;font-size:13px;color:${BRAND.muted};">
       This link expires in 1 hour. If you didn't request this, you can safely ignore this email.
     </p>
-  `);
+  `,
+    "Use this link to set a new HopTrack password. Expires in 1 hour."
+  );
 
   return {
     subject: "Reset your HopTrack password",
@@ -229,7 +252,9 @@ export function weeklyDigestEmail(params: {
   const trendIcon = stats.visitsTrend >= 0 ? "&#9650;" : "&#9660;";
   const trendColor = stats.visitsTrend >= 0 ? "#4CAF50" : "#EF5350";
 
-  const html = layout(`Weekly Report — ${breweryName}`, `
+  const html = layout(
+    `Weekly Report — ${breweryName}`,
+    `
     <h1 style="margin:0 0 8px;font-family:'Playfair Display',Georgia,serif;font-size:22px;color:${BRAND.text};">
       This Week at ${breweryName}
     </h1>
@@ -265,7 +290,9 @@ export function weeklyDigestEmail(params: {
     ${stats.newFollowers > 0 ? `<p style="margin:0 0 16px;font-size:14px;color:${BRAND.text};">+${stats.newFollowers} new follower${stats.newFollowers > 1 ? "s" : ""}</p>` : ""}
 
     ${button("View Full Analytics", `https://app.hoptrack.beer/brewery-admin/${breweryId}/analytics`)}
-  `);
+  `,
+    `${breweryName} weekly report — ${stats.visits} visits${stats.visitsTrend >= 0 ? ` (+${stats.visitsTrend}%)` : ` (${stats.visitsTrend}%)`} this week.`
+  );
 
   return {
     subject: `${breweryName} — Weekly Report`,
