@@ -71,6 +71,14 @@ export function buildMeshGradient(beerLogs: BeerLog[]): string {
 }
 
 /**
+ * Returns the raw hex values for a given style family.
+ * Use when CSS vars can't be used (e.g. gradient stops, canvas, inline alpha).
+ */
+export function getStyleHex(family: BeerStyleFamily): { primary: string; light: string } {
+  return FAMILY_HEX[family] ?? FAMILY_HEX.default
+}
+
+/**
  * Computes the box-shadow glow color for the session bubble,
  * derived from the first beer's style family.
  */

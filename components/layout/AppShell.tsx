@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { AnimatePresence } from "framer-motion";
 import { AppNav } from "@/components/layout/AppNav";
 import { createClient } from "@/lib/supabase/client";
@@ -37,6 +38,7 @@ export function AppShell({ children, username, unreadNotifications = 0 }: AppShe
 
 function AppShellInner({ children, username, unreadNotifications = 0 }: AppShellProps) {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [checkinOpen, setCheckinOpen] = useState(false);
   const [recapOpen, setRecapOpen] = useState(false);
@@ -165,7 +167,9 @@ function AppShellInner({ children, username, unreadNotifications = 0 }: AppShell
     setSessionResult(result);
     setRecapOpen(true);
     window.dispatchEvent(new CustomEvent('hoptrack:session-changed', { detail: null }));
-  }, [clearSession]);
+    // Re-run server components so the feed shows the just-ended session
+    router.refresh();
+  }, [clearSession, router]);
 
   const handleSessionCancelled = useCallback(() => {
     clearSession();
@@ -350,7 +354,7 @@ function MinimizedSessionBar({
         }}
       >
         <div className="flex items-center justify-between px-4 py-3">
-          <div className="flex items-center gap-2.5 min-w-0">
+          <div className="flex items-center gap-2.5 flex-1 min-w-0">
             {/* Live indicator */}
             <div className="relative flex-shrink-0">
               <div className="w-7 h-7 rounded-full bg-black/20 flex items-center justify-center">
@@ -358,7 +362,7 @@ function MinimizedSessionBar({
               </div>
               <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-green-400 border border-black/20 animate-pulse" />
             </div>
-            <div className="min-w-0">
+            <div className="flex-1 min-w-0">
               <p className="text-sm font-bold text-black leading-none truncate">
                 {breweryName}
               </p>

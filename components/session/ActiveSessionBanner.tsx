@@ -64,7 +64,7 @@ export default function ActiveSessionBanner({ session, breweryName, beerLogs = [
       >
         <div className="flex items-center justify-between px-4 py-2.5">
           {/* Left — tap to open tap wall */}
-          <button onClick={onTap} className="flex items-center gap-2.5 flex-1 text-left min-w-0">
+          <button onClick={onTap} className="flex items-center gap-2.5 flex-1 min-w-0 text-left overflow-hidden">
             <div className="relative flex-shrink-0">
               <div className="flex items-center justify-center w-7 h-7 rounded-full bg-black/20">
                 <Beer size={14} className="text-white" />

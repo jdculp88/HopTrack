@@ -142,6 +142,15 @@ export function useSession() {
     }
   }, [])
 
+  const removeBeerLog = useCallback(async (logId: string): Promise<boolean> => {
+    try {
+      const res = await fetch(`/api/beer-logs/${logId}`, { method: 'DELETE' })
+      return res.ok
+    } catch {
+      return false
+    }
+  }, [])
+
   const cancelSession = useCallback(async (sessionId: string): Promise<boolean> => {
     setLoading(true)
     setError(null)
@@ -170,6 +179,7 @@ export function useSession() {
     logBeer,
     updateBeerLog,
     incrementBeerQuantity,
+    removeBeerLog,
     endSession,
     cancelSession,
     loading,

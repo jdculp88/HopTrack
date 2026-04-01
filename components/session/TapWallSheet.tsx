@@ -3,6 +3,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Search, Check, Loader2, Beer, Plus, Users, ChevronDown, AlertTriangle } from 'lucide-react'
+import { getStyleFamily } from '@/lib/beerStyleColors'
+import { getStyleHex, buildMeshGradient } from '@/lib/session-colors'
 import { UserAvatar } from '@/components/ui/UserAvatar'
 import { FullScreenDrawer } from '@/components/ui/Modal'
 import { Skeleton } from '@/components/ui/SkeletonLoader'
@@ -103,6 +105,7 @@ export default function TapWallSheet({
   const [query, setQuery] = useState('')
   const [loggingBeer, setLoggingBeer] = useState<string | null>(null)
   const [incrementingLog, setIncrementingLog] = useState<string | null>(null)
+  const [decrementingLog, setDecrementingLog] = useState<string | null>(null)
   const [ratingSheet, setRatingSheet] = useState<{ log: BeerLog; beerName: string; previousRating?: number | null } | null>(null)
   const [showEndConfirm, setShowEndConfirm] = useState(false)
   const [showCancelConfirm, setShowCancelConfirm] = useState(false)
@@ -114,7 +117,7 @@ export default function TapWallSheet({
   const [friendResults, setFriendResults] = useState<Array<{ id: string; username: string; display_name: string | null; avatar_url: string | null }>>([])
   const [inviting, setInviting] = useState<string | null>(null)
   const [previousRatings, setPreviousRatings] = useState<Map<string, number>>(new Map())
-  const { logBeer, updateBeerLog, incrementBeerQuantity, endSession, cancelSession } = useSession()
+  const { logBeer, updateBeerLog, incrementBeerQuantity, removeBeerLog, endSession, cancelSession } = useSession()
   const elapsed = useElapsedTime(session.started_at)
 
   // Fetch participants on open
@@ -270,6 +273,20 @@ export default function TapWallSheet({
     setIncrementingLog(null)
   }
 
+  async function handleDecrement(log: BeerLog) {
+    setDecrementingLog(log.id)
+    const currentQty = log.quantity ?? 1
+    if (currentQty <= 1) {
+      // Remove the log entirely
+      const ok = await removeBeerLog(log.id)
+      if (ok) ctxRemoveBeerLog(log.id)
+    } else {
+      const updated = await updateBeerLog(log.id, { quantity: currentQty - 1 } as any)
+      if (updated) ctxUpdateBeerLog(log.id, { ...log, quantity: currentQty - 1 })
+    }
+    setDecrementingLog(null)
+  }
+
   async function handleSaveRating(logId: string, rating: number, comment?: string) {
     const existing = beerLogs.find(l => l.id === logId)
     if (existing) {
@@ -332,26 +349,32 @@ export default function TapWallSheet({
           >
             <ChevronDown size={20} />
           </button>
-          <div className="text-center flex-1 px-2">
+          <div className="text-center flex-1 px-2 min-w-0">
             <div className="flex items-center justify-center gap-2">
-              {/* Live indicator */}
-              <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-              <p className="font-display font-bold text-base leading-tight" style={{ color: 'var(--text-primary)' }}>
+              <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse flex-shrink-0" />
+              <p className="font-display font-bold text-base leading-tight truncate" style={{ color: 'var(--text-primary)' }}>
                 {breweryName}
               </p>
             </div>
             <p className="text-xs font-mono" style={{ color: 'var(--text-muted)' }}>
               {elapsed}
-              {lastBeer?.beer && (
-                <span> · {lastBeer.beer.name}</span>
-              )}
+              {lastBeer?.beer && <span> · {lastBeer.beer.name}</span>}
             </p>
           </div>
+          {/* Mesh gradient beer count badge */}
           <div
-            className="px-2.5 py-1 rounded-xl text-xs font-mono font-semibold"
-            style={{ background: 'var(--surface-2)', color: 'var(--accent-gold)', border: '1px solid var(--border)' }}
+            className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0 overflow-hidden"
+            style={{
+              background: buildMeshGradient(beerLogs),
+              transition: 'background 0.6s ease',
+            }}
           >
-            {totalPours} {totalPours === 1 ? 'beer' : 'beers'}
+            <span
+              className="text-sm font-bold font-mono text-white"
+              style={{ textShadow: '0 1px 3px rgba(0,0,0,0.3)' }}
+            >
+              {totalPours}
+            </span>
           </div>
         </div>
 
@@ -406,41 +429,51 @@ export default function TapWallSheet({
               {/* Already had this session */}
               {loggedBeers.length > 0 && (
                 <>
-                  <p className="text-xs font-mono uppercase tracking-widest pt-2 pb-1" style={{ color: 'var(--accent-gold)' }}>
-                    Already had
-                  </p>
+                  <div className="flex items-center gap-2 pt-2 pb-1">
+                    <p className="text-[10.5px] font-mono uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>
+                      Already Had
+                    </p>
+                    <div className="flex-1 h-px" style={{ background: 'var(--border)' }} />
+                  </div>
                   {loggedBeers.map((beer) => {
                     const log = loggedBeerMap.get(beer.id)!
                     return (
-                      <BeerRow
+                      <BeerCard
                         key={beer.id}
                         beer={beer}
                         logged
                         quantity={log.quantity ?? 1}
                         incrementing={incrementingLog === log.id}
+                        decrementing={decrementingLog === log.id}
                         onIncrement={() => handleIncrement(log)}
+                        onDecrement={() => handleDecrement(log)}
                         loading={false}
                         onLog={() => {}}
                       />
                     )
                   })}
                   {unloggedBeers.length > 0 && (
-                    <p className="text-xs font-mono uppercase tracking-widest pt-3 pb-1" style={{ color: 'var(--text-muted)' }}>
-                      {homeMode ? 'More results' : 'On tap'}
-                    </p>
+                    <div className="flex items-center gap-2 pt-3 pb-1">
+                      <p className="text-[10.5px] font-mono uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>
+                        {homeMode ? 'More Results' : 'On Tap'}
+                      </p>
+                      <div className="flex-1 h-px" style={{ background: 'var(--border)' }} />
+                    </div>
                   )}
                 </>
               )}
 
               {/* Unlogged beers */}
               {unloggedBeers.map((beer) => (
-                <BeerRow
+                <BeerCard
                   key={beer.id}
                   beer={beer}
                   logged={false}
                   quantity={1}
                   incrementing={false}
+                  decrementing={false}
                   onIncrement={() => {}}
+                  onDecrement={() => {}}
                   loading={loggingBeer === beer.id}
                   onLog={() => handleLogBeer(beer)}
                 />
@@ -657,24 +690,51 @@ export default function TapWallSheet({
           </AnimatePresence>
 
           <div className="flex items-center justify-between gap-3 py-2">
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => { setShowCancelConfirm(true); setShowEndConfirm(false) }}
-                className="text-xs px-3 py-1.5 rounded-lg transition-colors"
-                style={{ color: 'var(--text-muted)' }}
-              >
-                Cancel
-              </button>
-              <p className="text-xs font-mono" style={{ color: 'var(--text-muted)' }}>
+            <button
+              onClick={() => { setShowCancelConfirm(true); setShowEndConfirm(false) }}
+              className="text-xs px-2 py-1.5 rounded-lg transition-colors flex-shrink-0"
+              style={{ color: 'var(--text-muted)' }}
+            >
+              Cancel
+            </button>
+
+            {/* Beer color dot strip + count */}
+            <div className="flex items-center gap-2 flex-1 justify-center min-w-0">
+              {beerLogs.length > 0 && (
+                <div className="flex flex-shrink-0">
+                  {beerLogs.slice(0, 6).map((log, i) => {
+                    const family = getStyleFamily((log.beer as { style?: string | null } | undefined)?.style)
+                    const hex = getStyleHex(family)
+                    return (
+                      <span
+                        key={log.id}
+                        className="block w-2.5 h-2.5 rounded-full"
+                        style={{
+                          background: hex.primary,
+                          border: '1.5px solid var(--surface)',
+                          marginLeft: i > 0 ? '-3px' : 0,
+                          position: 'relative',
+                          zIndex: 6 - i,
+                        }}
+                      />
+                    )
+                  })}
+                </div>
+              )}
+              <p className="text-xs font-mono truncate" style={{ color: 'var(--text-muted)' }}>
                 {totalPours} {totalPours === 1 ? 'beer' : 'beers'} · {elapsed}
               </p>
             </div>
+
             <button
               onClick={() => { setShowEndConfirm(true); setShowCancelConfirm(false) }}
-              className="px-4 py-2 rounded-xl text-sm font-semibold transition-all"
+              className="px-4 py-2 rounded-xl text-sm font-semibold transition-all flex-shrink-0"
               style={{
-                background: 'linear-gradient(135deg, var(--accent-gold) 0%, var(--accent-amber) 100%)',
-                color: 'var(--bg)',
+                background: beerLogs.length > 0
+                  ? getStyleHex(getStyleFamily((beerLogs[0].beer as { style?: string | null } | undefined)?.style)).primary
+                  : 'var(--accent-gold)',
+                color: '#fff',
+                transition: 'background 0.4s ease',
               }}
             >
               End session
@@ -697,13 +757,72 @@ export default function TapWallSheet({
   )
 }
 
-// ─── Beer Row ──────────────────────────────────────────────────────────────────
-function BeerRow({
+// ─── QtyStepper ────────────────────────────────────────────────────────────────
+function QtyStepper({
+  qty,
+  onInc,
+  onDec,
+  incrementing,
+  decrementing,
+  primaryHex,
+}: {
+  qty: number
+  onInc: () => void
+  onDec: () => void
+  incrementing: boolean
+  decrementing: boolean
+  primaryHex: string
+}) {
+  return (
+    <div
+      className="flex items-center rounded-xl overflow-hidden"
+      style={{
+        background: primaryHex + '0D',
+        border: `1px solid ${primaryHex}22`,
+      }}
+    >
+      <button
+        onClick={(e) => { e.stopPropagation(); onDec() }}
+        disabled={decrementing}
+        className="w-8 h-8 flex items-center justify-center text-base font-medium transition-colors disabled:opacity-40"
+        style={{ color: primaryHex }}
+        title={qty <= 1 ? 'Remove' : 'One less'}
+      >
+        {decrementing ? <Loader2 size={11} className="animate-spin" /> : '−'}
+      </button>
+      <span
+        className="min-w-6 text-center text-sm font-bold font-mono"
+        style={{
+          color: primaryHex,
+          borderLeft: `1px solid ${primaryHex}15`,
+          borderRight: `1px solid ${primaryHex}15`,
+          lineHeight: '2rem',
+        }}
+      >
+        {qty}
+      </span>
+      <button
+        onClick={(e) => { e.stopPropagation(); onInc() }}
+        disabled={incrementing}
+        className="w-8 h-8 flex items-center justify-center text-base font-medium transition-colors disabled:opacity-40"
+        style={{ color: primaryHex }}
+        title="Had another"
+      >
+        {incrementing ? <Loader2 size={11} className="animate-spin" /> : '+'}
+      </button>
+    </div>
+  )
+}
+
+// ─── Beer Card ─────────────────────────────────────────────────────────────────
+function BeerCard({
   beer,
   logged,
   quantity,
   incrementing,
+  decrementing,
   onIncrement,
+  onDecrement,
   loading,
   onLog,
 }: {
@@ -711,96 +830,115 @@ function BeerRow({
   logged: boolean
   quantity: number
   incrementing: boolean
+  decrementing: boolean
   onIncrement: () => void
+  onDecrement: () => void
   loading: boolean
   onLog: () => void
 }) {
+  const family = getStyleFamily(beer.style)
+  const hex = getStyleHex(family)
+
   return (
     <div
-      className="flex items-center gap-3 p-3.5 rounded-2xl transition-all"
+      onClick={!logged ? onLog : undefined}
+      className="relative rounded-2xl overflow-hidden transition-all"
       style={{
+        border: `1.5px solid ${logged ? hex.primary + '30' : 'var(--border)'}`,
         background: logged
-          ? 'color-mix(in srgb, var(--accent-gold) 8%, var(--surface))'
+          ? `radial-gradient(ellipse at 85% 20%, ${hex.primary}0A 0%, transparent 50%), var(--surface)`
           : 'var(--surface)',
-        border: logged
-          ? '1px solid color-mix(in srgb, var(--accent-gold) 35%, transparent)'
-          : '1px solid var(--border)',
+        boxShadow: logged ? `0 2px 10px ${hex.primary}10` : undefined,
+        cursor: logged ? 'default' : 'pointer',
       }}
     >
-      {/* Icon */}
+      {/* Left accent bar */}
       <div
-        className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+        className="absolute left-0 top-0 bottom-0 w-1"
         style={{
-          background: logged
-            ? 'linear-gradient(135deg, var(--accent-gold) 0%, var(--accent-amber) 100%)'
-            : 'var(--surface-2)',
+          background: logged ? hex.primary : 'transparent',
+          transition: 'background 0.3s',
         }}
-      >
-        {logged ? (
-          <Check size={16} className="text-black" />
-        ) : (
-          <Beer size={16} style={{ color: 'var(--text-muted)' }} />
-        )}
-      </div>
+      />
 
-      {/* Info */}
-      <div className="flex-1 min-w-0">
-        <p
-          className="font-display font-semibold text-sm leading-tight truncate"
-          style={{ color: logged ? 'var(--accent-gold)' : 'var(--text-primary)' }}
-        >
-          {beer.name}
-        </p>
-        <p className="text-xs mt-0.5 truncate" style={{ color: 'var(--text-muted)' }}>
-          {beer.style ?? 'Beer'}
-          {beer.abv != null && ` · ${formatABV(beer.abv)}`}
-          {beer.avg_rating != null && ` · ★ ${beer.avg_rating.toFixed(1)}`}
-        </p>
-      </div>
-
-      {/* Action */}
-      {logged ? (
-        <div className="flex items-center gap-2 flex-shrink-0">
-          {quantity > 1 && (
-            <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-lg" style={{ background: 'var(--surface-2)', color: 'var(--accent-gold)' }}>
-              ×{quantity}
-            </span>
-          )}
-          <button
-            onClick={onIncrement}
-            disabled={incrementing}
-            className="w-9 h-9 rounded-xl flex items-center justify-center transition-all disabled:opacity-60"
+      <div className="pl-5 pr-4 py-3">
+        <div className="flex items-center gap-3">
+          {/* Icon */}
+          <div
+            className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 transition-all"
             style={{
-              background: 'var(--surface-2)',
-              border: '1px solid var(--border)',
-              color: 'var(--text-secondary)',
+              background: logged ? hex.primary : 'var(--surface-2)',
+              border: `1px solid ${logged ? hex.primary : 'var(--border)'}`,
             }}
-            title="Had another one"
           >
-            {incrementing ? (
-              <Loader2 size={13} className="animate-spin" />
+            {logged ? (
+              <Check size={14} className="text-white" />
             ) : (
-              <Plus size={14} />
+              <Beer size={15} style={{ color: hex.primary, opacity: 0.55 }} />
             )}
-          </button>
+          </div>
+
+          {/* Info */}
+          <div className="flex-1 min-w-0">
+            <p className="font-display font-semibold text-sm leading-tight truncate" style={{ color: 'var(--text-primary)' }}>
+              {beer.name}
+            </p>
+            <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+              {/* Style pill */}
+              {beer.style && (
+                <span
+                  className="inline-flex items-center gap-1 text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded"
+                  style={{
+                    background: hex.primary + '14',
+                    border: `1px solid ${hex.primary}20`,
+                    color: hex.primary,
+                  }}
+                >
+                  <span className="w-1.5 h-1.5 rounded-full block" style={{ background: hex.primary }} />
+                  {beer.style}
+                </span>
+              )}
+              {beer.abv != null && (
+                <span className="text-[11px] font-mono" style={{ color: 'var(--text-muted)' }}>
+                  {formatABV(beer.abv)}
+                </span>
+              )}
+              {beer.avg_rating != null && (
+                <span className="text-[11px] font-mono" style={{ color: logged ? hex.primary : 'var(--text-muted)' }}>
+                  ★ {beer.avg_rating.toFixed(1)}
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Action */}
+          <div className="flex-shrink-0">
+            {logged ? (
+              <QtyStepper
+                qty={quantity}
+                onInc={onIncrement}
+                onDec={onDecrement}
+                incrementing={incrementing}
+                decrementing={decrementing}
+                primaryHex={hex.primary}
+              />
+            ) : (
+              <button
+                onClick={(e) => { e.stopPropagation(); onLog() }}
+                disabled={loading}
+                className="px-3 py-1.5 rounded-xl text-xs font-semibold transition-all disabled:opacity-60 flex items-center gap-1"
+                style={{
+                  background: hex.primary,
+                  color: '#fff',
+                  boxShadow: `0 2px 6px ${hex.primary}28`,
+                }}
+              >
+                {loading ? <Loader2 size={12} className="animate-spin" /> : "I'm having this"}
+              </button>
+            )}
+          </div>
         </div>
-      ) : (
-        <button
-          onClick={onLog}
-          disabled={loading}
-          className="flex-shrink-0 px-3 py-2 rounded-xl text-xs font-semibold transition-all disabled:opacity-60 flex items-center gap-1"
-          style={{
-            background: 'linear-gradient(135deg, var(--accent-gold) 0%, var(--accent-amber) 100%)',
-            color: 'var(--bg)',
-          }}
-        >
-          {loading ? (
-            <Loader2 size={13} className="animate-spin" />
-          ) : (
-            <>I&apos;m having this</>
-          )}
-        </button>
-      )}
+      </div>
     </div>
   )
 }

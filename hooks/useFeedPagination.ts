@@ -30,6 +30,8 @@ export function useFeedPagination({
   const [page, setPage] = useState(2);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(initialSessions.length >= 20);
+  // Guard so the auto-fetch only fires once
+  const initialFetchDone = useRef(false);
 
   const [extraSessions, setExtraSessions] = useState<Session[]>([]);
   const [extraReactionCounts, setExtraReactionCounts] = useState<
@@ -87,6 +89,33 @@ export function useFeedPagination({
     observer.observe(sentinel);
     return () => observer.disconnect();
   }, [loadMore, hasMore]);
+
+  // Auto-fetch page 1 for "you" tab when SSR provided no initial data.
+  // This happens when the user's sessions don't appear in the first 20 of
+  // the friends feed (e.g. friends are more active recently).
+  useEffect(() => {
+    if (tab !== "you" || initialSessions.length > 0 || initialFetchDone.current) return;
+    initialFetchDone.current = true;
+    loadingRef.current = true;
+    setLoading(true);
+
+    fetch("/api/feed?tab=you&page=1")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data: FeedPage | null) => {
+        if (!data) return;
+        setExtraSessions(data.sessions ?? []);
+        setExtraReactionCounts(data.reactionCounts ?? {});
+        setExtraUserReactions(data.userReactions ?? {});
+        setExtraCommentCounts(data.commentCounts ?? {});
+        setHasMore(data.hasMore ?? false);
+        setPage(2);
+      })
+      .catch(() => {})
+      .finally(() => {
+        setLoading(false);
+        loadingRef.current = false;
+      });
+  }, [tab, initialSessions.length]);
 
   // Merge initial + extra data
   const sessions = [...initialSessions, ...extraSessions];
