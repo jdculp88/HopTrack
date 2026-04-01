@@ -6,6 +6,7 @@ import { Beer, ChevronRight } from 'lucide-react'
 import { Session, BeerLog } from '@/types/database'
 import { InviteFriendsButton } from '@/components/session/InviteFriendsButton'
 import { spring } from '@/lib/animation'
+import { buildMeshGradient, getBubbleGlow } from '@/lib/session-colors'
 import type { SessionParticipant } from '@/types/database'
 
 interface ActiveSessionBannerProps {
@@ -42,6 +43,9 @@ export default function ActiveSessionBanner({ session, breweryName, beerLogs = [
     ? `You + ${participantCount} ${participantCount === 1 ? 'friend' : 'friends'}`
     : null
 
+  const meshGradient = buildMeshGradient(beerLogs)
+  const bubbleGlow = getBubbleGlow(beerLogs)
+
   return (
     <motion.div
       initial={{ y: 60, opacity: 0 }}
@@ -53,8 +57,9 @@ export default function ActiveSessionBanner({ session, breweryName, beerLogs = [
       <motion.div
         className="rounded-2xl overflow-visible"
         style={{
-          background: 'linear-gradient(135deg, var(--accent-gold) 0%, var(--accent-amber) 100%)',
-          boxShadow: '0 4px 20px color-mix(in srgb, var(--accent-gold) 40%, transparent)',
+          background: meshGradient,
+          boxShadow: bubbleGlow,
+          transition: 'background 0.6s ease, box-shadow 0.6s ease',
         }}
       >
         <div className="flex items-center justify-between px-4 py-2.5">

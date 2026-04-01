@@ -254,6 +254,7 @@ function AppShellInner({ children, username, unreadNotifications = 0 }: AppShell
             breweryName={sessionBreweryName}
             beerCount={beerLogs.reduce((sum, l) => sum + (l.quantity ?? 1), 0)}
             startedAt={activeSession.started_at}
+            beerLogs={beerLogs}
             onTap={handleMinimizedTap}
           />
         )}
@@ -296,16 +297,20 @@ function AppShellInner({ children, username, unreadNotifications = 0 }: AppShell
 import { motion } from 'framer-motion';
 import { Beer, ChevronUp } from 'lucide-react';
 import { spring } from '@/lib/animation';
+import { buildMeshGradient, getBubbleGlow } from '@/lib/session-colors';
+import type { BeerLog } from '@/types/database';
 
 function MinimizedSessionBar({
   breweryName,
   beerCount,
   startedAt,
+  beerLogs,
   onTap,
 }: {
   breweryName: string
   beerCount: number
   startedAt: string
+  beerLogs: BeerLog[]
   onTap: () => void
 }) {
   const [timeLabel, setTimeLabel] = useState('')
@@ -324,6 +329,9 @@ function MinimizedSessionBar({
     return () => clearInterval(interval)
   }, [startedAt])
 
+  const meshGradient = buildMeshGradient(beerLogs)
+  const bubbleGlow = getBubbleGlow(beerLogs)
+
   return (
     <motion.div
       initial={{ y: 80, opacity: 0 }}
@@ -336,8 +344,9 @@ function MinimizedSessionBar({
         onClick={onTap}
         className="w-full rounded-2xl overflow-hidden"
         style={{
-          background: 'linear-gradient(135deg, var(--accent-gold) 0%, var(--accent-amber) 100%)',
-          boxShadow: '0 4px 20px color-mix(in srgb, var(--accent-gold) 40%, transparent)',
+          background: meshGradient,
+          boxShadow: bubbleGlow,
+          transition: 'background 0.6s ease, box-shadow 0.6s ease',
         }}
       >
         <div className="flex items-center justify-between px-4 py-3">
