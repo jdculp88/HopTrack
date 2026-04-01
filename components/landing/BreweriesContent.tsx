@@ -24,21 +24,7 @@ import {
 import { HopMark } from "@/components/ui/HopMark";
 import { useEffect, useState } from "react";
 
-const C = {
-  cream: "#FBF7F0",
-  dark: "#0F0E0C",
-  darkSurface: "#1C1A16",
-  darkBorder: "#3A3628",
-  gold: "#D4A843",
-  goldDark: "#C49A35",
-  text: "#1A1714",
-  textMuted: "#6B5E4E",
-  textSubtle: "#9E8E7A",
-  border: "#E5DDD0",
-  creamText: "#F5F0E8",
-  creamMuted: "#A89F8C",
-  creamSubtle: "#8B7E6A",
-} as const;
+import { C } from "@/lib/landing-colors";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 

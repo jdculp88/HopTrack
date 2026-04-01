@@ -67,7 +67,7 @@ export function FriendButton({ profileId, currentUserId }: FriendButtonProps) {
 
   if (status === "friends") {
     return (
-      <div className="flex items-center gap-1.5 px-4 py-2 bg-[#3D7A52]/15 border border-[#3D7A52]/30 text-[#3D7A52] rounded-xl text-sm font-medium">
+      <div className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium" style={{ background: "color-mix(in srgb, #22c55e 12%, transparent)", border: "1px solid color-mix(in srgb, #22c55e 25%, transparent)", color: "#22c55e" }}>
         <UserCheck size={14} />
         Friends
       </div>
