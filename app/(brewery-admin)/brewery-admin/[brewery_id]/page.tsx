@@ -3,12 +3,14 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import {
   Beer, Users, Star, TrendingUp, Award, Calendar, ArrowUpRight,
-  List, Clock, Heart, BarChart3, QrCode, Eye, Zap, Gift,
+  List, Clock, Heart, BarChart3, QrCode, Eye, Zap, Gift, RefreshCw,
 } from "lucide-react";
 import { formatRelativeTime } from "@/lib/dates";
 import BreweryOnboardingCard from "@/components/brewery-admin/BreweryOnboardingCard";
 import { OnboardingWizard } from "@/components/brewery-admin/onboarding/OnboardingWizard";
 import ROIDashboardCard from "@/components/brewery-admin/ROIDashboardCard";
+import { PosDashboardCard } from "@/components/brewery-admin/PosDashboardCard";
+import { PosSyncAlertBanner } from "@/components/brewery-admin/PosSyncAlertBanner";
 import { Sparkline, ActiveSessionsCounter, RecentActivityFeed } from "./DashboardClient";
 import type { ActivityItem } from "./DashboardClient";
 
@@ -280,6 +282,7 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
     { href: `/brewery-admin/${brewery_id}/events`, label: "Events", icon: Calendar, desc: "Manage events" },
     { href: `/brewery-admin/${brewery_id}/sessions`, label: "Sessions", icon: Clock, desc: "All visits" },
     { href: `/brewery/${brewery_id}`, label: "Public Page", icon: Eye, desc: "View as customer" },
+    ...((brewery as any)?.pos_connected ? [{ href: `/brewery-admin/${brewery_id}/pos-sync`, label: "POS Sync", icon: RefreshCw, desc: "Sync log" }] : []),
   ];
 
   return (
@@ -351,6 +354,11 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
           )}
         </div>
       </div>
+
+      {/* ── POS Sync Alert Banner ──────────────────────────────────── */}
+      {(brewery as any)?.pos_connected && (
+        <PosSyncAlertBanner breweryId={brewery_id} />
+      )}
 
       {/* ── KPI Cards ────────────────────────────────────────────────── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
@@ -563,6 +571,11 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
             subscriptionTier={subscriptionTier}
             hasLoyaltyProgram={hasLoyalty}
           />
+
+          {/* POS Sync Card */}
+          {(subscriptionTier === "cask" || subscriptionTier === "barrel") && (
+            <PosDashboardCard breweryId={brewery_id} />
+          )}
 
           {/* Quick Actions — Grid */}
           <div>

@@ -1,8 +1,8 @@
 # HopTrack Product Roadmap
 **Last updated:** 2026-04-01
 **PM:** Morgan
-**Current Sprint:** Sprint 86 — The Connector 🔌
-**Last completed:** Sprint 85 — The Pipeline ✅
+**Current Sprint:** Sprint 88 — The Monitor 📊
+**Last completed:** Sprint 87 — The Sync Engine ✅
 
 > This is a living document -- updated every sprint. For completed sprints 1-12, see `docs/roadmap-archive.md`. For sprint plans, see `docs/plans/`. For the Shore It Up master plan (Sprints 64-73), see `docs/plans/sprint-64-73-master-plan.md`. For the Q2 2026 roadmap research (30 features, 18 REQs, 4 sprint arcs), see `docs/plans/roadmap-research-2026-q2.md`.
 
@@ -221,6 +221,57 @@ Vitest configured (39 unit tests across 4 files). Vitest added to CI. Cookie con
 - `types/database.ts` — UPDATED: PosConnection, PosItemMapping, PosSyncLog + Beer/Brewery POS columns
 - `.env.local.example` — UPDATED: POS_TOKEN_ENCRYPTION_KEY, Toast/Square API credentials
 - `docs/plans/sprint-86-plan.md` — NEW: sprint plan
+
+---
+
+## Sprint 87 — The Sync Engine ⚡ (2026-04-01)
+**Theme:** POS sync brain — menu reconciliation, auto-mapping, conflict resolution
+**Arc:** Open the Pipes (Sprints 85-90)
+**Plan:** `docs/plans/sprint-87-plan.md` | **Retro:** `docs/retros/sprint-87-retro.md`
+
+**Goal 1: POS Sync Engine Core** — `lib/pos-sync/` with 5 files: reconciliation engine, provider adapters (Toast + Square), 4-stage auto-mapper (exact ID → exact name → normalized → fuzzy Levenshtein, ≥80% match rate), mock provider with 24 realistic items. Never deletes beers — only toggles `is_on_tap`.
+
+**Goal 2: Sync Status & Mapping Review UI** — Enhanced sync result toasts with actual numbers (+added, ~updated, -removed). Item Mappings expandable panel in Settings with filter pills (All/Unmapped/Auto/Manual), dropdown beer picker for unmapped items, unmap button, color-coded status dots.
+
+**Goal 3: Webhook + Manual Sync Wiring** — Toast webhook → fire-and-forget async → sync engine → DB updates + logging. Square webhook → notification-only → fetch catalog → sync engine. Manual sync → decrypt token → fetch menu (or mock) → sync engine → detailed response.
+
+**Goal 4: Testing** — 33 Vitest unit tests across 6 suites: Levenshtein (5), auto-mapper (9), Toast normalizer (3), Square normalizer (4), getAdapter (3), mock provider (6).
+
+**Key changes from Sprint 87:**
+- `lib/pos-sync/engine.ts` — NEW: runSync() reconciliation engine
+- `lib/pos-sync/mapper.ts` — NEW: autoMap() with 4-stage matching + levenshtein()
+- `lib/pos-sync/normalizer.ts` — NEW: toastAdapter, squareAdapter, getAdapter()
+- `lib/pos-sync/types.ts` — NEW: PosMenuItem, MappingResult, SyncResult, SyncContext, PosProviderAdapter
+- `lib/pos-sync/mock-provider.ts` — NEW: isMockMode(), generateMockToastWebhook/SquareCatalog()
+- `app/api/pos/sync/[provider]/route.ts` — UPDATED: wired to sync engine
+- `app/api/pos/webhook/toast/route.ts` — UPDATED: async sync on webhook
+- `app/api/pos/webhook/square/route.ts` — UPDATED: notification → fetch → sync
+- `app/(brewery-admin)/.../settings/BrewerySettingsClient.tsx` — UPDATED: mapping review UI
+- `lib/pos-sync/__tests__/` — NEW: 33 tests across 6 files
+
+---
+
+## Sprint 88 — The Monitor 📊 (2026-04-01)
+**Theme:** POS sync visibility for brewery owners
+**Arc:** Open the Pipes (Sprints 85-90)
+**Plan:** `docs/plans/sprint-88-plan.md`
+
+**Goal 1: POS Status Card on Dashboard** — `PosDashboardCard` client component in brewery admin dashboard right column. Shows connection health (green/yellow/red), last sync time, item count, Sync Now button, unmapped item badge with link to Settings. Empty state CTA for unconnected breweries. Only shows for Cask/Barrel tiers.
+
+**Goal 2: Dedicated Sync Log Page** — New page at `/brewery-admin/[id]/pos-sync/` with full paginated sync history. Filter pills for status (All/Success/Partial/Failed), provider (All/Toast/Square), and trigger type (All/Webhook/Manual/Scheduled). Each row shows status dot, provider, sync type, items (+added ~updated -removed), unmapped count, duration, timestamp. Failed syncs expand to show error detail. New `GET /api/pos/sync-logs` endpoint with pagination and filtering.
+
+**Goal 3: Sync Health Alerts** — `PosSyncAlertBanner` client component below Today's Snapshot on dashboard. Shows gold (stale) or red (error) alert when POS sync is unhealthy. Dismissible. Links to sync log page.
+
+**Goal 4: Quick Actions Update** — POS Sync added to Quick Actions grid (RefreshCw icon), conditionally shown when brewery has active POS connection.
+
+**Key changes from Sprint 88:**
+- `components/brewery-admin/PosDashboardCard.tsx` — NEW: POS status card for dashboard
+- `components/brewery-admin/PosSyncAlertBanner.tsx` — NEW: sync health alert banner
+- `app/api/pos/sync-logs/route.ts` — NEW: paginated sync log endpoint with filters
+- `app/(brewery-admin)/brewery-admin/[brewery_id]/pos-sync/page.tsx` — NEW: sync log page
+- `app/(brewery-admin)/brewery-admin/[brewery_id]/pos-sync/PosSyncLogClient.tsx` — NEW: sync log UI with filters + pagination
+- `app/(brewery-admin)/brewery-admin/[brewery_id]/pos-sync/loading.tsx` — NEW: skeleton loader
+- `app/(brewery-admin)/brewery-admin/[brewery_id]/page.tsx` — UPDATED: PosDashboardCard, PosSyncAlertBanner, POS quick action
 
 ---
 
