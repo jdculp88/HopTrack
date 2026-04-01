@@ -57,7 +57,7 @@ export function YouTabContent({
   if (!profile) return null;
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       {/* Profile header — pour fill hero card */}
       <motion.div
         initial={{ opacity: 0, y: 12 }}
@@ -153,7 +153,7 @@ export function YouTabContent({
 
       {/* Wrapped CTA */}
       {profile.total_checkins > 0 && (
-        <Link href="/wrapped" className="block mt-1 mb-1">
+        <Link href="/wrapped" className="block">
           <motion.div
             className="rounded-2xl p-5 relative overflow-hidden"
             style={{

@@ -4,6 +4,7 @@ import { HomeFeed } from "./HomeFeed";
 import type { FriendActiveRoute } from "@/components/social/HopRouteCTACard";
 import {
   fetchFeedSessions,
+  fetchUserSessions,
   fetchActiveFriendSessions,
   fetchWeekStats,
   fetchCommunityContent,
@@ -34,9 +35,10 @@ export default async function HomePage() {
   const today = new Date().toISOString().split("T")[0];
 
   // Parallel data fetch — all queries are fault-tolerant
-  const [sessions, activeFriendSessions, weekStats, community, social, friendActivity, friendChallengeCompletions, friendChallengeMilestones] =
+  const [sessions, userSessions, activeFriendSessions, weekStats, community, social, friendActivity, friendChallengeCompletions, friendChallengeMilestones] =
     await Promise.all([
       fetchFeedSessions(supabase, feedUserIds),
+      fetchUserSessions(supabase, user.id),
       fetchActiveFriendSessions(supabase, friendIds),
       fetchWeekStats(supabase, user.id),
       fetchCommunityContent(supabase, today, friendIds),
@@ -181,6 +183,7 @@ export default async function HomePage() {
     <HomeFeed
       profile={profile}
       sessions={sessions}
+      userSessions={userSessions}
       activeFriendSessions={activeFriendSessions}
       weekStats={weekStats}
       currentUserId={user.id}

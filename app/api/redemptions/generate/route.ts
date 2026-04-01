@@ -6,10 +6,10 @@ import crypto from "crypto";
 // Characters excluding ambiguous ones (0/O, I/1, L)
 const SAFE_CHARS = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
 
-function generateCode(): string {
-  const bytes = crypto.randomBytes(6);
+function generateCode(length = 5): string {
+  const bytes = crypto.randomBytes(length);
   let code = "";
-  for (let i = 0; i < 6; i++) {
+  for (let i = 0; i < length; i++) {
     code += SAFE_CHARS[bytes[i] % SAFE_CHARS.length];
   }
   return code;
@@ -25,13 +25,13 @@ export async function POST(req: Request) {
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await req.json();
-  const { type, brewery_id, program_id, mug_club_id, perk_index } = body;
+  const { type, brewery_id, program_id, mug_club_id, perk_index, promotion_id, promo_description } = body;
 
   if (!type || !brewery_id) {
     return NextResponse.json({ error: "Missing type or brewery_id" }, { status: 400 });
   }
 
-  if (type !== "loyalty_reward" && type !== "mug_club_perk") {
+  if (type !== "loyalty_reward" && type !== "mug_club_perk" && type !== "promotion") {
     return NextResponse.json({ error: "Invalid type" }, { status: 400 });
   }
 
@@ -75,6 +75,24 @@ export async function POST(req: Request) {
     if (!membership || membership.status !== "active") {
       return NextResponse.json({ error: "Not an active club member" }, { status: 400 });
     }
+  } else if (type === "promotion") {
+    // Promotion codes — verify the promotion exists and is active
+    if (promotion_id) {
+      const { data: promo } = await supabase
+        .from("promotions")
+        .select("id, is_active, redemption_limit, redemptions_count")
+        .eq("id", promotion_id)
+        .eq("brewery_id", brewery_id)
+        .single();
+
+      if (!promo || !promo.is_active) {
+        return NextResponse.json({ error: "Promotion not found or inactive" }, { status: 400 });
+      }
+
+      if (promo.redemption_limit && (promo.redemptions_count ?? 0) >= promo.redemption_limit) {
+        return NextResponse.json({ error: "Promotion redemption limit reached" }, { status: 400 });
+      }
+    }
   }
 
   // Cancel any existing pending codes for this user + brewery (prevent accumulation)
@@ -99,6 +117,8 @@ export async function POST(req: Request) {
         program_id: program_id ?? null,
         mug_club_id: mug_club_id ?? null,
         perk_index: perk_index ?? null,
+        promotion_id: promotion_id ?? null,
+        promo_description: promo_description ?? null,
       } as any);
 
     if (!insertError) {

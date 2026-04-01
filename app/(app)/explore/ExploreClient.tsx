@@ -6,7 +6,7 @@ import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Search, Map, List, Loader2, SlidersHorizontal, X, Sparkles,
-  Navigation, Trophy, ChevronDown, ChevronUp, MapPin, Users, Calendar, Clock,
+  Navigation, ChevronDown, ChevronUp, MapPin, Users, Calendar, Clock, Bookmark,
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -75,7 +75,9 @@ export function ExploreClient({
   const [visitFilter, setVisitFilter] = useState<VisitFilter>((searchParams.get("visit") as VisitFilter) ?? "all");
   const [typeFilter, setTypeFilter] = useState<BreweryType | "all">((searchParams.get("type") as BreweryType) ?? "all");
   const [botwFilter, setBotwFilter] = useState(searchParams.get("botw") === "1");
-  const [showFilters, setShowFilters] = useState(typeFilter !== "all" || botwFilter);
+  const [wishlistFilter, setWishlistFilter] = useState(searchParams.get("filter") === "wishlist");
+  const [wishlistBreweryIds, setWishlistBreweryIds] = useState<Set<string>>(new Set());
+  const [showFilters, setShowFilters] = useState(typeFilter !== "all" || botwFilter || wishlistFilter);
   const enriched = initialBreweries.map(b => ({ ...b, has_upcoming_events: hasUpcomingEvents.includes(b.id) }));
   const [breweries, setBreweries] = useState<BreweryWithStats[]>(enriched);
   const [searching, setSearching] = useState(false);
@@ -84,7 +86,21 @@ export function ExploreClient({
   const [hasMore, setHasMore] = useState(initialBreweries.length < totalBreweryCount);
   const geo = useGeolocation();
 
-  const activeFilterCount = (typeFilter !== "all" ? 1 : 0) + (botwFilter ? 1 : 0);
+  const activeFilterCount = (typeFilter !== "all" ? 1 : 0) + (botwFilter ? 1 : 0) + (wishlistFilter ? 1 : 0);
+
+  // Fetch wishlist brewery IDs when filter is active
+  useEffect(() => {
+    if (!wishlistFilter) { setWishlistBreweryIds(new Set()); return; }
+    (async () => {
+      try {
+        const res = await fetch("/api/wishlist/on-tap");
+        const data = await res.json();
+        setWishlistBreweryIds(new Set(data.brewery_ids ?? []));
+      } catch {
+        setWishlistBreweryIds(new Set());
+      }
+    })();
+  }, [wishlistFilter]);
 
   // Pre-compute distances for all breweries when location is available
   const distanceMap = useMemo(() => {
@@ -130,8 +146,8 @@ export function ExploreClient({
   function setTypeFilterAndSync(t: BreweryType | "all") { setTypeFilter(t); pushParams({ type: t === "all" ? "" : t }); }
   function setBotwFilterAndSync(v: boolean) { setBotwFilter(v); pushParams({ botw: v ? "1" : "" }); }
   function clearFiltersAndSync() {
-    setTypeFilter("all"); setBotwFilter(false);
-    pushParams({ type: "", botw: "" });
+    setTypeFilter("all"); setBotwFilter(false); setWishlistFilter(false);
+    pushParams({ type: "", botw: "", filter: "" });
   }
 
   useEffect(() => {
@@ -191,6 +207,7 @@ export function ExploreClient({
       }
       if (typeFilter !== "all" && b.brewery_type !== typeFilter) return false;
       if (botwFilter && !hasBeerOfTheWeek.includes(b.id)) return false;
+      if (wishlistFilter && !wishlistBreweryIds.has(b.id)) return false;
       return true;
     })
     .sort((a: any, b: any) => {
@@ -220,14 +237,6 @@ export function ExploreClient({
         <div className="flex items-center justify-between">
           <h1 className="font-sans text-3xl font-bold text-[var(--text-primary)]">Explore</h1>
           <div className="flex items-center gap-2">
-            <Link
-              href="/leaderboard"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm border transition-colors"
-              style={{ background: "var(--surface)", color: "var(--text-muted)", borderColor: "var(--border)" }}
-            >
-              <Trophy size={14} />
-              <span className="hidden sm:inline">Leaderboard</span>
-            </Link>
             {/* View toggle */}
             <div className="flex items-center gap-2 bg-[var(--surface)] border border-[var(--border)] rounded-xl p-1">
               <button
@@ -375,6 +384,12 @@ export function ExploreClient({
                       active={botwFilter}
                       onClick={() => setBotwFilterAndSync(!botwFilter)}
                       icon={<Sparkles size={12} />}
+                    />
+                    <FilterChip
+                      label="On My Wishlist"
+                      active={wishlistFilter}
+                      onClick={() => { setWishlistFilter(!wishlistFilter); pushParams({ filter: !wishlistFilter ? "wishlist" : "" }); }}
+                      icon={<Bookmark size={12} />}
                     />
                   </div>
                 </div>

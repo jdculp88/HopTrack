@@ -701,6 +701,7 @@ Features requiring explicit design work before or during implementation:
 - **F-022:** Tasting notes -- flavor wheel, sensory sliders
 - **F-026:** Consumer subscription -- premium badge, paywall screens
 - **F-027:** AI Sommelier -- chat UI, response cards
+- **F-031:** AI Business Suggestions -- proactive dashboard recommendations for brewery owners ("you should run this promo", "your XYZ isn't selling, lower the price", "your best seller deserves a spotlight"). Analyzes brewery data to suggest actionable revenue-driving moves.
 
 ---
 

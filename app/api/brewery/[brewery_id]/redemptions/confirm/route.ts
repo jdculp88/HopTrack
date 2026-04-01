@@ -15,21 +15,31 @@ export async function POST(
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  // Verify brewery ownership
-  const { data: brewery } = await supabase
-    .from("breweries")
-    .select("id, owner_id")
-    .eq("id", brewery_id)
+  // Verify brewery access (owner, manager, staff, or puncher)
+  const { data: account } = await supabase
+    .from("brewery_accounts")
+    .select("role")
+    .eq("brewery_id", brewery_id)
+    .eq("user_id", user.id)
     .single();
 
-  if (!brewery || brewery.owner_id !== user.id) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  // Fallback: also check direct ownership for legacy support
+  if (!account) {
+    const { data: brewery } = await supabase
+      .from("breweries")
+      .select("id, owner_id")
+      .eq("id", brewery_id)
+      .single();
+
+    if (!brewery || brewery.owner_id !== user.id) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
   }
 
   const body = await req.json();
   const { code } = body;
 
-  if (!code || typeof code !== "string" || code.length !== 6) {
+  if (!code || typeof code !== "string" || (code.length !== 5 && code.length !== 6)) {
     return NextResponse.json({ error: "Invalid code format" }, { status: 400 });
   }
 
@@ -111,17 +121,57 @@ export async function POST(
 
     const perks = (club?.perks ?? []) as string[];
     redeemDescription = perks[redemption.perk_index ?? 0] ?? "Mug club perk";
+  } else if (redemption.type === "promotion") {
+    // Get promotion details
+    const promoId = (redemption as any).promotion_id;
+    if (promoId) {
+      const { data: promo } = await supabase
+        .from("promotions")
+        .select("discount_type, discount_value, description")
+        .eq("id", promoId)
+        .single();
+
+      if (promo) {
+        const discount = promo.discount_type === "fixed"
+          ? `$${promo.discount_value} off`
+          : promo.discount_type === "percent"
+          ? `${promo.discount_value}% off`
+          : promo.discount_type === "bogo"
+          ? "Buy one get one"
+          : "Free item";
+        redeemDescription = `${discount}${(promo as any).description ? ` — ${(promo as any).description}` : ""}`;
+      }
+    }
+    // Fallback to promo_description stored on the code itself
+    if (!redeemDescription) {
+      redeemDescription = (redemption as any).promo_description ?? "Promotion redeemed";
+    }
+
+    // Increment promotion redemptions_count
+    if (promoId) {
+      try {
+        await supabase.rpc("increment_field" as any, { row_id: promoId, table_name: "promotions", field_name: "redemptions_count" });
+      } catch {
+        // Fallback: direct update if RPC doesn't exist
+        await supabase
+          .from("promotions")
+          .update({ redemptions_count: ((redemption as any).redemptions_count ?? 0) + 1 } as any)
+          .eq("id", promoId);
+      }
+    }
   }
 
-  // Mark the code as confirmed
-  await supabase
+  // Mark the code as confirmed (trigger auto-generates pos_reference)
+  const { data: confirmed } = await supabase
     .from("redemption_codes")
     .update({
       status: "confirmed",
       confirmed_at: new Date().toISOString(),
       confirmed_by: user.id,
     } as any)
-    .eq("id", redemption.id);
+    .eq("id", redemption.id)
+    .select("pos_reference")
+    .single();
 
   // Build user display info
   const profile = redemption.profile as any;
@@ -131,6 +181,7 @@ export async function POST(
     success: true,
     customer: displayName,
     type: redemption.type,
-    description: redeemDescription,
+    description: redeemDescription || (redemption as any).promo_description || "Redemption confirmed",
+    pos_reference: (confirmed as any)?.pos_reference ?? null,
   });
 }

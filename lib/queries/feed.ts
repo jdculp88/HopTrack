@@ -163,6 +163,27 @@ export async function fetchFeedSessions(
 }
 
 /**
+ * User's own completed sessions for the "You" tab (separate from shared feed).
+ */
+export async function fetchUserSessions(
+  supabase: SupabaseClient,
+  userId: string
+): Promise<Session[]> {
+  try {
+    const { data } = await supabase
+      .from("sessions")
+      .select(SESSION_SELECT)
+      .eq("user_id", userId)
+      .eq("is_active", false)
+      .order("started_at", { ascending: false })
+      .limit(20);
+    return (data as Session[]) ?? [];
+  } catch {
+    return [];
+  }
+}
+
+/**
  * Active (live) friend sessions for the "Live Now" strip.
  */
 export async function fetchActiveFriendSessions(

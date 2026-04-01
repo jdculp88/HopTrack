@@ -248,11 +248,12 @@ scripts/supabase-setup.mjs    — One-time setup script
 
 ## 🗺️ Where We Are
 
-**Last Completed Sprint:** Sprint 113 — The Proof ✅
-**Arc:** The Overhaul (Sprints 104-113) — CLOSED ✅
+**Last Completed Sprint:** Sprint 114 — The Operator ✅
+**Arc:** Multi-Location (Sprints 114-137)
+**Sprint plan (114):** `docs/plans/sprint-114-plan.md`
+**Last completed:** Sprint 114 — The Operator ✅ — Staff redemption system (4 roles: admin/business/marketing/staff, code entry UI, POS reference), brewery admin user management, 5 bug fixes (wishlist filter, You tab sessions, spacing, Explore cleanup, caching), smart search (pg_trgm fuzzy + typeahead API + SearchTypeahead component), multi-location schema foundation (brewery_brands, brand_accounts). 3 migrations (070-072). F-031 captured.
+**Previous arc:** The Overhaul (Sprints 104-113) — CLOSED ✅
 **Sprint plan (104-113):** `docs/plans/sprint-104-113-arc-plan.md`
-**Last completed:** Sprint 113 — The Proof ✅ — Full 10-sprint overhaul arc complete. 730 tests, structured logging, API response standard, monolith surgery (6 components split), error boundaries, retry logic, accessibility overhaul, font migration, bundle analyzer, performance hooks, brand polish. Ready for Multi-Location arc.
-**Next arc:** Multi-Location (Sprints 114+) — starting Sprint 114
 **Last completed:** Sprint 96 — The Lockdown ✅ — Session drawer UX overhaul (SessionContext, minimize, cancel), fraud prevention Phase 1 (redemption codes, staff confirmation), tier feature matrix + billing clarity, 217 tests, 0 lint errors, migration 066.
 **Last completed:** Sprint 95 — The Hub ✅ — Promotion Hub (F-029), HopRoute config relocation, router cache fix, 206→217 tests, 6 backlog items captured.
 **Retro (95):** `docs/retros/sprint-95-retro.md` (facilitated by Morgan)

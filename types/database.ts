@@ -224,6 +224,16 @@ export interface Database {
         Insert: Omit<EventRsvp, "id" | "created_at"> & { id?: string };
         Update: Partial<EventRsvp>;
       };
+      brewery_brands: {
+        Row: BreweryBrand;
+        Insert: Omit<BreweryBrand, "id" | "created_at"> & { id?: string };
+        Update: Partial<BreweryBrand>;
+      };
+      brand_accounts: {
+        Row: BrandAccount;
+        Insert: Omit<BrandAccount, "id" | "created_at"> & { id?: string };
+        Update: Partial<BrandAccount>;
+      };
     };
   };
 }
@@ -317,6 +327,8 @@ export interface Brewery {
   pos_provider: PosProvider | null;
   pos_connected: boolean;
   pos_last_sync_at: string | null;
+  // Multi-location (Sprint 114)
+  brand_id: string | null;
 }
 export type BreweryInsert = Omit<Brewery, "id" | "created_at"> & { id?: string };
 export type BreweryUpdate = Partial<Brewery>;
@@ -657,7 +669,7 @@ export interface BreweryAccount {
   id: string;
   user_id: string;
   brewery_id: string;
-  role: "owner" | "manager" | "staff";
+  role: "owner" | "business" | "marketing" | "staff";
   stripe_customer_id: string | null;
   subscription_tier: "free" | "tap" | "cask" | "barrel";
   subscription_status: "active" | "trialing" | "past_due" | "canceled" | null;
@@ -1043,15 +1055,40 @@ export interface EventRsvp {
 export interface RedemptionCode {
   id: string;
   code: string;
-  type: 'loyalty_reward' | 'mug_club_perk';
+  type: 'loyalty_reward' | 'mug_club_perk' | 'promotion';
   user_id: string;
   brewery_id: string;
   program_id: string | null;
   mug_club_id: string | null;
   perk_index: number | null;
+  promotion_id: string | null;
+  promo_description: string | null;
+  pos_reference: string | null;
   status: 'pending' | 'confirmed' | 'expired' | 'cancelled';
   created_at: string;
   expires_at: string;
   confirmed_at: string | null;
   confirmed_by: string | null;
+}
+
+// ─── Brewery Brands (Multi-Location) ────────────────────────────────────────
+export interface BreweryBrand {
+  id: string;
+  name: string;
+  slug: string;
+  logo_url: string | null;
+  description: string | null;
+  website_url: string | null;
+  created_at: string;
+  owner_id: string | null;
+}
+
+export type BrandAccountRole = "owner" | "regional_manager";
+
+export interface BrandAccount {
+  id: string;
+  brand_id: string;
+  user_id: string;
+  role: BrandAccountRole;
+  created_at: string;
 }

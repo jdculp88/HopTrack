@@ -7,6 +7,7 @@ import { useToast } from "@/components/ui/Toast";
 import { ImageUpload } from "@/components/ui/ImageUpload";
 import { MenuUpload } from "@/components/ui/MenuUpload";
 import { ApiKeyManager } from "@/components/brewery-admin/ApiKeyManager";
+import { StaffManager } from "@/components/brewery-admin/StaffManager";
 
 interface BrewerySettingsClientProps {
   brewery: any;
@@ -166,7 +167,7 @@ export function BrewerySettingsClient({ brewery, role, subscriptionTier = "free"
       </div>
 
       {/* API Keys */}
-      {(role === "owner" || role === "manager") && (
+      {(role === "owner" || role === "business") && (
         <div className="mt-6 rounded-2xl border p-6" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
           <div className="flex items-center gap-2 mb-1">
             <Key size={18} style={{ color: "var(--accent-gold)" }} />
@@ -180,13 +181,20 @@ export function BrewerySettingsClient({ brewery, role, subscriptionTier = "free"
       )}
 
       {/* HopRoute & Discovery */}
-      {(role === "owner" || role === "manager") && (
+      {(role === "owner" || role === "business") && (
         <HopRouteSettingsSection brewery={brewery} />
       )}
 
       {/* POS Integration */}
-      {(role === "owner" || role === "manager") && (
+      {(role === "owner" || role === "business") && (
         <PosSettingsSection breweryId={brewery.id} subscriptionTier={subscriptionTier} />
+      )}
+
+      {/* Staff Management */}
+      {(role === "owner" || role === "business") && (
+        <div className="mt-6">
+          <StaffManager breweryId={brewery.id} currentUserRole={role} />
+        </div>
       )}
 
       {/* Danger zone */}

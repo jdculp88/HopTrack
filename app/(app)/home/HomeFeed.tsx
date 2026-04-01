@@ -104,6 +104,7 @@ export interface RecommendedBeer {
 interface HomeFeedProps {
   profile: Profile | null;
   sessions: Session[];
+  userSessions?: Session[];
   activeFriendSessions: Session[];
   weekStats: { sessions: number; beers: number; uniqueBreweries: number };
   currentUserId: string;
@@ -134,6 +135,7 @@ interface HomeFeedProps {
 export function HomeFeed({
   profile,
   sessions,
+  userSessions,
   activeFriendSessions,
   weekStats,
   currentUserId,
@@ -191,9 +193,12 @@ export function HomeFeed({
     tab: "friends",
   });
 
+  // Use dedicated user sessions for the You tab (avoids friends crowding out user's own sessions)
   const initialYouSessions = useMemo(
-    () => sessions.filter((s) => s.user_id === currentUserId),
-    [sessions, currentUserId]
+    () => userSessions && userSessions.length > 0
+      ? userSessions
+      : sessions.filter((s) => s.user_id === currentUserId),
+    [userSessions, sessions, currentUserId]
   );
 
   const youPagination = useFeedPagination({

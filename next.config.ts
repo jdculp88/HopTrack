@@ -14,7 +14,7 @@ const nextConfig: NextConfig = {
     // Without this, Next.js caches RSC payloads and pages appear stale until hard refresh.
     staleTimes: {
       dynamic: 0,
-      static: 30,
+      static: 0,
     },
   },
   async headers() {
