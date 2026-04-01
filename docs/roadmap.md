@@ -1,8 +1,8 @@
 # HopTrack Product Roadmap
 **Last updated:** 2026-04-01
 **PM:** Morgan
-**Current Sprint:** Sprint 90 — The Close-Out 🔐
-**Last completed:** Sprint 89 — The Rolodex ✅
+**Current Sprint:** Sprint 91 — The Spotlight 🎯
+**Last completed:** Sprint 90 — The Close-Out ✅
 
 > This is a living document -- updated every sprint. For completed sprints 1-12, see `docs/roadmap-archive.md`. For sprint plans, see `docs/plans/`. For the Shore It Up master plan (Sprints 64-73), see `docs/plans/sprint-64-73-master-plan.md`. For the Q2 2026 roadmap research (30 features, 18 REQs, 4 sprint arcs), see `docs/plans/roadmap-research-2026-q2.md`.
 
@@ -353,6 +353,43 @@ Vitest configured (39 unit tests across 4 files). Vitest added to CI. Cookie con
 **Migrations this arc:** 057 (api_keys), 058 (POS schema), 059 (beer barcode)
 
 **Next arc:** The Flywheel (Sprints 91-96) — Sponsored challenges, ad engine, mug clubs, multi-location. Revenue flywheel.
+
+---
+
+## Sprint 91 — The Spotlight 🎯 (2026-04-01)
+**Theme:** Brewery-sponsored challenges — the B2C-to-B2B revenue feature
+**Arc:** The Flywheel (Sprint 1 of 6)
+**Plan:** `docs/plans/sprint-91-plan.md`
+
+**Goal 1: Sponsored Challenge Schema** — Migration 060: `is_sponsored`, `cover_image_url`, `geo_radius_km`, `impressions`, `joins_from_discovery` columns on challenges table. RLS for cross-brewery discovery of sponsored challenges. Atomic increment functions for impressions and discovery joins.
+
+**Goal 2: Sponsored Challenge Creation UI** — "Make it Sponsored" toggle in brewery admin ChallengesClient with tier gating (Cask/Barrel only, Tap sees locked state). Cover image URL input with preview. Geo radius selector (10/25/50/100 km). Sponsored badge on challenge cards in admin.
+
+**Goal 3: Sponsored Challenge Discovery** — "Challenges Near You" section in Discover tab (NearbyChallengesSection). SponsoredChallengeCard component with cover image, progress, distance. `GET /api/challenges/nearby` endpoint with haversine distance calculation, user participation enrichment. Join source tracking ("discovery" vs "brewery_page").
+
+**Goal 4: Sponsored Challenge Analytics** — Impression tracking via `POST /api/challenges/[id]/impression` (fires on card render). Discovery join tracking in join API. Admin view shows impressions, discovery joins, conversion rate for sponsored challenges.
+
+**Also this sprint:** Deep QA/BA audit of entire codebase — 83 API routes, 40+ pages, 70+ components. Found 3 P0s, 12 P1s, 15+ P2s. Audit report: `docs/plans/qa-audit-sprint-91.md`. Issues queued for Sprints 92-94.
+
+**Key changes from Sprint 91:**
+- `supabase/migrations/060_sponsored_challenges.sql` — NEW: 5 columns, index, RLS, 2 SQL functions
+- `app/api/challenges/nearby/route.ts` — NEW: geo-based sponsored challenge discovery
+- `app/api/challenges/[id]/impression/route.ts` — NEW: impression tracking
+- `app/api/challenges/join/route.ts` — UPDATED: source tracking (discovery vs brewery_page)
+- `app/api/brewery/[brewery_id]/challenges/route.ts` — UPDATED: sponsored fields in POST/PATCH
+- `components/social/SponsoredChallengeCard.tsx` — NEW: consumer card with impression tracking
+- `components/social/NearbyChallengesSection.tsx` — NEW: geo-aware challenge discovery section
+- `app/(app)/home/DiscoverTabContent.tsx` — UPDATED: "Challenges Near You" section added
+- `app/(brewery-admin)/.../challenges/ChallengesClient.tsx` — UPDATED: sponsored toggle, cover image, geo radius, analytics display
+- `app/(brewery-admin)/.../challenges/page.tsx` — UPDATED: passes subscription_tier
+- `components/brewery/BreweryChallenges.tsx` — UPDATED: join source tracking
+- `types/database.ts` — UPDATED: Challenge + ChallengeParticipant types registered, sponsored fields
+- `lib/__tests__/sponsored-challenges.test.ts` — NEW: 16 tests (geo, filtering, analytics, tier gating)
+- `docs/API-REFERENCE.md` — UPDATED: 66 endpoints (challenges section added)
+- `docs/plans/qa-audit-sprint-91.md` — NEW: comprehensive QA/BA audit report
+- `docs/plans/sprint-92-plan.md` — NEW: P0/P1 bug fix sprint plan
+- `docs/plans/sprint-93-plan.md` — NEW: hardening + ad engine sprint plan
+- `docs/plans/sprint-94-plan.md` — NEW: mug clubs + P2 polish sprint plan
 
 ---
 

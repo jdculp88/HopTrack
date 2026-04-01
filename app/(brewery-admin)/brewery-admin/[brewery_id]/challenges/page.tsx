@@ -15,7 +15,7 @@ export default async function ChallengesPage({
 
   const { data: account } = await (supabase
     .from("brewery_accounts")
-    .select("role, brewery:breweries(id, name)")
+    .select("role, brewery:breweries(id, name, subscription_tier)")
     .eq("user_id", user.id)
     .eq("brewery_id", brewery_id)
     .in("role", ["owner", "manager"])
@@ -48,11 +48,14 @@ export default async function ChallengesPage({
     completed_count: c.completed_count?.[0]?.count ?? 0,
   }));
 
+  const subscriptionTier = (account.brewery as any)?.subscription_tier ?? "free";
+
   return (
     <ChallengesClient
       breweryId={brewery_id}
       initialChallenges={formatted}
       tapListBeers={beers ?? []}
+      subscriptionTier={subscriptionTier}
     />
   );
 }

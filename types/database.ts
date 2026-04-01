@@ -189,6 +189,16 @@ export interface Database {
         Insert: Omit<PosSyncLog, "id" | "created_at"> & { id?: string };
         Update: Partial<PosSyncLog>;
       };
+      challenges: {
+        Row: Challenge;
+        Insert: Omit<Challenge, "id" | "created_at"> & { id?: string };
+        Update: Partial<Challenge>;
+      };
+      challenge_participants: {
+        Row: ChallengeParticipant;
+        Insert: Omit<ChallengeParticipant, "id" | "joined_at"> & { id?: string };
+        Update: Partial<ChallengeParticipant>;
+      };
     };
   };
 }
@@ -893,4 +903,41 @@ export interface PosSyncLog {
   error: string | null;
   duration_ms: number | null;
   created_at: string;
+}
+
+// ─── Challenges ──────────────────────────────────────────────────────────────
+export type ChallengeType = "beer_count" | "specific_beers" | "visit_streak" | "style_variety";
+
+export interface Challenge {
+  id: string;
+  brewery_id: string;
+  name: string;
+  description: string | null;
+  icon: string;
+  challenge_type: ChallengeType;
+  target_value: number;
+  target_beer_ids: string[];
+  reward_description: string | null;
+  reward_xp: number;
+  reward_loyalty_stamps: number;
+  starts_at: string | null;
+  ends_at: string | null;
+  is_active: boolean;
+  max_participants: number | null;
+  created_at: string;
+  // Sponsored challenge fields (Sprint 91)
+  is_sponsored: boolean;
+  cover_image_url: string | null;
+  geo_radius_km: number | null;
+  impressions: number;
+  joins_from_discovery: number;
+}
+
+export interface ChallengeParticipant {
+  id: string;
+  challenge_id: string;
+  user_id: string;
+  current_progress: number;
+  completed_at: string | null;
+  joined_at: string;
 }

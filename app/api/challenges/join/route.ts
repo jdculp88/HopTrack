@@ -7,13 +7,13 @@ export async function POST(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { challenge_id } = await request.json();
+  const { challenge_id, source } = await request.json();
   if (!challenge_id) return NextResponse.json({ error: "challenge_id is required" }, { status: 400 });
 
   // Verify challenge exists, is active, and hasn't ended
   const { data: challenge } = await (supabase
     .from("challenges")
-    .select("id, is_active, ends_at, max_participants, brewery_id")
+    .select("id, is_active, ends_at, max_participants, brewery_id, is_sponsored")
     .eq("id", challenge_id)
     .eq("is_active", true)
     .single() as any);
@@ -55,6 +55,13 @@ export async function POST(request: NextRequest) {
     .single() as any);
 
   if (error) return NextResponse.json({ error: "Failed to join challenge" }, { status: 500 });
+
+  // Track discovery join for sponsored challenges
+  if (source === "discovery" && challenge.is_sponsored !== false) {
+    await (supabase.rpc("increment_challenge_discovery_joins", {
+      challenge_id,
+    }) as any);
+  }
 
   return NextResponse.json(participant, { status: 201 });
 }

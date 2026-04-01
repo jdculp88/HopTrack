@@ -21,6 +21,7 @@ import {
 } from "@/components/social/DiscoveryCard";
 import type { NewBrewery, RecommendedBeer } from "./HomeFeed";
 import { RecommendationsScroll } from "@/components/social/RecommendationsScroll";
+import { NearbyChallengesSection } from "@/components/social/NearbyChallengesSection";
 
 export interface CommunityContent {
   featuredBeers: FeaturedBeer[];
@@ -131,6 +132,9 @@ export function DiscoverTabContent({
           </div>
         </motion.div>
       </Link>
+
+      {/* Challenges Near You — sponsored challenge discovery */}
+      <NearbyChallengesSection />
 
       {/* Beer of the Week */}
       {communityContent.featuredBeers.length > 0 && (

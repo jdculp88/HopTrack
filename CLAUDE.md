@@ -246,10 +246,10 @@ scripts/supabase-setup.mjs    — One-time setup script
 
 ## 🗺️ Where We Are
 
-**Current Sprint:** Sprint 90 — The Close-Out 🔐
-**Arc:** Open the Pipes (Sprint 6 of 6 — FINAL) ✅
-**Sprint plan (90):** `docs/plans/sprint-90-plan.md` — Arc close-out: API v1 polish (api-keys CORS, envelope, rate limiting), CRM tier threshold fix (CSV export aligned with lib/crm.ts), multi-location research (REQ-072 audit — complete, ready for Flywheel), roadmap updated. No migration.
-**Last completed:** Sprint 89 — The Rolodex ✅ — Brewery CRM: customer profiles (engagement score, taste profile, visit timeline), unified segments (VIP/Power/Regular/New in lib/crm.ts), segmented messaging, barcode scanning pilot (F-008). Migration 059. Bug fix: Settings redirect.
+**Current Sprint:** Sprint 91 — The Spotlight 🎯
+**Arc:** The Flywheel (Sprint 1 of 6)
+**Sprint plan (91):** `docs/plans/sprint-91-plan.md` — Sponsored challenges: migration 060 (is_sponsored, cover_image_url, geo_radius_km, impressions, joins_from_discovery), creation UI with tier gating (Cask/Barrel), discovery (Challenges Near You in Discover, /api/challenges/nearby with haversine geo), analytics (impression tracking, join source tracking, conversion rate). Deep QA/BA audit: 83 API routes, 40+ pages — 3 P0s, 12 P1s, 15+ P2s queued for Sprints 92-94. Audit report: `docs/plans/qa-audit-sprint-91.md`.
+**Last completed:** Sprint 90 — The Close-Out ✅ — Arc close-out: API v1 polish, CRM threshold fix, REQ-072 audit. Open the Pipes arc CLOSED.
 **Retro (90):** `docs/retros/sprint-90-retro.md` (arc retro included)
 **Retro (89):** `docs/retros/sprint-89-retro.md`
 **Last completed:** Sprint 87 — The Sync Engine ✅ — POS sync engine: reconciliation engine (lib/pos-sync/engine.ts), provider adapters for Toast + Square (lib/pos-sync/normalizer.ts), 4-stage auto-mapper with ≥80% match rate (lib/pos-sync/mapper.ts), mock provider for testing (lib/pos-sync/mock-provider.ts), webhook receivers wired to engine (async fire-and-forget), manual sync wired to engine (decrypt → fetch → diff → apply), mapping review UI with filter pills + beer picker, 33 Vitest tests. No migration needed.

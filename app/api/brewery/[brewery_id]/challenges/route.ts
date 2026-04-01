@@ -77,6 +77,9 @@ export async function POST(
     starts_at,
     ends_at,
     max_participants,
+    is_sponsored = false,
+    cover_image_url,
+    geo_radius_km = 50,
   } = body;
 
   if (!name?.trim()) {
@@ -108,6 +111,9 @@ export async function POST(
       starts_at: starts_at || null,
       ends_at: ends_at || null,
       max_participants: max_participants || null,
+      is_sponsored: !!is_sponsored,
+      cover_image_url: cover_image_url?.trim() || null,
+      geo_radius_km: is_sponsored ? (geo_radius_km || 50) : null,
     })
     .select()
     .single() as any);
@@ -149,7 +155,7 @@ export async function PATCH(
   if (!existing) return NextResponse.json({ error: "Challenge not found" }, { status: 404 });
 
   // Whitelist updatable fields
-  const allowed = ["name", "description", "icon", "reward_description", "reward_xp", "reward_loyalty_stamps", "ends_at", "is_active", "max_participants"];
+  const allowed = ["name", "description", "icon", "reward_description", "reward_xp", "reward_loyalty_stamps", "ends_at", "is_active", "max_participants", "is_sponsored", "cover_image_url", "geo_radius_km"];
   const safeUpdates: Record<string, unknown> = {};
   for (const key of allowed) {
     if (key in updates) safeUpdates[key] = updates[key];

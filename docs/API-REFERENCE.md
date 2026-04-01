@@ -1,6 +1,6 @@
 # HopTrack API Reference
-**Last updated:** 2026-03-30 (Sprint 68)
-**Total endpoints:** 57
+**Last updated:** 2026-04-01 (Sprint 91)
+**Total endpoints:** 66
 **Auth:** Supabase JWT (via cookie). All endpoints require auth unless noted.
 **Rate limiting:** Applied via `rateLimitResponse()` in `lib/rate-limit.ts`.
 
@@ -146,6 +146,22 @@
 |--------|------|-------------|------------|
 | POST | `/api/push/subscribe` | Register Web Push subscription | - |
 | DELETE | `/api/push/subscribe` | Unregister subscription | - |
+
+## Challenges (7 endpoints)
+
+| Method | Path | Description | Rate Limit |
+|--------|------|-------------|------------|
+| GET | `/api/brewery/[brewery_id]/challenges` | List brewery challenges (admin) | - |
+| POST | `/api/brewery/[brewery_id]/challenges` | Create challenge (admin) | - |
+| PATCH | `/api/brewery/[brewery_id]/challenges` | Update challenge (admin) | - |
+| DELETE | `/api/brewery/[brewery_id]/challenges` | Delete challenge (admin) | - |
+| GET | `/api/brewery/[brewery_id]/challenges/participants` | Challenge participant stats | - |
+| POST | `/api/challenges/join` | Join a challenge | - |
+| GET | `/api/challenges/my-challenges` | User's active challenges | - |
+| GET | `/api/challenges/nearby` | Discover sponsored challenges near location | - |
+| POST | `/api/challenges/[id]/impression` | Track sponsored challenge impression | - |
+
+---
 
 ## Admin (2 endpoints)
 

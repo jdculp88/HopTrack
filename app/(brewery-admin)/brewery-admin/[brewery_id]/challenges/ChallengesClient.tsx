@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Trophy, Plus, Trash2, Edit2, Users, CheckCircle, ChevronDown, X } from "lucide-react";
+import { Trophy, Plus, Trash2, Edit2, Users, CheckCircle, ChevronDown, X, Eye, Sparkles, Globe, Lock } from "lucide-react";
 import { useToast } from "@/components/ui/Toast";
 
 const CHALLENGE_ICONS = ["🍺", "🏆", "🔥", "⭐", "🎯", "🍻", "🌟", "💪", "🎉", "🏅", "👑", "🍁", "❄️", "☀️", "🌙", "🎃"];
@@ -31,6 +31,12 @@ interface Challenge {
   is_active: boolean;
   participant_count: number;
   completed_count: number;
+  // Sponsored fields (Sprint 91)
+  is_sponsored: boolean;
+  cover_image_url: string | null;
+  geo_radius_km: number | null;
+  impressions: number;
+  joins_from_discovery: number;
 }
 
 interface Beer {
@@ -43,7 +49,15 @@ interface Props {
   breweryId: string;
   initialChallenges: Challenge[];
   tapListBeers: Beer[];
+  subscriptionTier?: string;
 }
+
+const GEO_RADIUS_OPTIONS = [
+  { value: 10, label: "10 km" },
+  { value: 25, label: "25 km" },
+  { value: 50, label: "50 km (default)" },
+  { value: 100, label: "100 km" },
+];
 
 const defaultForm = {
   name: "",
@@ -56,9 +70,13 @@ const defaultForm = {
   reward_xp: 100,
   reward_loyalty_stamps: 0,
   ends_at: "",
+  is_sponsored: false,
+  cover_image_url: "",
+  geo_radius_km: 50,
 };
 
-export function ChallengesClient({ breweryId, initialChallenges, tapListBeers }: Props) {
+export function ChallengesClient({ breweryId, initialChallenges, tapListBeers, subscriptionTier }: Props) {
+  const canSponsor = subscriptionTier === "cask" || subscriptionTier === "barrel";
   const [challenges, setChallenges] = useState<Challenge[]>(initialChallenges);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -86,6 +104,9 @@ export function ChallengesClient({ breweryId, initialChallenges, tapListBeers }:
       reward_xp: c.reward_xp,
       reward_loyalty_stamps: c.reward_loyalty_stamps,
       ends_at: c.ends_at ? c.ends_at.split("T")[0] : "",
+      is_sponsored: c.is_sponsored ?? false,
+      cover_image_url: c.cover_image_url ?? "",
+      geo_radius_km: c.geo_radius_km ?? 50,
     });
     setShowForm(true);
   }
@@ -107,6 +128,9 @@ export function ChallengesClient({ breweryId, initialChallenges, tapListBeers }:
         target_value: form.challenge_type === "specific_beers"
           ? form.target_beer_ids.length
           : Number(form.target_value),
+        is_sponsored: canSponsor ? form.is_sponsored : false,
+        cover_image_url: form.cover_image_url || null,
+        geo_radius_km: form.is_sponsored ? form.geo_radius_km : null,
         ...(editingId ? { challenge_id: editingId } : {}),
       };
 
@@ -410,6 +434,94 @@ export function ChallengesClient({ breweryId, initialChallenges, tapListBeers }:
               />
             </div>
 
+            {/* Sponsored Section */}
+            <div className="rounded-xl border p-4 space-y-3" style={{ borderColor: canSponsor ? "color-mix(in srgb, var(--accent-gold) 30%, transparent)" : "var(--border)", background: "var(--surface-2)" }}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Sparkles size={14} style={{ color: "var(--accent-gold)" }} />
+                  <span className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>Make it Sponsored</span>
+                </div>
+                {canSponsor ? (
+                  <button
+                    type="button"
+                    onClick={() => setForm(prev => ({ ...prev, is_sponsored: !prev.is_sponsored }))}
+                    className="relative w-10 h-5 rounded-full transition-colors"
+                    style={{ background: form.is_sponsored ? "var(--accent-gold)" : "var(--border)" }}
+                    role="switch"
+                    aria-checked={form.is_sponsored}
+                  >
+                    <motion.div
+                      className="absolute top-0.5 w-4 h-4 rounded-full"
+                      style={{ background: "#fff" }}
+                      animate={{ left: form.is_sponsored ? 22 : 2 }}
+                      transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                    />
+                  </button>
+                ) : (
+                  <div className="flex items-center gap-1.5 px-2 py-1 rounded-full" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
+                    <Lock size={10} style={{ color: "var(--text-muted)" }} />
+                    <span className="text-[10px] font-medium" style={{ color: "var(--text-muted)" }}>Cask/Barrel</span>
+                  </div>
+                )}
+              </div>
+              <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+                Sponsored challenges appear in Discover and Explore — reaching users who haven&apos;t visited your brewery yet.
+              </p>
+
+              <AnimatePresence>
+                {form.is_sponsored && canSponsor && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="overflow-hidden space-y-3"
+                  >
+                    {/* Cover image URL */}
+                    <div>
+                      <label className="text-xs font-medium mb-1.5 block" style={{ color: "var(--text-muted)" }}>Cover Image URL</label>
+                      <input
+                        className="w-full rounded-xl px-3 py-2.5 text-sm border outline-none"
+                        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--text-primary)" }}
+                        placeholder="https://... (optional)"
+                        value={form.cover_image_url}
+                        onChange={e => setForm(prev => ({ ...prev, cover_image_url: e.target.value }))}
+                      />
+                      {form.cover_image_url && (
+                        <div className="mt-2 h-20 rounded-xl overflow-hidden">
+                          <img src={form.cover_image_url} alt="Preview" className="w-full h-full object-cover" />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Geo radius */}
+                    <div>
+                      <label className="text-xs font-medium mb-1.5 block" style={{ color: "var(--text-muted)" }}>
+                        <Globe size={10} className="inline mr-1" />
+                        Discovery Radius
+                      </label>
+                      <div className="flex gap-2">
+                        {GEO_RADIUS_OPTIONS.map(opt => (
+                          <button
+                            key={opt.value}
+                            type="button"
+                            onClick={() => setForm(prev => ({ ...prev, geo_radius_km: opt.value }))}
+                            className="flex-1 py-2 rounded-xl text-xs font-medium transition-all"
+                            style={{
+                              background: form.geo_radius_km === opt.value ? "var(--accent-gold)" : "var(--surface)",
+                              color: form.geo_radius_km === opt.value ? "#0F0E0C" : "var(--text-muted)",
+                              border: `1px solid ${form.geo_radius_km === opt.value ? "var(--accent-gold)" : "var(--border)"}`,
+                            }}
+                          >
+                            {opt.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
             {/* Actions */}
             <div className="flex gap-3 pt-1">
               <button
@@ -469,6 +581,18 @@ export function ChallengesClient({ breweryId, initialChallenges, tapListBeers }:
                     >
                       {c.is_active ? "Active" : "Paused"}
                     </span>
+                    {c.is_sponsored && (
+                      <span
+                        className="text-xs px-2 py-0.5 rounded-full font-medium"
+                        style={{
+                          background: "color-mix(in srgb, var(--accent-gold) 15%, transparent)",
+                          color: "var(--accent-gold)",
+                        }}
+                      >
+                        <Sparkles size={10} className="inline mr-0.5 -mt-0.5" />
+                        Sponsored
+                      </span>
+                    )}
                     {c.ends_at && new Date(c.ends_at) < new Date() && (
                       <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: "var(--surface-2)", color: "var(--text-muted)" }}>
                         Ended
@@ -496,6 +620,24 @@ export function ChallengesClient({ breweryId, initialChallenges, tapListBeers }:
                       </span>
                     )}
                   </div>
+                  {/* Sponsored analytics */}
+                  {c.is_sponsored && (c.impressions > 0 || c.joins_from_discovery > 0) && (
+                    <div className="flex items-center gap-4 mt-1.5 text-xs" style={{ color: "var(--accent-gold)" }}>
+                      <span className="flex items-center gap-1">
+                        <Eye size={12} />
+                        {c.impressions.toLocaleString()} impressions
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Globe size={12} />
+                        {c.joins_from_discovery} from discovery
+                      </span>
+                      {c.impressions > 0 && (
+                        <span className="font-mono">
+                          {((c.joins_from_discovery / c.impressions) * 100).toFixed(1)}% conversion
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
                 <div className="flex items-center gap-1 flex-shrink-0">
                   <button

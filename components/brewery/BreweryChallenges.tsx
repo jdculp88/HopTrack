@@ -45,7 +45,7 @@ export function BreweryChallenges({ challenges, myParticipations }: Props) {
       const res = await fetch("/api/challenges/join", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ challenge_id: challenge.id }),
+        body: JSON.stringify({ challenge_id: challenge.id, source: "brewery_page" }),
       });
 
       if (!res.ok) {
