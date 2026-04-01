@@ -6,6 +6,9 @@ import { NextRequest } from "next/server";
 import crypto from "crypto";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { runSync } from "@/lib/pos-sync/engine";
+import { createLogger } from "@/lib/logger";
+
+const logger = createLogger("POS Webhook / Toast");
 
 const MAX_WEBHOOK_AGE_MS = 5 * 60 * 1000; // 5 minutes — replay protection
 
@@ -15,14 +18,14 @@ export async function POST(req: NextRequest) {
   const webhookSecret = process.env.TOAST_WEBHOOK_SECRET;
 
   if (!webhookSecret) {
-    console.error("[POS Webhook] TOAST_WEBHOOK_SECRET not configured");
+    logger.error("TOAST_WEBHOOK_SECRET not configured");
     return Response.json({ error: "Webhook not configured" }, { status: 503 });
   }
 
   const rawBody = await req.text();
 
   if (!signature) {
-    console.warn("[POS Webhook] Missing signature header from Toast");
+    logger.warn("Missing signature header from Toast");
     return Response.json({ error: "Missing signature" }, { status: 401 });
   }
 
@@ -33,7 +36,7 @@ export async function POST(req: NextRequest) {
     .digest("hex");
 
   if (!crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature))) {
-    console.warn("[POS Webhook] Invalid Toast signature");
+    logger.warn("Invalid Toast signature");
     return Response.json({ error: "Invalid signature" }, { status: 401 });
   }
 
@@ -50,12 +53,12 @@ export async function POST(req: NextRequest) {
   if (webhookTimestamp) {
     const age = Date.now() - new Date(webhookTimestamp).getTime();
     if (age > MAX_WEBHOOK_AGE_MS) {
-      console.warn("[POS Webhook] Stale Toast webhook rejected:", age, "ms old");
+      logger.warn("Stale webhook rejected", { ageMs: age });
       return Response.json({ error: "Webhook too old" }, { status: 400 });
     }
   }
 
-  console.log("[POS Webhook] Toast event received:", payload.eventType || "unknown");
+  logger.info("Event received", { type: payload.eventType || "unknown" });
 
   // ACK immediately — process async to stay within webhook timeout
   // Toast sends the full menu payload in menus.updated events
@@ -63,7 +66,7 @@ export async function POST(req: NextRequest) {
   if (eventType === "menus.updated" || eventType === "menus.published") {
     // Fire and forget — don't block webhook response
     processToastWebhook(payload).catch(err => {
-      console.error("[POS Webhook] Toast async processing error:", err);
+      logger.error("Async processing error", { error: String(err) });
     });
   }
 
@@ -73,7 +76,7 @@ export async function POST(req: NextRequest) {
 async function processToastWebhook(payload: any) {
   const restaurantGuid = payload.restaurantGuid || payload.restaurantExternalId;
   if (!restaurantGuid) {
-    console.warn("[POS Webhook] Toast payload missing restaurantGuid");
+    logger.warn("Payload missing restaurantGuid");
     return;
   }
 
@@ -92,7 +95,7 @@ async function processToastWebhook(payload: any) {
     .single();
 
   if (!connection) {
-    console.warn(`[POS Webhook] No active Toast connection for restaurant ${restaurantGuid}`);
+    logger.warn("No active connection for restaurant", { restaurantGuid });
     return;
   }
 
@@ -140,5 +143,10 @@ async function processToastWebhook(payload: any) {
       duration_ms: result.duration_ms,
     });
 
-  console.log(`[POS Webhook] Toast sync complete for brewery ${connection.brewery_id}: +${result.items_added} ~${result.items_updated} -${result.items_removed}`);
+  logger.info("Sync complete", {
+    breweryId: connection.brewery_id,
+    added: result.items_added,
+    updated: result.items_updated,
+    removed: result.items_removed,
+  });
 }

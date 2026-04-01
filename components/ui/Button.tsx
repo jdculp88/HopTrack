@@ -30,10 +30,10 @@ const VARIANTS: Record<ButtonVariant, string> = {
 };
 
 const SIZES: Record<ButtonSize, string> = {
-  xs: "text-xs px-2 py-1 rounded-lg gap-1",
-  sm: "text-sm px-3 py-1.5 rounded-xl gap-1.5",
-  md: "text-sm px-4 py-2.5 rounded-xl gap-2",
-  lg: "text-base px-6 py-3 rounded-2xl gap-2",
+  xs: "text-xs px-2 py-1 min-h-[32px] rounded-lg gap-1",
+  sm: "text-sm px-3 py-2 min-h-[40px] rounded-xl gap-1.5",
+  md: "text-sm px-4 py-2.5 min-h-[44px] rounded-xl gap-2",
+  lg: "text-base px-6 py-3 min-h-[48px] rounded-2xl gap-2",
 };
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { triggerWishlistOnTap } from "@/lib/smart-triggers";
+import { apiUnauthorized, apiForbidden, apiNotFound } from "@/lib/api-response";
 
 /**
  * POST /api/beers/[beer_id]/on-tap
@@ -14,7 +15,7 @@ export async function POST(
   const { beer_id } = await params;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!user) return apiUnauthorized();
 
   // Get beer and brewery info
   const { data: beer } = await (supabase
@@ -23,7 +24,7 @@ export async function POST(
     .eq("id", beer_id)
     .single() as any);
 
-  if (!beer) return NextResponse.json({ error: "Beer not found" }, { status: 404 });
+  if (!beer) return apiNotFound("Beer");
 
   // Verify user is brewery admin
   const { data: account } = await supabase
@@ -33,7 +34,7 @@ export async function POST(
     .eq("brewery_id", beer.brewery_id)
     .single();
 
-  if (!account) return NextResponse.json({ error: "Not authorized" }, { status: 403 });
+  if (!account) return apiForbidden();
 
   // Fire smart trigger (async, don't block response)
   const breweryName = (beer.brewery as any)?.name ?? "Unknown Brewery";

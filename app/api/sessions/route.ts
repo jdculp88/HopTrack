@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { sendPushToUser } from '@/lib/push'
 import { triggerFriendSession } from '@/lib/smart-triggers'
 import { rateLimitResponse } from '@/lib/rate-limit'
+import { apiUnauthorized, apiBadRequest, apiServerError } from '@/lib/api-response'
 
 // POST /api/sessions — start a new session (check-in at brewery or home)
 export async function POST(request: NextRequest) {
@@ -12,13 +13,13 @@ export async function POST(request: NextRequest) {
 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!user) return apiUnauthorized()
 
   const body = await request.json()
   const { brewery_id, share_to_feed = true, note, context = 'brewery' } = body
 
   if (context === 'brewery' && !brewery_id) {
-    return NextResponse.json({ error: 'brewery_id is required for brewery sessions' }, { status: 400 })
+    return apiBadRequest('brewery_id is required for brewery sessions', 'brewery_id')
   }
 
   // Close any existing active session for this user before starting a new one
@@ -41,8 +42,7 @@ export async function POST(request: NextRequest) {
     .single()
 
   if (error) {
-    console.error('[sessions] Error creating session:', error)
-    return NextResponse.json({ error: 'Failed to create session' }, { status: 500 })
+    return apiServerError('sessions POST')
   }
 
   // Increment profile total_checkins — fetch current value then update
@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!user) return apiUnauthorized()
 
   const { searchParams } = new URL(request.url)
   const userId = searchParams.get('user_id') || user.id
@@ -99,8 +99,7 @@ export async function GET(request: NextRequest) {
   const { data: sessions, error } = await query
 
   if (error) {
-    console.error('[sessions] Error fetching sessions:', error)
-    return NextResponse.json({ error: 'Failed to fetch sessions' }, { status: 500 })
+    return apiServerError('sessions GET')
   }
 
   return NextResponse.json({ sessions })

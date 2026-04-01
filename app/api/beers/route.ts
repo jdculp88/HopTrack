@@ -1,5 +1,6 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { rateLimitResponse } from "@/lib/rate-limit";
 
 export async function GET(request: Request) {
   const supabase = await createClient();
@@ -27,7 +28,10 @@ export async function GET(request: Request) {
   return NextResponse.json({ beers: data ?? [] }, { headers: { 'Cache-Control': 'public, max-age=60, stale-while-revalidate=120' } });
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+  const limited = rateLimitResponse(request, 'beers-post', { limit: 20, windowMs: 60 * 60 * 1000 });
+  if (limited) return limited;
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

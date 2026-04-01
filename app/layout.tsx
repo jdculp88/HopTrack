@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Playfair_Display, JetBrains_Mono } from "next/font/google";
+import { Playfair_Display, JetBrains_Mono, DM_Sans } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { MotionConfig } from "framer-motion";
@@ -19,6 +19,13 @@ const jetbrainsMono = JetBrains_Mono({
   variable: "--font-jetbrains",
   subsets: ["latin"],
   weight: ["400", "500", "600"],
+});
+
+const dmSans = DM_Sans({
+  variable: "--font-dm-sans",
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  display: "swap",
 });
 
 export const viewport: Viewport = {
@@ -84,17 +91,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${playfair.variable} ${jetbrainsMono.variable}`}
+      className={`${playfair.variable} ${jetbrainsMono.variable} ${dmSans.variable}`}
       data-scroll-behavior="smooth"
     >
-      <head>
-        {/* Fontshare — Satoshi (primary) + General Sans (display) */}
-        <link rel="preconnect" href="https://api.fontshare.com" />
-        <link
-          href="https://api.fontshare.com/v2/css?f[]=satoshi@300,400,500,700,900&f[]=general-sans@300,400,500,600,700&display=swap"
-          rel="stylesheet"
-        />
-      </head>
       <body className="min-h-screen antialiased" suppressHydrationWarning>
         <MotionConfig reducedMotion="user">
           <ThemeProvider>

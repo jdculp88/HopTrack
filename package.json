@@ -28,8 +28,10 @@
     "cap:build": "next build && npx cap sync",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "test:e2e": "npx playwright test",
     "test:e2e:ui": "npx playwright test --ui",
+    "analyze": "ANALYZE=true next build",
     "barback": "node scripts/barback-crawl.mjs"
   },
   "dependencies": {
@@ -74,6 +76,8 @@
     "web-push": "^3.6.7"
   },
   "devDependencies": {
+    "@axe-core/react": "^4.10.2",
+    "@next/bundle-analyzer": "^16.2.1",
     "@playwright/test": "^1.58.2",
     "@tailwindcss/postcss": "^4",
     "@testing-library/jest-dom": "^6.9.1",
@@ -82,9 +86,12 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/web-push": "^3.6.4",
+    "@vitest/coverage-v8": "^4.1.2",
+    "axe-core": "^4.10.3",
     "eslint": "^9",
     "eslint-config-next": "16.2.1",
     "jsdom": "^29.0.1",
+    "msw": "^2.12.14",
     "supabase": "^2.84.0",
     "tailwindcss": "^4",
     "typescript": "^5",

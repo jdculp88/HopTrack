@@ -7,6 +7,9 @@ import crypto from "crypto";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { decryptToken } from "@/lib/pos-crypto";
 import { runSync, fetchPosMenuData } from "@/lib/pos-sync/engine";
+import { createLogger } from "@/lib/logger";
+
+const logger = createLogger("POS Webhook / Square");
 
 const MAX_WEBHOOK_AGE_MS = 5 * 60 * 1000; // 5 minutes — replay protection
 
@@ -16,14 +19,14 @@ export async function POST(req: NextRequest) {
   const webhookSecret = process.env.SQUARE_WEBHOOK_SECRET;
 
   if (!webhookSecret) {
-    console.error("[POS Webhook] SQUARE_WEBHOOK_SECRET not configured");
+    logger.error("SQUARE_WEBHOOK_SECRET not configured");
     return Response.json({ error: "Webhook not configured" }, { status: 503 });
   }
 
   const rawBody = await req.text();
 
   if (!signature) {
-    console.warn("[POS Webhook] Missing signature header from Square");
+    logger.warn("Missing signature header from Square");
     return Response.json({ error: "Missing signature" }, { status: 401 });
   }
 
@@ -35,7 +38,7 @@ export async function POST(req: NextRequest) {
     .digest("base64");
 
   if (!crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature))) {
-    console.warn("[POS Webhook] Invalid Square signature");
+    logger.warn("Invalid Square signature");
     return Response.json({ error: "Invalid signature" }, { status: 401 });
   }
 
@@ -52,18 +55,18 @@ export async function POST(req: NextRequest) {
   if (webhookTimestamp) {
     const age = Date.now() - new Date(webhookTimestamp).getTime();
     if (age > MAX_WEBHOOK_AGE_MS) {
-      console.warn("[POS Webhook] Stale Square webhook rejected:", age, "ms old");
+      logger.warn("Stale webhook rejected", { ageMs: age });
       return Response.json({ error: "Webhook too old" }, { status: 400 });
     }
   }
 
-  console.log("[POS Webhook] Square event received:", payload.type || "unknown");
+  logger.info("Event received", { type: payload.type || "unknown" });
 
   // ACK immediately — process async
   // Square webhooks are notifications only — we need to fetch the full catalog
   if (payload.type === "catalog.version.updated") {
     processSquareWebhook(payload).catch(err => {
-      console.error("[POS Webhook] Square async processing error:", err);
+      logger.error("Async processing error", { error: String(err) });
     });
   }
 
@@ -73,7 +76,7 @@ export async function POST(req: NextRequest) {
 async function processSquareWebhook(payload: any) {
   const merchantId = payload.merchant_id;
   if (!merchantId) {
-    console.warn("[POS Webhook] Square payload missing merchant_id");
+    logger.warn("Payload missing merchant_id");
     return;
   }
 
@@ -92,7 +95,7 @@ async function processSquareWebhook(payload: any) {
     .single();
 
   if (!connection) {
-    console.warn(`[POS Webhook] No active Square connection for merchant ${merchantId}`);
+    logger.warn("No active connection for merchant", { merchantId });
     return;
   }
 
@@ -101,7 +104,7 @@ async function processSquareWebhook(payload: any) {
   const menuData = await fetchPosMenuData("square", accessToken, connection.provider_location_id);
 
   if (!menuData) {
-    console.warn(`[POS Webhook] Failed to fetch Square catalog for merchant ${merchantId}`);
+    logger.warn("Failed to fetch catalog", { merchantId });
     // Log failure
     await supabase.from("pos_sync_logs").insert({
       pos_connection_id: connection.id,
@@ -160,5 +163,10 @@ async function processSquareWebhook(payload: any) {
       duration_ms: result.duration_ms,
     });
 
-  console.log(`[POS Webhook] Square sync complete for brewery ${connection.brewery_id}: +${result.items_added} ~${result.items_updated} -${result.items_removed}`);
+  logger.info("Sync complete", {
+    breweryId: connection.brewery_id,
+    added: result.items_added,
+    updated: result.items_updated,
+    removed: result.items_removed,
+  });
 }

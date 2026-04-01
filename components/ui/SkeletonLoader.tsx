@@ -6,7 +6,7 @@ interface SkeletonProps {
 }
 
 export function Skeleton({ className, style }: SkeletonProps) {
-  return <div className={cn("skeleton rounded", className)} style={style} />;
+  return <div className={cn("skeleton-gold rounded", className)} style={style} />;
 }
 
 export function SkeletonCard({ className }: { className?: string }) {

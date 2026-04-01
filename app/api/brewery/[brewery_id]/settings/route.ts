@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 import { rateLimitResponse } from "@/lib/rate-limit";
+import { apiUnauthorized, apiForbidden, apiBadRequest, apiServerError } from "@/lib/api-response";
 
 export async function PATCH(
   request: NextRequest,
@@ -13,7 +14,7 @@ export async function PATCH(
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return apiUnauthorized();
   }
 
   // Verify the user belongs to this brewery (owner or manager only)
@@ -26,14 +27,14 @@ export async function PATCH(
     .single();
 
   if (!account) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    return apiForbidden();
   }
 
   const body = await request.json();
   const { name, street, city, state, website_url, phone, description, cover_image_url, menu_image_url } = body;
 
   if (!name?.trim() || !city?.trim()) {
-    return NextResponse.json({ error: "Name and city are required" }, { status: 400 });
+    return apiBadRequest("Name and city are required");
   }
 
   const { error } = await supabase
@@ -52,8 +53,7 @@ export async function PATCH(
     .eq("id", brewery_id);
 
   if (error) {
-    console.error("Brewery settings update error:", error);
-    return NextResponse.json({ error: error.message || "Failed to update brewery" }, { status: 500 });
+    return apiServerError("brewery settings PATCH");
   }
 
   return NextResponse.json({ success: true });

@@ -1,8 +1,12 @@
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { rateLimitResponse } from "@/lib/rate-limit";
 
-export async function DELETE() {
+export async function DELETE(request: NextRequest) {
+  const limited = rateLimitResponse(request, 'delete-account', { limit: 3, windowMs: 60 * 60 * 1000 });
+  if (limited) return limited;
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

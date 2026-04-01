@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { apiUnauthorized, apiServerError } from '@/lib/api-response'
 
 // GET /api/sessions/active — get the current user's active session
 export async function GET(_request: NextRequest) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!user) return apiUnauthorized()
 
   const { data: session, error } = await supabase
     .from('sessions')
@@ -24,8 +25,7 @@ export async function GET(_request: NextRequest) {
     .maybeSingle()
 
   if (error) {
-    console.error('[sessions/active] Error fetching active session:', error)
-    return NextResponse.json({ error: 'Failed to fetch active session' }, { status: 500 })
+    return apiServerError('sessions/active GET')
   }
 
   // Auto-expire sessions older than 6 hours

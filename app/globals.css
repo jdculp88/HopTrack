@@ -250,6 +250,31 @@
   }
 }
 
+/*
+ * ─── SPACING SYSTEM — 4px Grid ──────────────────────────────────────────────
+ * All spacing, padding, margin, and gap values must be multiples of 4px.
+ * Tailwind mapping:
+ *   1  =  4px  — hairline gaps, icon insets
+ *   2  =  8px  — tight intra-component spacing
+ *   3  = 12px  — compact card padding
+ *   4  = 16px  — standard padding (default card, form fields)
+ *   5  = 20px  — relaxed intra-section
+ *   6  = 24px  — section gap, list item separation
+ *   8  = 32px  — inter-section spacing
+ *  10  = 40px  — major section breaks
+ *  12  = 48px  — screen padding (marketing pages)
+ *
+ * Card padding convention:
+ *   compact  → p-3 (12px) — dense lists, inline cards
+ *   default  → p-4 (16px) — standard cards
+ *   spacious → p-5 (20px) — hero cards, featured content
+ *
+ * Touch targets:
+ *   minimum 44px height on all interactive elements (Apple HIG / WCAG 2.5.5)
+ *   Button sizes: xs=32px, sm=40px, md=44px, lg=48px
+ * ────────────────────────────────────────────────────────────────────────────
+ */
+
 /* Gold shimmer ambient effect for share preview cards */
 .gold-shimmer {
   position: relative;
@@ -317,6 +342,18 @@ body {
   background: linear-gradient(90deg, var(--skeleton-base) 0%, var(--skeleton-shine) 50%, var(--skeleton-base) 100%);
   background-size: 200% 100%;
   animation: skeletonShimmer 1.5s linear infinite;
+  border-radius: 4px;
+}
+
+.skeleton-gold {
+  background: linear-gradient(
+    90deg,
+    var(--skeleton-base) 0%,
+    color-mix(in srgb, var(--accent-gold) 8%, var(--skeleton-shine)) 50%,
+    var(--skeleton-base) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.8s ease-in-out infinite;
   border-radius: 4px;
 }
 

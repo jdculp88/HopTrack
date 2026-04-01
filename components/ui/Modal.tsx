@@ -83,6 +83,14 @@ export function Modal({ open, onClose, title, children, size = "md", className }
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.97 }}
             transition={{ type: "spring", stiffness: 350, damping: 30 }}
+            drag="y"
+            dragConstraints={{ top: 0, bottom: 0 }}
+            dragElastic={{ top: 0, bottom: 0.4 }}
+            onDragEnd={(_, info) => {
+              if (info.velocity.y > 300 || info.offset.y > 100) {
+                onClose();
+              }
+            }}
             className={cn(
               "relative w-full bg-[var(--surface)] border border-[var(--border)]",
               "rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden",
@@ -94,6 +102,10 @@ export function Modal({ open, onClose, title, children, size = "md", className }
             aria-modal="true"
             aria-labelledby={title ? "modal-title" : undefined}
           >
+            {/* Drag handle — mobile bottom sheet indicator */}
+            <div className="sm:hidden flex justify-center pt-3 pb-1 flex-shrink-0">
+              <div className="w-10 h-1 rounded-full bg-[var(--border)]" />
+            </div>
             {title && (
               <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border)] flex-shrink-0">
                 <h2 id="modal-title" className="font-display text-lg font-semibold text-[var(--text-primary)]">{title}</h2>

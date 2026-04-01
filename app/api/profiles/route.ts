@@ -1,10 +1,12 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { rateLimitResponse } from "@/lib/rate-limit";
+import { apiUnauthorized, apiServerError } from "@/lib/api-response";
 
 export async function GET(request: Request) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!user) return apiUnauthorized();
 
   const { searchParams } = new URL(request.url);
   const q = searchParams.get("q");
@@ -30,10 +32,13 @@ export async function GET(request: Request) {
   return NextResponse.json({ profile: data });
 }
 
-export async function PATCH(request: Request) {
+export async function PATCH(request: NextRequest) {
+  const limited = rateLimitResponse(request, 'profiles-patch', { limit: 10, windowMs: 60 * 1000 });
+  if (limited) return limited;
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!user) return apiUnauthorized();
 
   const body = await request.json();
   const allowed = ["display_name", "username", "bio", "home_city", "avatar_url", "is_public", "notification_preferences"];
@@ -54,6 +59,6 @@ export async function PATCH(request: Request) {
     .select()
     .single();
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return apiServerError("profiles PATCH");
   return NextResponse.json({ profile: data });
 }

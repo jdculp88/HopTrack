@@ -3,24 +3,13 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, MapPin, Building2, CheckCircle, ChevronRight, ArrowLeft, Sparkles, BarChart3, Heart, QrCode, Tv, Beer, PlusCircle } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { Input, Textarea } from "@/components/ui/Input";
 import { formatDate } from "@/lib/dates";
-
-interface OpenBrewery {
-  id: string;
-  name: string;
-  brewery_type: string;
-  city: string;
-  state_province: string;
-  country: string;
-  address_1: string | null;
-  website_url: string | null;
-  phone: string | null;
-  latitude: string | null;
-  longitude: string | null;
-}
+import { ClaimProgressBar, type Step } from "./ClaimProgressBar";
+import { ClaimSearchStep, type OpenBrewery, TRIAL_FEATURES } from "./ClaimSearchStep";
+import { ClaimVerifyStep } from "./ClaimVerifyStep";
+import { ClaimConfirmStep } from "./ClaimConfirmStep";
 
 interface PendingClaim {
   id: string;
@@ -32,78 +21,6 @@ interface PendingClaim {
 interface ClaimBreweryClientProps {
   userEmail: string;
   pendingClaim?: PendingClaim | null;
-}
-
-type Step = "search" | "claim" | "success";
-
-const STEPS: { key: Step; label: string; number: number }[] = [
-  { key: "search", label: "Find", number: 1 },
-  { key: "claim", label: "Verify", number: 2 },
-  { key: "success", label: "Go Live", number: 3 },
-];
-
-const TRIAL_FEATURES = [
-  { icon: Beer, label: "Tap List Management", desc: "Add, edit, and 86 beers in real time" },
-  { icon: BarChart3, label: "Analytics Dashboard", desc: "Session data, top beers, peak times" },
-  { icon: Heart, label: "Loyalty Programs", desc: "Digital stamp cards and rewards" },
-  { icon: QrCode, label: "QR Table Tents", desc: "Branded QR codes that link to your page" },
-  { icon: Tv, label: "The Board TV Display", desc: "Beautiful tap menu on any screen" },
-];
-
-function ProgressIndicator({ currentStep }: { currentStep: Step }) {
-  const currentIndex = STEPS.findIndex((s) => s.key === currentStep);
-
-  return (
-    <div className="flex items-center justify-center gap-0 mb-10">
-      {STEPS.map((step, i) => {
-        const isComplete = i < currentIndex;
-        const isCurrent = i === currentIndex;
-
-        return (
-          <div key={step.key} className="flex items-center">
-            <div className="flex flex-col items-center">
-              <div
-                className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300"
-                style={{
-                  background: isComplete
-                    ? "var(--accent-gold)"
-                    : isCurrent
-                    ? "color-mix(in srgb, var(--accent-gold) 15%, transparent)"
-                    : "var(--surface-2)",
-                  color: isComplete
-                    ? "var(--bg)"
-                    : isCurrent
-                    ? "var(--accent-gold)"
-                    : "var(--text-muted)",
-                  border: isCurrent ? "2px solid var(--accent-gold)" : "2px solid transparent",
-                }}
-              >
-                {isComplete ? <CheckCircle size={16} /> : step.number}
-              </div>
-              <span
-                className="text-[10px] font-mono uppercase tracking-wider mt-1.5"
-                style={{
-                  color: isComplete || isCurrent ? "var(--accent-gold)" : "var(--text-muted)",
-                }}
-              >
-                {step.label}
-              </span>
-            </div>
-            {i < STEPS.length - 1 && (
-              <div
-                className="w-12 sm:w-16 h-0.5 mx-2 mb-5 rounded-full transition-all duration-300"
-                style={{
-                  background: isComplete
-                    ? "var(--accent-gold)"
-                    : "var(--border)",
-                }}
-              />
-            )}
-          </div>
-        );
-      })}
-    </div>
-  );
 }
 
 export function ClaimBreweryClient({ userEmail, pendingClaim }: ClaimBreweryClientProps) {
@@ -205,9 +122,6 @@ export function ClaimBreweryClient({ userEmail, pendingClaim }: ClaimBreweryClie
       setSubmitting(false);
     }
   };
-
-  const formatBreweryType = (type: string) =>
-    type.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 
   // ── Pending claim status view ──────────────────────────────────────────────
   if (pendingClaim && step === "search") {
@@ -360,294 +274,35 @@ export function ClaimBreweryClient({ userEmail, pendingClaim }: ClaimBreweryClie
         </div>
 
         {/* Progress indicator */}
-        <ProgressIndicator currentStep={step} />
+        <ClaimProgressBar currentStep={step} />
 
-        {/* ── Step 1: Search ───────────────────────────────────────────────── */}
         <AnimatePresence mode="wait">
+          {/* ── Step 1: Search ─────────────────────────────────────────────── */}
           {step === "search" && (
-            <motion.div
-              key="search"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ type: "spring", stiffness: 400, damping: 30 }}
-            >
-              <div
-                className="rounded-2xl border p-6"
-                style={{ background: "var(--surface)", borderColor: "var(--border)" }}
-              >
-                <div className="flex gap-2 mb-6">
-                  <div className="flex-1">
-                    <Input
-                      placeholder="e.g. Sierra Nevada, Dogfish Head..."
-                      value={query}
-                      onChange={(e) => setQuery(e.target.value)}
-                      onKeyDown={handleKeyDown}
-                      icon={<Search size={16} />}
-                      autoFocus
-                    />
-                  </div>
-                  <Button
-                    variant="primary"
-                    onClick={handleSearch}
-                    loading={searching}
-                    disabled={!query.trim()}
-                  >
-                    Search
-                  </Button>
-                </div>
-
-                {/* Results */}
-                {searching && (
-                  <div className="space-y-3">
-                    {[1, 2, 3].map((i) => (
-                      <div key={i} className="skeleton h-20 rounded-xl" />
-                    ))}
-                  </div>
-                )}
-
-                {!searching && results.length === 0 && query && !error && (
-                  <div className="space-y-4">
-                    <div className="text-center py-6">
-                      <Building2
-                        size={36}
-                        className="mx-auto mb-3"
-                        style={{ color: "var(--text-muted)" }}
-                      />
-                      <p className="font-display text-base" style={{ color: "var(--text-primary)" }}>
-                        No breweries found
-                      </p>
-                      <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
-                        Try a shorter name or check the spelling.
-                      </p>
-                    </div>
-
-                    {/* Not-found fallback card */}
-                    <div
-                      className="rounded-xl border p-5"
-                      style={{
-                        background: "color-mix(in srgb, var(--accent-gold) 3%, var(--surface))",
-                        borderColor: "color-mix(in srgb, var(--accent-gold) 20%, transparent)",
-                      }}
-                    >
-                      <div className="flex items-center gap-2 mb-2">
-                        <PlusCircle size={15} style={{ color: "var(--accent-gold)" }} />
-                        <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
-                          Can&apos;t find your brewery?
-                        </p>
-                      </div>
-                      <p className="text-xs mb-3" style={{ color: "var(--text-muted)" }}>
-                        Not every brewery is in our database yet. Submit yours and we&apos;ll add it within 24 hours.
-                      </p>
-
-                      <AnimatePresence mode="wait">
-                        {nfSubmitted ? (
-                          <motion.p
-                            key="thanks"
-                            initial={{ opacity: 0, y: 4 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="text-sm font-medium"
-                            style={{ color: "var(--accent-gold)" }}
-                          >
-                            Thanks! We&apos;ll add your brewery within 24 hours.
-                          </motion.p>
-                        ) : !showNotFoundForm ? (
-                          <motion.div key="cta" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                            <button
-                              onClick={() => setShowNotFoundForm(true)}
-                              className="text-xs font-semibold underline underline-offset-2"
-                              style={{ color: "var(--accent-gold)" }}
-                            >
-                              Submit your brewery →
-                            </button>
-                          </motion.div>
-                        ) : (
-                          <motion.form
-                            key="form"
-                            initial={{ opacity: 0, y: 6 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: 6 }}
-                            transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                            onSubmit={handleNotFoundSubmit}
-                            className="space-y-3"
-                          >
-                            <Input
-                              label="Brewery Name"
-                              required
-                              value={nfName}
-                              onChange={(e) => setNfName(e.target.value)}
-                              placeholder="e.g. Hoppy Trails Brewing"
-                            />
-                            <div className="grid grid-cols-2 gap-2">
-                              <Input
-                                label="City"
-                                required
-                                value={nfCity}
-                                onChange={(e) => setNfCity(e.target.value)}
-                                placeholder="Asheville"
-                              />
-                              <Input
-                                label="State"
-                                required
-                                value={nfState}
-                                onChange={(e) => setNfState(e.target.value)}
-                                placeholder="NC"
-                              />
-                            </div>
-                            <div className="flex gap-2 pt-1">
-                              <button
-                                type="button"
-                                onClick={() => setShowNotFoundForm(false)}
-                                className="text-xs"
-                                style={{ color: "var(--text-muted)" }}
-                              >
-                                Cancel
-                              </button>
-                              <Button
-                                type="submit"
-                                variant="primary"
-                                size="sm"
-                                loading={nfSubmitting}
-                                disabled={!nfName.trim() || !nfCity.trim() || !nfState.trim()}
-                              >
-                                Submit
-                              </Button>
-                            </div>
-                          </motion.form>
-                        )}
-                      </AnimatePresence>
-                    </div>
-                  </div>
-                )}
-
-                {error && (
-                  <p
-                    className="text-sm text-center py-4"
-                    style={{ color: "var(--danger)" }}
-                  >
-                    {error}
-                  </p>
-                )}
-
-                {!searching && results.length > 0 && (
-                  <div className="space-y-2">
-                    <p className="text-xs font-mono uppercase tracking-wider mb-3" style={{ color: "var(--text-muted)" }}>
-                      {results.length} result{results.length !== 1 ? "s" : ""}
-                    </p>
-                    {results.map((brewery, i) => (
-                      <motion.div
-                        key={brewery.id}
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: i * 0.05, type: "spring", stiffness: 400, damping: 30 }}
-                      >
-                        <button
-                          onClick={() => handleSelect(brewery)}
-                          className="w-full text-left rounded-xl border p-4 transition-all duration-150 group"
-                          style={{
-                            background: "var(--bg)",
-                            borderColor: "var(--border)",
-                          }}
-                          onMouseEnter={(e) => {
-                            (e.currentTarget as HTMLElement).style.borderColor = "var(--accent-gold)";
-                            (e.currentTarget as HTMLElement).style.background = "var(--surface-2)";
-                          }}
-                          onMouseLeave={(e) => {
-                            (e.currentTarget as HTMLElement).style.borderColor = "var(--border)";
-                            (e.currentTarget as HTMLElement).style.background = "var(--bg)";
-                          }}
-                        >
-                          <div className="flex items-start justify-between gap-3">
-                            <div className="flex-1 min-w-0">
-                              <p
-                                className="font-display font-semibold text-base truncate"
-                                style={{ color: "var(--text-primary)" }}
-                              >
-                                {brewery.name}
-                              </p>
-                              <div
-                                className="flex items-center gap-1.5 mt-1 text-xs"
-                                style={{ color: "var(--text-secondary)" }}
-                              >
-                                <MapPin size={11} />
-                                <span>
-                                  {[brewery.city, brewery.state_province]
-                                    .filter(Boolean)
-                                    .join(", ")}
-                                </span>
-                                {brewery.brewery_type && (
-                                  <>
-                                    <span style={{ color: "var(--text-muted)" }}>·</span>
-                                    <span
-                                      className="capitalize px-1.5 py-0.5 rounded-md text-[10px] font-mono"
-                                      style={{
-                                        background: "var(--surface)",
-                                        color: "var(--accent-gold)",
-                                        border: "1px solid var(--border)",
-                                      }}
-                                    >
-                                      {formatBreweryType(brewery.brewery_type)}
-                                    </span>
-                                  </>
-                                )}
-                              </div>
-                            </div>
-                            <ChevronRight
-                              size={16}
-                              className="flex-shrink-0 mt-1 opacity-40 group-hover:opacity-100 transition-opacity"
-                              style={{ color: "var(--accent-gold)" }}
-                            />
-                          </div>
-                        </button>
-                      </motion.div>
-                    ))}
-                  </div>
-                )}
-
-                {!searching && results.length === 0 && !query && (
-                  <div className="text-center py-8">
-                    <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-                      Start typing your brewery name above to search.
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              {/* Trial teaser below search */}
-              <div
-                className="mt-4 rounded-2xl border p-5"
-                style={{
-                  background: "color-mix(in srgb, var(--accent-gold) 3%, var(--surface))",
-                  borderColor: "color-mix(in srgb, var(--accent-gold) 15%, transparent)",
-                }}
-              >
-                <div className="flex items-center gap-2 mb-3">
-                  <Sparkles size={14} style={{ color: "var(--accent-gold)" }} />
-                  <p className="text-xs font-mono uppercase tracking-wider font-semibold" style={{ color: "var(--accent-gold)" }}>
-                    14-day free trial — no credit card
-                  </p>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                  {TRIAL_FEATURES.map(({ icon: Icon, label, desc }) => (
-                    <div key={label} className="flex items-start gap-2.5">
-                      <div
-                        className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"
-                        style={{ background: "color-mix(in srgb, var(--accent-gold) 10%, transparent)" }}
-                      >
-                        <Icon size={13} style={{ color: "var(--accent-gold)" }} />
-                      </div>
-                      <div>
-                        <p className="text-xs font-semibold" style={{ color: "var(--text-primary)" }}>{label}</p>
-                        <p className="text-[10px] leading-tight mt-0.5" style={{ color: "var(--text-muted)" }}>{desc}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </motion.div>
+            <ClaimSearchStep
+              query={query}
+              results={results}
+              searching={searching}
+              error={error}
+              showNotFoundForm={showNotFoundForm}
+              nfName={nfName}
+              nfCity={nfCity}
+              nfState={nfState}
+              nfSubmitting={nfSubmitting}
+              nfSubmitted={nfSubmitted}
+              onQueryChange={setQuery}
+              onSearch={handleSearch}
+              onKeyDown={handleKeyDown}
+              onSelect={handleSelect}
+              onShowNotFoundForm={setShowNotFoundForm}
+              onNfNameChange={setNfName}
+              onNfCityChange={setNfCity}
+              onNfStateChange={setNfState}
+              onNotFoundSubmit={handleNotFoundSubmit}
+            />
           )}
 
-          {/* ── Step 2: Claim form ───────────────────────────────────────────── */}
+          {/* ── Step 2: Verify + Confirm ────────────────────────────────────── */}
           {step === "claim" && selectedBrewery && (
             <motion.div
               key="claim"
@@ -657,168 +312,23 @@ export function ClaimBreweryClient({ userEmail, pendingClaim }: ClaimBreweryClie
               transition={{ type: "spring", stiffness: 400, damping: 30 }}
               className="space-y-4"
             >
-              {/* Selected brewery card */}
-              <div
-                className="rounded-2xl border p-5"
-                style={{ background: "var(--surface)", borderColor: "var(--accent-gold)", boxShadow: "0 0 0 1px var(--accent-gold)" }}
-              >
-                <div className="flex items-start gap-3">
-                  <div
-                    className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-                    style={{ background: "color-mix(in srgb, var(--accent-gold) 10%, transparent)" }}
-                  >
-                    <Building2 size={18} style={{ color: "var(--accent-gold)" }} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p
-                      className="font-display font-bold text-lg truncate"
-                      style={{ color: "var(--text-primary)" }}
-                    >
-                      {selectedBrewery.name}
-                    </p>
-                    <p className="text-xs mt-0.5" style={{ color: "var(--text-secondary)" }}>
-                      {[selectedBrewery.city, selectedBrewery.state_province]
-                        .filter(Boolean)
-                        .join(", ")}
-                      {selectedBrewery.brewery_type && (
-                        <> · {formatBreweryType(selectedBrewery.brewery_type)}</>
-                      )}
-                    </p>
-                  </div>
-                  <div
-                    className="flex items-center gap-1.5 px-2 py-1 rounded-lg text-[10px] font-mono flex-shrink-0"
-                    style={{
-                      background: "color-mix(in srgb, var(--accent-gold) 10%, transparent)",
-                      color: "var(--accent-gold)",
-                    }}
-                  >
-                    <CheckCircle size={10} />
-                    Selected
-                  </div>
-                </div>
-              </div>
-
-              {/* Claim form */}
-              <form
+              <ClaimVerifyStep brewery={selectedBrewery} />
+              <ClaimConfirmStep
+                businessEmail={businessEmail}
+                role={role}
+                notes={notes}
+                submitting={submitting}
+                error={error}
+                onBusinessEmailChange={setBusinessEmail}
+                onRoleChange={setRole}
+                onNotesChange={setNotes}
                 onSubmit={handleSubmit}
-                className="rounded-2xl border p-6 space-y-5"
-                style={{ background: "var(--surface)", borderColor: "var(--border)" }}
-              >
-                <div>
-                  <p
-                    className="text-xs font-mono uppercase tracking-wider mb-4"
-                    style={{ color: "var(--text-muted)" }}
-                  >
-                    Confirm Ownership
-                  </p>
-                  <div className="space-y-4">
-                    <Input
-                      label="Business Email"
-                      type="email"
-                      required
-                      value={businessEmail}
-                      onChange={(e) => setBusinessEmail(e.target.value)}
-                      placeholder="you@yourbrewery.com"
-                      hint="Use an email address associated with the brewery."
-                    />
-
-                    {/* Role selector */}
-                    <div className="flex flex-col gap-1.5">
-                      <label
-                        className="text-sm font-medium font-sans"
-                        style={{ color: "var(--text-secondary)" }}
-                      >
-                        Your Role
-                      </label>
-                      <div className="grid grid-cols-2 gap-2">
-                        {(["owner", "manager"] as const).map((r) => (
-                          <button
-                            key={r}
-                            type="button"
-                            onClick={() => setRole(r)}
-                            className="py-3 px-4 rounded-xl border text-sm font-medium transition-all duration-150 capitalize"
-                            style={
-                              role === r
-                                ? {
-                                    background: "var(--accent-gold)",
-                                    color: "var(--bg)",
-                                    borderColor: "var(--accent-gold)",
-                                  }
-                                : {
-                                    background: "var(--bg)",
-                                    color: "var(--text-secondary)",
-                                    borderColor: "var(--border)",
-                                  }
-                            }
-                          >
-                            {r === "owner" ? "Owner" : "Manager"}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    <Textarea
-                      label="Notes (optional)"
-                      value={notes}
-                      onChange={(e) => setNotes(e.target.value)}
-                      placeholder="Tell us about your role at the brewery..."
-                      rows={3}
-                      hint="Any additional context that helps us verify your claim faster."
-                    />
-                  </div>
-                </div>
-
-                {error && (
-                  <p className="text-sm" style={{ color: "var(--danger)" }}>
-                    {error}
-                  </p>
-                )}
-
-                <div className="flex gap-3 pt-1">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    onClick={handleBack}
-                    icon={<ArrowLeft size={14} />}
-                  >
-                    Back
-                  </Button>
-                  <Button
-                    type="submit"
-                    variant="primary"
-                    loading={submitting}
-                    fullWidth
-                  >
-                    Submit Claim
-                  </Button>
-                </div>
-              </form>
-
-              {/* Trial info below form */}
-              <div
-                className="rounded-2xl border p-4 flex items-center gap-3"
-                style={{
-                  background: "color-mix(in srgb, var(--accent-gold) 5%, var(--surface))",
-                  borderColor: "color-mix(in srgb, var(--accent-gold) 15%, transparent)",
-                }}
-              >
-                <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-                  style={{ background: "color-mix(in srgb, var(--accent-gold) 15%, transparent)" }}
-                >
-                  <Sparkles size={16} style={{ color: "var(--accent-gold)" }} />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold" style={{ color: "var(--accent-gold)" }}>14-day free trial</p>
-                  <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
-                    Full Tap tier access. No credit card. Cancel anytime.
-                  </p>
-                </div>
-              </div>
+                onBack={handleBack}
+              />
             </motion.div>
           )}
 
-          {/* ── Step 3: Success ──────────────────────────────────────────────── */}
+          {/* ── Step 3: Success ─────────────────────────────────────────────── */}
           {step === "success" && (
             <motion.div
               key="success"
@@ -839,7 +349,13 @@ export function ClaimBreweryClient({ userEmail, pendingClaim }: ClaimBreweryClie
   );
 }
 
-function SuccessStep({ claimedBreweryId, selectedBrewery }: { claimedBreweryId: string | null; selectedBrewery: OpenBrewery | null }) {
+function SuccessStep({
+  claimedBreweryId,
+  selectedBrewery,
+}: {
+  claimedBreweryId: string | null;
+  selectedBrewery: OpenBrewery | null;
+}) {
   const fired = useRef(false);
 
   useEffect(() => {
