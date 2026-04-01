@@ -1,8 +1,8 @@
 # HopTrack Product Roadmap
 **Last updated:** 2026-04-01
 **PM:** Morgan
-**Current Sprint:** Sprint 95 — The Hub
-**Last completed:** Sprint 94 — The Club ✅
+**Current Sprint:** Sprint 96 — The Lockdown
+**Last completed:** Sprint 95 — The Hub ✅
 
 > This is a living document -- updated every sprint. For completed sprints 1-12, see `docs/roadmap-archive.md`. For sprint plans, see `docs/plans/`. For the Shore It Up master plan (Sprints 64-73), see `docs/plans/sprint-64-73-master-plan.md`. For the Q2 2026 roadmap research (30 features, 18 REQs, 4 sprint arcs), see `docs/plans/roadmap-research-2026-q2.md`.
 
