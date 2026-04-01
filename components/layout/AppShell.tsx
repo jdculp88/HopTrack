@@ -16,6 +16,8 @@ const SessionRecapSheet = dynamic(() => import("@/components/session/SessionReca
 import { SessionShareCard } from "@/components/session/SessionShareCard";
 import { PushOptIn } from "@/components/push/PushOptIn";
 import { WelcomeFlow, isOnboardingComplete } from "@/components/onboarding/WelcomeFlow";
+import { OfflineBanner } from "@/components/ui/OfflineBanner";
+import { ScreenReaderAnnouncer } from "@/components/ui/ScreenReaderAnnouncer";
 import type { Session, Brewery } from "@/types/database";
 
 interface AppShellProps {
@@ -195,6 +197,8 @@ function AppShellInner({ children, username, unreadNotifications = 0 }: AppShell
 
   return (
     <>
+      <OfflineBanner />
+      <ScreenReaderAnnouncer />
       {/* Skip-to-content link — first focusable element, visually hidden until focused */}
       <a
         href="#main-content"
@@ -346,6 +350,7 @@ function MinimizedSessionBar({
     >
       <button
         onClick={onTap}
+        aria-label="Expand active session"
         className="w-full rounded-2xl overflow-hidden"
         style={{
           background: meshGradient,

@@ -82,49 +82,67 @@ function ToastStack({
   toasts: ToastItem[];
   onDismiss: (id: string) => void;
 }) {
+  // Split toasts by type so error toasts use assertive and others use polite
+  const errorToasts = toasts.filter((t) => t.type === "error");
+  const politeToasts = toasts.filter((t) => t.type !== "error");
+
   return (
     <div
       className="fixed top-4 right-4 z-[9999] flex flex-col gap-2 pointer-events-none"
       style={{ width: "min(360px, calc(100vw - 2rem))" }}
     >
-      <AnimatePresence initial={false}>
-        {toasts.map((t) => {
-          const Icon = ICONS[t.type];
-          const { border, icon } = COLORS[t.type];
-          return (
-            <motion.div
-              key={t.id}
-              layout
-              initial={{ opacity: 0, x: 60, scale: 0.92 }}
-              animate={{ opacity: 1, x: 0, scale: 1 }}
-              exit={{ opacity: 0, x: 60, scale: 0.92 }}
-              transition={{ type: "spring", stiffness: 420, damping: 32 }}
-              className="pointer-events-auto flex items-start gap-3 px-4 py-3.5 rounded-2xl"
-              style={{
-                background: "var(--surface)",
-                border: `1px solid ${border}`,
-                boxShadow: `0 8px 32px rgba(0,0,0,0.35)`,
-              }}
-            >
-              <Icon size={16} style={{ color: icon, flexShrink: 0, marginTop: 2 }} />
-              <p
-                className="flex-1 text-sm leading-snug"
-                style={{ color: "var(--text-primary)" }}
-              >
-                {t.message}
-              </p>
-              <button
-                onClick={() => onDismiss(t.id)}
-                className="flex-shrink-0 transition-opacity hover:opacity-100"
-                style={{ color: "var(--text-muted)", opacity: 0.5, marginTop: 1 }}
-                aria-label="Dismiss"
-              >
-                <X size={14} />
-              </button>
-            </motion.div>
-          );
-        })}
-      </AnimatePresence>
+      {/* Polite live region — announces success/info toasts after current speech finishes */}
+      <div aria-live="polite" role="status" aria-atomic="false" aria-relevant="additions">
+        <AnimatePresence initial={false}>
+          {politeToasts.map((t) => (
+            <ToastItem key={t.id} toast={t} onDismiss={onDismiss} />
+          ))}
+        </AnimatePresence>
+      </div>
+      {/* Assertive live region — interrupts immediately for error toasts */}
+      <div aria-live="assertive" role="alert" aria-atomic="false" aria-relevant="additions">
+        <AnimatePresence initial={false}>
+          {errorToasts.map((t) => (
+            <ToastItem key={t.id} toast={t} onDismiss={onDismiss} />
+          ))}
+        </AnimatePresence>
+      </div>
     </div>
+  );
+}
+
+function ToastItem({ toast: t, onDismiss }: { toast: ToastItem; onDismiss: (id: string) => void }) {
+  const Icon = ICONS[t.type];
+  const { border, icon } = COLORS[t.type];
+  return (
+    <motion.div
+      layout
+      initial={{ opacity: 0, x: 60, scale: 0.92 }}
+      animate={{ opacity: 1, x: 0, scale: 1 }}
+      exit={{ opacity: 0, x: 60, scale: 0.92 }}
+      transition={{ type: "spring", stiffness: 420, damping: 32 }}
+      className="pointer-events-auto flex items-start gap-3 px-4 py-3.5 rounded-2xl"
+      style={{
+        background: "var(--surface)",
+        border: `1px solid ${border}`,
+        boxShadow: `0 8px 32px rgba(0,0,0,0.35)`,
+      }}
+    >
+      <Icon size={16} style={{ color: icon, flexShrink: 0, marginTop: 2 }} />
+      <p
+        className="flex-1 text-sm leading-snug"
+        style={{ color: "var(--text-primary)" }}
+      >
+        {t.message}
+      </p>
+      <button
+        onClick={() => onDismiss(t.id)}
+        className="flex-shrink-0 transition-opacity hover:opacity-100"
+        style={{ color: "var(--text-muted)", opacity: 0.5, marginTop: 1 }}
+        aria-label="Dismiss"
+      >
+        <X size={14} />
+      </button>
+    </motion.div>
   );
 }

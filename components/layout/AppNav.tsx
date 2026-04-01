@@ -74,6 +74,7 @@ export function AppNav({ username, unreadNotifications = 0, onCheckin }: AppNavP
 
       {/* ── Desktop sidebar ─────────────────────────────────────────────────── */}
       <aside
+        aria-label="Main navigation"
         className="hidden lg:flex flex-col w-64 h-screen sticky top-0 flex-shrink-0 border-r"
         style={{ background: "var(--bg)", borderColor: "var(--border)" }}
       >
@@ -88,6 +89,7 @@ export function AppNav({ username, unreadNotifications = 0, onCheckin }: AppNavP
         <div className="px-4 py-4">
           <button
             onClick={onCheckin}
+            aria-expanded={false}
             className="w-full flex items-center justify-center gap-2 font-semibold py-3 rounded-2xl transition-all duration-150 active:scale-95 hover:opacity-90"
             style={{ background: "var(--accent-gold)", color: "var(--bg)" }}
           >
@@ -97,11 +99,11 @@ export function AppNav({ username, unreadNotifications = 0, onCheckin }: AppNavP
         </div>
 
         {/* Nav links */}
-        <nav className="flex-1 px-3 py-2 space-y-1 overflow-y-auto">
+        <nav aria-label="Main navigation" className="flex-1 px-3 py-2 space-y-1 overflow-y-auto">
           {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
             const isActive = pathname.startsWith(href);
             return (
-              <Link key={href} href={href}>
+              <Link key={href} href={href} aria-current={isActive ? "page" : undefined}>
                 <div
                   className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-150 group"
                   style={{
@@ -149,8 +151,9 @@ export function AppNav({ username, unreadNotifications = 0, onCheckin }: AppNavP
             { href: "/settings",            label: "Settings", icon: Settings, exact: true  },
           ].map(({ href, label, icon: Icon, exact, badge }) => {
             const isActive = exact ? pathname === href : pathname.startsWith("/profile");
+            const linkAriaLabel = badge ? `${label}, ${badge} unread` : label;
             return (
-              <Link key={href} href={href}>
+              <Link key={href} href={href} aria-label={linkAriaLabel} aria-current={isActive ? "page" : undefined}>
                 <div
                   className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-150"
                   style={{
@@ -195,6 +198,7 @@ export function AppNav({ username, unreadNotifications = 0, onCheckin }: AppNavP
           {/* Logout */}
           <button
             onClick={handleLogout}
+            aria-label="Log out"
             className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-150 text-left"
             style={{ color: "var(--text-muted)" }}
             onMouseEnter={e => {
@@ -214,6 +218,8 @@ export function AppNav({ username, unreadNotifications = 0, onCheckin }: AppNavP
 
       {/* ── Mobile bottom nav ───────────────────────────────────────────────── */}
       <div
+        role="navigation"
+        aria-label="Bottom navigation"
         className="lg:hidden fixed bottom-0 left-0 right-0 z-40 backdrop-blur-md border-t"
         style={{ background: "color-mix(in srgb, var(--surface) 95%, transparent)", borderColor: "var(--border)" }}
       >
@@ -221,7 +227,7 @@ export function AppNav({ username, unreadNotifications = 0, onCheckin }: AppNavP
           {MOBILE_NAV_ITEMS.slice(0, 2).map(({ href, label, icon: Icon }) => {
             const isActive = pathname.startsWith(href);
             return (
-              <Link key={href} href={href} className="flex-1" aria-label={label}>
+              <Link key={href} href={href} className="flex-1" aria-label={label} aria-current={isActive ? "page" : undefined}>
                 <div
                   className="flex flex-col items-center gap-1 py-1 rounded-xl transition-colors"
                   style={{ color: isActive ? "var(--accent-gold)" : "var(--text-muted)" }}
@@ -234,7 +240,7 @@ export function AppNav({ username, unreadNotifications = 0, onCheckin }: AppNavP
           })}
 
           {/* Center check-in FAB */}
-          <button onClick={onCheckin} className="flex-shrink-0 mx-2" aria-label="Start Session">
+          <button onClick={onCheckin} className="flex-shrink-0 mx-2" aria-label="Start Session" aria-expanded={false}>
             <div
               className="w-12 h-12 rounded-2xl flex items-center justify-center active:scale-95 transition-transform"
               style={{
@@ -249,8 +255,12 @@ export function AppNav({ username, unreadNotifications = 0, onCheckin }: AppNavP
           {MOBILE_NAV_ITEMS.slice(2).map(({ href, label, icon: Icon }) => {
             const isActive = href === "/notifications" ? pathname === href : pathname.startsWith(href);
             const isNotifications = href === "/notifications";
+            const mobileNotifBadge = isNotifications && unreadNotifications > 0
+              ? (unreadNotifications > 9 ? "9+" : String(unreadNotifications))
+              : null;
+            const mobileLinkAriaLabel = mobileNotifBadge ? `${label}, ${mobileNotifBadge} unread` : label;
             return (
-              <Link key={href} href={href} className="flex-1" aria-label={label}>
+              <Link key={href} href={href} className="flex-1" aria-label={mobileLinkAriaLabel} aria-current={isActive ? "page" : undefined}>
                 <div
                   className="flex flex-col items-center gap-1 py-1 rounded-xl transition-colors"
                   style={{ color: isActive ? "var(--accent-gold)" : "var(--text-muted)" }}
