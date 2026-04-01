@@ -1,5 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+
+export const revalidate = 30; // Revalidate every 30 seconds
 import Link from "next/link";
 import {
   Beer, Users, TrendingUp, Award, Calendar, ArrowUpRight,

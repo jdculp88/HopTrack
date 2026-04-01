@@ -1,0 +1,21 @@
+import { useState, useEffect } from "react";
+
+/**
+ * Returns a debounced version of value that only updates after the specified delay.
+ * Use for search inputs to prevent firing on every keystroke.
+ *
+ * @example
+ * const debouncedSearch = useDebouncedValue(searchQuery, 300);
+ */
+export function useDebouncedValue<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+    return () => clearTimeout(timer);
+  }, [value, delay]);
+
+  return debouncedValue;
+}
