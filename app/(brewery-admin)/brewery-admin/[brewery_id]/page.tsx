@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import {
-  Beer, Users, Star, TrendingUp, Award, Calendar, ArrowUpRight,
+  Beer, Users, TrendingUp, Award, Calendar, ArrowUpRight,
   List, Clock, Heart, BarChart3, QrCode, Eye, Zap, Gift, RefreshCw,
 } from "lucide-react";
 import { formatRelativeTime } from "@/lib/dates";
@@ -52,7 +52,7 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
     { data: activeSessions },
     { data: recentReviews },
     { data: recentFollowers },
-    { data: loyaltyProgramsForROI },
+    { data: _loyaltyProgramsForROI },
   ] = await Promise.all([
     supabase.from("breweries").select("*").eq("id", brewery_id).single() as any,
     supabase.from("beers").select("*").eq("brewery_id", brewery_id) as any,

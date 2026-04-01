@@ -135,6 +135,7 @@ export function ExploreClient({
   }
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (!query.trim()) { setBreweries(enriched); pushParams({ q: "" }); return; }
     pushParams({ q: query });
     const t = setTimeout(async () => {

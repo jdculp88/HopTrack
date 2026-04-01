@@ -1,10 +1,9 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Users, X, UserPlus, Check, PlusCircle, Search } from "lucide-react";
 import Image from "next/image";
-import { ParticipantAvatars } from "@/components/session/ParticipantAvatars";
 import { cn, getInitials, generateGradientFromString } from "@/lib/utils";
 import { useToast } from "@/components/ui/Toast";
 import type { SessionParticipant } from "@/types/database";

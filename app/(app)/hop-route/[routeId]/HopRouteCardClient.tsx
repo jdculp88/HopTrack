@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { MapPin, Clock, Users, ChevronDown, ChevronUp, Beer, Share2, Sparkles, ArrowRight, Star, Play, CheckCircle2, Zap } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/Toast";
 import { HopRouteShareCard } from "@/components/hop-route/HopRouteShareCard";
 import { getStyleVars } from "@/lib/beerStyleColors";
@@ -62,12 +61,11 @@ function formatTime(iso: string | null) {
   return new Date(iso).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
 }
 
-export function HopRouteCardClient({ route: initialRoute, userId }: HopRouteCardClientProps) {
+export function HopRouteCardClient({ route: initialRoute }: HopRouteCardClientProps) {
   const [route, setRoute] = useState(initialRoute);
   const [expandedStop, setExpandedStop] = useState<string | null>(initialRoute.hop_route_stops[0]?.id ?? null);
   const [showShare, setShowShare] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
-  const router = useRouter();
   const { success, error: showError } = useToast();
 
   const stops = route.hop_route_stops.sort((a, b) => a.stop_order - b.stop_order);
@@ -320,7 +318,7 @@ export function HopRouteCardClient({ route: initialRoute, userId }: HopRouteCard
                         {/* AI reasoning */}
                         {stop.reasoning_text && (
                           <div className="mt-3 p-3 rounded-xl" style={{ background: "var(--surface-2)" }}>
-                            <p className="text-sm text-[var(--text-secondary)] italic leading-relaxed">"{stop.reasoning_text}"</p>
+                            <p className="text-sm text-[var(--text-secondary)] italic leading-relaxed">&quot;{stop.reasoning_text}&quot;</p>
                           </div>
                         )}
 

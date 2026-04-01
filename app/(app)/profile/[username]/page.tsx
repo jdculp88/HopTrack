@@ -3,7 +3,6 @@ import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { MapPin, Settings, Star, Bookmark, Stamp, Flame } from "lucide-react";
 import { UserAvatar } from "@/components/ui/UserAvatar";
-import { AchievementBadge } from "@/components/achievements/AchievementBadge";
 import { ProfileBanner } from "@/components/profile/ProfileBanner";
 import { BeerStyleBadge } from "@/components/ui/BeerStyleBadge";
 import { AchievementsGrid } from "./AchievementsGrid";
@@ -37,7 +36,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
 
   const isOwnProfile = profile.id === user.id;
   const levelInfo = getLevelProgress(profile.xp);
-  const gradient = generateGradientFromString(profile.display_name + username);
+  const _gradient = generateGradientFromString(profile.display_name + username);
 
   // Fetch earned achievements
   const { data: userAchievements } = await supabase

@@ -132,7 +132,7 @@ export async function PATCH(
   const newXp = (profile?.xp || 0) + xpGained
   const newLevel = getLevelFromXP(newXp).level
 
-  const { data: rpcResult, error: rpcError } = await supabase
+  const { error: rpcError } = await supabase
     .rpc('increment_xp', {
       p_user_id: user.id,
       p_xp_amount: xpGained,
@@ -337,13 +337,13 @@ export async function PATCH(
       const sessionBeerIdsSet = new Set(beerLogs.map((b: any) => b.beer_id).filter(Boolean))
 
       // Fetch unique styles logged this session (for style_variety type)
-      let sessionStyles: string[] = []
+      let _sessionStyles: string[] = []
       if (sessionBeerIdsSet.size > 0) {
         const { data: sessionBeers } = await (supabase
           .from("beers")
           .select("id, style")
           .in("id", [...sessionBeerIdsSet]) as any)
-        sessionStyles = (sessionBeers ?? []).map((b: any) => b.style).filter(Boolean)
+        _sessionStyles = (sessionBeers ?? []).map((b: any) => b.style).filter(Boolean)
       }
 
       // Fetch user's all-time visit count to this brewery (for visit_streak)

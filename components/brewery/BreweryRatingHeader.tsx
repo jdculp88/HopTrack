@@ -10,7 +10,7 @@ interface BreweryRatingHeaderProps {
   currentUserId: string;
 }
 
-export function BreweryRatingHeader({ breweryId, currentUserId }: BreweryRatingHeaderProps) {
+export function BreweryRatingHeader({ breweryId }: BreweryRatingHeaderProps) {
   const [avgRating, setAvgRating] = useState<number | null>(null);
   const [totalReviews, setTotalReviews] = useState(0);
   const [userRating, setUserRating] = useState<number | null>(null);
@@ -32,6 +32,7 @@ export function BreweryRatingHeader({ breweryId, currentUserId }: BreweryRatingH
   }, [breweryId]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchData();
   }, [fetchData]);
 

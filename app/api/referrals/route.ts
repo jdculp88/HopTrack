@@ -28,7 +28,7 @@ function generateCode(): string {
 }
 
 // GET /api/referrals — get or create the current user's referral code + stats
-export async function GET(request: Request) {
+export async function GET(_request: Request) {
   const supabase = await createClient();
   const {
     data: { user },

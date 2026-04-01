@@ -2,9 +2,8 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Share2, ChevronRight, Trophy, ChevronLeft, Camera } from 'lucide-react'
+import { ChevronRight, Trophy, ChevronLeft, Camera } from 'lucide-react'
 import Image from 'next/image'
-import type { Options as ConfettiOptions } from 'canvas-confetti'
 import { getGlass, getGlassSvgContent } from '@/lib/glassware'
 import { Session, BeerLog } from '@/types/database'
 import { SESSION_XP, getLevelProgress } from '@/lib/xp'
@@ -171,7 +170,7 @@ export default function SessionRecapSheet({
   const [breweryReviewSubmitted, setBreweryReviewSubmitted] = useState(false)
   const [hasExistingBreweryReview, setHasExistingBreweryReview] = useState(false)
   const [existingBreweryRating, setExistingBreweryRating] = useState(0)
-  const [breweryReviewLoading, setBreweryReviewLoading] = useState(false)
+  const [_breweryReviewLoading, setBreweryReviewLoading] = useState(false)
   const [breweryStats, setBreweryStats] = useState<BreweryStats | null>(null)
   const [progressAnimated, setProgressAnimated] = useState(false)
   const [beerHistory, setBeerHistory] = useState<Record<string, { timesTried: number; avgRating: number | null }>>({})
@@ -184,7 +183,7 @@ export default function SessionRecapSheet({
   const totalBeers = allLogs.reduce((sum, l) => sum + (l.quantity ?? 1), 0)
   const duration = session ? formatDuration(session.started_at, session.ended_at) : ''
   const dateStr = session ? formatSessionDate(session.started_at, session.ended_at) : ''
-  const uniqueStyles = Array.from(new Set(allLogs.map((l) => l.beer?.style).filter(Boolean)))
+  const _uniqueStyles = Array.from(new Set(allLogs.map((l) => l.beer?.style).filter(Boolean)))
   const newTries = allLogs.filter(l => !l.rating || l.rating === 0).length
 
   // XP breakdown
@@ -302,7 +301,7 @@ export default function SessionRecapSheet({
     onClose()
   }, [saveBeerNotes, onClose])
 
-  const handleBreweryReview = useCallback(async () => {
+  const _handleBreweryReview = useCallback(async () => {
     if (!isBrewerySession || breweryRating === 0) return
     setBreweryReviewLoading(true)
     const breweryId = session!.brewery_id
@@ -536,12 +535,12 @@ export default function SessionRecapSheet({
               >
                 <span style={{ fontSize: 18, flexShrink: 0, marginTop: 1 }}>📊</span>
                 <p style={{ fontSize: 12, color: C.text2, lineHeight: 1.5 }}>
-                  You've spent <strong style={{ color: C.accent, fontWeight: 600 }}>{breweryStats.total_time_formatted}</strong> at {breweryName} across {breweryStats.visit_count} visits.
+                  You&apos;ve spent <strong style={{ color: C.accent, fontWeight: 600 }}>{breweryStats.total_time_formatted}</strong> at {breweryName} across {breweryStats.visit_count} visits.
                   {breweryStats.most_ordered_beer && (
                     <> Your most-ordered beer here is <strong style={{ color: C.accent, fontWeight: 600 }}>{breweryStats.most_ordered_beer.name}</strong> ({breweryStats.most_ordered_beer.count} times).</>
                   )}
                   {breweryStats.visitor_rank > 0 && breweryStats.visitor_rank <= 10 && (
-                    <> You're their <strong style={{ color: C.accent, fontWeight: 600 }}>#{breweryStats.visitor_rank} most frequent</strong> visitor on HopTrack.</>
+                    <> You&apos;re their <strong style={{ color: C.accent, fontWeight: 600 }}>#{breweryStats.visitor_rank} most frequent</strong> visitor on HopTrack.</>
                   )}
                 </p>
               </motion.div>

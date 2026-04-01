@@ -10,6 +10,8 @@ const eslintConfig = defineConfig([
       // Project convention: `as any` is required for Supabase join shapes
       // where PostgREST types don't match runtime data (see CLAUDE.md)
       "@typescript-eslint/no-explicit-any": "off",
+      // Project convention: `_`-prefixed variables are intentionally unused
+      "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_", "caughtErrorsIgnorePattern": "^_" }],
     },
   },
   // Override default ignores of eslint-config-next.
@@ -19,6 +21,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // One-time data scripts — not app code
+    "scripts/**",
   ]),
 ]);
 

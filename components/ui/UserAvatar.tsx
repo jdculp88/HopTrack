@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { cn, getInitials, generateGradientFromString } from "@/lib/utils";
 import { getLevelFromXP } from "@/lib/xp";
 

@@ -75,7 +75,7 @@ export default async function BreweryWelcomePage({ params }: Props) {
   // Fetch pour sizes
   const allBeers = beersRes.data ?? [];
   const beerIds = allBeers.map((b: any) => b.id);
-  let pourSizesMap: Record<string, any[]> = {};
+  const pourSizesMap: Record<string, any[]> = {};
 
   if (beerIds.length > 0) {
     const { data: pourSizes } = await (supabase as any)

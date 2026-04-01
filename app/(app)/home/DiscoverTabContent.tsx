@@ -22,6 +22,8 @@ import {
 import type { NewBrewery, RecommendedBeer } from "./HomeFeed";
 import { RecommendationsScroll } from "@/components/social/RecommendationsScroll";
 import { NearbyChallengesSection } from "@/components/social/NearbyChallengesSection";
+import { BreweryAdFeedCard } from "@/components/social/BreweryAdFeedCard";
+import { useFeedAd } from "@/hooks/useFeedAd";
 
 export interface CommunityContent {
   featuredBeers: FeaturedBeer[];
@@ -54,6 +56,7 @@ export function DiscoverTabContent({
   hasCommunityContent: boolean;
   recommendations?: RecommendedBeer[];
 }) {
+  const feedAd = useFeedAd();
   const hasNewBreweries = (communityContent?.newBreweries?.length ?? 0) > 0;
   const effectivelyEmpty = !hasCommunityContent && !hasNewBreweries;
 
@@ -135,6 +138,9 @@ export function DiscoverTabContent({
 
       {/* Challenges Near You — sponsored challenge discovery */}
       <NearbyChallengesSection />
+
+      {/* Sponsored Ad */}
+      {feedAd && <BreweryAdFeedCard ad={feedAd} />}
 
       {/* Beer of the Week */}
       {communityContent.featuredBeers.length > 0 && (

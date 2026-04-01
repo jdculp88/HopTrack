@@ -64,6 +64,7 @@ export function MentionInput({
   // Fetch friend suggestions
   useEffect(() => {
     if (!showPicker || mentionQuery.length === 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSuggestions([]);
       return;
     }

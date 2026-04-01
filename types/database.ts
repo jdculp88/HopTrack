@@ -204,6 +204,16 @@ export interface Database {
         Insert: Omit<BreweryAd, "id" | "created_at" | "updated_at" | "impressions" | "clicks" | "spent_cents"> & { id?: string };
         Update: Partial<BreweryAd>;
       };
+      mug_clubs: {
+        Row: MugClub;
+        Insert: Omit<MugClub, "id" | "created_at" | "updated_at"> & { id?: string };
+        Update: Partial<MugClub>;
+      };
+      mug_club_members: {
+        Row: MugClubMember;
+        Insert: Omit<MugClubMember, "id" | "joined_at"> & { id?: string };
+        Update: Partial<MugClubMember>;
+      };
     };
   };
 }
@@ -966,4 +976,33 @@ export interface BreweryAd {
   tier_required: "cask" | "barrel";
   created_at: string;
   updated_at: string;
+}
+
+// ─── Mug Clubs ──────────────────────────────────────────────────────────────
+export type MugClubMemberStatus = "active" | "expired" | "cancelled";
+
+export interface MugClub {
+  id: string;
+  brewery_id: string;
+  name: string;
+  description: string | null;
+  annual_fee: number;
+  max_members: number | null;
+  perks: Json;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface MugClubMember {
+  id: string;
+  mug_club_id: string;
+  user_id: string;
+  status: MugClubMemberStatus;
+  joined_at: string;
+  expires_at: string | null;
+  notes: string | null;
+  // joined fields
+  profile?: { id: string; username: string; display_name: string | null; avatar_url: string | null };
+  mug_club?: MugClub;
 }

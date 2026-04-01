@@ -3,7 +3,6 @@
 import { useEffect } from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
-import Link from "next/link";
 import type { BreweryWithStats } from "@/types/database";
 
 // Fix Leaflet's default icon paths (broken in bundled environments)
@@ -44,6 +43,7 @@ export function BreweryMap({ breweries, className }: BreweryMapProps) {
   useEffect(() => {
     // Leaflet CSS must be loaded client-side
     if (typeof window !== "undefined") {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       require("leaflet/dist/leaflet.css");
       fixLeafletIcons();
     }

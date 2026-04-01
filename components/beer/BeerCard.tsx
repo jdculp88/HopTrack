@@ -3,7 +3,6 @@
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { Plus } from "lucide-react";
 import { cn, formatABV, generateGradientFromString } from "@/lib/utils";
 import { BeerStyleBadge } from "@/components/ui/BeerStyleBadge";
 import { StarRating } from "@/components/ui/StarRating";

@@ -62,33 +62,6 @@ export default function CheckinEntryDrawer({ isOpen, onClose, onSessionStarted, 
     }
   }, [])
 
-  // Reset + detect on open
-  useEffect(() => {
-    if (isOpen) {
-      setQuery('')
-      setResults([])
-      setStartingSession(null)
-      setStartError(null)
-      setShowSearch(false)
-      setAutoDetected(null)
-      setLocationError(false)
-      loadRecentBreweries()
-      if (!preselectedBrewery) {
-        detectNearbyBreweries()
-      }
-    } else {
-      // Cancel any in-flight search when drawer closes
-      searchAbortRef.current?.abort()
-    }
-  }, [isOpen, preselectedBrewery, loadRecentBreweries])
-
-  // Focus input when search is shown
-  useEffect(() => {
-    if (showSearch) {
-      setTimeout(() => inputRef.current?.focus(), 100)
-    }
-  }, [showSearch])
-
   async function detectNearbyBreweries() {
     if (!navigator.geolocation) {
       setLocationError(true)
@@ -113,9 +86,38 @@ export default function CheckinEntryDrawer({ isOpen, onClose, onSessionStarted, 
     )
   }
 
+  // Reset + detect on open
+  useEffect(() => {
+    if (isOpen) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setQuery('')
+      setResults([])
+      setStartingSession(null)
+      setStartError(null)
+      setShowSearch(false)
+      setAutoDetected(null)
+      setLocationError(false)
+      loadRecentBreweries()
+      if (!preselectedBrewery) {
+        detectNearbyBreweries()
+      }
+    } else {
+      // Cancel any in-flight search when drawer closes
+      searchAbortRef.current?.abort()
+    }
+  }, [isOpen, preselectedBrewery, loadRecentBreweries])
+
+  // Focus input when search is shown
+  useEffect(() => {
+    if (showSearch) {
+      setTimeout(() => inputRef.current?.focus(), 100)
+    }
+  }, [showSearch])
+
   // Debounced search with AbortController
   useEffect(() => {
     if (!query.trim()) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setResults([])
       setSearching(false)
       return

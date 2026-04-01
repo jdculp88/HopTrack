@@ -26,8 +26,11 @@ export default async function ReportPage({ params }: { params: Promise<{ brewery
   if (!brewery) notFound();
 
   // Sessions — last 90 days
+  // eslint-disable-next-line react-hooks/purity
   const since90 = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
+  // eslint-disable-next-line react-hooks/purity
   const since30 = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+  // eslint-disable-next-line react-hooks/purity
   const since7 = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
 
   const { data: sessions90 } = await supabase

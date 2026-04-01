@@ -87,6 +87,7 @@ export function ApiKeyManager({ breweryId }: { breweryId: string }) {
 
   function timeAgo(dateStr: string | null) {
     if (!dateStr) return "Never";
+    // eslint-disable-next-line react-hooks/purity
     const diff = Date.now() - new Date(dateStr).getTime();
     const mins = Math.floor(diff / 60000);
     if (mins < 1) return "Just now";
@@ -143,7 +144,7 @@ export function ApiKeyManager({ breweryId }: { breweryId: string }) {
               className="text-xs mt-2 underline"
               style={{ color: "var(--text-muted)" }}
             >
-              I've copied it, dismiss
+              I&apos;ve copied it, dismiss
             </button>
           </motion.div>
         )}

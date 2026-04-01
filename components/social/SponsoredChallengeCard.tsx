@@ -52,6 +52,7 @@ export function SponsoredChallengeCard({ challenge }: Props) {
     : 0;
 
   const daysLeft = challenge.ends_at
+    // eslint-disable-next-line react-hooks/purity
     ? Math.max(0, Math.ceil((new Date(challenge.ends_at).getTime() - Date.now()) / 86400000))
     : null;
 

@@ -43,6 +43,7 @@ function useElapsedTime(startedAt: string) {
   }, [startedAt])
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     compute()
     const interval = setInterval(compute, 60000)
     return () => clearInterval(interval)

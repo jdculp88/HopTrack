@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { AnimatePresence } from "framer-motion";
 import { AppNav } from "@/components/layout/AppNav";
 import { createClient } from "@/lib/supabase/client";
@@ -24,7 +24,6 @@ interface AppShellProps {
 
 export function AppShell({ children, username, unreadNotifications = 0 }: AppShellProps) {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [checkinOpen, setCheckinOpen] = useState(false);
   const [tapWallOpen, setTapWallOpen] = useState(false);
@@ -33,6 +32,7 @@ export function AppShell({ children, username, unreadNotifications = 0 }: AppShe
   // Check onboarding state on mount (client-only)
   useEffect(() => {
     if (!isOnboardingComplete()) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setShowOnboarding(true);
     }
   }, []);

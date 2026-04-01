@@ -210,6 +210,7 @@ export function HomeFeed({
       profile.total_checkins === 0 &&
       !localStorage.getItem("hoptrack:onboarding-dismissed")
     ) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setShowOnboarding(true);
     }
   }, [profile]);

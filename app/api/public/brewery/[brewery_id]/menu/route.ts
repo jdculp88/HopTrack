@@ -52,7 +52,7 @@ export async function GET(
 
   // Fetch pour sizes for all on-tap beers
   const beerIds = (beersRes.data ?? []).map((b: any) => b.id);
-  let pourSizesMap: Record<string, any[]> = {};
+  const pourSizesMap: Record<string, any[]> = {};
 
   if (beerIds.length > 0) {
     const { data: pourSizes } = await (supabase as any)

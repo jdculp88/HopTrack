@@ -31,7 +31,7 @@ export function levenshtein(a: string, b: string): number {
   if (n === 0) return m;
 
   // Use single-row optimization
-  let prev = Array.from({ length: n + 1 }, (_, i) => i);
+  const prev = Array.from({ length: n + 1 }, (_, i) => i);
   const curr = new Array(n + 1);
 
   for (let i = 1; i <= m; i++) {
@@ -52,7 +52,7 @@ export function levenshtein(a: string, b: string): number {
 }
 
 /** Map POS category strings to HopTrack item types */
-const CATEGORY_TO_ITEM_TYPE: Record<string, string> = {
+const _CATEGORY_TO_ITEM_TYPE: Record<string, string> = {
   beer: "beer", draft: "beer", ale: "beer", lager: "beer",
   cider: "cider", "hard cider": "cider",
   wine: "wine", "red wine": "wine", "white wine": "wine",

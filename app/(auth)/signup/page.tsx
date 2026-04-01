@@ -48,6 +48,7 @@ export default function SignupPage() {
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     if (username.length < 3) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setUsernameStatus("idle");
       return;
     }

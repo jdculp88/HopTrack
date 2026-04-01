@@ -78,9 +78,9 @@ export async function GET(request: NextRequest) {
   // Batch-fetch reaction counts, user reactions, and comment counts
   const sessionIds = (pageSessions as Array<{ id: string }>).map((s) => s.id).filter(Boolean);
 
-  let reactionCounts: Record<string, Record<string, number>> = {};
-  let userReactions: Record<string, string[]> = {};
-  let commentCounts: Record<string, number> = {};
+  const reactionCounts: Record<string, Record<string, number>> = {};
+  const userReactions: Record<string, string[]> = {};
+  const commentCounts: Record<string, number> = {};
 
   if (sessionIds.length > 0) {
     const [countsRes, userReactionsRes, commentsRes] = await Promise.all([

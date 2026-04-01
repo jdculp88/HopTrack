@@ -10,6 +10,8 @@ import { FeedItemCard, type FeedItem } from "./FeedItemCard";
 import { FeedCardSkeletons, FeedEndMessage } from "./FeedPaginationUI";
 import type { Profile } from "@/types/database";
 import { useReactions } from "./ReactionContext";
+import { BreweryAdFeedCard } from "@/components/social/BreweryAdFeedCard";
+import { useFeedAd } from "@/hooks/useFeedAd";
 
 function getFeedItemKey(item: FeedItem, i: number): string {
   switch (item.type) {
@@ -49,7 +51,8 @@ export function FriendsTabContent({
   hasMore?: boolean;
   sentinelRef?: RefObject<HTMLDivElement | null>;
 }) {
-  const { reactionCounts, userReactions, commentCounts } = useReactions();
+  const { reactionCounts: _reactionCounts, userReactions: _userReactions, commentCounts: _commentCounts } = useReactions();
+  const feedAd = useFeedAd();
 
   return (
     <>
@@ -105,6 +108,8 @@ export function FriendsTabContent({
                 index={i}
                 currentUserId={currentUserId}
               />
+              {/* Inject sponsored ad after 3rd feed item */}
+              {i === 2 && feedAd && <div className="mt-3"><BreweryAdFeedCard ad={feedAd} /></div>}
             </div>
           ))}
 

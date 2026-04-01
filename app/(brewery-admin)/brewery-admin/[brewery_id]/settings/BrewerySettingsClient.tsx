@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Save, Loader2, UtensilsCrossed, Key, Plug, Unplug, RefreshCw, ArrowUpRight, Lock, ChevronDown, ChevronUp, AlertTriangle, Check, X, Search } from "lucide-react";
+import { Save, Loader2, UtensilsCrossed, Key, Plug, Unplug, RefreshCw, ArrowUpRight, Lock, ChevronDown, ChevronUp, X } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useToast } from "@/components/ui/Toast";
 import { ImageUpload } from "@/components/ui/ImageUpload";
@@ -54,7 +54,7 @@ export function BrewerySettingsClient({ brewery, role, subscriptionTier = "free"
       <div className="mb-8">
         <h1 className="font-display text-3xl font-bold" style={{ color: "var(--text-primary)" }}>Brewery Settings</h1>
         <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
-          Update your brewery's public profile information.
+          Update your brewery&apos;s public profile information.
         </p>
       </div>
 

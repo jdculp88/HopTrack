@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Art of Wine Glassware</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Source+Code+Pro:wght@400;600&family=Lora:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root { --cream: #F5F0E8; --dark: #1a1a1a; --gold: #C8962E; --gold-light: #D4A843; --amber: #B8860B; --muted: #8a8276; --border: #e0d8cc; --card-bg: rgba(255,252,245,0.6); }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--cream); color: var(--dark); font-family: 'Lora', Georgia, serif; min-height: 100vh; overflow-x: hidden; }
+  body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E"); pointer-events: none; z-index: 999; }
+  .container { max-width: 900px; margin: 0 auto; padding: 40px 30px 60px; }
+  header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; padding-bottom: 20px; border-bottom: 2px solid var(--dark); }
+  .logo-area { display: flex; align-items: center; gap: 16px; }
+  .logo-badge { width: 52px; height: 52px; background: var(--dark); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .page-title { font-family: 'Playfair Display', serif; font-style: italic; font-size: clamp(26px, 5vw, 48px); font-weight: 400; line-height: 1; letter-spacing: -0.5px; }
+  .glass-count { text-align: right; flex-shrink: 0; }
+  .glass-count .label { font-family: 'Source Code Pro', monospace; font-size: 11px; letter-spacing: 3px; color: var(--gold); text-transform: uppercase; }
+  .glass-count .number { font-family: 'Playfair Display', serif; font-size: 42px; color: var(--gold); line-height: 1; }
+  .intro-text { font-family: 'Lora', serif; font-size: 14px; color: var(--muted); line-height: 1.7; max-width: 680px; padding: 20px 0 10px; border-bottom: 1px solid var(--border); }
+  .glass-card { border-bottom: 1px solid var(--border); padding: 28px 0; animation: fadeUp 0.5s ease both; }
+  .glass-card:last-child { border-bottom: none; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  .glass-card:nth-child(1){animation-delay:.05s}.glass-card:nth-child(2){animation-delay:.1s}.glass-card:nth-child(3){animation-delay:.15s}.glass-card:nth-child(4){animation-delay:.2s}.glass-card:nth-child(5){animation-delay:.25s}.glass-card:nth-child(6){animation-delay:.3s}.glass-card:nth-child(7){animation-delay:.35s}.glass-card:nth-child(8){animation-delay:.4s}.glass-card:nth-child(9){animation-delay:.45s}.glass-card:nth-child(10){animation-delay:.5s}.glass-card:nth-child(11){animation-delay:.55s}.glass-card:nth-child(12){animation-delay:.6s}
+  .glass-top-row { display: flex; align-items: flex-start; gap: 20px; }
+  .glass-illustration { flex-shrink: 0; width: 70px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .glass-illustration svg { width: 60px; height: 86px; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.1)); }
+  .glass-type-label { font-family: 'Source Code Pro', monospace; font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); text-align: center; }
+  .glass-info { flex: 1; min-width: 0; }
+  .glass-name { font-family: 'Playfair Display', serif; font-size: clamp(24px, 4vw, 36px); font-weight: 700; line-height: 1.1; margin-bottom: 4px; letter-spacing: -0.3px; }
+  .glass-aka { font-family: 'Source Code Pro', monospace; font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+  .glass-desc { font-family: 'Lora', serif; font-size: 14px; color: #555; line-height: 1.6; margin-bottom: 12px; max-width: 560px; }
+  .best-for-label { font-family: 'Source Code Pro', monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--gold); margin-bottom: 8px; }
+  .best-for-label::before { content: '★ '; }
+  .beer-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .beer-tag { display: inline-flex; align-items: center; background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 6px 12px; transition: border-color 0.2s, box-shadow 0.2s; cursor: default; }
+  .beer-tag:hover { border-color: var(--gold-light); box-shadow: 0 2px 8px rgba(200,150,46,0.12); }
+  .beer-tag-text { font-family: 'Source Code Pro', monospace; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); line-height: 1.2; }
+  .footer-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--dark); color: var(--cream); padding: 12px 30px; display: flex; align-items: center; justify-content: center; font-family: 'Source Code Pro', monospace; font-size: 11px; letter-spacing: 1px; z-index: 100; gap: 20px; }
+  .footer-bar .gold { color: var(--gold); }
+  @media (max-width: 600px) { .container { padding: 24px 16px 80px; } .glass-top-row { gap: 12px; } .glass-illustration { width: 50px; } .glass-illustration svg { width: 44px; height: 64px; } }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div class="logo-area">
+      <div class="logo-badge">
+        <svg viewBox="0 0 40 48" xmlns="http://www.w3.org/2000/svg">
+          <path d="M14 28 Q10 18, 14 10 Q18 4, 20 6 Q22 4, 26 10 Q30 18, 26 28 Z" fill="#C8962E" opacity="0.3"/>
+          <path d="M14 28 Q10 18, 14 10 Q18 4, 20 6 Q22 4, 26 10 Q30 18, 26 28" fill="none" stroke="#C8962E" stroke-width="1.8"/>
+          <path d="M20 28 L20 40" stroke="#C8962E" stroke-width="2"/>
+          <path d="M14 42 L26 42" stroke="#C8962E" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="page-title">The Art of Wine Glassware</div>
+    </div>
+    <div class="glass-count">
+      <div class="label">Glasses</div>
+      <div class="number">12</div>
+    </div>
+  </header>
+  <div class="intro-text">
+    The shape of your glass is not snobbery — it's science. Bowl width controls oxidation, rim diameter directs wine to different taste zones on your palate, and stem length keeps temperature in check. Every curve has a purpose.
+  </div>
+  <div class="glass-list">
+
+    <!-- 1. Bordeaux -->
+    <div class="glass-card">
+      <div class="glass-top-row">
+        <div class="glass-illustration">
+          <svg viewBox="0 0 80 120" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="w1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#6B1A2A" stop-opacity="0.7"/><stop offset="100%" stop-color="#4A0E1A" stop-opacity="0.92"/></linearGradient>
+              <linearGradient id="wf1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FFF5F0"/><stop offset="100%" stop-color="#F0D8D0"/></linearGradient>
+            </defs>
+            <!-- Tall, angular bordeaux glass -->
+            <path d="M26 22 Q20 42, 22 56 Q24 68, 36 72 L36 90 L26 92 L26 95 L54 95 L54 92 L44 90 L44 72 Q56 68, 58 56 Q60 42, 54 22 Z" fill="url(#w1)" stroke="#5a1828" stroke-width="1" opacity="0.9"/>
+            <path d="M26 22 C30 20, 36 19, 40 20 C44 19, 50 20, 54 22 Z" fill="url(#wf1)" stroke="#c0a098" stroke-width="0.8"/>
+            <path d="M26 22 Q20 42, 22 56 Q24 68, 36 72 L36 90 L26 92 L26 95 L54 95 L54 92 L44 90 L44 72 Q56 68, 58 56 Q60 42, 54 22" fill="none" stroke="#5a1828" stroke-width="1.5"/>
+            <rect x="24" y="28" width="2.5" height="26" rx="1.2" fill="white" opacity="0.05"/>
+          </svg>
+          <span class="glass-type-label">18–22 oz</span>
+        </div>
+        <div class="glass-info">
+          <div class="glass-name">Bordeaux Glass</div>
+          <div class="glass-aka">Cabernet Glass · Tall Red Wine</div>
+          <div class="glass-desc">Tall and broad with a slightly tapered rim. Designed for full-bodied reds with high tannin — the wide bowl lets the wine breathe and the height directs it to the back of the palate where bold flavors register best.</div>
+          <div class="best-for-label">Best Served With</div>
+          <div class="beer-tags">
+            <div class="beer-tag"><span class="beer-tag-text">Cabernet Sauvignon</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Merlot</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Malbec</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Bordeaux Blends</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Tempranillo</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Burgundy -->
+    <div class="glass-card">
+      <div class="glass-top-row">
+        <div class="glass-illustration">
+          <svg viewBox="0 0 80 120" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="w2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#7A2030" stop-opacity="0.55"/><stop offset="100%" stop-color="#5A1420" stop-opacity="0.82"/></linearGradient>
+              <linearGradient id="wf2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FFF8F2"/><stop offset="100%" stop-color="#F0DDD5"/></linearGradient>
+            </defs>
+            <!-- Wide, balloon-like burgundy -->
+            <path d="M20 26 Q12 46, 16 60 Q20 72, 34 76 L34 90 L26 92 L26 95 L54 95 L54 92 L46 90 L46 76 Q60 72, 64 60 Q68 46, 60 26 Z" fill="url(#w2)" stroke="#5a1828" stroke-width="1" opacity="0.9"/>
+            <path d="M20 26 C24 22, 32 20, 40 22 C48 20, 56 22, 60 26 Z" fill="url(#wf2)" stroke="#c0a098" stroke-width="0.8"/>
+            <path d="M20 26 Q12 46, 16 60 Q20 72, 34 76 L34 90 L26 92 L26 95 L54 95 L54 92 L46 90 L46 76 Q60 72, 64 60 Q68 46, 60 26" fill="none" stroke="#5a1828" stroke-width="1.5"/>
+            <rect x="18" y="34" width="2.5" height="24" rx="1.2" fill="white" opacity="0.05"/>
+          </svg>
+          <span class="glass-type-label">20–28 oz</span>
+        </div>
+        <div class="glass-info">
+          <div class="glass-name">Burgundy Glass</div>
+          <div class="glass-aka">Pinot Noir Glass · Balloon Red</div>
+          <div class="glass-desc">The widest red wine bowl — almost balloon-shaped — with a narrower rim that funnels delicate aromatics. Captures the nuanced cherry, earth, and floral notes of lighter-bodied reds that would get lost in a Bordeaux glass.</div>
+          <div class="best-for-label">Best Served With</div>
+          <div class="beer-tags">
+            <div class="beer-tag"><span class="beer-tag-text">Pinot Noir</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Nebbiolo</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Barolo</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Gamay</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Burgundy</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Chardonnay / White Wine -->
+    <div class="glass-card">
+      <div class="glass-top-row">
+        <div class="glass-illustration">
+          <svg viewBox="0 0 80 120" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="w3" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#E8D870" stop-opacity="0.5"/><stop offset="100%" stop-color="#D0C048" stop-opacity="0.72"/></linearGradient>
+              <linearGradient id="wf3" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FFFFF8"/><stop offset="100%" stop-color="#F8F0DD"/></linearGradient>
+            </defs>
+            <path d="M26 26 Q22 42, 24 55 Q28 66, 36 70 L36 90 L28 92 L28 95 L52 95 L52 92 L44 90 L44 70 Q52 66, 56 55 Q58 42, 54 26 Z" fill="url(#w3)" stroke="#b0a050" stroke-width="1" opacity="0.9"/>
+            <path d="M26 26 C30 23, 36 22, 40 24 C44 22, 50 23, 54 26 Z" fill="url(#wf3)" stroke="#d0c8a0" stroke-width="0.8"/>
+            <path d="M26 26 Q22 42, 24 55 Q28 66, 36 70 L36 90 L28 92 L28 95 L52 95 L52 92 L44 90 L44 70 Q52 66, 56 55 Q58 42, 54 26" fill="none" stroke="#b0a050" stroke-width="1.5"/>
+            <rect x="26" y="32" width="2.5" height="22" rx="1.2" fill="white" opacity="0.06"/>
+          </svg>
+          <span class="glass-type-label">12–16 oz</span>
+        </div>
+        <div class="glass-info">
+          <div class="glass-name">White Wine Glass</div>
+          <div class="glass-aka">Chardonnay Glass · Standard White</div>
+          <div class="glass-desc">Smaller than its red counterparts to keep white wine colder longer. The U-shaped bowl allows aromas to develop while the narrower opening preserves floral and citrus top notes. Versatile enough for most whites.</div>
+          <div class="best-for-label">Best Served With</div>
+          <div class="beer-tags">
+            <div class="beer-tag"><span class="beer-tag-text">Chardonnay</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Viognier</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Chenin Blanc</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">White Burgundy</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Pinot Grigio</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. Sauvignon Blanc -->
+    <div class="glass-card">
+      <div class="glass-top-row">
+        <div class="glass-illustration">
+          <svg viewBox="0 0 80 120" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="w4" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#E0E878" stop-opacity="0.4"/><stop offset="100%" stop-color="#C8D050" stop-opacity="0.65"/></linearGradient>
+              <linearGradient id="wf4" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FFFFF5"/><stop offset="100%" stop-color="#F5F0DD"/></linearGradient>
+            </defs>
+            <!-- Taller, narrower white wine glass -->
+            <path d="M28 22 Q24 38, 26 52 Q28 64, 36 68 L36 90 L28 92 L28 95 L52 95 L52 92 L44 90 L44 68 Q52 64, 54 52 Q56 38, 52 22 Z" fill="url(#w4)" stroke="#a0a048" stroke-width="1" opacity="0.9"/>
+            <path d="M28 22 C32 19, 37 18, 40 20 C43 18, 48 19, 52 22 Z" fill="url(#wf4)" stroke="#c8c8a0" stroke-width="0.8"/>
+            <path d="M28 22 Q24 38, 26 52 Q28 64, 36 68 L36 90 L28 92 L28 95 L52 95 L52 92 L44 90 L44 68 Q52 64, 54 52 Q56 38, 52 22" fill="none" stroke="#a0a048" stroke-width="1.5"/>
+            <rect x="28" y="28" width="2" height="22" rx="1" fill="white" opacity="0.07"/>
+          </svg>
+          <span class="glass-type-label">12 oz</span>
+        </div>
+        <div class="glass-info">
+          <div class="glass-name">Sauvignon Blanc Glass</div>
+          <div class="glass-aka">Aromatic White Glass · Tall White</div>
+          <div class="glass-desc">Taller and slimmer than a standard white wine glass. The narrow bowl captures and focuses bright, herbaceous aromas — cut grass, lime zest, gooseberry — and delivers the wine to the tip of your tongue for maximum acidity perception.</div>
+          <div class="best-for-label">Best Served With</div>
+          <div class="beer-tags">
+            <div class="beer-tag"><span class="beer-tag-text">Sauvignon Blanc</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Albariño</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Grüner Veltliner</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Vermentino</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Sancerre</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. Champagne Flute -->
+    <div class="glass-card">
+      <div class="glass-top-row">
+        <div class="glass-illustration">
+          <svg viewBox="0 0 80 120" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="w5" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#F0E878" stop-opacity="0.45"/><stop offset="100%" stop-color="#E0D058" stop-opacity="0.65"/></linearGradient>
+              <linearGradient id="wf5" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FFFFF8"/><stop offset="100%" stop-color="#F8F2DD"/></linearGradient>
+            </defs>
+            <path d="M32 14 L30 65 Q30 72, 36 74 L36 88 L28 90 L28 93 L52 93 L52 90 L44 88 L44 74 Q50 72, 50 65 L48 14 Z" fill="url(#w5)" stroke="#b0a848" stroke-width="1" opacity="0.9"/>
+            <path d="M32 14 C36 11, 40 10, 44 12 C46 11, 48 13, 48 14 Z" fill="url(#wf5)" stroke="#d0c8a8" stroke-width="0.8"/>
+            <path d="M32 14 L30 65 Q30 72, 36 74 L36 88 L28 90 L28 93 L52 93 L52 90 L44 88 L44 74 Q50 72, 50 65 L48 14" fill="none" stroke="#b0a848" stroke-width="1.5"/>
+            <circle cx="39" cy="60" r="0.5" fill="white" opacity="0.18"/>
+            <circle cx="41" cy="50" r="0.4" fill="white" opacity="0.14"/>
+            <circle cx="40" cy="40" r="0.4" fill="white" opacity="0.1"/>
+            <circle cx="39" cy="28" r="0.3" fill="white" opacity="0.08"/>
+          </svg>
+          <span class="glass-type-label">6–8 oz</span>
+        </div>
+        <div class="glass-info">
+          <div class="glass-name">Champagne Flute</div>
+          <div class="glass-aka">Sparkling Wine Flute</div>
+          <div class="glass-desc">The narrow column preserves carbonation and sends a constant stream of fine bubbles upward, creating the visual spectacle that sparkling wine demands. Keeps the wine colder longer and delivers a focused, crisp sip.</div>
+          <div class="best-for-label">Best Served With</div>
+          <div class="beer-tags">
+            <div class="beer-tag"><span class="beer-tag-text">Champagne</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Prosecco</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Cava</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Crémant</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Sparkling Rosé</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. Champagne Coupe -->
+    <div class="glass-card">
+      <div class="glass-top-row">
+        <div class="glass-illustration">
+          <svg viewBox="0 0 80 120" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="w6" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#F0E070" stop-opacity="0.45"/><stop offset="100%" stop-color="#E0C850" stop-opacity="0.65"/></linearGradient>
+              <linearGradient id="wf6" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FFFFF8"/><stop offset="100%" stop-color="#F8F0DD"/></linearGradient>
+            </defs>
+            <!-- Coupe: wide, shallow, saucer-shaped bowl on stem -->
+            <path d="M14 38 Q14 48, 20 54 Q26 60, 36 62 L36 86 L26 88 L26 91 L54 91 L54 88 L44 86 L44 62 Q54 60, 60 54 Q66 48, 66 38 Z" fill="url(#w6)" stroke="#b0a048" stroke-width="1" opacity="0.9"/>
+            <path d="M14 38 C18 34, 28 32, 40 34 C52 32, 62 34, 66 38 Z" fill="url(#wf6)" stroke="#d0c8a0" stroke-width="0.8"/>
+            <path d="M14 38 Q14 48, 20 54 Q26 60, 36 62 L36 86 L26 88 L26 91 L54 91 L54 88 L44 86 L44 62 Q54 60, 60 54 Q66 48, 66 38" fill="none" stroke="#b0a048" stroke-width="1.5"/>
+            <rect x="18" y="40" width="2.5" height="12" rx="1.2" fill="white" opacity="0.06"/>
+          </svg>
+          <span class="glass-type-label">6–8 oz</span>
+        </div>
+        <div class="glass-info">
+          <div class="glass-name">Champagne Coupe</div>
+          <div class="glass-aka">Saucer · Marie Antoinette Glass</div>
+          <div class="glass-desc">The original champagne glass — wide, shallow, and romantically vintage. It lets bubbles escape quickly, which some sommeliers actually prefer for aged champagne. Iconic for cocktails and champagne towers alike.</div>
+          <div class="best-for-label">Best Served With</div>
+          <div class="beer-tags">
+            <div class="beer-tag"><span class="beer-tag-text">Vintage Champagne</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Champagne Cocktails</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Sparkling Rosé</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Dessert Sparklers</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7. Rosé Glass -->
+    <div class="glass-card">
+      <div class="glass-top-row">
+        <div class="glass-illustration">
+          <svg viewBox="0 0 80 120" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="w7" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#F0B0A0" stop-opacity="0.4"/><stop offset="100%" stop-color="#E09888" stop-opacity="0.62"/></linearGradient>
+              <linearGradient id="wf7" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FFF8F5"/><stop offset="100%" stop-color="#F8E8E0"/></linearGradient>
+            </defs>
+            <!-- Slightly tapered, flared lip rosé glass -->
+            <path d="M24 22 Q18 38, 20 50 Q22 58, 26 62 Q30 66, 36 68 L36 90 L28 92 L28 95 L52 95 L52 92 L44 90 L44 68 Q50 66, 54 62 Q58 58, 60 50 Q62 38, 56 22 Z" fill="url(#w7)" stroke="#c08878" stroke-width="1" opacity="0.9"/>
+            <path d="M24 22 C28 18, 34 17, 40 19 C46 17, 52 18, 56 22 Z" fill="url(#wf7)" stroke="#d0b8b0" stroke-width="0.8"/>
+            <path d="M24 22 Q18 38, 20 50 Q22 58, 26 62 Q30 66, 36 68 L36 90 L28 92 L28 95 L52 95 L52 92 L44 90 L44 68 Q50 66, 54 62 Q58 58, 60 50 Q62 38, 56 22" fill="none" stroke="#c08878" stroke-width="1.5"/>
+            <rect x="22" y="28" width="2.5" height="22" rx="1.2" fill="white" opacity="0.06"/>
+          </svg>
+          <span class="glass-type-label">14 oz</span>
+        </div>
+        <div class="glass-info">
+          <div class="glass-name">Rosé Glass</div>
+          <div class="glass-aka">Flared Lip White · Rosé Flute</div>
+          <div class="glass-desc">A subtle flare at the lip is the key — it directs wine to the tip of the tongue where sweetness is perceived first, then lets acidity clean the finish. Designed to balance the fruit-forward, bright character of rosé.</div>
+          <div class="best-for-label">Best Served With</div>
+          <div class="beer-tags">
+            <div class="beer-tag"><span class="beer-tag-text">Provence Rosé</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">White Zinfandel</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Rosé of Pinot Noir</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Tavel</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 8. Port / Dessert Wine Glass -->
+    <div class="glass-card">
+      <div class="glass-top-row">
+        <div class="glass-illustration">
+          <svg viewBox="0 0 80 120" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="w8" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#5A1020" stop-opacity="0.85"/><stop offset="100%" stop-color="#380810" stop-opacity="0.98"/></linearGradient>
+              <linearGradient id="wf8" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#F5E8E0"/><stop offset="100%" stop-color="#E0C8B8"/></linearGradient>
+            </defs>
+            <!-- Small, narrow port glass -->
+            <path d="M30 34 Q26 48, 28 58 Q30 66, 36 70 L36 88 L30 90 L30 93 L50 93 L50 90 L44 88 L44 70 Q50 66, 52 58 Q54 48, 50 34 Z" fill="url(#w8)" stroke="#4a1018" stroke-width="1"/>
+            <path d="M30 34 C34 31, 38 30, 40 32 C42 30, 46 31, 50 34 Z" fill="url(#wf8)" stroke="#b09888" stroke-width="0.8"/>
+            <path d="M30 34 Q26 48, 28 58 Q30 66, 36 70 L36 88 L30 90 L30 93 L50 93 L50 90 L44 88 L44 70 Q50 66, 52 58 Q54 48, 50 34" fill="none" stroke="#4a1018" stroke-width="1.5"/>
+            <rect x="30" y="40" width="2" height="18" rx="1" fill="white" opacity="0.04"/>
+          </svg>
+          <span class="glass-type-label">6–8 oz</span>
+        </div>
+        <div class="glass-info">
+          <div class="glass-name">Port Glass</div>
+          <div class="glass-aka">Dessert Wine Glass · Fortified Glass</div>
+          <div class="glass-desc">Intentionally small — dessert wines and fortified wines are served in smaller portions due to their intensity and sweetness. The narrow bowl concentrates rich plum, chocolate, and caramel aromatics while limiting the pour size.</div>
+          <div class="best-for-label">Best Served With</div>
+          <div class="beer-tags">
+            <div class="beer-tag"><span class="beer-tag-text">Port</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Sauternes</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Tokaji</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Late Harvest</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Vin Santo</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 9. Sherry / Copita -->
+    <div class="glass-card">
+      <div class="glass-top-row">
+        <div class="glass-illustration">
+          <svg viewBox="0 0 80 120" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="w9" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#D0A040" stop-opacity="0.65"/><stop offset="100%" stop-color="#A88020" stop-opacity="0.85"/></linearGradient>
+              <linearGradient id="wf9" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FFFAE5"/><stop offset="100%" stop-color="#F0E0C0"/></linearGradient>
+            </defs>
+            <!-- Copita: small, tulip-shaped, narrow -->
+            <path d="M30 28 Q26 42, 28 54 Q30 62, 36 66 L36 86 L30 88 L30 91 L50 91 L50 88 L44 86 L44 66 Q50 62, 52 54 Q54 42, 50 28 Z" fill="url(#w9)" stroke="#907028" stroke-width="1" opacity="0.9"/>
+            <path d="M30 28 C34 25, 38 24, 40 26 C42 24, 46 25, 50 28 Z" fill="url(#wf9)" stroke="#c8b890" stroke-width="0.8"/>
+            <path d="M30 28 Q26 42, 28 54 Q30 62, 36 66 L36 86 L30 88 L30 91 L50 91 L50 88 L44 86 L44 66 Q50 62, 52 54 Q54 42, 50 28" fill="none" stroke="#907028" stroke-width="1.5"/>
+            <rect x="30" y="34" width="2" height="18" rx="1" fill="white" opacity="0.06"/>
+          </svg>
+          <span class="glass-type-label">4–6 oz</span>
+        </div>
+        <div class="glass-info">
+          <div class="glass-name">Copita</div>
+          <div class="glass-aka">Sherry Glass · Catavino</div>
+          <div class="glass-desc">The official nosing glass of Jerez. This narrow tulip shape captures the volatile, complex aromatics of sherry — from saline fino to rich oloroso — and delivers them in concentrated waves. Also the standard for whisky nosing.</div>
+          <div class="best-for-label">Best Served With</div>
+          <div class="beer-tags">
+            <div class="beer-tag"><span class="beer-tag-text">Fino Sherry</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Amontillado</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Oloroso</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Manzanilla</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Madeira</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 10. Universal / ISO -->
+    <div class="glass-card">
+      <div class="glass-top-row">
+        <div class="glass-illustration">
+          <svg viewBox="0 0 80 120" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="w10" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#C89040" stop-opacity="0.55"/><stop offset="100%" stop-color="#A87828" stop-opacity="0.75"/></linearGradient>
+              <linearGradient id="wf10" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FFF8E8"/><stop offset="100%" stop-color="#F0E0C8"/></linearGradient>
+            </defs>
+            <path d="M26 24 Q20 42, 24 56 Q28 66, 36 70 L36 88 L28 90 L28 93 L52 93 L52 90 L44 88 L44 70 Q52 66, 56 56 Q60 42, 54 24 Z" fill="url(#w10)" stroke="#907030" stroke-width="1" opacity="0.9"/>
+            <path d="M26 24 C30 21, 36 20, 40 22 C44 20, 50 21, 54 24 Z" fill="url(#wf10)" stroke="#c8b898" stroke-width="0.8"/>
+            <path d="M26 24 Q20 42, 24 56 Q28 66, 36 70 L36 88 L28 90 L28 93 L52 93 L52 90 L44 88 L44 70 Q52 66, 56 56 Q60 42, 54 24" fill="none" stroke="#907030" stroke-width="1.5"/>
+            <rect x="24" y="30" width="2.5" height="24" rx="1.2" fill="white" opacity="0.06"/>
+          </svg>
+          <span class="glass-type-label">10–15 oz</span>
+        </div>
+        <div class="glass-info">
+          <div class="glass-name">Universal Wine Glass</div>
+          <div class="glass-aka">ISO Tasting Glass · All-Purpose</div>
+          <div class="glass-desc">The do-everything glass. Slightly egg-shaped bowl, moderate size, and a gentle taper at the rim. It won't be optimal for any single varietal but handles everything competently — the smart choice for a home bar that doesn't want twelve different stems.</div>
+          <div class="best-for-label">Best Served With</div>
+          <div class="beer-tags">
+            <div class="beer-tag"><span class="beer-tag-text">Any Varietal</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Wine Tastings</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Blends</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Natural Wine</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Orange Wine</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 11. Stemless -->
+    <div class="glass-card">
+      <div class="glass-top-row">
+        <div class="glass-illustration">
+          <svg viewBox="0 0 80 120" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="w11" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#8A2838" stop-opacity="0.6"/><stop offset="100%" stop-color="#5A1420" stop-opacity="0.85"/></linearGradient>
+            </defs>
+            <!-- Stemless: round tumbler shape -->
+            <path d="M20 38 Q16 58, 18 72 Q20 88, 26 94 L54 94 Q60 88, 62 72 Q64 58, 60 38 Z" fill="url(#w11)" stroke="#5a1828" stroke-width="1" opacity="0.9"/>
+            <path d="M20 38 C24 34, 32 32, 40 34 C48 32, 56 34, 60 38 Z" fill="#FFF5F0" stroke="#c0a098" stroke-width="0.8"/>
+            <path d="M20 38 Q16 58, 18 72 Q20 88, 26 94 L54 94 Q60 88, 62 72 Q64 58, 60 38" fill="none" stroke="#5a1828" stroke-width="1.5"/>
+            <rect x="26" y="94" width="28" height="3" rx="1" fill="#5a1828" opacity="0.3"/>
+            <rect x="22" y="44" width="3" height="35" rx="1.5" fill="white" opacity="0.05"/>
+          </svg>
+          <span class="glass-type-label">15–21 oz</span>
+        </div>
+        <div class="glass-info">
+          <div class="glass-name">Stemless Wine Glass</div>
+          <div class="glass-aka">Tumbler · Modern Wine Glass</div>
+          <div class="glass-desc">The casual option. No stem means no breakage risk, dishwasher-friendly, and easy to stack. Purists will note that hand warmth affects temperature, but for everyday drinking and outdoor gatherings, it's the practical modern standard.</div>
+          <div class="best-for-label">Best Served With</div>
+          <div class="beer-tags">
+            <div class="beer-tag"><span class="beer-tag-text">Everyday Reds</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Casual Whites</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Outdoor Pours</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Sangria</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 12. Riesling / Aromatic White -->
+    <div class="glass-card">
+      <div class="glass-top-row">
+        <div class="glass-illustration">
+          <svg viewBox="0 0 80 120" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="w12" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#F0E080" stop-opacity="0.35"/><stop offset="100%" stop-color="#D8C458" stop-opacity="0.58"/></linearGradient>
+              <linearGradient id="wf12" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FFFFFB"/><stop offset="100%" stop-color="#F8F2E0"/></linearGradient>
+            </defs>
+            <!-- Tall, slender, elegant -->
+            <path d="M30 18 Q26 34, 28 48 Q30 60, 36 66 L36 88 L28 90 L28 93 L52 93 L52 90 L44 88 L44 66 Q50 60, 52 48 Q54 34, 50 18 Z" fill="url(#w12)" stroke="#a8a050" stroke-width="1" opacity="0.9"/>
+            <path d="M30 18 C34 15, 38 14, 40 16 C42 14, 46 15, 50 18 Z" fill="url(#wf12)" stroke="#d0c8a8" stroke-width="0.8"/>
+            <path d="M30 18 Q26 34, 28 48 Q30 60, 36 66 L36 88 L28 90 L28 93 L52 93 L52 90 L44 88 L44 66 Q50 60, 52 48 Q54 34, 50 18" fill="none" stroke="#a8a050" stroke-width="1.5"/>
+            <rect x="30" y="24" width="2" height="24" rx="1" fill="white" opacity="0.07"/>
+          </svg>
+          <span class="glass-type-label">10–13 oz</span>
+        </div>
+        <div class="glass-info">
+          <div class="glass-name">Riesling Glass</div>
+          <div class="glass-aka">Aromatic Wine Glass · Rhine Glass</div>
+          <div class="glass-desc">Tall and slender with a narrow opening to capture and intensify the perfumed aromatics Riesling is famous for — petrol, peach, honeysuckle. The slim shape keeps serving temperature cold and focuses each sip precisely.</div>
+          <div class="best-for-label">Best Served With</div>
+          <div class="beer-tags">
+            <div class="beer-tag"><span class="beer-tag-text">Riesling</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Gewürztraminer</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Moscato</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Torrontés</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Ice Wine</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+<div class="footer-bar">
+  <span>🍷 <span class="gold">12</span> glass styles · Every curve has a purpose</span>
+  <span style="letter-spacing:2px;" class="gold">WINE GLASSWARE</span>
+</div>
+</body>
+</html>

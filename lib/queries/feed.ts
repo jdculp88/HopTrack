@@ -7,7 +7,7 @@
  */
 
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Session, Achievement, Beer, Brewery, Profile } from "@/types/database";
+import type { Session, Achievement } from "@/types/database";
 
 // ── Return types ────────────────────────────────────────────────────────────
 

@@ -12,7 +12,7 @@ interface BeerListsSectionProps {
   username: string;
 }
 
-export function BeerListsSection({ lists: initialLists, isOwnProfile, username }: BeerListsSectionProps) {
+export function BeerListsSection({ lists: initialLists, isOwnProfile }: BeerListsSectionProps) {
   const [lists, setLists] = useState(initialLists);
   const [showCreate, setShowCreate] = useState(false);
   const [title, setTitle] = useState("");
@@ -139,7 +139,7 @@ export function BeerListsSection({ lists: initialLists, isOwnProfile, username }
           <Beer size={24} style={{ color: "var(--text-muted)", margin: "0 auto 8px" }} />
           <p className="font-display text-sm" style={{ color: "var(--text-primary)" }}>No beer lists yet</p>
           <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>
-            Curate your favorites — "My Top 10 Stouts", "Asheville Must-Tries"
+            Curate your favorites — &quot;My Top 10 Stouts&quot;, &quot;Asheville Must-Tries&quot;
           </p>
         </div>
       ) : (

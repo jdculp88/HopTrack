@@ -247,7 +247,7 @@ export async function fetchWrappedStats(
   };
 }
 
-export function getShareText(stats: WrappedStats, username: string): string {
+export function getShareText(stats: WrappedStats, _username: string): string {
   const parts = [
     `My HopTrack Wrapped: "${stats.personality.archetype}" ${stats.personality.emoji}`,
     `${stats.totalBeers} beers across ${stats.uniqueBreweries} breweries`,

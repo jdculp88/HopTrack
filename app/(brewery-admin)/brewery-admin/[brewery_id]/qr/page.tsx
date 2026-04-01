@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { notFound, redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 import { QRTentClient } from "./QRTentClient";
 
 export async function generateMetadata({ params }: { params: Promise<{ brewery_id: string }> }) {

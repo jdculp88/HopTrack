@@ -71,6 +71,7 @@ export function BarcodeScanner({ onBeerFound, onClose }: BarcodeScannerProps) {
   useEffect(() => {
     // Check for BarcodeDetector support
     if (typeof window === "undefined" || !("BarcodeDetector" in window)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setStatus("unsupported");
       return;
     }
@@ -289,6 +290,7 @@ export function BarcodeScanButton({ onBeerFound }: { onBeerFound: (result: Barco
   // Only show if BarcodeDetector might be available (don't show on desktop Safari, etc.)
   const [supported, setSupported] = useState(false);
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSupported("BarcodeDetector" in window);
   }, []);
 

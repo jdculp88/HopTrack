@@ -17,7 +17,6 @@ export function SessionComments({ sessionId, currentUserId, sessionOwnerId }: Se
   const [expanded, setExpanded] = useState(false);
   const [comments, setComments] = useState<SessionComment[]>([]);
   const [loaded, setLoaded] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [body, setBody] = useState("");
   const [error, setError] = useState<string | null>(null);

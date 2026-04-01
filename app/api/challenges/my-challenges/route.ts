@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
   const url = new URL(request.url);
   const brewery_id = url.searchParams.get("brewery_id");
 
-  let query = supabase
+  const query = supabase
     .from("challenge_participants")
     .select(`
       id,

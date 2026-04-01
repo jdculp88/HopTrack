@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { MapPin, Beer, Star, Zap, Clock, Home, Users } from "lucide-react";
+import { MapPin, Beer, Star, Home, Users } from "lucide-react";
 import { cn, formatRelativeTime } from "@/lib/utils";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import { SessionComments } from "@/components/social/SessionComments";
@@ -92,13 +92,13 @@ export function SessionCard({ session, currentUserId, className, reactionCounts,
   const { profile, brewery, beer_logs } = session;
   const beerCount = beer_logs?.length ?? 0;
   const ratedLogs = (beer_logs ?? []).filter((l) => l.rating != null);
-  const avgRating =
+  const _avgRating =
     ratedLogs.length > 0
       ? ratedLogs.reduce((sum, l) => sum + (l.rating ?? 0), 0) / ratedLogs.length
       : null;
 
   // Session duration
-  const duration = session.ended_at
+  const _duration = session.ended_at
     ? (() => {
         const ms = new Date(session.ended_at).getTime() - new Date(session.started_at).getTime();
         const mins = Math.round(ms / 60000);

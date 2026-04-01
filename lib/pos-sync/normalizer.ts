@@ -146,7 +146,7 @@ export const squareAdapter: PosProviderAdapter = {
     return items;
   },
 
-  normalizeWebhookPayload(raw: unknown): PosMenuItem[] {
+  normalizeWebhookPayload(_raw: unknown): PosMenuItem[] {
     // Square catalog.version.updated webhook sends { type, merchant_id, data: { ... } }
     // The payload doesn't include full catalog — we need to fetch it.
     // Return empty; the engine will do a full fetch via the sync path.

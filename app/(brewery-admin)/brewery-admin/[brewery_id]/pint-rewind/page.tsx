@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { notFound, redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 import { PintRewindClient } from "./PintRewindClient";
 
 export const metadata = { title: "Pint Rewind" };
@@ -20,6 +20,7 @@ export default async function PintRewindPage({ params }: { params: Promise<{ bre
     .from("breweries").select("name").eq("id", brewery_id).single();
 
   // Last 30 days — sessions
+  // eslint-disable-next-line react-hooks/purity
   const since30 = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
   const { data: sessions30 } = await supabase
     .from("sessions")

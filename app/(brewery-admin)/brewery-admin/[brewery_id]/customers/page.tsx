@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { notFound, redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 import { CustomersClient } from "./CustomersClient";
 
 export const metadata = { title: "Customer Insights" };

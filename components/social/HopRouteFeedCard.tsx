@@ -30,7 +30,7 @@ interface HopRouteFeedCardProps {
 }
 
 export function HopRouteFeedCard({ route, index, currentUserId }: HopRouteFeedCardProps) {
-  const { success } = useToast();
+  const { success: _success } = useToast();
   const isOwn = route.user.id === currentUserId;
   const displayName = route.user.display_name || route.user.username;
 

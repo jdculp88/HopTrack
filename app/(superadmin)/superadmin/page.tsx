@@ -20,6 +20,7 @@ export default async function SuperadminOverviewPage() {
   // Service role client for aggregate counts that bypass RLS
   const serviceSupabase = createServiceClient();
 
+  // eslint-disable-next-line react-hooks/purity
   const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
 
   const [

@@ -63,6 +63,7 @@ export function AchievementFeedCard({
 }) {
   const tier = achievement.achievement.tier;
   const tierColor = TIER_COLORS[tier] ?? "var(--badge-gold)";
+   
   const CategoryIcon = getCategoryIcon(achievement.achievement.category);
   const [showCelebration, setShowCelebration] = useState(() =>
     isNewAchievement(achievement.earned_at)
@@ -108,6 +109,7 @@ export function AchievementFeedCard({
           background: `color-mix(in srgb, ${tierColor} 10%, transparent)`,
         }}
       >
+        {/* eslint-disable-next-line react-hooks/static-components */}
         <CategoryIcon size={22} strokeWidth={1.75} style={{ color: tierColor }} />
       </div>
 

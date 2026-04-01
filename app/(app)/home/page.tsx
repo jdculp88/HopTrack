@@ -68,6 +68,7 @@ export default async function HomePage() {
   })();
 
   // Friend brewery reviews (past 7 days)
+  // eslint-disable-next-line react-hooks/purity
   const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
   const friendBreweryReviews = await (async () => {
     if (friendIds.length === 0) return [];

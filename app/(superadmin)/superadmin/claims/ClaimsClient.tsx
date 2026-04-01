@@ -166,7 +166,7 @@ export function ClaimsClient({ initialClaims }: { initialClaims: Claim[] }) {
                   </span>
                 </div>
                 {claim.notes && (
-                  <p className="mt-2 text-sm text-[var(--text-muted)] italic">"{claim.notes}"</p>
+                  <p className="mt-2 text-sm text-[var(--text-muted)] italic">&quot;{claim.notes}&quot;</p>
                 )}
               </div>
               {claim.status === "pending" && (

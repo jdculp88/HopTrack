@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Art of Non-Alcoholic Glassware</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Source+Code+Pro:wght@400;600&family=Lora:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root { --cream: #F5F0E8; --dark: #1a1a1a; --gold: #C8962E; --gold-light: #D4A843; --amber: #B8860B; --muted: #8a8276; --border: #e0d8cc; --card-bg: rgba(255,252,245,0.6); }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--cream); color: var(--dark); font-family: 'Lora', Georgia, serif; min-height: 100vh; overflow-x: hidden; }
+  body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E"); pointer-events: none; z-index: 999; }
+  .container { max-width: 900px; margin: 0 auto; padding: 40px 30px 60px; }
+  header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; padding-bottom: 20px; border-bottom: 2px solid var(--dark); }
+  .logo-area { display: flex; align-items: center; gap: 16px; }
+  .logo-badge { width: 52px; height: 52px; background: var(--dark); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .page-title { font-family: 'Playfair Display', serif; font-style: italic; font-size: clamp(26px, 5vw, 44px); font-weight: 400; line-height: 1; letter-spacing: -0.5px; }
+  .glass-count { text-align: right; flex-shrink: 0; }
+  .glass-count .label { font-family: 'Source Code Pro', monospace; font-size: 11px; letter-spacing: 3px; color: var(--gold); text-transform: uppercase; }
+  .glass-count .number { font-family: 'Playfair Display', serif; font-size: 42px; color: var(--gold); line-height: 1; }
+  .intro-text { font-family: 'Lora', serif; font-size: 14px; color: var(--muted); line-height: 1.7; max-width: 680px; padding: 20px 0 10px; border-bottom: 1px solid var(--border); }
+  .glass-card { border-bottom: 1px solid var(--border); padding: 28px 0; animation: fadeUp 0.5s ease both; }
+  .glass-card:last-child { border-bottom: none; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  .glass-card:nth-child(1){animation-delay:.05s}.glass-card:nth-child(2){animation-delay:.1s}.glass-card:nth-child(3){animation-delay:.15s}.glass-card:nth-child(4){animation-delay:.2s}.glass-card:nth-child(5){animation-delay:.25s}.glass-card:nth-child(6){animation-delay:.3s}.glass-card:nth-child(7){animation-delay:.35s}.glass-card:nth-child(8){animation-delay:.4s}.glass-card:nth-child(9){animation-delay:.45s}.glass-card:nth-child(10){animation-delay:.5s}
+  .glass-top-row { display: flex; align-items: flex-start; gap: 20px; }
+  .glass-illustration { flex-shrink: 0; width: 70px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .glass-illustration svg { width: 60px; height: 86px; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.1)); }
+  .glass-type-label { font-family: 'Source Code Pro', monospace; font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); text-align: center; }
+  .glass-info { flex: 1; min-width: 0; }
+  .glass-name { font-family: 'Playfair Display', serif; font-size: clamp(24px, 4vw, 36px); font-weight: 700; line-height: 1.1; margin-bottom: 4px; letter-spacing: -0.3px; }
+  .glass-aka { font-family: 'Source Code Pro', monospace; font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+  .glass-desc { font-family: 'Lora', serif; font-size: 14px; color: #555; line-height: 1.6; margin-bottom: 12px; max-width: 560px; }
+  .best-for-label { font-family: 'Source Code Pro', monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--gold); margin-bottom: 8px; }
+  .best-for-label::before { content: '★ '; }
+  .beer-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .beer-tag { display: inline-flex; align-items: center; background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 6px 12px; transition: border-color 0.2s, box-shadow 0.2s; cursor: default; }
+  .beer-tag:hover { border-color: var(--gold-light); box-shadow: 0 2px 8px rgba(200,150,46,0.12); }
+  .beer-tag-text { font-family: 'Source Code Pro', monospace; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); line-height: 1.2; }
+  .footer-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--dark); color: var(--cream); padding: 12px 30px; display: flex; align-items: center; justify-content: center; font-family: 'Source Code Pro', monospace; font-size: 11px; letter-spacing: 1px; z-index: 100; gap: 20px; }
+  .footer-bar .gold { color: var(--gold); }
+  @media (max-width: 600px) { .container { padding: 24px 16px 80px; } .glass-top-row { gap: 12px; } .glass-illustration { width: 50px; } .glass-illustration svg { width: 44px; height: 64px; } }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div class="logo-area">
+      <div class="logo-badge">
+        <svg viewBox="0 0 40 48" xmlns="http://www.w3.org/2000/svg">
+          <rect x="14" y="14" width="16" height="20" rx="2" fill="none" stroke="#C8962E" stroke-width="1.8"/>
+          <path d="M30 22 Q36 24, 36 30 Q36 36, 30 34" fill="none" stroke="#C8962E" stroke-width="1.5"/>
+          <path d="M18 14 L18 10 Q20 8, 22 10 L22 14" fill="none" stroke="#C8962E" stroke-width="1" opacity="0.5"/>
+          <path d="M12 38 L28 38" stroke="#C8962E" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="page-title">Non-Alcoholic Glassware</div>
+    </div>
+    <div class="glass-count">
+      <div class="label">Glasses</div>
+      <div class="number">10</div>
+    </div>
+  </header>
+  <div class="intro-text">
+    Coffee, tea, water, juice, mocktails — the non-alcoholic world has its own glassware traditions that are just as intentional. The right vessel elevates a simple drink into an experience worth savoring.
+  </div>
+  <div class="glass-list">
+
+    <!-- 1. Coffee Mug -->
+    <div class="glass-card">
+      <div class="glass-top-row">
+        <div class="glass-illustration">
+          <svg viewBox="0 0 80 120" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="n1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#4A3020" stop-opacity="0.85"/><stop offset="100%" stop-color="#2A1810" stop-opacity="0.95"/></linearGradient>
+              <linearGradient id="nf1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#F5ECD8"/><stop offset="100%" stop-color="#E0D0B0"/></linearGradient>
+            </defs>
+            <rect x="14" y="30" width="36" height="62" rx="4" fill="url(#n1)" stroke="#3a2018" stroke-width="1.5"/>
+            <path d="M14 30 C18 26, 26 24, 34 26 C42 24, 50 28, 50 30 Z" fill="url(#nf1)" stroke="#b0a080" stroke-width="0.8"/>
+            <rect x="14" y="30" width="36" height="62" rx="4" fill="none" stroke="#3a2018" stroke-width="1.5"/>
+            <rect x="14" y="92" width="36" height="3" rx="1" fill="#3a2018" opacity="0.4"/>
+            <path d="M50 42 Q62 44, 64 56 Q64 68, 50 72" fill="none" stroke="#3a2018" stroke-width="3.5" stroke-linecap="round"/>
+            <path d="M50 42 Q60 43, 62 56 Q62 67, 50 72" fill="none" stroke="#5a4030" stroke-width="1.5" stroke-linecap="round"/>
+            <!-- Steam wisps -->
+            <path d="M26 24 Q24 18, 26 12" fill="none" stroke="#a09070" stroke-width="1" opacity="0.3" stroke-linecap="round"/>
+            <path d="M34 22 Q32 14, 34 8" fill="none" stroke="#a09070" stroke-width="1" opacity="0.25" stroke-linecap="round"/>
+            <path d="M42 24 Q44 16, 42 10" fill="none" stroke="#a09070" stroke-width="1" opacity="0.2" stroke-linecap="round"/>
+          </svg>
+          <span class="glass-type-label">8–12 oz</span>
+        </div>
+        <div class="glass-info">
+          <div class="glass-name">Coffee Mug</div>
+          <div class="glass-aka">Standard Mug · Diner Mug</div>
+          <div class="glass-desc">The thick ceramic walls hold heat, the sturdy handle keeps fingers away from the hot surface, and the wide opening lets you inhale the aroma with every sip. The universal comfort object of morning routines everywhere.</div>
+          <div class="best-for-label">Best Served With</div>
+          <div class="beer-tags">
+            <div class="beer-tag"><span class="beer-tag-text">Drip Coffee</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Americano</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Hot Chocolate</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Hot Tea</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Mulled Cider</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Espresso Cup -->
+    <div class="glass-card">
+      <div class="glass-top-row">
+        <div class="glass-illustration">
+          <svg viewBox="0 0 80 120" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="n2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#3A2010" stop-opacity="0.92"/><stop offset="100%" stop-color="#1A0E08" stop-opacity="0.98"/></linearGradient>
+              <linearGradient id="nf2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#D4A870"/><stop offset="100%" stop-color="#C09050"/></linearGradient>
+            </defs>
+            <!-- Small, thick demitasse cup -->
+            <path d="M20 56 Q18 68, 18 78 Q18 88, 24 92 L56 92 Q62 88, 62 78 Q62 68, 60 56 Z" fill="white" stroke="#c0b8a0" stroke-width="1.5"/>
+            <path d="M22 58 Q20 68, 20 78 Q20 86, 26 90 L54 90 Q60 86, 60 78 Q60 68, 58 58 Z" fill="url(#n2)" stroke="none"/>
+            <!-- Crema layer -->
+            <path d="M22 58 C26 56, 34 55, 40 56 C46 55, 54 56, 58 58 Z" fill="url(#nf2)" stroke="#b89060" stroke-width="0.5"/>
+            <path d="M20 56 Q18 68, 18 78 Q18 88, 24 92 L56 92 Q62 88, 62 78 Q62 68, 60 56" fill="none" stroke="#c0b8a0" stroke-width="1.5"/>
+            <!-- Saucer -->
+            <ellipse cx="40" cy="96" rx="26" ry="4" fill="none" stroke="#c0b8a0" stroke-width="1.2"/>
+            <!-- Handle -->
+            <path d="M60 64 Q68 66, 68 74 Q68 82, 60 84" fill="none" stroke="#c0b8a0" stroke-width="2.5" stroke-linecap="round"/>
+            <!-- Steam -->
+            <path d="M34 52 Q32 46, 34 40" fill="none" stroke="#a09070" stroke-width="0.8" opacity="0.25" stroke-linecap="round"/>
+            <path d="M44 50 Q46 44, 44 38" fill="none" stroke="#a09070" stroke-width="0.8" opacity="0.2" stroke-linecap="round"/>
+          </svg>
+          <span class="glass-type-label">2–3 oz</span>
+        </div>
+        <div class="glass-info">
+          <div class="glass-name">Espresso Cup</div>
+          <div class="glass-aka">Demitasse · Tazzina</div>
+          <div class="glass-desc">Small and thick-walled to keep the espresso hot during its brief life. The narrow opening concentrates the aroma of the crema — that golden layer of emulsified oils that carries the shot's signature flavor. Always served with a saucer.</div>
+          <div class="best-for-label">Best Served With</div>
+          <div class="beer-tags">
+            <div class="beer-tag"><span class="beer-tag-text">Espresso</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Ristretto</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Macchiato</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Cortado</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Latte Glass -->
+    <div class="glass-card">
+      <div class="glass-top-row">
+        <div class="glass-illustration">
+          <svg viewBox="0 0 80 120" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="n3" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#D8C0A0" stop-opacity="0.7"/><stop offset="40%" stop-color="#C8A878" stop-opacity="0.8"/><stop offset="100%" stop-color="#4A3020" stop-opacity="0.9"/></linearGradient>
+              <linearGradient id="nf3" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FFFFF5"/><stop offset="100%" stop-color="#F0E8D0"/></linearGradient>
+            </defs>
+            <!-- Tall latte glass, slightly tapered -->
+            <path d="M24 20 L22 96 L58 96 L56 20 Z" fill="url(#n3)" stroke="#a09070" stroke-width="1.5" opacity="0.9"/>
+            <path d="M24 20 C28 17, 34 16, 40 18 C46 16, 52 17, 56 20 Z" fill="url(#nf3)" stroke="#c8b898" stroke-width="0.8"/>
+            <path d="M24 20 L22 96 L58 96 L56 20" fill="none" stroke="#a09070" stroke-width="1.5"/>
+            <rect x="22" y="96" width="36" height="3" rx="1" fill="#a09070" opacity="0.35"/>
+            <!-- Latte art swirl at top -->
+            <path d="M36 22 Q34 26, 40 26 Q46 26, 44 22" fill="none" stroke="#C8A060" stroke-width="0.8" opacity="0.4"/>
+            <circle cx="40" cy="24" r="1.5" fill="#C8A060" opacity="0.3"/>
+            <rect x="26" y="30" width="2.5" height="58" rx="1.2" fill="white" opacity="0.06"/>
+          </svg>
+          <span class="glass-type-label">10–16 oz</span>
+        </div>
+        <div class="glass-info">
+          <div class="glass-name">Latte Glass</div>
+          <div class="glass-aka">Café Latte Glass · Irish Coffee Glass</div>
+          <div class="glass-desc">Tall and clear to showcase the beautiful gradient of espresso through steamed milk. The glass lets you watch the layers — dark to light — and the wide opening accommodates latte art. Also used for Irish coffee, with a handle version available.</div>
+          <div class="best-for-label">Best Served With</div>
+          <div class="beer-tags">
+            <div class="beer-tag"><span class="beer-tag-text">Café Latte</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Iced Latte</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Irish Coffee</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Hot Chocolate</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Matcha Latte</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. Teacup & Saucer -->
+    <div class="glass-card">
+      <div class="glass-top-row">
+        <div class="glass-illustration">
+          <svg viewBox="0 0 80 120" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="n4" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#C8A050" stop-opacity="0.4"/><stop offset="100%" stop-color="#A88830" stop-opacity="0.6"/></linearGradient>
+            </defs>
+            <!-- Wide, shallow teacup -->
+            <path d="M14 48 Q12 60, 14 70 Q16 80, 22 84 L58 84 Q64 80, 66 70 Q68 60, 66 48 Z" fill="url(#n4)" stroke="#a09060" stroke-width="1.5"/>
+            <path d="M14 48 C18 44, 28 42, 40 44 C52 42, 62 44, 66 48 Z" fill="#FFF8E8" stroke="#c8b898" stroke-width="0.8"/>
+            <path d="M14 48 Q12 60, 14 70 Q16 80, 22 84 L58 84 Q64 80, 66 70 Q68 60, 66 48" fill="none" stroke="#a09060" stroke-width="1.5"/>
+            <!-- Handle -->
+            <path d="M66 56 Q76 58, 76 66 Q76 74, 66 76" fill="none" stroke="#a09060" stroke-width="2.5" stroke-linecap="round"/>
+            <!-- Saucer -->
+            <ellipse cx="40" cy="90" rx="30" ry="5" fill="none" stroke="#a09060" stroke-width="1.2"/>
+            <!-- Tea color -->
+            <path d="M18 52 Q16 60, 18 68 Q20 76, 24 80 L56 80 Q60 76, 62 68 Q64 60, 62 52 Z" fill="#C8A050" opacity="0.15"/>
+            <!-- Steam -->
+            <path d="M30 42 Q28 36, 30 30" fill="none" stroke="#a09070" stroke-width="0.8" opacity="0.2" stroke-linecap="round"/>
+            <path d="M42 40 Q44 34, 42 28" fill="none" stroke="#a09070" stroke-width="0.8" opacity="0.18" stroke-linecap="round"/>
+          </svg>
+          <span class="glass-type-label">6–8 oz</span>
+        </div>
+        <div class="glass-info">
+          <div class="glass-name">Teacup & Saucer</div>
+          <div class="glass-aka">Tea Cup · China Cup</div>
+          <div class="glass-desc">Thinner walls than a coffee mug let the tea cool faster — intentional, since many teas are best sipped at lower temperatures. The wide, shallow shape exposes more surface area, releasing delicate floral and grassy aromas with each sip.</div>
+          <div class="best-for-label">Best Served With</div>
+          <div class="beer-tags">
+            <div class="beer-tag"><span class="beer-tag-text">Black Tea</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Green Tea</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Earl Grey</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Herbal Tea</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Chai</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. Highball / Collins -->
+    <div class="glass-card">
+      <div class="glass-top-row">
+        <div class="glass-illustration">
+          <svg viewBox="0 0 80 120" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="n5" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#E0E8B0" stop-opacity="0.4"/><stop offset="100%" stop-color="#C8D098" stop-opacity="0.65"/></linearGradient>
+            </defs>
+            <rect x="22" y="18" width="36" height="82" rx="3" fill="url(#n5)" stroke="#a0a878" stroke-width="1.5" opacity="0.9"/>
+            <rect x="22" y="18" width="36" height="82" rx="3" fill="none" stroke="#a0a878" stroke-width="1.5"/>
+            <rect x="22" y="100" width="36" height="3" rx="1" fill="#a0a878" opacity="0.35"/>
+            <!-- Ice -->
+            <rect x="26" y="24" width="14" height="12" rx="2" fill="white" opacity="0.12"/>
+            <rect x="42" y="26" width="12" height="10" rx="2" fill="white" opacity="0.1"/>
+            <!-- Lemon slice -->
+            <circle cx="48" cy="20" r="6" fill="#E8D060" opacity="0.4" stroke="#C8B040" stroke-width="0.5"/>
+            <path d="M44 20 L48 14 L52 20" fill="none" stroke="#C8B040" stroke-width="0.5" opacity="0.3"/>
+            <!-- Bubbles -->
+            <circle cx="36" cy="80" r="0.7" fill="white" opacity="0.14"/>
+            <circle cx="42" cy="68" r="0.6" fill="white" opacity="0.1"/>
+            <circle cx="38" cy="56" r="0.5" fill="white" opacity="0.08"/>
+            <rect x="24" y="40" width="2" height="52" rx="1" fill="white" opacity="0.05"/>
+          </svg>
+          <span class="glass-type-label">10–14 oz</span>
+        </div>
+        <div class="glass-info">
+          <div class="glass-name">Highball Glass</div>
+          <div class="glass-aka">Tall Glass · Collins Glass</div>
+          <div class="glass-desc">The workhorse for any long, iced drink. Its height shows off color and carbonation, and the straight sides keep bubbles alive longer. Just as essential for a well-made mocktail or NA spirit serve as for its alcoholic cousins.</div>
+          <div class="best-for-label">Best Served With</div>
+          <div class="beer-tags">
+            <div class="beer-tag"><span class="beer-tag-text">Mocktails</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">NA Spirits & Tonic</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Lemonade</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Arnold Palmer</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Club Soda</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. Rocks / Tumbler -->
+    <div class="glass-card">
+      <div class="glass-top-row">
+        <div class="glass-illustration">
+          <svg viewBox="0 0 80 120" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="n6" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#D0C0A0" stop-opacity="0.35"/><stop offset="100%" stop-color="#B8A888" stop-opacity="0.55"/></linearGradient>
+            </defs>
+            <path d="M18 38 L16 96 L64 96 L62 38 Z" fill="url(#n6)" stroke="#a09878" stroke-width="1.5" opacity="0.9"/>
+            <path d="M18 38 L16 96 L64 96 L62 38" fill="none" stroke="#a09878" stroke-width="1.5"/>
+            <rect x="16" y="96" width="48" height="3" rx="1" fill="#a09878" opacity="0.35"/>
+            <!-- Large ice sphere -->
+            <circle cx="40" cy="60" r="14" fill="white" opacity="0.12" stroke="white" stroke-width="0.5" stroke-opacity="0.15"/>
+            <ellipse cx="36" cy="55" rx="4" ry="3" fill="white" opacity="0.06"/>
+            <rect x="22" y="42" width="2.5" height="44" rx="1.2" fill="white" opacity="0.05"/>
+          </svg>
+          <span class="glass-type-label">8–10 oz</span>
+        </div>
+        <div class="glass-info">
+          <div class="glass-name">Rocks Glass</div>
+          <div class="glass-aka">Old Fashioned · Lowball</div>
+          <div class="glass-desc">The short, wide glass isn't just for whiskey. NA spirits like Seedlip and Lyre's deserve the same presentation — a large ice cube, a proper garnish, and a glass with satisfying weight. The sipping experience matters regardless of ABV.</div>
+          <div class="best-for-label">Best Served With</div>
+          <div class="beer-tags">
+            <div class="beer-tag"><span class="beer-tag-text">NA Old Fashioned</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">NA Spirits Neat</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Shrub Cocktails</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Bitters & Soda</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7. Coupe -->
+    <div class="glass-card">
+      <div class="glass-top-row">
+        <div class="glass-illustration">
+          <svg viewBox="0 0 80 120" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="n7" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#E0A888" stop-opacity="0.4"/><stop offset="100%" stop-color="#C89070" stop-opacity="0.6"/></linearGradient>
+            </defs>
+            <path d="M14 36 Q14 48, 20 54 Q26 60, 36 62 L36 86 L26 88 L26 91 L54 91 L54 88 L44 86 L44 62 Q54 60, 60 54 Q66 48, 66 36 Z" fill="url(#n7)" stroke="#a08068" stroke-width="1" opacity="0.9"/>
+            <path d="M14 36 C18 32, 28 30, 40 32 C52 30, 62 32, 66 36 Z" fill="#FFF5EE" stroke="#c8b0a0" stroke-width="0.8"/>
+            <path d="M14 36 Q14 48, 20 54 Q26 60, 36 62 L36 86 L26 88 L26 91 L54 91 L54 88 L44 86 L44 62 Q54 60, 60 54 Q66 48, 66 36" fill="none" stroke="#a08068" stroke-width="1.5"/>
+            <rect x="18" y="38" width="2.5" height="14" rx="1.2" fill="white" opacity="0.06"/>
+          </svg>
+          <span class="glass-type-label">5–7 oz</span>
+        </div>
+        <div class="glass-info">
+          <div class="glass-name">Coupe</div>
+          <div class="glass-aka">Mocktail Coupe · Cocktail Coupe</div>
+          <div class="glass-desc">Elevating the mocktail from afterthought to headliner. A proper coupe tells the drinker this NA cocktail was made with the same care as any other. The wide bowl works beautifully with stirred-down, spirit-free creations and zero-proof aperitifs.</div>
+          <div class="best-for-label">Best Served With</div>
+          <div class="beer-tags">
+            <div class="beer-tag"><span class="beer-tag-text">NA Martini</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Seedlip Garden</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Zero-Proof Daiquiri</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Fancy Mocktails</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 8. Water Goblet -->
+    <div class="glass-card">
+      <div class="glass-top-row">
+        <div class="glass-illustration">
+          <svg viewBox="0 0 80 120" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="n8" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#C0D8E8" stop-opacity="0.25"/><stop offset="100%" stop-color="#A0C0D0" stop-opacity="0.4"/></linearGradient>
+            </defs>
+            <!-- Rounded goblet on short stem -->
+            <path d="M20 26 Q16 46, 20 58 Q24 68, 36 72 L36 86 L26 88 L26 91 L54 91 L54 88 L44 86 L44 72 Q56 68, 60 58 Q64 46, 60 26 Z" fill="url(#n8)" stroke="#8098a8" stroke-width="1" opacity="0.9"/>
+            <path d="M20 26 C24 22, 32 20, 40 22 C48 20, 56 22, 60 26 Z" fill="#F0F5F8" stroke="#a0b8c0" stroke-width="0.8"/>
+            <path d="M20 26 Q16 46, 20 58 Q24 68, 36 72 L36 86 L26 88 L26 91 L54 91 L54 88 L44 86 L44 72 Q56 68, 60 58 Q64 46, 60 26" fill="none" stroke="#8098a8" stroke-width="1.5"/>
+            <rect x="22" y="32" width="2.5" height="24" rx="1.2" fill="white" opacity="0.08"/>
+          </svg>
+          <span class="glass-type-label">12–16 oz</span>
+        </div>
+        <div class="glass-info">
+          <div class="glass-name">Water Goblet</div>
+          <div class="glass-aka">Stemmed Water Glass</div>
+          <div class="glass-desc">The large, stemmed goblet is the standard at fine dining tables. The stem keeps fingers off the bowl (no fingerprints), the generous size accommodates ice, and the proportions complement the wine glasses it sits alongside.</div>
+          <div class="best-for-label">Best Served With</div>
+          <div class="beer-tags">
+            <div class="beer-tag"><span class="beer-tag-text">Still Water</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Sparkling Water</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Infused Water</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Formal Dining</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 9. Juice Glass -->
+    <div class="glass-card">
+      <div class="glass-top-row">
+        <div class="glass-illustration">
+          <svg viewBox="0 0 80 120" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="n9" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#E8A830" stop-opacity="0.65"/><stop offset="100%" stop-color="#D09020" stop-opacity="0.82"/></linearGradient>
+            </defs>
+            <!-- Small, straight-sided juice glass -->
+            <path d="M26 42 L24 96 L56 96 L54 42 Z" fill="url(#n9)" stroke="#b08828" stroke-width="1.5" opacity="0.9"/>
+            <path d="M26 42 L24 96 L56 96 L54 42" fill="none" stroke="#b08828" stroke-width="1.5"/>
+            <rect x="24" y="96" width="32" height="3" rx="1" fill="#b08828" opacity="0.35"/>
+            <rect x="28" y="48" width="2.5" height="40" rx="1.2" fill="white" opacity="0.06"/>
+            <!-- Pulp texture -->
+            <circle cx="38" cy="70" r="1" fill="white" opacity="0.08"/>
+            <circle cx="44" cy="80" r="0.8" fill="white" opacity="0.06"/>
+            <circle cx="36" cy="85" r="0.7" fill="white" opacity="0.05"/>
+          </svg>
+          <span class="glass-type-label">4–8 oz</span>
+        </div>
+        <div class="glass-info">
+          <div class="glass-name">Juice Glass</div>
+          <div class="glass-aka">Breakfast Glass · Small Tumbler</div>
+          <div class="glass-desc">Intentionally small — juice is rich, sweet, and calorie-dense, so the portion is naturally controlled. The simple, straight-sided shape lets the color of fresh-squeezed juice do all the talking. A breakfast table essential.</div>
+          <div class="best-for-label">Best Served With</div>
+          <div class="beer-tags">
+            <div class="beer-tag"><span class="beer-tag-text">Orange Juice</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Grapefruit Juice</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Apple Juice</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Green Juice</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Kombucha</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 10. Handleless Cup / Yunomi -->
+    <div class="glass-card">
+      <div class="glass-top-row">
+        <div class="glass-illustration">
+          <svg viewBox="0 0 80 120" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="n10" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#90A868" stop-opacity="0.4"/><stop offset="100%" stop-color="#788848" stop-opacity="0.65"/></linearGradient>
+            </defs>
+            <!-- Japanese yunomi / handleless tea cup, slightly tapered -->
+            <path d="M24 42 Q22 58, 22 72 Q22 86, 28 92 L52 92 Q58 86, 58 72 Q58 58, 56 42 Z" fill="url(#n10)" stroke="#607848" stroke-width="1.5"/>
+            <path d="M24 42 C28 38, 34 36, 40 38 C46 36, 52 38, 56 42 Z" fill="#F0F5E8" stroke="#90a070" stroke-width="0.8"/>
+            <path d="M24 42 Q22 58, 22 72 Q22 86, 28 92 L52 92 Q58 86, 58 72 Q58 58, 56 42" fill="none" stroke="#607848" stroke-width="1.5"/>
+            <rect x="28" y="92" width="24" height="3" rx="1" fill="#607848" opacity="0.3"/>
+            <!-- Subtle glaze texture -->
+            <path d="M26 60 Q40 56, 54 60" fill="none" stroke="white" stroke-width="0.5" opacity="0.08"/>
+            <path d="M24 72 Q40 68, 56 72" fill="none" stroke="white" stroke-width="0.5" opacity="0.06"/>
+            <!-- Steam -->
+            <path d="M34 36 Q32 30, 34 24" fill="none" stroke="#809068" stroke-width="0.8" opacity="0.2" stroke-linecap="round"/>
+            <path d="M44 34 Q46 28, 44 22" fill="none" stroke="#809068" stroke-width="0.8" opacity="0.18" stroke-linecap="round"/>
+          </svg>
+          <span class="glass-type-label">5–8 oz</span>
+        </div>
+        <div class="glass-info">
+          <div class="glass-name">Yunomi</div>
+          <div class="glass-aka">Japanese Tea Cup · Handleless Cup</div>
+          <div class="glass-desc">In Japanese tea culture, the cup itself is the temperature gauge — you hold it, and if it's too hot, the tea is too hot. The lack of a handle creates an intimate, tactile connection between drinker and drink that handles deliberately eliminate.</div>
+          <div class="best-for-label">Best Served With</div>
+          <div class="beer-tags">
+            <div class="beer-tag"><span class="beer-tag-text">Sencha</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Hojicha</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Genmaicha</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Matcha</span></div>
+            <div class="beer-tag"><span class="beer-tag-text">Oolong</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+<div class="footer-bar">
+  <span>☕ <span class="gold">10</span> glass styles · No alcohol required</span>
+  <span style="letter-spacing:2px;" class="gold">NON-ALCOHOLIC GLASSWARE</span>
+</div>
+</body>
+</html>

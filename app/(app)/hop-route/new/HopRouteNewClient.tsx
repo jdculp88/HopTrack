@@ -165,7 +165,7 @@ export function HopRouteNewClient({ tasteDna }: HopRouteNewClientProps) {
   const [transport, setTransport] = useState<Transport>("walking");
 
   // Step 3 — Taste DNA (editable)
-  const [dna, setDna] = useState<TasteDnaEntry[]>(tasteDna);
+  const [dna, _setDna] = useState<TasteDnaEntry[]>(tasteDna);
 
   function toggleVibe(v: string) {
     setVibes(prev => prev.includes(v) ? prev.filter(x => x !== v) : [...prev, v]);

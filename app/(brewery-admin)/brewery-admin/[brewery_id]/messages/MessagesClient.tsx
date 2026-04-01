@@ -20,7 +20,7 @@ interface MessagesClientProps {
   customers: Customer[];
 }
 
-export function MessagesClient({ breweryId, breweryName, customers }: MessagesClientProps) {
+export function MessagesClient({ breweryId, breweryName: _breweryName, customers }: MessagesClientProps) {
   const [selectedAudience, setSelectedAudience] = useState<Audience>("all");
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");

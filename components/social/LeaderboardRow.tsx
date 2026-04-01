@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { TrendingUp, TrendingDown } from "lucide-react";
 import { cn, formatCount } from "@/lib/utils";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import type { LeaderboardEntry } from "@/types/database";

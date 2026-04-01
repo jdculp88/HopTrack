@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HopTrack Color System v2 — Beverage Style Palette</title>
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&f[]=general-sans@400,500,600,700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* ═══════════════════════════════════════════
+       BRAND FOUNDATION
+       ═══════════════════════════════════════════ */
+    --brand-amber: #C17B2F;
+    --brand-amber-light: #F5E6CC;
+    --brand-dark: #1A1614;
+    --brand-cream: #FAF6F0;
+    --brand-warm-gray: #8C8279;
+
+    /* ═══════════════════════════════════════════
+       BEER STYLE COLORS
+       Content-layer only. Never on chrome.
+       ═══════════════════════════════════════════ */
+
+    /* IPA — Hop Green */
+    --style-ipa: #4A7C59;
+    --style-ipa-light: #D4E8D9;
+    --style-ipa-dark-soft: #6B9E78;
+
+    /* Stout — Espresso */
+    --style-stout: #3E2723;
+    --style-stout-light: #D7CCC8;
+    --style-stout-dark-soft: #6D4C41;
+
+    /* Sour — Wild Berry */
+    --style-sour: #8E3A59;
+    --style-sour-light: #F0D4DF;
+    --style-sour-dark-soft: #B8668A;
+
+    /* Porter — Barrel Plum */
+    --style-porter: #5D3A6E;
+    --style-porter-light: #E0D0E8;
+    --style-porter-dark-soft: #8B6B9E;
+
+    /* Lager — Crisp Sky */
+    --style-lager: #4A90B8;
+    --style-lager-light: #CCE5F0;
+    --style-lager-dark-soft: #72B0CE;
+
+    /* Wheat / Saison — Harvest Peach */
+    --style-wheat: #C8895A;
+    --style-wheat-light: #F5E0D0;
+    --style-wheat-dark-soft: #DEAC82;
+
+    /* ═══════════════════════════════════════════
+       BEVERAGE CATEGORY COLORS (NEW)
+       Same rules: content-layer only.
+       One color per category. No sub-styles.
+       ═══════════════════════════════════════════ */
+
+    /* Cider — Orchard Rose */
+    --style-cider: #B85C4A;
+    --style-cider-light: #F2DCD6;
+    --style-cider-dark-soft: #D08878;
+
+    /* Wine — Burgundy */
+    --style-wine: #722F37;
+    --style-wine-light: #EDCFD4;
+    --style-wine-dark-soft: #9E5B64;
+
+    /* Cocktail — Tropical Teal */
+    --style-cocktail: #1A8E80;
+    --style-cocktail-light: #C8EFEA;
+    --style-cocktail-dark-soft: #4DB8AC;
+
+    /* Non-Alcoholic — Fresh Lemon */
+    --style-na: #BFA032;
+    --style-na-light: #F5EDCE;
+    --style-na-dark-soft: #D4B958;
+
+    /* ═══════════════════════════════════════════
+       FUNCTIONAL COLORS (unchanged)
+       Gamification / Status — separate lane.
+       ═══════════════════════════════════════════ */
+    --func-streak: #E8622F;
+    --func-xp: #2F8FE8;
+    --func-live: #E82F4A;
+    --func-badge-bronze: #A0724E;
+    --func-badge-silver: #8C9298;
+    --func-badge-gold: #C9A84C;
+    --func-badge-platinum: #7B8794;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Satoshi', sans-serif;
+    background: var(--brand-cream);
+    color: var(--brand-dark);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── HEADER ─────────────────────────────── */
+  .header {
+    background: var(--brand-dark);
+    color: var(--brand-cream);
+    padding: 60px 48px 48px;
+  }
+  .header-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .header-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(193, 123, 47, 0.15);
+    border: 1px solid rgba(193, 123, 47, 0.3);
+    border-radius: 100px;
+    padding: 6px 16px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--brand-amber);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+  .header-badge::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--brand-amber);
+  }
+  .header h1 {
+    font-family: 'General Sans', sans-serif;
+    font-size: 42px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 12px;
+  }
+  .header p {
+    font-size: 17px;
+    color: var(--brand-warm-gray);
+    max-width: 620px;
+    line-height: 1.7;
+  }
+  .header .version-tag {
+    display: inline-block;
+    margin-top: 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: rgba(250, 246, 240, 0.4);
+  }
+
+  /* ── MAIN CONTENT ───────────────────────── */
+  .content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 56px 48px 80px;
+  }
+
+  /* ── SECTION ────────────────────────────── */
+  .section {
+    margin-bottom: 64px;
+  }
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 8px;
+  }
+  .section-title {
+    font-family: 'General Sans', sans-serif;
+    font-size: 26px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  .section-count {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--brand-warm-gray);
+  }
+  .section-desc {
+    font-size: 15px;
+    color: var(--brand-warm-gray);
+    margin-bottom: 32px;
+    max-width: 600px;
+  }
+  .section-rule {
+    background: rgba(193, 123, 47, 0.12);
+    border: 1px solid rgba(193, 123, 47, 0.2);
+    border-radius: 8px;
+    padding: 14px 20px;
+    font-size: 13px;
+    color: var(--brand-amber);
+    margin-bottom: 32px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-rule svg {
+    flex-shrink: 0;
+  }
+
+  /* ── NEW BADGE ──────────────────────────── */
+  .new-badge {
+    display: inline-flex;
+    align-items: center;
+    background: var(--brand-amber);
+    color: white;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 4px;
+    vertical-align: middle;
+    margin-left: 8px;
+  }
+
+  /* ── COLOR GRID ─────────────────────────── */
+  .color-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 24px;
+  }
+
+  /* ── COLOR CARD ─────────────────────────── */
+  .color-card {
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(26, 22, 20, 0.06), 0 8px 24px rgba(26, 22, 20, 0.04);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .color-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 6px rgba(26, 22, 20, 0.08), 0 12px 32px rgba(26, 22, 20, 0.06);
+  }
+  .color-card.is-new {
+    box-shadow: 0 1px 3px rgba(26, 22, 20, 0.06), 0 8px 24px rgba(26, 22, 20, 0.04), 0 0 0 2px rgba(193, 123, 47, 0.25);
+  }
+
+  /* Swatch band */
+  .swatch-band {
+    height: 100px;
+    display: flex;
+  }
+  .swatch-primary {
+    flex: 2;
+    display: flex;
+    align-items: flex-end;
+    padding: 10px 14px;
+  }
+  .swatch-primary span {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    color: white;
+    opacity: 0.85;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  }
+  .swatch-variants {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  .swatch-light {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .swatch-light span {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    font-weight: 500;
+    opacity: 0.6;
+  }
+  .swatch-dark-soft {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .swatch-dark-soft span {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    font-weight: 500;
+    color: white;
+    opacity: 0.7;
+  }
+
+  /* Card body */
+  .color-info {
+    padding: 20px;
+  }
+  .color-name {
+    font-family: 'General Sans', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 2px;
+    display: flex;
+    align-items: center;
+  }
+  .color-style {
+    font-size: 13px;
+    color: var(--brand-warm-gray);
+    margin-bottom: 14px;
+  }
+  .color-tokens {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .token-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+  }
+  .token-name {
+    color: var(--brand-warm-gray);
+  }
+  .token-value {
+    color: var(--brand-dark);
+    font-weight: 500;
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: background 0.15s;
+  }
+  .token-value:hover {
+    background: var(--brand-amber-light);
+  }
+  .token-divider {
+    height: 1px;
+    background: rgba(26, 22, 20, 0.06);
+    margin: 6px 0;
+  }
+
+  /* ── USAGE NOTES ────────────────────────── */
+  .usage-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    margin-top: 32px;
+  }
+  .usage-card {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(26, 22, 20, 0.06);
+  }
+  .usage-card h4 {
+    font-family: 'General Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .usage-card p {
+    font-size: 13px;
+    color: var(--brand-warm-gray);
+    line-height: 1.6;
+  }
+  .usage-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+  }
+  .usage-icon svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  /* ── COMPARISON STRIP ───────────────────── */
+  .comparison-section {
+    margin-top: 48px;
+  }
+  .comparison-strip {
+    display: flex;
+    height: 64px;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(26, 22, 20, 0.06);
+    margin-bottom: 12px;
+  }
+  .comp-swatch {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: flex 0.3s ease;
+    cursor: pointer;
+    position: relative;
+  }
+  .comp-swatch:hover {
+    flex: 1.8;
+  }
+  .comp-swatch span {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    color: white;
+    opacity: 0;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    transition: opacity 0.2s;
+    white-space: nowrap;
+  }
+  .comp-swatch:hover span {
+    opacity: 1;
+  }
+  .strip-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--brand-warm-gray);
+  }
+
+  /* ── DARK MODE PREVIEW ──────────────────── */
+  .dark-preview {
+    background: var(--brand-dark);
+    border-radius: 16px;
+    padding: 40px;
+    margin-top: 48px;
+  }
+  .dark-preview-title {
+    font-family: 'General Sans', sans-serif;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--brand-cream);
+    margin-bottom: 6px;
+  }
+  .dark-preview-desc {
+    font-size: 13px;
+    color: var(--brand-warm-gray);
+    margin-bottom: 28px;
+  }
+  .dark-swatch-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 12px;
+  }
+  .dark-swatch {
+    height: 56px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .dark-swatch span {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: white;
+    opacity: 0.7;
+  }
+
+  /* ── FOOTER ─────────────────────────────── */
+  .footer {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 48px 64px;
+    text-align: center;
+  }
+  .footer-rule {
+    height: 1px;
+    background: rgba(26, 22, 20, 0.08);
+    margin-bottom: 32px;
+  }
+  .footer-text {
+    font-size: 13px;
+    color: var(--brand-warm-gray);
+    line-height: 1.7;
+  }
+  .footer-quote {
+    font-style: italic;
+    color: var(--brand-amber);
+    margin-top: 16px;
+    font-size: 14px;
+  }
+
+  /* ── COPY TOAST ─────────────────────────── */
+  .toast {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--brand-dark);
+    color: var(--brand-cream);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    padding: 12px 24px;
+    border-radius: 100px;
+    opacity: 0;
+    transition: all 0.3s ease;
+    pointer-events: none;
+    z-index: 100;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-inner">
+    <div class="header-badge">Design System — Color</div>
+    <h1>Beverage Style Palette</h1>
+    <p>Every beverage style maps to exactly one color family. Style drives color. Color never appears on chrome — only on content. This is the complete reference.</p>
+    <span class="version-tag">v2.0 — Updated March 2026 · +Cider, Wine, Cocktail, Non-Alcoholic</span>
+  </div>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+
+  <!-- ════════════════════════════════════════ -->
+  <!-- BEER STYLES (EXISTING)                  -->
+  <!-- ════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <h2 class="section-title">Beer Styles</h2>
+      <span class="section-count">6 families</span>
+    </div>
+    <p class="section-desc">The original six. Each beer style owns exactly one color family with three variants: primary, light tint, and dark-mode soft.</p>
+
+    <div class="section-rule">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M12 8v4M12 16h.01"/></svg>
+      Rule: No more than 2–3 style colors visible in any single viewport. Style colors are for content elements only — never on UI chrome.
+    </div>
+
+    <div class="color-grid">
+
+      <!-- IPA -->
+      <div class="color-card">
+        <div class="swatch-band">
+          <div class="swatch-primary" style="background: var(--style-ipa);"><span>#4A7C59</span></div>
+          <div class="swatch-variants">
+            <div class="swatch-light" style="background: var(--style-ipa-light);"><span>#D4E8D9</span></div>
+            <div class="swatch-dark-soft" style="background: var(--style-ipa-dark-soft);"><span>#6B9E78</span></div>
+          </div>
+        </div>
+        <div class="color-info">
+          <div class="color-name">Hop Green</div>
+          <div class="color-style">IPA · Pale Ale</div>
+          <div class="color-tokens">
+            <div class="token-row"><span class="token-name">--style-ipa</span><span class="token-value" onclick="copyToken(this)">#4A7C59</span></div>
+            <div class="token-row"><span class="token-name">--style-ipa-light</span><span class="token-value" onclick="copyToken(this)">#D4E8D9</span></div>
+            <div class="token-row"><span class="token-name">--style-ipa-dark-soft</span><span class="token-value" onclick="copyToken(this)">#6B9E78</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stout -->
+      <div class="color-card">
+        <div class="swatch-band">
+          <div class="swatch-primary" style="background: var(--style-stout);"><span>#3E2723</span></div>
+          <div class="swatch-variants">
+            <div class="swatch-light" style="background: var(--style-stout-light);"><span>#D7CCC8</span></div>
+            <div class="swatch-dark-soft" style="background: var(--style-stout-dark-soft);"><span>#6D4C41</span></div>
+          </div>
+        </div>
+        <div class="color-info">
+          <div class="color-name">Espresso</div>
+          <div class="color-style">Stout · Dark Ale</div>
+          <div class="color-tokens">
+            <div class="token-row"><span class="token-name">--style-stout</span><span class="token-value" onclick="copyToken(this)">#3E2723</span></div>
+            <div class="token-row"><span class="token-name">--style-stout-light</span><span class="token-value" onclick="copyToken(this)">#D7CCC8</span></div>
+            <div class="token-row"><span class="token-name">--style-stout-dark-soft</span><span class="token-value" onclick="copyToken(this)">#6D4C41</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sour -->
+      <div class="color-card">
+        <div class="swatch-band">
+          <div class="swatch-primary" style="background: var(--style-sour);"><span>#8E3A59</span></div>
+          <div class="swatch-variants">
+            <div class="swatch-light" style="background: var(--style-sour-light);"><span>#F0D4DF</span></div>
+            <div class="swatch-dark-soft" style="background: var(--style-sour-dark-soft);"><span>#B8668A</span></div>
+          </div>
+        </div>
+        <div class="color-info">
+          <div class="color-name">Wild Berry</div>
+          <div class="color-style">Sour · Wild Ale · Gose</div>
+          <div class="color-tokens">
+            <div class="token-row"><span class="token-name">--style-sour</span><span class="token-value" onclick="copyToken(this)">#8E3A59</span></div>
+            <div class="token-row"><span class="token-name">--style-sour-light</span><span class="token-value" onclick="copyToken(this)">#F0D4DF</span></div>
+            <div class="token-row"><span class="token-name">--style-sour-dark-soft</span><span class="token-value" onclick="copyToken(this)">#B8668A</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Porter -->
+      <div class="color-card">
+        <div class="swatch-band">
+          <div class="swatch-primary" style="background: var(--style-porter);"><span>#5D3A6E</span></div>
+          <div class="swatch-variants">
+            <div class="swatch-light" style="background: var(--style-porter-light);"><span>#E0D0E8</span></div>
+            <div class="swatch-dark-soft" style="background: var(--style-porter-dark-soft);"><span>#8B6B9E</span></div>
+          </div>
+        </div>
+        <div class="color-info">
+          <div class="color-name">Barrel Plum</div>
+          <div class="color-style">Porter · Brown Ale</div>
+          <div class="color-tokens">
+            <div class="token-row"><span class="token-name">--style-porter</span><span class="token-value" onclick="copyToken(this)">#5D3A6E</span></div>
+            <div class="token-row"><span class="token-name">--style-porter-light</span><span class="token-value" onclick="copyToken(this)">#E0D0E8</span></div>
+            <div class="token-row"><span class="token-name">--style-porter-dark-soft</span><span class="token-value" onclick="copyToken(this)">#8B6B9E</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lager -->
+      <div class="color-card">
+        <div class="swatch-band">
+          <div class="swatch-primary" style="background: var(--style-lager);"><span>#4A90B8</span></div>
+          <div class="swatch-variants">
+            <div class="swatch-light" style="background: var(--style-lager-light);"><span>#CCE5F0</span></div>
+            <div class="swatch-dark-soft" style="background: var(--style-lager-dark-soft);"><span>#72B0CE</span></div>
+          </div>
+        </div>
+        <div class="color-info">
+          <div class="color-name">Crisp Sky</div>
+          <div class="color-style">Lager · Pilsner · Kölsch</div>
+          <div class="color-tokens">
+            <div class="token-row"><span class="token-name">--style-lager</span><span class="token-value" onclick="copyToken(this)">#4A90B8</span></div>
+            <div class="token-row"><span class="token-name">--style-lager-light</span><span class="token-value" onclick="copyToken(this)">#CCE5F0</span></div>
+            <div class="token-row"><span class="token-name">--style-lager-dark-soft</span><span class="token-value" onclick="copyToken(this)">#72B0CE</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Wheat / Saison -->
+      <div class="color-card">
+        <div class="swatch-band">
+          <div class="swatch-primary" style="background: var(--style-wheat);"><span>#C8895A</span></div>
+          <div class="swatch-variants">
+            <div class="swatch-light" style="background: var(--style-wheat-light);"><span>#F5E0D0</span></div>
+            <div class="swatch-dark-soft" style="background: var(--style-wheat-dark-soft);"><span>#DEAC82</span></div>
+          </div>
+        </div>
+        <div class="color-info">
+          <div class="color-name">Harvest Peach</div>
+          <div class="color-style">Wheat · Saison · Hefeweizen</div>
+          <div class="color-tokens">
+            <div class="token-row"><span class="token-name">--style-wheat</span><span class="token-value" onclick="copyToken(this)">#C8895A</span></div>
+            <div class="token-row"><span class="token-name">--style-wheat-light</span><span class="token-value" onclick="copyToken(this)">#F5E0D0</span></div>
+            <div class="token-row"><span class="token-name">--style-wheat-dark-soft</span><span class="token-value" onclick="copyToken(this)">#DEAC82</span></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════ -->
+  <!-- BEVERAGE CATEGORIES (NEW)               -->
+  <!-- ════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <h2 class="section-title">Beverage Categories</h2>
+      <span class="section-count">4 families</span>
+      <span class="new-badge">NEW IN V2</span>
+    </div>
+    <p class="section-desc">Expanding beyond beer. Each category gets one color — no sub-style breakdowns. Same three-variant structure. Same content-layer-only rule.</p>
+
+    <div class="section-rule">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M12 8v4M12 16h.01"/></svg>
+      These are intentionally broad. "Wine" covers all wine. "Cider" covers all cider. One color per category — keep it simple.
+    </div>
+
+    <div class="color-grid">
+
+      <!-- Cider -->
+      <div class="color-card is-new">
+        <div class="swatch-band">
+          <div class="swatch-primary" style="background: var(--style-cider);"><span>#B85C4A</span></div>
+          <div class="swatch-variants">
+            <div class="swatch-light" style="background: var(--style-cider-light);"><span>#F2DCD6</span></div>
+            <div class="swatch-dark-soft" style="background: var(--style-cider-dark-soft);"><span>#D08878</span></div>
+          </div>
+        </div>
+        <div class="color-info">
+          <div class="color-name">Orchard Rose<span class="new-badge">NEW</span></div>
+          <div class="color-style">Cider · Hard Cider · Perry</div>
+          <div class="color-tokens">
+            <div class="token-row"><span class="token-name">--style-cider</span><span class="token-value" onclick="copyToken(this)">#B85C4A</span></div>
+            <div class="token-row"><span class="token-name">--style-cider-light</span><span class="token-value" onclick="copyToken(this)">#F2DCD6</span></div>
+            <div class="token-row"><span class="token-name">--style-cider-dark-soft</span><span class="token-value" onclick="copyToken(this)">#D08878</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Wine -->
+      <div class="color-card is-new">
+        <div class="swatch-band">
+          <div class="swatch-primary" style="background: var(--style-wine);"><span>#722F37</span></div>
+          <div class="swatch-variants">
+            <div class="swatch-light" style="background: var(--style-wine-light);"><span>#EDCFD4</span></div>
+            <div class="swatch-dark-soft" style="background: var(--style-wine-dark-soft);"><span>#9E5B64</span></div>
+          </div>
+        </div>
+        <div class="color-info">
+          <div class="color-name">Burgundy<span class="new-badge">NEW</span></div>
+          <div class="color-style">Wine · Red · White · Rosé · Natural</div>
+          <div class="color-tokens">
+            <div class="token-row"><span class="token-name">--style-wine</span><span class="token-value" onclick="copyToken(this)">#722F37</span></div>
+            <div class="token-row"><span class="token-name">--style-wine-light</span><span class="token-value" onclick="copyToken(this)">#EDCFD4</span></div>
+            <div class="token-row"><span class="token-name">--style-wine-dark-soft</span><span class="token-value" onclick="copyToken(this)">#9E5B64</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cocktail -->
+      <div class="color-card is-new">
+        <div class="swatch-band">
+          <div class="swatch-primary" style="background: var(--style-cocktail);"><span>#1A8E80</span></div>
+          <div class="swatch-variants">
+            <div class="swatch-light" style="background: var(--style-cocktail-light);"><span>#C8EFEA</span></div>
+            <div class="swatch-dark-soft" style="background: var(--style-cocktail-dark-soft);"><span>#4DB8AC</span></div>
+          </div>
+        </div>
+        <div class="color-info">
+          <div class="color-name">Tropical Teal<span class="new-badge">NEW</span></div>
+          <div class="color-style">Cocktail · Mixed Drinks · Spirits</div>
+          <div class="color-tokens">
+            <div class="token-row"><span class="token-name">--style-cocktail</span><span class="token-value" onclick="copyToken(this)">#1A8E80</span></div>
+            <div class="token-row"><span class="token-name">--style-cocktail-light</span><span class="token-value" onclick="copyToken(this)">#C8EFEA</span></div>
+            <div class="token-row"><span class="token-name">--style-cocktail-dark-soft</span><span class="token-value" onclick="copyToken(this)">#4DB8AC</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Non-Alcoholic -->
+      <div class="color-card is-new">
+        <div class="swatch-band">
+          <div class="swatch-primary" style="background: var(--style-na);"><span>#BFA032</span></div>
+          <div class="swatch-variants">
+            <div class="swatch-light" style="background: var(--style-na-light);"><span>#F5EDCE</span></div>
+            <div class="swatch-dark-soft" style="background: var(--style-na-dark-soft);"><span>#D4B958</span></div>
+          </div>
+        </div>
+        <div class="color-info">
+          <div class="color-name">Fresh Lemon<span class="new-badge">NEW</span></div>
+          <div class="color-style">Non-Alcoholic · NA Beer · Mocktails</div>
+          <div class="color-tokens">
+            <div class="token-row"><span class="token-name">--style-na</span><span class="token-value" onclick="copyToken(this)">#BFA032</span></div>
+            <div class="token-row"><span class="token-name">--style-na-light</span><span class="token-value" onclick="copyToken(this)">#F5EDCE</span></div>
+            <div class="token-row"><span class="token-name">--style-na-dark-soft</span><span class="token-value" onclick="copyToken(this)">#D4B958</span></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════ -->
+  <!-- FULL SPECTRUM COMPARISON                -->
+  <!-- ════════════════════════════════════════ -->
+  <div class="section comparison-section">
+    <div class="section-header">
+      <h2 class="section-title">Full Spectrum</h2>
+      <span class="section-count">10 families total</span>
+    </div>
+    <p class="section-desc">All ten style colors side by side. Hover to expand. Every color is distinct — no overlaps, no confusion.</p>
+
+    <!-- Primary Strip -->
+    <div class="comparison-strip">
+      <div class="comp-swatch" style="background: var(--style-ipa);"><span>IPA</span></div>
+      <div class="comp-swatch" style="background: var(--style-stout);"><span>Stout</span></div>
+      <div class="comp-swatch" style="background: var(--style-sour);"><span>Sour</span></div>
+      <div class="comp-swatch" style="background: var(--style-porter);"><span>Porter</span></div>
+      <div class="comp-swatch" style="background: var(--style-lager);"><span>Lager</span></div>
+      <div class="comp-swatch" style="background: var(--style-wheat);"><span>Wheat</span></div>
+      <div class="comp-swatch" style="background: var(--style-cider);"><span>Cider</span></div>
+      <div class="comp-swatch" style="background: var(--style-wine);"><span>Wine</span></div>
+      <div class="comp-swatch" style="background: var(--style-cocktail);"><span>Cocktail</span></div>
+      <div class="comp-swatch" style="background: var(--style-na);"><span>NA</span></div>
+    </div>
+    <div class="strip-label">Primary — hover to expand</div>
+
+    <!-- Light Tint Strip -->
+    <div class="comparison-strip" style="margin-top: 16px;">
+      <div class="comp-swatch" style="background: var(--style-ipa-light);"><span style="color: var(--style-ipa);">IPA</span></div>
+      <div class="comp-swatch" style="background: var(--style-stout-light);"><span style="color: var(--style-stout);">Stout</span></div>
+      <div class="comp-swatch" style="background: var(--style-sour-light);"><span style="color: var(--style-sour);">Sour</span></div>
+      <div class="comp-swatch" style="background: var(--style-porter-light);"><span style="color: var(--style-porter);">Porter</span></div>
+      <div class="comp-swatch" style="background: var(--style-lager-light);"><span style="color: var(--style-lager);">Lager</span></div>
+      <div class="comp-swatch" style="background: var(--style-wheat-light);"><span style="color: var(--style-wheat);">Wheat</span></div>
+      <div class="comp-swatch" style="background: var(--style-cider-light);"><span style="color: var(--style-cider);">Cider</span></div>
+      <div class="comp-swatch" style="background: var(--style-wine-light);"><span style="color: var(--style-wine);">Wine</span></div>
+      <div class="comp-swatch" style="background: var(--style-cocktail-light);"><span style="color: var(--style-cocktail);">Cocktail</span></div>
+      <div class="comp-swatch" style="background: var(--style-na-light);"><span style="color: var(--style-na);">NA</span></div>
+    </div>
+    <div class="strip-label">Light Tint — card backgrounds, badges, tags</div>
+
+    <!-- Dark Mode Strip -->
+    <div class="dark-preview" style="margin-top: 24px;">
+      <div class="dark-preview-title">Dark Mode Variants</div>
+      <div class="dark-preview-desc">Softened primaries for dark backgrounds. Readable, warm, never neon.</div>
+      <div class="dark-swatch-grid">
+        <div class="dark-swatch" style="background: var(--style-ipa-dark-soft);"><span>IPA</span></div>
+        <div class="dark-swatch" style="background: var(--style-stout-dark-soft);"><span>Stout</span></div>
+        <div class="dark-swatch" style="background: var(--style-sour-dark-soft);"><span>Sour</span></div>
+        <div class="dark-swatch" style="background: var(--style-porter-dark-soft);"><span>Porter</span></div>
+        <div class="dark-swatch" style="background: var(--style-lager-dark-soft);"><span>Lager</span></div>
+        <div class="dark-swatch" style="background: var(--style-wheat-dark-soft);"><span>Wheat</span></div>
+        <div class="dark-swatch" style="background: var(--style-cider-dark-soft);"><span>Cider</span></div>
+        <div class="dark-swatch" style="background: var(--style-wine-dark-soft);"><span>Wine</span></div>
+        <div class="dark-swatch" style="background: var(--style-cocktail-dark-soft);"><span>Cocktail</span></div>
+        <div class="dark-swatch" style="background: var(--style-na-dark-soft);"><span>NA</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════ -->
+  <!-- FUNCTIONAL COLORS (REFERENCE)           -->
+  <!-- ════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <h2 class="section-title">Functional Colors</h2>
+      <span class="section-count">Separate lane — unchanged</span>
+    </div>
+    <p class="section-desc">Gamification, status, and badges. These never overlap with style colors. Included here for completeness.</p>
+
+    <div class="comparison-strip">
+      <div class="comp-swatch" style="background: var(--func-streak);"><span>Streak</span></div>
+      <div class="comp-swatch" style="background: var(--func-xp);"><span>XP</span></div>
+      <div class="comp-swatch" style="background: var(--func-live);"><span>Live</span></div>
+      <div class="comp-swatch" style="background: var(--func-badge-bronze);"><span>Bronze</span></div>
+      <div class="comp-swatch" style="background: var(--func-badge-silver);"><span>Silver</span></div>
+      <div class="comp-swatch" style="background: var(--func-badge-gold);"><span>Gold</span></div>
+      <div class="comp-swatch" style="background: var(--func-badge-platinum);"><span>Platinum</span></div>
+    </div>
+    <div class="strip-label">Functional — gamification & status indicators</div>
+  </div>
+
+  <!-- ════════════════════════════════════════ -->
+  <!-- IMPLEMENTATION NOTES                    -->
+  <!-- ════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <h2 class="section-title">Implementation Notes</h2>
+    </div>
+
+    <div class="usage-grid">
+      <div class="usage-card">
+        <div class="usage-icon" style="background: var(--style-cider-light);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--style-cider)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        </div>
+        <h4>Copy-Paste Ready</h4>
+        <p>All CSS custom properties are defined in <code>:root</code>. Click any hex value on this page to copy it. Drop the variable block into your stylesheet and go.</p>
+      </div>
+      <div class="usage-card">
+        <div class="usage-icon" style="background: var(--style-cocktail-light);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--style-cocktail)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+        <h4>No Sub-Styles</h4>
+        <p>Beer categories have sub-style mapping (IPA → Pale Ale, etc). The four new beverage categories do not. Rosé, Merlot, Champagne — they're all <code>--style-wine</code>. Keep it flat.</p>
+      </div>
+      <div class="usage-card">
+        <div class="usage-icon" style="background: var(--style-wine-light);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--style-wine)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+        </div>
+        <h4>Same Rules Apply</h4>
+        <p>Content-vs-chrome separation. Max 2–3 style colors per viewport. Functional colors in their own lane. Nothing changes — we just have more colors to work with.</p>
+      </div>
+      <div class="usage-card">
+        <div class="usage-icon" style="background: var(--style-na-light);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--style-na)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+        </div>
+        <h4>Jordan — Handoff</h4>
+        <p>The new CSS variables follow the exact same naming convention. <code>--style-[category]</code>, <code>-light</code>, <code>-dark-soft</code>. No surprises. Add them below the existing beer style block in the theme file.</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <div class="footer-rule"></div>
+  <p class="footer-text">
+    HopTrack Design System · Color Palette v2.0<br>
+    10 beverage style families · 30 color tokens · 7 functional colors
+  </p>
+  <p class="footer-quote"><em>"The palette grows, but the rules don't change. That's the whole point of a system." —Morgan</em></p>
+</div>
+
+<!-- COPY TOAST -->
+<div class="toast" id="toast">Copied!</div>
+
+<script>
+function copyToken(el) {
+  const text = el.textContent.trim();
+  navigator.clipboard.writeText(text).then(() => {
+    const toast = document.getElementById('toast');
+    toast.textContent = `Copied ${text}`;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 1800);
+  });
+}
+</script>
+</body>
+</html>

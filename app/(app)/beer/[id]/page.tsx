@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { WishlistButton } from "@/components/ui/WishlistButton";
 import { BeerStyleBadge } from "@/components/ui/BeerStyleBadge";
-import { StarRating, RatingDisplay } from "@/components/ui/StarRating";
+import { RatingDisplay } from "@/components/ui/StarRating";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import { generateGradientFromString, formatABV } from "@/lib/utils";
 import { BeerReviewSection } from "@/components/beer/BeerReviewSection";

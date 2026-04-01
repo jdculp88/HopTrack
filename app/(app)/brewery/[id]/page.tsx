@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { notFound, redirect } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { MapPin, Globe, Phone, Star, Users, ArrowLeft, TrendingUp, Beer, CheckCheck, Award, Calendar, Clock, Wine, Coffee, UtensilsCrossed, FileText, ExternalLink } from "lucide-react";
+import { MapPin, Globe, Phone, Star, Users, ArrowLeft, TrendingUp, Beer, CheckCheck, Award, Calendar, Clock, UtensilsCrossed, FileText, ExternalLink } from "lucide-react";
 import { ITEM_TYPE_LABELS, ITEM_TYPE_EMOJI } from "@/types/database";
 import type { Brewery, BreweryVisit, Profile } from "@/types/database";
 import { BeerCard } from "@/components/beer/BeerCard";
@@ -14,6 +14,7 @@ import { BreweryReview } from "@/components/brewery/BreweryReview";
 import { BreweryRatingHeader } from "@/components/brewery/BreweryRatingHeader";
 import { FollowBreweryButton } from "@/components/brewery/FollowBreweryButton";
 import { BreweryChallenges } from "@/components/brewery/BreweryChallenges";
+import { MugClubSection } from "@/components/brewery/MugClubSection";
 
 // Supabase join shapes for tables not in generated types
 interface ActiveFriendSession {
@@ -113,6 +114,7 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
   const userVisit = userVisitRaw as BreweryVisit | null;
 
   // Friends Here Now — friends with active sessions at this brewery
+  // eslint-disable-next-line react-hooks/purity
   const sixHoursAgo = new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString();
   const { data: friendshipsRaw } = await supabase
     .from("friendships")
@@ -225,6 +227,27 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
       .eq("user_id", user.id)
       .in("challenge_id", challengeIds) as any);
     myParticipations = participationsRaw ?? [];
+  }
+
+  // Mug clubs — active clubs with member count
+  const { data: mugClubsRaw } = await (supabase
+    .from("mug_clubs")
+    .select("*, member_count:mug_club_members(count)")
+    .eq("brewery_id", id)
+    .eq("is_active", true)
+    .order("created_at", { ascending: false }) as any);
+  const mugClubs = mugClubsRaw ?? [];
+
+  // User's mug club memberships at this brewery
+  let myMugMemberships: any[] = [];
+  if (mugClubs.length > 0) {
+    const clubIds = mugClubs.map((c: any) => c.id);
+    const { data: membershipsRaw } = await (supabase
+      .from("mug_club_members")
+      .select("*")
+      .eq("user_id", user.id)
+      .in("mug_club_id", clubIds) as any);
+    myMugMemberships = membershipsRaw ?? [];
   }
 
   // Check if brewery has any admin accounts (for claim CTA)
@@ -371,6 +394,7 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
             </div>
             <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide -mx-1 px-1">
               {friendsHere.map((s) => {
+                // eslint-disable-next-line react-hooks/purity
                 const diffMs = Date.now() - new Date(s.started_at).getTime();
                 const mins = Math.floor(diffMs / 60000);
                 const elapsed = mins < 60 ? `${mins}m` : `${Math.floor(mins / 60)}h ${mins % 60}m`;
@@ -504,7 +528,7 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
         {/* On Tap — Full Menu */}
         {(() => {
           const allItems = beers ?? [];
-          const beerItems = allItems.filter((b: any) => !b.item_type || b.item_type === "beer");
+          const _beerItems = allItems.filter((b: any) => !b.item_type || b.item_type === "beer");
           const nonBeerItems = allItems.filter((b: any) => b.item_type && b.item_type !== "beer");
           const hasNonBeer = nonBeerItems.length > 0;
           const typeOrder = ["beer", "cider", "wine", "cocktail", "na_beverage", "food"];
@@ -621,6 +645,14 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
           <BreweryChallenges
             challenges={activeChallenges}
             myParticipations={myParticipations}
+          />
+        )}
+
+        {/* Mug Clubs */}
+        {mugClubs.length > 0 && (
+          <MugClubSection
+            clubs={mugClubs}
+            myMemberships={myMugMemberships}
           />
         )}
 

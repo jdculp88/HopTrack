@@ -7,7 +7,7 @@ import { createClient as createServiceClient } from "@supabase/supabase-js";
 import type { PosMenuItem, BeerForMatching, SyncResult, SyncContext, MappingResult } from "./types";
 import { getAdapter } from "./normalizer";
 import { autoMap } from "./mapper";
-import { isMockMode, generateMockMenuItems, generateMockSquareCatalog } from "./mock-provider";
+import { isMockMode, generateMockSquareCatalog } from "./mock-provider";
 
 /**
  * Run a full POS sync for a brewery.

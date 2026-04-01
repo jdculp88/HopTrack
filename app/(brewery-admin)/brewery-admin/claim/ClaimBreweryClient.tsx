@@ -226,7 +226,7 @@ export function ClaimBreweryClient({ userEmail, pendingClaim }: ClaimBreweryClie
               Claim Pending
             </h1>
             <p className="text-sm leading-relaxed" style={{ color: "var(--text-secondary)" }}>
-              Your claim is under review. We'll confirm you're the owner shortly.
+              Your claim is under review. We&apos;ll confirm you&apos;re the owner shortly.
             </p>
           </div>
 
@@ -433,11 +433,11 @@ export function ClaimBreweryClient({ userEmail, pendingClaim }: ClaimBreweryClie
                       <div className="flex items-center gap-2 mb-2">
                         <PlusCircle size={15} style={{ color: "var(--accent-gold)" }} />
                         <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
-                          Can't find your brewery?
+                          Can&apos;t find your brewery?
                         </p>
                       </div>
                       <p className="text-xs mb-3" style={{ color: "var(--text-muted)" }}>
-                        Not every brewery is in our database yet. Submit yours and we'll add it within 24 hours.
+                        Not every brewery is in our database yet. Submit yours and we&apos;ll add it within 24 hours.
                       </p>
 
                       <AnimatePresence mode="wait">
@@ -449,7 +449,7 @@ export function ClaimBreweryClient({ userEmail, pendingClaim }: ClaimBreweryClie
                             className="text-sm font-medium"
                             style={{ color: "var(--accent-gold)" }}
                           >
-                            Thanks! We'll add your brewery within 24 hours.
+                            Thanks! We&apos;ll add your brewery within 24 hours.
                           </motion.p>
                         ) : !showNotFoundForm ? (
                           <motion.div key="cta" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
@@ -881,7 +881,7 @@ function SuccessStep({ claimedBreweryId, selectedBrewery }: { claimedBreweryId: 
       </div>
 
       <p className="text-sm leading-relaxed" style={{ color: "var(--text-secondary)" }}>
-        Your claim is submitted. We'll verify ownership within{" "}
+        Your claim is submitted. We&apos;ll verify ownership within{" "}
         <strong style={{ color: "var(--text-primary)" }}>24 hours</strong>.
         In the meantime, your dashboard is ready to explore.
       </p>
@@ -895,7 +895,7 @@ function SuccessStep({ claimedBreweryId, selectedBrewery }: { claimedBreweryId: 
         }}
       >
         <p className="text-xs font-mono uppercase tracking-wider" style={{ color: "var(--accent-gold)" }}>
-          What's included in your 14-day trial
+          What&apos;s included in your 14-day trial
         </p>
         <div className="space-y-3">
           {TRIAL_FEATURES.map(({ icon: Icon, label, desc }, i) => (

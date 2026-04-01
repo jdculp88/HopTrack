@@ -28,7 +28,7 @@ export interface FriendBreweryReview {
 
 export function BreweryRatingFeedCard({
   review,
-  index = 0,
+  index: _index = 0,
 }: {
   review: FriendBreweryReview;
   index?: number;

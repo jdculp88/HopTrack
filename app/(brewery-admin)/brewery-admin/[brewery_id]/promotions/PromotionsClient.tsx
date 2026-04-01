@@ -104,7 +104,7 @@ export function PromotionsClient({ brewery }: PromotionsClientProps) {
               color: "var(--text-primary)",
             }}
           />
-          <p className="text-xs text-[var(--text-muted)]">{offer.length}/120 — shown on the stop card when a user's route includes you</p>
+          <p className="text-xs text-[var(--text-muted)]">{offer.length}/120 — shown on the stop card when a user&apos;s route includes you</p>
         </div>
 
         {eligible && (

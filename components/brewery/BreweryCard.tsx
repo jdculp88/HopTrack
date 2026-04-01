@@ -3,9 +3,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { MapPin, ExternalLink, Star, Users, Calendar } from "lucide-react";
+import { MapPin, Users, Calendar } from "lucide-react";
 import { cn, formatCount } from "@/lib/utils";
-import { BeerStyleBadge } from "@/components/ui/BeerStyleBadge";
 import type { BreweryWithStats } from "@/types/database";
 
 const BREWERY_PLACEHOLDER_IMAGES = [

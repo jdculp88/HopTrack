@@ -2,10 +2,10 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Settings, X, Calendar } from "lucide-react";
+import { Settings, Calendar } from "lucide-react";
 import { HopMark } from "@/components/ui/HopMark";
 import { createClient } from "@/lib/supabase/client";
-import { GLASS_TYPES, getGlass, getGlassSvgContent } from "@/lib/glassware";
+import { getGlass, getGlassSvgContent } from "@/lib/glassware";
 import type { PourSize } from "@/lib/glassware";
 
 // ─── Types ────────────────────────────────────────────────────────────────────

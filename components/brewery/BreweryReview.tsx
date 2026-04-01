@@ -28,7 +28,7 @@ interface Review {
   };
 }
 
-export function BreweryReview({ breweryId, currentUserId, isBreweryAdmin }: BreweryReviewProps) {
+export function BreweryReview({ breweryId, currentUserId: _currentUserId, isBreweryAdmin }: BreweryReviewProps) {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [userReview, setUserReview] = useState<Review | null>(null);
   const [avgRating, setAvgRating] = useState<number | null>(null);
@@ -43,10 +43,6 @@ export function BreweryReview({ breweryId, currentUserId, isBreweryAdmin }: Brew
   const [responseText, setResponseText] = useState("");
   const [respondingSubmitting, setRespondingSubmitting] = useState(false);
 
-  useEffect(() => {
-    fetchReviews();
-  }, [breweryId]); // eslint-disable-line react-hooks/exhaustive-deps
-
   async function fetchReviews() {
     const res = await fetch(`/api/brewery/${breweryId}/reviews`);
     if (!res.ok) return;
@@ -60,6 +56,11 @@ export function BreweryReview({ breweryId, currentUserId, isBreweryAdmin }: Brew
       setComment(data.userReview.comment ?? "");
     }
   }
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchReviews();
+  }, [breweryId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function handleSubmit() {
     if (rating === 0) return;

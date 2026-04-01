@@ -12,13 +12,6 @@ interface StarRatingProps {
   className?: string;
 }
 
-const SIZES = {
-  sm: "w-4 h-4",
-  md: "w-6 h-6",
-  lg: "w-8 h-8",
-  xl: "w-12 h-12",
-};
-
 const SIZE_PX = {
   sm: 16,
   md: 24,
@@ -122,7 +115,7 @@ export function StarRating({
   );
 }
 
-function StarSVG({ fill, className, style }: { fill: "full" | "half" | "empty"; className?: string; style?: React.CSSProperties }) {
+function StarSVG({ fill: _fill, className, style }: { fill: "full" | "half" | "empty"; className?: string; style?: React.CSSProperties }) {
   return (
     <svg
       viewBox="0 0 24 24"

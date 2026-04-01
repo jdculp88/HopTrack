@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Trophy, Plus, Trash2, Edit2, Users, CheckCircle, ChevronDown, X, Eye, Sparkles, Globe, Lock } from "lucide-react";
+import { Trophy, Plus, Trash2, Edit2, Users, CheckCircle, X, Eye, Sparkles, Globe, Lock } from "lucide-react";
 import { useToast } from "@/components/ui/Toast";
 
 const CHALLENGE_ICONS = ["🍺", "🏆", "🔥", "⭐", "🎯", "🍻", "🌟", "💪", "🎉", "🏅", "👑", "🍁", "❄️", "☀️", "🌙", "🎃"];

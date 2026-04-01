@@ -25,7 +25,7 @@ interface Review {
   };
 }
 
-export function BeerReviewSection({ beerId, currentUserId }: BeerReviewSectionProps) {
+export function BeerReviewSection({ beerId }: BeerReviewSectionProps) {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [userReview, setUserReview] = useState<Review | null>(null);
   const [avgRating, setAvgRating] = useState<number | null>(null);
@@ -52,6 +52,7 @@ export function BeerReviewSection({ beerId, currentUserId }: BeerReviewSectionPr
   }, [beerId]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchReviews();
   }, [fetchReviews]);
 

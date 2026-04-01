@@ -24,7 +24,7 @@ interface BeerListsClientProps {
   initialLists: BeerList[];
 }
 
-export function BeerListsClient({ userId, initialLists }: BeerListsClientProps) {
+export function BeerListsClient({ userId: _userId, initialLists }: BeerListsClientProps) {
   const [lists, setLists] = useState<BeerList[]>(initialLists);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
@@ -222,7 +222,7 @@ export function BeerListsClient({ userId, initialLists }: BeerListsClientProps) 
             No lists yet — start curating!
           </p>
           <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
-            Build lists like "Asheville Must-Tries" or "Best IPAs of 2026"
+            Build lists like &quot;Asheville Must-Tries&quot; or &quot;Best IPAs of 2026&quot;
           </p>
         </div>
       )}

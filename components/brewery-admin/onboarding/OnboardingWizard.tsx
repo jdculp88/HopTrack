@@ -35,6 +35,7 @@ export function OnboardingWizard({ breweryId, breweryName }: OnboardingWizardPro
   useEffect(() => {
     // Show wizard if not previously completed
     if (!localStorage.getItem(dismissKey)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setVisible(true);
       // Restore progress
       const saved = localStorage.getItem(storageKey);

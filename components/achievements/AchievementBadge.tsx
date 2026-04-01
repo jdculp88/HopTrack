@@ -29,7 +29,7 @@ const SIZES = {
 export function AchievementBadge({
   achievement,
   earned = false,
-  earnedAt,
+  earnedAt: _earnedAt,
   size = "md",
   onClick,
   className,

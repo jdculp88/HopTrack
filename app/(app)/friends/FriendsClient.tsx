@@ -213,8 +213,6 @@ export function FriendsClient({
     (u: any) => u.id !== currentUserId && !friendIds.has(u.id) && !pendingIds.has(u.id)
   );
 
-  const totalRequests = pendingRequests.length + sentRequests.length;
-
   return (
     <div className="max-w-2xl mx-auto px-4 py-6 space-y-5">
       <h1 className="font-sans text-3xl font-bold" style={{ color: "var(--text-primary)" }}>Friends</h1>

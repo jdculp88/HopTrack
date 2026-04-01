@@ -3,7 +3,7 @@
 import { useMemo, type RefObject } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Beer, MapPin, Flame, Route, Gift } from "lucide-react";
+import { Beer, MapPin, Route, Gift } from "lucide-react";
 import { getStyleFamily, getStyleVars } from "@/lib/beerStyleColors";
 import { ActivityHeatmap } from "@/components/profile/ActivityHeatmap";
 import { BeerDNACard } from "@/components/profile/BeerDNACard";
@@ -18,7 +18,7 @@ import { useReactions } from "./ReactionContext";
 export function YouTabContent({
   profile,
   sessions,
-  weekStats,
+  weekStats: _weekStats,
   currentUserId,
   userAchievements,
   wishlist,
@@ -45,8 +45,6 @@ export function YouTabContent({
   const { reactionCounts, userReactions, commentCounts } = useReactions();
   const levelInfo = profile ? getLevelProgress(profile.xp) : null;
 
-  if (!profile) return null;
-
   const visitedBreweries = useMemo(() => {
     const seen = new Map<string, { id: string; name: string; city: string | null; state: string | null }>();
     for (const s of sessions) {
@@ -55,6 +53,8 @@ export function YouTabContent({
     }
     return Array.from(seen.values());
   }, [sessions]);
+
+  if (!profile) return null;
 
   return (
     <div className="space-y-5">

@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
   const now = new Date().toISOString();
   const { data: ads } = await (supabase
     .from("brewery_ads")
-    .select("*, brewery:breweries(name, city, state_province, latitude, longitude, logo_url)")
+    .select("*, brewery:breweries(name, city, state, latitude, longitude, logo_url)")
     .eq("is_active", true)
     .lte("starts_at", now)
     .order("created_at", { ascending: false })
@@ -72,7 +72,7 @@ export async function GET(req: NextRequest) {
       brewery: {
         name: ad.brewery?.name,
         city: ad.brewery?.city,
-        state: ad.brewery?.state_province,
+        state: ad.brewery?.state,
         logo_url: ad.brewery?.logo_url,
       },
     },

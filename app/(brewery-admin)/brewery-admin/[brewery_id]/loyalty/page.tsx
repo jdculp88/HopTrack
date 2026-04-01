@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { notFound, redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 import { LoyaltyClient } from "./LoyaltyClient";
 
 export const metadata = { title: "Loyalty & Promotions" };

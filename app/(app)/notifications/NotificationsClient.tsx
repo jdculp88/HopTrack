@@ -540,7 +540,7 @@ function GroupedNotification({
 
 function SingleNotification({
   notification: n,
-  index,
+  index: _index,
   friendActions,
   onAccept,
   onDecline,

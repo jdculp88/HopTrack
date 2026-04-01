@@ -77,7 +77,7 @@ test.describe("Brewery Admin Dashboard", () => {
     const body = await page.textContent("body");
     expect(body).toBeTruthy();
     // Board is full-screen; sidebar nav should NOT be present
-    const sidebarVisible = await page.locator("nav").isVisible().catch(() => false);
+    const _sidebarVisible = await page.locator("nav").isVisible().catch(() => false);
     // Can't guarantee this without more context, just verify page loaded
     expect(body!.length).toBeGreaterThan(10);
   });

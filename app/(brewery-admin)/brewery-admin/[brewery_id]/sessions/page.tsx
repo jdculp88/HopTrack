@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
-import { notFound, redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Beer, Star, Clock } from "lucide-react";
+import { ArrowLeft, Star, Clock } from "lucide-react";
 import { formatDateShort } from "@/lib/dates";
 
 const PAGE_SIZE = 25;

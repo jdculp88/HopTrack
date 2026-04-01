@@ -5,7 +5,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { generateApiKey, apiResponse, apiError, apiOptions } from "@/lib/api-keys";
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { rateLimitResponse } from "@/lib/rate-limit";
 
 // CORS preflight handler

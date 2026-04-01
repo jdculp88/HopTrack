@@ -3,7 +3,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { validateApiKey, apiResponse, apiError, apiOptions } from "@/lib/api-keys";
-import { rateLimitResponse, getClientIP } from "@/lib/rate-limit";
+import { getClientIP } from "@/lib/rate-limit";
 import { checkRateLimit } from "@/lib/rate-limit";
 
 export const OPTIONS = apiOptions;

@@ -2,7 +2,7 @@
 
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import { HopMark } from "@/components/ui/HopMark";
-import { Printer, Star } from "lucide-react";
+import { Printer } from "lucide-react";
 
 // Self-contained cream palette — same pattern as The Board / SessionRecapSheet
 const R = {

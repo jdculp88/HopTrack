@@ -63,7 +63,7 @@ export default async function EmbedMenuPage({ params, searchParams }: Props) {
 
   // Fetch pour sizes
   const beerIds = (beersRes.data ?? []).map((b: any) => b.id);
-  let pourSizesMap: Record<string, any[]> = {};
+  const pourSizesMap: Record<string, any[]> = {};
 
   if (beerIds.length > 0) {
     const { data: pourSizes } = await (supabase as any)

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight, Share2, Home } from "lucide-react";
+import { ChevronLeft, ChevronRight, Home } from "lucide-react";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/SkeletonLoader";
 
@@ -58,7 +58,7 @@ const cards: Card[] = [
           className="text-lg"
           style={{ color: "rgba(255,255,255,0.7)" }}
         >
-          Let's look at your beer journey.
+          Let&apos;s look at your beer journey.
         </motion.p>
       </div>
     ),
@@ -79,7 +79,7 @@ const cards: Card[] = [
         </motion.h2>
         {data.personality.topStyle && (
           <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }} className="text-base" style={{ color: "rgba(255,255,255,0.6)" }}>
-            You've had <span className="font-bold" style={{ color: "var(--accent-gold)" }}>{data.personality.count}</span> {data.personality.topStyle}{data.personality.count !== 1 ? "s" : ""}. It's a lifestyle at this point.
+            You&apos;ve had <span className="font-bold" style={{ color: "var(--accent-gold)" }}>{data.personality.count}</span> {data.personality.topStyle}{data.personality.count !== 1 ? "s" : ""}. It&apos;s a lifestyle at this point.
           </motion.p>
         )}
       </div>
@@ -102,12 +102,12 @@ const cards: Card[] = [
               {data.signatureBeer.name}
             </motion.h2>
             <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }} className="text-base" style={{ color: "rgba(255,255,255,0.6)" }}>
-              You've had it <span className="font-bold" style={{ color: "var(--accent-gold)" }}>{data.signatureBeer.count}</span> time{data.signatureBeer.count !== 1 ? "s" : ""}. The bartender knows your order.
+              You&apos;ve had it <span className="font-bold" style={{ color: "var(--accent-gold)" }}>{data.signatureBeer.count}</span> time{data.signatureBeer.count !== 1 ? "s" : ""}. The bartender knows your order.
             </motion.p>
           </>
         ) : (
           <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }} className="text-base" style={{ color: "rgba(255,255,255,0.6)" }}>
-            You haven't found your signature beer yet. Keep exploring!
+            You haven&apos;t found your signature beer yet. Keep exploring!
           </motion.p>
         )}
       </div>
@@ -135,7 +135,7 @@ const cards: Card[] = [
           </>
         ) : (
           <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }} className="text-base" style={{ color: "rgba(255,255,255,0.6)" }}>
-            You haven't found your regular spot yet. Time to explore!
+            You haven&apos;t found your regular spot yet. Time to explore!
           </motion.p>
         )}
       </div>
@@ -162,7 +162,7 @@ const cards: Card[] = [
             </motion.p>
             {data.legendarySession.durationHours && (
               <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }} className="text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>
-                {data.legendarySession.durationHours}h session. We're impressed.
+                {data.legendarySession.durationHours}h session. We&apos;re impressed.
               </motion.p>
             )}
           </>
@@ -196,7 +196,7 @@ const cards: Card[] = [
           </>
         ) : (
           <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }} className="text-base" style={{ color: "rgba(255,255,255,0.6)" }}>
-            You haven't rated any beers yet. Your inner critic awaits.
+            You haven&apos;t rated any beers yet. Your inner critic awaits.
           </motion.p>
         )}
       </div>
@@ -224,7 +224,7 @@ const cards: Card[] = [
           </>
         ) : (
           <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }} className="text-base" style={{ color: "rgba(255,255,255,0.6)" }}>
-            No home sessions yet. You're a taproom purist. We respect that.
+            No home sessions yet. You&apos;re a taproom purist. We respect that.
           </motion.p>
         )}
       </div>

@@ -30,11 +30,6 @@ export function AchievementsGrid({ achievements }: AchievementsGridProps) {
   const [filterCategory, setFilterCategory] = useState<AchievementCategory | "all">("all");
   const [showLocked, setShowLocked] = useState(true);
 
-  if (achievements.length === 0) return null;
-
-  // Most recent 3 (before any filtering) for "New" badges
-  const recentIds = new Set(achievements.slice(0, 3).map((a: any) => a.id));
-
   // Which tiers actually have earned achievements
   const earnedTiers = useMemo(() => {
     const tiers = new Set<AchievementTier>();
@@ -77,6 +72,11 @@ export function AchievementsGrid({ achievements }: AchievementsGridProps) {
 
     return list;
   }, [achievements, sortBy, filterTier, filterCategory]);
+
+  if (achievements.length === 0) return null;
+
+  // Most recent 3 (before any filtering) for "New" badges
+  const recentIds = new Set(achievements.slice(0, 3).map((a: any) => a.id));
 
   const earnedCount = achievements.length;
 

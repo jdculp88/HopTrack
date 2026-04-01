@@ -34,6 +34,7 @@ export default function BreweryOnboardingCard({
   useEffect(() => {
     // Only show if not previously dismissed
     if (!localStorage.getItem(storageKey)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setVisible(true);
     }
     setHasQr(!!localStorage.getItem(qrKey));

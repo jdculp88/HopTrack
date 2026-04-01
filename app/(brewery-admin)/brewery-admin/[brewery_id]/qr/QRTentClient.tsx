@@ -25,8 +25,8 @@ export function QRTentClient({ breweryId, breweryName, breweryCity, breweryState
   const [qrDataUrl, setQrDataUrl] = useState<string>("");
   const [selectedSize, setSelectedSize] = useState<TentSize>("table");
   const [copied, setCopied] = useState(false);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const _canvasRef = useRef<HTMLCanvasElement>(null);
+  const _iframeRef = useRef<HTMLIFrameElement>(null);
 
   const breweryUrl = `${typeof window !== "undefined" ? window.location.origin : "https://app.hoptrack.beer"}/brewery-welcome/${breweryId}`;
 
@@ -94,6 +94,7 @@ export function QRTentClient({ breweryId, breweryName, breweryCity, breweryState
     // QR background rounded rect
     ctx.fillStyle = "#FBF7F0";
     ctx.beginPath();
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     (ctx as any).roundRect?.(qrX - 8, qrY - 8, qrSize + 16, qrSize + 16, 12) ??
       ctx.rect(qrX - 8, qrY - 8, qrSize + 16, qrSize + 16);
     ctx.fill();
@@ -112,7 +113,7 @@ export function QRTentClient({ breweryId, breweryName, breweryCity, breweryState
     const maxW = size.w - 60;
     const words = breweryName.split(" ");
     let line = "";
-    let lines: string[] = [];
+    const lines: string[] = [];
     for (const word of words) {
       const test = line ? `${line} ${word}` : word;
       if (ctx.measureText(test).width > maxW && line) {
@@ -137,6 +138,7 @@ export function QRTentClient({ breweryId, breweryName, breweryCity, breweryState
     const ctaY = size.h - 52;
     ctx.fillStyle = "rgba(212,168,67,0.12)";
     ctx.beginPath();
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     (ctx as any).roundRect?.(size.w / 2 - 100, ctaY - 20, 200, 32, 8) ??
       ctx.rect(size.w / 2 - 100, ctaY - 20, 200, 32);
     ctx.fill();

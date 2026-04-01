@@ -2,7 +2,7 @@
 
 import { useRef, useCallback, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Share2, Copy, Star, Beer, Zap, Download, QrCode, Smartphone } from "lucide-react";
+import { X, Share2, Copy, Star, Beer, Download, QrCode, Smartphone } from "lucide-react";
 import { HopMark } from "@/components/ui/HopMark";
 import QRCode from "react-qr-code";
 import { useToast } from "@/components/ui/Toast";

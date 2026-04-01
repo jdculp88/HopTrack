@@ -21,21 +21,22 @@ export function useTheme() {
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>("dark");
 
+  function apply(t: Theme) {
+    document.documentElement.setAttribute("data-theme", t);
+  }
+
   // On mount: read saved preference or system preference
   useEffect(() => {
     const saved = localStorage.getItem("hoptrack-theme") as Theme | null;
     if (saved === "light" || saved === "dark") {
       apply(saved);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setTheme(saved);
     } else if (window.matchMedia("(prefers-color-scheme: light)").matches) {
       apply("light");
       setTheme("light");
     }
   }, []);
-
-  function apply(t: Theme) {
-    document.documentElement.setAttribute("data-theme", t);
-  }
 
   function toggle() {
     const next = theme === "dark" ? "light" : "dark";

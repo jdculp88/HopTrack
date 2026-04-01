@@ -44,6 +44,7 @@ function AnalyticsInner({ sessions: allSessions, beerLogs: allBeerLogs }: { sess
     const option = RANGE_OPTIONS.find((o) => o.key === range)!;
     if (!option.days) return { sessions: allSessions, beerLogs: allBeerLogs };
 
+    // eslint-disable-next-line react-hooks/purity
     const since = new Date(Date.now() - option.days * 24 * 60 * 60 * 1000).toISOString();
     return {
       sessions: allSessions.filter((s) => s.started_at >= since),
@@ -52,6 +53,7 @@ function AnalyticsInner({ sessions: allSessions, beerLogs: allBeerLogs }: { sess
   }, [allSessions, allBeerLogs, range]);
 
   // Compute chart day count based on range
+  // eslint-disable-next-line react-hooks/purity
   const chartDays = range === "7d" ? 7 : range === "30d" ? 30 : range === "90d" ? 90 : Math.min(90, Math.ceil((Date.now() - new Date(allSessions[0]?.started_at ?? Date.now()).getTime()) / 86400000) || 30);
 
   // Visits by day
@@ -144,6 +146,7 @@ function AnalyticsInner({ sessions: allSessions, beerLogs: allBeerLogs }: { sess
   const totalBeersLogged = beerLogs.reduce((sum, l) => sum + (l.quantity ?? 1), 0);
   const rated = beerLogs.filter(l => l.rating > 0);
   const avgRating = rated.length > 0 ? (rated.reduce((a, l) => a + l.rating, 0) / rated.length).toFixed(2) : null;
+  // eslint-disable-next-line react-hooks/purity
   const thisWeek = sessions.filter(s => new Date(s.started_at) > new Date(Date.now() - 7 * 86400000)).length;
   const uniqueVisitors = useMemo(() => new Set(sessions.map(s => s.user_id).filter(Boolean)).size, [sessions]);
 
@@ -159,6 +162,7 @@ function AnalyticsInner({ sessions: allSessions, beerLogs: allBeerLogs }: { sess
 
   // Beer Performance — per-beer engagement metrics with trending direction
   const beerPerformance = useMemo(() => {
+    // eslint-disable-next-line react-hooks/purity
     const now = Date.now();
     const thirtyDaysAgo = now - 30 * 86400000;
     const sixtyDaysAgo = now - 60 * 86400000;
@@ -543,7 +547,7 @@ function AnalyticsInner({ sessions: allSessions, beerLogs: allBeerLogs }: { sess
   );
 }
 
-export function AnalyticsClient({ breweryId, sessions, beerLogs }: AnalyticsClientProps) {
+export function AnalyticsClient({ breweryId: _breweryId, sessions, beerLogs }: AnalyticsClientProps) {
   return (
     <Suspense fallback={
       <div className="p-6 lg:p-8 max-w-5xl mx-auto pt-16 lg:pt-8">

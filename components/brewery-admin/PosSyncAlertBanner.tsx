@@ -38,6 +38,7 @@ export function PosSyncAlertBanner({ breweryId }: PosSyncAlertBannerProps) {
     }
   }, [breweryId]);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { fetchStatus(); }, [fetchStatus]);
 
   if (!alert || dismissed) return null;

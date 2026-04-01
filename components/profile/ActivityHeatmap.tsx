@@ -40,7 +40,7 @@ export function ActivityHeatmap({ data, compact = false }: ActivityHeatmapProps)
     const startDate = new Date(endDate);
     startDate.setDate(startDate.getDate() - weeks * 7 + 1);
 
-    let currentDate = new Date(startDate);
+    const currentDate = new Date(startDate);
     let currentWeek: { date: string; count: number; style?: string; dayOfWeek: number }[] = [];
 
     let total = 0;

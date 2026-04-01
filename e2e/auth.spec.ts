@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { login, TEST_USER } from "./helpers/auth";
+import { login } from "./helpers/auth";
 
 // ─── Auth Flow Tests ────────────────────────────────────────────────────────
 // Comprehensive tests for signup, login, forgot password, and route protection.
