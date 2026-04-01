@@ -62,7 +62,7 @@ export async function GET(request: NextRequest) {
     .from("sessions")
     .select(SESSION_SELECT)
     .in("user_id", userIds)
-    .eq("share_to_feed", true)
+    .neq("share_to_feed", false)
     .eq("is_active", false)
     .order("started_at", { ascending: false })
     .range(offset, offset + PAGE_SIZE);

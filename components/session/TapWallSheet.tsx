@@ -103,7 +103,7 @@ export default function TapWallSheet({
   const [query, setQuery] = useState('')
   const [loggingBeer, setLoggingBeer] = useState<string | null>(null)
   const [incrementingLog, setIncrementingLog] = useState<string | null>(null)
-  const [ratingSheet, setRatingSheet] = useState<{ log: BeerLog; beerName: string } | null>(null)
+  const [ratingSheet, setRatingSheet] = useState<{ log: BeerLog; beerName: string; previousRating?: number | null } | null>(null)
   const [showEndConfirm, setShowEndConfirm] = useState(false)
   const [showCancelConfirm, setShowCancelConfirm] = useState(false)
   const [ending, setEnding] = useState(false)
@@ -253,10 +253,9 @@ export default function TapWallSheet({
 
     if (result) {
       ctxUpdateBeerLog(tempLog.id, { ...result, beer: tempLog.beer })
-      // Skip rating sheet if user has already rated this beer in a past session
-      if (!previousRatings.has(beer.id)) {
-        setRatingSheet({ log: result, beerName: beer.name })
-      }
+      // Show rating sheet — pass previous rating if user has already rated this beer
+      const prevRating = previousRatings.get(beer.id)
+      setRatingSheet({ log: result, beerName: beer.name, previousRating: prevRating ?? null })
     } else {
       ctxRemoveBeerLog(tempLog.id)
     }
@@ -691,6 +690,7 @@ export default function TapWallSheet({
           isOpen={!!ratingSheet}
           onSave={handleSaveRating}
           onSkip={() => setRatingSheet(null)}
+          previousRating={ratingSheet.previousRating}
         />
       )}
     </>
