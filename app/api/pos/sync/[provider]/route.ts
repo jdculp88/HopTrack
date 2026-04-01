@@ -1,10 +1,12 @@
 // POS Manual Sync — Trigger immediate sync from POS
-// Sprint 86 — The Connector
+// Sprint 86 — The Connector | Sprint 87 — The Sync Engine
 // POST /api/pos/sync/[provider] { brewery_id }
 // Debounced: max once per 5 minutes
 
 import { NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { decryptToken } from "@/lib/pos-crypto";
+import { runSync, fetchPosMenuData } from "@/lib/pos-sync/engine";
 
 const SYNC_COOLDOWN_MS = 5 * 60 * 1000; // 5 minutes
 
@@ -36,10 +38,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ pro
     return Response.json({ data: null, meta: {}, error: { message: "Not authorized", code: "forbidden", status: 403 } }, { status: 403 });
   }
 
-  // Get connection
+  // Get connection (including encrypted token for API calls)
   const { data: connection } = await (supabase as any)
     .from("pos_connections")
-    .select("id, status, last_sync_at")
+    .select("id, status, last_sync_at, access_token_encrypted, provider_location_id, provider_merchant_id")
     .eq("brewery_id", breweryId)
     .eq("provider", provider)
     .maybeSingle();
@@ -61,23 +63,30 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ pro
     }
   }
 
-  // TODO (Sprint 87): Pull current menu from POS API
-  // Toast: GET /menus for restaurant
-  // Square: GET /v2/catalog/list?types=ITEM
-  // Then diff against current tap list and apply changes
+  // Fetch menu data from POS provider (or mock in POS_MOCK_MODE)
+  const accessToken = connection.access_token_encrypted
+    ? decryptToken(connection.access_token_encrypted)
+    : "";
+  const locationId = connection.provider_location_id || connection.provider_merchant_id;
 
-  const startTime = Date.now();
+  const menuData = await fetchPosMenuData(provider, accessToken, locationId);
+  if (!menuData) {
+    return Response.json({
+      data: null, meta: {},
+      error: { message: `Failed to fetch menu from ${provider}. Check connection status.`, code: "sync_failed", status: 502 },
+    }, { status: 502 });
+  }
 
-  // STUB: Simulate sync result
-  const syncResult = {
-    items_added: 0,
-    items_updated: 0,
-    items_removed: 0,
-    items_unmapped: 0,
-    status: "success" as const,
-  };
-
-  const durationMs = Date.now() - startTime;
+  // Run the sync engine
+  const syncResult = await runSync(
+    {
+      brewery_id: breweryId,
+      pos_connection_id: connection.id,
+      provider: provider as "toast" | "square",
+      sync_type: "manual",
+    },
+    menuData
+  );
 
   // Update connection
   await (supabase as any)
@@ -86,6 +95,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ pro
       last_sync_at: new Date().toISOString(),
       last_sync_status: syncResult.status,
       last_sync_item_count: syncResult.items_added + syncResult.items_updated,
+      status: syncResult.status === "failed" ? "error" : "active",
     })
     .eq("id", connection.id);
 
@@ -103,18 +113,27 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ pro
       brewery_id: breweryId,
       sync_type: "manual",
       provider,
-      ...syncResult,
-      duration_ms: durationMs,
+      items_added: syncResult.items_added,
+      items_updated: syncResult.items_updated,
+      items_removed: syncResult.items_removed,
+      items_unmapped: syncResult.items_unmapped,
+      status: syncResult.status,
+      error: syncResult.error || null,
+      duration_ms: syncResult.duration_ms,
     });
 
   return Response.json({
     data: {
       synced: true,
       provider,
-      ...syncResult,
-      duration_ms: durationMs,
+      items_added: syncResult.items_added,
+      items_updated: syncResult.items_updated,
+      items_removed: syncResult.items_removed,
+      items_unmapped: syncResult.items_unmapped,
+      status: syncResult.status,
+      duration_ms: syncResult.duration_ms,
     },
     meta: {},
-    error: null,
-  });
+    error: syncResult.status === "failed" ? { message: syncResult.error || "Sync failed", code: "sync_failed", status: 500 } : null,
+  }, { status: syncResult.status === "failed" ? 500 : 200 });
 }

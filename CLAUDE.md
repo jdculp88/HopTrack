@@ -223,6 +223,8 @@ components/                   — Shared components
 lib/                          — Utils, Supabase clients, XP logic
 lib/glassware.ts              — 20 glass SVGs, PourSize interface, getGlassSvgContent()
 lib/beerStyleColors.ts        — 26 styles → 6 color families
+lib/pos-crypto.ts             — AES-256-GCM token encryption for POS (S86)
+lib/pos-sync/                 — POS sync engine: engine, mapper, normalizer, types, mock (S87)
 types/database.ts             — Supabase schema types (all tables registered)
 types/supabase-helpers.ts     — Common join shapes (S65)
 supabase/migrations/          — DB migrations (run in order, see README.md)
@@ -243,12 +245,16 @@ scripts/supabase-setup.mjs    — One-time setup script
 
 ## 🗺️ Where We Are
 
-**Current Sprint:** Sprint 86 — The Connector 🔌
+**Current Sprint:** Sprint 87 — The Sync Engine ⚡ ✅
 **Arc:** Open the Pipes (Sprints 85-90) — Integrations
-**Sprint plan (86):** `docs/plans/sprint-86-plan.md` — POS integration foundation: migration 058 (pos_connections, pos_item_mappings, pos_sync_logs + beer/brewery POS columns), AES-256-GCM token encryption (lib/pos-crypto.ts), 9 API endpoints (/api/pos/connect, callback, disconnect, sync, status, mapping, webhook/toast, webhook/square), POS Settings UI in brewery admin (connection cards, sync status, tier gating — Cask/Barrel only), HMAC-SHA256 webhook verification + replay protection. OAuth flows stubbed pending partner approval.
+**Sprint plan (87):** `docs/plans/sprint-87-plan.md` — POS sync engine: reconciliation engine (lib/pos-sync/engine.ts), provider adapters for Toast + Square (lib/pos-sync/normalizer.ts), 4-stage auto-mapper with ≥80% match rate (lib/pos-sync/mapper.ts), mock provider for testing (lib/pos-sync/mock-provider.ts), webhook receivers wired to engine (async fire-and-forget), manual sync wired to engine (decrypt → fetch → diff → apply), mapping review UI with filter pills + beer picker, 33 Vitest tests. No migration needed.
+**Retro (87):** `docs/retros/sprint-87-retro.md` (facilitated by Quinn)
+**Last completed:** Sprint 86 — The Connector ✅ — POS integration foundation: migration 058 (pos_connections, pos_item_mappings, pos_sync_logs + beer/brewery POS columns), AES-256-GCM token encryption (lib/pos-crypto.ts), 9 API endpoints, POS Settings UI, HMAC-SHA256 webhook verification + replay protection. OAuth flows stubbed pending partner approval.
+**Retro (86):** `docs/retros/sprint-86-retro.md` (facilitated by Riley)
 **Last completed:** Sprint 85 — The Pipeline ✅ — Public API v1 (F-016): 7 versioned endpoints at `/api/v1/`, API key system (SHA-256, revocable, brewery-scoped), standardized JSON envelope, rate limiting, CORS, ApiKeyManager UI in Settings, API Documentation in Resources, migration 057, REQ-073 written (POS Integration).
-**Sprint plan (85):** `docs/plans/sprint-85-plan.md` — Public API v1 (F-016): 7 versioned endpoints at `/api/v1/` (brewery detail, beers/tap list, full menu, events, stats, beer detail, beer search), API key system (SHA-256 hashed, `ht_live_` prefix, max 5 per brewery, revocable), standardized JSON envelope (`{ data, meta, error }`), rate limiting (100/min authenticated, 20/min public), CORS, ApiKeyManager UI in brewery Settings, API Documentation section in Resources page, migration 057 (api_keys table + RLS + limit trigger). REQ-073 written (POS Integration — Toast + Square).
-**Last completed:** Sprint 84 — The Wrap ✅ — HopTrack Wrapped (F-012): 7-slide animated Year-in-Review experience (stats, personality, top brewery/beer, cities, adventurer score, level badge), swipeable slides with Framer Motion, Web Share API sharing, You tab CTA, empty state. Also: brewery-covers storage bucket (migration 056). BL-005 logged (menu upload PGRST204 cache bug).
+**Retro (85):** `docs/retros/sprint-85-retro.md` (facilitated by Sam)
+**Last completed:** Sprint 84 — The Wrap ✅ — HopTrack Wrapped (F-012): 7-slide animated Year-in-Review, Web Share API, You tab CTA. Brewery-covers bucket (migration 056). BL-005 logged.
+**Retro (84):** `docs/retros/sprint-84-retro.md` (facilitated by Morgan)
 **Last completed:** Sprint 83 — The Palette ✅ — Beverage category colors (cider/wine/cocktail/NA — 4 new color families, CSS vars dark+light, card-bg-reco rules, beerStyleColors.ts expanded with itemType param), PDF menu upload (MenuUpload component, brewery settings + detail page PDF display), embed menu multi-beverage grouping
 **Retro (83):** `docs/retros/sprint-83-retro.md` (facilitated by Jamie — first time)
 **Last completed:** Sprint 82 — The Full Menu ✅ — Non-beer tap list items (F-011 Phase 1: cider/wine/cocktail/NA), food pivot (menu image upload in Settings), HopRoute location autocomplete (F-030), Challenge feed card fixes + ChallengeMilestoneFeedCard, glass library 20→53 (one-for-one from 5 guides), glass picker filtered by type, Resources section in brewery admin, REQ-072 documented

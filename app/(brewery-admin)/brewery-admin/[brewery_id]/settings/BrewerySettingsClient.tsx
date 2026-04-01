@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Save, Loader2, UtensilsCrossed, Key, Plug, Unplug, RefreshCw, ArrowUpRight, Lock, ChevronDown, ChevronUp } from "lucide-react";
+import { Save, Loader2, UtensilsCrossed, Key, Plug, Unplug, RefreshCw, ArrowUpRight, Lock, ChevronDown, ChevronUp, AlertTriangle, Check, X, Search } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useToast } from "@/components/ui/Toast";
 import { ImageUpload } from "@/components/ui/ImageUpload";
@@ -222,6 +222,15 @@ const PROVIDERS = [
   { id: "square" as const, name: "Square", description: "Sync your tap list automatically from Square POS", logo: "⬛" },
 ];
 
+interface PosMapping {
+  id: string;
+  pos_item_id: string;
+  pos_item_name: string;
+  beer_id: string | null;
+  mapping_type: "auto" | "manual" | "unmapped";
+  beer?: { id: string; name: string; style: string | null; abv: number | null };
+}
+
 function PosSettingsSection({ breweryId, subscriptionTier }: { breweryId: string; subscriptionTier: string }) {
   const [connections, setConnections] = useState<PosConnection[]>([]);
   const [recentSyncs, setRecentSyncs] = useState<any[]>([]);
@@ -229,6 +238,11 @@ function PosSettingsSection({ breweryId, subscriptionTier }: { breweryId: string
   const [syncing, setSyncing] = useState<string | null>(null);
   const [disconnecting, setDisconnecting] = useState<string | null>(null);
   const [showSyncHistory, setShowSyncHistory] = useState(false);
+  const [showMappings, setShowMappings] = useState(false);
+  const [mappings, setMappings] = useState<PosMapping[]>([]);
+  const [availableBeers, setAvailableBeers] = useState<{ id: string; name: string; style: string | null }[]>([]);
+  const [mappingsLoading, setMappingsLoading] = useState(false);
+  const [mappingFilter, setMappingFilter] = useState<"all" | "unmapped" | "auto" | "manual">("all");
   const { success, error: toastError } = useToast();
 
   const isTierEligible = ["cask", "barrel"].includes(subscriptionTier);
@@ -286,8 +300,10 @@ function PosSettingsSection({ breweryId, subscriptionTier }: { breweryId: string
       });
       const json = await res.json();
       if (res.ok) {
-        success("Sync complete!");
+        const d = json.data;
+        success(`Sync complete! +${d.items_added} added, ${d.items_updated} updated, ${d.items_removed} removed`);
         fetchStatus();
+        if (showMappings) fetchMappings();
       } else {
         toastError(json.error?.message || "Sync failed");
       }
@@ -295,6 +311,40 @@ function PosSettingsSection({ breweryId, subscriptionTier }: { breweryId: string
       toastError("Sync failed");
     } finally {
       setSyncing(null);
+    }
+  }
+
+  async function fetchMappings() {
+    setMappingsLoading(true);
+    try {
+      const res = await fetch(`/api/pos/mapping?brewery_id=${breweryId}`);
+      if (res.ok) {
+        const json = await res.json();
+        setMappings(json.data?.mappings || []);
+        setAvailableBeers(json.data?.available_beers || []);
+      }
+    } catch {
+      // Non-critical
+    } finally {
+      setMappingsLoading(false);
+    }
+  }
+
+  async function updateMapping(mappingId: string, beerId: string | null) {
+    try {
+      const res = await fetch(`/api/pos/mapping`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ brewery_id: breweryId, mapping_id: mappingId, beer_id: beerId }),
+      });
+      if (res.ok) {
+        success(beerId ? "Mapping updated" : "Mapping cleared");
+        fetchMappings();
+      } else {
+        toastError("Failed to update mapping");
+      }
+    } catch {
+      toastError("Failed to update mapping");
     }
   }
 
@@ -445,11 +495,110 @@ function PosSettingsSection({ breweryId, subscriptionTier }: { breweryId: string
                         <span className="capitalize">{sync.sync_type}</span>
                       </div>
                       <div className="flex items-center gap-3" style={{ color: "var(--text-muted)" }}>
-                        <span>+{sync.items_added} /{sync.items_updated}u /-{sync.items_removed}</span>
+                        <span>+{sync.items_added} ~{sync.items_updated} -{sync.items_removed}</span>
                         <span>{formatTimeAgo(sync.created_at)}</span>
                       </div>
                     </div>
                   ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      )}
+
+      {/* Item Mappings — Sprint 87 */}
+      {connections.some(c => c.status === "active") && (
+        <div className="mt-4">
+          <button
+            onClick={() => { setShowMappings(!showMappings); if (!showMappings && mappings.length === 0) fetchMappings(); }}
+            className="flex items-center gap-1.5 text-xs font-medium"
+            style={{ color: "var(--text-muted)" }}
+          >
+            {showMappings ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+            Item Mappings {mappings.length > 0 && `(${mappings.filter(m => m.mapping_type === "unmapped").length} unmapped)`}
+          </button>
+          <AnimatePresence>
+            {showMappings && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                className="overflow-hidden"
+              >
+                <div className="mt-2">
+                  {/* Filter pills */}
+                  <div className="flex gap-1.5 mb-3">
+                    {(["all", "unmapped", "auto", "manual"] as const).map(f => (
+                      <button
+                        key={f}
+                        onClick={() => setMappingFilter(f)}
+                        className="px-2.5 py-1 rounded-lg text-xs font-medium transition-colors capitalize"
+                        style={{
+                          background: mappingFilter === f ? "var(--accent-gold)" : "var(--surface-2)",
+                          color: mappingFilter === f ? "var(--bg)" : "var(--text-muted)",
+                        }}
+                      >
+                        {f} {f === "unmapped" && mappings.filter(m => m.mapping_type === "unmapped").length > 0 &&
+                          `(${mappings.filter(m => m.mapping_type === "unmapped").length})`}
+                      </button>
+                    ))}
+                  </div>
+
+                  {mappingsLoading ? (
+                    <div className="flex items-center justify-center py-6">
+                      <Loader2 size={16} className="animate-spin" style={{ color: "var(--text-muted)" }} />
+                    </div>
+                  ) : (
+                    <div className="space-y-1.5 max-h-80 overflow-y-auto">
+                      {mappings
+                        .filter(m => mappingFilter === "all" || m.mapping_type === mappingFilter)
+                        .map(mapping => (
+                          <div key={mapping.id} className="flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-xs" style={{ background: "var(--surface-2)" }}>
+                            <div className="flex items-center gap-2 min-w-0 flex-1">
+                              <span
+                                className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                                style={{ background: mapping.mapping_type === "auto" ? "#22c55e" : mapping.mapping_type === "manual" ? "#3b82f6" : "#eab308" }}
+                              />
+                              <span className="truncate" style={{ color: "var(--text-primary)" }}>{mapping.pos_item_name}</span>
+                            </div>
+                            <div className="flex items-center gap-2 flex-shrink-0">
+                              {mapping.mapping_type === "unmapped" ? (
+                                <select
+                                  className="text-xs rounded-lg px-2 py-1 max-w-[160px]"
+                                  style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--text-primary)", border: "1px solid var(--border)" }}
+                                  value=""
+                                  onChange={e => { if (e.target.value) updateMapping(mapping.id, e.target.value); }}
+                                >
+                                  <option value="">Map to beer...</option>
+                                  {availableBeers.map(b => (
+                                    <option key={b.id} value={b.id}>{b.name}</option>
+                                  ))}
+                                </select>
+                              ) : (
+                                <span className="truncate max-w-[160px]" style={{ color: "var(--text-muted)" }}>
+                                  {mapping.beer?.name || "—"}
+                                </span>
+                              )}
+                              {mapping.mapping_type !== "unmapped" && (
+                                <button
+                                  onClick={() => updateMapping(mapping.id, null)}
+                                  className="p-0.5 rounded hover:opacity-70"
+                                  title="Unmap"
+                                >
+                                  <X size={10} style={{ color: "var(--text-muted)" }} />
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      {mappings.filter(m => mappingFilter === "all" || m.mapping_type === mappingFilter).length === 0 && (
+                        <p className="text-xs text-center py-4" style={{ color: "var(--text-muted)" }}>
+                          {mappingFilter === "unmapped" ? "All items are mapped!" : "No mappings yet. Run a sync to discover POS items."}
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </div>
               </motion.div>
             )}
