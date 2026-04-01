@@ -7,6 +7,7 @@ import { cn, formatABV, generateGradientFromString } from "@/lib/utils";
 import { BeerStyleBadge } from "@/components/ui/BeerStyleBadge";
 import { StarRating } from "@/components/ui/StarRating";
 import type { BeerWithBrewery } from "@/types/database";
+import { IncompleteBeerBadge } from "@/components/beer/IncompleteBeerBadge";
 
 interface BeerCardProps {
   beer: BeerWithBrewery;
@@ -104,6 +105,8 @@ export function BeerCard({ beer, variant = "default", className }: BeerCardProps
           ) : (
             <p className="text-xs text-[var(--text-muted)]">No ratings yet</p>
           )}
+
+          <IncompleteBeerBadge beer={beer} compact />
         </div>
       </Link>
 

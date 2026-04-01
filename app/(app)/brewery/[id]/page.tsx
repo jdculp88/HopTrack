@@ -15,6 +15,7 @@ import { BreweryRatingHeader } from "@/components/brewery/BreweryRatingHeader";
 import { FollowBreweryButton } from "@/components/brewery/FollowBreweryButton";
 import { BreweryChallenges } from "@/components/brewery/BreweryChallenges";
 import { MugClubSection } from "@/components/brewery/MugClubSection";
+import { LoyaltyStampCard } from "@/components/loyalty/LoyaltyStampCard";
 
 // Supabase join shapes for tables not in generated types
 interface ActiveFriendSession {
@@ -248,6 +249,29 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
       .eq("user_id", user.id)
       .in("mug_club_id", clubIds) as any);
     myMugMemberships = membershipsRaw ?? [];
+  }
+
+  // Loyalty programs for this brewery
+  const { data: loyaltyPrograms } = await (supabase
+    .from("loyalty_programs")
+    .select("id, name, stamps_required, reward_description")
+    .eq("brewery_id", id)
+    .eq("is_active", true)
+    .order("created_at", { ascending: false }) as any);
+
+  // User's loyalty cards at this brewery
+  const myLoyaltyCards: Record<string, { stamps: number; lifetime_stamps: number }> = {};
+  if (loyaltyPrograms?.length) {
+    const { data: cardsRaw } = await (supabase
+      .from("loyalty_cards")
+      .select("program_id, stamps, lifetime_stamps")
+      .eq("user_id", user.id)
+      .eq("brewery_id", id) as any);
+    for (const card of (cardsRaw ?? []) as any[]) {
+      if (card.program_id) {
+        myLoyaltyCards[card.program_id] = { stamps: card.stamps, lifetime_stamps: card.lifetime_stamps };
+      }
+    }
   }
 
   // Check if brewery has any admin accounts (for claim CTA)
@@ -655,6 +679,24 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
             myMemberships={myMugMemberships}
             breweryId={brewery.id}
           />
+        )}
+
+        {/* Loyalty Programs */}
+        {(loyaltyPrograms ?? []).length > 0 && (
+          <div>
+            <h2 className="font-display text-2xl font-bold text-[var(--text-primary)] mb-3">Loyalty Program</h2>
+            <div className="space-y-4">
+              {(loyaltyPrograms as any[]).map((program: any) => (
+                <LoyaltyStampCard
+                  key={program.id}
+                  program={program}
+                  card={myLoyaltyCards[program.id] ?? null}
+                  breweryName={brewery.name}
+                  breweryId={brewery.id}
+                />
+              ))}
+            </div>
+          </div>
         )}
 
         {/* Upcoming Events */}
