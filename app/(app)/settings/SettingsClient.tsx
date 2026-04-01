@@ -58,6 +58,12 @@ export function SettingsClient({ profile, userEmail }: SettingsClientProps) {
         }
       })
       .catch(() => {});
+
+    // Scroll to hash anchor on mount (e.g. #invite-friends)
+    if (window.location.hash) {
+      const el = document.querySelector(window.location.hash);
+      if (el) setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
+    }
   }, []);
 
   function handleCopyCode() {
@@ -434,6 +440,7 @@ export function SettingsClient({ profile, userEmail }: SettingsClientProps) {
       </Section>
 
       {/* Invite Friends section */}
+      <div id="invite-friends" />
       <Section title="Invite Friends" icon={<Gift size={16} />} description="Earn 250 XP for every friend who joins">
         <div className="space-y-4">
           <p className="text-sm text-[var(--text-secondary)]">

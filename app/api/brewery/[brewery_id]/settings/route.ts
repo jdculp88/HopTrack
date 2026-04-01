@@ -1,10 +1,13 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
+import { rateLimitResponse } from "@/lib/rate-limit";
 
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ brewery_id: string }> }
 ) {
+  const rl = rateLimitResponse(request, "brewery-settings", { limit: 10, windowMs: 60_000 });
+  if (rl) return rl;
   const { brewery_id } = await params;
   const supabase = await createClient();
 

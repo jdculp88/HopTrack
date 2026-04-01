@@ -39,8 +39,15 @@ export default async function BreweryAdminLayout({ children }: { children: React
   return (
     <ToastProvider>
       <div className="min-h-screen flex" style={{ background: "var(--bg)" }}>
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:top-4 focus:left-4 focus:px-4 focus:py-2 focus:rounded-xl focus:text-sm focus:font-semibold"
+          style={{ background: "var(--accent-gold)", color: "var(--bg)" }}
+        >
+          Skip to main content
+        </a>
         <BreweryAdminNav accounts={accounts} />
-        <main className="flex-1 overflow-auto">
+        <main id="main-content" className="flex-1 overflow-auto">
           {children}
         </main>
       </div>

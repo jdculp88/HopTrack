@@ -37,7 +37,9 @@ export function QRTentClient({ breweryId, breweryName, breweryCity, breweryState
       color: { dark: "#1A1714", light: "#FBF7F0" },
       errorCorrectionLevel: "H",
     }).then(setQrDataUrl);
-  }, [breweryUrl]);
+    // Mark QR page as visited for onboarding card
+    localStorage.setItem(`hoptrack:brewery-qr-visited-${breweryId}`, "1");
+  }, [breweryUrl, breweryId]);
 
   const size = TENT_SIZES.find(s => s.id === selectedSize)!;
 

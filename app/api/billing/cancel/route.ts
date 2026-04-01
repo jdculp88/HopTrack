@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getStripe, isStripeConfigured } from "@/lib/stripe";
+import { rateLimitResponse } from "@/lib/rate-limit";
 
 export async function POST(req: NextRequest) {
+  const rl = rateLimitResponse(req, "billing-cancel", { limit: 5, windowMs: 60_000 });
+  if (rl) return rl;
   try {
     const { brewery_id } = await req.json() as { brewery_id: string };
 

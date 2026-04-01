@@ -10,40 +10,41 @@ interface Step {
   href: string;
   icon: typeof List;
   complete: boolean;
+  onClickMark?: string;
 }
 
 interface BreweryOnboardingCardProps {
   breweryId: string;
   hasBeers: boolean;
   hasLoyalty: boolean;
-  /** Whether the brewery has generated / viewed the QR page before — default false */
-  hasQr?: boolean;
-  /** Whether the brewery public page has been shared — default false */
-  hasShared?: boolean;
 }
 
 export default function BreweryOnboardingCard({
   breweryId,
   hasBeers,
   hasLoyalty,
-  hasQr = false,
-  hasShared = false,
 }: BreweryOnboardingCardProps) {
   const storageKey = `hoptrack:brewery-onboarding-${breweryId}-dismissed`;
+  const qrKey = `hoptrack:brewery-qr-visited-${breweryId}`;
+  const sharedKey = `hoptrack:brewery-shared-${breweryId}`;
   const [visible, setVisible] = useState(false);
+  const [hasQr, setHasQr] = useState(false);
+  const [hasShared, setHasShared] = useState(false);
 
   useEffect(() => {
     // Only show if not previously dismissed
     if (!localStorage.getItem(storageKey)) {
       setVisible(true);
     }
-  }, [storageKey]);
+    setHasQr(!!localStorage.getItem(qrKey));
+    setHasShared(!!localStorage.getItem(sharedKey));
+  }, [storageKey, qrKey, sharedKey]);
 
   const steps: Step[] = [
     { label: "Add your beers", href: `/brewery-admin/${breweryId}/tap-list`, icon: List, complete: hasBeers },
     { label: "Create a loyalty program", href: `/brewery-admin/${breweryId}/loyalty`, icon: Gift, complete: hasLoyalty },
     { label: "Generate QR table tents", href: `/brewery-admin/${breweryId}/qr`, icon: QrCode, complete: hasQr },
-    { label: "Share your brewery page", href: `/brewery/${breweryId}`, icon: ExternalLink, complete: hasShared },
+    { label: "Share your brewery page", href: `/brewery/${breweryId}`, icon: ExternalLink, complete: hasShared, onClickMark: sharedKey },
   ];
 
   const completedCount = steps.filter((s) => s.complete).length;
@@ -116,6 +117,12 @@ export default function BreweryOnboardingCard({
                   key={step.label}
                   href={step.href}
                   target={step.icon === ExternalLink ? "_blank" : undefined}
+                  onClick={() => {
+                    if (step.onClickMark) {
+                      localStorage.setItem(step.onClickMark, "1");
+                      setHasShared(true);
+                    }
+                  }}
                   className="flex items-center gap-3 w-full text-left p-3 rounded-xl transition-colors"
                   style={{
                     background: "var(--surface)",

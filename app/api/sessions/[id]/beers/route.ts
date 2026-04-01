@@ -59,6 +59,18 @@ export async function POST(
     return NextResponse.json({ error: 'Session is no longer active' }, { status: 400 })
   }
 
+  // Validate beer_id exists if provided
+  if (beer_id) {
+    const { data: beerExists } = await supabase
+      .from('beers')
+      .select('id')
+      .eq('id', beer_id)
+      .maybeSingle()
+    if (!beerExists) {
+      return NextResponse.json({ error: 'Beer not found' }, { status: 400 })
+    }
+  }
+
   const { data: beerLog, error } = await supabase
     .from('beer_logs')
     .insert({

@@ -12,15 +12,15 @@ const SQUARE_AUTH_URL = "https://connect.squareup.com/oauth2/authorize";
 export async function GET(req: NextRequest, { params }: { params: Promise<{ provider: string }> }) {
   const { provider } = await params;
   if (provider !== "toast" && provider !== "square") {
-    return Response.json({ error: "Unsupported provider. Use 'toast' or 'square'." }, { status: 400 });
+    return Response.json({ data: null, meta: {}, error: { message: "Unsupported provider. Use 'toast' or 'square'.", code: "BAD_REQUEST", status: 400 } }, { status: 400 });
   }
 
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return Response.json({ error: "Unauthorized" }, { status: 401 });
+  if (!user) return Response.json({ data: null, meta: {}, error: { message: "Unauthorized", code: "UNAUTHORIZED", status: 401 } }, { status: 401 });
 
   const breweryId = req.nextUrl.searchParams.get("brewery_id");
-  if (!breweryId) return Response.json({ error: "brewery_id is required" }, { status: 400 });
+  if (!breweryId) return Response.json({ data: null, meta: {}, error: { message: "brewery_id is required", code: "BAD_REQUEST", status: 400 } }, { status: 400 });
 
   // Verify brewery ownership (Cask or Barrel tier)
   const { data: account } = await (supabase as any)
@@ -31,13 +31,13 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ prov
     .single();
 
   if (!account || !["owner", "manager"].includes(account.role)) {
-    return Response.json({ error: "Not authorized for this brewery" }, { status: 403 });
+    return Response.json({ data: null, meta: {}, error: { message: "Not authorized for this brewery", code: "FORBIDDEN", status: 403 } }, { status: 403 });
   }
 
   const { data: brewery } = await (supabase as any)
     .from("breweries").select("subscription_tier").eq("id", breweryId).single();
   if (!brewery || !["cask", "barrel"].includes(brewery.subscription_tier)) {
-    return Response.json({ error: "POS integration requires Cask or Barrel tier" }, { status: 403 });
+    return Response.json({ data: null, meta: {}, error: { message: "POS integration requires Cask or Barrel tier", code: "TIER_REQUIRED", status: 403 } }, { status: 403 });
   }
 
   // Check for existing active connection
@@ -50,7 +50,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ prov
     .maybeSingle();
 
   if (existing) {
-    return Response.json({ error: `Already connected to ${provider}` }, { status: 409 });
+    return Response.json({ data: null, meta: {}, error: { message: `Already connected to ${provider}`, code: "CONFLICT", status: 409 } }, { status: 409 });
   }
 
   // Generate OAuth state param (CSRF protection)
@@ -65,13 +65,13 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ prov
   if (provider === "toast") {
     const clientId = process.env.TOAST_CLIENT_ID;
     if (!clientId) {
-      return Response.json({ error: "Toast integration not configured. Partner approval pending." }, { status: 503 });
+      return Response.json({ data: null, meta: {}, error: { message: "Toast integration not configured. Partner approval pending.", code: "NOT_CONFIGURED", status: 503 } }, { status: 503 });
     }
     authUrl = `${TOAST_AUTH_URL}?response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(callbackUrl)}&state=${state}&scope=menus:read`;
   } else {
     const appId = process.env.SQUARE_APP_ID;
     if (!appId) {
-      return Response.json({ error: "Square integration not configured. App review pending." }, { status: 503 });
+      return Response.json({ data: null, meta: {}, error: { message: "Square integration not configured. App review pending.", code: "NOT_CONFIGURED", status: 503 } }, { status: 503 });
     }
     authUrl = `${SQUARE_AUTH_URL}?client_id=${appId}&redirect_uri=${encodeURIComponent(callbackUrl)}&state=${state}&scope=ITEMS_READ+MERCHANT_PROFILE_READ&session=false`;
   }

@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getStripe, STRIPE_PRICES, isStripeConfigured } from "@/lib/stripe";
+import { rateLimitResponse } from "@/lib/rate-limit";
 
 export async function POST(req: NextRequest) {
+  const rl = rateLimitResponse(req, "billing-checkout", { limit: 5, windowMs: 60_000 });
+  if (rl) return rl;
   try {
     const { brewery_id, tier, interval = "monthly" } = await req.json() as {
       brewery_id: string;

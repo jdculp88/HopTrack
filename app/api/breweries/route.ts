@@ -5,6 +5,7 @@ import {
   getBreweriesByLocation,
   mapOpenBreweryToDb,
 } from "@/lib/openbrewerydb";
+import { rateLimitResponse } from "@/lib/rate-limit";
 
 export async function GET(request: Request) {
   const supabase = await createClient();
@@ -119,6 +120,8 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  const rl = rateLimitResponse(request, "breweries-create", { limit: 5, windowMs: 60_000 });
+  if (rl) return rl;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

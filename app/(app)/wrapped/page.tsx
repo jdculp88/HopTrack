@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { WrappedClient } from "./WrappedClient";
+import { fetchWrappedStats } from "@/lib/wrapped";
 
 export const metadata = {
   title: "Your Wrapped | HopTrack",
@@ -18,5 +19,7 @@ export default async function WrappedPage() {
     .eq("id", user.id)
     .single() as any;
 
-  return <WrappedClient username={profile?.username ?? "beer-lover"} />;
+  const stats = await fetchWrappedStats(supabase, user.id);
+
+  return <WrappedClient username={profile?.username ?? "beer-lover"} initialStats={stats} />;
 }

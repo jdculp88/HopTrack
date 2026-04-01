@@ -1,8 +1,8 @@
 # HopTrack Product Roadmap
 **Last updated:** 2026-04-01
 **PM:** Morgan
-**Current Sprint:** Sprint 92 — The Audit Fix 🔧
-**Last completed:** Sprint 91 — The Spotlight ✅
+**Current Sprint:** Sprint 94 — TBD
+**Last completed:** Sprint 93 — The Hardening ✅
 
 > This is a living document -- updated every sprint. For completed sprints 1-12, see `docs/roadmap-archive.md`. For sprint plans, see `docs/plans/`. For the Shore It Up master plan (Sprints 64-73), see `docs/plans/sprint-64-73-master-plan.md`. For the Q2 2026 roadmap research (30 features, 18 REQs, 4 sprint arcs), see `docs/plans/roadmap-research-2026-q2.md`.
 
@@ -353,6 +353,63 @@ Vitest configured (39 unit tests across 4 files). Vitest added to CI. Cookie con
 **Migrations this arc:** 057 (api_keys), 058 (POS schema), 059 (beer barcode)
 
 **Next arc:** The Flywheel (Sprints 91-96) — Sponsored challenges, ad engine, mug clubs, multi-location. Revenue flywheel.
+
+---
+
+## Sprint 93 — The Hardening 🔧 (2026-04-01)
+**Theme:** Full QA audit close-out + ad engine foundation
+**Arc:** The Flywheel (Sprint 3 of 6)
+**Plan:** `docs/plans/sprint-93-plan.md` | **Retro:** `docs/retros/sprint-93-retro.md`
+
+**Goal 1: Data Integrity Fixes (P1 #10-11)** — TapListClient: 3 silent delete failures fixed with error checking + toast. Drag-sort batched with `Promise.all()` + rollback. `forEach(async...)` anti-pattern in sortByStyle/sortAlphabetical replaced with proper `Promise.all(sorted.map(...))`.
+
+**Goal 2: Rate Limiting (P1 #13)** — 11 mutation endpoints protected: wishlist (POST/DELETE), challenges/join, featured-beer, settings, billing (checkout/portal/cancel), push/subscribe, brewery-claims, breweries.
+
+**Goal 3: P2 Polish** — 5 new sidebar nav items (Sessions, Embed, Board, POS Sync, Ad Campaigns). OnboardingCard wired to localStorage for QR/shared tracking. Skip-to-content links in brewery admin + superadmin layouts. aria-label on Loyalty close button.
+
+**Goal 4: P2 Full Close-Out** — Wrapped + Pint Rewind extracted to shared lib functions (`fetchWrappedStats`, `fetchPintRewindData`), pages now SSR. Settings `#invite-friends` anchor + scroll. POS route envelopes standardized. beer_id validation in session beer log API.
+
+**Goal 5: Ad Engine Foundation (F-028)** — Migration 061: `brewery_ads` table with geo, budget, tier gating. RPCs: `increment_ad_impressions`, `increment_ad_clicks`. 7 API endpoints: feed (haversine geo), impression, click, brewery CRUD. `BreweryAdFeedCard` with intersection observer. Brewery admin ads page with full CRUD, stats, tier gating.
+
+**QA Audit Status:** 30/30 items CLOSED (P0: 3/3, P1: 12/12, P2: 15/15) across Sprints 92-93.
+
+**Key changes from Sprint 93:**
+- `supabase/migrations/061_brewery_ads.sql` — NEW: brewery_ads table, RLS, RPCs
+- `lib/wrapped.ts` — UPDATED: `fetchWrappedStats()` extracted from API route
+- `lib/pint-rewind.ts` — NEW: `fetchPintRewindData()` extracted from API route
+- `app/api/ads/feed/route.ts` — NEW: geo-targeted ad feed
+- `app/api/ads/impression/route.ts` — NEW: impression tracking
+- `app/api/ads/click/route.ts` — NEW: click tracking
+- `app/api/brewery/[brewery_id]/ads/route.ts` — NEW: list + create ads
+- `app/api/brewery/[brewery_id]/ads/[ad_id]/route.ts` — NEW: update + delete ads
+- `components/social/BreweryAdFeedCard.tsx` — NEW: native ad card for consumer feed
+- `app/(brewery-admin)/.../ads/AdsClient.tsx` — NEW: full CRUD admin UI
+- `app/(brewery-admin)/.../ads/page.tsx` — NEW: ads admin page
+- `components/brewery-admin/BreweryAdminNav.tsx` — UPDATED: 5 new nav items
+- `components/brewery-admin/BreweryOnboardingCard.tsx` — UPDATED: localStorage QR/shared tracking
+- `app/(brewery-admin)/layout.tsx` — UPDATED: skip-to-content + id="main-content"
+- `app/(superadmin)/layout.tsx` — UPDATED: skip-to-content + id="main-content"
+- `app/(brewery-admin)/.../loyalty/LoyaltyClient.tsx` — UPDATED: aria-label on close button
+- `app/(brewery-admin)/.../tap-list/TapListClient.tsx` — UPDATED: delete error handling, batch sort, async fix
+- `app/(app)/wrapped/page.tsx` — UPDATED: SSR data fetching
+- `app/(app)/wrapped/WrappedClient.tsx` — UPDATED: accepts initialStats prop
+- `app/(app)/pint-rewind/page.tsx` — UPDATED: SSR data fetching
+- `app/(app)/pint-rewind/PintRewindCards.tsx` — UPDATED: accepts initialData prop
+- `app/(app)/settings/SettingsClient.tsx` — UPDATED: #invite-friends anchor + scroll
+- `app/api/sessions/[id]/beers/route.ts` — UPDATED: beer_id validation
+- `app/api/pos/sync-logs/route.ts` — UPDATED: standardized envelope
+- `app/api/pos/connect/[provider]/route.ts` — UPDATED: standardized envelope
+- 11 API routes — UPDATED: rateLimitResponse added
+- `types/database.ts` — UPDATED: BreweryAd interface + table registration
+
+---
+
+## Sprint 92 — The Audit Fix 🔧 (2026-04-01)
+**Theme:** QA audit burndown — P0s and P1s
+**Arc:** The Flywheel (Sprint 2 of 6)
+**Plan:** `docs/plans/sprint-92-plan.md`
+
+16 bugs fixed: 3 P0s (ActiveSessionsCounter polling, embed auth, motion.button), 9 P1s (Discover fake data → real DB, curated collections removed, beer list Edit link, notification link, Loyalty/Events toasts, 3 loading.tsx, 5 API auth checks, leaderboard xp_awarded), 4 P2s (promotions padding, events delete toast, metadata exports, seasonal cards). Zero P0s remaining.
 
 ---
 

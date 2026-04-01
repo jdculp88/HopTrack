@@ -35,10 +35,10 @@
 | 7 | Consumer | **Broken notification link** — `/profile/achievements` doesn't exist, should be `/achievements` | `NotificationsClient.tsx:726` | 92 ✅ |
 | 8 | Brewery Admin | **Missing toasts on Loyalty mutations** — 6 operations complete silently | `LoyaltyClient.tsx` | 92 ✅ |
 | 9 | Brewery Admin | **Missing toasts on Events mutations** — 4 operations complete silently | `EventsClient.tsx` | 92 ✅ |
-| 10 | Brewery Admin | **Silent delete failures** — Events, Loyalty, Tap List delete operations don't check DB result | `EventsClient.tsx`, `LoyaltyClient.tsx`, `TapListClient.tsx` | 93 |
-| 11 | Brewery Admin | **Drag-sort sends N individual updates** — 30 beers = 30 sequential DB calls, no error handling | `TapListClient.tsx:340-357` | 93 |
+| 10 | Brewery Admin | **Silent delete failures** — Events, Loyalty, Tap List delete operations don't check DB result | `EventsClient.tsx`, `LoyaltyClient.tsx`, `TapListClient.tsx` | 93 ✅ |
+| 11 | Brewery Admin | **Drag-sort sends N individual updates** — 30 beers = 30 sequential DB calls, no error handling | `TapListClient.tsx:340-357` | 93 ✅ |
 | 12 | API | **5 GET endpoints missing auth** — `/api/beers`, `/api/breweries`, `/api/breweries/browse`, `/api/sessions/[id]/photos`, `/api/beers/barcode/[code]` | Various | 92 ✅ |
-| 13 | API | **Missing rate limits on 11+ mutation endpoints** | Various | 93 |
+| 13 | API | **Missing rate limits on 11+ mutation endpoints** | Various | 93 ✅ |
 | 14 | API | **Leaderboard monthly XP query may use wrong column** — `xp_earned` vs `xp_awarded` | `leaderboard/route.ts:27` | 92 ✅ |
 | 15 | Brewery Admin | **3 pages missing loading.tsx** — challenges, embed, customer profile detail | 3 dirs | 92 ✅ |
 
@@ -49,19 +49,19 @@
 | # | Area | Issue | Fix Sprint |
 |---|------|-------|------------|
 | 16 | Consumer | Non-interactive seasonal beer cards in Discover | 92 ✅ |
-| 17 | API | Inconsistent response envelopes (v1 vs internal routes) | 94 |
-| 18 | Brewery Admin | 4 pages not in sidebar nav (Sessions, Embed, Board, POS Sync) | 93 |
-| 19 | Brewery Admin | OnboardingCard `hasQr`/`hasShared` always false | 93 |
+| 17 | API | Inconsistent response envelopes (v1 vs internal routes) | 93 ✅ |
+| 18 | Brewery Admin | 4 pages not in sidebar nav (Sessions, Embed, Board, POS Sync) | 93 ✅ |
+| 19 | Brewery Admin | OnboardingCard `hasQr`/`hasShared` always false | 93 ✅ |
 | 20 | Brewery Admin | Promotions page missing mobile top padding (`pt-16`) | 92 ✅ |
 | 21 | Brewery Admin | Events delete no success toast | 92 ✅ |
 | 22 | Brewery Admin | Embed + Challenges pages missing metadata export | 92 ✅ |
-| 23 | Accessibility | Missing skip-to-content links in brewery admin + superadmin | 93 |
-| 24 | Accessibility | Missing `id="main-content"` on admin `<main>` elements | 93 |
-| 25 | Accessibility | Icon-only close button missing aria-label in Loyalty | 93 |
-| 26 | Consumer | Wrapped/Pint Rewind use client-side fetch (double loading flash) | 94 |
-| 27 | Consumer | Settings hash anchor `#invite-friends` not verified | 94 |
-| 28 | API | POS routes inconsistent envelope shapes | 94 |
-| 29 | API | `POST /api/sessions/[id]/beers` doesn't validate beer_id existence | 94 |
+| 23 | Accessibility | Missing skip-to-content links in brewery admin + superadmin | 93 ✅ |
+| 24 | Accessibility | Missing `id="main-content"` on admin `<main>` elements | 93 ✅ |
+| 25 | Accessibility | Icon-only close button missing aria-label in Loyalty | 93 ✅ |
+| 26 | Consumer | Wrapped/Pint Rewind use client-side fetch (double loading flash) | 93 ✅ |
+| 27 | Consumer | Settings hash anchor `#invite-friends` not verified | 93 ✅ |
+| 28 | API | POS routes inconsistent envelope shapes | 93 ✅ |
+| 29 | API | `POST /api/sessions/[id]/beers` doesn't validate beer_id existence | 93 ✅ |
 | 30 | API | Challenges + challenge_participants were missing from Database types (FIXED in Sprint 91) | Done |
 
 ---

@@ -217,7 +217,7 @@ Brilliant product instincts, trusts the team completely, types fast and sometime
 app/(app)/                    — Consumer app
 app/(brewery-admin)/          — Brewery owner dashboard
 app/(superadmin)/             — Platform admin
-app/api/                      — 59 API endpoints
+app/api/                      — 66+ API endpoints
 components/session/           — Session flow (was checkin/, renamed S64)
 components/                   — Shared components
 lib/                          — Utils, Supabase clients, XP logic
@@ -226,7 +226,9 @@ lib/beerStyleColors.ts        — 26 styles → 6 color families
 lib/pos-crypto.ts             — AES-256-GCM token encryption for POS (S86)
 lib/crm.ts                    — Customer segments, engagement scoring, profile builder (S89)
 lib/pos-sync/                 — POS sync engine: engine, mapper, normalizer, types, mock (S87)
-types/database.ts             — Supabase schema types (all tables registered)
+lib/pint-rewind.ts            — PintRewind data aggregation (extracted S93)
+lib/wrapped.ts                — Wrapped stats + fetchWrappedStats() (extracted S93)
+types/database.ts             — Supabase schema types (all tables registered incl. BreweryAd)
 types/supabase-helpers.ts     — Common join shapes (S65)
 supabase/migrations/          — DB migrations (run in order, see README.md)
 supabase/functions/           — Edge Functions
@@ -246,9 +248,13 @@ scripts/supabase-setup.mjs    — One-time setup script
 
 ## 🗺️ Where We Are
 
-**Current Sprint:** Sprint 92 — The Audit Fix 🔧
-**Arc:** The Flywheel (Sprint 2 of 6)
-**Sprint plan (92):** `docs/plans/sprint-92-plan.md` — QA audit burndown: 3 P0s (ActiveSessionsCounter polling fix, embed auth check, motion.button violations), 9 P1s (fake Discover data → real DB queries, curated collections removed, beer list Edit link, notification link, Loyalty/Events toasts, 3 loading.tsx, 5 API auth checks, leaderboard xp_awarded fix), 4 P2 quick wins (promotions padding, metadata exports). 16 bugs fixed, 0 remaining P0s. Audit report: `docs/plans/qa-audit-sprint-91.md`.
+**Current Sprint:** Sprint 94 — TBD
+**Arc:** The Flywheel (Sprint 4 of 6)
+**Sprint plan (94):** `docs/plans/sprint-94-plan.md` — mug clubs + P2 polish
+**Last completed:** Sprint 93 — The Hardening ✅ — Full QA audit close-out (30/30 items), ad engine foundation (F-028: migration 061, 7 endpoints, feed card, admin UI), 11 endpoints rate-limited, TapList data integrity fixes, Wrapped/PintRewind SSR, skip-to-content a11y.
+**Retro (93):** `docs/retros/sprint-93-retro.md` (facilitated by Morgan)
+**Last completed:** Sprint 92 — The Audit Fix ✅ — 16 bugs fixed (3 P0s, 9 P1s, 4 P2s), zero P0s remaining. Audit report: `docs/plans/qa-audit-sprint-91.md`.
+**Retro (92):** N/A (rolled into Sprint 93 retro)
 **Last completed:** Sprint 91 — The Spotlight ✅ — Sponsored challenges (migration 060, creation UI with tier gating, discovery with haversine geo, analytics). Deep QA/BA audit: 83 API routes, 40+ pages.
 **Retro (91):** `docs/retros/sprint-91-retro.md` (facilitated by Sage)
 **Last completed:** Sprint 90 — The Close-Out ✅ — Arc close-out: API v1 polish, CRM threshold fix, REQ-072 audit. Open the Pipes arc CLOSED.

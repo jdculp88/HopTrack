@@ -199,6 +199,11 @@ export interface Database {
         Insert: Omit<ChallengeParticipant, "id" | "joined_at"> & { id?: string };
         Update: Partial<ChallengeParticipant>;
       };
+      brewery_ads: {
+        Row: BreweryAd;
+        Insert: Omit<BreweryAd, "id" | "created_at" | "updated_at" | "impressions" | "clicks" | "spent_cents"> & { id?: string };
+        Update: Partial<BreweryAd>;
+      };
     };
   };
 }
@@ -940,4 +945,25 @@ export interface ChallengeParticipant {
   current_progress: number;
   completed_at: string | null;
   joined_at: string;
+}
+
+export interface BreweryAd {
+  id: string;
+  brewery_id: string;
+  title: string;
+  body: string | null;
+  image_url: string | null;
+  cta_url: string | null;
+  cta_label: string;
+  radius_km: number;
+  budget_cents: number;
+  spent_cents: number;
+  impressions: number;
+  clicks: number;
+  starts_at: string;
+  ends_at: string | null;
+  is_active: boolean;
+  tier_required: "cask" | "barrel";
+  created_at: string;
+  updated_at: string;
 }

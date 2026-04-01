@@ -5,13 +5,13 @@ export async function GET(req: NextRequest) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
-    return NextResponse.json({ error: { message: "Unauthorized", status: 401 } }, { status: 401 });
+    return NextResponse.json({ data: null, meta: {}, error: { message: "Unauthorized", code: "UNAUTHORIZED", status: 401 } }, { status: 401 });
   }
 
   const { searchParams } = req.nextUrl;
   const breweryId = searchParams.get("brewery_id");
   if (!breweryId) {
-    return NextResponse.json({ error: { message: "brewery_id required", status: 400 } }, { status: 400 });
+    return NextResponse.json({ data: null, meta: {}, error: { message: "brewery_id required", code: "BAD_REQUEST", status: 400 } }, { status: 400 });
   }
 
   // Verify access
@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
     .maybeSingle() as any;
 
   if (!account || !["owner", "manager"].includes(account.role)) {
-    return NextResponse.json({ error: { message: "Forbidden", status: 403 } }, { status: 403 });
+    return NextResponse.json({ data: null, meta: {}, error: { message: "Forbidden", code: "FORBIDDEN", status: 403 } }, { status: 403 });
   }
 
   // Parse filters
@@ -49,7 +49,7 @@ export async function GET(req: NextRequest) {
   const { data: logs, count, error } = await query;
 
   if (error) {
-    return NextResponse.json({ error: { message: error.message, status: 500 } }, { status: 500 });
+    return NextResponse.json({ data: null, meta: {}, error: { message: error.message, code: "SERVER_ERROR", status: 500 } }, { status: 500 });
   }
 
   return NextResponse.json({
@@ -60,5 +60,7 @@ export async function GET(req: NextRequest) {
       limit,
       total_pages: Math.ceil((count ?? 0) / limit),
     },
+    meta: {},
+    error: null,
   });
 }

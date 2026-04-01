@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, Share2, Home } from "lucide-react";
 import Link from "next/link";
@@ -290,18 +290,11 @@ const cards: Card[] = [
   },
 ];
 
-export function PintRewindCards() {
-  const [data, setData] = useState<RewindData | null>(null);
-  const [loading, setLoading] = useState(true);
+export function PintRewindCards({ initialData }: { initialData?: RewindData | null }) {
+  const [data] = useState<RewindData | null>(initialData ?? null);
+  const [loading] = useState(false);
   const [current, setCurrent] = useState(0);
   const [direction, setDirection] = useState(0);
-
-  useEffect(() => {
-    fetch("/api/pint-rewind")
-      .then((r) => r.json())
-      .then((d) => { setData(d); setLoading(false); })
-      .catch(() => setLoading(false));
-  }, []);
 
   function goNext() {
     if (current < cards.length - 1) {

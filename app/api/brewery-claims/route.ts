@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { onBreweryClaim } from "@/lib/email-triggers";
+import { rateLimitResponse } from "@/lib/rate-limit";
 
 export async function POST(request: NextRequest) {
+  const rl = rateLimitResponse(request, "brewery-claims", { limit: 5, windowMs: 60_000 });
+  if (rl) return rl;
   try {
     const supabase = await createClient();
 

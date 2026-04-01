@@ -528,7 +528,7 @@ function FormModal({ title, onClose, onSave, saving, saveLabel, children }: {
         style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
         <div className="flex items-center justify-between">
           <h2 className="font-display text-xl font-bold" style={{ color: "var(--text-primary)" }}>{title}</h2>
-          <button onClick={onClose} style={{ color: "var(--text-muted)" }}><X size={20} /></button>
+          <button onClick={onClose} aria-label="Close" style={{ color: "var(--text-muted)" }}><X size={20} /></button>
         </div>
         {children}
         <div className="flex gap-3 pt-2">

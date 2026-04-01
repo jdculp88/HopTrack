@@ -183,7 +183,7 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
     setShowForm(false);
     setConfirmDiscard(false);
   }
-  const { success: toastSuccess } = useToast();
+  const { success: toastSuccess, error: toastError } = useToast();
 
   const filtered = beers.filter(b =>
     filter === "on_tap" ? b.is_on_tap :
@@ -277,9 +277,10 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
 
     // Save pour sizes — delete existing, insert new
     const validSizes = pourSizes.filter(s => s.label.trim() && s.price && !isNaN(parseFloat(s.price)));
-    await supabase.from("beer_pour_sizes").delete().eq("beer_id", savedBeerId);
+    const { error: pourDeleteError } = await supabase.from("beer_pour_sizes").delete().eq("beer_id", savedBeerId);
+    if (pourDeleteError) { toastError("Failed to update pour sizes"); setSaving(false); return; }
     if (validSizes.length > 0) {
-      await supabase.from("beer_pour_sizes").insert(
+      const { error: pourInsertError } = await supabase.from("beer_pour_sizes").insert(
         validSizes.map((s, i) => ({
           beer_id: savedBeerId,
           label: s.label.trim(),
@@ -288,6 +289,7 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
           display_order: i,
         }))
       );
+      if (pourInsertError) { toastError("Failed to save pour sizes"); setSaving(false); return; }
     }
 
     setSaving(false);
@@ -345,14 +347,21 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
     const oldIndex = beers.findIndex(b => b.id === active.id);
     const newIndex = beers.findIndex(b => b.id === over.id);
     const reordered = arrayMove(beers, oldIndex, newIndex);
+    const previous = [...beers];
 
     // Optimistic update
     setBeers(reordered);
 
-    // Persist new order
-    const updates = reordered.map((b, i) => ({ id: b.id, display_order: i }));
-    for (const u of updates) {
-      await supabase.from("beers").update({ display_order: u.display_order }).eq("id", u.id);
+    // Persist new order — batched
+    const results = await Promise.all(
+      reordered.map((b, i) =>
+        supabase.from("beers").update({ display_order: i }).eq("id", b.id)
+      )
+    );
+    const failed = results.filter(r => r.error);
+    if (failed.length > 0) {
+      setBeers(previous);
+      toastError("Failed to save new order. Reverted.");
     }
   }
 
@@ -407,47 +416,70 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
     if (selectedIds.size === 0) return;
     setBatchSaving(true);
     const ids = Array.from(selectedIds);
+    const previous = [...beers];
 
-    await Promise.all(ids.map(id =>
+    // Optimistic
+    setBeers(prev => prev.filter(b => !ids.includes(b.id)));
+
+    const results = await Promise.all(ids.map(id =>
       supabase.from("beers").delete().eq("id", id)
     ));
-
-    setBeers(prev => prev.filter(b => !ids.includes(b.id)));
-    toastSuccess(`${ids.length} beer${ids.length !== 1 ? "s" : ""} removed`);
+    const failed = results.filter(r => r.error);
+    if (failed.length > 0) {
+      setBeers(previous);
+      toastError(`Failed to delete ${failed.length} beer${failed.length !== 1 ? "s" : ""}. Reverted.`);
+    } else {
+      toastSuccess(`${ids.length} beer${ids.length !== 1 ? "s" : ""} removed`);
+    }
     setBatchSaving(false);
     setSelectedIds(new Set());
     setBatchMode(false);
     setBatchDeleteConfirm(false);
   }
 
-  function sortByStyle() {
+  async function sortByStyle() {
     const sorted = [...beers].sort((a, b) => {
       const styleCmp = a.style.localeCompare(b.style);
       if (styleCmp !== 0) return styleCmp;
       return a.name.localeCompare(b.name);
     });
+    const previous = [...beers];
     setBeers(sorted);
-    // Persist new order
-    sorted.forEach(async (b, i) => {
-      await supabase.from("beers").update({ display_order: i }).eq("id", b.id);
-    });
-    toastSuccess("Beers sorted by style");
+    const results = await Promise.all(
+      sorted.map((b, i) => supabase.from("beers").update({ display_order: i }).eq("id", b.id))
+    );
+    if (results.some(r => r.error)) {
+      setBeers(previous);
+      toastError("Failed to save sort order. Reverted.");
+    } else {
+      toastSuccess("Beers sorted by style");
+    }
   }
 
-  function sortAlphabetical() {
+  async function sortAlphabetical() {
     const sorted = [...beers].sort((a, b) => a.name.localeCompare(b.name));
+    const previous = [...beers];
     setBeers(sorted);
-    sorted.forEach(async (b, i) => {
-      await supabase.from("beers").update({ display_order: i }).eq("id", b.id);
-    });
-    toastSuccess("Beers sorted alphabetically");
+    const results = await Promise.all(
+      sorted.map((b, i) => supabase.from("beers").update({ display_order: i }).eq("id", b.id))
+    );
+    if (results.some(r => r.error)) {
+      setBeers(previous);
+      toastError("Failed to save sort order. Reverted.");
+    } else {
+      toastSuccess("Beers sorted alphabetically");
+    }
   }
 
   async function handleDelete(beer: Beer) {
     setDeletingId(beer.id);
     setConfirmDeleteId(null);
-    await supabase.from("beers").delete().eq("id", beer.id);
-    setBeers(prev => prev.filter(b => b.id !== beer.id));
+    const { error } = await supabase.from("beers").delete().eq("id", beer.id);
+    if (error) {
+      toastError(`Failed to delete ${beer.name}`);
+    } else {
+      setBeers(prev => prev.filter(b => b.id !== beer.id));
+    }
     setDeletingId(null);
   }
 
