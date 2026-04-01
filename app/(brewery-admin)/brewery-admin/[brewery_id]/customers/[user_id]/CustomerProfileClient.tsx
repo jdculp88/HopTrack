@@ -138,7 +138,7 @@ export function CustomerProfileClient({ profile, breweryId, recentSessions }: Pr
           ) : (
             <div className="space-y-3">
               {p.topStyles.map((style, i) => {
-                const vars = getStyleVars(style.style as any);
+                const vars = getStyleVars(style.style);
                 const maxCount = p.topStyles[0]?.count ?? 1;
                 const barWidth = Math.max(15, (style.count / maxCount) * 100);
                 return (

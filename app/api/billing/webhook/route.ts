@@ -44,10 +44,10 @@ export async function POST(req: NextRequest) {
         await supabase
           .from("breweries")
           .update({
-            stripe_customer_id: session.customer,
-            subscription_tier: tier || "tap",
-            trial_ends_at: null, // clear trial — they're paying
-          } as any)
+            stripe_customer_id: session.customer as string,
+            subscription_tier: (tier || "tap") as "free" | "tap" | "cask" | "barrel",
+            trial_ends_at: null,
+          })
           .eq("id", brewery_id);
 
         console.info(`[webhook] Brewery ${brewery_id} subscribed to ${tier}`);
@@ -65,8 +65,8 @@ export async function POST(req: NextRequest) {
         await supabase
           .from("breweries")
           .update({
-            subscription_tier: isActive ? (tier || "tap") : "free",
-          } as any)
+            subscription_tier: (isActive ? (tier || "tap") : "free") as "free" | "tap" | "cask" | "barrel",
+          })
           .eq("id", brewery_id);
 
         break;
@@ -80,7 +80,7 @@ export async function POST(req: NextRequest) {
         // Downgrade to free — read-only mode kicks in
         await supabase
           .from("breweries")
-          .update({ subscription_tier: "free" } as any)
+          .update({ subscription_tier: "free" })
           .eq("id", brewery_id);
 
         console.info(`[webhook] Brewery ${brewery_id} subscription cancelled — downgraded to free`);

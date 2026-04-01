@@ -35,7 +35,7 @@ export function SettingsClient({ profile, userEmail }: SettingsClientProps) {
   const usernameDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { success: toastSuccess, error: toastError } = useToast();
   const [notifPrefs, setNotifPrefs] = useState<Record<string, boolean>>(
-    () => ({ ...DEFAULT_PREFS, ...((profile as any)?.notification_preferences ?? {}) })
+    () => ({ ...DEFAULT_PREFS, ...(profile?.notification_preferences ?? {}) })
   );
   const [referralCode, setReferralCode] = useState<string | null>(null);
   const [referralUseCount, setReferralUseCount] = useState(0);

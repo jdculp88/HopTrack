@@ -37,9 +37,9 @@ export async function GET(request: Request) {
       const uid = row.user_id;
       const existing = xpMap.get(uid);
       if (existing) {
-        existing.xp += (row as any).xp_awarded ?? 0;
+        existing.xp += (row as any).xp_awarded ?? 0; // supabase join shape
       } else {
-        xpMap.set(uid, { xp: (row as any).xp_awarded ?? 0, profile: row.profile });
+        xpMap.set(uid, { xp: (row as any).xp_awarded ?? 0, profile: row.profile }); // supabase join shape
       }
     }
 

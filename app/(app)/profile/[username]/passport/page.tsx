@@ -33,7 +33,7 @@ export default async function PassportPage({ params }: { params: Promise<{ usern
 
   // Deduplicate by beer_id — keep first occurrence (first time tried)
   const seen = new Set<string>();
-  const stamps = ((beerLogs as any[]) ?? [])
+  const stamps = ((beerLogs as any[]) ?? []) // supabase join shape
     .filter((log: any) => {
       if (!log.beer_id || seen.has(log.beer_id)) return false;
       seen.add(log.beer_id);
@@ -61,7 +61,7 @@ export default async function PassportPage({ params }: { params: Promise<{ usern
         className="inline-flex items-center gap-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-sm transition-colors"
       >
         <ArrowLeft size={14} />
-        {(profile as any).display_name ?? username}
+        {profile.display_name ?? username}
       </Link>
 
       <PassportGrid

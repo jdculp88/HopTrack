@@ -120,7 +120,7 @@ export function useSession() {
   }, [])
 
   const incrementBeerQuantity = useCallback(async (logId: string, currentQuantity: number): Promise<BeerLog | null> => {
-    return updateBeerLog(logId, { quantity: currentQuantity + 1 } as any)
+    return updateBeerLog(logId, { quantity: currentQuantity + 1 })
   }, [updateBeerLog])
 
   const endSession = useCallback(async (sessionId: string): Promise<SessionResult | null> => {

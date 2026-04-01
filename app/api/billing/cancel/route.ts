@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
     if (!isStripeConfigured()) {
       await supabase
         .from("breweries")
-        .update({ subscription_tier: "free" } as any)
+        .update({ subscription_tier: "free" })
         .eq("id", brewery_id);
 
       return NextResponse.json({ cancelled: true, demo: true });

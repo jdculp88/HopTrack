@@ -128,8 +128,8 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
       <div className="relative h-48 sm:h-64 mx-4 mt-4 rounded-2xl overflow-hidden">
         <ProfileBanner
           username={username}
-          displayName={(profile as any).display_name}
-          bannerUrl={(profile as any).banner_url}
+          displayName={profile.display_name}
+          bannerUrl={profile.banner_url}
         />
         {/* gradient overlay — stronger at bottom for readability */}
         <div className="absolute inset-0" style={{ background: "linear-gradient(to top, var(--bg), color-mix(in srgb, var(--bg) 30%, transparent), transparent)" }} />
@@ -176,8 +176,8 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
               <p className="text-[10px] text-[var(--text-muted)] mt-1 font-mono uppercase tracking-wide">Breweries</p>
             </div>
             <div className="text-center rounded-2xl py-3 px-1" style={{ background: "color-mix(in srgb, var(--surface-2) 55%, transparent)" }}>
-              <p className="font-mono font-bold text-xl leading-none" style={{ color: ((profile as any).current_streak ?? 0) > 0 ? "var(--accent-amber)" : "var(--accent-gold)" }}>
-                {(profile as any).current_streak ?? 0}
+              <p className="font-mono font-bold text-xl leading-none" style={{ color: (profile.current_streak ?? 0) > 0 ? "var(--accent-amber)" : "var(--accent-gold)" }}>
+                {profile.current_streak ?? 0}
               </p>
               <p className="text-[10px] text-[var(--text-muted)] mt-1 font-mono uppercase tracking-wide">Day Streak</p>
             </div>
@@ -204,23 +204,23 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
               style={{ background: "linear-gradient(to right, var(--accent-gold), var(--accent-amber))", width: `${levelInfo.progress}%` }}
             />
           </div>
-          {((profile as any).current_streak > 0 || (profile as any).longest_streak > 0) && (
+          {(profile.current_streak > 0 || profile.longest_streak > 0) && (
             <div className="flex items-center gap-3 mt-3 pt-3 border-t border-[var(--border)]">
-              {(profile as any).current_streak > 0 && (
+              {profile.current_streak > 0 && (
                 <div className="flex items-center gap-1.5">
                   <Flame
                     size={14}
-                    className={(profile as any).current_streak >= 30 ? "text-[var(--accent-amber)]" : (profile as any).current_streak >= 7 ? "text-[var(--accent-gold)]" : "text-[var(--text-muted)]"}
+                    className={profile.current_streak >= 30 ? "text-[var(--accent-amber)]" : profile.current_streak >= 7 ? "text-[var(--accent-gold)]" : "text-[var(--text-muted)]"}
                   />
-                  <span className="text-sm font-mono font-bold" style={{ color: (profile as any).current_streak >= 7 ? 'var(--accent-gold)' : 'var(--text-secondary)' }}>
-                    {(profile as any).current_streak}
+                  <span className="text-sm font-mono font-bold" style={{ color: profile.current_streak >= 7 ? 'var(--accent-gold)' : 'var(--text-secondary)' }}>
+                    {profile.current_streak}
                   </span>
                   <span className="text-xs text-[var(--text-muted)]">day streak</span>
                 </div>
               )}
-              {(profile as any).longest_streak > (profile as any).current_streak && (
+              {profile.longest_streak > profile.current_streak && (
                 <div className="flex items-center gap-1 ml-auto">
-                  <span className="text-xs text-[var(--text-muted)]">Best: {(profile as any).longest_streak}d</span>
+                  <span className="text-xs text-[var(--text-muted)]">Best: {profile.longest_streak}d</span>
                 </div>
               )}
             </div>

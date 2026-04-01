@@ -85,7 +85,7 @@ export async function PATCH(
   // Streak calculation (with grace period)
   const { data: profile } = await supabase
     .from('profiles')
-    .select('xp, level, current_streak, longest_streak, last_session_date, streak_grace_used_at')
+    .select('xp, level, current_streak, longest_streak, last_session_date, streak_grace_used_at, unique_breweries')
     .eq('id', user.id)
     .single()
 
@@ -145,7 +145,7 @@ export async function PATCH(
   if (rpcError) {
     const updates: any = { xp: newXp, level: newLevel }
     if (isFirstVisit && !isHomeSession) {
-      updates.unique_breweries = ((profile as any)?.unique_breweries || 0) + 1
+      updates.unique_breweries = (profile?.unique_breweries || 0) + 1
     }
     if (streakUpdates) {
       updates.current_streak = streakUpdates.current_streak

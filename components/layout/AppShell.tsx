@@ -110,7 +110,7 @@ function AppShellInner({ children, username, unreadNotifications = 0 }: AppShell
           .eq('id', breweryId)
           .maybeSingle();
         if (brewery) {
-          setPreselectedBrewery(brewery as any);
+          setPreselectedBrewery(brewery as Brewery); // partial select, safe for preselection
           setCheckinOpen(true);
         }
       } catch {

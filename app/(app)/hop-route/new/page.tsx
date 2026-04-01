@@ -20,7 +20,7 @@ export default async function HopRouteNewPage() {
 
   const styleMap = new Map<string, { total: number; count: number }>();
   for (const log of beerLogs ?? []) {
-    const style = (log.beer as any)?.style;
+    const style = (log.beer as any)?.style; // supabase join shape
     if (!style || !log.rating) continue;
     const existing = styleMap.get(style) ?? { total: 0, count: 0 };
     styleMap.set(style, { total: existing.total + log.rating, count: existing.count + 1 });

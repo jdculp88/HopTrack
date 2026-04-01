@@ -22,7 +22,7 @@ export function OnboardingStepLogo({ breweryId, onComplete }: OnboardingStepLogo
     const supabase = createClient();
     const { error } = await supabase
       .from("breweries")
-      .update({ logo_url: url } as any)
+      .update({ logo_url: url })
       .eq("id", breweryId);
 
     if (!error) {

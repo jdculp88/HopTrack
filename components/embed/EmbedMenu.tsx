@@ -47,6 +47,7 @@ interface EmbedBeer {
   total_ratings: number | null;
   price_per_pint: number | null;
   glass_type: string | null;
+  item_type?: string | null;
   pour_sizes: { label: string; oz: number | null; price: number }[];
 }
 
@@ -244,7 +245,7 @@ export function EmbedMenu({
           // Group regular items by style/category family
           const groups: Record<string, typeof regularBeers> = {};
           for (const beer of regularBeers) {
-            const family = getStyleFamily(beer.style ?? "", (beer as any).item_type);
+            const family = getStyleFamily(beer.style ?? "", beer.item_type);
             if (!groups[family]) groups[family] = [];
             groups[family].push(beer);
           }

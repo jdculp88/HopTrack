@@ -169,7 +169,7 @@ export function BreweryCard({ brewery, distance, variant = "default", className 
               ✓ Visited
             </div>
           )}
-          {(brewery as any).has_upcoming_events && !brewery.user_visit && (
+          {brewery.has_upcoming_events && !brewery.user_visit && (
             <div className="absolute top-3 right-3 flex items-center gap-1 bg-[#5B8DEF]/90 text-white text-xs font-mono px-2 py-0.5 rounded-full">
               <Calendar size={10} /> Event
             </div>

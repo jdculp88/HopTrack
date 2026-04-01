@@ -630,8 +630,8 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
         })()}
 
         {/* Food Menu */}
-        {(brewery as any).menu_image_url && (() => {
-          const menuUrl = (brewery as any).menu_image_url as string;
+        {brewery.menu_image_url && (() => {
+          const menuUrl = brewery.menu_image_url;
           const isPdf = menuUrl.toLowerCase().endsWith(".pdf");
           return (
             <div>

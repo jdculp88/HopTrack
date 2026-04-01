@@ -398,7 +398,7 @@ export function BeerListsClient({ userId: _userId, initialLists }: BeerListsClie
                       ) : (
                         <div className="divide-y" style={{ borderColor: "var(--border)" }}>
                           {items.map((item) => {
-                            const beer = item.beer as any;
+                            const beer = item.beer as any; // supabase join shape
                             return (
                               <div key={item.id} className="flex items-center gap-3 px-4 py-2.5">
                                 <span

@@ -102,7 +102,7 @@ export async function POST(
     .single();
 
   const inviterName = inviterProfile?.display_name || inviterProfile?.username || "Someone";
-  const breweryName = (session.brewery as any)?.name ?? null;
+  const breweryName = (session.brewery as any)?.name ?? null; // supabase join shape
   const notifBody = breweryName
     ? `${inviterName} invited you to their session at ${breweryName}`
     : `${inviterName} invited you to their home session`;

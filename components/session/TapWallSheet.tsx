@@ -281,7 +281,7 @@ export default function TapWallSheet({
       const ok = await removeBeerLog(log.id)
       if (ok) ctxRemoveBeerLog(log.id)
     } else {
-      const updated = await updateBeerLog(log.id, { quantity: currentQty - 1 } as any)
+      const updated = await updateBeerLog(log.id, { quantity: currentQty - 1 })
       if (updated) ctxUpdateBeerLog(log.id, { ...log, quantity: currentQty - 1 })
     }
     setDecrementingLog(null)

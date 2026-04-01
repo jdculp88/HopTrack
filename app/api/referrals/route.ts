@@ -37,7 +37,7 @@ export async function GET(_request: Request) {
 
   // Try to fetch existing code
   let { data: codeRow } = await supabase
-    .from("referral_codes" as any)
+    .from("referral_codes")
     .select("id, code, use_count, created_at")
     .eq("user_id", user.id)
     .single() as { data: ReferralCodeRow | null };
@@ -48,7 +48,7 @@ export async function GET(_request: Request) {
     // Retry on collision (extremely rare)
     for (let attempt = 0; attempt < 5; attempt++) {
       const { data: inserted, error } = await supabase
-        .from("referral_codes" as any)
+        .from("referral_codes")
         .insert({ user_id: user.id, code })
         .select("id, code, use_count, created_at")
         .single() as { data: ReferralCodeRow | null; error: unknown };
@@ -65,7 +65,7 @@ export async function GET(_request: Request) {
 
   // Fetch referred users count + list
   const { data: uses } = await supabase
-    .from("referral_uses" as any)
+    .from("referral_uses")
     .select("referred_id, created_at, profile:profiles!referral_uses_referred_id_fkey(username, display_name, avatar_url)")
     .eq("referrer_id", user.id)
     .order("created_at", { ascending: false })
@@ -97,7 +97,7 @@ export async function POST(request: Request) {
 
   // Check if this user has already been referred
   const { data: existingUse } = await supabase
-    .from("referral_uses" as any)
+    .from("referral_uses")
     .select("id")
     .eq("referred_id", user.id)
     .single() as { data: { id: string } | null };
@@ -108,7 +108,7 @@ export async function POST(request: Request) {
 
   // Look up the code
   const { data: codeRow } = await supabase
-    .from("referral_codes" as any)
+    .from("referral_codes")
     .select("id, user_id, use_count")
     .eq("code", code.toUpperCase().trim())
     .single() as { data: Pick<ReferralCodeRow, "id" | "user_id" | "use_count"> | null };
@@ -123,7 +123,7 @@ export async function POST(request: Request) {
 
   // Record the referral use
   const { error: useError } = await supabase
-    .from("referral_uses" as any)
+    .from("referral_uses")
     .insert({ referrer_id: codeRow.user_id, referred_id: user.id });
 
   if (useError) {
@@ -132,14 +132,14 @@ export async function POST(request: Request) {
 
   // Increment use_count on the code
   await supabase
-    .from("referral_codes" as any)
+    .from("referral_codes")
     .update({ use_count: codeRow.use_count + 1 })
     .eq("id", codeRow.id);
 
   // Mark referred_by on the new user's profile
   await supabase
     .from("profiles")
-    .update({ referred_by: codeRow.user_id } as any)
+    .update({ referred_by: codeRow.user_id })
     .eq("id", user.id);
 
   // Reward the referrer: +250 XP (atomic via RPC — no race condition)

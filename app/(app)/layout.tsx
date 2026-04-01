@@ -22,7 +22,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     .eq("user_id", user.id)
     .eq("read", false);
 
-  const username = (profile as any)?.username ?? user.email?.split("@")[0] ?? "me";
+  const username = profile?.username ?? user.email?.split("@")[0] ?? "me";
 
   return (
     <AppShell username={username} unreadNotifications={unreadCount ?? 0}>

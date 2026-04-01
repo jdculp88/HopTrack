@@ -1,3 +1,5 @@
+import type { BreweryType } from "@/types/database";
+
 const BASE_URL = "https://api.openbrewerydb.org/v1";
 
 export interface OpenBreweryResult {
@@ -62,7 +64,7 @@ export function mapOpenBreweryToDb(b: OpenBreweryResult) {
   return {
     external_id: b.id,
     name: b.name,
-    brewery_type: b.brewery_type as any,
+    brewery_type: b.brewery_type as BreweryType, // external API string → our union type
     street: b.street || b.address_1 || null,
     city: b.city,
     state: b.state || b.state_province,

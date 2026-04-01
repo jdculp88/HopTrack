@@ -48,12 +48,27 @@ export function StarRating({
     if (navigator.vibrate) navigator.vibrate(30);
   }
 
+  function handleKeyDown(e: React.KeyboardEvent) {
+    if (!isInteractive) return;
+    if (e.key === "ArrowRight" || e.key === "ArrowUp") {
+      e.preventDefault();
+      const next = Math.min(5, (value || 0) + 0.5);
+      onChange?.(next);
+    } else if (e.key === "ArrowLeft" || e.key === "ArrowDown") {
+      e.preventDefault();
+      const prev = Math.max(0.5, (value || 0) - 0.5);
+      onChange?.(prev);
+    }
+  }
+
   return (
     <div
-      role="radiogroup"
-      aria-label="Star rating"
+      role={isInteractive ? "radiogroup" : "img"}
+      aria-label={isInteractive ? "Star rating" : `${value} out of 5 stars`}
       className={cn("inline-flex items-center gap-0.5", className)}
       onMouseLeave={() => setHovered(null)}
+      onKeyDown={handleKeyDown}
+      tabIndex={isInteractive ? 0 : undefined}
     >
       {Array.from({ length: 5 }).map((_, i) => {
         const starValue = i + 1;
@@ -70,7 +85,7 @@ export function StarRating({
             type="button"
             disabled={!isInteractive}
             aria-label={`Rate ${starValue} star${starValue !== 1 ? "s" : ""}`}
-            aria-checked={value >= starValue - 0.5 && value <= starValue}
+            aria-pressed={isInteractive ? (value >= starValue - 0.5 && value <= starValue) : undefined}
             className={cn(
               "relative appearance-none border-0 bg-transparent p-0",
               isInteractive ? "cursor-pointer" : "cursor-default"

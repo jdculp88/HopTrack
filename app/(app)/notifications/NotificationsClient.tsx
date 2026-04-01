@@ -156,7 +156,7 @@ interface NotificationsClientProps {
 
 export function NotificationsClient({ notifications: initial }: NotificationsClientProps) {
   const [notifications, setNotifications] = useState<Notification[]>(initial);
-  const [friendActions, setFriendActions] = useState<Record<string, "accepting" | "declining" | "accepted" | "declined">>({});
+  const [friendActions, setFriendActions] = useState<Record<string, "accepting" | "declining" | "accepted" | "declined" | undefined>>({});
   const [markingRead, setMarkingRead] = useState(false);
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const { success, error: showError } = useToast();
@@ -232,7 +232,7 @@ export function NotificationsClient({ notifications: initial }: NotificationsCli
       setFriendActions(p => ({ ...p, [notifId]: "accepted" }));
       success("Friend request accepted!");
     } else {
-      setFriendActions(p => ({ ...p, [notifId]: undefined as any }));
+      setFriendActions(p => ({ ...p, [notifId]: undefined }));
       showError("Failed to accept friend request");
     }
   }
@@ -248,7 +248,7 @@ export function NotificationsClient({ notifications: initial }: NotificationsCli
       setFriendActions(p => ({ ...p, [notifId]: "declined" }));
       success("Friend request declined");
     } else {
-      setFriendActions(p => ({ ...p, [notifId]: undefined as any }));
+      setFriendActions(p => ({ ...p, [notifId]: undefined }));
       showError("Failed to decline friend request");
     }
   }
@@ -548,7 +548,7 @@ function SingleNotification({
 }: {
   notification: Notification;
   index: number;
-  friendActions: Record<string, "accepting" | "declining" | "accepted" | "declined">;
+  friendActions: Record<string, "accepting" | "declining" | "accepted" | "declined" | undefined>;
   onAccept: (notifId: string, friendshipId: string) => void;
   onDecline: (notifId: string, friendshipId: string) => void;
   onDismiss: () => void;

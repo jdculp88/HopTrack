@@ -91,8 +91,8 @@ export function ExploreClient({
     const map: Record<string, number> = {};
     if (!geo.latitude || !geo.longitude) return map;
     for (const b of initialBreweries) {
-      const lat = (b as any).latitude;
-      const lng = (b as any).longitude;
+      const lat = b.latitude;
+      const lng = b.longitude;
       if (typeof lat === "number" && typeof lng === "number") {
         map[b.id] = haversineDistance(geo.latitude, geo.longitude, lat, lng);
       }

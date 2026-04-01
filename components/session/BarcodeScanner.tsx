@@ -95,7 +95,7 @@ export function BarcodeScanner({ onBeerFound, onClose }: BarcodeScannerProps) {
           await videoRef.current.play();
         }
 
-        const detector = new (window as any).BarcodeDetector({
+        const detector = new (window as any).BarcodeDetector({ // BarcodeDetector API not in TS stdlib
           formats: ["ean_13", "ean_8", "upc_a", "upc_e"],
         });
 

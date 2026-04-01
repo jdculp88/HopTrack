@@ -79,7 +79,7 @@ export async function DELETE(
   // Decrement total_checkins since the session creation incremented it
   // Non-critical — if RPC doesn't exist or fails, skip silently
   try {
-    await supabase.rpc("decrement_checkins" as any, { p_user_id: user.id });
+    await supabase.rpc("decrement_checkins" as any, { p_user_id: user.id }); // supabase rpc not in generated types
   } catch {
     // skip
   }

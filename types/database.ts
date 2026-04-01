@@ -247,6 +247,9 @@ export interface Profile {
   longest_streak: number;
   last_session_date: string | null;
   created_at: string;
+  banner_url?: string | null;
+  referred_by?: string | null;
+  email?: string | null;
   // Preference fields stored as JSONB on the profiles row
   notification_preferences?: Record<string, boolean> | null;
   share_live?: boolean | null;
@@ -301,6 +304,15 @@ export interface Brewery {
   verified: boolean;
   created_by: string | null;
   created_at: string;
+  logo_url: string | null;
+  subscription_tier?: "free" | "tap" | "cask" | "barrel";
+  hop_route_eligible?: boolean;
+  stripe_customer_id?: string | null;
+  trial_ends_at?: string | null;
+  // Barback crawl (Sprint 79)
+  data_source?: string | null;
+  last_crawled_at?: string | null;
+  crawl_beer_count?: number;
   // POS integration (Sprint 86)
   pos_provider: PosProvider | null;
   pos_connected: boolean;
@@ -381,6 +393,7 @@ export interface Beer {
   pos_item_id: string | null;
   pos_price_cents: number | null;
   pos_last_seen_at: string | null;
+  is_on_tap?: boolean;
   // Barcode scanning (Sprint 89)
   barcode: string | null;
 }
