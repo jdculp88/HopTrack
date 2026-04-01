@@ -680,6 +680,83 @@ export async function fetchFriendChallengeCompletions(
   }
 }
 
+// ─── Challenge Milestone Progress (Sprint 82 carry-over) ─────────────────────
+
+export interface FriendChallengeMilestone {
+  id: string;
+  userId: string;
+  username: string;
+  displayName: string;
+  avatarUrl: string | null;
+  challengeName: string;
+  challengeIcon: string;
+  progress: number; // 0-1
+  milestone: "50%" | "75%";
+  targetValue: number;
+  currentProgress: number;
+  breweryName: string;
+  breweryId: string;
+  updatedAt: string;
+}
+
+export async function fetchFriendChallengeMilestones(
+  supabase: SupabaseClient,
+  friendIds: string[]
+): Promise<FriendChallengeMilestone[]> {
+  if (friendIds.length === 0) return [];
+
+  try {
+    const { data } = await supabase
+      .from("challenge_participants")
+      .select(`
+        id,
+        current_progress,
+        user_id,
+        updated_at,
+        challenge:challenges(id, name, icon, target_value, brewery:breweries(id, name)),
+        profile:profiles(id, username, display_name, avatar_url)
+      `)
+      .in("user_id", friendIds)
+      .is("completed_at", null)
+      .order("updated_at", { ascending: false })
+      .limit(20) as any;
+
+    return ((data ?? []) as any[])
+      .filter((p: any) => {
+        if (!p.challenge || !p.profile) return false;
+        const pct = p.current_progress / p.challenge.target_value;
+        // Only show 50% and 75% milestones
+        return pct >= 0.5;
+      })
+      .map((p: any) => {
+        const pct = p.current_progress / p.challenge.target_value;
+        return {
+          id: p.id,
+          userId: p.profile.id,
+          username: p.profile.username,
+          displayName: p.profile.display_name ?? p.profile.username,
+          avatarUrl: p.profile.avatar_url,
+          challengeName: p.challenge.name,
+          challengeIcon: p.challenge.icon,
+          progress: pct,
+          milestone: pct >= 0.75 ? "75%" as const : "50%" as const,
+          targetValue: p.challenge.target_value,
+          currentProgress: p.current_progress,
+          breweryName: p.challenge.brewery?.name ?? "Unknown Brewery",
+          breweryId: p.challenge.brewery?.id ?? "",
+          updatedAt: p.updated_at,
+        };
+      })
+      // Deduplicate: one card per user per challenge (highest milestone)
+      .filter((m: FriendChallengeMilestone, i: number, arr: FriendChallengeMilestone[]) =>
+        arr.findIndex(x => x.userId === m.userId && x.challengeName === m.challengeName) === i
+      )
+      .slice(0, 5);
+  } catch {
+    return [];
+  }
+}
+
 export async function fetchFriendIds(
   supabase: SupabaseClient,
   userId: string

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Trophy, ChevronRight, X, Check, Loader2 } from "lucide-react";
-import { toast } from "sonner";
+import { useToast } from "@/components/ui/Toast";
 
 interface Challenge {
   id: string;
@@ -33,6 +33,7 @@ export function BreweryChallenges({ challenges, myParticipations }: Props) {
   const [participations, setParticipations] = useState<Participation[]>(myParticipations);
   const [selected, setSelected] = useState<Challenge | null>(null);
   const [joining, setJoining] = useState(false);
+  const { success: toastSuccess, error: toastError } = useToast();
 
   if (challenges.length === 0) return null;
 
@@ -54,10 +55,10 @@ export function BreweryChallenges({ challenges, myParticipations }: Props) {
 
       const participant = await res.json();
       setParticipations(prev => [...prev, { ...participant, challenge }]);
-      toast.success(`Joined "${challenge.name}"! Start a session here to make progress.`);
+      toastSuccess(`Joined "${challenge.name}"! Start a session here to make progress.`);
       setSelected(null);
     } catch (e: any) {
-      toast.error(e.message);
+      toastError(e.message);
     } finally {
       setJoining(false);
     }

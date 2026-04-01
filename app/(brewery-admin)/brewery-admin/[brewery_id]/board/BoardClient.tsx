@@ -24,7 +24,18 @@ interface BoardBeer {
   price_per_pint?: number | null;
   promo_text?: string | null;
   glass_type?: string | null;
+  item_type?: string;
+  category?: string | null;
 }
+
+const BOARD_SECTION_LABELS: Record<string, { label: string; emoji: string }> = {
+  beer: { label: "Beers", emoji: "🍺" },
+  cider: { label: "Ciders", emoji: "🍏" },
+  wine: { label: "Wine", emoji: "🍷" },
+  cocktail: { label: "Cocktails", emoji: "🍹" },
+  na_beverage: { label: "Non-Alcoholic", emoji: "🥤" },
+  food: { label: "Food & Snacks", emoji: "🍽️" },
+};
 
 interface BoardEvent {
   id: string;
@@ -259,6 +270,22 @@ export function BoardClient({
   const activeTapBeers = beers.filter(b => !b.is_featured && !b.is_86d);
   const eightySixedBeers = beers.filter(b => b.is_86d);
   const activeBeerCount = (featuredBeer ? 1 : 0) + activeTapBeers.length;
+
+  // Group active items by item_type for section headers
+  const hasMultipleTypes = new Set(activeTapBeers.map(b => b.item_type ?? "beer")).size > 1;
+  const groupedByType: { type: string; items: BoardBeer[] }[] = (() => {
+    if (!hasMultipleTypes) return [{ type: "beer", items: activeTapBeers }];
+    const typeOrder = ["beer", "cider", "wine", "cocktail", "na_beverage", "food"];
+    const groups: Record<string, BoardBeer[]> = {};
+    for (const b of activeTapBeers) {
+      const t = b.item_type ?? "beer";
+      if (!groups[t]) groups[t] = [];
+      groups[t].push(b);
+    }
+    return typeOrder
+      .filter(t => groups[t] && groups[t].length > 0)
+      .map(t => ({ type: t, items: groups[t] }));
+  })();
   const initials = getInitials(breweryName);
 
   // Realtime updates — refetch beers AND pour sizes
@@ -564,7 +591,7 @@ export function BoardClient({
           </div>
           <div style={{ flexShrink: 0, display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 2 }}>
             <span className="font-mono" style={{ fontSize: 13, textTransform: "uppercase", letterSpacing: "0.22em", color: C.gold }}>
-              On Tap
+              {hasMultipleTypes ? "On Menu" : "On Tap"}
             </span>
             <span className="font-mono" style={{ fontSize: 36, fontWeight: 700, lineHeight: 1, color: C.gold }}>
               {activeBeerCount}
@@ -704,11 +731,46 @@ export function BoardClient({
           style={{ flex: 1, minHeight: 0, padding: "16px 40px", overflowY: "auto" }}
         >
           <AnimatePresence mode="popLayout">
-            {activeTapBeers.map((beer, i) =>
-              renderBeerRow(beer, {
-                animDelay: (featuredBeer ? 1 : 0) * 0.04 + i * 0.04,
-              })
-            )}
+            {groupedByType.map((group, gi) => {
+              const section = BOARD_SECTION_LABELS[group.type] ?? { label: group.type, emoji: "" };
+              const baseDelay = (featuredBeer ? 1 : 0) * 0.04;
+              let itemOffset = 0;
+              for (let k = 0; k < gi; k++) itemOffset += groupedByType[k].items.length;
+              return (
+                <div key={group.type}>
+                  {/* Section header — only when multiple types */}
+                  {hasMultipleTypes && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.4, delay: baseDelay + itemOffset * 0.04 }}
+                      style={{
+                        display: "flex", alignItems: "center", gap: 12,
+                        marginBottom: "clamp(10px, 1.5vh, 20px)",
+                        marginTop: gi > 0 ? "clamp(16px, 2vh, 28px)" : 0,
+                      }}
+                    >
+                      <span style={{ fontSize: 20 }}>{section.emoji}</span>
+                      <span className="font-mono" style={{
+                        fontSize: 14, textTransform: "uppercase", letterSpacing: "0.2em",
+                        color: C.gold, fontWeight: 700,
+                      }}>
+                        {section.label}
+                      </span>
+                      <span className="font-mono" style={{ fontSize: 13, color: C.textSubtle }}>
+                        ({group.items.length})
+                      </span>
+                      <div style={{ flex: 1, height: 1, background: "rgba(212,168,67,0.2)" }} />
+                    </motion.div>
+                  )}
+                  {group.items.map((beer, i) =>
+                    renderBeerRow(beer, {
+                      animDelay: baseDelay + (itemOffset + i) * 0.04,
+                    })
+                  )}
+                </div>
+              );
+            })}
             {eightySixedBeers.map((beer, i) =>
               renderBeerRow(beer, {
                 eightySixed: true,

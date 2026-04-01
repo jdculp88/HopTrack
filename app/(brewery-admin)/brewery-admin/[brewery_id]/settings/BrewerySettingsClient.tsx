@@ -1,16 +1,20 @@
 "use client";
 
-import { useState } from "react";
-import { Save, Loader2 } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { Save, Loader2, UtensilsCrossed, Key, Plug, Unplug, RefreshCw, ArrowUpRight, Lock, ChevronDown, ChevronUp } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
 import { useToast } from "@/components/ui/Toast";
 import { ImageUpload } from "@/components/ui/ImageUpload";
+import { MenuUpload } from "@/components/ui/MenuUpload";
+import { ApiKeyManager } from "@/components/brewery-admin/ApiKeyManager";
 
 interface BrewerySettingsClientProps {
   brewery: any;
   role: string;
+  subscriptionTier?: string;
 }
 
-export function BrewerySettingsClient({ brewery, role }: BrewerySettingsClientProps) {
+export function BrewerySettingsClient({ brewery, role, subscriptionTier = "free" }: BrewerySettingsClientProps) {
   const [form, setForm] = useState({
     name: brewery?.name ?? "",
     street: brewery?.street ?? "",
@@ -20,6 +24,7 @@ export function BrewerySettingsClient({ brewery, role }: BrewerySettingsClientPr
     phone: brewery?.phone ?? "",
     description: brewery?.description ?? "",
     cover_image_url: brewery?.cover_image_url ?? "",
+    menu_image_url: brewery?.menu_image_url ?? "",
   });
   const [saving, setSaving] = useState(false);
   const { success, error: toastError } = useToast();
@@ -106,6 +111,27 @@ export function BrewerySettingsClient({ brewery, role }: BrewerySettingsClientPr
           </p>
         </div>
 
+        {/* Food Menu Upload */}
+        <div>
+          <label className="text-xs font-mono uppercase tracking-wider block mb-1.5" style={{ color: "var(--text-muted)" }}>
+            <span className="flex items-center gap-1.5">
+              <UtensilsCrossed size={12} /> Food Menu
+            </span>
+          </label>
+          <MenuUpload
+            bucket="brewery-covers"
+            folder={`${brewery.id}/menu`}
+            currentUrl={form.menu_image_url || null}
+            onUpload={(url) => setForm(f => ({ ...f, menu_image_url: url }))}
+            onRemove={() => setForm(f => ({ ...f, menu_image_url: "" }))}
+            maxSizeMb={10}
+            label="Upload food menu"
+          />
+          <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>
+            Upload a photo, scan, or PDF of your food menu. Shown on your public brewery page.
+          </p>
+        </div>
+
         {/* Description */}
         <div>
           <label className="text-xs font-mono uppercase tracking-wider block mb-1.5" style={{ color: "var(--text-muted)" }}>
@@ -139,6 +165,25 @@ export function BrewerySettingsClient({ brewery, role }: BrewerySettingsClientPr
         </div>
       </div>
 
+      {/* API Keys */}
+      {(role === "owner" || role === "manager") && (
+        <div className="mt-6 rounded-2xl border p-6" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
+          <div className="flex items-center gap-2 mb-1">
+            <Key size={18} style={{ color: "var(--accent-gold)" }} />
+            <h3 className="font-display font-bold text-lg" style={{ color: "var(--text-primary)" }}>API Keys</h3>
+          </div>
+          <p className="text-sm mb-4" style={{ color: "var(--text-muted)" }}>
+            Generate API keys to access the HopTrack Public API. Use keys to build integrations, display your tap list on your website, or connect to POS systems.
+          </p>
+          <ApiKeyManager breweryId={brewery.id} />
+        </div>
+      )}
+
+      {/* POS Integration */}
+      {(role === "owner" || role === "manager") && (
+        <PosSettingsSection breweryId={brewery.id} subscriptionTier={subscriptionTier} />
+      )}
+
       {/* Danger zone */}
       {role === "owner" && (
         <div className="mt-6 rounded-2xl border p-6" style={{ borderColor: "var(--danger)", background: "rgba(196,75,58,0.05)" }}>
@@ -157,4 +202,269 @@ export function BrewerySettingsClient({ brewery, role }: BrewerySettingsClientPr
       )}
     </div>
   );
+}
+
+// ─── POS Settings Section ────────────────────────────────────────────────────
+
+interface PosConnection {
+  id: string;
+  provider: string;
+  status: string;
+  last_sync_at: string | null;
+  last_sync_status: string | null;
+  last_sync_item_count: number;
+  connected_at: string;
+  health: "green" | "yellow" | "red";
+}
+
+const PROVIDERS = [
+  { id: "toast" as const, name: "Toast", description: "Sync your tap list automatically from Toast POS", logo: "🍞" },
+  { id: "square" as const, name: "Square", description: "Sync your tap list automatically from Square POS", logo: "⬛" },
+];
+
+function PosSettingsSection({ breweryId, subscriptionTier }: { breweryId: string; subscriptionTier: string }) {
+  const [connections, setConnections] = useState<PosConnection[]>([]);
+  const [recentSyncs, setRecentSyncs] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [syncing, setSyncing] = useState<string | null>(null);
+  const [disconnecting, setDisconnecting] = useState<string | null>(null);
+  const [showSyncHistory, setShowSyncHistory] = useState(false);
+  const { success, error: toastError } = useToast();
+
+  const isTierEligible = ["cask", "barrel"].includes(subscriptionTier);
+
+  const fetchStatus = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/pos/status?brewery_id=${breweryId}`);
+      if (res.ok) {
+        const json = await res.json();
+        setConnections(json.data.connections || []);
+        setRecentSyncs(json.data.recent_syncs || []);
+      }
+    } catch {
+      // Silently fail — status is non-critical
+    } finally {
+      setLoading(false);
+    }
+  }, [breweryId]);
+
+  useEffect(() => { fetchStatus(); }, [fetchStatus]);
+
+  async function handleConnect(provider: string) {
+    window.location.href = `/api/pos/connect/${provider}?brewery_id=${breweryId}`;
+  }
+
+  async function handleDisconnect(provider: string) {
+    setDisconnecting(provider);
+    try {
+      const res = await fetch(`/api/pos/disconnect/${provider}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ brewery_id: breweryId }),
+      });
+      if (res.ok) {
+        success(`Disconnected from ${provider}`);
+        fetchStatus();
+      } else {
+        const json = await res.json();
+        toastError(json.error?.message || "Failed to disconnect");
+      }
+    } catch {
+      toastError("Failed to disconnect");
+    } finally {
+      setDisconnecting(null);
+    }
+  }
+
+  async function handleSync(provider: string) {
+    setSyncing(provider);
+    try {
+      const res = await fetch(`/api/pos/sync/${provider}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ brewery_id: breweryId }),
+      });
+      const json = await res.json();
+      if (res.ok) {
+        success("Sync complete!");
+        fetchStatus();
+      } else {
+        toastError(json.error?.message || "Sync failed");
+      }
+    } catch {
+      toastError("Sync failed");
+    } finally {
+      setSyncing(null);
+    }
+  }
+
+  function getConnectionForProvider(provider: string): PosConnection | undefined {
+    return connections.find(c => c.provider === provider && c.status !== "disconnected");
+  }
+
+  const healthColor = { green: "#22c55e", yellow: "#eab308", red: "#ef4444" };
+
+  return (
+    <div className="mt-6 rounded-2xl border p-6" style={{ background: "var(--surface)", borderColor: "var(--border)", position: "relative", overflow: "hidden" }}>
+      <div className="flex items-center gap-2 mb-1">
+        <Plug size={18} style={{ color: "var(--accent-gold)" }} />
+        <h3 className="font-display font-bold text-lg" style={{ color: "var(--text-primary)" }}>POS Integration</h3>
+      </div>
+      <p className="text-sm mb-5" style={{ color: "var(--text-muted)" }}>
+        Connect your point-of-sale system to keep your HopTrack tap list in sync automatically. No more double entry.
+      </p>
+
+      {/* Tier gating overlay */}
+      {!isTierEligible && (
+        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center rounded-2xl" style={{ background: "rgba(15,14,12,0.85)", backdropFilter: "blur(4px)" }}>
+          <Lock size={32} style={{ color: "var(--accent-gold)", marginBottom: 12 }} />
+          <p className="font-display font-bold text-lg text-center px-6" style={{ color: "var(--text-primary)" }}>
+            Connect your POS and never double-enter a tap list again
+          </p>
+          <p className="text-sm mt-2 text-center px-6" style={{ color: "var(--text-muted)" }}>
+            POS integration is available on Cask ($149/mo) and Barrel tiers.
+          </p>
+          <button
+            className="mt-4 px-6 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2"
+            style={{ background: "var(--accent-gold)", color: "var(--bg)" }}
+            onClick={() => window.location.href = `/brewery-admin/${breweryId}/billing`}
+          >
+            Upgrade to Cask <ArrowUpRight size={14} />
+          </button>
+        </div>
+      )}
+
+      {/* Connection cards */}
+      <div className="space-y-3">
+        {PROVIDERS.map(prov => {
+          const conn = getConnectionForProvider(prov.id);
+          const isConnected = !!conn && conn.status === "active";
+          const isDisconnecting = disconnecting === prov.id;
+          const isSyncing = syncing === prov.id;
+
+          return (
+            <div key={prov.id} className="rounded-xl border p-4" style={{ borderColor: "var(--border)", background: "var(--surface-2)" }}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">{prov.logo}</span>
+                  <div>
+                    <p className="font-semibold text-sm" style={{ color: "var(--text-primary)" }}>{prov.name}</p>
+                    <p className="text-xs" style={{ color: "var(--text-muted)" }}>{prov.description}</p>
+                  </div>
+                </div>
+                {!isConnected ? (
+                  <button
+                    onClick={() => handleConnect(prov.id)}
+                    disabled={loading}
+                    className="px-4 py-2 rounded-xl text-sm font-semibold transition-all"
+                    style={{ background: "var(--accent-gold)", color: "var(--bg)" }}
+                  >
+                    Connect
+                  </button>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full" style={{ background: healthColor[conn.health] }} />
+                    <span className="text-xs font-mono" style={{ color: "var(--text-muted)" }}>
+                      {conn.health === "green" ? "Synced" : conn.health === "yellow" ? "Stale" : "Error"}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Connected state details */}
+              <AnimatePresence>
+                {isConnected && conn && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="mt-3 pt-3 border-t" style={{ borderColor: "var(--border)" }}>
+                      <div className="flex items-center justify-between text-xs" style={{ color: "var(--text-muted)" }}>
+                        <div className="space-y-1">
+                          <p>Connected {formatTimeAgo(conn.connected_at)}</p>
+                          <p>Last sync: {formatTimeAgo(conn.last_sync_at)} · {conn.last_sync_item_count} items</p>
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleSync(prov.id)}
+                            disabled={isSyncing}
+                            className="px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-colors"
+                            style={{ border: "1px solid var(--border)", color: "var(--text-primary)" }}
+                          >
+                            {isSyncing ? <Loader2 size={12} className="animate-spin" /> : <RefreshCw size={12} />}
+                            Sync Now
+                          </button>
+                          <button
+                            onClick={() => handleDisconnect(prov.id)}
+                            disabled={isDisconnecting}
+                            className="px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-colors"
+                            style={{ border: "1px solid var(--danger)", color: "var(--danger)" }}
+                          >
+                            {isDisconnecting ? <Loader2 size={12} className="animate-spin" /> : <Unplug size={12} />}
+                            Disconnect
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Sync History */}
+      {recentSyncs.length > 0 && (
+        <div className="mt-4">
+          <button
+            onClick={() => setShowSyncHistory(!showSyncHistory)}
+            className="flex items-center gap-1.5 text-xs font-medium"
+            style={{ color: "var(--text-muted)" }}
+          >
+            {showSyncHistory ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+            Sync History ({recentSyncs.length})
+          </button>
+          <AnimatePresence>
+            {showSyncHistory && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                className="overflow-hidden"
+              >
+                <div className="mt-2 space-y-1.5">
+                  {recentSyncs.map((sync: any) => (
+                    <div key={sync.id} className="flex items-center justify-between text-xs px-3 py-2 rounded-lg" style={{ background: "var(--surface-2)" }}>
+                      <div className="flex items-center gap-2" style={{ color: "var(--text-muted)" }}>
+                        <span className="w-1.5 h-1.5 rounded-full" style={{ background: sync.status === "success" ? "#22c55e" : sync.status === "partial" ? "#eab308" : "#ef4444" }} />
+                        <span className="capitalize">{sync.provider}</span>
+                        <span>·</span>
+                        <span className="capitalize">{sync.sync_type}</span>
+                      </div>
+                      <div className="flex items-center gap-3" style={{ color: "var(--text-muted)" }}>
+                        <span>+{sync.items_added} /{sync.items_updated}u /-{sync.items_removed}</span>
+                        <span>{formatTimeAgo(sync.created_at)}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      )}
+    </div>
+  );
+
+  function formatTimeAgo(dateStr: string | null): string {
+    if (!dateStr) return "Never";
+    const diff = Date.now() - new Date(dateStr).getTime();
+    if (diff < 60_000) return "Just now";
+    if (diff < 3_600_000) return `${Math.floor(diff / 60_000)}m ago`;
+    if (diff < 86_400_000) return `${Math.floor(diff / 3_600_000)}h ago`;
+    return `${Math.floor(diff / 86_400_000)}d ago`;
+  }
 }

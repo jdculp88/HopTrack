@@ -243,7 +243,14 @@ scripts/supabase-setup.mjs    — One-time setup script
 
 ## 🗺️ Where We Are
 
-**Current Sprint:** Sprint 83 — TBD
+**Current Sprint:** Sprint 86 — The Connector 🔌
+**Arc:** Open the Pipes (Sprints 85-90) — Integrations
+**Sprint plan (86):** `docs/plans/sprint-86-plan.md` — POS integration foundation: migration 058 (pos_connections, pos_item_mappings, pos_sync_logs + beer/brewery POS columns), AES-256-GCM token encryption (lib/pos-crypto.ts), 9 API endpoints (/api/pos/connect, callback, disconnect, sync, status, mapping, webhook/toast, webhook/square), POS Settings UI in brewery admin (connection cards, sync status, tier gating — Cask/Barrel only), HMAC-SHA256 webhook verification + replay protection. OAuth flows stubbed pending partner approval.
+**Last completed:** Sprint 85 — The Pipeline ✅ — Public API v1 (F-016): 7 versioned endpoints at `/api/v1/`, API key system (SHA-256, revocable, brewery-scoped), standardized JSON envelope, rate limiting, CORS, ApiKeyManager UI in Settings, API Documentation in Resources, migration 057, REQ-073 written (POS Integration).
+**Sprint plan (85):** `docs/plans/sprint-85-plan.md` — Public API v1 (F-016): 7 versioned endpoints at `/api/v1/` (brewery detail, beers/tap list, full menu, events, stats, beer detail, beer search), API key system (SHA-256 hashed, `ht_live_` prefix, max 5 per brewery, revocable), standardized JSON envelope (`{ data, meta, error }`), rate limiting (100/min authenticated, 20/min public), CORS, ApiKeyManager UI in brewery Settings, API Documentation section in Resources page, migration 057 (api_keys table + RLS + limit trigger). REQ-073 written (POS Integration — Toast + Square).
+**Last completed:** Sprint 84 — The Wrap ✅ — HopTrack Wrapped (F-012): 7-slide animated Year-in-Review experience (stats, personality, top brewery/beer, cities, adventurer score, level badge), swipeable slides with Framer Motion, Web Share API sharing, You tab CTA, empty state. Also: brewery-covers storage bucket (migration 056). BL-005 logged (menu upload PGRST204 cache bug).
+**Last completed:** Sprint 83 — The Palette ✅ — Beverage category colors (cider/wine/cocktail/NA — 4 new color families, CSS vars dark+light, card-bg-reco rules, beerStyleColors.ts expanded with itemType param), PDF menu upload (MenuUpload component, brewery settings + detail page PDF display), embed menu multi-beverage grouping
+**Retro (83):** `docs/retros/sprint-83-retro.md` (facilitated by Jamie — first time)
 **Last completed:** Sprint 82 — The Full Menu ✅ — Non-beer tap list items (F-011 Phase 1: cider/wine/cocktail/NA), food pivot (menu image upload in Settings), HopRoute location autocomplete (F-030), Challenge feed card fixes + ChallengeMilestoneFeedCard, glass library 20→53 (one-for-one from 5 guides), glass picker filtered by type, Resources section in brewery admin, REQ-072 documented
 **Retro (82):** `docs/retros/sprint-82-retro.md`
 **Sprint plan (82):** `docs/plans/sprint-82-plan.md`
@@ -405,6 +412,35 @@ Migration state (001-041): all applied — see `docs/sprint-history.md#migration
 - `AchievementFeedCard` — `role="article"` + `aria-label` added
 - `SessionCard` — `role="article"` + `aria-label` + `whileInView` scroll reveal added
 - 6 public API routes — `Cache-Control: public` headers on 200 GET responses
+
+### Sprint 85 — The Pipeline ✅ (2026-04-01)
+**Theme:** Public API v1 — the foundation for all integrations
+**Arc:** Open the Pipes (Sprints 85-90)
+
+**Goal 1: Public API v1 (F-016)** — Versioned REST API at `/api/v1/`. 7 read-only endpoints: brewery detail, tap list (beers with pour sizes), full menu (grouped by item_type), events, stats (API key required), beer detail, beer search. API key system: SHA-256 hashed keys with `ht_live_` prefix, max 5 per brewery, revocable from Settings. Standardized JSON envelope (`{ data, meta, error }`). Rate limiting: 100 req/min authenticated, 20 req/min unauthenticated. CORS enabled. Stats endpoint is brewery-scoped (key must match brewery_id).
+
+**Goal 2: POS Integration Research (REQ-073)** — Sam wrote comprehensive requirements for Toast + Square POS integration: OAuth2 flows, menu sync webhooks, sales intelligence, keg tracking, encrypted token storage, tier gating (Cask/Barrel only). Groundwork for Sprints 86-87.
+
+**Key changes from Sprint 85:**
+- `supabase/migrations/057_api_keys.sql` — NEW: api_keys table, RLS (brewery admins + superadmin), 5-key limit trigger
+- `lib/api-keys.ts` — NEW: generateApiKey(), validateApiKey(), hashApiKey(), apiResponse(), apiError(), apiOptions()
+- `app/api/v1/breweries/[brewery_id]/route.ts` — NEW: public brewery detail
+- `app/api/v1/breweries/[brewery_id]/beers/route.ts` — NEW: tap list with pour sizes + pagination
+- `app/api/v1/breweries/[brewery_id]/menu/route.ts` — NEW: full menu grouped by item_type
+- `app/api/v1/breweries/[brewery_id]/events/route.ts` — NEW: upcoming events + pagination
+- `app/api/v1/breweries/[brewery_id]/stats/route.ts` — NEW: brewery analytics (API key required, brewery-scoped)
+- `app/api/v1/beers/[beer_id]/route.ts` — NEW: beer detail with brewery + pour sizes
+- `app/api/v1/beers/search/route.ts` — NEW: search by name, style, brewery_id, item_type
+- `app/api/v1/brewery/[brewery_id]/api-keys/route.ts` — NEW: key management (list, create, revoke)
+- `components/brewery-admin/ApiKeyManager.tsx` — NEW: API key management UI with AnimatePresence
+- `app/(brewery-admin)/.../settings/BrewerySettingsClient.tsx` — UPDATED: API Keys section added
+- `app/(brewery-admin)/.../resources/page.tsx` — UPDATED: API Documentation section (getting started, endpoints, rate limits)
+- `next.config.ts` — UPDATED: CORS headers for /api/v1/ routes
+- `types/database.ts` — UPDATED: ApiKey interface + table registration
+- `docs/requirements/REQ-073-pos-integration.md` — NEW: POS integration requirements (Sam)
+- `docs/plans/sprint-85-plan.md` — NEW: sprint plan
+
+---
 
 ### Sprint 74 — First Impressions ✅ (2026-03-31)
 **Theme:** Brewery onboarding wizard + push notification wiring

@@ -11,12 +11,12 @@ export default async function BrewerySettingsPage({ params }: { params: Promise<
   if (!user) redirect("/login");
 
   const { data: account } = await supabase
-    .from("brewery_accounts").select("role")
+    .from("brewery_accounts").select("role, subscription_tier")
     .eq("user_id", user.id).eq("brewery_id", brewery_id).single() as any;
   if (!account) redirect("/brewery-admin");
 
   const { data: brewery } = await supabase
     .from("breweries").select("*").eq("id", brewery_id).single() as any;
 
-  return <BrewerySettingsClient brewery={brewery as any} role={(account as any).role} />;
+  return <BrewerySettingsClient brewery={brewery as any} role={(account as any).role} subscriptionTier={(account as any).subscription_tier} />;
 }

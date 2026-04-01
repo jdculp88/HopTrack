@@ -2,7 +2,8 @@ import { createClient } from "@/lib/supabase/server";
 import { notFound, redirect } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { MapPin, Globe, Phone, Star, Users, ArrowLeft, TrendingUp, Beer, CheckCheck, Award, Calendar, Clock } from "lucide-react";
+import { MapPin, Globe, Phone, Star, Users, ArrowLeft, TrendingUp, Beer, CheckCheck, Award, Calendar, Clock, Wine, Coffee, UtensilsCrossed, FileText, ExternalLink } from "lucide-react";
+import { ITEM_TYPE_LABELS, ITEM_TYPE_EMOJI } from "@/types/database";
 import type { Brewery, BreweryVisit, Profile } from "@/types/database";
 import { BeerCard } from "@/components/beer/BeerCard";
 import { BeerStyleBadge } from "@/components/ui/BeerStyleBadge";
@@ -500,27 +501,120 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
           </Link>
         )}
 
-        {/* On Tap — Beer Menu */}
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-display text-2xl font-bold text-[var(--text-primary)]">On Tap</h2>
-            <span className="text-sm font-mono text-[var(--text-muted)]">{beers?.length ?? 0} beers</span>
-          </div>
+        {/* On Tap — Full Menu */}
+        {(() => {
+          const allItems = beers ?? [];
+          const beerItems = allItems.filter((b: any) => !b.item_type || b.item_type === "beer");
+          const nonBeerItems = allItems.filter((b: any) => b.item_type && b.item_type !== "beer");
+          const hasNonBeer = nonBeerItems.length > 0;
+          const typeOrder = ["beer", "cider", "wine", "cocktail", "na_beverage", "food"];
+          const grouped = hasNonBeer
+            ? typeOrder
+                .map(t => ({
+                  type: t,
+                  items: allItems.filter((b: any) => (b.item_type ?? "beer") === t),
+                }))
+                .filter(g => g.items.length > 0)
+            : [{ type: "beer", items: allItems }];
 
-          {beers && beers.length > 0 ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-              {(beers ?? []).map((beer) => (
-                <BeerCard key={beer.id} beer={beer} variant="grid" />
-              ))}
+          return (
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="font-display text-2xl font-bold text-[var(--text-primary)]">
+                  {hasNonBeer ? "Menu" : "On Tap"}
+                </h2>
+                <span className="text-sm font-mono text-[var(--text-muted)]">{allItems.length} items</span>
+              </div>
+
+              {allItems.length > 0 ? (
+                <div className="space-y-6">
+                  {grouped.map((group) => {
+                    const section = ITEM_TYPE_LABELS[group.type as keyof typeof ITEM_TYPE_LABELS] ?? group.type;
+                    const emoji = ITEM_TYPE_EMOJI[group.type as keyof typeof ITEM_TYPE_EMOJI] ?? "🍺";
+                    return (
+                      <div key={group.type}>
+                        {hasNonBeer && (
+                          <div className="flex items-center gap-2 mb-3">
+                            <span className="text-lg">{emoji}</span>
+                            <h3 className="font-display text-lg font-bold text-[var(--text-primary)]">{section}</h3>
+                            <span className="text-xs font-mono text-[var(--text-muted)]">({group.items.length})</span>
+                          </div>
+                        )}
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                          {group.items.map((beer: any) => (
+                            <BeerCard key={beer.id} beer={beer} variant="grid" />
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="text-center py-12 bg-[var(--surface)] rounded-2xl border border-[var(--border)]">
+                  <p className="text-4xl mb-3">🍺</p>
+                  <p className="font-display text-lg text-[var(--text-primary)]">Taps are quiet</p>
+                  <p className="text-sm text-[var(--text-secondary)] mt-1">This brewery hasn&apos;t added anything yet — check back soon.</p>
+                </div>
+              )}
             </div>
-          ) : (
-            <div className="text-center py-12 bg-[var(--surface)] rounded-2xl border border-[var(--border)]">
-              <p className="text-4xl mb-3">🍺</p>
-              <p className="font-display text-lg text-[var(--text-primary)]">Taps are quiet</p>
-              <p className="text-sm text-[var(--text-secondary)] mt-1">This brewery hasn&apos;t added beers yet — check back soon.</p>
+          );
+        })()}
+
+        {/* Food Menu */}
+        {(brewery as any).menu_image_url && (() => {
+          const menuUrl = (brewery as any).menu_image_url as string;
+          const isPdf = menuUrl.toLowerCase().endsWith(".pdf");
+          return (
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <UtensilsCrossed size={18} className="text-[var(--accent-gold)]" />
+                <h2 className="font-display text-2xl font-bold text-[var(--text-primary)]">Food Menu</h2>
+              </div>
+              {isPdf ? (
+                <a
+                  href={menuUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-4 p-6 rounded-2xl border border-[var(--border)] hover:border-[var(--accent-gold)]/40 transition-colors group"
+                  style={{ background: "var(--surface)" }}
+                >
+                  <div className="p-3 rounded-xl" style={{ background: "color-mix(in srgb, var(--accent-gold) 12%, var(--surface))" }}>
+                    <FileText size={28} style={{ color: "var(--accent-gold)" }} />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-display font-semibold text-[var(--text-primary)] group-hover:text-[var(--accent-gold)] transition-colors">
+                      View Food Menu
+                    </p>
+                    <p className="text-sm text-[var(--text-muted)]">Opens as PDF in a new tab</p>
+                  </div>
+                  <ExternalLink size={18} className="text-[var(--text-muted)] group-hover:text-[var(--accent-gold)] transition-colors" />
+                </a>
+              ) : (
+                <div className="rounded-2xl border border-[var(--border)] overflow-hidden">
+                  <a href={menuUrl} target="_blank" rel="noopener noreferrer">
+                    <img
+                      src={menuUrl}
+                      alt={`${brewery.name} food menu`}
+                      className="w-full h-auto"
+                      style={{ maxHeight: 600, objectFit: "contain", background: "var(--surface)" }}
+                    />
+                  </a>
+                  <div className="px-4 py-2 text-center" style={{ background: "var(--surface)" }}>
+                    <a
+                      href={menuUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs font-mono"
+                      style={{ color: "var(--accent-gold)" }}
+                    >
+                      Tap to view full size
+                    </a>
+                  </div>
+                </div>
+              )}
             </div>
-          )}
-        </div>
+          );
+        })()}
 
         {/* Challenges */}
         {activeChallenges.length > 0 && (

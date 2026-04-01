@@ -72,6 +72,24 @@
   --saison-peach:           #d48a50;
   --saison-peach-light:     #2a1a08;
 
+  /* ── Beverage Category Colors (dark mode) ───────────────────────────────── */
+  /* Content-layer only. One color per category. No sub-styles.              */
+  --cider-rose:             #B85C4A;
+  --cider-rose-light:       #2a1410;
+  --cider-rose-soft:        #D08878;
+
+  --wine-burgundy:          #722F37;
+  --wine-burgundy-light:    #1e0c10;
+  --wine-burgundy-soft:     #9E5B64;
+
+  --cocktail-teal:          #1A8E80;
+  --cocktail-teal-light:    #0a2420;
+  --cocktail-teal-soft:     #4DB8AC;
+
+  --na-lemon:               #BFA032;
+  --na-lemon-light:         #2a2208;
+  --na-lemon-soft:          #D4B958;
+
   /* ── Functional System Colors ───────────────────────────────────────────── */
   --streak-flame:           #e07830;
   --xp-emerald:             #4a8a5c;
@@ -127,6 +145,23 @@
 
   --saison-peach:           #d48a50;
   --saison-peach-light:     #f8eddf;
+
+  /* ── Beverage Category Colors (light mode) ──────────────────────────────── */
+  --cider-rose:             #B85C4A;
+  --cider-rose-light:       #F2DCD6;
+  --cider-rose-soft:        #9A4838;
+
+  --wine-burgundy:          #722F37;
+  --wine-burgundy-light:    #EDCFD4;
+  --wine-burgundy-soft:     #5C222A;
+
+  --cocktail-teal:          #1A8E80;
+  --cocktail-teal-light:    #C8EFEA;
+  --cocktail-teal-soft:     #147268;
+
+  --na-lemon:               #BFA032;
+  --na-lemon-light:         #F5EDCE;
+  --na-lemon-soft:          #9A8228;
 
   /* ── Functional System Colors ───────────────────────────────────────────── */
   --streak-flame:           #d06020;
@@ -624,6 +659,10 @@ input, select, textarea { font-size: max(16px, 1em); }
 .card-bg-reco[data-style="porter"] { background: linear-gradient(135deg, color-mix(in srgb, var(--porter-plum) 8%, var(--surface)) 0%, var(--surface) 60%); border-color: color-mix(in srgb, var(--porter-plum) 10%, var(--border)) !important; }
 .card-bg-reco[data-style="lager"]  { background: linear-gradient(135deg, color-mix(in srgb, var(--lager-sky) 8%, var(--surface)) 0%, var(--surface) 60%); border-color: color-mix(in srgb, var(--lager-sky) 10%, var(--border)) !important; }
 .card-bg-reco[data-style="saison"] { background: linear-gradient(135deg, color-mix(in srgb, var(--saison-peach) 8%, var(--surface)) 0%, var(--surface) 60%); border-color: color-mix(in srgb, var(--saison-peach) 10%, var(--border)) !important; }
+.card-bg-reco[data-style="cider"]    { background: linear-gradient(135deg, color-mix(in srgb, var(--cider-rose) 8%, var(--surface)) 0%, var(--surface) 60%); border-color: color-mix(in srgb, var(--cider-rose) 10%, var(--border)) !important; }
+.card-bg-reco[data-style="wine"]     { background: linear-gradient(135deg, color-mix(in srgb, var(--wine-burgundy) 8%, var(--surface)) 0%, var(--surface) 60%); border-color: color-mix(in srgb, var(--wine-burgundy) 10%, var(--border)) !important; }
+.card-bg-reco[data-style="cocktail"] { background: linear-gradient(135deg, color-mix(in srgb, var(--cocktail-teal) 8%, var(--surface)) 0%, var(--surface) 60%); border-color: color-mix(in srgb, var(--cocktail-teal) 10%, var(--border)) !important; }
+.card-bg-reco[data-style="na"]       { background: linear-gradient(135deg, color-mix(in srgb, var(--na-lemon) 8%, var(--surface)) 0%, var(--surface) 60%); border-color: color-mix(in srgb, var(--na-lemon) 10%, var(--border)) !important; }
 
 /* ── 10. SOCIAL — Intentionally bare ────────────────────────────────────── */
 /* No styles needed — restraint IS the design */

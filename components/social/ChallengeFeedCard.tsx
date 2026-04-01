@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { Trophy, MapPin } from "lucide-react";
 import { UserAvatar } from "@/components/ui/UserAvatar";
-import { timeAgo } from "@/lib/utils";
+import { formatRelativeTime } from "@/lib/utils";
 
 export interface FriendChallengeCompletion {
   id: string;
@@ -39,9 +39,11 @@ export function ChallengeFeedCard({
       <div className="flex items-start gap-3">
         <Link href={`/profile/${completion.username}`}>
           <UserAvatar
-            avatarUrl={completion.avatarUrl}
-            displayName={completion.displayName}
-            id={completion.userId}
+            profile={{
+              id: completion.userId,
+              display_name: completion.displayName,
+              avatar_url: completion.avatarUrl,
+            }}
             size="md"
           />
         </Link>
@@ -64,7 +66,7 @@ export function ChallengeFeedCard({
             </Link>
           </p>
           <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
-            {timeAgo(completion.completedAt)}
+            {formatRelativeTime(completion.completedAt)}
           </p>
         </div>
       </div>

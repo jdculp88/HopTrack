@@ -5,7 +5,7 @@ import { getStyleFamily } from "@/lib/beerStyleColors";
 
 // ─── Style grouping helpers ─────────────────────────────────────────────────
 
-const STYLE_ORDER = ["ipa", "lager", "stout", "sour", "porter", "saison", "default"] as const;
+const STYLE_ORDER = ["ipa", "lager", "stout", "sour", "porter", "saison", "cider", "wine", "cocktail", "na", "default"] as const;
 
 const STYLE_GROUP_NAMES: Record<string, string> = {
   ipa: "IPAs & Pale Ales",
@@ -14,6 +14,10 @@ const STYLE_GROUP_NAMES: Record<string, string> = {
   sour: "Sours & Wild Ales",
   porter: "Porters & Brown Ales",
   saison: "Wheat, Belgian & Saison",
+  cider: "Ciders",
+  wine: "Wine",
+  cocktail: "Cocktails",
+  na: "Non-Alcoholic",
   default: "Other",
 };
 
@@ -24,6 +28,10 @@ const STYLE_GROUP_ACCENTS: Record<string, string> = {
   porter: "#7B5B8D",
   lager: "#4A7B9B",
   saison: "#B8863B",
+  cider: "#B85C4A",
+  wine: "#722F37",
+  cocktail: "#1A8E80",
+  na: "#BFA032",
   default: "#9E8E7A",
 };
 
@@ -233,10 +241,10 @@ export function EmbedMenu({
             </p>
           </div>
         ) : (() => {
-          // Group regular beers by style family
+          // Group regular items by style/category family
           const groups: Record<string, typeof regularBeers> = {};
           for (const beer of regularBeers) {
-            const family = getStyleFamily(beer.style ?? "");
+            const family = getStyleFamily(beer.style ?? "", (beer as any).item_type);
             if (!groups[family]) groups[family] = [];
             groups[family].push(beer);
           }

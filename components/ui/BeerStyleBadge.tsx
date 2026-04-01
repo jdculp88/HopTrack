@@ -1,16 +1,18 @@
 import { cn } from "@/lib/utils";
-import type { BeerStyle } from "@/types/database";
+import type { BeerStyle, ItemType } from "@/types/database";
+import { ITEM_TYPE_LABELS } from "@/types/database";
 import { getStyleVars } from "@/lib/beerStyleColors";
 
 interface BeerStyleBadgeProps {
   style: BeerStyle | string | null;
+  itemType?: string | null;
   size?: "xs" | "sm" | "md";
   className?: string;
 }
 
-export function BeerStyleBadge({ style, size = "sm", className }: BeerStyleBadgeProps) {
-  if (!style) return null;
-  const vars = getStyleVars(style);
+export function BeerStyleBadge({ style, itemType, size = "sm", className }: BeerStyleBadgeProps) {
+  if (!style && !itemType) return null;
+  const vars = getStyleVars(style, itemType);
 
   const sizeClasses = {
     xs: "text-xs px-1.5 py-0.5",
@@ -31,7 +33,7 @@ export function BeerStyleBadge({ style, size = "sm", className }: BeerStyleBadge
         border: `1px solid color-mix(in srgb, ${vars.primary} 28%, transparent)`,
       }}
     >
-      {style}
+      {style || (itemType ? ITEM_TYPE_LABELS[itemType as ItemType] ?? itemType : "")}
     </span>
   );
 }

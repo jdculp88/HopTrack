@@ -35,6 +35,10 @@ import {
   ChallengeFeedCard,
   type FriendChallengeCompletion,
 } from "@/components/social/ChallengeFeedCard";
+import {
+  ChallengeMilestoneFeedCard,
+} from "@/components/social/ChallengeMilestoneFeedCard";
+import type { FriendChallengeMilestone } from "@/lib/queries/feed";
 import type { Session } from "@/types/database";
 import { useReactions } from "./ReactionContext";
 
@@ -48,7 +52,8 @@ export type FeedItem =
   | { type: "hop_route_completed"; data: HopRouteFeedItem; sortDate: string }
   | { type: "brewery_review"; data: FriendBreweryReview; sortDate: string }
   | { type: "hop_route_cta"; data: FriendActiveRoute; sortDate: string }
-  | { type: "challenge_completion"; data: FriendChallengeCompletion; sortDate: string };
+  | { type: "challenge_completion"; data: FriendChallengeCompletion; sortDate: string }
+  | { type: "challenge_milestone"; data: FriendChallengeMilestone; sortDate: string };
 
 export type { FriendBreweryReview };
 
@@ -115,6 +120,10 @@ export function FeedItemCard({
 
   if (item.type === "challenge_completion") {
     return <ChallengeFeedCard completion={item.data} index={index} />;
+  }
+
+  if (item.type === "challenge_milestone") {
+    return <ChallengeMilestoneFeedCard milestone={item.data} index={index} />;
   }
 
   return null;

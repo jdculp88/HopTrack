@@ -1,10 +1,36 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { MapPin, Clock, Users, Zap, Navigation, ChevronRight, Loader2, Beer } from "lucide-react";
 import { useToast } from "@/components/ui/Toast";
+
+// ─── Nominatim autocomplete types ────────────────────────────────────────────
+interface NominatimResult {
+  display_name: string;
+  lat: string;
+  lon: string;
+  address?: {
+    city?: string;
+    town?: string;
+    village?: string;
+    county?: string;
+    state?: string;
+    country?: string;
+  };
+}
+
+function formatLocationLabel(r: NominatimResult): string {
+  const addr = r.address;
+  if (!addr) return r.display_name.split(",").slice(0, 2).join(",").trim();
+  const city = addr.city || addr.town || addr.village || "";
+  const state = addr.state || "";
+  const country = addr.country || "";
+  const parts = [city, state].filter(Boolean);
+  if (country && country !== "United States") parts.push(country);
+  return parts.join(", ") || r.display_name.split(",").slice(0, 2).join(",").trim();
+}
 
 type GroupSize = "solo" | "couple" | "small" | "large";
 type Transport = "walking" | "rideshare" | "driving";
@@ -60,6 +86,77 @@ export function HopRouteNewClient({ tasteDna }: HopRouteNewClientProps) {
     d.setHours(d.getHours() + 4);
     return d.toISOString().slice(0, 16);
   });
+
+  // Autocomplete
+  const [suggestions, setSuggestions] = useState<NominatimResult[]>([]);
+  const [suggestionsLoading, setSuggestionsLoading] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [highlightIdx, setHighlightIdx] = useState(-1);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const suggestionsRef = useRef<HTMLDivElement>(null);
+
+  const fetchSuggestions = useCallback(async (query: string) => {
+    if (query.length < 2) { setSuggestions([]); return; }
+    setSuggestionsLoading(true);
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1&countrycodes=us`,
+        { headers: { "User-Agent": "HopTrack/1.0" } }
+      );
+      const data: NominatimResult[] = await res.json();
+      // Filter to places with a city/town/village
+      const filtered = data.filter(r => r.address?.city || r.address?.town || r.address?.village);
+      setSuggestions(filtered.length > 0 ? filtered : data.slice(0, 5));
+      setShowSuggestions(true);
+      setHighlightIdx(-1);
+    } catch {
+      setSuggestions([]);
+    } finally {
+      setSuggestionsLoading(false);
+    }
+  }, []);
+
+  function handleCityChange(value: string) {
+    setCity(value);
+    setCoords(null);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => fetchSuggestions(value), 300);
+  }
+
+  function selectSuggestion(r: NominatimResult) {
+    const label = formatLocationLabel(r);
+    setCity(label);
+    setCoords({ lat: parseFloat(r.lat), lng: parseFloat(r.lon) });
+    setShowSuggestions(false);
+    setSuggestions([]);
+  }
+
+  function handleCityKeyDown(e: React.KeyboardEvent) {
+    if (!showSuggestions || suggestions.length === 0) return;
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setHighlightIdx(prev => Math.min(prev + 1, suggestions.length - 1));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setHighlightIdx(prev => Math.max(prev - 1, 0));
+    } else if (e.key === "Enter" && highlightIdx >= 0) {
+      e.preventDefault();
+      selectSuggestion(suggestions[highlightIdx]);
+    } else if (e.key === "Escape") {
+      setShowSuggestions(false);
+    }
+  }
+
+  // Close suggestions on click outside
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (suggestionsRef.current && !suggestionsRef.current.contains(e.target as Node)) {
+        setShowSuggestions(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
 
   // Step 2 — Preferences
   const [stopCount, setStopCount] = useState(3);
@@ -213,16 +310,58 @@ export function HopRouteNewClient({ tasteDna }: HopRouteNewClientProps) {
                 {locationMode === "gps" ? "Using your location" : "Use my location"}
               </button>
 
-              <div className="relative">
+              <div className="relative" ref={suggestionsRef}>
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-[var(--text-muted)]">or</span>
                 <input
                   type="text"
                   placeholder="Enter city (e.g. Asheville, NC)"
                   value={locationMode === "city" ? city : ""}
-                  onFocus={() => setLocationMode("city")}
-                  onChange={(e) => { setCity(e.target.value); setCoords(null); }}
+                  onFocus={() => { setLocationMode("city"); if (suggestions.length > 0) setShowSuggestions(true); }}
+                  onChange={(e) => { setLocationMode("city"); handleCityChange(e.target.value); }}
+                  onKeyDown={handleCityKeyDown}
                   className="w-full pl-10 pr-4 py-3 rounded-xl bg-[var(--surface)] border border-[var(--border)] text-[var(--text-primary)] text-sm placeholder:text-[var(--text-muted)] focus:border-[var(--accent-gold)] outline-none"
+                  autoComplete="off"
                 />
+                {/* Autocomplete dropdown */}
+                <AnimatePresence>
+                  {showSuggestions && locationMode === "city" && (suggestions.length > 0 || suggestionsLoading) && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -4 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute z-50 left-0 right-0 mt-1 rounded-xl border overflow-hidden shadow-lg"
+                      style={{ background: "var(--surface)", borderColor: "var(--border)" }}
+                    >
+                      {suggestionsLoading && suggestions.length === 0 ? (
+                        <div className="flex items-center gap-2 px-4 py-3 text-sm" style={{ color: "var(--text-muted)" }}>
+                          <Loader2 size={14} className="animate-spin" /> Searching...
+                        </div>
+                      ) : (
+                        suggestions.map((r, i) => {
+                          const label = formatLocationLabel(r);
+                          return (
+                            <button
+                              key={`${r.lat}-${r.lon}`}
+                              type="button"
+                              onClick={() => selectSuggestion(r)}
+                              className="w-full text-left px-4 py-3 text-sm transition-colors flex items-center gap-2 min-h-[44px]"
+                              style={{
+                                background: i === highlightIdx ? "rgba(212,168,67,0.1)" : "transparent",
+                                color: "var(--text-primary)",
+                                borderBottom: i < suggestions.length - 1 ? "1px solid var(--border)" : "none",
+                              }}
+                              onMouseEnter={() => setHighlightIdx(i)}
+                            >
+                              <MapPin size={13} style={{ color: "var(--accent-gold)", flexShrink: 0 }} />
+                              <span className="truncate">{label}</span>
+                            </button>
+                          );
+                        })
+                      )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             </div>
 

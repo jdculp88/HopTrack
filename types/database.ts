@@ -169,6 +169,26 @@ export interface Database {
         Insert: Omit<LoyaltyRedemption, "id" | "created_at"> & { id?: string };
         Update: Partial<LoyaltyRedemption>;
       };
+      api_keys: {
+        Row: ApiKey;
+        Insert: Omit<ApiKey, "id" | "created_at"> & { id?: string };
+        Update: Partial<ApiKey>;
+      };
+      pos_connections: {
+        Row: PosConnection;
+        Insert: Omit<PosConnection, "id" | "created_at" | "updated_at" | "connected_at"> & { id?: string };
+        Update: Partial<PosConnection>;
+      };
+      pos_item_mappings: {
+        Row: PosItemMapping;
+        Insert: Omit<PosItemMapping, "id" | "created_at" | "updated_at"> & { id?: string };
+        Update: Partial<PosItemMapping>;
+      };
+      pos_sync_logs: {
+        Row: PosSyncLog;
+        Insert: Omit<PosSyncLog, "id" | "created_at"> & { id?: string };
+        Update: Partial<PosSyncLog>;
+      };
     };
   };
 }
@@ -242,12 +262,38 @@ export interface Brewery {
   longitude: number | null;
   description: string | null;
   cover_image_url: string | null;
+  menu_image_url: string | null;
   verified: boolean;
   created_by: string | null;
   created_at: string;
+  // POS integration (Sprint 86)
+  pos_provider: PosProvider | null;
+  pos_connected: boolean;
+  pos_last_sync_at: string | null;
 }
 export type BreweryInsert = Omit<Brewery, "id" | "created_at"> & { id?: string };
 export type BreweryUpdate = Partial<Brewery>;
+
+// ─── Menu Item Types ─────────────────────────────────────────────────────────
+export type ItemType = "beer" | "cider" | "wine" | "cocktail" | "na_beverage" | "food";
+
+export const ITEM_TYPE_LABELS: Record<ItemType, string> = {
+  beer: "Beer",
+  cider: "Cider",
+  wine: "Wine",
+  cocktail: "Cocktail",
+  na_beverage: "Non-Alcoholic",
+  food: "Food & Snacks",
+};
+
+export const ITEM_TYPE_EMOJI: Record<ItemType, string> = {
+  beer: "🍺",
+  cider: "🍏",
+  wine: "🍷",
+  cocktail: "🍹",
+  na_beverage: "🥤",
+  food: "🍽️",
+};
 
 // ─── Beers ────────────────────────────────────────────────────────────────────
 export type BeerStyle =
@@ -294,6 +340,12 @@ export interface Beer {
   total_ratings: number;
   created_by: string | null;
   created_at: string;
+  item_type: ItemType;
+  category: string | null;
+  // POS integration (Sprint 86)
+  pos_item_id: string | null;
+  pos_price_cents: number | null;
+  pos_last_seen_at: string | null;
 }
 export type BeerInsert = Omit<Beer, "id" | "created_at"> & { id?: string };
 export type BeerUpdate = Partial<Beer>;
@@ -768,5 +820,75 @@ export interface LoyaltyRedemption {
   program_id: string;
   user_id: string;
   redeemed_at: string;
+  created_at: string;
+}
+
+// ─── API Keys ──────────────────────────────────────────────────────────────
+export interface ApiKey {
+  id: string;
+  brewery_id: string;
+  created_by: string;
+  name: string;
+  key_hash: string;
+  key_prefix: string;
+  last_used_at: string | null;
+  revoked_at: string | null;
+  rate_limit: number;
+  created_at: string;
+}
+
+// ─── POS Integration ──────────────────────────────────────────────────────────
+export type PosProvider = "toast" | "square";
+export type PosConnectionStatus = "active" | "error" | "disconnected";
+export type PosSyncStatus = "success" | "partial" | "failed";
+export type PosSyncType = "webhook" | "manual" | "scheduled";
+export type PosMappingType = "auto" | "manual" | "unmapped";
+
+export interface PosConnection {
+  id: string;
+  brewery_id: string;
+  provider: PosProvider;
+  access_token_encrypted: string | null;
+  refresh_token_encrypted: string | null;
+  token_expires_at: string | null;
+  provider_location_id: string | null;
+  provider_merchant_id: string | null;
+  status: PosConnectionStatus;
+  last_sync_at: string | null;
+  last_sync_status: PosSyncStatus | null;
+  last_sync_item_count: number;
+  webhook_subscription_id: string | null;
+  connected_at: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PosItemMapping {
+  id: string;
+  pos_connection_id: string;
+  brewery_id: string;
+  pos_item_id: string;
+  pos_item_name: string;
+  beer_id: string | null;
+  mapping_type: PosMappingType;
+  created_at: string;
+  updated_at: string;
+  // joined fields
+  beer?: { id: string; name: string; style: string | null; abv: number | null };
+}
+
+export interface PosSyncLog {
+  id: string;
+  pos_connection_id: string;
+  brewery_id: string;
+  sync_type: PosSyncType;
+  provider: PosProvider;
+  items_added: number;
+  items_updated: number;
+  items_removed: number;
+  items_unmapped: number;
+  status: PosSyncStatus;
+  error: string | null;
+  duration_ms: number | null;
   created_at: string;
 }

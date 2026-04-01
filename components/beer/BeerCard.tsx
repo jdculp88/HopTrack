@@ -44,7 +44,7 @@ export function BeerCard({ beer, variant = "default", className }: BeerCardProps
               {beer.name}
             </p>
             <div className="flex items-center gap-2 mt-0.5">
-              <BeerStyleBadge style={beer.style} size="xs" />
+              <BeerStyleBadge style={beer.style} itemType={(beer as any).item_type} size="xs" />
               <span className="text-xs font-mono text-[var(--text-muted)]">{formatABV(beer.abv)}</span>
             </div>
           </div>
@@ -93,7 +93,7 @@ export function BeerCard({ beer, variant = "default", className }: BeerCardProps
           </h3>
 
           <div className="flex items-center gap-1.5 flex-wrap">
-            <BeerStyleBadge style={beer.style} size="xs" />
+            <BeerStyleBadge style={beer.style} itemType={(beer as any).item_type} size="xs" />
             <span className="text-xs font-mono text-[var(--text-muted)]">{formatABV(beer.abv)}</span>
           </div>
 

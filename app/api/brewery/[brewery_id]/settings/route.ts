@@ -27,7 +27,7 @@ export async function PATCH(
   }
 
   const body = await request.json();
-  const { name, street, city, state, website_url, phone, description } = body;
+  const { name, street, city, state, website_url, phone, description, cover_image_url, menu_image_url } = body;
 
   if (!name?.trim() || !city?.trim()) {
     return NextResponse.json({ error: "Name and city are required" }, { status: 400 });
@@ -43,11 +43,14 @@ export async function PATCH(
       website_url: website_url?.trim() || null,
       phone: phone?.trim() || null,
       description: description?.trim() || null,
+      ...(cover_image_url !== undefined && { cover_image_url: cover_image_url?.trim() || null }),
+      ...(menu_image_url !== undefined && { menu_image_url: menu_image_url?.trim() || null }),
     })
     .eq("id", brewery_id);
 
   if (error) {
-    return NextResponse.json({ error: "Failed to update brewery" }, { status: 500 });
+    console.error("Brewery settings update error:", error);
+    return NextResponse.json({ error: error.message || "Failed to update brewery" }, { status: 500 });
   }
 
   return NextResponse.json({ success: true });

@@ -1,7 +1,8 @@
 # HopTrack Product Roadmap
-**Last updated:** 2026-03-31
+**Last updated:** 2026-04-01
 **PM:** Morgan
-**Current Sprint:** Sprint 81 — The Challenge
+**Current Sprint:** Sprint 86 — The Connector 🔌
+**Last completed:** Sprint 85 — The Pipeline ✅
 
 > This is a living document -- updated every sprint. For completed sprints 1-12, see `docs/roadmap-archive.md`. For sprint plans, see `docs/plans/`. For the Shore It Up master plan (Sprints 64-73), see `docs/plans/sprint-64-73-master-plan.md`. For the Q2 2026 roadmap research (30 features, 18 REQs, 4 sprint arcs), see `docs/plans/roadmap-research-2026-q2.md`.
 
@@ -133,6 +134,96 @@ Vitest configured (39 unit tests across 4 files). Vitest added to CI. Cookie con
 
 ---
 
+## Sprint 84 — The Wrap ✅ (2026-03-31)
+**Theme:** HopTrack Wrapped — Year-in-Review shareable experience
+**Arc:** Stick Around (Sprints 79-84) — FINAL SPRINT
+**Plan:** `docs/plans/sprint-84-plan.md`
+
+**F-012: HopTrack Wrapped (Year-in-Review)** — Spotify Wrapped for craft beer. Animated 7-slide experience showing a user's beer journey: total stats, taste personality, top brewery, top beer, cities visited, adventurer score, and level badge. Swipeable/tappable slides with Framer Motion spring animations. Web Share API + clipboard fallback for sharing. Empty state for new users. "Your Wrapped is ready" CTA in You tab.
+
+**Key changes from Sprint 84:**
+- `lib/wrapped.ts` — NEW: WrappedStats interface, personality archetypes (24 style→archetype mappings), rating personalities, adventurer score, share text generator, color theming from top style
+- `app/api/wrapped/route.ts` — NEW: Wrapped data API with date-range filtering (?year=2026 or all-time), aggregates sessions/beers/breweries/styles/achievements/friends, rate limited
+- `components/wrapped/WrappedExperience.tsx` — NEW: shell with slide navigation (swipe + tap zones + arrows), progress bar, share button, AnimatePresence transitions, ambient gradient background
+- `components/wrapped/slides/WrappedIntro.tsx` — NEW: "Your Year in Beer" hero with emoji rain
+- `components/wrapped/slides/WrappedNumbers.tsx` — NEW: 4-stat grid (beers, breweries, sessions, XP) with animated counters
+- `components/wrapped/slides/WrappedTaste.tsx` — NEW: personality archetype, top style pill, avg rating
+- `components/wrapped/slides/WrappedTopBrewery.tsx` — NEW: home base brewery with topo-style rings
+- `components/wrapped/slides/WrappedTopBeer.tsx` — NEW: most-ordered beer with star rating
+- `components/wrapped/slides/WrappedJourney.tsx` — NEW: adventurer score ring (SVG), cities visited pills
+- `components/wrapped/slides/WrappedBadge.tsx` — NEW: level badge, achievements/streak/friends grid
+- `app/(app)/wrapped/page.tsx` — NEW: server page with auth redirect
+- `app/(app)/wrapped/WrappedClient.tsx` — NEW: client wrapper with loading/error/empty states
+- `app/(app)/wrapped/loading.tsx` — NEW: skeleton loader
+- `app/(app)/home/YouTabContent.tsx` — UPDATED: "Your Wrapped is ready" CTA card with Gift icon
+- `supabase/migrations/056_brewery_covers_bucket.sql` — NEW: brewery-covers storage bucket + RLS policies
+- No schema changes for Wrapped — all data exists in sessions/beer_logs/profiles/achievements/friendships
+
+**Also this sprint:**
+- BL-005 logged: menu upload PGRST204 schema cache bug (deferred)
+
+---
+
+## Sprint 85 — The Pipeline ✅ (2026-04-01)
+**Theme:** Public API v1 — the foundation for all integrations
+**Arc:** Open the Pipes (Sprints 85-90)
+**Plan:** `docs/plans/sprint-85-plan.md`
+
+**F-016: Public API v1** — Versioned REST API at `/api/v1/` with standardized JSON envelope (`{ data, meta, error }`). 7 read-only endpoints: brewery detail, tap list (beers), full menu (grouped by item type), events, stats (API key required), beer detail, beer search. API key system for brewery owners — SHA-256 hashed, generated from Settings page, max 5 per brewery, revocable. Rate limiting: 100 req/min authenticated, 20 req/min unauthenticated. CORS for cross-origin usage. `Authorization: Bearer ht_live_...` header for authenticated endpoints.
+
+**Goal 2: POS Integration Research (REQ-073)** — Sam wrote comprehensive POS requirements covering Toast + Square OAuth2, menu sync webhooks, sales intelligence, keg tracking, encrypted token storage, tier gating (Cask/Barrel only).
+
+**Key changes from Sprint 85:**
+- `supabase/migrations/057_api_keys.sql` — NEW: api_keys table (SHA-256 hashed, RLS, 5-key limit trigger)
+- `lib/api-keys.ts` — NEW: generateApiKey(), validateApiKey(), hashApiKey(), apiResponse(), apiError(), apiOptions()
+- `app/api/v1/breweries/[brewery_id]/route.ts` — NEW: public brewery detail
+- `app/api/v1/breweries/[brewery_id]/beers/route.ts` — NEW: tap list with pour sizes, pagination
+- `app/api/v1/breweries/[brewery_id]/menu/route.ts` — NEW: full menu grouped by item_type
+- `app/api/v1/breweries/[brewery_id]/events/route.ts` — NEW: upcoming events, pagination
+- `app/api/v1/breweries/[brewery_id]/stats/route.ts` — NEW: brewery stats (API key required, period filtering)
+- `app/api/v1/beers/[beer_id]/route.ts` — NEW: individual beer detail with pour sizes + brewery
+- `app/api/v1/beers/search/route.ts` — NEW: beer search by name, style, brewery, item_type
+- `app/api/v1/brewery/[brewery_id]/api-keys/route.ts` — NEW: key management (GET list, POST create, PATCH revoke)
+- `components/brewery-admin/ApiKeyManager.tsx` — NEW: API key management UI (create, copy, revoke with AnimatePresence)
+- `app/(brewery-admin)/.../settings/BrewerySettingsClient.tsx` — UPDATED: API Keys section added
+- `next.config.ts` — UPDATED: CORS headers for /api/v1/ routes
+- `types/database.ts` — UPDATED: ApiKey interface + table registration
+- `app/(brewery-admin)/.../resources/page.tsx` — UPDATED: API Documentation section (getting started, endpoints, rate limits)
+- `docs/requirements/REQ-073-pos-integration.md` — NEW: POS integration requirements (Sam)
+- `docs/plans/sprint-85-plan.md` — NEW: sprint plan
+
+---
+
+## Sprint 86 — The Connector 🔌 (2026-04-01)
+**Theme:** POS integration foundation — build everything before partner API access arrives
+**Arc:** Open the Pipes (Sprints 85-90)
+**Plan:** `docs/plans/sprint-86-plan.md`
+
+**Goal 1: POS Database Schema + Encryption** — Migration 058: `pos_connections` (encrypted OAuth tokens, provider location, sync status), `pos_item_mappings` (POS items → HopTrack beers), `pos_sync_logs` (audit trail). New columns on `beers` (pos_item_id, pos_price_cents, pos_last_seen_at) and `breweries` (pos_provider, pos_connected, pos_last_sync_at). AES-256-GCM encryption utility (`lib/pos-crypto.ts`) for token storage. RLS: brewery-owner scoped on all tables.
+
+**Goal 2: POS Settings UI + OAuth Stubs** — POS section in brewery Settings with connection cards for Toast and Square (connected/disconnected states, health indicators, Sync Now, Disconnect). OAuth flow endpoints scaffolded (`/api/pos/connect/[provider]`, `/api/pos/callback/[provider]`). Tier gating: Tap tier sees locked overlay with Cask upgrade CTA.
+
+**Goal 3: Webhook Infrastructure** — Webhook receivers for Toast (`/api/pos/webhook/toast`) and Square (`/api/pos/webhook/square`) with HMAC-SHA256 signature verification and replay protection. Status, mapping, and sync endpoints. All endpoints follow Sprint 85 JSON envelope pattern.
+
+**Key changes from Sprint 86:**
+- `supabase/migrations/058_pos_integration.sql` — NEW: 3 tables + columns on beers/breweries, indexes, RLS, updated_at triggers
+- `lib/pos-crypto.ts` — NEW: encryptToken(), decryptToken(), isPosEncryptionConfigured()
+- `app/api/pos/connect/[provider]/route.ts` — NEW: OAuth initiate (state + redirect)
+- `app/api/pos/callback/[provider]/route.ts` — NEW: OAuth callback (token exchange + encrypt + store)
+- `app/api/pos/disconnect/[provider]/route.ts` — NEW: revoke + delete connection
+- `app/api/pos/sync/[provider]/route.ts` — NEW: manual sync trigger (5-min debounce)
+- `app/api/pos/webhook/toast/route.ts` — NEW: Toast webhook receiver (HMAC, replay protection)
+- `app/api/pos/webhook/square/route.ts` — NEW: Square webhook receiver (HMAC, replay protection)
+- `app/api/pos/status/route.ts` — NEW: connection health + recent syncs
+- `app/api/pos/mapping/route.ts` — NEW: GET/PUT field mappings
+- `app/(brewery-admin)/.../settings/BrewerySettingsClient.tsx` — UPDATED: POS section with connection cards, sync status, tier gating
+- `app/(brewery-admin)/.../settings/page.tsx` — UPDATED: subscription_tier passed to client
+- `types/database.ts` — UPDATED: PosConnection, PosItemMapping, PosSyncLog + Beer/Brewery POS columns
+- `.env.local.example` — UPDATED: POS_TOKEN_ENCRYPTION_KEY, Toast/Square API credentials
+- `docs/plans/sprint-86-plan.md` — NEW: sprint plan
+
+---
+
 ## Backlog
 
 | # | Item | Notes | Source |
@@ -141,6 +232,7 @@ Vitest configured (39 unit tests across 4 files). Vitest added to CI. Cookie con
 | BL-002 | Closed brewery memorial mode | Closed breweries stay visible with their history (beers, reviews, sessions) but are clearly marked closed. Restrict all edits unless reopened. "Remember what they offered." | Sprint 78 |
 | BL-003 | Incomplete beer data handling | Flag beers with suspect data (e.g., 0.1% ABV). Show "Brewery needs to add details" badge. Encourage owners to claim and update. | Sprint 78 |
 | BL-004 | Lint cleanup pass | 74 pre-existing lint errors (unescaped entities, React hooks issues). Not blocking but CI shows failures. | Sprint 78 |
+| BL-005 | Menu upload save fails (PGRST204) | PostgREST schema cache not picking up `menu_image_url` column on `breweries` (migration 055). Bucket created (056), column exists, but `NOTIFY pgrst` not clearing cache. May need Supabase project restart or support ticket. Upload works, save doesn't. | Sprint 84 |
 
 ---
 
@@ -439,8 +531,11 @@ Referrals, group sessions V1, HopTrack Report page, beer list URLs. Migrations 0
 
 | REQ-069 | Enhanced KPIs & Analytics (Drinker + Brewery) | QUEUED | Stick Around (79-84) |
 | REQ-070 | Non-Beer Menu Uploads for Breweries | QUEUED | Launch or Bust (75-78) / Stick Around (79-84) |
+| REQ-071 | The Barback — AI Beer Crawler | COMPLETE | Sprint 79 |
+| REQ-072 | Multi-Location Brewery Support (F-017) | DOCUMENTED | The Flywheel (91-96) |
+| REQ-073 | POS Integration (Toast + Square) | DOCUMENTED | Open the Pipes (85-90) |
 
-**Score:** 48 of 52 requirements COMPLETE. 2 IN PROGRESS (PWA TestFlight, staging infra). 2 QUEUED (REQ-069, REQ-070).
+**Score:** 48 of 54 requirements COMPLETE. 2 IN PROGRESS (PWA TestFlight, staging infra). 4 QUEUED/DOCUMENTED (REQ-069, REQ-070, REQ-072, REQ-073).
 
 ---
 

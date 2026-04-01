@@ -3,7 +3,7 @@
 import { useMemo, type RefObject } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Beer, MapPin, Flame, Route } from "lucide-react";
+import { Beer, MapPin, Flame, Route, Gift } from "lucide-react";
 import { getStyleFamily, getStyleVars } from "@/lib/beerStyleColors";
 import { ActivityHeatmap } from "@/components/profile/ActivityHeatmap";
 import { BeerDNACard } from "@/components/profile/BeerDNACard";
@@ -150,6 +150,61 @@ export function YouTabContent({
           </div>
         </div>
       </div>
+
+      {/* Wrapped CTA */}
+      {profile.total_checkins > 0 && (
+        <Link href="/wrapped" className="block mt-1 mb-1">
+          <motion.div
+            className="rounded-2xl p-5 relative overflow-hidden"
+            style={{
+              background: "linear-gradient(135deg, rgba(212,168,67,0.10) 0%, rgba(212,168,67,0.03) 100%)",
+              border: "1px solid rgba(212,168,67,0.20)",
+            }}
+            whileHover={{ scale: 1.01 }}
+            whileTap={{ scale: 0.99 }}
+          >
+            {/* Sparkle particles */}
+            {[0, 1, 2, 3, 4, 5].map(i => (
+              <motion.div
+                key={i}
+                className="absolute rounded-full"
+                style={{
+                  width: i % 2 === 0 ? 2.5 : 2,
+                  height: i % 2 === 0 ? 2.5 : 2,
+                  background: "#D4A843",
+                  left: `${12 + i * 15}%`,
+                  top: `${20 + (i * 11) % 60}%`,
+                }}
+                animate={{
+                  opacity: [0, 0.7, 0],
+                  scale: [0.5, 1.2, 0.5],
+                  y: [0, -8, 0],
+                }}
+                transition={{
+                  duration: 2 + (i % 3) * 0.6,
+                  delay: i * 0.4,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+              />
+            ))}
+            <div className="flex items-center gap-3.5 relative z-10">
+              <div className="p-2.5 rounded-xl" style={{ background: "rgba(212,168,67,0.12)" }}>
+                <Gift size={18} style={{ color: "var(--accent-gold)" }} />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
+                  Your Wrapped is ready
+                </p>
+                <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+                  See your year in beer — stats, favorites, and personality
+                </p>
+              </div>
+              <span className="text-xs font-mono" style={{ color: "var(--accent-gold)" }}>View</span>
+            </div>
+          </motion.div>
+        </Link>
+      )}
 
       {/* Activity Heatmap */}
       {activityHeatmap && activityHeatmap.length > 0 && (

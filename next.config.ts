@@ -14,12 +14,21 @@ const nextConfig: NextConfig = {
         ],
       },
       {
-        // CORS for public API
+        // CORS for public API (legacy)
         source: "/api/public/:path*",
         headers: [
           { key: "Access-Control-Allow-Origin", value: "*" },
           { key: "Access-Control-Allow-Methods", value: "GET, OPTIONS" },
           { key: "Access-Control-Allow-Headers", value: "Content-Type" },
+        ],
+      },
+      {
+        // CORS for v1 API (Sprint 85)
+        source: "/api/v1/:path*",
+        headers: [
+          { key: "Access-Control-Allow-Origin", value: "*" },
+          { key: "Access-Control-Allow-Methods", value: "GET, OPTIONS" },
+          { key: "Access-Control-Allow-Headers", value: "Content-Type, Authorization" },
         ],
       },
     ];

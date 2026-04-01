@@ -42,12 +42,15 @@ const STYLE_ACCENTS: Record<string, string> = {
   porter: "#7B5B8D",
   lager: "#4A7B9B",
   saison: "#B8863B",
+  cider: "#B85C4A",
+  wine: "#722F37",
+  cocktail: "#1A8E80",
+  na: "#BFA032",
   default: "#9E8E7A",
 };
 
-function getStyleAccent(style: string | null): string {
-  if (!style) return STYLE_ACCENTS.default;
-  const family = getStyleFamily(style);
+function getStyleAccent(style: string | null, itemType?: string | null): string {
+  const family = getStyleFamily(style, itemType);
   return STYLE_ACCENTS[family] ?? STYLE_ACCENTS.default;
 }
 

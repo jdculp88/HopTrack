@@ -32,6 +32,7 @@ import type { FeedItem } from "./FeedItemCard";
 import type { FriendBreweryReview } from "@/components/social/BreweryRatingFeedCard";
 import type { FriendActiveRoute } from "@/components/social/HopRouteCTACard";
 import type { FriendChallengeCompletion } from "@/components/social/ChallengeFeedCard";
+import type { FriendChallengeMilestone } from "@/lib/queries/feed";
 import { ReactionProvider } from "./ReactionContext";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { WishlistOnTapAlert } from "@/components/wishlist/WishlistOnTapAlert";
@@ -125,6 +126,7 @@ interface HomeFeedProps {
   friendBreweryReviews?: FriendBreweryReview[];
   friendActiveRoutes?: FriendActiveRoute[];
   friendChallengeCompletions?: FriendChallengeCompletion[];
+  friendChallengeMilestones?: FriendChallengeMilestone[];
 }
 
 // ─── HomeFeed ───────────────────────────────────────────────────────────────
@@ -154,6 +156,7 @@ export function HomeFeed({
   friendBreweryReviews,
   friendActiveRoutes,
   friendChallengeCompletions,
+  friendChallengeMilestones,
 }: HomeFeedProps) {
   const [activeTab, setActiveTab] = useState<FeedTab>("friends");
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -340,6 +343,17 @@ export function HomeFeed({
       });
     }
 
+    // Friend challenge milestones (50%, 75%)
+    if (friendChallengeMilestones && friendChallengeMilestones.length > 0) {
+      friendChallengeMilestones.forEach((m) => {
+        items.push({
+          type: "challenge_milestone",
+          data: m,
+          sortDate: m.updatedAt,
+        });
+      });
+    }
+
     // Sort: live first, then chronological
     const sorted = items.sort((a, b) => {
       const aLive = a.type === "session" && a.isLive ? 1 : 0;
@@ -361,6 +375,7 @@ export function HomeFeed({
     friendBreweryReviews,
     friendActiveRoutes,
     friendChallengeCompletions,
+    friendChallengeMilestones,
     currentUserId,
   ]);
 

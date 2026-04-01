@@ -13,6 +13,7 @@ import {
   fetchFriendIds,
   fetchActivityHeatmap,
   fetchFriendChallengeCompletions,
+  fetchFriendChallengeMilestones,
 } from "@/lib/queries/feed";
 import { getRecommendations } from "@/lib/recommendations";
 
@@ -33,7 +34,7 @@ export default async function HomePage() {
   const today = new Date().toISOString().split("T")[0];
 
   // Parallel data fetch — all queries are fault-tolerant
-  const [sessions, activeFriendSessions, weekStats, community, social, friendActivity, friendChallengeCompletions] =
+  const [sessions, activeFriendSessions, weekStats, community, social, friendActivity, friendChallengeCompletions, friendChallengeMilestones] =
     await Promise.all([
       fetchFeedSessions(supabase, feedUserIds),
       fetchActiveFriendSessions(supabase, friendIds),
@@ -42,6 +43,7 @@ export default async function HomePage() {
       fetchSocialData(supabase, user.id, friendIds),
       fetchFriendActivity(supabase, user.id, friendIds),
       fetchFriendChallengeCompletions(supabase, friendIds),
+      fetchFriendChallengeMilestones(supabase, friendIds),
     ]);
 
   // Wishlist on-tap count — how many wishlisted beers are currently on tap anywhere
@@ -209,6 +211,7 @@ export default async function HomePage() {
       friendBreweryReviews={friendBreweryReviews}
       friendActiveRoutes={friendActiveRoutesData}
       friendChallengeCompletions={friendChallengeCompletions}
+      friendChallengeMilestones={friendChallengeMilestones}
     />
   );
 }

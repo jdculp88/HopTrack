@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Trophy, Plus, Trash2, Edit2, Users, CheckCircle, ChevronDown, X } from "lucide-react";
-import { toast } from "sonner";
+import { useToast } from "@/components/ui/Toast";
 
 const CHALLENGE_ICONS = ["🍺", "🏆", "🔥", "⭐", "🎯", "🍻", "🌟", "💪", "🎉", "🏅", "👑", "🍁", "❄️", "☀️", "🌙", "🎃"];
 
@@ -65,6 +65,7 @@ export function ChallengesClient({ breweryId, initialChallenges, tapListBeers }:
   const [form, setForm] = useState(defaultForm);
   const [saving, setSaving] = useState(false);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const { success: toastSuccess, error: toastError } = useToast();
 
   function openCreate() {
     setEditingId(null);
@@ -90,10 +91,10 @@ export function ChallengesClient({ breweryId, initialChallenges, tapListBeers }:
   }
 
   async function handleSave() {
-    if (!form.name.trim()) { toast.error("Name is required"); return; }
-    if (form.target_value < 1) { toast.error("Target must be at least 1"); return; }
+    if (!form.name.trim()) { toastError("Name is required"); return; }
+    if (form.target_value < 1) { toastError("Target must be at least 1"); return; }
     if (form.challenge_type === "specific_beers" && form.target_beer_ids.length === 0) {
-      toast.error("Select at least one beer"); return;
+      toastError("Select at least one beer"); return;
     }
 
     setSaving(true);
@@ -124,16 +125,16 @@ export function ChallengesClient({ breweryId, initialChallenges, tapListBeers }:
 
       if (editingId) {
         setChallenges(prev => prev.map(c => c.id === editingId ? { ...c, ...saved } : c));
-        toast.success("Challenge updated");
+        toastSuccess("Challenge updated");
       } else {
         setChallenges(prev => [{ ...saved, participant_count: 0, completed_count: 0 }, ...prev]);
-        toast.success("Challenge created!");
+        toastSuccess("Challenge created!");
       }
 
       setShowForm(false);
       setEditingId(null);
     } catch (e: any) {
-      toast.error(e.message);
+      toastError(e.message);
     } finally {
       setSaving(false);
     }
@@ -147,7 +148,7 @@ export function ChallengesClient({ breweryId, initialChallenges, tapListBeers }:
     });
     if (res.ok) {
       setChallenges(prev => prev.map(ch => ch.id === c.id ? { ...ch, is_active: !c.is_active } : ch));
-      toast.success(c.is_active ? "Challenge paused" : "Challenge activated");
+      toastSuccess(c.is_active ? "Challenge paused" : "Challenge activated");
     }
   }
 
@@ -159,9 +160,9 @@ export function ChallengesClient({ breweryId, initialChallenges, tapListBeers }:
     });
     if (res.ok) {
       setChallenges(prev => prev.filter(c => c.id !== id));
-      toast.success("Challenge deleted");
+      toastSuccess("Challenge deleted");
     } else {
-      toast.error("Failed to delete");
+      toastError("Failed to delete");
     }
     setConfirmDeleteId(null);
   }

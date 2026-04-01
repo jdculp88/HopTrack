@@ -236,3 +236,140 @@ describe("Challenge type validation helper", () => {
     expect(isValidChallengeType("BEER_COUNT")).toBe(false); // case-sensitive
   });
 });
+
+// ── Challenge join validation (Sprint 82 carry-over) ────────────────────────
+
+interface JoinRequest {
+  userId: string;
+  challengeId: string;
+}
+
+interface ExistingParticipation {
+  userId: string;
+  challengeId: string;
+}
+
+function validateJoinRequest(
+  req: JoinRequest,
+  existingParticipations: ExistingParticipation[],
+  activeChallenge: { is_active: boolean; ends_at: string | null } | null,
+): string[] {
+  const errors: string[] = [];
+  if (!req.userId) errors.push("User ID is required");
+  if (!req.challengeId) errors.push("Challenge ID is required");
+  if (!activeChallenge) {
+    errors.push("Challenge not found");
+    return errors;
+  }
+  if (!activeChallenge.is_active) errors.push("Challenge is not active");
+  if (activeChallenge.ends_at && new Date(activeChallenge.ends_at) < new Date()) {
+    errors.push("Challenge has expired");
+  }
+  const alreadyJoined = existingParticipations.some(
+    p => p.userId === req.userId && p.challengeId === req.challengeId
+  );
+  if (alreadyJoined) errors.push("Already joined this challenge");
+  return errors;
+}
+
+describe("Challenge join validation", () => {
+  const activeChallenge = { is_active: true, ends_at: null };
+  const expiredChallenge = { is_active: true, ends_at: "2020-01-01T00:00:00Z" };
+  const inactiveChallenge = { is_active: false, ends_at: null };
+
+  it("allows valid join request", () => {
+    const errors = validateJoinRequest(
+      { userId: "user-1", challengeId: "chal-1" },
+      [],
+      activeChallenge,
+    );
+    expect(errors).toHaveLength(0);
+  });
+
+  it("prevents double-join (race condition)", () => {
+    const errors = validateJoinRequest(
+      { userId: "user-1", challengeId: "chal-1" },
+      [{ userId: "user-1", challengeId: "chal-1" }],
+      activeChallenge,
+    );
+    expect(errors).toContain("Already joined this challenge");
+  });
+
+  it("allows different user to join same challenge", () => {
+    const errors = validateJoinRequest(
+      { userId: "user-2", challengeId: "chal-1" },
+      [{ userId: "user-1", challengeId: "chal-1" }],
+      activeChallenge,
+    );
+    expect(errors).toHaveLength(0);
+  });
+
+  it("rejects join to expired challenge", () => {
+    const errors = validateJoinRequest(
+      { userId: "user-1", challengeId: "chal-1" },
+      [],
+      expiredChallenge,
+    );
+    expect(errors).toContain("Challenge has expired");
+  });
+
+  it("rejects join to inactive challenge", () => {
+    const errors = validateJoinRequest(
+      { userId: "user-1", challengeId: "chal-1" },
+      [],
+      inactiveChallenge,
+    );
+    expect(errors).toContain("Challenge is not active");
+  });
+
+  it("rejects join to non-existent challenge", () => {
+    const errors = validateJoinRequest(
+      { userId: "user-1", challengeId: "chal-1" },
+      [],
+      null,
+    );
+    expect(errors).toContain("Challenge not found");
+  });
+
+  it("requires user ID", () => {
+    const errors = validateJoinRequest(
+      { userId: "", challengeId: "chal-1" },
+      [],
+      activeChallenge,
+    );
+    expect(errors).toContain("User ID is required");
+  });
+
+  it("requires challenge ID", () => {
+    const errors = validateJoinRequest(
+      { userId: "user-1", challengeId: "" },
+      [],
+      activeChallenge,
+    );
+    expect(errors).toContain("Challenge ID is required");
+  });
+
+  it("allows same user to join different challenges", () => {
+    const errors = validateJoinRequest(
+      { userId: "user-1", challengeId: "chal-2" },
+      [{ userId: "user-1", challengeId: "chal-1" }],
+      activeChallenge,
+    );
+    expect(errors).toHaveLength(0);
+  });
+
+  it("handles concurrent join detection with multiple existing", () => {
+    const existing = [
+      { userId: "user-1", challengeId: "chal-1" },
+      { userId: "user-2", challengeId: "chal-1" },
+      { userId: "user-1", challengeId: "chal-2" },
+    ];
+    const errors = validateJoinRequest(
+      { userId: "user-1", challengeId: "chal-1" },
+      existing,
+      activeChallenge,
+    );
+    expect(errors).toContain("Already joined this challenge");
+    expect(errors).toHaveLength(1);
+  });
+});
