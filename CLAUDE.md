@@ -224,6 +224,7 @@ lib/                          — Utils, Supabase clients, XP logic
 lib/glassware.ts              — 20 glass SVGs, PourSize interface, getGlassSvgContent()
 lib/beerStyleColors.ts        — 26 styles → 6 color families
 lib/pos-crypto.ts             — AES-256-GCM token encryption for POS (S86)
+lib/crm.ts                    — Customer segments, engagement scoring, profile builder (S89)
 lib/pos-sync/                 — POS sync engine: engine, mapper, normalizer, types, mock (S87)
 types/database.ts             — Supabase schema types (all tables registered)
 types/supabase-helpers.ts     — Common join shapes (S65)
@@ -245,9 +246,11 @@ scripts/supabase-setup.mjs    — One-time setup script
 
 ## 🗺️ Where We Are
 
-**Current Sprint:** Sprint 88 — The Monitor 📊
+**Current Sprint:** Sprint 89 — The Rolodex 📇
 **Arc:** Open the Pipes (Sprints 85-90) — Integrations
-**Sprint plan (88):** `docs/plans/sprint-88-plan.md` — POS sync visibility: PosDashboardCard (health status, sync button, unmapped badge), dedicated sync log page with filters + pagination (/brewery-admin/[id]/pos-sync/), PosSyncAlertBanner (stale/error alerts on dashboard), sync-logs API endpoint, POS quick action. No migration needed.
+**Sprint plan (89):** `docs/plans/sprint-89-plan.md` — Brewery CRM: customer profiles (engagement score, taste profile, visit timeline), unified segments (VIP/Power/Regular/New in lib/crm.ts), segmented messaging, barcode scanning pilot (F-008). Migration 059 (beer barcode column). Bug fix: Settings redirect (subscription_tier queried from wrong table). POS Integration Guide in Resources.
+**Last completed:** Sprint 88 — The Monitor ✅ — POS sync visibility: PosDashboardCard (health status, sync button, unmapped badge), dedicated sync log page with filters + pagination (/brewery-admin/[id]/pos-sync/), PosSyncAlertBanner (stale/error alerts on dashboard), sync-logs API endpoint, POS quick action. No migration needed.
+**Retro (88):** `docs/retros/sprint-88-retro.md`
 **Last completed:** Sprint 87 — The Sync Engine ✅ — POS sync engine: reconciliation engine (lib/pos-sync/engine.ts), provider adapters for Toast + Square (lib/pos-sync/normalizer.ts), 4-stage auto-mapper with ≥80% match rate (lib/pos-sync/mapper.ts), mock provider for testing (lib/pos-sync/mock-provider.ts), webhook receivers wired to engine (async fire-and-forget), manual sync wired to engine (decrypt → fetch → diff → apply), mapping review UI with filter pills + beer picker, 33 Vitest tests. No migration needed.
 **Retro (87):** `docs/retros/sprint-87-retro.md` (facilitated by Quinn)
 **Last completed:** Sprint 86 — The Connector ✅ — POS integration foundation: migration 058 (pos_connections, pos_item_mappings, pos_sync_logs + beer/brewery POS columns), AES-256-GCM token encryption (lib/pos-crypto.ts), 9 API endpoints, POS Settings UI, HMAC-SHA256 webhook verification + replay protection. OAuth flows stubbed pending partner approval.

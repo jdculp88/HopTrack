@@ -346,6 +346,8 @@ export interface Beer {
   pos_item_id: string | null;
   pos_price_cents: number | null;
   pos_last_seen_at: string | null;
+  // Barcode scanning (Sprint 89)
+  barcode: string | null;
 }
 export type BeerInsert = Omit<Beer, "id" | "created_at"> & { id?: string };
 export type BeerUpdate = Partial<Beer>;

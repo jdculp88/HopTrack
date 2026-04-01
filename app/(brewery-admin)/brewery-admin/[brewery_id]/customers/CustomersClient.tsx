@@ -3,9 +3,10 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { Search, ArrowUpDown, Users, Crown, Star, TrendingUp, Download } from "lucide-react";
+import { Search, ArrowUpDown, Users, Crown, Download, ChevronRight } from "lucide-react";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import { formatRelativeTime } from "@/lib/dates";
+import { computeSegment, getSegmentConfig, SEGMENTS, type CustomerSegment } from "@/lib/crm";
 
 interface CustomerRow {
   user_id: string;
@@ -20,53 +21,14 @@ interface CustomerRow {
 type SortKey = "visits" | "last_visit" | "name";
 type SortDir = "asc" | "desc";
 
-function getTier(visits: number): "VIP" | "Power User" | "Regular" | null {
-  if (visits >= 30) return "VIP";
-  if (visits >= 15) return "Power User";
-  if (visits >= 5) return "Regular";
-  return null;
-}
-
-function TierBadge({ tier }: { tier: "VIP" | "Power User" | "Regular" | null }) {
-  if (!tier) return null;
-
-  if (tier === "VIP") {
-    return (
-      <span
-        className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold"
-        style={{ background: "var(--accent-gold)", color: "var(--bg)" }}
-      >
-        <Crown size={11} />
-        VIP
-      </span>
-    );
-  }
-
-  if (tier === "Power User") {
-    return (
-      <span
-        className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold border"
-        style={{
-          borderColor: "var(--accent-gold)",
-          color: "var(--accent-gold)",
-          background: "color-mix(in srgb, var(--accent-gold) 10%, transparent)",
-        }}
-      >
-        <Star size={11} />
-        Power User
-      </span>
-    );
-  }
-
+function SegmentBadge({ visits }: { visits: number }) {
+  const config = getSegmentConfig(visits);
   return (
     <span
-      className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium"
-      style={{
-        background: "var(--surface-2)",
-        color: "var(--text-secondary)",
-      }}
+      className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold"
+      style={{ background: config.bgColor, color: config.color }}
     >
-      Regular
+      {config.emoji} {config.label}
     </span>
   );
 }
@@ -76,6 +38,7 @@ export function CustomersClient({ customers }: { customers: CustomerRow[] }) {
   const [search, setSearch] = useState("");
   const [sortKey, setSortKey] = useState<SortKey>("visits");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
+  const [segmentFilter, setSegmentFilter] = useState<CustomerSegment | "all">("all");
 
   function toggleSort(key: SortKey) {
     if (sortKey === key) {
@@ -96,6 +59,9 @@ export function CustomersClient({ customers }: { customers: CustomerRow[] }) {
           c.username.toLowerCase().includes(q)
       );
     }
+    if (segmentFilter !== "all") {
+      list = list.filter((c) => computeSegment(c.visits) === segmentFilter);
+    }
     list = [...list].sort((a, b) => {
       let cmp = 0;
       if (sortKey === "visits") cmp = a.visits - b.visits;
@@ -104,12 +70,18 @@ export function CustomersClient({ customers }: { customers: CustomerRow[] }) {
       return sortDir === "asc" ? cmp : -cmp;
     });
     return list;
-  }, [customers, search, sortKey, sortDir]);
+  }, [customers, search, sortKey, sortDir, segmentFilter]);
 
-  const totalCustomers = customers.length;
-  const regulars = customers.filter((c) => getTier(c.visits) === "Regular").length;
-  const powerUsers = customers.filter((c) => getTier(c.visits) === "Power User").length;
-  const vips = customers.filter((c) => getTier(c.visits) === "VIP").length;
+  // Compute segment counts
+  const segmentCounts = useMemo(() => {
+    const counts: Record<string, number> = { all: customers.length };
+    SEGMENTS.forEach((s) => { counts[s.id] = 0; });
+    customers.forEach((c) => {
+      const seg = computeSegment(c.visits);
+      counts[seg] = (counts[seg] ?? 0) + 1;
+    });
+    return counts;
+  }, [customers]);
 
   // Superfans: top 5 visitors by visit count (minimum 5 visits to qualify)
   const superfans = useMemo(() => {
@@ -123,7 +95,7 @@ export function CustomersClient({ customers }: { customers: CustomerRow[] }) {
   }, [customers]);
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 space-y-6">
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 pt-16 lg:pt-8 space-y-6">
       {/* Page header */}
       <div className="flex items-start justify-between gap-4">
         <div>
@@ -151,16 +123,36 @@ export function CustomersClient({ customers }: { customers: CustomerRow[] }) {
         )}
       </div>
 
-      {/* Summary bar */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <SummaryCard icon={Users} label="Total Customers" value={totalCustomers} />
-        <SummaryCard icon={TrendingUp} label="Regulars (5+)" value={regulars} />
-        <SummaryCard icon={Star} label="Power Users (15+)" value={powerUsers} accent />
-        <SummaryCard icon={Crown} label="VIPs (30+)" value={vips} accent />
+      {/* Segment filter pills */}
+      <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
+        <button
+          onClick={() => setSegmentFilter("all")}
+          className="flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all border min-h-[36px]"
+          style={segmentFilter === "all"
+            ? { background: "var(--accent-gold)", color: "var(--bg)", borderColor: "var(--accent-gold)" }
+            : { background: "var(--surface)", color: "var(--text-secondary)", borderColor: "var(--border)" }
+          }
+        >
+          <Users size={13} />
+          All ({segmentCounts.all})
+        </button>
+        {SEGMENTS.map((seg) => (
+          <button
+            key={seg.id}
+            onClick={() => setSegmentFilter(seg.id)}
+            className="flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all border min-h-[36px]"
+            style={segmentFilter === seg.id
+              ? { background: seg.color, color: "var(--bg)", borderColor: seg.color }
+              : { background: seg.bgColor, color: seg.color, borderColor: "transparent" }
+            }
+          >
+            {seg.emoji} {seg.label} ({segmentCounts[seg.id] ?? 0})
+          </button>
+        ))}
       </div>
 
       {/* Superfans highlight */}
-      {superfans.fans.length > 0 && (
+      {superfans.fans.length > 0 && segmentFilter === "all" && (
         <div
           className="rounded-2xl border p-5 space-y-4"
           style={{
@@ -188,9 +180,10 @@ export function CustomersClient({ customers }: { customers: CustomerRow[] }) {
 
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
             {superfans.fans.map((fan, i) => (
-              <div
+              <Link
                 key={fan.user_id}
-                className="flex sm:flex-col items-center gap-3 sm:gap-2 p-3 rounded-xl text-center min-h-[44px]"
+                href={`/brewery-admin/${brewery_id}/customers/${fan.user_id}`}
+                className="flex sm:flex-col items-center gap-3 sm:gap-2 p-3 rounded-xl text-center min-h-[44px] transition-all hover:scale-[1.02]"
                 style={{
                   background: "color-mix(in srgb, var(--accent-gold) 6%, var(--surface))",
                 }}
@@ -226,7 +219,7 @@ export function CustomersClient({ customers }: { customers: CustomerRow[] }) {
                     </p>
                   )}
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </div>
@@ -293,123 +286,84 @@ export function CustomersClient({ customers }: { customers: CustomerRow[] }) {
         {filtered.length === 0 ? (
           <div className="py-16 text-center">
             <p className="font-display text-lg font-semibold" style={{ color: "var(--text-primary)" }}>
-              {search ? "No customers match that search" : "No customers yet"}
+              {search || segmentFilter !== "all" ? "No customers match that filter" : "No customers yet"}
             </p>
             <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
-              {search
-                ? "Try a different name."
+              {search || segmentFilter !== "all"
+                ? "Try a different search or filter."
                 : "When people start visiting, they'll show up here."}
             </p>
           </div>
         ) : (
           <div className="divide-y" style={{ borderColor: "var(--border)" }}>
             {/* Header row — desktop only */}
-            <div className="hidden sm:grid grid-cols-[1fr_100px_120px_160px_120px] gap-4 px-4 py-3 text-xs font-medium" style={{ color: "var(--text-muted)" }}>
+            <div className="hidden sm:grid grid-cols-[1fr_80px_110px_140px_100px_32px] gap-4 px-4 py-3 text-xs font-medium" style={{ color: "var(--text-muted)" }}>
               <span>Customer</span>
               <span className="text-right">Visits</span>
               <span className="text-right">Last Visit</span>
               <span>Favorite Beer</span>
-              <span className="text-right">Tier</span>
+              <span className="text-right">Segment</span>
+              <span />
             </div>
 
-            {filtered.map((c) => {
-              const tier = getTier(c.visits);
-              return (
-                <div
-                  key={c.user_id}
-                  className="flex flex-col sm:grid sm:grid-cols-[1fr_100px_120px_160px_120px] gap-2 sm:gap-4 items-start sm:items-center px-4 py-3 transition-colors"
-                  style={{ borderColor: "var(--border)" }}
-                >
-                  {/* Customer info */}
-                  <div className="flex items-center gap-3 min-w-0">
-                    <UserAvatar
-                      profile={{
-                        display_name: c.display_name,
-                        avatar_url: c.avatar_url,
-                        username: c.username,
-                      }}
-                      size="sm"
-                    />
-                    <div className="min-w-0">
-                      <Link
-                        href={`/profile/${c.username}`}
-                        className="font-display font-semibold text-sm truncate block transition-colors hover:opacity-80"
-                        style={{ color: "var(--text-primary)" }}
-                      >
-                        {c.display_name}
-                      </Link>
-                      <span className="text-xs truncate block" style={{ color: "var(--text-muted)" }}>
-                        @{c.username}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Mobile: inline stats row */}
-                  <div className="flex items-center gap-4 sm:hidden text-xs" style={{ color: "var(--text-secondary)" }}>
-                    <span>{c.visits} visits</span>
-                    <span>{formatRelativeTime(c.last_visit)}</span>
-                    {c.favorite_beer && <span className="truncate max-w-[120px]">{c.favorite_beer}</span>}
-                    <TierBadge tier={tier} />
-                  </div>
-
-                  {/* Desktop columns */}
-                  <span className="hidden sm:block text-sm font-mono text-right" style={{ color: "var(--text-primary)" }}>
-                    {c.visits}
-                  </span>
-                  <span className="hidden sm:block text-sm text-right" style={{ color: "var(--text-secondary)" }}>
-                    {formatRelativeTime(c.last_visit)}
-                  </span>
-                  <span className="hidden sm:block text-sm truncate" style={{ color: "var(--text-secondary)" }}>
-                    {c.favorite_beer ?? "--"}
-                  </span>
-                  <div className="hidden sm:flex justify-end">
-                    <TierBadge tier={tier} />
+            {filtered.map((c) => (
+              <Link
+                key={c.user_id}
+                href={`/brewery-admin/${brewery_id}/customers/${c.user_id}`}
+                className="flex flex-col sm:grid sm:grid-cols-[1fr_80px_110px_140px_100px_32px] gap-2 sm:gap-4 items-start sm:items-center px-4 py-3 transition-colors hover:bg-[var(--surface-2)] cursor-pointer"
+                style={{ borderColor: "var(--border)" }}
+              >
+                {/* Customer info */}
+                <div className="flex items-center gap-3 min-w-0">
+                  <UserAvatar
+                    profile={{
+                      display_name: c.display_name,
+                      avatar_url: c.avatar_url,
+                      username: c.username,
+                    }}
+                    size="sm"
+                  />
+                  <div className="min-w-0">
+                    <span
+                      className="font-display font-semibold text-sm truncate block"
+                      style={{ color: "var(--text-primary)" }}
+                    >
+                      {c.display_name}
+                    </span>
+                    <span className="text-xs truncate block" style={{ color: "var(--text-muted)" }}>
+                      @{c.username}
+                    </span>
                   </div>
                 </div>
-              );
-            })}
+
+                {/* Mobile: inline stats row */}
+                <div className="flex items-center gap-3 sm:hidden text-xs" style={{ color: "var(--text-secondary)" }}>
+                  <span>{c.visits} visits</span>
+                  <span>{formatRelativeTime(c.last_visit)}</span>
+                  <SegmentBadge visits={c.visits} />
+                </div>
+
+                {/* Desktop columns */}
+                <span className="hidden sm:block text-sm font-mono text-right" style={{ color: "var(--text-primary)" }}>
+                  {c.visits}
+                </span>
+                <span className="hidden sm:block text-sm text-right" style={{ color: "var(--text-secondary)" }}>
+                  {formatRelativeTime(c.last_visit)}
+                </span>
+                <span className="hidden sm:block text-sm truncate" style={{ color: "var(--text-secondary)" }}>
+                  {c.favorite_beer ?? "--"}
+                </span>
+                <div className="hidden sm:flex justify-end">
+                  <SegmentBadge visits={c.visits} />
+                </div>
+                <div className="hidden sm:flex justify-end">
+                  <ChevronRight size={14} style={{ color: "var(--text-muted)" }} />
+                </div>
+              </Link>
+            ))}
           </div>
         )}
       </div>
-    </div>
-  );
-}
-
-function SummaryCard({
-  icon: Icon,
-  label,
-  value,
-  accent,
-}: {
-  icon: React.ComponentType<{ size?: number; className?: string }>;
-  label: string;
-  value: number;
-  accent?: boolean;
-}) {
-  return (
-    <div
-      className="rounded-2xl border p-4 space-y-1"
-      style={{
-        background: accent
-          ? "color-mix(in srgb, var(--accent-gold) 8%, var(--surface))"
-          : "var(--surface)",
-        borderColor: accent ? "color-mix(in srgb, var(--accent-gold) 30%, transparent)" : "var(--border)",
-      }}
-    >
-      <div className="flex items-center gap-2">
-        <span style={{ color: accent ? "var(--accent-gold)" : "var(--text-muted)" }}>
-          <Icon size={14} />
-        </span>
-        <span className="text-xs font-medium" style={{ color: "var(--text-muted)" }}>
-          {label}
-        </span>
-      </div>
-      <p
-        className="font-display text-2xl font-bold"
-        style={{ color: accent ? "var(--accent-gold)" : "var(--text-primary)" }}
-      >
-        {value}
-      </p>
     </div>
   );
 }

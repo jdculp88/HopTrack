@@ -1,4 +1,4 @@
-import { ExternalLink, BookOpen, GlassWater, Code2, Key, BarChart3, Beer, CalendarDays, Search, LayoutGrid } from "lucide-react";
+import { ExternalLink, BookOpen, GlassWater, Code2, Key, BarChart3, Beer, CalendarDays, Search, LayoutGrid, Plug, RefreshCw, ArrowRight, AlertTriangle, CheckCircle2, Settings } from "lucide-react";
 import { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Resources" };
@@ -292,6 +292,180 @@ export default function ResourcesPage() {
             <div className="flex items-start gap-2">
               <span style={{ color: "var(--accent-gold)" }}>&#8226;</span>
               <p><strong>Security:</strong> Your API key is scoped to your brewery. Stats are private — only accessible with your key.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* POS Integration Guide */}
+      <div className="mb-4">
+        <div className="flex items-center gap-2 mb-4">
+          <Plug size={14} style={{ color: "var(--text-muted)" }} />
+          <span className="text-xs font-mono uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
+            POS Integration
+          </span>
+        </div>
+
+        {/* Overview */}
+        <div
+          className="rounded-2xl border p-5 mb-4"
+          style={{ background: "var(--surface)", borderColor: "var(--border)" }}
+        >
+          <div className="flex items-center gap-2 mb-3">
+            <RefreshCw size={16} style={{ color: "var(--accent-gold)" }} />
+            <h3 className="font-display font-semibold" style={{ color: "var(--text-primary)" }}>
+              How POS Sync Works
+            </h3>
+          </div>
+          <div className="space-y-3 text-sm" style={{ color: "var(--text-secondary)" }}>
+            <p>Connect your Toast or Square POS to automatically keep your HopTrack tap list in sync. When you update your menu in your POS, HopTrack updates too — no double entry.</p>
+            <div className="flex items-center gap-3 py-3 flex-wrap">
+              {[
+                { label: "POS Menu Updated", icon: "🍞" },
+                { label: "Webhook Received", icon: "📡" },
+                { label: "Items Matched", icon: "🔗" },
+                { label: "Tap List Synced", icon: "✅" },
+              ].map((step, i) => (
+                <div key={step.label} className="flex items-center gap-2">
+                  {i > 0 && <ArrowRight size={12} style={{ color: "var(--text-muted)" }} />}
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium" style={{ background: "var(--surface-2)", color: "var(--text-primary)" }}>
+                    <span>{step.icon}</span>
+                    {step.label}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <p><strong style={{ color: "var(--text-primary)" }}>Available on Cask ($149/mo) and Barrel tiers.</strong> Go to Settings &rarr; POS Integration to connect.</p>
+          </div>
+        </div>
+
+        {/* Supported Providers */}
+        <div
+          className="rounded-2xl border p-5 mb-4"
+          style={{ background: "var(--surface)", borderColor: "var(--border)" }}
+        >
+          <h3 className="font-display font-semibold mb-4" style={{ color: "var(--text-primary)" }}>
+            Supported Providers
+          </h3>
+          <div className="space-y-3">
+            {[
+              {
+                name: "Toast",
+                emoji: "🍞",
+                desc: "Full menu sync via webhooks. When you update items in Toast, HopTrack receives a notification and syncs automatically within seconds.",
+                features: ["Real-time webhook sync", "Menu item matching", "Price sync", "86'd item detection"],
+              },
+              {
+                name: "Square",
+                emoji: "⬛",
+                desc: "Catalog sync via Square webhooks. Square sends catalog change notifications and HopTrack fetches your latest menu.",
+                features: ["Catalog change detection", "Item matching by name", "Category mapping", "Variation support"],
+              },
+            ].map((prov) => (
+              <div
+                key={prov.name}
+                className="p-4 rounded-xl"
+                style={{ background: "var(--surface-2)" }}
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xl">{prov.emoji}</span>
+                  <span className="font-display font-semibold" style={{ color: "var(--text-primary)" }}>{prov.name}</span>
+                </div>
+                <p className="text-sm mb-3" style={{ color: "var(--text-muted)" }}>{prov.desc}</p>
+                <div className="flex flex-wrap gap-2">
+                  {prov.features.map((f) => (
+                    <span key={f} className="text-[11px] font-mono px-2 py-1 rounded-lg" style={{ background: "rgba(212,168,67,0.1)", color: "var(--accent-gold)" }}>
+                      {f}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Setup Steps */}
+        <div
+          className="rounded-2xl border p-5 mb-4"
+          style={{ background: "var(--surface)", borderColor: "var(--border)" }}
+        >
+          <div className="flex items-center gap-2 mb-3">
+            <Settings size={16} style={{ color: "var(--accent-gold)" }} />
+            <h3 className="font-display font-semibold" style={{ color: "var(--text-primary)" }}>
+              Setup Guide
+            </h3>
+          </div>
+          <div className="space-y-4 text-sm" style={{ color: "var(--text-secondary)" }}>
+            {[
+              {
+                step: "1",
+                title: "Connect your POS",
+                desc: "Go to Settings → POS Integration and click Connect on your provider (Toast or Square). You'll be redirected to authorize HopTrack.",
+              },
+              {
+                step: "2",
+                title: "Run your first sync",
+                desc: "After connecting, click Sync Now. HopTrack will pull your current menu and auto-match items to your existing tap list.",
+              },
+              {
+                step: "3",
+                title: "Review mappings",
+                desc: "Check the Item Mappings section in Settings. Auto-matched items show a green dot. Unmapped items need you to select the matching HopTrack beer from the dropdown.",
+              },
+              {
+                step: "4",
+                title: "Automatic sync active",
+                desc: "Once connected, every menu change in your POS triggers an automatic sync. New items are added, removed items are toggled off-tap, and prices stay current.",
+              },
+            ].map((s) => (
+              <div key={s.step} className="flex items-start gap-3">
+                <div
+                  className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5"
+                  style={{ background: "var(--accent-gold)", color: "var(--bg)" }}
+                >
+                  {s.step}
+                </div>
+                <div>
+                  <p className="font-medium" style={{ color: "var(--text-primary)" }}>{s.title}</p>
+                  <p className="mt-0.5" style={{ color: "var(--text-muted)" }}>{s.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Sync Log & Troubleshooting */}
+        <div
+          className="rounded-2xl border p-5"
+          style={{ background: "var(--surface)", borderColor: "var(--border)" }}
+        >
+          <div className="flex items-center gap-2 mb-3">
+            <AlertTriangle size={16} style={{ color: "var(--accent-gold)" }} />
+            <h3 className="font-display font-semibold" style={{ color: "var(--text-primary)" }}>
+              Monitoring & Troubleshooting
+            </h3>
+          </div>
+          <div className="space-y-3 text-sm" style={{ color: "var(--text-secondary)" }}>
+            <div className="flex items-start gap-2">
+              <CheckCircle2 size={14} className="mt-0.5 flex-shrink-0" style={{ color: "#22c55e" }} />
+              <p><strong style={{ color: "var(--text-primary)" }}>Dashboard card:</strong> Your brewery dashboard shows a POS status card with connection health (green/yellow/red), last sync time, and item count.</p>
+            </div>
+            <div className="flex items-start gap-2">
+              <CheckCircle2 size={14} className="mt-0.5 flex-shrink-0" style={{ color: "#22c55e" }} />
+              <p><strong style={{ color: "var(--text-primary)" }}>Sync log:</strong> Visit the POS Sync page (from dashboard or quick actions) to see a full history of every sync — what was added, updated, or removed.</p>
+            </div>
+            <div className="flex items-start gap-2">
+              <CheckCircle2 size={14} className="mt-0.5 flex-shrink-0" style={{ color: "#22c55e" }} />
+              <p><strong style={{ color: "var(--text-primary)" }}>Alert banners:</strong> If a sync fails or data goes stale (no sync in 24+ hours), a warning banner appears on your dashboard automatically.</p>
+            </div>
+            <div className="mt-3 p-3 rounded-xl" style={{ background: "var(--surface-2)" }}>
+              <p className="font-medium mb-1" style={{ color: "var(--text-primary)" }}>Common issues:</p>
+              <ul className="space-y-1.5 ml-4" style={{ color: "var(--text-muted)" }}>
+                <li className="list-disc">Unmapped items — open Settings &rarr; POS Integration &rarr; Item Mappings and assign each item</li>
+                <li className="list-disc">Stale sync — click Sync Now on the dashboard POS card to force a fresh sync</li>
+                <li className="list-disc">Connection lost — disconnect and reconnect from Settings &rarr; POS Integration</li>
+                <li className="list-disc">Missing items — ensure items are active and visible in your POS system</li>
+              </ul>
             </div>
           </div>
         </div>

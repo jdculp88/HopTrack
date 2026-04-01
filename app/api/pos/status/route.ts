@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
   // Verify brewery access
   const { data: account } = await (supabase as any)
     .from("brewery_accounts")
-    .select("role, subscription_tier")
+    .select("role")
     .eq("user_id", user.id)
     .eq("brewery_id", breweryId)
     .single();

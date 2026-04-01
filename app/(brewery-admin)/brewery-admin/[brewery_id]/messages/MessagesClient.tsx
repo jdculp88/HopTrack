@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Mail, Send, Users, Crown, Star, TrendingUp, UserPlus, Loader2, CheckCircle } from "lucide-react";
+import { Mail, Send, Users, Loader2, CheckCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/components/ui/Toast";
+import { computeSegment, SEGMENTS, type CustomerSegment } from "@/lib/crm";
 
-type Tier = "all" | "vip" | "power_user" | "regular" | "new";
+type Audience = "all" | CustomerSegment;
 
 interface Customer {
   user_id: string;
@@ -19,23 +20,8 @@ interface MessagesClientProps {
   customers: Customer[];
 }
 
-function getTierForVisits(visits: number): "vip" | "power_user" | "regular" | "new" {
-  if (visits >= 10) return "vip";
-  if (visits >= 5) return "power_user";
-  if (visits >= 2) return "regular";
-  return "new";
-}
-
-const TIER_OPTIONS: { key: Tier; label: string; icon: React.ComponentType<{ size?: number }>; description: string }[] = [
-  { key: "all", label: "All Customers", icon: Users, description: "Everyone who has visited" },
-  { key: "vip", label: "VIP", icon: Crown, description: "10+ visits" },
-  { key: "power_user", label: "Power Users", icon: Star, description: "5\u20139 visits" },
-  { key: "regular", label: "Regulars", icon: TrendingUp, description: "2\u20134 visits" },
-  { key: "new", label: "New Visitors", icon: UserPlus, description: "1 visit" },
-];
-
 export function MessagesClient({ breweryId, breweryName, customers }: MessagesClientProps) {
-  const [selectedTier, setSelectedTier] = useState<Tier>("all");
+  const [selectedAudience, setSelectedAudience] = useState<Audience>("all");
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
   const [sending, setSending] = useState(false);
@@ -43,14 +29,16 @@ export function MessagesClient({ breweryId, breweryName, customers }: MessagesCl
   const { success, error: showError } = useToast();
 
   const filteredCount = useMemo(() => {
-    if (selectedTier === "all") return customers.length;
-    return customers.filter((c) => getTierForVisits(c.visits) === selectedTier).length;
-  }, [customers, selectedTier]);
+    if (selectedAudience === "all") return customers.length;
+    return customers.filter((c) => computeSegment(c.visits) === selectedAudience).length;
+  }, [customers, selectedAudience]);
 
-  const tierCounts = useMemo(() => {
-    const counts: Record<Tier, number> = { all: customers.length, vip: 0, power_user: 0, regular: 0, new: 0 };
+  const segmentCounts = useMemo(() => {
+    const counts: Record<string, number> = { all: customers.length };
+    SEGMENTS.forEach((s) => { counts[s.id] = 0; });
     customers.forEach((c) => {
-      counts[getTierForVisits(c.visits)]++;
+      const seg = computeSegment(c.visits);
+      counts[seg] = (counts[seg] ?? 0) + 1;
     });
     return counts;
   }, [customers]);
@@ -70,7 +58,7 @@ export function MessagesClient({ breweryId, breweryName, customers }: MessagesCl
       const res = await fetch(`/api/brewery/${breweryId}/messages`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tier: selectedTier, subject: subject.trim(), body: body.trim() }),
+        body: JSON.stringify({ tier: selectedAudience, subject: subject.trim(), body: body.trim() }),
       });
 
       if (!res.ok) {
@@ -106,38 +94,47 @@ export function MessagesClient({ breweryId, breweryName, customers }: MessagesCl
         </p>
       </div>
 
-      {/* Tier selector */}
+      {/* Segment selector */}
       <div className="rounded-2xl border p-5 space-y-4" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
         <h2 className="font-display font-bold text-sm" style={{ color: "var(--text-primary)" }}>
           Select audience
         </h2>
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-          {TIER_OPTIONS.map(({ key, label, icon: Icon, description }) => {
-            const isActive = selectedTier === key;
-            const count = tierCounts[key];
+          {/* All option */}
+          <button
+            onClick={() => setSelectedAudience("all")}
+            className="flex flex-col items-center gap-1.5 p-3 rounded-xl text-center transition-all border"
+            style={
+              selectedAudience === "all"
+                ? { background: "color-mix(in srgb, var(--accent-gold) 15%, transparent)", borderColor: "var(--accent-gold)", color: "var(--accent-gold)" }
+                : { background: "var(--surface-2)", borderColor: "var(--border)", color: "var(--text-secondary)" }
+            }
+          >
+            <Users size={18} />
+            <span className="font-display font-semibold text-xs">All</span>
+            <span className="text-[10px] font-mono" style={{ color: selectedAudience === "all" ? "var(--accent-gold)" : "var(--text-muted)" }}>
+              {segmentCounts.all} customers
+            </span>
+          </button>
+
+          {/* Segment options from CRM */}
+          {SEGMENTS.map((seg) => {
+            const isActive = selectedAudience === seg.id;
             return (
               <button
-                key={key}
-                onClick={() => setSelectedTier(key)}
+                key={seg.id}
+                onClick={() => setSelectedAudience(seg.id)}
                 className="flex flex-col items-center gap-1.5 p-3 rounded-xl text-center transition-all border"
                 style={
                   isActive
-                    ? {
-                        background: "color-mix(in srgb, var(--accent-gold) 15%, transparent)",
-                        borderColor: "var(--accent-gold)",
-                        color: "var(--accent-gold)",
-                      }
-                    : {
-                        background: "var(--surface-2)",
-                        borderColor: "var(--border)",
-                        color: "var(--text-secondary)",
-                      }
+                    ? { background: seg.bgColor, borderColor: seg.color, color: seg.color }
+                    : { background: "var(--surface-2)", borderColor: "var(--border)", color: "var(--text-secondary)" }
                 }
               >
-                <Icon size={18} />
-                <span className="font-display font-semibold text-xs">{label}</span>
-                <span className="text-[10px] font-mono" style={{ color: isActive ? "var(--accent-gold)" : "var(--text-muted)" }}>
-                  {count} · {description}
+                <span className="text-lg">{seg.emoji}</span>
+                <span className="font-display font-semibold text-xs">{seg.label}</span>
+                <span className="text-[10px] font-mono" style={{ color: isActive ? seg.color : "var(--text-muted)" }}>
+                  {segmentCounts[seg.id] ?? 0} · {seg.minVisits}{seg.maxVisits ? `-${seg.maxVisits}` : "+"} visits
                 </span>
               </button>
             );

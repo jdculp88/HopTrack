@@ -25,7 +25,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ prov
   // Verify brewery ownership (Cask or Barrel tier)
   const { data: account } = await (supabase as any)
     .from("brewery_accounts")
-    .select("role, subscription_tier")
+    .select("role")
     .eq("user_id", user.id)
     .eq("brewery_id", breweryId)
     .single();
@@ -34,7 +34,9 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ prov
     return Response.json({ error: "Not authorized for this brewery" }, { status: 403 });
   }
 
-  if (!["cask", "barrel"].includes(account.subscription_tier)) {
+  const { data: brewery } = await (supabase as any)
+    .from("breweries").select("subscription_tier").eq("id", breweryId).single();
+  if (!brewery || !["cask", "barrel"].includes(brewery.subscription_tier)) {
     return Response.json({ error: "POS integration requires Cask or Barrel tier" }, { status: 403 });
   }
 

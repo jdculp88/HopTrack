@@ -2,8 +2,9 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { sendPushToUser } from "@/lib/push";
 import type { PushPayload } from "@/lib/push";
+import { computeSegment, type CustomerSegment } from "@/lib/crm";
 
-type Tier = "all" | "vip" | "power_user" | "regular" | "new";
+type Tier = "all" | CustomerSegment;
 
 export async function POST(
   request: Request,
@@ -65,21 +66,13 @@ export async function POST(
     visitCounts.set(s.user_id, (visitCounts.get(s.user_id) ?? 0) + 1);
   }
 
-  // Filter by tier
+  // Filter by segment (using unified CRM logic)
   const targetUsers: string[] = [];
   for (const [userId, visits] of visitCounts) {
     // Don't message yourself
     if (userId === user.id) continue;
 
-    if (tier === "all") {
-      targetUsers.push(userId);
-    } else if (tier === "vip" && visits >= 10) {
-      targetUsers.push(userId);
-    } else if (tier === "power_user" && visits >= 5 && visits <= 9) {
-      targetUsers.push(userId);
-    } else if (tier === "regular" && visits >= 2 && visits <= 4) {
-      targetUsers.push(userId);
-    } else if (tier === "new" && visits === 1) {
+    if (tier === "all" || computeSegment(visits) === tier) {
       targetUsers.push(userId);
     }
   }

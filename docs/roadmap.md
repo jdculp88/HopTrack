@@ -1,8 +1,8 @@
 # HopTrack Product Roadmap
 **Last updated:** 2026-04-01
 **PM:** Morgan
-**Current Sprint:** Sprint 88 — The Monitor 📊
-**Last completed:** Sprint 87 — The Sync Engine ✅
+**Current Sprint:** Sprint 89 — The Rolodex 📇
+**Last completed:** Sprint 88 — The Monitor ✅
 
 > This is a living document -- updated every sprint. For completed sprints 1-12, see `docs/roadmap-archive.md`. For sprint plans, see `docs/plans/`. For the Shore It Up master plan (Sprints 64-73), see `docs/plans/sprint-64-73-master-plan.md`. For the Q2 2026 roadmap research (30 features, 18 REQs, 4 sprint arcs), see `docs/plans/roadmap-research-2026-q2.md`.
 
@@ -272,6 +272,42 @@ Vitest configured (39 unit tests across 4 files). Vitest added to CI. Cookie con
 - `app/(brewery-admin)/brewery-admin/[brewery_id]/pos-sync/PosSyncLogClient.tsx` — NEW: sync log UI with filters + pagination
 - `app/(brewery-admin)/brewery-admin/[brewery_id]/pos-sync/loading.tsx` — NEW: skeleton loader
 - `app/(brewery-admin)/brewery-admin/[brewery_id]/page.tsx` — UPDATED: PosDashboardCard, PosSyncAlertBanner, POS quick action
+
+---
+
+## Sprint 89 — The Rolodex 📇 (2026-04-01)
+**Theme:** Know your customers — brewery CRM & intelligence
+**Arc:** Open the Pipes (Sprints 85-90)
+**Plan:** `docs/plans/sprint-89-plan.md`
+
+**Goal 1: Customer Profiles (F-018 Phase 1)** — Individual customer detail page at `/brewery-admin/[id]/customers/[user_id]`. Shows visit timeline (last 20 sessions with beers), loyalty status, taste profile (top 5 styles with bars), favorite beers (top 5 ranked), engagement stats (visits, beers logged, avg rating, unique beers), engagement score (0-100 from frequency + recency + depth + loyalty + connection), and segment badge. All data computed from existing tables — no new migration needed for CRM.
+
+**Goal 2: Customer Segments** — Unified segment system in `lib/crm.ts`. Four auto-computed segments: VIP (10+ visits, gold 👑), Power (5-9, purple ⚡), Regular (2-4, blue 🍺), New (1, green 🌱). Single source of truth replaces inconsistent thresholds across Customers page (was 5/15/30) and Messages page (was 2/5/10). Segment filter pills on Customers list with counts. Clickable rows navigate to customer profile.
+
+**Goal 3: Segmented Messaging** — Messages page upgraded with unified CRM segments. Segment selector shows emoji + label + count + visit range. API updated to use `computeSegment()` from `lib/crm.ts`. Recipient count preview. Push notification delivery (Sprint 74 wiring).
+
+**Goal 4: Barcode Scanning Pilot (F-008)** — Camera-based beer lookup. `BarcodeScanner` component uses native BarcodeDetector API (Chrome/Edge/Android). Scan UPC/EAN → `GET /api/beers/barcode/[code]` → pre-fill beer picker. Graceful "not found" for unmatched barcodes. `BarcodeScanButton` auto-hides on unsupported browsers. Migration 059: `barcode` column on `beers` table.
+
+**Bug fix:** Settings page redirect — was querying `subscription_tier` from `brewery_accounts` (doesn't exist there, lives on `breweries`). Fixed in settings page + 2 POS API routes. Also added `.maybeSingle()` to avoid PostgREST errors.
+
+**Also this sprint:** POS Integration Guide added to Resources page (how sync works, supported providers, setup guide, troubleshooting).
+
+**Key changes from Sprint 89:**
+- `lib/crm.ts` — NEW: computeSegment(), computeEngagementScore(), buildCustomerProfile(), SEGMENTS constant, CustomerProfile interface
+- `lib/__tests__/crm.test.ts` — NEW: 22 tests (segments, scoring, profile builder)
+- `app/(brewery-admin)/brewery-admin/[brewery_id]/customers/[user_id]/page.tsx` — NEW: customer profile server page
+- `app/(brewery-admin)/brewery-admin/[brewery_id]/customers/[user_id]/CustomerProfileClient.tsx` — NEW: profile UI (stats, taste profile, favorites, visit timeline)
+- `app/(brewery-admin)/brewery-admin/[brewery_id]/customers/CustomersClient.tsx` — UPDATED: segment filter pills, CRM badges, clickable rows → profile
+- `app/(brewery-admin)/brewery-admin/[brewery_id]/messages/MessagesClient.tsx` — UPDATED: unified CRM segments
+- `app/api/brewery/[brewery_id]/messages/route.ts` — UPDATED: uses computeSegment() from lib/crm.ts
+- `components/session/BarcodeScanner.tsx` — NEW: camera barcode scanner + BarcodeScanButton
+- `app/api/beers/barcode/[code]/route.ts` — NEW: barcode lookup endpoint
+- `supabase/migrations/059_beer_barcode.sql` — NEW: barcode column on beers table
+- `types/database.ts` — UPDATED: barcode field on Beer interface
+- `app/(brewery-admin)/brewery-admin/[brewery_id]/settings/page.tsx` — FIXED: subscription_tier query (was querying wrong table)
+- `app/api/pos/connect/[provider]/route.ts` — FIXED: subscription_tier query
+- `app/api/pos/status/route.ts` — FIXED: subscription_tier query
+- `app/(brewery-admin)/brewery-admin/[brewery_id]/resources/page.tsx` — UPDATED: POS Integration Guide section added
 
 ---
 
