@@ -142,6 +142,27 @@ export function useSession() {
     }
   }, [])
 
+  const cancelSession = useCallback(async (sessionId: string): Promise<boolean> => {
+    setLoading(true)
+    setError(null)
+    try {
+      const res = await fetch(`/api/sessions/${sessionId}`, {
+        method: 'DELETE',
+      })
+      if (!res.ok) {
+        const data = await res.json()
+        setError(data.error || 'Failed to cancel session')
+        return false
+      }
+      return true
+    } catch {
+      setError('Network error')
+      return false
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
   return {
     startSession,
     startHomeSession,
@@ -150,6 +171,7 @@ export function useSession() {
     updateBeerLog,
     incrementBeerQuantity,
     endSession,
+    cancelSession,
     loading,
     error,
   }

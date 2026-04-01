@@ -214,6 +214,11 @@ export interface Database {
         Insert: Omit<MugClubMember, "id" | "joined_at"> & { id?: string };
         Update: Partial<MugClubMember>;
       };
+      redemption_codes: {
+        Row: RedemptionCode;
+        Insert: Omit<RedemptionCode, "id" | "created_at" | "expires_at" | "confirmed_at" | "confirmed_by" | "status"> & { id?: string; status?: string };
+        Update: Partial<RedemptionCode>;
+      };
     };
   };
 }
@@ -1005,4 +1010,20 @@ export interface MugClubMember {
   // joined fields
   profile?: { id: string; username: string; display_name: string | null; avatar_url: string | null };
   mug_club?: MugClub;
+}
+
+export interface RedemptionCode {
+  id: string;
+  code: string;
+  type: 'loyalty_reward' | 'mug_club_perk';
+  user_id: string;
+  brewery_id: string;
+  program_id: string | null;
+  mug_club_id: string | null;
+  perk_index: number | null;
+  status: 'pending' | 'confirmed' | 'expired' | 'cancelled';
+  created_at: string;
+  expires_at: string;
+  confirmed_at: string | null;
+  confirmed_by: string | null;
 }

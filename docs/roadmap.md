@@ -1,10 +1,30 @@
 # HopTrack Product Roadmap
 **Last updated:** 2026-04-01
 **PM:** Morgan
-**Current Sprint:** Sprint 96 — The Lockdown
-**Last completed:** Sprint 95 — The Hub ✅
+**Last completed:** Sprint 96 — The Lockdown ✅
+**Last arc:** The Flywheel (Sprints 91-96) — CLOSED ✅
 
 > This is a living document -- updated every sprint. For completed sprints 1-12, see `docs/roadmap-archive.md`. For sprint plans, see `docs/plans/`. For the Shore It Up master plan (Sprints 64-73), see `docs/plans/sprint-64-73-master-plan.md`. For the Q2 2026 roadmap research (30 features, 18 REQs, 4 sprint arcs), see `docs/plans/roadmap-research-2026-q2.md`.
+
+---
+
+## Sprint 96 — The Lockdown (COMPLETE ✅)
+**Theme:** Secure the foundation, fix the core flow
+**Arc:** The Flywheel (Sprint 6 of 6 — FINAL)
+**Plan:** `docs/plans/sprint-96-plan.md` | **Retro:** `docs/retros/sprint-96-retro.md`
+
+**Session Drawer UX Overhaul (BL-011)** — `SessionContext` lifts beer logs to React context so selections persist across drawer close/reopen (P0 fix). Minimized mode: drawer collapses to compact gold bar above nav. Enhanced `ActiveSessionBanner`: pulsing live indicator, last beer name, companion avatars. Cancel session: full DELETE flow with AnimatePresence confirmation, hard-deletes beer logs, no XP.
+
+**Fraud Prevention Phase 1 (BL-010)** — Migration 066: `redemption_codes` table with 6-char codes, 5-minute expiry, full RLS. Customer generates code from LoyaltyStampCard or MugClubSection, brewery staff confirms via dashboard input. Covers loyalty stamp redemptions + mug club perk claims. Rate limited (5 gen/min, 10 confirm/min). Phase 1-3 design doc: `docs/plans/fraud-prevention-design.md`.
+
+**Tier Feature Matrix + Billing Clarity (BL-007/008)** — `FEATURE_MATRIX` constant (20 features × 4 tiers) in `lib/stripe.ts`. Free tier card added. Current tier badge ("CURRENT PLAN"). Upgrade/downgrade CTAs. Full responsive feature comparison table. Current tier column highlighted in gold.
+
+---
+
+## The Flywheel Arc — CLOSED ✅ (Sprints 91-96)
+**Theme:** Revenue features, quality, trust
+
+6 sprints, 0 carryover. Shipped: sponsored challenges, full QA audit (30 items), ad engine, digital mug clubs, promotion hub, session drawer overhaul, fraud prevention, tier feature matrix. Tests: 149 → 217. Lint: 223 → 0.
 
 ---
 

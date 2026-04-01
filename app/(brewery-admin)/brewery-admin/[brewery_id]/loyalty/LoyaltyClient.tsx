@@ -240,6 +240,9 @@ export function LoyaltyClient({ breweryId, initialPrograms, initialPromotions, b
         </section>
       )}
 
+      {/* ── Verify Redemption Code ─────────────────────────── */}
+      <VerifyRedemptionCard breweryId={breweryId} />
+
       {/* Loyalty Programs */}
       <section className="mb-10">
         <div className="flex items-center justify-between mb-4">
@@ -511,6 +514,116 @@ function Field({ label, required, children }: { label: string; required?: boolea
       </label>
       {children}
     </div>
+  );
+}
+
+// ─── Verify Redemption Code Card ────────────────────────────────────────────
+
+function VerifyRedemptionCard({ breweryId }: { breweryId: string }) {
+  const [code, setCode] = useState("");
+  const [verifying, setVerifying] = useState(false);
+  const [result, setResult] = useState<{ success: boolean; customer?: string; description?: string; error?: string } | null>(null);
+  const { success: toastSuccess, error: toastError } = useToast();
+
+  async function handleVerify() {
+    if (code.length !== 6) return;
+    setVerifying(true);
+    setResult(null);
+    try {
+      const res = await fetch(`/api/brewery/${breweryId}/redemptions/confirm`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: code.toUpperCase() }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setResult({ success: true, customer: data.customer, description: data.description });
+        toastSuccess(`Redemption confirmed for ${data.customer}`);
+        setCode("");
+      } else {
+        setResult({ success: false, error: data.error || "Invalid code" });
+      }
+    } catch {
+      setResult({ success: false, error: "Network error" });
+    } finally {
+      setVerifying(false);
+    }
+  }
+
+  return (
+    <section className="mb-10">
+      <div className="rounded-2xl border p-5" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
+        <div className="flex items-center gap-2 mb-4">
+          <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: "color-mix(in srgb, var(--accent-gold) 15%, transparent)" }}>
+            <Gift size={16} style={{ color: "var(--accent-gold)" }} />
+          </div>
+          <div>
+            <h3 className="font-display font-bold text-sm" style={{ color: "var(--text-primary)" }}>Verify Redemption</h3>
+            <p className="text-xs" style={{ color: "var(--text-muted)" }}>Enter a customer&apos;s 6-digit code to confirm their reward</p>
+          </div>
+        </div>
+
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={code}
+            onChange={(e) => setCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6))}
+            placeholder="ABCDEF"
+            maxLength={6}
+            className="flex-1 px-4 py-3 rounded-xl text-center font-mono text-lg tracking-[0.3em] uppercase outline-none"
+            style={{ background: "var(--surface-2)", border: "1px solid var(--border)", color: "var(--text-primary)" }}
+            onKeyDown={(e) => e.key === "Enter" && handleVerify()}
+          />
+          <button
+            onClick={handleVerify}
+            disabled={code.length !== 6 || verifying}
+            className="px-5 py-3 rounded-xl text-sm font-semibold disabled:opacity-50 flex items-center gap-1.5"
+            style={{ background: "var(--accent-gold)", color: "var(--bg)" }}
+          >
+            {verifying ? <Loader2 size={14} className="animate-spin" /> : "Verify"}
+          </button>
+        </div>
+
+        <AnimatePresence>
+          {result && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="overflow-hidden"
+            >
+              <div
+                className="mt-3 px-4 py-3 rounded-xl text-sm"
+                style={{
+                  background: result.success
+                    ? "color-mix(in srgb, #22c55e 10%, transparent)"
+                    : "color-mix(in srgb, var(--danger) 10%, transparent)",
+                  border: result.success
+                    ? "1px solid color-mix(in srgb, #22c55e 30%, transparent)"
+                    : "1px solid color-mix(in srgb, var(--danger) 30%, transparent)",
+                  color: result.success ? "#22c55e" : "var(--danger)",
+                }}
+              >
+                {result.success ? (
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">🎉</span>
+                    <div>
+                      <p className="font-semibold">Confirmed — {result.customer}</p>
+                      <p className="text-xs opacity-80">{result.description}</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <AlertTriangle size={16} />
+                    <span>{result.error}</span>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </section>
   );
 }
 

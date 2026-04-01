@@ -6,6 +6,7 @@ import { AnimatePresence } from "framer-motion";
 import { AppNav } from "@/components/layout/AppNav";
 import { createClient } from "@/lib/supabase/client";
 import { ToastProvider } from "@/components/ui/Toast";
+import { SessionProvider, useSessionContext } from "@/contexts/SessionContext";
 import ActiveSessionBanner from "@/components/session/ActiveSessionBanner";
 import CheckinEntryDrawer from "@/components/session/CheckinEntryDrawer";
 import TapWallSheet from "@/components/session/TapWallSheet";
@@ -23,11 +24,32 @@ interface AppShellProps {
 }
 
 export function AppShell({ children, username, unreadNotifications = 0 }: AppShellProps) {
+  return (
+    <ToastProvider>
+      <SessionProvider>
+        <AppShellInner username={username} unreadNotifications={unreadNotifications}>
+          {children}
+        </AppShellInner>
+      </SessionProvider>
+    </ToastProvider>
+  );
+}
+
+function AppShellInner({ children, username, unreadNotifications = 0 }: AppShellProps) {
   const searchParams = useSearchParams();
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [checkinOpen, setCheckinOpen] = useState(false);
-  const [tapWallOpen, setTapWallOpen] = useState(false);
   const [recapOpen, setRecapOpen] = useState(false);
+
+  const {
+    activeSession,
+    sessionBreweryName,
+    beerLogs,
+    tapWallMode,
+    setActiveSession,
+    clearSession,
+    setTapWallMode,
+  } = useSessionContext();
 
   // Check onboarding state on mount (client-only)
   useEffect(() => {
@@ -37,8 +59,6 @@ export function AppShell({ children, username, unreadNotifications = 0 }: AppShe
     }
   }, []);
 
-  const [activeSession, setActiveSession] = useState<Session | null>(null);
-  const [sessionBreweryName, setSessionBreweryName] = useState('');
   const [preselectedBrewery, setPreselectedBrewery] = useState<Brewery | null>(null);
   const [sessionResult, setSessionResult] = useState<{ xpGained: number; newAchievements: any[]; session?: any; beerLogs?: any[] } | null>(null);
   const [shareOpen, setShareOpen] = useState(false);
@@ -48,16 +68,14 @@ export function AppShell({ children, username, unreadNotifications = 0 }: AppShe
     function handleSessionChanged(e: Event) {
       const detail = (e as CustomEvent).detail;
       if (detail) {
-        setActiveSession(detail.session);
-        setSessionBreweryName(detail.breweryName);
+        setActiveSession(detail.session, detail.breweryName);
       } else {
-        setActiveSession(null);
-        setSessionBreweryName('');
+        clearSession();
       }
     }
     window.addEventListener('hoptrack:session-changed', handleSessionChanged);
     return () => window.removeEventListener('hoptrack:session-changed', handleSessionChanged);
-  }, []);
+  }, [setActiveSession, clearSession]);
 
   // Open checkin drawer (optionally pre-loaded with a brewery)
   useEffect(() => {
@@ -103,11 +121,11 @@ export function AppShell({ children, username, unreadNotifications = 0 }: AppShe
   // Open tap wall
   useEffect(() => {
     function handleOpenTapWall() {
-      if (activeSession) setTapWallOpen(true);
+      if (activeSession) setTapWallMode('open');
     }
     window.addEventListener('hoptrack:open-tapwall', handleOpenTapWall);
     return () => window.removeEventListener('hoptrack:open-tapwall', handleOpenTapWall);
-  }, [activeSession]);
+  }, [activeSession, setTapWallMode]);
 
   function handleCheckin() {
     if (activeSession) {
@@ -123,37 +141,56 @@ export function AppShell({ children, username, unreadNotifications = 0 }: AppShe
   }
 
   const handleSessionStarted = useCallback((session: Session, breweryName: string) => {
-    setActiveSession(session);
-    setSessionBreweryName(breweryName);
+    setActiveSession(session, breweryName);
     setCheckinOpen(false);
     setPreselectedBrewery(null);
-    setTapWallOpen(true);
+    setTapWallMode('open');
     window.dispatchEvent(new CustomEvent('hoptrack:session-changed', {
       detail: { session, breweryName },
     }));
-  }, []);
+  }, [setActiveSession, setTapWallMode]);
 
   const handleHomeSessionStarted = useCallback((session: Session) => {
-    setActiveSession(session);
-    setSessionBreweryName('At Home');
+    setActiveSession(session, 'At Home');
     setCheckinOpen(false);
     setPreselectedBrewery(null);
-    setTapWallOpen(true);
+    setTapWallMode('open');
     window.dispatchEvent(new CustomEvent('hoptrack:session-changed', {
       detail: { session, breweryName: 'At Home' },
     }));
-  }, []);
+  }, [setActiveSession, setTapWallMode]);
 
   const handleSessionEnd = useCallback((result: { xpGained: number; newAchievements: any[]; session?: any; beerLogs?: any[] }) => {
-    setActiveSession(null);
-    setTapWallOpen(false);
+    clearSession();
     setSessionResult(result);
     setRecapOpen(true);
     window.dispatchEvent(new CustomEvent('hoptrack:session-changed', { detail: null }));
-  }, []);
+  }, [clearSession]);
+
+  const handleSessionCancelled = useCallback(() => {
+    clearSession();
+    window.dispatchEvent(new CustomEvent('hoptrack:session-changed', { detail: null }));
+  }, [clearSession]);
+
+  const handleTapWallClose = useCallback(() => {
+    // Minimize instead of fully closing — beer logs persist in context
+    if (activeSession) {
+      setTapWallMode('minimized');
+    } else {
+      setTapWallMode('closed');
+    }
+  }, [activeSession, setTapWallMode]);
+
+  const handleMinimizedTap = useCallback(() => {
+    setTapWallMode('open');
+  }, [setTapWallMode]);
+
+  const handleBannerTap = useCallback(() => {
+    setTapWallMode('open');
+  }, [setTapWallMode]);
 
   return (
-    <ToastProvider>
+    <>
       {/* Skip-to-content link — first focusable element, visually hidden until focused */}
       <a
         href="#main-content"
@@ -174,13 +211,14 @@ export function AppShell({ children, username, unreadNotifications = 0 }: AppShe
           {children}
         </main>
 
-        {/* Active session banner — fixed position, last child so RSC hydration cursor stays aligned */}
+        {/* Active session banner — shows when session active and tap wall is closed */}
         <AnimatePresence>
-          {activeSession && (
+          {activeSession && tapWallMode === 'closed' && (
             <ActiveSessionBanner
               session={activeSession}
               breweryName={sessionBreweryName}
-              onTap={handleOpenTapWall}
+              beerLogs={beerLogs}
+              onTap={handleBannerTap}
             />
           )}
         </AnimatePresence>
@@ -197,15 +235,29 @@ export function AppShell({ children, username, unreadNotifications = 0 }: AppShe
 
       {activeSession && (
         <TapWallSheet
-          isOpen={tapWallOpen}
-          onClose={() => setTapWallOpen(false)}
+          isOpen={tapWallMode === 'open'}
+          onClose={handleTapWallClose}
+          onMinimize={() => setTapWallMode('minimized')}
           session={activeSession}
           breweryName={sessionBreweryName}
           breweryId={activeSession.brewery_id}
           homeMode={activeSession.context === 'home'}
           onSessionEnd={handleSessionEnd}
+          onSessionCancelled={handleSessionCancelled}
         />
       )}
+
+      {/* Minimized session bar */}
+      <AnimatePresence>
+        {activeSession && tapWallMode === 'minimized' && (
+          <MinimizedSessionBar
+            breweryName={sessionBreweryName}
+            beerCount={beerLogs.reduce((sum, l) => sum + (l.quantity ?? 1), 0)}
+            startedAt={activeSession.started_at}
+            onTap={handleMinimizedTap}
+          />
+        )}
+      </AnimatePresence>
 
       <SessionRecapSheet
         isOpen={recapOpen}
@@ -235,6 +287,83 @@ export function AppShell({ children, username, unreadNotifications = 0 }: AppShe
           <WelcomeFlow onComplete={() => setShowOnboarding(false)} />
         )}
       </AnimatePresence>
-    </ToastProvider>
+    </>
   );
+}
+
+// ─── Minimized Session Bar ─────────────────────────────────────────────────────
+
+import { motion } from 'framer-motion';
+import { Beer, ChevronUp } from 'lucide-react';
+import { spring } from '@/lib/animation';
+
+function MinimizedSessionBar({
+  breweryName,
+  beerCount,
+  startedAt,
+  onTap,
+}: {
+  breweryName: string
+  beerCount: number
+  startedAt: string
+  onTap: () => void
+}) {
+  const [timeLabel, setTimeLabel] = useState('')
+
+  useEffect(() => {
+    function compute() {
+      const start = new Date(startedAt)
+      const diffMs = Date.now() - start.getTime()
+      const mins = Math.floor(diffMs / 60000)
+      const hours = Math.floor(mins / 60)
+      const rem = mins % 60
+      setTimeLabel(hours > 0 ? `${hours}h ${rem}m` : `${mins}m`)
+    }
+    compute()
+    const interval = setInterval(compute, 60000)
+    return () => clearInterval(interval)
+  }, [startedAt])
+
+  return (
+    <motion.div
+      initial={{ y: 80, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      exit={{ y: 80, opacity: 0 }}
+      transition={spring.default}
+      className="fixed bottom-[calc(4rem+env(safe-area-inset-bottom))] left-0 right-0 z-40 px-3 pb-2"
+    >
+      <button
+        onClick={onTap}
+        className="w-full rounded-2xl overflow-hidden"
+        style={{
+          background: 'linear-gradient(135deg, var(--accent-gold) 0%, var(--accent-amber) 100%)',
+          boxShadow: '0 4px 20px color-mix(in srgb, var(--accent-gold) 40%, transparent)',
+        }}
+      >
+        <div className="flex items-center justify-between px-4 py-3">
+          <div className="flex items-center gap-2.5 min-w-0">
+            {/* Live indicator */}
+            <div className="relative flex-shrink-0">
+              <div className="w-7 h-7 rounded-full bg-black/20 flex items-center justify-center">
+                <Beer size={14} className="text-white" />
+              </div>
+              <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-green-400 border border-black/20 animate-pulse" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-bold text-black leading-none truncate">
+                {breweryName}
+              </p>
+              <p className="text-xs text-black/70 leading-none mt-0.5 font-mono">
+                {beerCount} {beerCount === 1 ? 'beer' : 'beers'} · {timeLabel}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-1.5 flex-shrink-0">
+            <span className="text-xs font-semibold text-black/70">Expand</span>
+            <ChevronUp size={16} className="text-black/70" />
+          </div>
+        </div>
+      </button>
+    </motion.div>
+  )
 }

@@ -62,3 +62,27 @@ export const TIER_INFO = {
   barrel: { label: "Barrel", monthly: 0, annual: 0, monthlyDisplay: "Custom", annualDisplay: "Custom", annualMonthlyDisplay: "Custom", savings: "" },
   free: { label: "Free Trial", monthly: 0, annual: 0, monthlyDisplay: "Free", annualDisplay: "Free", annualMonthlyDisplay: "Free", savings: "" },
 } as const;
+
+// Feature matrix — single source of truth for tier gating
+export const FEATURE_MATRIX = [
+  { feature: "Tap list management", free: true, tap: true, cask: true, barrel: true, category: "Core" },
+  { feature: "Brewery profile page", free: true, tap: true, cask: true, barrel: true, category: "Core" },
+  { feature: "QR code table tents", free: false, tap: true, cask: true, barrel: true, category: "Core" },
+  { feature: "Basic analytics", free: false, tap: true, cask: true, barrel: true, category: "Analytics" },
+  { feature: "Loyalty program (up to 50 members)", free: false, tap: true, cask: false, barrel: false, category: "Loyalty" },
+  { feature: "Unlimited loyalty members", free: false, tap: false, cask: true, barrel: true, category: "Loyalty" },
+  { feature: "Digital mug clubs", free: false, tap: false, cask: true, barrel: true, category: "Loyalty" },
+  { feature: "Redemption code verification", free: false, tap: false, cask: true, barrel: true, category: "Loyalty" },
+  { feature: "Ad campaigns", free: false, tap: false, cask: true, barrel: true, category: "Marketing" },
+  { feature: "Promotion hub", free: false, tap: false, cask: true, barrel: true, category: "Marketing" },
+  { feature: "Sponsored challenges", free: false, tap: false, cask: true, barrel: true, category: "Marketing" },
+  { feature: "Advanced analytics & trends", free: false, tap: false, cask: true, barrel: true, category: "Analytics" },
+  { feature: "Events management", free: false, tap: false, cask: true, barrel: true, category: "Events" },
+  { feature: "POS integration", free: false, tap: false, cask: true, barrel: true, category: "Integrations" },
+  { feature: "Public API access", free: false, tap: false, cask: true, barrel: true, category: "Integrations" },
+  { feature: "Customer messaging", free: false, tap: false, cask: true, barrel: true, category: "Marketing" },
+  { feature: "Priority support", free: false, tap: false, cask: true, barrel: true, category: "Support" },
+  { feature: "Multi-location management", free: false, tap: false, cask: false, barrel: true, category: "Enterprise" },
+  { feature: "Custom integrations", free: false, tap: false, cask: false, barrel: true, category: "Enterprise" },
+  { feature: "Dedicated account manager", free: false, tap: false, cask: false, barrel: true, category: "Enterprise" },
+] as const;

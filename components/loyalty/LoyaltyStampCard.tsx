@@ -1,9 +1,12 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useState, useEffect, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface LoyaltyProgram {
+  id?: string;
   name: string;
   stamps_required: number;
   reward_description: string;
@@ -18,6 +21,7 @@ interface LoyaltyStampCardProps {
   program: LoyaltyProgram;
   card: LoyaltyCard | null;
   breweryName: string;
+  breweryId?: string;
 }
 
 // SVG hop cone icon used for filled stamps
@@ -92,7 +96,7 @@ const rewardBannerVariants = {
   },
 };
 
-export function LoyaltyStampCard({ program, card, breweryName }: LoyaltyStampCardProps) {
+export function LoyaltyStampCard({ program, card, breweryName, breweryId }: LoyaltyStampCardProps) {
   const stamps = card?.stamps ?? 0;
   const lifetimeStamps = card?.lifetime_stamps ?? 0;
   const { stamps_required, name, reward_description } = program;
@@ -258,35 +262,15 @@ export function LoyaltyStampCard({ program, card, breweryName }: LoyaltyStampCar
           [data-hop-empty] svg  { color: color-mix(in srgb, var(--text-muted) 40%, transparent); }
         `}</style>
 
-        {/* ── Progress text ───────────────────────────────────── */}
+        {/* ── Progress text / Redemption ────────────────────── */}
         {card !== null && (
           <div className="mt-4">
             {isRewardReady ? (
-              <motion.div
-                variants={rewardBannerVariants}
-                initial="hidden"
-                animate="visible"
-                className="rounded-xl px-4 py-3 text-center"
-                style={{
-                  background:
-                    "color-mix(in srgb, var(--accent-gold) 12%, transparent)",
-                  border:
-                    "1px solid color-mix(in srgb, var(--accent-gold) 50%, transparent)",
-                }}
-              >
-                <p
-                  className="font-display font-bold text-base"
-                  style={{ color: "var(--accent-gold)" }}
-                >
-                  Reward Ready!
-                </p>
-                <p
-                  className="text-xs mt-0.5"
-                  style={{ color: "var(--text-secondary)" }}
-                >
-                  Show this screen to your bartender
-                </p>
-              </motion.div>
+              <RedemptionCodeSection
+                breweryId={breweryId}
+                programId={program.id}
+                rewardDescription={reward_description}
+              />
             ) : (
               <p
                 className="text-xs text-center"
@@ -318,6 +302,145 @@ export function LoyaltyStampCard({ program, card, breweryName }: LoyaltyStampCar
           </p>
         )}
       </div>
+    </motion.div>
+  );
+}
+
+// ─── Redemption Code Section ────────────────────────────────────────────────
+
+function RedemptionCodeSection({
+  breweryId,
+  programId,
+  rewardDescription,
+}: {
+  breweryId?: string;
+  programId?: string;
+  rewardDescription: string;
+}) {
+  const [code, setCode] = useState<string | null>(null);
+  const [expiresAt, setExpiresAt] = useState<string | null>(null);
+  const [generating, setGenerating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [timeLeft, setTimeLeft] = useState(0);
+
+  const generateCode = useCallback(async () => {
+    if (!breweryId || !programId) return;
+    setGenerating(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/redemptions/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "loyalty_reward",
+          brewery_id: breweryId,
+          program_id: programId,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || "Failed to generate code");
+        return;
+      }
+      setCode(data.code);
+      setExpiresAt(data.expires_at);
+    } catch {
+      setError("Network error");
+    } finally {
+      setGenerating(false);
+    }
+  }, [breweryId, programId]);
+
+  // Countdown timer
+  useEffect(() => {
+    if (!expiresAt) return;
+    function tick() {
+      const remaining = Math.max(0, Math.floor((new Date(expiresAt!).getTime() - Date.now()) / 1000));
+      setTimeLeft(remaining);
+      if (remaining <= 0) {
+        setCode(null);
+        setExpiresAt(null);
+      }
+    }
+    tick();
+    const interval = setInterval(tick, 1000);
+    return () => clearInterval(interval);
+  }, [expiresAt]);
+
+  const minutes = Math.floor(timeLeft / 60);
+  const seconds = timeLeft % 60;
+
+  if (code) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="rounded-xl px-4 py-4 text-center"
+        style={{
+          background: "color-mix(in srgb, var(--accent-gold) 12%, transparent)",
+          border: "1px solid color-mix(in srgb, var(--accent-gold) 50%, transparent)",
+        }}
+      >
+        <p className="text-xs font-mono uppercase tracking-wide mb-2" style={{ color: "var(--text-muted)" }}>
+          Show this code to your bartender
+        </p>
+        <div className="flex items-center justify-center gap-1.5 mb-2">
+          {code.split("").map((char, i) => (
+            <div
+              key={i}
+              className="w-10 h-12 rounded-lg flex items-center justify-center font-mono text-2xl font-bold"
+              style={{
+                background: "var(--surface)",
+                border: "1.5px solid var(--accent-gold)",
+                color: "var(--accent-gold)",
+              }}
+            >
+              {char}
+            </div>
+          ))}
+        </div>
+        <p className="text-xs font-mono" style={{ color: timeLeft <= 60 ? "var(--danger)" : "var(--text-muted)" }}>
+          Expires in {minutes}:{seconds.toString().padStart(2, "0")}
+        </p>
+        <p className="text-xs mt-1" style={{ color: "var(--text-secondary)" }}>
+          {rewardDescription}
+        </p>
+      </motion.div>
+    );
+  }
+
+  return (
+    <motion.div
+      variants={rewardBannerVariants}
+      initial="hidden"
+      animate="visible"
+      className="rounded-xl px-4 py-3 text-center"
+      style={{
+        background: "color-mix(in srgb, var(--accent-gold) 12%, transparent)",
+        border: "1px solid color-mix(in srgb, var(--accent-gold) 50%, transparent)",
+      }}
+    >
+      <p className="font-display font-bold text-base" style={{ color: "var(--accent-gold)" }}>
+        Reward Ready!
+      </p>
+      {error && (
+        <p className="text-xs mt-1" style={{ color: "var(--danger)" }}>{error}</p>
+      )}
+      <button
+        onClick={generateCode}
+        disabled={generating || !breweryId || !programId}
+        className="mt-2 px-5 py-2 rounded-xl text-sm font-semibold transition-all disabled:opacity-60 inline-flex items-center gap-1.5"
+        style={{
+          background: "linear-gradient(135deg, var(--accent-gold) 0%, var(--accent-amber) 100%)",
+          color: "var(--bg)",
+        }}
+      >
+        {generating ? (
+          <><Loader2 size={14} className="animate-spin" /> Generating...</>
+        ) : (
+          "Redeem Reward"
+        )}
+      </button>
     </motion.div>
   );
 }

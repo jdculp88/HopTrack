@@ -2,11 +2,13 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Search, Check, Loader2, Beer, Plus, Users } from 'lucide-react'
+import { X, Search, Check, Loader2, Beer, Plus, Users, ChevronDown, AlertTriangle } from 'lucide-react'
 import { UserAvatar } from '@/components/ui/UserAvatar'
 import { FullScreenDrawer } from '@/components/ui/Modal'
 import { Skeleton } from '@/components/ui/SkeletonLoader'
 import { useSession } from '@/hooks/useSession'
+import { useSessionContext } from '@/contexts/SessionContext'
+import { useToast } from '@/components/ui/Toast'
 import QuickRatingSheet from '@/components/session/QuickRatingSheet'
 import { formatABV } from '@/lib/utils'
 import type { Session, BeerLog } from '@/types/database'
@@ -22,11 +24,13 @@ interface TapWallBeer {
 interface TapWallSheetProps {
   isOpen: boolean
   onClose: () => void
+  onMinimize?: () => void
   session: Session
   breweryName: string
   breweryId: string | null
   homeMode?: boolean
   onSessionEnd: (result: { xpGained: number; newAchievements: any[]; session?: any; beerLogs?: any[] }) => void
+  onSessionCancelled?: () => void
 }
 
 function useElapsedTime(startedAt: string) {
@@ -71,31 +75,46 @@ function BeerSkeletonRow() {
 export default function TapWallSheet({
   isOpen,
   onClose,
+  onMinimize,
   session,
   breweryName,
   breweryId,
   homeMode = false,
   onSessionEnd,
+  onSessionCancelled,
 }: TapWallSheetProps) {
+  // Beer logs from context — persist across mount/unmount
+  const {
+    beerLogs,
+    addBeerLog: ctxAddBeerLog,
+    updateBeerLog: ctxUpdateBeerLog,
+    removeBeerLog: ctxRemoveBeerLog,
+    sessionNote,
+    setSessionNote,
+    participants,
+    setParticipants,
+  } = useSessionContext()
+
+  const toast = useToast()
+
+  // Ephemeral UI state (local only)
   const [beers, setBeers] = useState<TapWallBeer[]>([])
   const [beerLoading, setBeerLoading] = useState(true)
   const [query, setQuery] = useState('')
-  const [localLogs, setLocalLogs] = useState<BeerLog[]>(session.beer_logs ?? [])
   const [loggingBeer, setLoggingBeer] = useState<string | null>(null)
   const [incrementingLog, setIncrementingLog] = useState<string | null>(null)
   const [ratingSheet, setRatingSheet] = useState<{ log: BeerLog; beerName: string } | null>(null)
   const [showEndConfirm, setShowEndConfirm] = useState(false)
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false)
   const [ending, setEnding] = useState(false)
-  const [sessionNote, setSessionNote] = useState(session.note ?? '')
+  const [cancelling, setCancelling] = useState(false)
   const [showNoteInput, setShowNoteInput] = useState(!!session.note)
-  const [participants, setParticipants] = useState<Array<{ id: string; user_id: string; status: string; profile: { id: string; username: string; display_name: string | null; avatar_url: string | null } | null }>>([])
   const [showInvite, setShowInvite] = useState(false)
   const [friendSearch, setFriendSearch] = useState('')
   const [friendResults, setFriendResults] = useState<Array<{ id: string; username: string; display_name: string | null; avatar_url: string | null }>>([])
   const [inviting, setInviting] = useState<string | null>(null)
-  // Map of beer_id → previous rating (from any past session)
   const [previousRatings, setPreviousRatings] = useState<Map<string, number>>(new Map())
-  const { logBeer, updateBeerLog, incrementBeerQuantity, endSession } = useSession()
+  const { logBeer, updateBeerLog, incrementBeerQuantity, endSession, cancelSession } = useSession()
   const elapsed = useElapsedTime(session.started_at)
 
   // Fetch participants on open
@@ -105,7 +124,7 @@ export default function TapWallSheet({
       .then((r) => (r.ok ? r.json() : []))
       .then((data) => setParticipants(Array.isArray(data) ? data : []))
       .catch(() => {})
-  }, [isOpen, session.id])
+  }, [isOpen, session.id, setParticipants])
 
   // Debounced friend search for invite
   useEffect(() => {
@@ -129,7 +148,7 @@ export default function TapWallSheet({
       })
       if (res.ok) {
         const participant = await res.json()
-        setParticipants((prev) => [...prev, participant])
+        setParticipants([...participants, participant])
         setShowInvite(false)
         setFriendSearch('')
         setFriendResults([])
@@ -177,13 +196,6 @@ export default function TapWallSheet({
     return () => clearTimeout(timer)
   }, [query, isOpen, homeMode])
 
-  // Sync logs from session prop on open
-  useEffect(() => {
-    if (isOpen) {
-      setLocalLogs(session.beer_logs ?? [])
-    }
-  }, [isOpen, session.beer_logs])
-
   // Fetch previously-rated beer IDs on open (for smart re-review skip)
   useEffect(() => {
     if (!isOpen) return
@@ -199,9 +211,9 @@ export default function TapWallSheet({
       .catch(() => {})
   }, [isOpen])
 
-  // beer_id → log in this session
+  // beer_id → log in this session (from context)
   const loggedBeerMap = new Map<string, BeerLog>()
-  for (const log of localLogs) {
+  for (const log of beerLogs) {
     if (log.beer_id) loggedBeerMap.set(log.beer_id, log)
   }
 
@@ -231,7 +243,7 @@ export default function TapWallSheet({
       logged_at: new Date().toISOString(),
       beer: { id: beer.id, name: beer.name, style: beer.style, abv: beer.abv, avg_rating: beer.avg_rating },
     }
-    setLocalLogs((prev) => [...prev, tempLog])
+    ctxAddBeerLog(tempLog)
     setLoggingBeer(null)
 
     const result = await logBeer(session.id, {
@@ -240,13 +252,13 @@ export default function TapWallSheet({
     })
 
     if (result) {
-      setLocalLogs((prev) => prev.map((l) => l.id === tempLog.id ? { ...result, beer: tempLog.beer } : l))
+      ctxUpdateBeerLog(tempLog.id, { ...result, beer: tempLog.beer })
       // Skip rating sheet if user has already rated this beer in a past session
       if (!previousRatings.has(beer.id)) {
         setRatingSheet({ log: result, beerName: beer.name })
       }
     } else {
-      setLocalLogs((prev) => prev.filter((l) => l.id !== tempLog.id))
+      ctxRemoveBeerLog(tempLog.id)
     }
   }
 
@@ -254,13 +266,16 @@ export default function TapWallSheet({
     setIncrementingLog(log.id)
     const updated = await incrementBeerQuantity(log.id, log.quantity ?? 1)
     if (updated) {
-      setLocalLogs((prev) => prev.map((l) => l.id === log.id ? { ...l, quantity: updated.quantity } : l))
+      ctxUpdateBeerLog(log.id, { ...log, quantity: updated.quantity })
     }
     setIncrementingLog(null)
   }
 
   async function handleSaveRating(logId: string, rating: number, comment?: string) {
-    setLocalLogs((prev) => prev.map((l) => l.id === logId ? { ...l, rating, comment: comment ?? l.comment } : l))
+    const existing = beerLogs.find(l => l.id === logId)
+    if (existing) {
+      ctxUpdateBeerLog(logId, { ...existing, rating, comment: comment ?? existing.comment })
+    }
     await updateBeerLog(logId, { rating, comment })
     setRatingSheet(null)
   }
@@ -283,8 +298,24 @@ export default function TapWallSheet({
     }
   }
 
+  async function handleCancelSession() {
+    setCancelling(true)
+    const success = await cancelSession(session.id)
+    setCancelling(false)
+    setShowCancelConfirm(false)
+    if (success) {
+      toast.info('Session cancelled')
+      onSessionCancelled?.()
+    } else {
+      toast.error('Failed to cancel session')
+    }
+  }
+
   // Total pours (sum of quantities)
-  const totalPours = localLogs.reduce((sum, l) => sum + (l.quantity ?? 1), 0)
+  const totalPours = beerLogs.reduce((sum, l) => sum + (l.quantity ?? 1), 0)
+
+  // Last beer logged
+  const lastBeer = beerLogs.length > 0 ? beerLogs[beerLogs.length - 1] : null
 
   return (
     <>
@@ -295,18 +326,26 @@ export default function TapWallSheet({
           style={{ borderColor: 'var(--border)' }}
         >
           <button
-            onClick={onClose}
+            onClick={onMinimize ?? onClose}
             className="p-2 -ml-2 rounded-xl transition-colors"
             style={{ color: 'var(--text-secondary)' }}
+            title="Minimize"
           >
-            <X size={20} />
+            <ChevronDown size={20} />
           </button>
           <div className="text-center flex-1 px-2">
-            <p className="font-display font-bold text-base leading-tight" style={{ color: 'var(--text-primary)' }}>
-              {breweryName}
-            </p>
+            <div className="flex items-center justify-center gap-2">
+              {/* Live indicator */}
+              <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+              <p className="font-display font-bold text-base leading-tight" style={{ color: 'var(--text-primary)' }}>
+                {breweryName}
+              </p>
+            </div>
             <p className="text-xs font-mono" style={{ color: 'var(--text-muted)' }}>
               {elapsed}
+              {lastBeer?.beer && (
+                <span> · {lastBeer.beer.name}</span>
+              )}
             </p>
           </div>
           <div
@@ -422,6 +461,7 @@ export default function TapWallSheet({
           className="absolute bottom-0 left-0 right-0 px-4 pb-safe pt-3"
           style={{ background: 'var(--surface)', borderTop: '1px solid var(--border)' }}
         >
+          {/* End session confirmation */}
           <AnimatePresence>
             {showEndConfirm && (
               <motion.div
@@ -450,9 +490,54 @@ export default function TapWallSheet({
                       onClick={handleEndSession}
                       disabled={ending}
                       className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-60 flex items-center justify-center gap-1.5"
+                      style={{ background: 'var(--accent-gold)', color: 'var(--bg)' }}
+                    >
+                      {ending ? <><Loader2 size={14} className="animate-spin" /> Ending...</> : 'End & save'}
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Cancel session confirmation */}
+          <AnimatePresence>
+            {showCancelConfirm && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="overflow-hidden"
+              >
+                <div className="pb-3">
+                  <div className="flex items-center justify-center gap-2 mb-2">
+                    <AlertTriangle size={16} style={{ color: 'var(--danger)' }} />
+                    <p className="text-sm font-semibold" style={{ color: 'var(--danger)' }}>
+                      Cancel session?
+                    </p>
+                  </div>
+                  <p className="text-xs text-center mb-3" style={{ color: 'var(--text-muted)' }}>
+                    All {totalPours} beer {totalPours === 1 ? 'log' : 'logs'} and notes will be permanently deleted. No XP will be awarded.
+                  </p>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setShowCancelConfirm(false)}
+                      className="flex-1 py-2.5 rounded-xl text-sm font-medium transition-colors"
+                      style={{
+                        background: 'var(--surface-2)',
+                        color: 'var(--text-secondary)',
+                        border: '1px solid var(--border)',
+                      }}
+                    >
+                      Keep going
+                    </button>
+                    <button
+                      onClick={handleCancelSession}
+                      disabled={cancelling}
+                      className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-60 flex items-center justify-center gap-1.5"
                       style={{ background: 'var(--danger)', color: '#fff' }}
                     >
-                      {ending ? <><Loader2 size={14} className="animate-spin" /> Ending...</> : 'End session'}
+                      {cancelling ? <><Loader2 size={14} className="animate-spin" /> Cancelling...</> : 'Yes, cancel'}
                     </button>
                   </div>
                 </div>
@@ -573,18 +658,24 @@ export default function TapWallSheet({
           </AnimatePresence>
 
           <div className="flex items-center justify-between gap-3 py-2">
-            <div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => { setShowCancelConfirm(true); setShowEndConfirm(false) }}
+                className="text-xs px-3 py-1.5 rounded-lg transition-colors"
+                style={{ color: 'var(--text-muted)' }}
+              >
+                Cancel
+              </button>
               <p className="text-xs font-mono" style={{ color: 'var(--text-muted)' }}>
                 {totalPours} {totalPours === 1 ? 'beer' : 'beers'} · {elapsed}
               </p>
             </div>
             <button
-              onClick={() => setShowEndConfirm(true)}
+              onClick={() => { setShowEndConfirm(true); setShowCancelConfirm(false) }}
               className="px-4 py-2 rounded-xl text-sm font-semibold transition-all"
               style={{
-                background: 'var(--surface-2)',
-                color: 'var(--danger)',
-                border: '1px solid color-mix(in srgb, var(--danger) 30%, transparent)',
+                background: 'linear-gradient(135deg, var(--accent-gold) 0%, var(--accent-amber) 100%)',
+                color: 'var(--bg)',
               }}
             >
               End session

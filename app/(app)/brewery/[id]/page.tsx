@@ -653,6 +653,7 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
           <MugClubSection
             clubs={mugClubs}
             myMemberships={myMugMemberships}
+            breweryId={brewery.id}
           />
         )}
 

@@ -1,6 +1,8 @@
 "use client";
 
-import { Crown, Check, Users } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Crown, Check, Users, Loader2, Gift } from "lucide-react";
 import { useToast } from "@/components/ui/Toast";
 import type { MugClub, MugClubMember } from "@/types/database";
 
@@ -11,9 +13,10 @@ interface MugClubWithCount extends MugClub {
 interface Props {
   clubs: MugClubWithCount[];
   myMemberships: MugClubMember[];
+  breweryId?: string;
 }
 
-export function MugClubSection({ clubs, myMemberships }: Props) {
+export function MugClubSection({ clubs, myMemberships, breweryId }: Props) {
   const { success } = useToast();
 
   if (clubs.length === 0) return null;
@@ -67,18 +70,18 @@ export function MugClubSection({ clubs, myMemberships }: Props) {
                 </div>
               </div>
 
-              {/* Perks */}
+              {/* Perks — with claim buttons for members */}
               {perks.length > 0 && (
                 <ul className="space-y-1.5">
                   {perks.map((perk, i) => (
-                    <li key={i} className="flex items-start gap-2 text-sm text-[var(--text-secondary)]">
-                      <Check
-                        size={14}
-                        className="flex-shrink-0 mt-0.5"
-                        style={{ color: "var(--accent-gold)" }}
-                      />
-                      {perk}
-                    </li>
+                    <PerkRow
+                      key={i}
+                      perk={perk}
+                      perkIndex={i}
+                      isMember={!!membership}
+                      breweryId={breweryId}
+                      mugClubId={club.id}
+                    />
                   ))}
                 </ul>
               )}
@@ -131,5 +134,126 @@ export function MugClubSection({ clubs, myMemberships }: Props) {
         })}
       </div>
     </div>
+  );
+}
+
+// ─── Perk Row with Claim Button ─────────────────────────────────────────────
+
+function PerkRow({
+  perk,
+  perkIndex,
+  isMember,
+  breweryId,
+  mugClubId,
+}: {
+  perk: string;
+  perkIndex: number;
+  isMember: boolean;
+  breweryId?: string;
+  mugClubId: string;
+}) {
+  const [code, setCode] = useState<string | null>(null);
+  const [expiresAt, setExpiresAt] = useState<string | null>(null);
+  const [generating, setGenerating] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(0);
+
+  const generateCode = useCallback(async () => {
+    if (!breweryId) return;
+    setGenerating(true);
+    try {
+      const res = await fetch("/api/redemptions/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "mug_club_perk",
+          brewery_id: breweryId,
+          mug_club_id: mugClubId,
+          perk_index: perkIndex,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setCode(data.code);
+        setExpiresAt(data.expires_at);
+      }
+    } finally {
+      setGenerating(false);
+    }
+  }, [breweryId, mugClubId, perkIndex]);
+
+  // Countdown timer
+  useEffect(() => {
+    if (!expiresAt) return;
+    function tick() {
+      const remaining = Math.max(0, Math.floor((new Date(expiresAt!).getTime() - Date.now()) / 1000));
+      setTimeLeft(remaining);
+      if (remaining <= 0) {
+        setCode(null);
+        setExpiresAt(null);
+      }
+    }
+    tick();
+    const interval = setInterval(tick, 1000);
+    return () => clearInterval(interval);
+  }, [expiresAt]);
+
+  return (
+    <li className="text-sm text-[var(--text-secondary)]">
+      <div className="flex items-start gap-2">
+        <Check
+          size={14}
+          className="flex-shrink-0 mt-0.5"
+          style={{ color: "var(--accent-gold)" }}
+        />
+        <span className="flex-1">{perk}</span>
+        {isMember && !code && (
+          <button
+            onClick={generateCode}
+            disabled={generating}
+            className="flex items-center gap-1 text-xs px-2 py-1 rounded-lg transition-colors flex-shrink-0 disabled:opacity-60"
+            style={{
+              background: "color-mix(in srgb, var(--accent-gold) 15%, transparent)",
+              color: "var(--accent-gold)",
+            }}
+          >
+            {generating ? (
+              <Loader2 size={10} className="animate-spin" />
+            ) : (
+              <><Gift size={10} /> Claim</>
+            )}
+          </button>
+        )}
+      </div>
+      <AnimatePresence>
+        {code && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="overflow-hidden"
+          >
+            <div className="ml-5 mt-1.5 px-3 py-2 rounded-lg" style={{ background: "color-mix(in srgb, var(--accent-gold) 10%, transparent)" }}>
+              <div className="flex items-center gap-1">
+                {code.split("").map((char, i) => (
+                  <span
+                    key={i}
+                    className="w-6 h-7 rounded flex items-center justify-center font-mono text-sm font-bold"
+                    style={{ background: "var(--surface)", border: "1px solid var(--accent-gold)", color: "var(--accent-gold)" }}
+                  >
+                    {char}
+                  </span>
+                ))}
+                <span className="ml-2 text-xs font-mono" style={{ color: timeLeft <= 60 ? "var(--danger)" : "var(--text-muted)" }}>
+                  {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, "0")}
+                </span>
+              </div>
+              <p className="text-[10px] mt-1" style={{ color: "var(--text-muted)" }}>
+                Show this code to your bartender
+              </p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </li>
   );
 }
