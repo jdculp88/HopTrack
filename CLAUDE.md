@@ -260,10 +260,11 @@ scripts/supabase-setup.mjs    — One-time setup script
 
 ## 🗺️ Where We Are
 
-**Last Completed Sprint:** Sprint 116 — The Daily Pour ✅
+**Last Completed Sprint:** Sprint 117 — The Dashboard ✅
 **Arc:** Multi-Location (Sprints 114-137)
-**Sprint plan (115):** `docs/plans/sprint-115-plan.md`
-**Retro (116):** `docs/retros/sprint-116-retro.md` (facilitated by Morgan)
+**Sprint plan (117):** `docs/plans/sprint-117-plan.md`
+**Retro (117):** `docs/retros/sprint-117-retro.md` (facilitated by Morgan)
+**Last completed:** Sprint 117 — The Dashboard ✅ — Brand dashboard with aggregated analytics across all locations (Today's Snapshot, 5 KPI cards with WoW trend, cross-location visitors, per-location breakdown with animated progress bars, top beers grouped by name, weekly sparkline, recent activity feed). 2 new API endpoints (brand analytics, brand active sessions). Consumer brand page interactive map (Leaflet, gold pins, auto-center/zoom, BrandMapClient SSR wrapper). Brand admin nav updated: "Brand Dashboard" replaces "Brand Settings" as default entry point. Loading skeleton. 7 new files, 0 migrations.
 **Last completed:** Sprint 116 — The Daily Pour ✅ — Service worker caching fix (30-sprint root cause: cache-first SW for /_next/static/ stripped to push-only, all caches cleared on activate). WishlistOnTapAlert hydration mismatch fixed (useState false → useEffect reveal). Individual notification dismiss fixed (API was always marking all read). You tab spacing (!mt-10 on Your Activity). Migration 076: Friday night at Pint & Pixel (40 test users, 120-150 visitors, 400+ drinks, Joshua wired as owner). seed-next-day.mjs: day simulator script (day-of-week traffic model, auto-advances from last session date, inserts sessions/beer_logs/ratings/reviews/reactions). Sprint close ceremony codified in CLAUDE.md + memory.
 **Retro (115):** `docs/retros/sprint-115-retro.md` (facilitated by Morgan)
 **Last completed:** Sprint 115 — The Brand ✅ — Multi-location brand system: brand creation wizard (3-step modal), add location flow (search existing or create new), brand-level role propagation (lib/brand-propagation.ts), location selector in brewery-admin nav (brand grouping with fallback), brand settings page (profile/locations/team/dissolve), consumer brand page (/brand/[slug] with hero + location grid + JSON-LD), brand API routes (5 new: create, slug-check, CRUD, locations, members). RLS infinite recursion fix on brewery_accounts. Massive seed data: 11 test auth users, 45+ sessions, 60+ beer logs, reviews, comments, reactions, ads, challenges, mug club, achievements. Joshua's account wired as Pint & Pixel owner. 3 migrations (073-075).

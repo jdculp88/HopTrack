@@ -99,12 +99,12 @@ export function BreweryAdminNav({ accounts, brandAccounts = [] }: { accounts: an
                                 <span className="text-xs font-bold" style={{ color: "var(--accent-gold)" }}>{b.name}</span>
                               </div>
                               <Link
-                                href={`/brewery-admin/brand/${b.id}/settings`}
+                                href={`/brewery-admin/brand/${b.id}/dashboard`}
                                 onClick={() => setOpen(false)}
                                 className="text-[10px] transition-opacity hover:opacity-70"
-                                style={{ color: "var(--text-muted)" }}
+                                style={{ color: "var(--accent-gold)" }}
                               >
-                                <Settings size={10} />
+                                <LayoutDashboard size={10} />
                               </Link>
                             </div>
                             {locs.map((a: any) => (
@@ -152,10 +152,10 @@ export function BreweryAdminNav({ accounts, brandAccounts = [] }: { accounts: an
 
         {/* Nav */}
         <nav className="flex-1 px-3 py-4 space-y-1">
-          {/* Brand Settings link — only when brewery belongs to a brand */}
+          {/* Brand Dashboard link — only when brewery belongs to a brand */}
           {brewery?.brand && brandAccounts.some((ba: any) => ba.brand_id === brewery.brand.id) && (
             <Link
-              href={`/brewery-admin/brand/${brewery.brand.id}/settings`}
+              href={`/brewery-admin/brand/${brewery.brand.id}/dashboard`}
               className={cn(
                 "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all mb-2",
                 pathname.includes(`/brand/${brewery.brand.id}`)
@@ -168,7 +168,7 @@ export function BreweryAdminNav({ accounts, brandAccounts = [] }: { accounts: an
               }
             >
               <Building2 size={16} />
-              Brand Settings
+              Brand Dashboard
             </Link>
           )}
           {NAV_ITEMS.map(({ href, label, icon: Icon }) => {

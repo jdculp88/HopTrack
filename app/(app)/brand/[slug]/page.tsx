@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { MapPin, Globe, Building2 } from "lucide-react";
+import { BrandMapClient } from "./BrandMapClient";
 
 export const revalidate = 60;
 
@@ -49,6 +50,7 @@ export default async function BrandPage({ params }: { params: Promise<{ slug: st
     .order("name") as any);
 
   const locationCount = locations?.length ?? 0;
+  const mappableLocations = (locations ?? []).filter((l: any) => l.latitude != null && l.longitude != null);
 
   return (
     <div className="min-h-screen pb-24" style={{ background: "var(--bg)" }}>
@@ -104,6 +106,16 @@ export default async function BrandPage({ params }: { params: Promise<{ slug: st
           </div>
         </div>
       </div>
+
+      {/* Location Map */}
+      {mappableLocations.length > 0 && (
+        <div className="max-w-3xl mx-auto px-4 mb-8">
+          <h2 className="font-display text-xl font-bold mb-4" style={{ color: "var(--text-primary)" }}>
+            Find a Location
+          </h2>
+          <BrandMapClient locations={locations ?? []} />
+        </div>
+      )}
 
       {/* Locations Grid */}
       <div className="max-w-3xl mx-auto px-4">
