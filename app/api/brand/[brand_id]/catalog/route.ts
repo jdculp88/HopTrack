@@ -8,6 +8,7 @@ import {
   apiConflict,
   apiServerError,
 } from "@/lib/api-response";
+import { verifyBrandAccess } from "@/lib/brand-auth";
 
 // ─── GET /api/brand/[brand_id]/catalog ──────────────────────────────────────
 // Returns all catalog beers for the brand with location overlay data.
@@ -20,15 +21,8 @@ export async function GET(
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return apiUnauthorized();
 
-  const { data: membership } = await (supabase
-    .from("brand_accounts")
-    .select("role")
-    .eq("brand_id", brand_id)
-    .eq("user_id", user.id)
-    .in("role", ["owner", "regional_manager"])
-    .maybeSingle() as any);
-
-  if (!membership) return apiForbidden();
+  const role = await verifyBrandAccess(supabase, brand_id, user.id);
+  if (!role || !["owner", "regional_manager"].includes(role)) return apiForbidden();
 
   try {
     // Fetch catalog beers and locations in parallel
@@ -166,15 +160,8 @@ export async function POST(
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return apiUnauthorized();
 
-  const { data: membership } = await (supabase
-    .from("brand_accounts")
-    .select("role")
-    .eq("brand_id", brand_id)
-    .eq("user_id", user.id)
-    .in("role", ["owner", "regional_manager"])
-    .maybeSingle() as any);
-
-  if (!membership) return apiForbidden();
+  const role = await verifyBrandAccess(supabase, brand_id, user.id);
+  if (!role || !["owner", "regional_manager"].includes(role)) return apiForbidden();
 
   const body = await request.json();
   const { name, style, abv, ibu, description, itemType, category, glassType, seasonal, coverImageUrl } = body;

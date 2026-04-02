@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { rateLimitResponse } from "@/lib/rate-limit";
+import { verifyBrandAccess } from "@/lib/brand-auth";
 import { apiSuccess, apiUnauthorized, apiForbidden, apiBadRequest, apiNotFound, apiConflict, apiServerError } from "@/lib/api-response";
 
 // ─── GET /api/brand/[brand_id] ──────────────────────────────────────────────
@@ -45,15 +46,8 @@ export async function PATCH(
   if (!user) return apiUnauthorized();
 
   // Check brand membership
-  const { data: membership } = await (supabase
-    .from("brand_accounts")
-    .select("role")
-    .eq("brand_id", brand_id)
-    .eq("user_id", user.id)
-    .in("role", ["owner", "regional_manager"])
-    .maybeSingle() as any);
-
-  if (!membership) return apiForbidden();
+  const role = await verifyBrandAccess(supabase, brand_id, user.id);
+  if (!role || !["owner", "regional_manager"].includes(role)) return apiForbidden();
 
   const body = await request.json();
   const { name, slug, description, website_url, logo_url } = body;

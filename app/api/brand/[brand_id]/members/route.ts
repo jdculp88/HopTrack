@@ -1,24 +1,13 @@
 import { NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/service";
 import { rateLimitResponse } from "@/lib/rate-limit";
 import { apiSuccess, apiUnauthorized, apiForbidden, apiBadRequest, apiNotFound, apiConflict, apiServerError } from "@/lib/api-response";
 import { propagateBrandAccess, removePropagatedAccess, recalculateScopedAccess } from "@/lib/brand-propagation";
 import { logTeamActivity } from "@/lib/brand-team-activity";
+import { verifyBrandAccess } from "@/lib/brand-auth";
 
 const VALID_BRAND_ROLES = ["owner", "brand_manager", "regional_manager"] as const;
-
-/**
- * Returns the caller's brand_accounts role, or null if not a member.
- */
-async function verifyBrandRole(supabase: any, userId: string, brandId: string): Promise<string | null> {
-  const { data } = await (supabase
-    .from("brand_accounts")
-    .select("role")
-    .eq("brand_id", brandId)
-    .eq("user_id", userId)
-    .maybeSingle() as any);
-  return data?.role ?? null;
-}
 
 function canManageTeam(role: string | null): boolean {
   return role === "owner" || role === "brand_manager";
@@ -36,35 +25,48 @@ export async function GET(
   if (!user) return apiUnauthorized();
 
   // Must be a brand member to see members
-  const callerRole = await verifyBrandRole(supabase, user.id, brand_id);
+  const callerRole = await verifyBrandAccess(supabase, brand_id, user.id);
   if (!callerRole) return apiForbidden();
 
-  const { data: members, error } = await (supabase
+  // Use service client to bypass RLS recursion on brand_accounts
+  const serviceClient = createServiceClient();
+  const { data: rawMembers, error } = await (serviceClient
     .from("brand_accounts")
-    .select(`
-      id,
-      user_id,
-      role,
-      created_at,
-      invited_at,
-      invited_by,
-      location_scope,
-      profile:profiles!brand_accounts_user_id_fkey(
-        display_name,
-        username,
-        avatar_url
-      ),
-      inviter:profiles!brand_accounts_invited_by_fkey(
-        display_name,
-        username
-      )
-    `)
+    .select("id, user_id, role, created_at, invited_at, invited_by, location_scope")
     .eq("brand_id", brand_id)
     .order("created_at", { ascending: true }) as any);
 
   if (error) return apiServerError("brand members GET");
 
-  return apiSuccess(members ?? []);
+  // Hydrate profiles separately (brand_accounts FK points to auth.users, not profiles)
+  const memberList = rawMembers ?? [];
+  if (memberList.length > 0) {
+    const userIds = memberList.map((m: any) => m.user_id).filter(Boolean);
+    const inviterIds = memberList.map((m: any) => m.invited_by).filter(Boolean);
+    const allIds = [...new Set([...userIds, ...inviterIds])];
+
+    const { data: profiles } = await (serviceClient
+      .from("profiles")
+      .select("id, display_name, username, avatar_url")
+      .in("id", allIds) as any);
+
+    const profileMap: Record<string, any> = {};
+    (profiles ?? []).forEach((p: any) => { profileMap[p.id] = p; });
+
+    memberList.forEach((m: any) => {
+      m.profile = profileMap[m.user_id] ? {
+        display_name: profileMap[m.user_id].display_name,
+        username: profileMap[m.user_id].username,
+        avatar_url: profileMap[m.user_id].avatar_url,
+      } : null;
+      m.inviter = m.invited_by && profileMap[m.invited_by] ? {
+        display_name: profileMap[m.invited_by].display_name,
+        username: profileMap[m.invited_by].username,
+      } : null;
+    });
+  }
+
+  return apiSuccess(memberList);
 }
 
 // ─── POST /api/brand/[brand_id]/members ─────────────────────────────────────
@@ -82,7 +84,7 @@ export async function POST(
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return apiUnauthorized();
 
-  const callerRole = await verifyBrandRole(supabase, user.id, brand_id);
+  const callerRole = await verifyBrandAccess(supabase, brand_id, user.id);
   if (!canManageTeam(callerRole)) return apiForbidden();
 
   const body = await request.json();
@@ -208,7 +210,7 @@ export async function PATCH(
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return apiUnauthorized();
 
-  const callerRole = await verifyBrandRole(supabase, user.id, brand_id);
+  const callerRole = await verifyBrandAccess(supabase, brand_id, user.id);
   if (!canManageTeam(callerRole)) return apiForbidden();
 
   const body = await request.json();
@@ -307,7 +309,7 @@ export async function DELETE(
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return apiUnauthorized();
 
-  const callerRole = await verifyBrandRole(supabase, user.id, brand_id);
+  const callerRole = await verifyBrandAccess(supabase, brand_id, user.id);
   if (!canManageTeam(callerRole)) return apiForbidden();
 
   const body = await request.json();

@@ -1,19 +1,10 @@
 import { NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { rateLimitResponse } from "@/lib/rate-limit";
+import { verifyBrandAccess } from "@/lib/brand-auth";
 import { apiSuccess, apiUnauthorized, apiForbidden, apiBadRequest, apiNotFound, apiConflict, apiServerError } from "@/lib/api-response";
 import { propagateBrandAccess, removePropagatedAccess } from "@/lib/brand-propagation";
 import { syncLocationTierOnBrandJoin, syncLocationTierOnBrandLeave } from "@/lib/brand-billing";
-
-async function getBrandRole(supabase: any, userId: string, brandId: string): Promise<string | null> {
-  const { data } = await (supabase
-    .from("brand_accounts")
-    .select("role")
-    .eq("brand_id", brandId)
-    .eq("user_id", userId)
-    .maybeSingle() as any);
-  return data?.role ?? null;
-}
 
 // ─── GET /api/brand/[brand_id]/locations ────────────────────────────────────
 // List all locations for a brand.
@@ -48,7 +39,7 @@ export async function POST(
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return apiUnauthorized();
 
-  const role = await getBrandRole(supabase, user.id, brand_id);
+  const role = await verifyBrandAccess(supabase, brand_id, user.id);
   if (role !== "owner") return apiForbidden();
 
   const body = await request.json();
@@ -128,7 +119,7 @@ export async function DELETE(
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return apiUnauthorized();
 
-  const role = await getBrandRole(supabase, user.id, brand_id);
+  const role = await verifyBrandAccess(supabase, brand_id, user.id);
   if (role !== "owner") return apiForbidden();
 
   const body = await request.json();

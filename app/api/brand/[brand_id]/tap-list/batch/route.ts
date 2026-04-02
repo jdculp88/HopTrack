@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { apiSuccess, apiUnauthorized, apiForbidden, apiBadRequest, apiServerError } from "@/lib/api-response";
+import { verifyBrandAccess } from "@/lib/brand-auth";
 
 // ─── PATCH /api/brand/[brand_id]/tap-list/batch ──────────────────────────────
 // Batch update is_on_tap / is_86d for beers across multiple locations.
@@ -18,15 +19,8 @@ export async function PATCH(
   if (!user) return apiUnauthorized();
 
   // Verify brand membership
-  const { data: membership } = await (supabase
-    .from("brand_accounts")
-    .select("role")
-    .eq("brand_id", brand_id)
-    .eq("user_id", user.id)
-    .in("role", ["owner", "regional_manager"])
-    .maybeSingle() as any);
-
-  if (!membership) return apiForbidden();
+  const role = await verifyBrandAccess(supabase, brand_id, user.id);
+  if (!role || !["owner", "regional_manager"].includes(role)) return apiForbidden();
 
   const body = await request.json();
   const { beerIds, action } = body;

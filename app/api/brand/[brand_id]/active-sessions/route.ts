@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest } from "next/server";
+import { verifyBrandAccess } from "@/lib/brand-auth";
 import { apiSuccess, apiUnauthorized, apiForbidden, apiNotFound } from "@/lib/api-response";
 
 // ─── GET /api/brand/[brand_id]/active-sessions ──────────────────────────────
@@ -15,15 +16,8 @@ export async function GET(
   if (!user) return apiUnauthorized();
 
   // Verify brand membership
-  const { data: membership } = await (supabase
-    .from("brand_accounts")
-    .select("role")
-    .eq("brand_id", brand_id)
-    .eq("user_id", user.id)
-    .in("role", ["owner", "regional_manager"])
-    .maybeSingle() as any);
-
-  if (!membership) return apiForbidden();
+  const role = await verifyBrandAccess(supabase, brand_id, user.id);
+  if (!role || !["owner", "regional_manager"].includes(role)) return apiForbidden();
 
   // Get all location IDs for this brand
   const { data: locations } = await (supabase

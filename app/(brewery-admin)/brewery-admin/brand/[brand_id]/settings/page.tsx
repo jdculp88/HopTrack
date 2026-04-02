@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
 import { BrandSettingsClient } from "./BrandSettingsClient";
+import { verifyBrandAccess } from "@/lib/brand-auth";
 
 export const metadata = { title: "Brand Settings" };
 
@@ -10,15 +11,9 @@ export default async function BrandSettingsPage({ params }: { params: Promise<{ 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  // Verify brand membership
-  const { data: membership } = await (supabase
-    .from("brand_accounts")
-    .select("role")
-    .eq("brand_id", brand_id)
-    .eq("user_id", user.id)
-    .maybeSingle() as any);
-
-  if (!membership) redirect("/brewery-admin");
+  // Verify brand membership (shared utility — handles RLS fallback)
+  const brandRole = await verifyBrandAccess(supabase, brand_id, user.id);
+  if (!brandRole) redirect("/brewery-admin");
 
   // Fetch brand
   const { data: brand } = await (supabase
@@ -40,7 +35,7 @@ export default async function BrandSettingsPage({ params }: { params: Promise<{ 
     <BrandSettingsClient
       brand={brand as any}
       locations={(locations as any) ?? []}
-      userRole={(membership as any).role}
+      userRole={brandRole as any}
       userId={user.id}
     />
   );

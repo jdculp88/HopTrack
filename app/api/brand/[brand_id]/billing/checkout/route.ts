@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { verifyBrandAccess } from "@/lib/brand-auth";
 import { getStripe, STRIPE_BRAND_PRICES, isStripeConfigured } from "@/lib/stripe";
 import { getBrandLocationCount } from "@/lib/brand-billing";
 import { rateLimitResponse } from "@/lib/rate-limit";
@@ -32,14 +33,8 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { data: brandAccount } = await supabase
-      .from("brand_accounts")
-      .select("role")
-      .eq("user_id", user.id)
-      .eq("brand_id", brand_id)
-      .single() as any;
-
-    if (!brandAccount || brandAccount.role !== "owner") {
+    const role = await verifyBrandAccess(supabase, brand_id, user.id);
+    if (role !== "owner") {
       return NextResponse.json({ error: "Only brand owners can manage billing" }, { status: 403 });
     }
 

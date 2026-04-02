@@ -8,6 +8,7 @@ import {
   apiNotFound,
   apiServerError,
 } from "@/lib/api-response";
+import { verifyBrandAccess } from "@/lib/brand-auth";
 
 // ─── POST /api/brand/[brand_id]/catalog/[catalog_beer_id]/add-to-locations ──
 // Add a catalog beer to one or more locations.
@@ -21,15 +22,8 @@ export async function POST(
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return apiUnauthorized();
 
-  const { data: membership } = await (supabase
-    .from("brand_accounts")
-    .select("role")
-    .eq("brand_id", brand_id)
-    .eq("user_id", user.id)
-    .in("role", ["owner", "regional_manager"])
-    .maybeSingle() as any);
-
-  if (!membership) return apiForbidden();
+  const role = await verifyBrandAccess(supabase, brand_id, user.id);
+  if (!role || !["owner", "regional_manager"].includes(role)) return apiForbidden();
 
   const body = await request.json();
   const { locationIds } = body;

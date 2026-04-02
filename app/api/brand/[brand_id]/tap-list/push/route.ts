@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { apiSuccess, apiUnauthorized, apiForbidden, apiBadRequest, apiNotFound, apiServerError } from "@/lib/api-response";
+import { verifyBrandAccess } from "@/lib/brand-auth";
 
 // ─── POST /api/brand/[brand_id]/tap-list/push ────────────────────────────────
 // Push a beer to target locations.
@@ -17,15 +18,8 @@ export async function POST(
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return apiUnauthorized();
 
-  const { data: membership } = await (supabase
-    .from("brand_accounts")
-    .select("role")
-    .eq("brand_id", brand_id)
-    .eq("user_id", user.id)
-    .in("role", ["owner", "regional_manager"])
-    .maybeSingle() as any);
-
-  if (!membership) return apiForbidden();
+  const role = await verifyBrandAccess(supabase, brand_id, user.id);
+  if (!role || !["owner", "regional_manager"].includes(role)) return apiForbidden();
 
   const body = await request.json();
   const { catalogBeerIds, sourceBeerIds, targetLocationIds } = body;

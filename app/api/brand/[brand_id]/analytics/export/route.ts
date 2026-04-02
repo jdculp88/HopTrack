@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { verifyBrandAccess } from "@/lib/brand-auth";
 
 // ─── GET /api/brand/[brand_id]/analytics/export ──────────────────────────────
 // CSV export of brand analytics across all locations.
@@ -14,15 +15,8 @@ export async function GET(
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   // Verify brand membership
-  const { data: membership } = await (supabase
-    .from("brand_accounts")
-    .select("role")
-    .eq("brand_id", brand_id)
-    .eq("user_id", user.id)
-    .in("role", ["owner", "regional_manager"])
-    .maybeSingle() as any);
-
-  if (!membership) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const role = await verifyBrandAccess(supabase, brand_id, user.id);
+  if (!role || !["owner", "regional_manager"].includes(role)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   // Fetch brand + locations
   const { data: brand } = await (supabase

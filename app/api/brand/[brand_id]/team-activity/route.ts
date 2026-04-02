@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { verifyBrandAccess } from "@/lib/brand-auth";
 import { apiSuccess, apiUnauthorized, apiForbidden, apiServerError } from "@/lib/api-response";
 
 // ─── GET /api/brand/[brand_id]/team-activity ────────────────────────────────
@@ -14,14 +15,8 @@ export async function GET(
   if (!user) return apiUnauthorized();
 
   // Verify caller is owner or brand_manager
-  const { data: membership } = await (supabase
-    .from("brand_accounts")
-    .select("role")
-    .eq("brand_id", brand_id)
-    .eq("user_id", user.id)
-    .maybeSingle() as any);
-
-  if (!membership || !["owner", "brand_manager"].includes(membership.role)) {
+  const role = await verifyBrandAccess(supabase, brand_id, user.id);
+  if (!role || !["owner", "brand_manager"].includes(role)) {
     return apiForbidden();
   }
 

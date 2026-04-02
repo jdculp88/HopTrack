@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Building2, ArrowLeft, List, Settings } from "lucide-react";
 import { BrandCatalogClient } from "./BrandCatalogClient";
+import { verifyBrandAccess } from "@/lib/brand-auth";
 
 export const revalidate = 30;
 
@@ -24,14 +25,9 @@ export default async function BrandCatalogPage({ params }: { params: Promise<{ b
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const { data: membership } = await (supabase
-    .from("brand_accounts")
-    .select("role")
-    .eq("brand_id", brand_id)
-    .eq("user_id", user.id)
-    .maybeSingle() as any);
-
-  if (!membership) redirect("/brewery-admin");
+  // Verify brand membership (shared utility — handles RLS fallback)
+  const brandRole = await verifyBrandAccess(supabase, brand_id, user.id);
+  if (!brandRole) redirect("/brewery-admin");
 
   const { data: brand } = await (supabase
     .from("brewery_brands")

@@ -8,20 +8,9 @@ import {
   apiBadRequest,
   apiServerError,
 } from "@/lib/api-response";
+import { verifyBrandAccess } from "@/lib/brand-auth";
 
 type Params = Promise<{ brand_id: string; catalog_beer_id: string }>;
-
-// ─── Helper: verify brand membership ────────────────────────────────────────
-async function verifyMembership(supabase: any, brandId: string, userId: string, roles: string[] = ["owner", "regional_manager"]) {
-  const { data } = await (supabase
-    .from("brand_accounts")
-    .select("role")
-    .eq("brand_id", brandId)
-    .eq("user_id", userId)
-    .in("role", roles)
-    .maybeSingle() as any);
-  return data;
-}
 
 // ─── GET /api/brand/[brand_id]/catalog/[catalog_beer_id] ────────────────────
 export async function GET(
@@ -33,7 +22,8 @@ export async function GET(
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return apiUnauthorized();
 
-  if (!await verifyMembership(supabase, brand_id, user.id)) return apiForbidden();
+  const role = await verifyBrandAccess(supabase, brand_id, user.id);
+  if (!role || !["owner", "regional_manager"].includes(role)) return apiForbidden();
 
   try {
     const { data: catalogBeer } = await (supabase
@@ -79,7 +69,8 @@ export async function PATCH(
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return apiUnauthorized();
 
-  if (!await verifyMembership(supabase, brand_id, user.id)) return apiForbidden();
+  const role = await verifyBrandAccess(supabase, brand_id, user.id);
+  if (!role || !["owner", "regional_manager"].includes(role)) return apiForbidden();
 
   const body = await request.json();
   const { propagate, ...fields } = body;
@@ -159,7 +150,8 @@ export async function DELETE(
   if (!user) return apiUnauthorized();
 
   // Delete requires owner role
-  if (!await verifyMembership(supabase, brand_id, user.id, ["owner"])) return apiForbidden();
+  const role = await verifyBrandAccess(supabase, brand_id, user.id);
+  if (!role || role !== "owner") return apiForbidden();
 
   try {
     const { data, error } = await (supabase

@@ -34,6 +34,8 @@ export async function propagateBrandAccess(
   opts?: { breweryId?: string; userId?: string }
 ) {
   // 1. Get brand members (all or one specific user)
+  // NOTE: Queries brand_accounts via caller's supabase client (RLS applies).
+  // Depends on migration 081 SECURITY DEFINER fix for correct results.
   let membersQuery = supabase
     .from("brand_accounts")
     .select("user_id, role, location_scope")
@@ -189,6 +191,7 @@ export async function recalculateScopedAccess(
   // Add propagated access for new locations
   if (toAdd.length > 0) {
     // Get member's role to determine brewery-level role
+    // NOTE: Depends on migration 081 SECURITY DEFINER fix for RLS
     const { data: member } = await (supabase
       .from("brand_accounts")
       .select("role")

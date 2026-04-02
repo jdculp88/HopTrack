@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Building2, MapPin, ArrowLeft } from "lucide-react";
 import { BrandReportsClient } from "./BrandReportsClient";
+import { verifyBrandAccess } from "@/lib/brand-auth";
 
 export const revalidate = 30;
 
@@ -24,15 +25,9 @@ export default async function BrandReportsPage({ params }: { params: Promise<{ b
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  // Verify brand membership
-  const { data: membership } = await (supabase
-    .from("brand_accounts")
-    .select("role")
-    .eq("brand_id", brand_id)
-    .eq("user_id", user.id)
-    .maybeSingle() as any);
-
-  if (!membership) redirect("/brewery-admin");
+  // Verify brand membership (shared utility — handles RLS fallback)
+  const brandRole = await verifyBrandAccess(supabase, brand_id, user.id);
+  if (!brandRole) redirect("/brewery-admin");
 
   // Fetch brand + locations
   const { data: brand } = await (supabase

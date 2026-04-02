@@ -113,20 +113,20 @@ export function BreweryAdminNav({ accounts, brandAccounts = [] }: { accounts: an
                       <>
                         {Array.from(brandGroups.values()).map(({ brand: b, locations: locs }) => (
                           <div key={b.id}>
-                            <div className="flex items-center justify-between px-3 py-2 border-b" style={{ borderColor: "var(--border)" }}>
+                            <Link
+                              href={`/brewery-admin/brand/${b.id}/dashboard`}
+                              onClick={() => setOpen(false)}
+                              className="flex items-center justify-between px-3 py-2.5 border-b transition-colors"
+                              style={{ borderColor: "var(--border)", background: activeBrandId === b.id ? "color-mix(in srgb, var(--accent-gold) 12%, transparent)" : undefined }}
+                              onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "color-mix(in srgb, var(--accent-gold) 12%, transparent)"}
+                              onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = activeBrandId === b.id ? "color-mix(in srgb, var(--accent-gold) 12%, transparent)" : "transparent"}
+                            >
                               <div className="flex items-center gap-2">
-                                <Building2 size={12} style={{ color: "var(--accent-gold)" }} />
+                                <Building2 size={14} style={{ color: "var(--accent-gold)" }} />
                                 <span className="text-xs font-bold" style={{ color: "var(--accent-gold)" }}>{b.name}</span>
                               </div>
-                              <Link
-                                href={`/brewery-admin/brand/${b.id}/dashboard`}
-                                onClick={() => setOpen(false)}
-                                className="text-[10px] transition-opacity hover:opacity-70"
-                                style={{ color: "var(--accent-gold)" }}
-                              >
-                                <LayoutDashboard size={10} />
-                              </Link>
-                            </div>
+                              <span className="text-[10px] font-medium" style={{ color: "var(--accent-gold)", opacity: 0.7 }}>Brand Dashboard →</span>
+                            </Link>
                             {locs.map((a: any) => (
                               <Link
                                 key={a.brewery_id}
@@ -325,8 +325,20 @@ export function BreweryAdminNav({ accounts, brandAccounts = [] }: { accounts: an
         {/* Top row */}
         <div className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2">
-            <BreweryAvatar name={brewery?.name ?? ""} size="sm" />
-            <span className="font-display font-semibold text-sm truncate max-w-[160px]" style={{ color: "var(--text-primary)" }}>{brewery?.name}</span>
+            {isBrandPage && brewery?.brand ? (
+              <>
+                <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
+                  style={{ background: "color-mix(in srgb, var(--accent-gold) 15%, transparent)" }}>
+                  <Building2 size={13} style={{ color: "var(--accent-gold)" }} />
+                </div>
+                <span className="font-display font-semibold text-sm truncate max-w-[160px]" style={{ color: "var(--accent-gold)" }}>{brewery.brand.name}</span>
+              </>
+            ) : (
+              <>
+                <BreweryAvatar name={brewery?.name ?? ""} size="sm" />
+                <span className="font-display font-semibold text-sm truncate max-w-[160px]" style={{ color: "var(--text-primary)" }}>{brewery?.name}</span>
+              </>
+            )}
           </div>
           <Link href="/home" className="text-xs flex-shrink-0" style={{ color: "var(--accent-gold)" }}>← App</Link>
         </div>
@@ -338,6 +350,33 @@ export function BreweryAdminNav({ accounts, brandAccounts = [] }: { accounts: an
           style={{ background: "linear-gradient(to right, transparent, var(--surface))" }}
         />
         <div className="flex overflow-x-auto scrollbar-hide">
+          {/* Brand tabs (mobile) */}
+          {brewery?.brand && brandAccounts.some((ba: any) => ba.brand_id === brewery.brand.id) && (
+            <>
+              {[
+                { href: `/brewery-admin/brand/${brewery.brand.id}/dashboard`, label: "Brand", icon: Building2 },
+                { href: `/brewery-admin/brand/${brewery.brand.id}/team`, label: "Team", icon: Users },
+                { href: `/brewery-admin/brand/${brewery.brand.id}/catalog`, label: "Catalog", icon: List },
+              ].map(({ href: bHref, label: bLabel, icon: BIcon }) => {
+                const bActive = pathname.startsWith(bHref);
+                return (
+                  <Link
+                    key={bHref}
+                    href={bHref}
+                    className="flex items-center gap-1.5 px-4 py-2.5 text-xs font-medium whitespace-nowrap border-b-2 transition-all flex-shrink-0"
+                    style={bActive
+                      ? { color: "var(--accent-gold)", borderColor: "var(--accent-gold)" }
+                      : { color: "var(--accent-gold)", borderColor: "transparent", opacity: 0.6 }
+                    }
+                  >
+                    <BIcon size={13} />
+                    {bLabel}
+                  </Link>
+                );
+              })}
+              <div className="w-px my-2 flex-shrink-0" style={{ background: "var(--border)" }} />
+            </>
+          )}
           {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
             const fullHref = `/brewery-admin/${activeBreweryId}${href}`;
             const isActive = href === ""

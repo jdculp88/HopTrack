@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { apiSuccess, apiUnauthorized, apiForbidden, apiNotFound, apiServerError } from "@/lib/api-response";
 import { formatRelativeTime } from "@/lib/dates";
+import { verifyBrandAccess } from "@/lib/brand-auth";
 
 // ─── GET /api/brand/[brand_id]/analytics ─────────────────────────────────────
 // Aggregated analytics across all brand locations.
@@ -16,15 +17,8 @@ export async function GET(
   if (!user) return apiUnauthorized();
 
   // Verify brand membership
-  const { data: membership } = await (supabase
-    .from("brand_accounts")
-    .select("role")
-    .eq("brand_id", brand_id)
-    .eq("user_id", user.id)
-    .in("role", ["owner", "regional_manager"])
-    .maybeSingle() as any);
-
-  if (!membership) return apiForbidden();
+  const role = await verifyBrandAccess(supabase, brand_id, user.id);
+  if (!role || !["owner", "regional_manager"].includes(role)) return apiForbidden();
 
   // Fetch brand + locations
   const { data: brand } = await (supabase

@@ -18,6 +18,8 @@ export async function logTeamActivity(
   oldValue?: string | null,
   newValue?: string | null
 ) {
+  // NOTE: brand_team_activity INSERT policy uses is_brand_manager_or_owner()
+  // SECURITY DEFINER function (migration 081) to avoid RLS recursion.
   const { error } = await (supabase
     .from("brand_team_activity")
     .insert({

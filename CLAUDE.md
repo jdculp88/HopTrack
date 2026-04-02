@@ -238,6 +238,7 @@ lib/beerStyleColors.ts        — 26 styles → 6 color families
 lib/pos-crypto.ts             — AES-256-GCM token encryption for POS (S86)
 lib/crm.ts                    — Customer segments, engagement scoring, profile builder (S89)
 lib/pos-sync/                 — POS sync engine: engine, mapper, normalizer, types, mock (S87)
+lib/brand-auth.ts             — Brand access verification with brewery_accounts fallback (S123)
 lib/brand-billing.ts          — Brand tier propagation: propagate, revert, sync on join/leave (S121)
 lib/pint-rewind.ts            — PintRewind data aggregation (extracted S93)
 lib/wrapped.ts                — Wrapped stats + fetchWrappedStats() (extracted S93)
@@ -261,8 +262,10 @@ scripts/supabase-setup.mjs    — One-time setup script
 
 ## 🗺️ Where We Are
 
-**Last Completed Sprint:** Sprint 122 — The Crew ✅
+**Last Completed Sprint:** Sprint 123 — The Fix ✅
 **Arc:** Multi-Location (Sprints 114-137)
+**Retro (123):** `docs/retros/sprint-123-retro.md` (facilitated by Morgan)
+**Last completed:** Sprint 123 — The Fix ✅ — Brand hardening sprint. Migration 081: `is_brand_manager_or_owner()` SECURITY DEFINER function fixes RLS recursion on `brand_accounts` (silent zero-row bug since Sprint 122). `lib/brand-auth.ts` shared `verifyBrandAccess()` with brewery_accounts fallback. All 16 brand API routes standardized (removed 3 local auth helpers). Members API FK fix (two-step profile hydration). Mobile brand nav (3 tabs: Brand, Team, Catalog). Brand error boundary. Nav dropdown brand link fix. 3 guardrail tests: RLS safety scanner, route standardization guard, brand-auth unit tests. 22 modified, 5 created, 1 migration, 9 new tests (756 → 765).
 **Retro (122):** `docs/retros/sprint-122-retro.md` (facilitated by Morgan)
 **Last completed:** Sprint 122 — The Crew ✅ — Brand-level team management. Migration 080 (brand_accounts: invited_at, invited_by, location_scope uuid[], brand_manager role; brand_team_activity audit log table; expanded RLS for brand_manager). 3-tier brand role hierarchy (Owner/Brand Manager/Regional Manager). Location scoping for regional managers (null = all, array = specific). `recalculateScopedAccess()` diff-based scope propagation. PATCH handler on members API (role + scope changes). Team activity audit log API. Brand Team page (`/brewery-admin/brand/[brand_id]/team/`) with roster, filter pills, add member form, role change dropdown, LocationScopePicker, activity log. "Brand Team" nav link with Users icon. "Via Brand" propagated badge on StaffManager (disables local controls for brand-propagated members). 9 new files, 6 modified, 1 migration, 12 new tests (744 → 756).
 **Retro (121):** `docs/retros/sprint-121-retro.md` (facilitated by Morgan)
