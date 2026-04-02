@@ -16,13 +16,15 @@ import { TapListFilters, type FilterValue } from "./TapListFilters";
 import { BatchActionBar } from "./BatchActionBar";
 import { SortableBeerItem } from "./SortableBeerItem";
 import { BeerFormModal } from "./BeerFormModal";
+import { CatalogPickerModal } from "./CatalogPickerModal";
 
 interface TapListClientProps {
   breweryId: string;
   initialBeers: Beer[];
+  brandId?: string | null;
 }
 
-export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
+export function TapListClient({ breweryId, initialBeers, brandId }: TapListClientProps) {
   const [beers, setBeers] = useState<Beer[]>(initialBeers);
   const [showForm, setShowForm] = useState(false);
   const [editingBeer, setEditingBeer] = useState<Beer | null>(null);
@@ -40,6 +42,7 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
   const [batchSaving, setBatchSaving] = useState(false);
   const [batchDeleteConfirm, setBatchDeleteConfirm] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [showCatalogPicker, setShowCatalogPicker] = useState(false);
   const supabase = createClient();
   const { success: toastSuccess, error: toastError } = useToast();
 
@@ -327,6 +330,8 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
         onTapCount={onTapCount}
         totalCount={beers.length}
         onAdd={openAdd}
+        brandId={brandId}
+        onAddFromCatalog={brandId ? () => setShowCatalogPicker(true) : undefined}
       />
 
       <TapListFilters
@@ -444,6 +449,29 @@ export function TapListClient({ breweryId, initialBeers }: TapListClientProps) {
             saveError={saveError}
             onSave={handleSave}
             onClose={() => setShowForm(false)}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Catalog Picker Modal */}
+      <AnimatePresence>
+        {showCatalogPicker && brandId && (
+          <CatalogPickerModal
+            brandId={brandId}
+            breweryId={breweryId}
+            existingBeerNames={beers.map(b => b.name)}
+            onClose={() => setShowCatalogPicker(false)}
+            onAdded={async () => {
+              setShowCatalogPicker(false);
+              // Refetch beers from server
+              const { data } = await supabase
+                .from("beers").select("*")
+                .eq("brewery_id", breweryId)
+                .order("display_order", { ascending: true })
+                .order("name") as any;
+              if (data) setBeers(data);
+              toastSuccess("Beers added from catalog");
+            }}
           />
         )}
       </AnimatePresence>

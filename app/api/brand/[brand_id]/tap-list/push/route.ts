@@ -3,13 +3,11 @@ import { createClient } from "@/lib/supabase/server";
 import { apiSuccess, apiUnauthorized, apiForbidden, apiBadRequest, apiNotFound, apiServerError } from "@/lib/api-response";
 
 // ─── POST /api/brand/[brand_id]/tap-list/push ────────────────────────────────
-// Push (clone) a beer from one location to one or more target locations.
-// Creates new beer records at each target with the same metadata.
-// Also clones pour sizes from the source beer.
-//
-// Body: { sourceBeerIds: string[], targetLocationIds: string[] }
-//   - sourceBeerIds: array of beer IDs to clone (from one location)
-//   - targetLocationIds: array of brewery IDs to push to
+// Push a beer to target locations.
+// Supports two modes:
+//   1. catalogBeerIds — push from catalog entry (preferred, Sprint 119+)
+//   2. sourceBeerIds  — legacy clone mode (copies from a source location beer)
+// When using catalog mode, created beers link back to brand_catalog_beer_id.
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ brand_id: string }> }
@@ -19,7 +17,6 @@ export async function POST(
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return apiUnauthorized();
 
-  // Verify brand ownership
   const { data: membership } = await (supabase
     .from("brand_accounts")
     .select("role")
@@ -31,37 +28,98 @@ export async function POST(
   if (!membership) return apiForbidden();
 
   const body = await request.json();
-  const { sourceBeerIds, targetLocationIds } = body;
+  const { catalogBeerIds, sourceBeerIds, targetLocationIds } = body;
 
-  if (!Array.isArray(sourceBeerIds) || sourceBeerIds.length === 0) {
-    return apiBadRequest("sourceBeerIds is required");
-  }
   if (!Array.isArray(targetLocationIds) || targetLocationIds.length === 0) {
     return apiBadRequest("targetLocationIds is required");
   }
 
-  try {
-    // Verify target locations belong to this brand
-    const { data: locations } = await (supabase
-      .from("breweries")
-      .select("id")
-      .eq("brand_id", brand_id)
-      .in("id", targetLocationIds) as any);
+  // Verify target locations belong to this brand
+  const { data: validLocations } = await (supabase
+    .from("breweries")
+    .select("id")
+    .eq("brand_id", brand_id)
+    .in("id", targetLocationIds) as any);
 
-    const validTargetIds = new Set((locations ?? []).map((l: any) => l.id));
-    if (validTargetIds.size === 0) {
-      return apiBadRequest("No valid target locations found in this brand");
+  const validTargetIds = new Set((validLocations ?? []).map((l: any) => l.id));
+  if (validTargetIds.size === 0) return apiBadRequest("No valid target locations found");
+
+  try {
+    // ── Mode 1: Catalog-based push ──
+    if (Array.isArray(catalogBeerIds) && catalogBeerIds.length > 0) {
+      const { data: catalogBeers } = await (supabase
+        .from("brand_catalog_beers")
+        .select("*")
+        .eq("brand_id", brand_id)
+        .in("id", catalogBeerIds)
+        .eq("is_active", true) as any);
+
+      if (!catalogBeers || catalogBeers.length === 0) return apiNotFound("Catalog beers");
+
+      let created = 0;
+      let skipped = 0;
+
+      for (const catalogBeer of catalogBeers) {
+        for (const targetId of Array.from(validTargetIds)) {
+          // Check if already exists at target (linked or same name)
+          const { data: existing } = await (supabase
+            .from("beers")
+            .select("id, brand_catalog_beer_id")
+            .eq("brewery_id", targetId)
+            .or(`brand_catalog_beer_id.eq.${catalogBeer.id},name.ilike.${catalogBeer.name}`)
+            .eq("is_active", true)
+            .maybeSingle() as any);
+
+          if (existing) {
+            // Link if not already linked
+            if (!existing.brand_catalog_beer_id) {
+              await (supabase
+                .from("beers")
+                .update({ brand_catalog_beer_id: catalogBeer.id })
+                .eq("id", existing.id) as any);
+            }
+            skipped++;
+            continue;
+          }
+
+          // Create from catalog
+          await (supabase
+            .from("beers")
+            .insert({
+              brewery_id: targetId,
+              brand_catalog_beer_id: catalogBeer.id,
+              name: catalogBeer.name,
+              style: catalogBeer.style,
+              abv: catalogBeer.abv ? parseFloat(catalogBeer.abv) : null,
+              ibu: catalogBeer.ibu,
+              description: catalogBeer.description,
+              item_type: catalogBeer.item_type ?? "beer",
+              category: catalogBeer.category,
+              glass_type: catalogBeer.glass_type,
+              is_on_tap: true,
+              is_active: true,
+              is_featured: false,
+              created_by: user.id,
+            }) as any);
+
+          created++;
+        }
+      }
+
+      return apiSuccess({ created, skipped }, 201);
     }
 
-    // Fetch source beers
+    // ── Mode 2: Legacy source beer clone ──
+    if (!Array.isArray(sourceBeerIds) || sourceBeerIds.length === 0) {
+      return apiBadRequest("catalogBeerIds or sourceBeerIds is required");
+    }
+
     const { data: sourceBeers } = await (supabase
       .from("beers")
       .select("*")
       .in("id", sourceBeerIds) as any);
 
-    if (!sourceBeers || sourceBeers.length === 0) {
-      return apiNotFound("Source beers");
-    }
+    if (!sourceBeers || sourceBeers.length === 0) return apiNotFound("Source beers");
 
     // Fetch pour sizes for source beers
     const { data: sourcePourSizes } = await (supabase
@@ -76,19 +134,13 @@ export async function POST(
       pourSizesByBeer[ps.beer_id].push(ps);
     });
 
-    // For each source beer × target location, check if already exists and clone if not
     let created = 0;
     let skipped = 0;
 
     for (const beer of sourceBeers) {
       for (const targetId of Array.from(validTargetIds)) {
-        // Skip if target is the same brewery as source
-        if (targetId === beer.brewery_id) {
-          skipped++;
-          continue;
-        }
+        if (targetId === beer.brewery_id) { skipped++; continue; }
 
-        // Check if beer with same name already exists at target
         const { data: existing } = await (supabase
           .from("beers")
           .select("id")
@@ -97,16 +149,13 @@ export async function POST(
           .eq("is_active", true)
           .maybeSingle() as any);
 
-        if (existing) {
-          skipped++;
-          continue;
-        }
+        if (existing) { skipped++; continue; }
 
-        // Clone the beer
         const { data: newBeer, error: insertError } = await (supabase
           .from("beers")
           .insert({
             brewery_id: targetId,
+            brand_catalog_beer_id: beer.brand_catalog_beer_id,
             name: beer.name,
             style: beer.style,
             abv: beer.abv,
@@ -123,10 +172,7 @@ export async function POST(
           .select("id")
           .single() as any);
 
-        if (insertError || !newBeer) {
-          console.error("Failed to clone beer:", insertError);
-          continue;
-        }
+        if (insertError || !newBeer) continue;
 
         // Clone pour sizes
         const sourcePours = pourSizesByBeer[beer.id] ?? [];

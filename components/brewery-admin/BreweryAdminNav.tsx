@@ -152,24 +152,42 @@ export function BreweryAdminNav({ accounts, brandAccounts = [] }: { accounts: an
 
         {/* Nav */}
         <nav className="flex-1 px-3 py-4 space-y-1">
-          {/* Brand Dashboard link — only when brewery belongs to a brand */}
+          {/* Brand links — only when brewery belongs to a brand */}
           {brewery?.brand && brandAccounts.some((ba: any) => ba.brand_id === brewery.brand.id) && (
-            <Link
-              href={`/brewery-admin/brand/${brewery.brand.id}/dashboard`}
-              className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all mb-2",
-                pathname.includes(`/brand/${brewery.brand.id}`)
-                  ? "text-[var(--bg)] font-semibold"
-                  : "hover:opacity-80"
-              )}
-              style={pathname.includes(`/brand/${brewery.brand.id}`)
-                ? { background: "var(--accent-gold)", color: "var(--bg)" }
-                : { color: "var(--accent-gold)", background: "color-mix(in srgb, var(--accent-gold) 10%, transparent)" }
-              }
-            >
-              <Building2 size={16} />
-              Brand Dashboard
-            </Link>
+            <div className="mb-2 space-y-1">
+              <Link
+                href={`/brewery-admin/brand/${brewery.brand.id}/dashboard`}
+                className={cn(
+                  "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all",
+                  pathname.includes(`/brand/${brewery.brand.id}/dashboard`)
+                    ? "text-[var(--bg)] font-semibold"
+                    : "hover:opacity-80"
+                )}
+                style={pathname.includes(`/brand/${brewery.brand.id}/dashboard`)
+                  ? { background: "var(--accent-gold)", color: "var(--bg)" }
+                  : { color: "var(--accent-gold)", background: "color-mix(in srgb, var(--accent-gold) 10%, transparent)" }
+                }
+              >
+                <Building2 size={16} />
+                Brand Dashboard
+              </Link>
+              <Link
+                href={`/brewery-admin/brand/${brewery.brand.id}/catalog`}
+                className={cn(
+                  "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all",
+                  pathname.includes(`/brand/${brewery.brand.id}/catalog`)
+                    ? "text-[var(--bg)] font-semibold"
+                    : "hover:opacity-80"
+                )}
+                style={pathname.includes(`/brand/${brewery.brand.id}/catalog`)
+                  ? { background: "var(--accent-gold)", color: "var(--bg)" }
+                  : { color: "var(--accent-gold)", background: "color-mix(in srgb, var(--accent-gold) 10%, transparent)" }
+                }
+              >
+                <List size={16} />
+                Brand Catalog
+              </Link>
+            </div>
           )}
           {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
             const fullHref = `/brewery-admin/${activeBreweryId}${href}`;

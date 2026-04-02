@@ -17,6 +17,7 @@ export interface Beer {
   glass_type: string | null;
   item_type: ItemType;
   category: string | null;
+  brand_catalog_beer_id?: string | null;
 }
 
 export interface PourSizeRow {

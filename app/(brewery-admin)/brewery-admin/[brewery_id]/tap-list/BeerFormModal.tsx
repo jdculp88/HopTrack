@@ -94,9 +94,17 @@ export function BeerFormModal({
         style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
 
         <div className="flex items-center justify-between mb-5">
-          <h2 className="font-display text-xl font-bold" style={{ color: "var(--text-primary)" }}>
-            {editingBeer ? `Edit ${ITEM_TYPE_LABELS[form.itemType] || "Item"}` : `Add ${ITEM_TYPE_LABELS[form.itemType] || "Item"}`}
-          </h2>
+          <div className="flex items-center gap-2">
+            <h2 className="font-display text-xl font-bold" style={{ color: "var(--text-primary)" }}>
+              {editingBeer ? `Edit ${ITEM_TYPE_LABELS[form.itemType] || "Item"}` : `Add ${ITEM_TYPE_LABELS[form.itemType] || "Item"}`}
+            </h2>
+            {editingBeer?.brand_catalog_beer_id && (
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full"
+                style={{ background: "color-mix(in srgb, var(--accent-gold) 15%, transparent)", color: "var(--accent-gold)" }}>
+                Catalog Linked
+              </span>
+            )}
+          </div>
           <button onClick={closeForm} style={{ color: "var(--text-muted)" }}>
             <X size={20} />
           </button>

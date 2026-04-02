@@ -408,6 +408,8 @@ export interface Beer {
   is_on_tap?: boolean;
   // Barcode scanning (Sprint 89)
   barcode: string | null;
+  // Brand catalog link (Sprint 119)
+  brand_catalog_beer_id: string | null;
 }
 export type BeerInsert = Omit<Beer, "id" | "created_at"> & { id?: string };
 export type BeerUpdate = Partial<Beer>;
@@ -1092,4 +1094,24 @@ export interface BrandAccount {
   user_id: string;
   role: BrandAccountRole;
   created_at: string;
+}
+
+// ─── Brand Catalog Beers (Sprint 119) ──────────────────────────────────────
+export interface BrandCatalogBeer {
+  id: string;
+  brand_id: string;
+  name: string;
+  style: BeerStyle | null;
+  abv: number | null;
+  ibu: number | null;
+  description: string | null;
+  item_type: ItemType;
+  category: string | null;
+  glass_type: string | null;
+  cover_image_url: string | null;
+  seasonal: boolean;
+  is_active: boolean;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
 }

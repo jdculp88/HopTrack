@@ -2,8 +2,8 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { Building2, ArrowLeft, Settings, Package } from "lucide-react";
-import { BrandTapListClient } from "./BrandTapListClient";
+import { Building2, ArrowLeft, List, Settings } from "lucide-react";
+import { BrandCatalogClient } from "./BrandCatalogClient";
 
 export const revalidate = 30;
 
@@ -15,16 +15,15 @@ export async function generateMetadata({ params }: { params: Promise<{ brand_id:
     .select("name")
     .eq("id", brand_id)
     .single() as any);
-  return { title: `${data?.name ?? "Brand"} Tap List — HopTrack` };
+  return { title: `${data?.name ?? "Brand"} Catalog — HopTrack` };
 }
 
-export default async function BrandTapListPage({ params }: { params: Promise<{ brand_id: string }> }) {
+export default async function BrandCatalogPage({ params }: { params: Promise<{ brand_id: string }> }) {
   const { brand_id } = await params;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  // Verify brand membership
   const { data: membership } = await (supabase
     .from("brand_accounts")
     .select("role")
@@ -34,7 +33,6 @@ export default async function BrandTapListPage({ params }: { params: Promise<{ b
 
   if (!membership) redirect("/brewery-admin");
 
-  // Fetch brand
   const { data: brand } = await (supabase
     .from("brewery_brands")
     .select("*")
@@ -60,7 +58,7 @@ export default async function BrandTapListPage({ params }: { params: Promise<{ b
           )}
           <div className="flex-1 min-w-0">
             <h1 className="font-display text-2xl font-bold truncate" style={{ color: "var(--text-primary)" }}>
-              {brand.name} — Tap List
+              {brand.name} — Beer Catalog
             </h1>
             <div className="flex items-center gap-3 mt-0.5">
               <Link
@@ -71,11 +69,11 @@ export default async function BrandTapListPage({ params }: { params: Promise<{ b
                 <ArrowLeft size={11} /> Dashboard
               </Link>
               <Link
-                href={`/brewery-admin/brand/${brand_id}/catalog`}
+                href={`/brewery-admin/brand/${brand_id}/tap-list`}
                 className="text-xs flex items-center gap-1 hover:opacity-70 transition-opacity"
-                style={{ color: "var(--accent-gold)" }}
+                style={{ color: "var(--text-muted)" }}
               >
-                <Package size={11} /> Catalog
+                <List size={11} /> Tap List
               </Link>
               <Link
                 href={`/brewery-admin/brand/${brand_id}/settings`}
@@ -89,8 +87,7 @@ export default async function BrandTapListPage({ params }: { params: Promise<{ b
         </div>
       </div>
 
-      {/* Tap List Content */}
-      <BrandTapListClient brandId={brand_id} />
+      <BrandCatalogClient brandId={brand_id} />
     </div>
   );
 }

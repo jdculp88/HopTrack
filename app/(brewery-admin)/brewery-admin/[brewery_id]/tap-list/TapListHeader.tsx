@@ -1,15 +1,17 @@
 "use client";
 
-import { Plus, Tv, Code2 } from "lucide-react";
+import { Plus, Tv, Code2, Package } from "lucide-react";
 
 interface TapListHeaderProps {
   breweryId: string;
   onTapCount: number;
   totalCount: number;
   onAdd: () => void;
+  brandId?: string | null;
+  onAddFromCatalog?: () => void;
 }
 
-export function TapListHeader({ breweryId, onTapCount, totalCount, onAdd }: TapListHeaderProps) {
+export function TapListHeader({ breweryId, onTapCount, totalCount, onAdd, brandId, onAddFromCatalog }: TapListHeaderProps) {
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
       <div>
@@ -33,6 +35,13 @@ export function TapListHeader({ breweryId, onTapCount, totalCount, onAdd }: TapL
         >
           <Tv size={16} /> <span className="hidden sm:inline">The </span>Board
         </button>
+        {brandId && onAddFromCatalog && (
+          <button onClick={onAddFromCatalog}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all active:scale-95 border min-h-[44px]"
+            style={{ borderColor: "var(--accent-gold)", color: "var(--accent-gold)", background: "transparent" }}>
+            <Package size={16} /> <span className="hidden sm:inline">From Catalog</span>
+          </button>
+        )}
         <button onClick={onAdd}
           className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all active:scale-95 min-h-[44px]"
           style={{ background: "var(--accent-gold)", color: "var(--bg)" }}>
