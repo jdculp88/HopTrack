@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/service";
 import { getStripe } from "@/lib/stripe";
+import { propagateBrandTier, revertBrandTier } from "@/lib/brand-billing";
 
 // Required for Stripe webhook signature verification
 export const dynamic = "force-dynamic";
@@ -36,64 +38,110 @@ export async function POST(req: NextRequest) {
     switch (event.type) {
       case "checkout.session.completed": {
         const session = event.data.object;
-        const { brewery_id, tier } = session.metadata ?? {};
+        const meta = session.metadata ?? {};
 
-        if (!brewery_id) break;
+        if (meta.type === "brand" && meta.brand_id) {
+          // ─── Brand checkout ───
+          const serviceClient = createServiceClient();
 
-        // Store Stripe customer ID + activate subscription
-        await supabase
-          .from("breweries")
-          .update({
-            stripe_customer_id: session.customer as string,
-            subscription_tier: (tier || "tap") as "free" | "tap" | "cask" | "barrel",
-            trial_ends_at: null,
-          })
-          .eq("id", brewery_id);
+          await (serviceClient
+            .from("brewery_brands")
+            .update({
+              stripe_customer_id: session.customer as string,
+              subscription_tier: (meta.tier || "barrel") as any,
+              trial_ends_at: null,
+            })
+            .eq("id", meta.brand_id) as any);
 
-        console.info(`[webhook] Brewery ${brewery_id} subscribed to ${tier}`);
+          // Propagate tier to all brand locations
+          await propagateBrandTier(
+            serviceClient,
+            meta.brand_id,
+            (meta.tier || "barrel") as any
+          );
+
+          console.info(`[webhook] Brand ${meta.brand_id} subscribed to ${meta.tier}`);
+        } else if (meta.brewery_id) {
+          // ─── Brewery checkout (existing) ───
+          await supabase
+            .from("breweries")
+            .update({
+              stripe_customer_id: session.customer as string,
+              subscription_tier: (meta.tier || "tap") as "free" | "tap" | "cask" | "barrel",
+              trial_ends_at: null,
+            })
+            .eq("id", meta.brewery_id);
+
+          console.info(`[webhook] Brewery ${meta.brewery_id} subscribed to ${meta.tier}`);
+        }
         break;
       }
 
       case "customer.subscription.updated": {
         const sub = event.data.object;
-        const brewery_id = sub.metadata?.brewery_id;
-        if (!brewery_id) break;
-
-        const tier = sub.metadata?.tier;
+        const meta = sub.metadata ?? {};
         const isActive = sub.status === "active" || sub.status === "trialing";
 
-        await supabase
-          .from("breweries")
-          .update({
-            subscription_tier: (isActive ? (tier || "tap") : "free") as "free" | "tap" | "cask" | "barrel",
-          })
-          .eq("id", brewery_id);
+        if (meta.type === "brand" && meta.brand_id) {
+          // ─── Brand subscription updated ───
+          const serviceClient = createServiceClient();
+          const tier = isActive ? (meta.tier || "barrel") : "free";
 
+          await (serviceClient
+            .from("brewery_brands")
+            .update({ subscription_tier: tier as any })
+            .eq("id", meta.brand_id) as any);
+
+          if (isActive) {
+            await propagateBrandTier(serviceClient, meta.brand_id, tier as any);
+          } else {
+            await revertBrandTier(serviceClient, meta.brand_id);
+          }
+        } else if (meta.brewery_id) {
+          // ─── Brewery subscription updated (existing) ───
+          await supabase
+            .from("breweries")
+            .update({
+              subscription_tier: (isActive ? (meta.tier || "tap") : "free") as "free" | "tap" | "cask" | "barrel",
+            })
+            .eq("id", meta.brewery_id);
+        }
         break;
       }
 
       case "customer.subscription.deleted": {
         const sub = event.data.object;
-        const brewery_id = sub.metadata?.brewery_id;
-        if (!brewery_id) break;
+        const meta = sub.metadata ?? {};
 
-        // Downgrade to free — read-only mode kicks in
-        await supabase
-          .from("breweries")
-          .update({ subscription_tier: "free" })
-          .eq("id", brewery_id);
+        if (meta.type === "brand" && meta.brand_id) {
+          // ─── Brand subscription deleted ───
+          const serviceClient = createServiceClient();
 
-        console.info(`[webhook] Brewery ${brewery_id} subscription cancelled — downgraded to free`);
+          await (serviceClient
+            .from("brewery_brands")
+            .update({ subscription_tier: "free" as any })
+            .eq("id", meta.brand_id) as any);
+
+          await revertBrandTier(serviceClient, meta.brand_id);
+
+          console.info(`[webhook] Brand ${meta.brand_id} subscription cancelled — downgraded to free`);
+        } else if (meta.brewery_id) {
+          // ─── Brewery subscription deleted (existing) ───
+          await supabase
+            .from("breweries")
+            .update({ subscription_tier: "free" })
+            .eq("id", meta.brewery_id);
+
+          console.info(`[webhook] Brewery ${meta.brewery_id} subscription cancelled — downgraded to free`);
+        }
         break;
       }
 
       case "invoice.payment_failed": {
         const invoice = event.data.object;
-        const sub_id = invoice.subscription;
+        if (!invoice.subscription) break;
 
-        if (!sub_id) break;
-
-        // Look up brewery by stripe_customer_id
+        // Try brewery lookup first
         const { data: brewery } = await supabase
           .from("breweries")
           .select("id, name")
@@ -102,8 +150,17 @@ export async function POST(req: NextRequest) {
 
         if (brewery) {
           console.warn(`[webhook] Payment failed for brewery ${brewery.id} (${brewery.name}). Attempt: ${invoice.attempt_count}`);
-          // Stripe handles retries automatically. After final retry fails,
-          // subscription.deleted event will fire and we downgrade then.
+        } else {
+          // Try brand lookup
+          const { data: brand } = await supabase
+            .from("brewery_brands")
+            .select("id, name")
+            .eq("stripe_customer_id", invoice.customer)
+            .single() as any;
+
+          if (brand) {
+            console.warn(`[webhook] Payment failed for brand ${brand.id} (${brand.name}). Attempt: ${invoice.attempt_count}`);
+          }
         }
         break;
       }
@@ -111,7 +168,7 @@ export async function POST(req: NextRequest) {
       case "invoice.paid": {
         const invoice = event.data.object;
 
-        // Confirm payment — ensure tier is still active
+        // Try brewery lookup first
         const { data: brewery } = await supabase
           .from("breweries")
           .select("id, subscription_tier")
@@ -120,17 +177,29 @@ export async function POST(req: NextRequest) {
 
         if (brewery) {
           console.info(`[webhook] Invoice paid for brewery ${brewery.id}. Tier: ${brewery.subscription_tier}`);
+        } else {
+          // Try brand lookup
+          const { data: brand } = await supabase
+            .from("brewery_brands")
+            .select("id, subscription_tier")
+            .eq("stripe_customer_id", invoice.customer)
+            .single() as any;
+
+          if (brand) {
+            console.info(`[webhook] Invoice paid for brand ${brand.id}. Tier: ${brand.subscription_tier}`);
+          }
         }
         break;
       }
 
       case "customer.subscription.trial_will_end": {
         const sub = event.data.object;
-        const brewery_id = sub.metadata?.brewery_id;
+        const meta = sub.metadata ?? {};
 
-        if (brewery_id) {
-          console.info(`[webhook] Trial ending soon for brewery ${brewery_id}`);
-          // Future: trigger trial warning email via email-triggers.ts
+        if (meta.type === "brand" && meta.brand_id) {
+          console.info(`[webhook] Trial ending soon for brand ${meta.brand_id}`);
+        } else if (meta.brewery_id) {
+          console.info(`[webhook] Trial ending soon for brewery ${meta.brewery_id}`);
         }
         break;
       }

@@ -238,6 +238,7 @@ lib/beerStyleColors.ts        — 26 styles → 6 color families
 lib/pos-crypto.ts             — AES-256-GCM token encryption for POS (S86)
 lib/crm.ts                    — Customer segments, engagement scoring, profile builder (S89)
 lib/pos-sync/                 — POS sync engine: engine, mapper, normalizer, types, mock (S87)
+lib/brand-billing.ts          — Brand tier propagation: propagate, revert, sync on join/leave (S121)
 lib/pint-rewind.ts            — PintRewind data aggregation (extracted S93)
 lib/wrapped.ts                — Wrapped stats + fetchWrappedStats() (extracted S93)
 types/database.ts             — Supabase schema types (all tables registered incl. BreweryAd)
@@ -260,8 +261,10 @@ scripts/supabase-setup.mjs    — One-time setup script
 
 ## 🗺️ Where We Are
 
-**Last Completed Sprint:** Sprint 120 — The Lens ✅
+**Last Completed Sprint:** Sprint 121 — The Ledger ✅
 **Arc:** Multi-Location (Sprints 114-137)
+**Retro (121):** `docs/retros/sprint-121-retro.md` (facilitated by Morgan)
+**Last completed:** Sprint 121 — The Ledger ✅ — Brand-level billing & subscriptions. Migration 079 (billing columns on `brewery_brands`: subscription_tier, stripe_customer_id, trial_ends_at, billing_email). `lib/brand-billing.ts` tier propagation (propagateBrandTier, revertBrandTier, syncLocationTierOnBrandJoin/Leave). `STRIPE_BRAND_PRICES` + `BRAND_ADDON_INFO` ($39/location/mo, $374/location/yr, 20% savings). 3 brand billing API routes (checkout with 2 line items: base barrel + per-location add-on, portal, cancel at period end). Webhook dual-path (`type: "brand"` metadata discriminator, service role client for cross-brewery propagation). Brand Billing page (`/brewery-admin/brand/[brand_id]/billing/`) with active subscription card, location roster, pricing card (monthly/annual toggle), feature list. "Brand Billing" nav link with CreditCard icon. Per-brewery billing redirect ("covered by brand subscription" banner). Location add/remove tier sync. 9 new files, 7 modified, 1 migration, 14 new tests (730 → 744).
 **Retro (120):** `docs/retros/sprint-120-retro.md` (facilitated by Morgan)
 **Last completed:** Sprint 120 — The Lens ✅ — Brand-level reporting & exports. Cross-location comparison API (`/api/brand/[brand_id]/analytics/comparison?range=7d|30d|90d`) with per-location stats, brand totals/averages, % of average benchmarks, WoW trends, outlier detection. Brand CSV export endpoint. Brand Reports page (`/brewery-admin/brand/[brand_id]/reports/`) with time range pills, Recharts bar charts, location leaderboard (sortable, animated), performance benchmark table (color-coded green/gold/red). Brand digest email (template + stats calculator + cron integration with brand owner dedup). "Brand Reports" nav link. CSV download button on brand dashboard. Critical bug fix: `breweries.logo_url` → `cover_image_url` across 8 files (silently broke all brand queries since S115). Nav context fix: brand pages show brand name + "Brand Management" instead of random brewery. Migration 078 (Pint & Pixel brand seed: 2 locations, Charlotte NC 28270). 6 new files, 13 modified, 1 migration.
 **Retro (119):** `docs/retros/sprint-119-retro.md` (facilitated by Morgan)

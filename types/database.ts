@@ -1084,6 +1084,11 @@ export interface BreweryBrand {
   website_url: string | null;
   created_at: string;
   owner_id: string | null;
+  // Brand Billing (Sprint 121)
+  subscription_tier: "free" | "tap" | "cask" | "barrel";
+  stripe_customer_id: string | null;
+  trial_ends_at: string | null;
+  billing_email: string | null;
 }
 
 export type BrandAccountRole = "owner" | "regional_manager";

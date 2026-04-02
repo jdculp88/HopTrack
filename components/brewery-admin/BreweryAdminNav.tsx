@@ -223,6 +223,22 @@ export function BreweryAdminNav({ accounts, brandAccounts = [] }: { accounts: an
                 <List size={16} />
                 Brand Catalog
               </Link>
+              <Link
+                href={`/brewery-admin/brand/${brewery.brand.id}/billing`}
+                className={cn(
+                  "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all",
+                  pathname.includes(`/brand/${brewery.brand.id}/billing`)
+                    ? "text-[var(--bg)] font-semibold"
+                    : "hover:opacity-80"
+                )}
+                style={pathname.includes(`/brand/${brewery.brand.id}/billing`)
+                  ? { background: "var(--accent-gold)", color: "var(--bg)" }
+                  : { color: "var(--accent-gold)", background: "color-mix(in srgb, var(--accent-gold) 10%, transparent)" }
+                }
+              >
+                <CreditCard size={16} />
+                Brand Billing
+              </Link>
             </div>
           )}
           {NAV_ITEMS.map(({ href, label, icon: Icon }) => {

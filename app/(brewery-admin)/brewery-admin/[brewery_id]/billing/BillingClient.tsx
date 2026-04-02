@@ -79,7 +79,13 @@ const TIERS = [
   },
 ];
 
-export function BillingClient({ brewery }: { brewery: Brewery }) {
+interface BrandBilling {
+  id: string;
+  name: string;
+  subscription_tier: string;
+}
+
+export function BillingClient({ brewery, brandBilling }: { brewery: Brewery; brandBilling?: BrandBilling | null }) {
   const { success, error: toastError } = useToast();
   const searchParams = useSearchParams();
   const [loadingTier, setLoadingTier] = useState<string | null>(null);
@@ -272,6 +278,32 @@ export function BillingClient({ brewery }: { brewery: Brewery }) {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Brand billing redirect — when location is covered by brand subscription */}
+      {brandBilling && (
+        <motion.div
+          initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
+          className="rounded-2xl p-5 flex items-start gap-4"
+          style={{ border: "2px solid var(--accent-gold)", background: "color-mix(in srgb, var(--accent-gold) 10%, transparent)" }}
+        >
+          <Building2 size={20} style={{ color: "var(--accent-gold)", flexShrink: 0, marginTop: 1 }} />
+          <div className="flex-1 space-y-2">
+            <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
+              This location is covered by {brandBilling.name}&apos;s brand subscription
+            </p>
+            <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+              Billing is managed at the brand level. All locations under {brandBilling.name} share the Barrel plan.
+            </p>
+            <a
+              href={`/brewery-admin/brand/${brandBilling.id}/billing`}
+              className="inline-flex items-center gap-1.5 text-xs font-medium underline"
+              style={{ color: "var(--accent-gold)" }}
+            >
+              Go to Brand Billing
+            </a>
+          </div>
+        </motion.div>
+      )}
 
       {/* Trial urgency banner (<=5 days) */}
       <AnimatePresence>

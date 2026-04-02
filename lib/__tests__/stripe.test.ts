@@ -1,6 +1,6 @@
-// Stripe helpers unit tests — Avery + Reese, Sprint 77
+// Stripe helpers unit tests — Avery + Reese, Sprint 77 (updated Sprint 121)
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { STRIPE_PRICES, TIER_INFO, isStripeConfigured } from "@/lib/stripe";
+import { STRIPE_PRICES, TIER_INFO, isStripeConfigured, STRIPE_BRAND_PRICES, BRAND_ADDON_INFO } from "@/lib/stripe";
 
 // ── STRIPE_PRICES ──
 
@@ -103,5 +103,48 @@ describe("isStripeConfigured", () => {
   it("returns true when STRIPE_SECRET_KEY is set", () => {
     process.env.STRIPE_SECRET_KEY = "sk_test_123";
     expect(isStripeConfigured()).toBe(true);
+  });
+});
+
+// ── STRIPE_BRAND_PRICES (Sprint 121) ──
+
+describe("STRIPE_BRAND_PRICES", () => {
+  it("has all four brand price keys", () => {
+    expect(STRIPE_BRAND_PRICES).toHaveProperty("barrel_monthly");
+    expect(STRIPE_BRAND_PRICES).toHaveProperty("barrel_annual");
+    expect(STRIPE_BRAND_PRICES).toHaveProperty("location_addon_monthly");
+    expect(STRIPE_BRAND_PRICES).toHaveProperty("location_addon_annual");
+  });
+
+  it("all brand price values are strings", () => {
+    for (const key of Object.keys(STRIPE_BRAND_PRICES) as (keyof typeof STRIPE_BRAND_PRICES)[]) {
+      expect(typeof STRIPE_BRAND_PRICES[key]).toBe("string");
+    }
+  });
+
+  it("uses placeholder values when env vars are not set", () => {
+    expect(STRIPE_BRAND_PRICES.barrel_monthly).toContain("placeholder");
+    expect(STRIPE_BRAND_PRICES.barrel_annual).toContain("placeholder");
+    expect(STRIPE_BRAND_PRICES.location_addon_monthly).toContain("placeholder");
+    expect(STRIPE_BRAND_PRICES.location_addon_annual).toContain("placeholder");
+  });
+});
+
+// ── BRAND_ADDON_INFO (Sprint 121) ──
+
+describe("BRAND_ADDON_INFO", () => {
+  it("has correct per-location add-on pricing", () => {
+    expect(BRAND_ADDON_INFO.monthly).toBe(39);
+    expect(BRAND_ADDON_INFO.annual).toBe(374);
+  });
+
+  it("has display strings", () => {
+    expect(BRAND_ADDON_INFO.monthlyDisplay).toBe("$39/location/mo");
+    expect(BRAND_ADDON_INFO.annualDisplay).toBe("$374/location/yr");
+    expect(BRAND_ADDON_INFO.savings).toBe("20%");
+  });
+
+  it("annual is cheaper than 12x monthly", () => {
+    expect(BRAND_ADDON_INFO.annual).toBeLessThan(BRAND_ADDON_INFO.monthly * 12);
   });
 });

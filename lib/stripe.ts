@@ -86,3 +86,23 @@ export const FEATURE_MATRIX = [
   { feature: "Custom integrations", free: false, tap: false, cask: false, barrel: true, category: "Enterprise" },
   { feature: "Dedicated account manager", free: false, tap: false, cask: false, barrel: true, category: "Enterprise" },
 ] as const;
+
+// ─── Brand Billing (Sprint 121 — The Ledger) ──────────────────────────────
+
+// Brand-level Stripe price IDs — base Barrel subscription + per-location add-on
+export const STRIPE_BRAND_PRICES = {
+  barrel_monthly: process.env.STRIPE_PRICE_BRAND_BARREL_MONTHLY || "price_brand_barrel_monthly_placeholder",
+  barrel_annual: process.env.STRIPE_PRICE_BRAND_BARREL_ANNUAL || "price_brand_barrel_annual_placeholder",
+  location_addon_monthly: process.env.STRIPE_PRICE_BRAND_LOCATION_ADDON_MONTHLY || "price_brand_addon_monthly_placeholder",
+  location_addon_annual: process.env.STRIPE_PRICE_BRAND_LOCATION_ADDON_ANNUAL || "price_brand_addon_annual_placeholder",
+} as const;
+
+// Per-location add-on display info
+export const BRAND_ADDON_INFO = {
+  monthly: 39,
+  annual: 374,
+  monthlyDisplay: "$39/location/mo",
+  annualDisplay: "$374/location/yr",
+  annualMonthlyDisplay: "$31/location/mo",
+  savings: "20%",
+} as const;

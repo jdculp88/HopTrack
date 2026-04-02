@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { rateLimitResponse } from "@/lib/rate-limit";
 import { apiSuccess, apiUnauthorized, apiForbidden, apiBadRequest, apiNotFound, apiConflict, apiServerError } from "@/lib/api-response";
 import { propagateBrandAccess, removePropagatedAccess } from "@/lib/brand-propagation";
+import { syncLocationTierOnBrandJoin, syncLocationTierOnBrandLeave } from "@/lib/brand-billing";
 
 async function getBrandRole(supabase: any, userId: string, brandId: string): Promise<string | null> {
   const { data } = await (supabase
@@ -99,6 +100,9 @@ export async function POST(
   // Propagate brand access to the new location
   await propagateBrandAccess(supabase as any, brand_id, { breweryId: targetBreweryId });
 
+  // Inherit brand subscription tier if brand is subscribed
+  await syncLocationTierOnBrandJoin(supabase as any, brand_id, targetBreweryId);
+
   // Fetch the updated brewery to return
   const { data: location } = await (supabase
     .from("breweries")
@@ -144,6 +148,9 @@ export async function DELETE(
 
   // Remove propagated access BEFORE clearing brand_id
   await removePropagatedAccess(supabase as any, brand_id, { breweryId: brewery_id });
+
+  // Revert location tier to free (unless it has its own subscription)
+  await syncLocationTierOnBrandLeave(supabase as any, brewery_id);
 
   // Clear brand_id
   const { error } = await (supabase
