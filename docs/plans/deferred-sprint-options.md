@@ -127,3 +127,41 @@ These ideas keep coming back — they're clearly high-value:
 - **"Visit All Locations" Auto-Challenge** — Automatically generated brand challenge
 - **Real-Time Brand Activity Feed** — Live cross-location dashboard
 - **Claim Funnel Optimization** — 7,177 listings, need conversion
+
+---
+
+## Roadmap Ideas — Captured 2026-04-02
+
+*Source: Joshua braindump. Captured by Sage.*
+
+- **Smarter Search** — Type-ahead, predictive search, investigate tools/libraries to improve search UX beyond current pg_trgm fuzzy search (S114). Think autocomplete dropdowns, popular searches, "did you mean?" corrections. *Owner: Jordan/Avery (architecture + implementation). Priority: P2 — UX quality of life, not blocking but highly visible.*
+
+- **AI Promotion Suggestions** — Proactive revenue intelligence for brewery owners. "You should run this type of promotion," "You're not selling XYZ — lower the price and let people know." Uses check-in data + tap list analytics to generate actionable business suggestions. *Owner: Sam (requirements) + Avery (build) + Drew (validation). Priority: P2 — high value for brewery retention, needs data density first.*
+
+- **Certified Beer Reviewers** — Badge system for certified/trained reviewers (Cicerone, BJCP, etc.). Their reviews get promoted/highlighted on beer and brewery pages. Builds trust in review quality. *Owner: Sam (criteria definition) + Alex (badge design) + Avery (build). Priority: P3 — nice differentiator, not urgent.*
+
+- **Superadmin: Brewery Impersonation** — Ability to impersonate any brewery from superadmin dashboard to diagnose issues, see what brewery owners see. Essential for support and debugging at scale. *Owner: Riley/Quinn (security) + Avery (build). Priority: P1 — critical for launch support, founders need this on day one.*
+
+- **Superadmin: AI Seeding (Barback) Review Page** — Make the existing Barback crawler review page (`/superadmin/barback/`) more accessible from the main superadmin dashboard. Add manual crawl kick-off button and schedule adjustment controls. Infrastructure exists (S79), needs polish and discoverability. *Owner: Avery (build) + Riley (infra). Priority: P2 — needed before scaling crawl operations.*
+
+- **Data Standardization** — Audit all location data for consistency: addresses, cities, states, zip codes. Open Brewery DB data (S78, 7,177 breweries) has inconsistent formatting. Normalize to standard formats. *Owner: Quinn (data migration) + Sam (audit criteria). Priority: P1 — data quality directly impacts search, proximity, and credibility.*
+
+- **Superadmin Enhancement** — Central founder dashboard to track HopTrack as it launches. Manage everything from one location: user growth, brewery claims, revenue, crawl status, system health. What features does a founder need to run the business day-to-day? *Owner: Sam (requirements) + Avery (build). Priority: P1 — Joshua needs this for launch operations.*
+
+- **Bartender Code Entry** — Clear, dedicated UI for bartenders/staff to enter promo codes that customers present. Current staff redemption system (S114) has code entry, but the UX path for a busy bartender needs to be obvious and fast. Where exactly does a bartender go? One-tap access from POS or dashboard. *Owner: Drew (workflow validation) + Alex (UX) + Avery (build). Priority: P2 — important for loyalty adoption, Drew should validate the real-world flow.*
+
+- **Per-Location Toggle on Analytics** — Toggle for by-location tracking in weekly trends and other analytics views. Currently analytics show aggregate; brand owners need to drill into individual locations from any analytics chart or KPI card. *Owner: Avery (build). Priority: P2 — enhances existing analytics (S124), natural extension.*
+
+- **Menu Type Specification** — Ability to specify menu type when uploading: Lunch, Dinner, Brunch, Kids, Cocktails, Wine List, etc. Extends the current 8-category system (S128) with more granular meal/occasion-based categorization. May need schema change on `brewery_menus`. *Owner: Sam (category taxonomy) + Avery (build). Priority: P3 — current 8 categories cover launch, this is a refinement.*
+
+- **Brewery Admin Nav Reorganization** — Too many nav items in brewery-admin, need hierarchy/grouping. Combine into nested groups or collapsible themes (e.g., "Content" for tap list + menus + events, "Business" for analytics + billing + CRM, "Brand" for all brand features). *Owner: Alex (information architecture) + Avery (build). Priority: P1 — usability issue that gets worse with every feature we add.*
+
+- **Brand Colors on Admin** — Brewery-admin and superadmin pages need consistent use of brand colors instead of current hodgepodge. Audit all admin surfaces for color consistency, align with Jamie's brand guide (dark theme + gold accent system). *Owner: Jamie (brand audit) + Alex (design) + Avery (implementation). Priority: P2 — visual polish, builds trust with brewery owners.*
+
+- **User Guides for All Admin Features** — Comprehensive documentation with screenshots for every admin feature. In-app help or linked docs. Brewery owners should never be confused about how to use a feature. *Owner: Sam (content) + Jamie (visual design). Priority: P2 — critical for self-serve onboarding, reduces support load.*
+
+- **Public Brewery Pages (No Account)** — Unauthenticated users can see brewery info, menus, description, phone number, tap list. Everything else (reviews, social, loyalty) blurred with "Create a HopTrack account" CTA overlay. Turns every brewery page into a conversion funnel. *Owner: Taylor (conversion strategy) + Avery (build) + Jordan (auth architecture). Priority: P1 — massive for SEO and organic growth, every brewery page becomes a landing page.*
+
+- **Brewery Social Links** — Ability to link to social feeds (X, Facebook, Instagram, etc.) displayed alongside phone number on brewery pages. Simple addition to brewery profile settings + display on public pages. *Owner: Avery (build). Priority: P3 — low effort, nice to have, enhances brewery pages.*
+
+- **Image from Screenshot (Investigation)** — Joshua saw a recommendation (possibly related to Next.js config or image optimization) but is unsure if it's still relevant. Needs investigation — could be about `next/image` remote patterns, OG image generation, or screenshot-to-image tooling. *Owner: Jordan (investigation). Priority: P3 — needs clarification from Joshua before scoping.*

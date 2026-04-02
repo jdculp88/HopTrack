@@ -5,8 +5,10 @@ import Link from "next/link";
 import { Building2, Settings, MapPin, GlassWater } from "lucide-react";
 import { BrandDashboardClient } from "./BrandDashboardClient";
 import { formatRelativeTime } from "@/lib/dates";
-import { verifyBrandAccess } from "@/lib/brand-auth";
+import { verifyBrandAccessWithScope } from "@/lib/brand-auth";
 import { calculateBreweryKPIs, type BreweryKPIs } from "@/lib/kpi";
+import { BrandOnboardingWizard } from "@/components/brewery-admin/brand/onboarding/BrandOnboardingWizard";
+import BrandOnboardingCard from "@/components/brewery-admin/brand/onboarding/BrandOnboardingCard";
 
 export const revalidate = 30;
 
@@ -28,8 +30,9 @@ export default async function BrandDashboardPage({ params }: { params: Promise<{
   if (!user) redirect("/login");
 
   // Verify brand membership (shared utility — handles RLS fallback)
-  const brandRole = await verifyBrandAccess(supabase, brand_id, user.id);
-  if (!brandRole) redirect("/brewery-admin");
+  const brandAccess = await verifyBrandAccessWithScope(supabase, brand_id, user.id);
+  if (!brandAccess) redirect("/brewery-admin");
+  const { role: brandRole, locationScope } = brandAccess;
 
   // Fetch brand
   const { data: brand } = await (supabase
@@ -48,6 +51,12 @@ export default async function BrandDashboardPage({ params }: { params: Promise<{
     .order("name") as any);
 
   const locationIds = (locations ?? []).map((l: any) => l.id);
+
+  // Onboarding data — parallel queries for card
+  const [{ data: brandLoyalty }, { count: teamCount }] = await Promise.all([
+    supabase.from("brand_loyalty_programs").select("id").eq("brand_id", brand_id).eq("is_active", true).limit(1) as any,
+    supabase.from("brand_accounts").select("id", { count: "exact", head: true }).eq("brand_id", brand_id) as any,
+  ]);
 
   // Fetch analytics data server-side for initial render
   let stats = {
@@ -274,6 +283,25 @@ export default async function BrandDashboardPage({ params }: { params: Promise<{
         </div>
       </div>
 
+      {/* Brand Onboarding */}
+      <div className="max-w-5xl mx-auto px-6 lg:px-8 pt-6">
+        <BrandOnboardingCard
+          brandId={brand_id}
+          brandSlug={brand.slug ?? ""}
+          locationCount={(locations ?? []).length}
+          hasLoyalty={!!(brandLoyalty && brandLoyalty.length > 0)}
+          teamSize={teamCount ?? 1}
+        />
+      </div>
+
+      {/* Onboarding Wizard (auto-shows for brands with < 2 locations) */}
+      <BrandOnboardingWizard
+        brandId={brand_id}
+        brandName={brand.name}
+        brandSlug={brand.slug}
+        locationCount={(locations ?? []).length}
+      />
+
       {/* Dashboard Content */}
       <BrandDashboardClient
         brandId={brand_id}
@@ -288,6 +316,7 @@ export default async function BrandDashboardPage({ params }: { params: Promise<{
         }}
         tapStats={tapStats}
         brandKPIs={brandKPIs}
+        locationScope={locationScope}
       />
     </div>
   );

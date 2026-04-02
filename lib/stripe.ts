@@ -87,6 +87,21 @@ export const FEATURE_MATRIX = [
   { feature: "Dedicated account manager", free: false, tap: false, cask: false, barrel: true, category: "Enterprise" },
 ] as const;
 
+// ─── Brand Feature Gates (Sprint 130 — The Welcome Mat) ───────────────────
+// Brands require Barrel tier to exist. These gates document which brand features
+// require which minimum tier. Since brand creation itself is gated to Barrel,
+// these serve as documentation + test anchors, not runtime checks.
+export const BRAND_FEATURE_GATES = {
+  brand_dashboard: ["barrel"],
+  brand_loyalty: ["cask", "barrel"],
+  brand_catalog: ["barrel"],
+  brand_tap_list: ["barrel"],
+  brand_reports: ["barrel"],
+  brand_team: ["barrel"],
+  brand_customers: ["barrel"],
+  brand_billing: ["barrel"],
+} as const;
+
 // ─── Brand Billing (Sprint 121 — The Ledger) ──────────────────────────────
 
 // Brand-level Stripe price IDs — base Barrel subscription + per-location add-on

@@ -74,6 +74,7 @@ interface BrandDashboardClientProps {
   initialData: BrandAnalytics;
   tapStats?: TapStats;
   brandKPIs?: BreweryKPIs | null;
+  locationScope?: string[] | null;
 }
 
 // ── Active Sessions Counter for Brand ──
@@ -128,12 +129,25 @@ function WoWTrend({ current, previous }: { current: number; previous: number }) 
   return <Minus size={14} style={{ color: "var(--text-muted)" }} />;
 }
 
-export function BrandDashboardClient({ brandId, initialData, tapStats, brandKPIs }: BrandDashboardClientProps) {
+export function BrandDashboardClient({ brandId, initialData, tapStats, brandKPIs, locationScope }: BrandDashboardClientProps) {
   const { stats, locationBreakdown, topBeers, recentActivity, weeklyTrend, locations } = initialData;
   const maxLocationSessions = Math.max(...locationBreakdown.map(l => l.sessions), 1);
 
   return (
     <div className="p-6 lg:p-8 max-w-5xl mx-auto pt-16 lg:pt-8 space-y-6">
+      {/* Scope indicator for regional managers */}
+      {locationScope && (
+        <div
+          className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs"
+          style={{ background: "var(--surface-2)", color: "var(--text-muted)" }}
+        >
+          <MapPin size={12} />
+          <span>
+            Viewing: {locationScope.length} of {locations.length} location{locations.length !== 1 ? "s" : ""}
+          </span>
+        </div>
+      )}
+
       {/* Today's Snapshot */}
       <div
         className="rounded-2xl border p-5 sm:p-6"

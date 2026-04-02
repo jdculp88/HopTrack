@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Users, UserPlus, Trash2, Loader2, Shield, ShieldCheck, ShieldAlert, ChevronDown, Clock, X } from "lucide-react";
+import { Users, UserPlus, Trash2, Loader2, Shield, ShieldCheck, ShieldAlert, ChevronDown, Clock, X, MapPin } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useToast } from "@/components/ui/Toast";
 import { LocationScopePicker } from "@/components/brewery-admin/brand/LocationScopePicker";
@@ -357,9 +357,15 @@ export function BrandTeamClient({ brandId, brandName, locations, userRole, userI
             const roleConfig = ROLE_CONFIG[m.role] ?? ROLE_CONFIG.regional_manager;
             const RoleIcon = roleConfig.icon;
             const isSelf = m.user_id === userId;
+            const scopeNames = m.location_scope
+              ? m.location_scope.map((id: string) => locations.find((l) => l.id === id)?.name ?? "Unknown").filter(Boolean)
+              : [];
             const scopeLabel = m.location_scope
-              ? `${m.location_scope.length} location${m.location_scope.length !== 1 ? "s" : ""}`
+              ? scopeNames.length <= 3
+                ? scopeNames.join(", ")
+                : `${scopeNames.length} of ${locations.length} locations`
               : "All locations";
+            const isAllLocations = !m.location_scope;
 
             return (
               <motion.div
@@ -443,12 +449,16 @@ export function BrandTeamClient({ brandId, brandName, locations, userRole, userI
                           ) : (
                             <button
                               onClick={() => canManage && setEditingScopeId(m.user_id)}
-                              className="text-xs px-2 py-1 rounded-lg transition-opacity hover:opacity-80"
-                              style={{ background: "var(--surface)", color: "var(--text-muted)", border: "1px solid var(--border)" }}
+                              className="flex items-center gap-1 text-xs px-2 py-1 rounded-lg transition-opacity hover:opacity-80"
+                              style={isAllLocations
+                                ? { background: "color-mix(in srgb, #22c55e 10%, transparent)", color: "#22c55e", border: "1px solid color-mix(in srgb, #22c55e 20%, transparent)" }
+                                : { background: "var(--surface)", color: "var(--text-muted)", border: "1px solid var(--border)" }
+                              }
                               disabled={!canManage}
                             >
+                              <MapPin size={10} />
                               {scopeLabel}
-                              {canManage && <ChevronDown size={10} className="inline ml-1" />}
+                              {canManage && <ChevronDown size={10} className="ml-0.5" />}
                             </button>
                           )}
                         </>

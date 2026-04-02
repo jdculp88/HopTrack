@@ -93,12 +93,21 @@ export function BreweryRatingHeader({ breweryId }: BreweryRatingHeaderProps) {
 
         {!showForm && (
           userRating != null ? (
-            <button
+            <div
+              role="button"
+              tabIndex={0}
               onClick={() => {
                 setFormRating(userRating);
                 setShowForm(true);
               }}
-              className="flex items-center gap-1.5 text-sm transition-colors"
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  setFormRating(userRating);
+                  setShowForm(true);
+                }
+              }}
+              className="flex items-center gap-1.5 text-sm transition-colors cursor-pointer"
               style={{ color: "var(--text-muted)" }}
             >
               <span>You rated</span>
@@ -109,7 +118,7 @@ export function BreweryRatingHeader({ breweryId }: BreweryRatingHeaderProps) {
               >
                 Edit
               </span>
-            </button>
+            </div>
           ) : (
             <button
               onClick={() => setShowForm(true)}
