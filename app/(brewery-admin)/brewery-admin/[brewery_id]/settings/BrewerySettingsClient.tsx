@@ -8,14 +8,21 @@ import { ImageUpload } from "@/components/ui/ImageUpload";
 import { MenuUpload } from "@/components/ui/MenuUpload";
 import { ApiKeyManager } from "@/components/brewery-admin/ApiKeyManager";
 import { StaffManager } from "@/components/brewery-admin/StaffManager";
+import { CreateBrandWizard } from "@/components/brewery-admin/brand/CreateBrandWizard";
+import { Building2, ArrowRight } from "lucide-react";
+import Link from "next/link";
 
 interface BrewerySettingsClientProps {
   brewery: any;
   role: string;
   subscriptionTier?: string;
+  brand?: any;
+  userId?: string;
 }
 
-export function BrewerySettingsClient({ brewery, role, subscriptionTier = "free" }: BrewerySettingsClientProps) {
+export function BrewerySettingsClient({ brewery, role, subscriptionTier = "free", brand, userId }: BrewerySettingsClientProps) {
+  const [showBrandWizard, setShowBrandWizard] = useState(false);
+  const [currentBrand, setCurrentBrand] = useState(brand ?? null);
   const [form, setForm] = useState({
     name: brewery?.name ?? "",
     street: brewery?.street ?? "",
@@ -196,6 +203,74 @@ export function BrewerySettingsClient({ brewery, role, subscriptionTier = "free"
           <StaffManager breweryId={brewery.id} currentUserRole={role} />
         </div>
       )}
+
+      {/* Multi-Location Brand */}
+      {role === "owner" && !currentBrand && (
+        <div className="mt-6 rounded-2xl border p-6" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center"
+              style={{ background: "color-mix(in srgb, var(--accent-gold) 15%, transparent)" }}>
+              <Building2 size={20} style={{ color: "var(--accent-gold)" }} />
+            </div>
+            <div>
+              <h3 className="font-display font-bold" style={{ color: "var(--text-primary)" }}>Multi-Location Brand</h3>
+              <p className="text-xs" style={{ color: "var(--text-muted)" }}>Manage multiple locations under one brand</p>
+            </div>
+          </div>
+          <p className="text-sm mb-4" style={{ color: "var(--text-secondary)" }}>
+            Create a brand to group multiple brewery locations together. Share staff, analytics, and a unified public brand page.
+          </p>
+          <button
+            onClick={() => setShowBrandWizard(true)}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all"
+            style={{ background: "var(--accent-gold)", color: "var(--bg)" }}
+          >
+            <Building2 size={16} />
+            Create Brand
+          </button>
+        </div>
+      )}
+
+      {role === "owner" && currentBrand && (
+        <div className="mt-6 rounded-2xl border p-6" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center"
+                style={{ background: "color-mix(in srgb, var(--accent-gold) 15%, transparent)" }}>
+                <Building2 size={20} style={{ color: "var(--accent-gold)" }} />
+              </div>
+              <div>
+                <h3 className="font-display font-bold" style={{ color: "var(--text-primary)" }}>Part of {currentBrand.name}</h3>
+                <p className="text-xs font-mono" style={{ color: "var(--text-muted)" }}>/brand/{currentBrand.slug}</p>
+              </div>
+            </div>
+            <Link
+              href={`/brewery-admin/brand/${currentBrand.id}/settings`}
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all"
+              style={{ color: "var(--accent-gold)" }}
+            >
+              Brand Settings
+              <ArrowRight size={14} />
+            </Link>
+          </div>
+        </div>
+      )}
+
+      {/* Brand Creation Wizard */}
+      <AnimatePresence>
+        {showBrandWizard && userId && (
+          <CreateBrandWizard
+            breweryId={brewery.id}
+            breweryName={brewery.name}
+            userId={userId}
+            onComplete={(brand) => {
+              setShowBrandWizard(false);
+              setCurrentBrand(brand);
+            }}
+            onClose={() => setShowBrandWizard(false)}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Danger zone */}
       {role === "owner" && (

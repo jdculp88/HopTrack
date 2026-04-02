@@ -47,9 +47,9 @@ CREATE POLICY "Brewery admins can view brewery codes"
   ON redemption_codes FOR SELECT
   USING (
     EXISTS (
-      SELECT 1 FROM breweries
-      WHERE breweries.id = redemption_codes.brewery_id
-        AND breweries.owner_id = auth.uid()
+      SELECT 1 FROM brewery_accounts
+      WHERE brewery_accounts.brewery_id = redemption_codes.brewery_id
+        AND brewery_accounts.user_id = auth.uid()
     )
   );
 
@@ -58,9 +58,9 @@ CREATE POLICY "Brewery admins can update brewery codes"
   ON redemption_codes FOR UPDATE
   USING (
     EXISTS (
-      SELECT 1 FROM breweries
-      WHERE breweries.id = redemption_codes.brewery_id
-        AND breweries.owner_id = auth.uid()
+      SELECT 1 FROM brewery_accounts
+      WHERE brewery_accounts.brewery_id = redemption_codes.brewery_id
+        AND brewery_accounts.user_id = auth.uid()
     )
   );
 

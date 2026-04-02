@@ -674,6 +674,7 @@ export interface BreweryAccount {
   subscription_tier: "free" | "tap" | "cask" | "barrel";
   subscription_status: "active" | "trialing" | "past_due" | "canceled" | null;
   trial_ends_at: string | null;
+  propagated_from_brand: boolean;
   created_at: string;
 }
 

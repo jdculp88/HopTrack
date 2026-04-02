@@ -18,5 +18,13 @@ export default async function BrewerySettingsPage({ params }: { params: Promise<
   const { data: brewery } = await supabase
     .from("breweries").select("*").eq("id", brewery_id).single() as any;
 
-  return <BrewerySettingsClient brewery={brewery as any} role={(account as any).role} subscriptionTier={(brewery as any)?.subscription_tier ?? "free"} />;
+  // Fetch brand if brewery belongs to one
+  let brand = null;
+  if ((brewery as any)?.brand_id) {
+    const { data } = await supabase
+      .from("brewery_brands").select("*").eq("id", (brewery as any).brand_id).single() as any;
+    brand = data;
+  }
+
+  return <BrewerySettingsClient brewery={brewery as any} role={(account as any).role} subscriptionTier={(brewery as any)?.subscription_tier ?? "free"} brand={brand} userId={user.id} />;
 }

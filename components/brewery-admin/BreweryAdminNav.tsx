@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, List, BarChart2, Gift, Settings, ChevronDown, ExternalLink, Rewind, LogOut, Calendar, QrCode, CreditCard, Users, FileText, Mail, Trophy, BookOpen, Activity, Code2, Tv, RefreshCw, Megaphone, Crown } from "lucide-react";
+import { LayoutDashboard, List, BarChart2, Gift, Settings, ChevronDown, ExternalLink, Rewind, LogOut, Calendar, QrCode, CreditCard, Users, FileText, Mail, Trophy, BookOpen, Activity, Code2, Tv, RefreshCw, Megaphone, Crown, Building2 } from "lucide-react";
 import { HopMark } from "@/components/ui/HopMark";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
@@ -32,7 +32,7 @@ const NAV_ITEMS = [
   { href: "/resources",     label: "Resources",    icon: BookOpen },
 ];
 
-export function BreweryAdminNav({ accounts }: { accounts: any[] }) {
+export function BreweryAdminNav({ accounts, brandAccounts = [] }: { accounts: any[]; brandAccounts?: any[] }) {
   const pathname = usePathname();
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -76,20 +76,66 @@ export function BreweryAdminNav({ accounts }: { accounts: any[] }) {
                 <ChevronDown size={14} style={{ color: "var(--text-muted)" }} className={cn("transition-transform", open && "rotate-180")} />
               </button>
               {open && (
-                <div className="absolute top-full left-0 right-0 mt-1 rounded-xl border shadow-xl z-50 overflow-hidden"
+                <div className="absolute top-full left-0 right-0 mt-1 rounded-xl border shadow-xl z-50 overflow-hidden max-h-72 overflow-y-auto"
                   style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
-                  {accounts.map((a: any) => (
-                    <Link
-                      key={a.brewery_id}
-                      href={`/brewery-admin/${a.brewery_id}`}
-                      onClick={() => setOpen(false)}
-                      className="flex items-center gap-3 px-3 py-2.5 transition-colors"
-                      style={{ color: "var(--text-primary)" }}
-                    >
-                      <BreweryAvatar name={a.brewery?.name ?? ""} size="sm" />
-                      <span className="text-sm font-medium">{a.brewery?.name}</span>
-                    </Link>
-                  ))}
+                  {(() => {
+                    // Group accounts by brand
+                    const branded = accounts.filter((a: any) => a.brewery?.brand);
+                    const independent = accounts.filter((a: any) => !a.brewery?.brand);
+                    const brandGroups = new Map<string, { brand: any; locations: any[] }>();
+                    branded.forEach((a: any) => {
+                      const b = a.brewery.brand;
+                      if (!brandGroups.has(b.id)) brandGroups.set(b.id, { brand: b, locations: [] });
+                      brandGroups.get(b.id)!.locations.push(a);
+                    });
+
+                    return (
+                      <>
+                        {Array.from(brandGroups.values()).map(({ brand: b, locations: locs }) => (
+                          <div key={b.id}>
+                            <div className="flex items-center justify-between px-3 py-2 border-b" style={{ borderColor: "var(--border)" }}>
+                              <div className="flex items-center gap-2">
+                                <Building2 size={12} style={{ color: "var(--accent-gold)" }} />
+                                <span className="text-xs font-bold" style={{ color: "var(--accent-gold)" }}>{b.name}</span>
+                              </div>
+                              <Link
+                                href={`/brewery-admin/brand/${b.id}/settings`}
+                                onClick={() => setOpen(false)}
+                                className="text-[10px] transition-opacity hover:opacity-70"
+                                style={{ color: "var(--text-muted)" }}
+                              >
+                                <Settings size={10} />
+                              </Link>
+                            </div>
+                            {locs.map((a: any) => (
+                              <Link
+                                key={a.brewery_id}
+                                href={`/brewery-admin/${a.brewery_id}`}
+                                onClick={() => setOpen(false)}
+                                className="flex items-center gap-3 px-3 py-2.5 pl-7 transition-colors"
+                                style={{ color: "var(--text-primary)" }}
+                              >
+                                <BreweryAvatar name={a.brewery?.name ?? ""} size="sm" />
+                                <span className="text-sm font-medium">{a.brewery?.name}</span>
+                              </Link>
+                            ))}
+                          </div>
+                        ))}
+                        {independent.map((a: any) => (
+                          <Link
+                            key={a.brewery_id}
+                            href={`/brewery-admin/${a.brewery_id}`}
+                            onClick={() => setOpen(false)}
+                            className="flex items-center gap-3 px-3 py-2.5 transition-colors"
+                            style={{ color: "var(--text-primary)" }}
+                          >
+                            <BreweryAvatar name={a.brewery?.name ?? ""} size="sm" />
+                            <span className="text-sm font-medium">{a.brewery?.name}</span>
+                          </Link>
+                        ))}
+                      </>
+                    );
+                  })()}
                 </div>
               )}
             </div>
@@ -106,6 +152,25 @@ export function BreweryAdminNav({ accounts }: { accounts: any[] }) {
 
         {/* Nav */}
         <nav className="flex-1 px-3 py-4 space-y-1">
+          {/* Brand Settings link — only when brewery belongs to a brand */}
+          {brewery?.brand && brandAccounts.some((ba: any) => ba.brand_id === brewery.brand.id) && (
+            <Link
+              href={`/brewery-admin/brand/${brewery.brand.id}/settings`}
+              className={cn(
+                "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all mb-2",
+                pathname.includes(`/brand/${brewery.brand.id}`)
+                  ? "text-[var(--bg)] font-semibold"
+                  : "hover:opacity-80"
+              )}
+              style={pathname.includes(`/brand/${brewery.brand.id}`)
+                ? { background: "var(--accent-gold)", color: "var(--bg)" }
+                : { color: "var(--accent-gold)", background: "color-mix(in srgb, var(--accent-gold) 10%, transparent)" }
+              }
+            >
+              <Building2 size={16} />
+              Brand Settings
+            </Link>
+          )}
           {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
             const fullHref = `/brewery-admin/${activeBreweryId}${href}`;
             const isActive = href === ""

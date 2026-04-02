@@ -18,12 +18,28 @@ export default async function BreweryAdminLayout({ children }: { children: React
   const isBoard = pathname.includes("/board");
 
   // Fetch all breweries this user manages (verified or pending)
-  const { data: accounts } = await supabase
+  // Try with brand join; fall back to simple join if schema cache is stale
+  let { data: accounts, error: accountsError } = await supabase
     .from("brewery_accounts")
-    .select("*, brewery:breweries(*)")
+    .select("*, brewery:breweries(*, brand:brewery_brands(id, name, slug, logo_url))")
     .eq("user_id", user.id) as any;
 
+  if (accountsError) {
+    // Brand join failed (schema cache stale) — retry without it
+    const fallback = await supabase
+      .from("brewery_accounts")
+      .select("*, brewery:breweries(*)")
+      .eq("user_id", user.id) as any;
+    accounts = fallback.data;
+  }
+
   if (!isClaiming && !isBoard && (!accounts || accounts.length === 0)) redirect("/brewery-admin/claim");
+
+  // Fetch brand memberships for nav grouping
+  const { data: brandAccounts } = await supabase
+    .from("brand_accounts")
+    .select("brand_id, role")
+    .eq("user_id", user.id) as any;
 
   // On the claim page or board: render without the sidebar nav
   if (isClaiming || isBoard || !accounts || accounts.length === 0) {
@@ -46,7 +62,7 @@ export default async function BreweryAdminLayout({ children }: { children: React
         >
           Skip to main content
         </a>
-        <BreweryAdminNav accounts={accounts} />
+        <BreweryAdminNav accounts={accounts} brandAccounts={brandAccounts ?? []} />
         <main id="main-content" className="flex-1 overflow-auto">
           {children}
         </main>

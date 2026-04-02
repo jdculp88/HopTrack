@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 interface ImageUploadProps {
-  bucket: "beer-photos" | "brewery-covers" | "avatars" | "session-photos";
+  bucket: "beer-photos" | "brewery-covers" | "avatars" | "session-photos" | "brand-logos";
   /** Path prefix inside bucket — e.g. userId or breweryId */
   folder: string;
   currentUrl?: string | null;

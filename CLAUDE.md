@@ -248,9 +248,11 @@ scripts/supabase-setup.mjs    — One-time setup script
 
 ## 🗺️ Where We Are
 
-**Last Completed Sprint:** Sprint 114 — The Operator ✅
+**Last Completed Sprint:** Sprint 115 — The Brand ✅
 **Arc:** Multi-Location (Sprints 114-137)
-**Sprint plan (114):** `docs/plans/sprint-114-plan.md`
+**Sprint plan (115):** `docs/plans/sprint-115-plan.md`
+**Retro (114):** `docs/retros/sprint-114-retro.md` (facilitated by Morgan)
+**Last completed:** Sprint 115 — The Brand ✅ — Multi-location brand system: brand creation wizard (3-step modal), add location flow (search existing or create new), brand-level role propagation (lib/brand-propagation.ts), location selector in brewery-admin nav (brand grouping with fallback), brand settings page (profile/locations/team/dissolve), consumer brand page (/brand/[slug] with hero + location grid + JSON-LD), brand API routes (5 new: create, slug-check, CRUD, locations, members). RLS infinite recursion fix on brewery_accounts. Massive seed data: 11 test auth users, 45+ sessions, 60+ beer logs, reviews, comments, reactions, ads, challenges, mug club, achievements. Joshua's account wired as Pint & Pixel owner. 3 migrations (073-075).
 **Last completed:** Sprint 114 — The Operator ✅ — Staff redemption system (4 roles: admin/business/marketing/staff, code entry UI, POS reference), brewery admin user management, 5 bug fixes (wishlist filter, You tab sessions, spacing, Explore cleanup, caching), smart search (pg_trgm fuzzy + typeahead API + SearchTypeahead component), multi-location schema foundation (brewery_brands, brand_accounts). 3 migrations (070-072). F-031 captured.
 **Previous arc:** The Overhaul (Sprints 104-113) — CLOSED ✅
 **Sprint plan (104-113):** `docs/plans/sprint-104-113-arc-plan.md`
