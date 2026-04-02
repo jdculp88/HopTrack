@@ -96,15 +96,22 @@ Joshua "picked it specifically for security."
 
 ---
 
+## Sprint 128 — Selected: The Menu (menu uploads & food presence, REQ-070)
+
+- **"The Stage" — Brand Events & Cross-Location Experiences** — Multi-location event management (tap takeovers, trivia nights, beer releases). Brand creates event once, pushes to all/selected locations. Consumer event discovery with proximity. Event feed cards. Deferred 3x now (S124, S125, S128) — strong team consensus, Drew keeps asking. **OPEN**
+- **"The Megaphone" — Brand-Level Promotions & Challenges** — Cross-location challenges ("Visit 3 Pint & Pixel locations this month"), brand-wide happy hours, cross-location loyalty bonuses. Barrel tier differentiator. Taylor: clear upsell path. Deferred 3x (S119, S122, S128). **OPEN**
+
+---
+
 ## Recurring Themes (appeared in multiple sprints)
 
 These ideas keep coming back — they're clearly high-value:
 
 | Theme | Appeared In | Status |
 |-------|------------|--------|
-| **Brand Events / The Stage** | S124, S125 | **OPEN** — twice deferred, strong team consensus |
-| **Menu Uploads / The Menu (REQ-070)** | S124, S125 | **OPEN** — twice deferred, sales blocker per Taylor |
-| **Brand Promotions / The Megaphone / The Rollout** | S119, S122 | **OPEN** — cross-location challenges, Barrel differentiator |
+| **Brand Events / The Stage** | S124, S125, S128 | **OPEN** — 3x deferred, strong team consensus, Drew keeps asking |
+| **Menu Uploads / The Menu (REQ-070)** | S124, S125 | **BUILT — Sprint 128** |
+| **Brand Promotions / The Megaphone / The Rollout** | S119, S122, S128 | **OPEN** — 3x deferred, cross-location challenges, Barrel differentiator |
 | **Consumer Bridge / Cross-Location Experience** | S121 | **PARTIAL** — loyalty done, wishlist + auto-challenges still open |
 | **Brand Onboarding Wizard** | S123, S126 | **OPEN** — keeps getting deferred for higher-priority items |
 | **Location Transfer / Merge** | S117 | **OPEN** — critical for real operators claiming listings |

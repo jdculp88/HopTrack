@@ -254,6 +254,11 @@ export interface Database {
         Insert: Omit<BrandLoyaltyRedemption, "id" | "redeemed_at"> & { id?: string };
         Update: Partial<BrandLoyaltyRedemption>;
       };
+      brewery_menus: {
+        Row: BreweryMenu;
+        Insert: Omit<BreweryMenu, "id" | "created_at" | "updated_at"> & { id?: string };
+        Update: Partial<BreweryMenu>;
+      };
     };
   };
 }
@@ -1173,6 +1178,40 @@ export interface BrandLoyaltyRedemption {
   brewery_id: string;
   program_id: string;
   redeemed_at: string;
+}
+
+// ─── Brewery Menus (Sprint 128) ──────────────────────────────────────────────
+export type MenuCategory =
+  | "food"
+  | "happy_hour"
+  | "wine"
+  | "cocktail"
+  | "non_alcoholic"
+  | "seasonal"
+  | "kids"
+  | "brunch";
+
+export const MENU_CATEGORY_LABELS: Record<MenuCategory, string> = {
+  food: "Food Menu",
+  happy_hour: "Happy Hour",
+  wine: "Wine List",
+  cocktail: "Cocktail Menu",
+  non_alcoholic: "Non-Alcoholic",
+  seasonal: "Seasonal / Special",
+  kids: "Kids Menu",
+  brunch: "Brunch",
+};
+
+export interface BreweryMenu {
+  id: string;
+  brewery_id: string;
+  category: MenuCategory;
+  title: string | null;
+  image_urls: string[];
+  display_order: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
 // ─── Brand Catalog Beers (Sprint 119) ──────────────────────────────────────

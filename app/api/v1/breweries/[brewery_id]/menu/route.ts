@@ -17,7 +17,7 @@ export async function GET(
   const { brewery_id } = await params;
   const supabase = await createClient();
 
-  const [breweryRes, beersRes, eventsRes] = await Promise.all([
+  const [breweryRes, beersRes, eventsRes, menusRes] = await Promise.all([
     (supabase as any)
       .from("breweries")
       .select("id, name, city, state, brewery_type, description, cover_image_url, website_url, phone, latitude, longitude, menu_image_url")
@@ -39,6 +39,12 @@ export async function GET(
       .gte("event_date", new Date().toISOString().split("T")[0])
       .order("event_date", { ascending: true })
       .limit(10),
+    (supabase as any)
+      .from("brewery_menus")
+      .select("category, title, image_urls, display_order")
+      .eq("brewery_id", brewery_id)
+      .eq("is_active", true)
+      .order("display_order"),
   ]);
 
   if (!breweryRes.data) return apiError("Brewery not found", 404, "not_found");
@@ -76,6 +82,7 @@ export async function GET(
   return apiResponse({
     brewery: breweryRes.data,
     menu: grouped,
+    menus: menusRes.data ?? [],
     events: eventsRes.data ?? [],
   }, {
     total_items: items.length,

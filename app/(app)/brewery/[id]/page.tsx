@@ -12,6 +12,7 @@ import { BreweryRatingHeader } from "@/components/brewery/BreweryRatingHeader";
 import { generateGradientFromString } from "@/lib/utils";
 import { BreweryHeroSection } from "./BreweryHeroSection";
 import { BreweryTapListSection } from "./BreweryTapListSection";
+import { BreweryMenusSection } from "@/components/brewery/BreweryMenusSection";
 import { BreweryEventsSection } from "./BreweryEventsSection";
 import { BreweryReviewsSection } from "./BreweryReviewsSection";
 
@@ -295,6 +296,14 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
     hasBrandLoyalty = (blp?.length ?? 0) > 0;
   }
 
+  // ── Menus ──
+  const { data: breweryMenus } = await (supabase
+    .from("brewery_menus")
+    .select("*")
+    .eq("brewery_id", id)
+    .eq("is_active", true)
+    .order("display_order") as any);
+
   // ── Event RSVPs ──
   const eventIds = upcomingEvents.map((e) => e.id);
   const myEventRsvps: Record<string, { status: string }> = {};
@@ -562,6 +571,9 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
             breweryName={brewery.name}
             menuImageUrl={brewery.menu_image_url ?? null}
           />
+
+          {/* Menus */}
+          <BreweryMenusSection menus={breweryMenus ?? []} />
 
           {/* Challenges */}
           {activeChallenges.length > 0 && (
