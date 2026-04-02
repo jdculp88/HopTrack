@@ -589,6 +589,8 @@ export interface Session {
   share_to_feed: boolean
   note: string | null
   xp_awarded: number
+  session_latitude: number | null
+  session_longitude: number | null
   created_at: string
   // joined fields
   brewery?: {

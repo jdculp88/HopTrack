@@ -18,9 +18,10 @@ interface BrandMapClientProps {
     latitude: number | null;
     longitude: number | null;
   }>;
+  userLocation?: { latitude: number; longitude: number } | null;
 }
 
-export function BrandMapClient({ locations }: BrandMapClientProps) {
+export function BrandMapClient({ locations, userLocation }: BrandMapClientProps) {
   const mappable = locations.filter(l => l.latitude != null && l.longitude != null);
   if (mappable.length === 0) return null;
 
@@ -31,6 +32,7 @@ export function BrandMapClient({ locations }: BrandMapClientProps) {
         brewery_type: null,
       })) as any}
       className="h-[300px] sm:h-[400px]"
+      userLocation={userLocation}
     />
   );
 }

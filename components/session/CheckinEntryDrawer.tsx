@@ -33,6 +33,7 @@ export default function CheckinEntryDrawer({ isOpen, onClose, onSessionStarted, 
   const [showSearch, setShowSearch] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const searchAbortRef = useRef<AbortController | null>(null)
+  const userCoordsRef = useRef<{ latitude: number; longitude: number } | null>(null)
   const { startSession, startHomeSession } = useSession()
   const { error: toastError } = useToast()
 
@@ -70,10 +71,11 @@ export default function CheckinEntryDrawer({ isOpen, onClose, onSessionStarted, 
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         const { latitude, longitude } = pos.coords
+        userCoordsRef.current = { latitude, longitude }
         try {
           const res = await fetch(`/api/breweries?lat=${latitude}&lng=${longitude}&limit=5`)
           const data = await res.json()
-          const nearby: Brewery[] = data.breweries ?? []
+          const nearby: Brewery[] = groupNearbyByBrand(data.breweries ?? [])
           setNearbyBreweries(nearby)
           if (nearby.length === 1) setAutoDetected(nearby[0])
         } catch {
@@ -160,7 +162,7 @@ export default function CheckinEntryDrawer({ isOpen, onClose, onSessionStarted, 
   async function handleSelectBrewery(brewery: Brewery) {
     setStartingSession(brewery.id)
     setStartError(null)
-    const session = await startSession(brewery.id, true)
+    const session = await startSession(brewery.id, true, userCoordsRef.current ?? undefined)
     if (!session) {
       setStartingSession(null)
       setStartError('Could not start session. Please try again.')
@@ -519,6 +521,11 @@ function BreweryRow({
           style={{ background: generateGradientFromString(brewery.name) }}
         />
         <div className="flex-1 min-w-0">
+          {(brewery as any).brand && (
+            <p className="text-xs font-semibold truncate" style={{ color: 'var(--accent-gold)' }}>
+              {(brewery as any).brand.name}
+            </p>
+          )}
           <p className="font-display font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
             {brewery.name}
           </p>
@@ -535,4 +542,25 @@ function BreweryRow({
       </motion.div>
     </button>
   )
+}
+
+/**
+ * Groups nearby breweries so brand locations appear together.
+ * Branded locations come first (grouped by brand, nearest first within each group),
+ * followed by independent breweries.
+ */
+export function groupNearbyByBrand(breweries: Brewery[]): Brewery[] {
+  const branded = breweries.filter((b: any) => b.brand_id)
+  const independent = breweries.filter((b: any) => !b.brand_id)
+
+  // Group branded by brand_id, maintain existing order (nearest first from API)
+  const brandGroups = new Map<string, Brewery[]>()
+  for (const b of branded) {
+    const key = (b as any).brand_id
+    const group = brandGroups.get(key) || []
+    group.push(b)
+    brandGroups.set(key, group)
+  }
+
+  return [...[...brandGroups.values()].flat(), ...independent]
 }

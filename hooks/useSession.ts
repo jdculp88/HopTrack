@@ -26,14 +26,24 @@ export function useSession() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const startSession = useCallback(async (breweryId: string, shareToFeed = true): Promise<Session | null> => {
+  const startSession = useCallback(async (
+    breweryId: string,
+    shareToFeed = true,
+    location?: { latitude: number; longitude: number },
+  ): Promise<Session | null> => {
     setLoading(true)
     setError(null)
     try {
       const res = await fetch('/api/sessions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ brewery_id: breweryId, share_to_feed: shareToFeed, context: 'brewery' }),
+        body: JSON.stringify({
+          brewery_id: breweryId,
+          share_to_feed: shareToFeed,
+          context: 'brewery',
+          session_latitude: location?.latitude,
+          session_longitude: location?.longitude,
+        }),
       })
       const data = await res.json()
       if (!res.ok) { setError(data.error || 'Failed to start session'); return null }

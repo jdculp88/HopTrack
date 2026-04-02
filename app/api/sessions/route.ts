@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
   if (!user) return apiUnauthorized()
 
   const body = await request.json()
-  const { brewery_id, share_to_feed = true, note, context = 'brewery' } = body
+  const { brewery_id, share_to_feed = true, note, context = 'brewery', session_latitude, session_longitude } = body
 
   if (context === 'brewery' && !brewery_id) {
     return apiBadRequest('brewery_id is required for brewery sessions', 'brewery_id')
@@ -37,6 +37,8 @@ export async function POST(request: NextRequest) {
       share_to_feed,
       note: note || null,
       context,
+      session_latitude: typeof session_latitude === 'number' ? session_latitude : null,
+      session_longitude: typeof session_longitude === 'number' ? session_longitude : null,
     })
     .select()
     .single()

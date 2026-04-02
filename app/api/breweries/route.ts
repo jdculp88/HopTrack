@@ -23,7 +23,7 @@ export async function GET(request: Request) {
     // Nearby breweries: first check DB, then Open Brewery DB
     const { data: dbBreweries } = await supabase
       .from("breweries")
-      .select("*")
+      .select("*, brand:brewery_brands(id, name, slug)")
       .not("latitude", "is", null)
       .limit(500);
 

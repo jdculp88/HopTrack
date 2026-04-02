@@ -77,15 +77,15 @@ CREATE POLICY "Anyone can view active brand loyalty programs"
 
 CREATE POLICY "Brand owners/managers can insert programs"
   ON brand_loyalty_programs FOR INSERT
-  WITH CHECK (is_brand_manager_or_owner(brand_id));
+  WITH CHECK (is_brand_manager_or_owner(brand_id, auth.uid()));
 
 CREATE POLICY "Brand owners/managers can update programs"
   ON brand_loyalty_programs FOR UPDATE
-  USING (is_brand_manager_or_owner(brand_id));
+  USING (is_brand_manager_or_owner(brand_id, auth.uid()));
 
 CREATE POLICY "Brand owners/managers can delete programs"
   ON brand_loyalty_programs FOR DELETE
-  USING (is_brand_manager_or_owner(brand_id));
+  USING (is_brand_manager_or_owner(brand_id, auth.uid()));
 
 -- Brand Loyalty Cards: users see own, brand owners/managers see all
 ALTER TABLE brand_loyalty_cards ENABLE ROW LEVEL SECURITY;
@@ -96,7 +96,7 @@ CREATE POLICY "Users can view own brand loyalty cards"
 
 CREATE POLICY "Brand owners/managers can view all cards"
   ON brand_loyalty_cards FOR SELECT
-  USING (is_brand_manager_or_owner(brand_id));
+  USING (is_brand_manager_or_owner(brand_id, auth.uid()));
 
 CREATE POLICY "System can insert brand loyalty cards"
   ON brand_loyalty_cards FOR INSERT
@@ -109,7 +109,7 @@ CREATE POLICY "System can update own brand loyalty cards"
 -- Brand admins can also update cards (for stamp management)
 CREATE POLICY "Brand owners/managers can update cards"
   ON brand_loyalty_cards FOR UPDATE
-  USING (is_brand_manager_or_owner(brand_id));
+  USING (is_brand_manager_or_owner(brand_id, auth.uid()));
 
 -- Brand Loyalty Redemptions: users see own, brand owners/managers see all
 ALTER TABLE brand_loyalty_redemptions ENABLE ROW LEVEL SECURITY;
@@ -120,7 +120,7 @@ CREATE POLICY "Users can view own brand redemptions"
 
 CREATE POLICY "Brand owners/managers can view all redemptions"
   ON brand_loyalty_redemptions FOR SELECT
-  USING (is_brand_manager_or_owner(brand_id));
+  USING (is_brand_manager_or_owner(brand_id, auth.uid()));
 
 CREATE POLICY "Users can insert own brand redemptions"
   ON brand_loyalty_redemptions FOR INSERT
