@@ -16,18 +16,11 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     .eq("id", user.id)
     .single();
 
-  // Fetch unread notification count
-  const { count: unreadCount } = await supabase
-    .from("notifications")
-    .select("id", { count: "exact", head: true })
-    .eq("user_id", user.id)
-    .eq("read", false);
-
   const username = profile?.username ?? user.email?.split("@")[0] ?? "me";
 
   return (
     <ErrorBoundary context="AppLayout">
-      <AppShell username={username} unreadNotifications={unreadCount ?? 0}>
+      <AppShell username={username}>
         {children}
       </AppShell>
     </ErrorBoundary>

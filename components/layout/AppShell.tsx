@@ -18,6 +18,7 @@ import { PushOptIn } from "@/components/push/PushOptIn";
 import { WelcomeFlow, isOnboardingComplete } from "@/components/onboarding/WelcomeFlow";
 import { OfflineBanner } from "@/components/ui/OfflineBanner";
 import { ScreenReaderAnnouncer } from "@/components/ui/ScreenReaderAnnouncer";
+import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
 import type { Session, Brewery } from "@/types/database";
 
 interface AppShellProps {
@@ -38,12 +39,15 @@ export function AppShell({ children, username, unreadNotifications = 0 }: AppShe
   );
 }
 
-function AppShellInner({ children, username, unreadNotifications = 0 }: AppShellProps) {
+function AppShellInner({ children, username, unreadNotifications: initialUnread = 0 }: AppShellProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [checkinOpen, setCheckinOpen] = useState(false);
   const [recapOpen, setRecapOpen] = useState(false);
+
+  // Client-side notification count — initializes with server value, then polls
+  const { count: unreadNotifications } = useUnreadNotifications(initialUnread);
 
   const {
     activeSession,

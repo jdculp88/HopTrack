@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Beer, X, ChevronRight } from "lucide-react";
 
@@ -12,31 +12,45 @@ interface WishlistOnTapAlertProps {
 const DISMISS_KEY = "hoptrack:wishlist-on-tap-dismissed";
 
 export function WishlistOnTapAlert({ count }: WishlistOnTapAlertProps) {
-  const [dismissed, setDismissed] = useState(() => {
-    if (typeof window === "undefined") return false;
-    // Dismiss resets daily
+  // Start as hidden on both server and client — avoids hydration mismatch.
+  // After mount, check localStorage and reveal if not dismissed today.
+  const [visible, setVisible] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (count === 0) return;
     const stored = localStorage.getItem(DISMISS_KEY);
-    if (!stored) return false;
-    const dismissedDate = new Date(stored).toDateString();
-    return dismissedDate === new Date().toDateString();
-  });
+    const dismissedToday = stored
+      ? new Date(stored).toDateString() === new Date().toDateString()
+      : false;
+    if (!dismissedToday) {
+      setVisible(true); // eslint-disable-line react-hooks/set-state-in-effect
+    }
+  }, [count]);
 
-  if (count === 0 || dismissed) return null;
-
-  function handleDismiss() {
+  function handleDismiss(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
     localStorage.setItem(DISMISS_KEY, new Date().toISOString());
-    setDismissed(true);
+    setVisible(false);
+  }
+
+  function handleExplore(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    router.push("/explore?filter=wishlist");
   }
 
   return (
     <AnimatePresence>
-      {!dismissed && (
+      {visible && (
         <motion.div
           initial={{ opacity: 0, y: -8, scale: 0.98 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: -8, scale: 0.98 }}
           transition={{ type: "spring", stiffness: 400, damping: 30 }}
-          className="card-bg-notification rounded-2xl overflow-hidden"
+          className="card-bg-notification rounded-2xl border relative"
+          style={{ zIndex: 5 }}
         >
           <div className="flex items-center gap-3 p-4">
             <div
@@ -56,17 +70,19 @@ export function WishlistOnTapAlert({ count }: WishlistOnTapAlertProps) {
             </div>
 
             <div className="flex items-center gap-1 flex-shrink-0">
-              <Link
-                href="/explore?filter=wishlist"
-                className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
+              <button
+                type="button"
+                onClick={handleExplore}
+                className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer"
                 style={{ background: "var(--accent-gold)", color: "var(--bg)" }}
               >
                 Explore
                 <ChevronRight size={12} />
-              </Link>
+              </button>
               <button
+                type="button"
                 onClick={handleDismiss}
-                className="p-1.5 rounded-lg transition-colors"
+                className="p-1.5 rounded-lg transition-colors cursor-pointer"
                 style={{ color: "var(--text-muted)" }}
                 aria-label="Dismiss wishlist alert"
               >

@@ -10,11 +10,12 @@ const nextConfig: NextConfig = {
   // Enabled in Sprint 104 — double-render in dev catches side-effect bugs before prod.
   reactStrictMode: true,
   experimental: {
-    // Disable client-side Router Cache so navigations always fetch fresh server data.
-    // Without this, Next.js caches RSC payloads and pages appear stale until hard refresh.
+    // Brief client-side Router Cache — keeps layout RSC payloads for 30s so
+    // tab switches don't re-fetch auth + profile every click. Mutations call
+    // router.refresh() to bust the cache when data changes.
     staleTimes: {
-      dynamic: 0,
-      static: 0,
+      dynamic: 30,
+      static: 300,
     },
   },
   async headers() {

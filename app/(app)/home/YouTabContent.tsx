@@ -406,7 +406,7 @@ export function YouTabContent({
       )}
 
       {/* Your activity */}
-      <div className="space-y-3">
+      <div className="space-y-3 !mt-10">
         <div className="flex items-center gap-3">
           <div className="flex-1 h-px" style={{ background: "var(--border)" }} />
           <span className="text-[10px] font-mono uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
