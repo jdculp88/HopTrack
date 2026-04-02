@@ -103,15 +103,25 @@ Joshua "picked it specifically for security."
 
 ---
 
+## Sprint 131 — Selected: The Storefront (public brewery pages)
+
+Joshua explicitly backlogged both deferred options "way into the future":
+
+- **"The Stage" — Brand Events & Cross-Location Experiences** — Multi-location event management. Deferred 4x (S124, S125, S128, S131). **BACKLOGGED** — Joshua says "way more into the future"
+- **"The Megaphone" — Brand-Level Promotions & Challenges** — Cross-location challenges. Deferred 4x (S119, S122, S128, S131). **BACKLOGGED** — Joshua says "way more into the future"
+
+---
+
 ## Recurring Themes (appeared in multiple sprints)
 
 These ideas keep coming back — they're clearly high-value:
 
 | Theme | Appeared In | Status |
 |-------|------------|--------|
-| **Brand Events / The Stage** | S124, S125, S128 | **OPEN** — 3x deferred, strong team consensus, Drew keeps asking |
+| **Brand Events / The Stage** | S124, S125, S128, S131 | **BACKLOGGED** — Joshua deferred "way into the future" (S131). 4x deferred. |
 | **Menu Uploads / The Menu (REQ-070)** | S124, S125 | **BUILT — Sprint 128** |
-| **Brand Promotions / The Megaphone / The Rollout** | S119, S122, S128 | **OPEN** — 3x deferred, cross-location challenges, Barrel differentiator |
+| **Brand Promotions / The Megaphone / The Rollout** | S119, S122, S128, S131 | **BACKLOGGED** — Joshua deferred "way into the future" (S131). 4x deferred. |
+| **Public Brewery Pages / The Storefront** | S123, S131 | **BUILT — Sprint 131** |
 | **Consumer Bridge / Cross-Location Experience** | S121 | **PARTIAL** — loyalty done, wishlist + auto-challenges still open |
 | **Brand Onboarding Wizard** | S123, S126 | **OPEN** — keeps getting deferred for higher-priority items |
 | **Location Transfer / Merge** | S117 | **OPEN** — critical for real operators claiming listings |

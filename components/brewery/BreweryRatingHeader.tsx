@@ -7,10 +7,16 @@ import { StarRating } from "@/components/ui/StarRating";
 
 interface BreweryRatingHeaderProps {
   breweryId: string;
-  currentUserId: string;
+  currentUserId: string | null;
+  isAuthenticated?: boolean;
+  returnPath?: string;
 }
 
-export function BreweryRatingHeader({ breweryId }: BreweryRatingHeaderProps) {
+export function BreweryRatingHeader({
+  breweryId,
+  isAuthenticated = true,
+  returnPath,
+}: BreweryRatingHeaderProps) {
   const [avgRating, setAvgRating] = useState<number | null>(null);
   const [totalReviews, setTotalReviews] = useState(0);
   const [userRating, setUserRating] = useState<number | null>(null);
@@ -92,7 +98,16 @@ export function BreweryRatingHeader({ breweryId }: BreweryRatingHeaderProps) {
         </div>
 
         {!showForm && (
-          userRating != null ? (
+          !isAuthenticated ? (
+            <a
+              href={`/signup?next=${encodeURIComponent(returnPath ?? "/")}`}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold transition-all hover:opacity-80"
+              style={{ background: "var(--accent-gold)", color: "var(--bg)" }}
+            >
+              <Star size={14} />
+              Sign Up to Rate
+            </a>
+          ) : userRating != null ? (
             <div
               role="button"
               tabIndex={0}

@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import Link from "next/link";
 import { MapPin, Globe, Phone, Star, Users, TrendingUp, Beer, CheckCheck } from "lucide-react";
 import type { Brewery, BreweryVisit, Profile } from "@/types/database";
@@ -15,6 +15,8 @@ import { BreweryTapListSection } from "./BreweryTapListSection";
 import { BreweryMenusSection } from "@/components/brewery/BreweryMenusSection";
 import { BreweryEventsSection } from "./BreweryEventsSection";
 import { BreweryReviewsSection } from "./BreweryReviewsSection";
+import { AuthGate } from "@/components/ui/AuthGate";
+import { StorefrontGate } from "@/components/ui/StorefrontGate";
 
 // ─── Supabase join shapes ────────────────────────────────────────────────────
 
@@ -73,17 +75,26 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const title = `${data.name} · ${data.city}, ${data.state}`;
   const cityParam = [data.city, data.state].filter(Boolean).join(", ");
   const ogImage = `/og?type=brewery&brewery=${encodeURIComponent(data.name)}&city=${encodeURIComponent(cityParam)}`;
+  const description = data.description
+    ? data.description.slice(0, 160)
+    : `${data.name} in ${data.city}, ${data.state}. View tap list, menus, events, and reviews on HopTrack.`;
 
   return {
     title,
+    description,
     openGraph: {
       title,
+      description,
       images: [{ url: ogImage, width: 1200, height: 630, alt: data.name }],
     },
     twitter: {
       card: "summary_large_image" as const,
       title,
+      description,
       images: [ogImage],
+    },
+    alternates: {
+      canonical: `/brewery/${id}`,
     },
   };
 }
@@ -96,14 +107,16 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
 
-  // ── Core brewery data ──
+  const isAuthenticated = !!user;
+  const returnPath = `/brewery/${id}`;
+
+  // ── Core brewery data (public) ──
   const { data: breweryRaw } = await supabase.from("breweries").select("*").eq("id", id).single();
   if (!breweryRaw) notFound();
   const brewery = breweryRaw as Brewery;
 
-  // ── Beers ──
+  // ── Beers (public) ──
   const { data: beers } = await supabase
     .from("beers")
     .select("*, brewery:breweries(id, name)")
@@ -111,55 +124,63 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
     .eq("is_active", true)
     .order("total_ratings", { ascending: false });
 
-  // ── User's visit ──
-  const { data: userVisitRaw } = await supabase
-    .from("brewery_visits")
-    .select("*")
-    .eq("user_id", user.id)
-    .eq("brewery_id", id)
-    .single();
-  const userVisit = userVisitRaw as BreweryVisit | null;
-
-  // ── Friends Here Now ──
-  const sixHoursAgo = new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString();
-  const { data: friendshipsRaw } = await supabase
-    .from("friendships")
-    .select("requester_id, addressee_id")
-    .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`)
-    .eq("status", "accepted");
-  const friendIds = (friendshipsRaw ?? []).map(
-    (f: { requester_id: string; addressee_id: string }) =>
-      f.requester_id === user.id ? f.addressee_id : f.requester_id,
-  );
-  let friendsHere: ActiveFriendSession[] = [];
-  if (friendIds.length > 0) {
-    const { data: activeSessions } = await supabase // supabase join shape
-      .from("sessions")
-      .select(
-        `id, user_id, started_at,
-        profile:profiles!user_id(id, username, display_name, avatar_url, notification_preferences),
-        beer_logs(id)`,
-      )
-      .in("user_id", friendIds)
+  // ── User's visit (auth only) ──
+  let userVisit: BreweryVisit | null = null;
+  if (user) {
+    const { data: userVisitRaw } = await supabase
+      .from("brewery_visits")
+      .select("*")
+      .eq("user_id", user.id)
       .eq("brewery_id", id)
-      .eq("is_active", true)
-      .gte("started_at", sixHoursAgo);
-    friendsHere = ((activeSessions ?? []) as unknown as ActiveFriendSession[]).filter((s) => {
-      const prefs = s.profile?.notification_preferences ?? {};
-      return prefs.share_live !== false;
-    });
+      .single();
+    userVisit = userVisitRaw as BreweryVisit | null;
   }
 
-  // ── Top visitors leaderboard ──
-  const { data: topVisitorsRaw } = await supabase
-    .from("brewery_visits")
-    .select("*, profile:profiles(*)")
-    .eq("brewery_id", id)
-    .order("total_visits", { ascending: false })
-    .limit(10);
-  const topVisitors = (topVisitorsRaw ?? []) as unknown as TopVisitor[];
+  // ── Friends Here Now (auth only) ──
+  let friendsHere: ActiveFriendSession[] = [];
+  if (user) {
+    const sixHoursAgo = new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString();
+    const { data: friendshipsRaw } = await supabase
+      .from("friendships")
+      .select("requester_id, addressee_id")
+      .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`)
+      .eq("status", "accepted");
+    const friendIds = (friendshipsRaw ?? []).map(
+      (f: { requester_id: string; addressee_id: string }) =>
+        f.requester_id === user.id ? f.addressee_id : f.requester_id,
+    );
+    if (friendIds.length > 0) {
+      const { data: activeSessions } = await supabase // supabase join shape
+        .from("sessions")
+        .select(
+          `id, user_id, started_at,
+          profile:profiles!user_id(id, username, display_name, avatar_url, notification_preferences),
+          beer_logs(id)`,
+        )
+        .in("user_id", friendIds)
+        .eq("brewery_id", id)
+        .eq("is_active", true)
+        .gte("started_at", sixHoursAgo);
+      friendsHere = ((activeSessions ?? []) as unknown as ActiveFriendSession[]).filter((s) => {
+        const prefs = s.profile?.notification_preferences ?? {};
+        return prefs.share_live !== false;
+      });
+    }
+  }
 
-  // ── Brewery stats ──
+  // ── Top visitors leaderboard (auth only) ──
+  let topVisitors: TopVisitor[] = [];
+  if (user) {
+    const { data: topVisitorsRaw } = await supabase
+      .from("brewery_visits")
+      .select("*, profile:profiles(*)")
+      .eq("brewery_id", id)
+      .order("total_visits", { ascending: false })
+      .limit(10);
+    topVisitors = (topVisitorsRaw ?? []) as unknown as TopVisitor[];
+  }
+
+  // ── Brewery stats (public) ──
   const { data: brewerySessionsRaw } = await supabase // supabase join shape
     .from("sessions")
     .select("user_id")
@@ -193,7 +214,7 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
     Object.values(beerCountMap).sort((a, b) => b.count - a.count)[0] ?? null;
   const beersOnTap = beers?.length ?? 0;
 
-  // ── Upcoming events ──
+  // ── Upcoming events (public) ──
   const today = new Date().toISOString().split("T")[0];
   const { data: upcomingEventsRaw } = await supabase // supabase join shape
     .from("brewery_events")
@@ -205,7 +226,7 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
     .limit(5);
   const upcomingEvents = (upcomingEventsRaw ?? []) as unknown as BreweryEvent[];
 
-  // ── Challenges ──
+  // ── Challenges (public — promotional content) ──
   const { data: challengesRaw } = await (supabase
     .from("challenges")
     .select(
@@ -218,8 +239,9 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
     (c: any) => !c.ends_at || new Date(c.ends_at) >= new Date(),
   );
 
+  // ── Challenge participations (auth only) ──
   let myParticipations: any[] = [];
-  if (activeChallenges.length > 0) {
+  if (user && activeChallenges.length > 0) {
     const challengeIds = activeChallenges.map((c: any) => c.id);
     const { data: participationsRaw } = await (supabase
       .from("challenge_participants")
@@ -231,7 +253,7 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
     myParticipations = participationsRaw ?? [];
   }
 
-  // ── Mug clubs ──
+  // ── Mug clubs (public — promotional content) ──
   const { data: mugClubsRaw } = await (supabase
     .from("mug_clubs")
     .select("*, member_count:mug_club_members(count)")
@@ -240,8 +262,9 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
     .order("created_at", { ascending: false }) as any);
   const mugClubs = mugClubsRaw ?? [];
 
+  // ── Mug club memberships (auth only) ──
   let myMugMemberships: any[] = [];
-  if (mugClubs.length > 0) {
+  if (user && mugClubs.length > 0) {
     const clubIds = mugClubs.map((c: any) => c.id);
     const { data: membershipsRaw } = await (supabase
       .from("mug_club_members")
@@ -251,7 +274,7 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
     myMugMemberships = membershipsRaw ?? [];
   }
 
-  // ── Loyalty programs ──
+  // ── Loyalty programs (public — promotional content) ──
   const { data: loyaltyPrograms } = await (supabase
     .from("loyalty_programs")
     .select("id, name, stamps_required, reward_description")
@@ -259,8 +282,9 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
     .eq("is_active", true)
     .order("created_at", { ascending: false }) as any);
 
+  // ── Loyalty cards (auth only) ──
   const myLoyaltyCards: Record<string, { stamps: number; lifetime_stamps: number }> = {};
-  if (loyaltyPrograms?.length) {
+  if (user && loyaltyPrograms?.length) {
     const { data: cardsRaw } = await (supabase
       .from("loyalty_cards")
       .select("program_id, stamps, lifetime_stamps")
@@ -276,7 +300,7 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
     }
   }
 
-  // ── Brand loyalty ──
+  // ── Brand loyalty (public metadata) ──
   let brandName: string | null = null;
   let hasBrandLoyalty = false;
   if (brewery.brand_id) {
@@ -286,7 +310,6 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
       .eq("id", brewery.brand_id)
       .single() as any);
     brandName = brandRow?.name ?? null;
-    // Check if brand has active loyalty program
     const { data: blp } = await (supabase
       .from("brand_loyalty_programs")
       .select("id")
@@ -296,7 +319,7 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
     hasBrandLoyalty = (blp?.length ?? 0) > 0;
   }
 
-  // ── Menus ──
+  // ── Menus (public) ──
   const { data: breweryMenus } = await (supabase
     .from("brewery_menus")
     .select("*")
@@ -304,10 +327,10 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
     .eq("is_active", true)
     .order("display_order") as any);
 
-  // ── Event RSVPs ──
+  // ── Event RSVPs (auth only) ──
   const eventIds = upcomingEvents.map((e) => e.id);
   const myEventRsvps: Record<string, { status: string }> = {};
-  if (eventIds.length > 0) {
+  if (user && eventIds.length > 0) {
     const { data: rsvpsRaw } = await (supabase
       .from("event_rsvps")
       .select("event_id, status")
@@ -318,17 +341,23 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
     }
   }
 
-  // ── Claim CTA check ──
+  // ── Claim CTA check (public) ──
   const { count: adminCount } = await supabase
     .from("brewery_accounts")
     .select("id", { count: "exact", head: true })
     .eq("brewery_id", id);
   const hasAdmin = (adminCount ?? 0) > 0;
 
+  // ── Storefront tier check ──
+  // Claimed breweries on Tap+ tier get the full public Storefront
+  // Unclaimed or free-tier breweries get a basic page with gated sections
+  const paidTiers = ["tap", "cask", "barrel"];
+  const hasStorefront = hasAdmin && paidTiers.includes(brewery.subscription_tier ?? "");
+
   const isClosed = brewery.brewery_type === "closed";
   const gradient = generateGradientFromString(brewery.name);
 
-  // ── JSON-LD ──
+  // ── JSON-LD (public) ──
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Brewery",
@@ -381,7 +410,13 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
       />
       <div className="max-w-4xl mx-auto">
         {/* Hero */}
-        <BreweryHeroSection brewery={brewery} userVisit={userVisit} gradient={gradient} />
+        <BreweryHeroSection
+          brewery={brewery}
+          userVisit={userVisit}
+          gradient={gradient}
+          isAuthenticated={isAuthenticated}
+          returnPath={returnPath}
+        />
 
         <div className="px-4 sm:px-6 py-6 space-y-8">
           {/* Closed Brewery Banner */}
@@ -415,8 +450,8 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
             <p className="text-[var(--text-secondary)] leading-relaxed">{brewery.description}</p>
           )}
 
-          {/* Friends Here Now */}
-          {friendsHere.length > 0 && (
+          {/* Friends Here Now — auth only */}
+          {isAuthenticated && friendsHere.length > 0 && (
             <div className="card-bg-live border border-[var(--accent-gold)]/20 rounded-2xl p-4">
               <div className="flex items-center gap-2 mb-3">
                 <span
@@ -495,7 +530,12 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
           )}
 
           {/* Brewery Rating */}
-          <BreweryRatingHeader breweryId={id} currentUserId={user.id} />
+          <BreweryRatingHeader
+            breweryId={id}
+            currentUserId={user?.id ?? null}
+            isAuthenticated={isAuthenticated}
+            returnPath={returnPath}
+          />
 
           {/* Stats Bar */}
           <div
@@ -565,76 +605,187 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
             </div>
           </div>
 
-          {/* Tap List + Food Menu */}
-          <BreweryTapListSection
-            beers={(beers ?? []) as any[]}
-            breweryName={brewery.name}
-            menuImageUrl={brewery.menu_image_url ?? null}
-          />
+          {/* Tap List + Food Menu — gated for unclaimed/free-tier on public view */}
+          {isAuthenticated || hasStorefront ? (
+            <BreweryTapListSection
+              beers={(beers ?? []) as any[]}
+              breweryName={brewery.name}
+              menuImageUrl={brewery.menu_image_url ?? null}
+            />
+          ) : (
+            <StorefrontGate isUnlocked={false} sectionName="Tap List" breweryId={id}>
+              <BreweryTapListSection
+                beers={(beers ?? []) as any[]}
+                breweryName={brewery.name}
+                menuImageUrl={brewery.menu_image_url ?? null}
+              />
+            </StorefrontGate>
+          )}
 
-          {/* Menus */}
-          <BreweryMenusSection menus={breweryMenus ?? []} />
+          {/* Menus — gated for unclaimed/free-tier on public view */}
+          {isAuthenticated || hasStorefront ? (
+            <BreweryMenusSection menus={breweryMenus ?? []} />
+          ) : (breweryMenus ?? []).length > 0 ? (
+            <StorefrontGate isUnlocked={false} sectionName="Menus & Food" breweryId={id}>
+              <BreweryMenusSection menus={breweryMenus ?? []} />
+            </StorefrontGate>
+          ) : null}
 
-          {/* Challenges */}
+          {/* Challenges — gated for unclaimed/free-tier on public view */}
           {activeChallenges.length > 0 && (
-            <BreweryChallenges
-              challenges={activeChallenges}
-              myParticipations={myParticipations}
-            />
+            isAuthenticated || hasStorefront ? (
+              <BreweryChallenges
+                challenges={activeChallenges}
+                myParticipations={myParticipations}
+                isAuthenticated={isAuthenticated}
+                returnPath={returnPath}
+              />
+            ) : (
+              <StorefrontGate isUnlocked={false} sectionName="Challenges" breweryId={id}>
+                <BreweryChallenges
+                  challenges={activeChallenges}
+                  myParticipations={[]}
+                  isAuthenticated={false}
+                  returnPath={returnPath}
+                />
+              </StorefrontGate>
+            )
           )}
 
-          {/* Mug Clubs */}
+          {/* Mug Clubs — gated for unclaimed/free-tier on public view */}
           {mugClubs.length > 0 && (
-            <MugClubSection
-              clubs={mugClubs}
-              myMemberships={myMugMemberships}
-              breweryId={brewery.id}
-            />
+            isAuthenticated || hasStorefront ? (
+              <MugClubSection
+                clubs={mugClubs}
+                myMemberships={myMugMemberships}
+                breweryId={brewery.id}
+                isAuthenticated={isAuthenticated}
+                returnPath={returnPath}
+              />
+            ) : (
+              <StorefrontGate isUnlocked={false} sectionName="Mug Clubs" breweryId={id}>
+                <MugClubSection
+                  clubs={mugClubs}
+                  myMemberships={[]}
+                  breweryId={brewery.id}
+                  isAuthenticated={false}
+                  returnPath={returnPath}
+                />
+              </StorefrontGate>
+            )
           )}
 
-          {/* Brand-Wide Loyalty (takes precedence when available) */}
+          {/* Brand-Wide Loyalty — gated for unclaimed/free-tier on public view */}
           {hasBrandLoyalty && brewery.brand_id && brandName && (
             <div>
               <h2 className="font-display text-2xl font-bold text-[var(--text-primary)] mb-3">
                 {brandName} Passport
               </h2>
-              <BrandLoyaltyStampCard
-                brandId={brewery.brand_id}
-                brandName={brandName}
-                breweryId={brewery.id}
-                breweryName={brewery.name}
-              />
+              {isAuthenticated ? (
+                <BrandLoyaltyStampCard
+                  brandId={brewery.brand_id}
+                  brandName={brandName}
+                  breweryId={brewery.id}
+                  breweryName={brewery.name}
+                />
+              ) : hasStorefront ? (
+                <AuthGate isAuthenticated={false} featureName="track loyalty stamps" returnPath={returnPath}>
+                  <BrandLoyaltyStampCard
+                    brandId={brewery.brand_id}
+                    brandName={brandName}
+                    breweryId={brewery.id}
+                    breweryName={brewery.name}
+                  />
+                </AuthGate>
+              ) : (
+                <StorefrontGate isUnlocked={false} sectionName="Loyalty Program" breweryId={id}>
+                  <BrandLoyaltyStampCard
+                    brandId={brewery.brand_id}
+                    brandName={brandName}
+                    breweryId={brewery.id}
+                    breweryName={brewery.name}
+                  />
+                </StorefrontGate>
+              )}
             </div>
           )}
 
-          {/* Per-Location Loyalty Programs (show when no brand loyalty) */}
+          {/* Per-Location Loyalty Programs — gated for unclaimed/free-tier on public view */}
           {!hasBrandLoyalty && (loyaltyPrograms ?? []).length > 0 && (
             <div>
               <h2 className="font-display text-2xl font-bold text-[var(--text-primary)] mb-3">
                 Loyalty Program
               </h2>
-              <div className="space-y-4">
-                {(loyaltyPrograms as any[]).map((program: any) => (
-                  <LoyaltyStampCard
-                    key={program.id}
-                    program={program}
-                    card={myLoyaltyCards[program.id] ?? null}
-                    breweryName={brewery.name}
-                    breweryId={brewery.id}
-                  />
-                ))}
-              </div>
+              {isAuthenticated ? (
+                <div className="space-y-4">
+                  {(loyaltyPrograms as any[]).map((program: any) => (
+                    <LoyaltyStampCard
+                      key={program.id}
+                      program={program}
+                      card={myLoyaltyCards[program.id] ?? null}
+                      breweryName={brewery.name}
+                      breweryId={brewery.id}
+                    />
+                  ))}
+                </div>
+              ) : hasStorefront ? (
+                <AuthGate isAuthenticated={false} featureName="earn loyalty stamps" returnPath={returnPath}>
+                  <div className="space-y-4">
+                    {(loyaltyPrograms as any[]).map((program: any) => (
+                      <LoyaltyStampCard
+                        key={program.id}
+                        program={program}
+                        card={null}
+                        breweryName={brewery.name}
+                        breweryId={brewery.id}
+                      />
+                    ))}
+                  </div>
+                </AuthGate>
+              ) : (
+                <StorefrontGate isUnlocked={false} sectionName="Loyalty Program" breweryId={id}>
+                  <div className="space-y-4">
+                    {(loyaltyPrograms as any[]).map((program: any) => (
+                      <LoyaltyStampCard
+                        key={program.id}
+                        program={program}
+                        card={null}
+                        breweryName={brewery.name}
+                        breweryId={brewery.id}
+                      />
+                    ))}
+                  </div>
+                </StorefrontGate>
+              )}
             </div>
           )}
 
-          {/* Events */}
-          <BreweryEventsSection events={upcomingEvents} myEventRsvps={myEventRsvps} />
+          {/* Events — gated for unclaimed/free-tier on public view */}
+          {isAuthenticated || hasStorefront ? (
+            <BreweryEventsSection
+              events={upcomingEvents}
+              myEventRsvps={myEventRsvps}
+              isAuthenticated={isAuthenticated}
+              returnPath={returnPath}
+            />
+          ) : upcomingEvents.length > 0 ? (
+            <StorefrontGate isUnlocked={false} sectionName="Events" breweryId={id}>
+              <BreweryEventsSection
+                events={upcomingEvents}
+                myEventRsvps={{}}
+                isAuthenticated={false}
+                returnPath={returnPath}
+              />
+            </StorefrontGate>
+          ) : null}
 
           {/* Reviews + Top Visitors */}
           <BreweryReviewsSection
             breweryId={id}
-            currentUserId={user.id}
+            currentUserId={user?.id ?? null}
             topVisitors={topVisitors}
+            isAuthenticated={isAuthenticated}
+            returnPath={returnPath}
           />
 
           {/* Claim This Brewery CTA */}

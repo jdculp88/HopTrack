@@ -1,6 +1,7 @@
 "use client";
 
-import { Calendar, Clock } from "lucide-react";
+import Link from "next/link";
+import { Calendar, Clock, Beer } from "lucide-react";
 import { EventRSVPButton } from "@/components/events/EventRSVPButton";
 
 export interface BreweryEvent {
@@ -25,9 +26,16 @@ const EVENT_EMOJIS: Record<string, string> = {
 interface BreweryEventsSectionProps {
   events: BreweryEvent[];
   myEventRsvps: Record<string, { status: string }>;
+  isAuthenticated?: boolean;
+  returnPath?: string;
 }
 
-export function BreweryEventsSection({ events, myEventRsvps }: BreweryEventsSectionProps) {
+export function BreweryEventsSection({
+  events,
+  myEventRsvps,
+  isAuthenticated = true,
+  returnPath,
+}: BreweryEventsSectionProps) {
   return (
     <div>
       <h2 className="font-display text-2xl font-bold text-[var(--text-primary)] mb-3">
@@ -74,14 +82,25 @@ export function BreweryEventsSection({ events, myEventRsvps }: BreweryEventsSect
                     )}
                   </div>
                   <div className="mt-2">
-                    <EventRSVPButton
-                      eventId={event.id}
-                      initialStatus={
-                        (myEventRsvps[event.id]?.status as "going" | "interested") ?? null
-                      }
-                      goingCount={0}
-                      interestedCount={0}
-                    />
+                    {isAuthenticated ? (
+                      <EventRSVPButton
+                        eventId={event.id}
+                        initialStatus={
+                          (myEventRsvps[event.id]?.status as "going" | "interested") ?? null
+                        }
+                        goingCount={0}
+                        interestedCount={0}
+                      />
+                    ) : (
+                      <Link
+                        href={`/signup?next=${encodeURIComponent(returnPath ?? "/")}`}
+                        className="inline-flex items-center gap-1 text-xs font-medium transition-colors"
+                        style={{ color: "var(--accent-gold)" }}
+                      >
+                        <Beer size={11} />
+                        Sign up to RSVP
+                      </Link>
+                    )}
                   </div>
                 </div>
               </div>

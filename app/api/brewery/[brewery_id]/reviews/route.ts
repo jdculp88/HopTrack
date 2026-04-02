@@ -10,7 +10,6 @@ export async function GET(
   const { brewery_id } = await params;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { data: reviews, error } = await supabase
     .from("brewery_reviews")
@@ -21,7 +20,9 @@ export async function GET(
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  const userReview = (reviews ?? []).find((r: any) => r.user_id === user.id) ?? null;
+  const userReview = user
+    ? (reviews ?? []).find((r: any) => r.user_id === user.id) ?? null
+    : null;
 
   // Compute average
   const allRatings = (reviews ?? []).map((r: any) => Number(r.rating));

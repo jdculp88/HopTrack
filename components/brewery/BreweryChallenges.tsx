@@ -27,9 +27,11 @@ interface Participation {
 interface Props {
   challenges: Challenge[];
   myParticipations: Participation[];
+  isAuthenticated?: boolean;
+  returnPath?: string;
 }
 
-export function BreweryChallenges({ challenges, myParticipations }: Props) {
+export function BreweryChallenges({ challenges, myParticipations, isAuthenticated = true, returnPath }: Props) {
   const [participations, setParticipations] = useState<Participation[]>(myParticipations);
   const [selected, setSelected] = useState<Challenge | null>(null);
   const [joining, setJoining] = useState(false);
@@ -247,7 +249,15 @@ export function BreweryChallenges({ challenges, myParticipations }: Props) {
               )}
 
               {/* CTA */}
-              {!participationMap.has(selected.id) ? (
+              {!isAuthenticated ? (
+                <a
+                  href={`/signup?next=${encodeURIComponent(returnPath ?? "/")}`}
+                  className="w-full py-3.5 rounded-2xl font-semibold text-sm flex items-center justify-center gap-2 transition-opacity hover:opacity-90"
+                  style={{ background: "var(--accent-gold)", color: "var(--bg)" }}
+                >
+                  <Trophy size={16} /> Sign Up to Accept Challenge
+                </a>
+              ) : !participationMap.has(selected.id) ? (
                 <button
                   onClick={() => handleJoin(selected)}
                   disabled={joining}

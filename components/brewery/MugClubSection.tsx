@@ -14,9 +14,11 @@ interface Props {
   clubs: MugClubWithCount[];
   myMemberships: MugClubMember[];
   breweryId?: string;
+  isAuthenticated?: boolean;
+  returnPath?: string;
 }
 
-export function MugClubSection({ clubs, myMemberships, breweryId }: Props) {
+export function MugClubSection({ clubs, myMemberships, breweryId, isAuthenticated = true, returnPath }: Props) {
   const { success } = useToast();
 
   if (clubs.length === 0) return null;
@@ -114,7 +116,7 @@ export function MugClubSection({ clubs, myMemberships, breweryId }: Props) {
                       </span>
                     )}
                   </div>
-                ) : (
+                ) : isAuthenticated ? (
                   <button
                     onClick={() => {
                       success(
@@ -129,6 +131,17 @@ export function MugClubSection({ clubs, myMemberships, breweryId }: Props) {
                   >
                     Join Club
                   </button>
+                ) : (
+                  <a
+                    href={`/signup?next=${encodeURIComponent(returnPath ?? "/")}`}
+                    className="px-4 py-2 rounded-xl text-sm font-semibold transition-colors"
+                    style={{
+                      background: "var(--accent-gold)",
+                      color: "var(--bg)",
+                    }}
+                  >
+                    Sign Up to Join
+                  </a>
                 )}
               </div>
             </div>

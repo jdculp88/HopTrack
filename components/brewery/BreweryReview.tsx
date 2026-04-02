@@ -8,8 +8,10 @@ import { formatRelativeTime } from "@/lib/utils";
 
 interface BreweryReviewProps {
   breweryId: string;
-  currentUserId: string;
+  currentUserId: string | null;
   isBreweryAdmin?: boolean;
+  isAuthenticated?: boolean;
+  returnPath?: string;
 }
 
 interface Review {
@@ -28,7 +30,7 @@ interface Review {
   };
 }
 
-export function BreweryReview({ breweryId, currentUserId: _currentUserId, isBreweryAdmin }: BreweryReviewProps) {
+export function BreweryReview({ breweryId, currentUserId: _currentUserId, isBreweryAdmin, isAuthenticated = true, returnPath }: BreweryReviewProps) {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [userReview, setUserReview] = useState<Review | null>(null);
   const [avgRating, setAvgRating] = useState<number | null>(null);
@@ -136,14 +138,25 @@ export function BreweryReview({ breweryId, currentUserId: _currentUserId, isBrew
           )}
         </div>
         {!showForm && (
-          <button
-            onClick={() => setShowForm(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-medium transition-all hover:opacity-80"
-            style={{ background: "var(--accent-gold)", color: "var(--bg)" }}
-          >
-            <Star size={13} />
-            {userReview ? "Edit Review" : "Rate"}
-          </button>
+          isAuthenticated ? (
+            <button
+              onClick={() => setShowForm(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-medium transition-all hover:opacity-80"
+              style={{ background: "var(--accent-gold)", color: "var(--bg)" }}
+            >
+              <Star size={13} />
+              {userReview ? "Edit Review" : "Rate"}
+            </button>
+          ) : (
+            <a
+              href={`/signup?next=${encodeURIComponent(returnPath ?? "/")}`}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-medium transition-all hover:opacity-80"
+              style={{ background: "var(--accent-gold)", color: "var(--bg)" }}
+            >
+              <Star size={13} />
+              Sign Up to Review
+            </a>
+          )
         )}
       </div>
 
