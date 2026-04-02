@@ -105,7 +105,7 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
   // ── Beers ──
   const { data: beers } = await supabase
     .from("beers")
-    .select("*, brewery:breweries(*)")
+    .select("*, brewery:breweries(id, name)")
     .eq("brewery_id", id)
     .eq("is_active", true)
     .order("total_ratings", { ascending: false });

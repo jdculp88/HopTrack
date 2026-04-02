@@ -65,7 +65,7 @@ export async function GET(request: Request) {
     if (isZip) {
       const { data } = await supabase
         .from("breweries")
-        .select("*")
+        .select("*, brand:brewery_brands(id, name, slug)")
         .ilike("postal_code", `${q.trim().slice(0, 5)}%`)
         .limit(limit);
       dbResults = data ?? [];
@@ -75,7 +75,7 @@ export async function GET(request: Request) {
     if (!isZip || dbResults.length < 3) {
       const { data: nameResults } = await supabase
         .from("breweries")
-        .select("*")
+        .select("*, brand:brewery_brands(id, name, slug)")
         .or(`name.ilike.%${q}%,city.ilike.%${q}%,state.ilike.%${q}%`)
         .limit(limit);
 
@@ -102,7 +102,7 @@ export async function GET(request: Request) {
     // Re-fetch from DB (includes both existing and newly upserted)
     const { data: merged } = await supabase
       .from("breweries")
-      .select("*")
+      .select("*, brand:brewery_brands(id, name, slug)")
       .or(`name.ilike.%${q}%,city.ilike.%${q}%,state.ilike.%${q}%,postal_code.ilike.${q.trim().slice(0, 5)}%`)
       .limit(limit);
 
@@ -112,7 +112,7 @@ export async function GET(request: Request) {
   // Default: return recently added / trending breweries
   const { data } = await supabase
     .from("breweries")
-    .select("*")
+    .select("*, brand:brewery_brands(id, name, slug)")
     .order("created_at", { ascending: false })
     .limit(limit);
 

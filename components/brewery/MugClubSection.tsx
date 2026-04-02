@@ -38,7 +38,9 @@ export function MugClubSection({ clubs, myMemberships, breweryId }: Props) {
       <div className="space-y-4">
         {clubs.map((club) => {
           const membership = membershipMap.get(club.id);
-          const perks = Array.isArray(club.perks) ? (club.perks as string[]) : [];
+          const perks = Array.isArray(club.perks)
+            ? (club.perks as Array<string | { title: string; description?: string }>)
+            : [];
           const count =
             club.member_count && club.member_count.length > 0
               ? club.member_count[0].count
@@ -146,7 +148,7 @@ function PerkRow({
   breweryId,
   mugClubId,
 }: {
-  perk: string;
+  perk: string | { title: string; description?: string };
   perkIndex: number;
   isMember: boolean;
   breweryId?: string;
@@ -205,7 +207,12 @@ function PerkRow({
           className="flex-shrink-0 mt-0.5"
           style={{ color: "var(--accent-gold)" }}
         />
-        <span className="flex-1">{perk}</span>
+        <span className="flex-1">
+          {typeof perk === "string" ? perk : perk.title}
+          {typeof perk === "object" && perk.description && (
+            <span className="block text-xs text-[var(--text-muted)]">{perk.description}</span>
+          )}
+        </span>
         {isMember && !code && (
           <button
             onClick={generateCode}

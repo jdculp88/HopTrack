@@ -254,7 +254,7 @@ export function SeasonalBeersScroll({ beers }: { beers: SeasonalBeer[] }) {
               {beer.name}
             </p>
             <p className="text-[11px] mt-1 truncate" style={{ color: 'var(--text-muted)' }}>
-              {beer.brewery}
+              {typeof beer.brewery === 'string' ? beer.brewery : (beer.brewery as any)?.name ?? ''}
             </p>
             {(() => {
               const sv = getStyleVars(beer.style)
