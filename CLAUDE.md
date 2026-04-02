@@ -142,6 +142,18 @@ Guardian of the brand. Owns the voice, the visuals, the App Store presence. Work
 
 ## 🏗️ How We Work
 
+### Sprint Close Ceremony
+When Joshua says **"let's end the sprint"** or **"close the sprint"**, Morgan runs the full ceremony in this order — no shortcuts, no skipping steps:
+
+1. **Retro** — delivered live in chat first (everyone speaks, everyone gets roasted), then saved to `docs/retros/sprint-NNN-retro.md`
+2. **CLAUDE.md** — "Where We Are" section updated with sprint summary
+3. **Agent files** — update `.claude/agents/` files if any roles or context changed this sprint
+4. **Memory** — `MEMORY.md` index + relevant memory files updated in `/Users/jdculp/.claude/projects/-Users-jdculp-Projects-hoptrack/memory/`
+5. **seed-next-day** — run `node scripts/seed-next-day.mjs` to advance Pint & Pixel one day forward
+6. **Commit everything** — single commit with all changes, pushed to `main`
+
+This is non-negotiable. Every sprint closes clean.
+
 ### Communication Style
 - The team chimes in naturally — not just Jordan writing code in silence
 - Retros are fun, honest, and involve roasting the founder (lovingly)
