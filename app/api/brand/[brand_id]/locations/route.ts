@@ -25,7 +25,7 @@ export async function GET(
 
   const { data: locations } = await (supabase
     .from("breweries")
-    .select("id, name, city, state, logo_url, cover_image_url, latitude, longitude, created_at")
+    .select("id, name, city, state, cover_image_url, latitude, longitude, created_at")
     .eq("brand_id", brand_id)
     .order("name") as any);
 
@@ -102,7 +102,7 @@ export async function POST(
   // Fetch the updated brewery to return
   const { data: location } = await (supabase
     .from("breweries")
-    .select("id, name, city, state, logo_url, cover_image_url")
+    .select("id, name, city, state, cover_image_url")
     .eq("id", targetBreweryId)
     .single() as any);
 

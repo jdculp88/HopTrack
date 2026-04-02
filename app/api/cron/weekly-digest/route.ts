@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { sendEmail } from "@/lib/email";
 import { weeklyDigestEmail } from "@/lib/email-templates";
 import { calculateDigestStats } from "@/app/api/brewery/[brewery_id]/digest/route";
+import { onBrandWeeklyDigest } from "@/lib/email-triggers";
 import { rateLimitResponse } from "@/lib/rate-limit";
 
 // POST /api/cron/weekly-digest — send weekly digest emails to all eligible breweries
@@ -74,6 +75,46 @@ export async function POST(req: Request) {
   let failed = 0;
   const errors: string[] = [];
 
+  // ── Brand digests — process first to build dedup set ──
+  // Brand owners get a brand digest instead of per-location digests
+  let brandSent = 0;
+  let brandFailed = 0;
+  const brandOwnerUserIds = new Set<string>();
+
+  // Find brands with active locations this week
+  const { data: brandLocations } = await supabase
+    .from("breweries")
+    .select("brand_id")
+    .in("id", activeBreweryIds)
+    .not("brand_id", "is", null) as any;
+
+  const activeBrandIds = [
+    ...new Set((brandLocations ?? []).map((b: any) => b.brand_id).filter(Boolean)),
+  ] as string[];
+
+  for (const brandId of activeBrandIds) {
+    try {
+      // Find brand owner to build dedup set
+      const { data: brandAccounts } = await supabase
+        .from("brand_accounts")
+        .select("user_id")
+        .eq("brand_id", brandId)
+        .eq("role", "owner") as any;
+
+      if (brandAccounts?.length) {
+        brandAccounts.forEach((ba: any) => brandOwnerUserIds.add(ba.user_id));
+      }
+
+      await onBrandWeeklyDigest(brandId);
+      brandSent++;
+    } catch (err: any) {
+      brandFailed++;
+      errors.push(`brand ${brandId}: ${err.message}`);
+      console.error(`[weekly-digest] Failed for brand ${brandId}:`, err.message);
+    }
+  }
+
+  // ── Per-brewery digests — skip brand owners (they got the brand digest) ──
   for (const brewery of breweries as any[]) {
     try {
       // Find brewery owner
@@ -85,6 +126,11 @@ export async function POST(req: Request) {
 
       if (!accounts?.length) {
         // No owner — skip (manager-only breweries don't get digest)
+        continue;
+      }
+
+      // Dedup: skip if this owner already received a brand digest
+      if (brandOwnerUserIds.has(accounts[0].user_id)) {
         continue;
       }
 
@@ -136,14 +182,16 @@ export async function POST(req: Request) {
   }
 
   console.info(
-    `[weekly-digest] Complete: ${sent} sent, ${failed} failed out of ${breweries.length} eligible`,
+    `[weekly-digest] Complete: ${sent} brewery + ${brandSent} brand sent, ${failed + brandFailed} failed out of ${breweries.length} breweries + ${activeBrandIds.length} brands`,
   );
 
   return NextResponse.json({
     success: true,
-    sent,
-    failed,
-    total: breweries.length,
+    sent: sent + brandSent,
+    failed: failed + brandFailed,
+    total: breweries.length + activeBrandIds.length,
+    brewerySent: sent,
+    brandSent,
     ...(errors.length > 0 ? { errors } : {}),
   });
 }

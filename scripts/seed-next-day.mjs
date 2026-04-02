@@ -231,7 +231,7 @@ async function main() {
   const { data: brewery, error: breweryErr } = await supabase
     .from('breweries')
     .select('id, name')
-    .ilike('name', '%Pint & Pixel%')
+    .eq('id', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890')
     .single();
 
   if (breweryErr || !brewery) {

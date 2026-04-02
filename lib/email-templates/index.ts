@@ -300,3 +300,103 @@ export function weeklyDigestEmail(params: {
     text: `This week at ${breweryName}: ${stats.visits} visits (${stats.visitsTrend >= 0 ? "+" : ""}${stats.visitsTrend}%), ${stats.uniqueVisitors} unique visitors, ${stats.beersLogged} beers logged. View full analytics at https://app.hoptrack.beer/brewery-admin/${breweryId}/analytics`,
   };
 }
+
+// ── Brand Weekly Digest (Multi-Location) ──
+
+export function brandDigestEmail(params: {
+  brandName: string;
+  ownerName: string;
+  brandId: string;
+  stats: {
+    totalVisits: number;
+    visitsTrend: number;
+    totalUniqueVisitors: number;
+    totalBeersLogged: number;
+    crossLocationVisitors: number;
+    topPerformer: { name: string; visits: number } | null;
+    locations: Array<{
+      name: string;
+      visits: number;
+      uniqueVisitors: number;
+      topBeer: string | null;
+    }>;
+  };
+}) {
+  const { brandName, ownerName, brandId, stats } = params;
+  const firstName = ownerName.split(" ")[0] || "there";
+  const trendIcon = stats.visitsTrend >= 0 ? "&#9650;" : "&#9660;";
+  const trendColor = stats.visitsTrend >= 0 ? "#4CAF50" : "#EF5350";
+
+  // Location rows
+  const locationRows = stats.locations
+    .map(
+      (loc) => `
+    <tr>
+      <td style="padding:8px 12px;font-size:13px;color:${BRAND.text};border-bottom:1px solid #2A2825;">${loc.name}</td>
+      <td style="padding:8px 12px;font-size:13px;color:${BRAND.text};font-family:'JetBrains Mono',monospace;text-align:center;border-bottom:1px solid #2A2825;">${loc.visits}</td>
+      <td style="padding:8px 12px;font-size:13px;color:${BRAND.text};font-family:'JetBrains Mono',monospace;text-align:center;border-bottom:1px solid #2A2825;">${loc.uniqueVisitors}</td>
+      <td style="padding:8px 12px;font-size:13px;color:${BRAND.muted};border-bottom:1px solid #2A2825;">${loc.topBeer ?? "—"}</td>
+    </tr>`
+    )
+    .join("");
+
+  const html = layout(
+    `Weekly Brand Report — ${brandName}`,
+    `
+    <h1 style="margin:0 0 8px;font-family:'Playfair Display',Georgia,serif;font-size:22px;color:${BRAND.text};">
+      This Week Across ${brandName}
+    </h1>
+    <p style="margin:0 0 24px;font-size:13px;color:${BRAND.muted};">
+      Hey ${firstName}, here's your brand-wide weekly snapshot.
+    </p>
+
+    <!-- Stats grid -->
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+      <tr>
+        <td width="50%" style="padding:12px;background:#252320;border-radius:12px 0 0 0;">
+          <p style="margin:0;font-size:24px;font-weight:700;color:${BRAND.gold};font-family:'JetBrains Mono',monospace;">${stats.totalVisits}</p>
+          <p style="margin:4px 0 0;font-size:11px;color:${BRAND.muted};">Total Visits <span style="color:${trendColor};font-size:10px;">${trendIcon} ${Math.abs(stats.visitsTrend)}%</span></p>
+        </td>
+        <td width="50%" style="padding:12px;background:#252320;border-radius:0 12px 0 0;">
+          <p style="margin:0;font-size:24px;font-weight:700;color:${BRAND.text};font-family:'JetBrains Mono',monospace;">${stats.totalUniqueVisitors}</p>
+          <p style="margin:4px 0 0;font-size:11px;color:${BRAND.muted};">Unique Visitors</p>
+        </td>
+      </tr>
+      <tr>
+        <td width="50%" style="padding:12px;background:#252320;border-radius:0 0 0 12px;">
+          <p style="margin:0;font-size:24px;font-weight:700;color:${BRAND.text};font-family:'JetBrains Mono',monospace;">${stats.totalBeersLogged}</p>
+          <p style="margin:4px 0 0;font-size:11px;color:${BRAND.muted};">Beers Logged</p>
+        </td>
+        <td width="50%" style="padding:12px;background:#252320;border-radius:0 0 12px 0;">
+          <p style="margin:0;font-size:24px;font-weight:700;color:${BRAND.gold};font-family:'JetBrains Mono',monospace;">${stats.crossLocationVisitors}</p>
+          <p style="margin:4px 0 0;font-size:11px;color:${BRAND.muted};">Cross-Location Visitors</p>
+        </td>
+      </tr>
+    </table>
+
+    ${stats.topPerformer ? `<p style="margin:0 0 16px;font-size:14px;color:${BRAND.text};">&#11088; Star location this week: <strong style="color:${BRAND.gold};">${stats.topPerformer.name}</strong> with ${stats.topPerformer.visits} visits</p>` : ""}
+
+    <!-- Location breakdown table -->
+    ${stats.locations.length > 0 ? `
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;background:#252320;border-radius:12px;overflow:hidden;">
+      <tr>
+        <th style="padding:10px 12px;font-size:11px;color:${BRAND.muted};text-align:left;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid #2A2825;">Location</th>
+        <th style="padding:10px 12px;font-size:11px;color:${BRAND.muted};text-align:center;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid #2A2825;">Visits</th>
+        <th style="padding:10px 12px;font-size:11px;color:${BRAND.muted};text-align:center;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid #2A2825;">Visitors</th>
+        <th style="padding:10px 12px;font-size:11px;color:${BRAND.muted};text-align:left;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid #2A2825;">Top Beer</th>
+      </tr>
+      ${locationRows}
+    </table>
+    ` : ""}
+
+    ${button("View Brand Reports", `https://app.hoptrack.beer/brewery-admin/brand/${brandId}/reports`)}
+  `,
+    `${brandName} brand report — ${stats.totalVisits} visits${stats.visitsTrend >= 0 ? ` (+${stats.visitsTrend}%)` : ` (${stats.visitsTrend}%)`} across ${stats.locations.length} locations.`
+  );
+
+  return {
+    subject: `${brandName} — Weekly Brand Report`,
+    html,
+    text: `This week across ${brandName}: ${stats.totalVisits} visits (${stats.visitsTrend >= 0 ? "+" : ""}${stats.visitsTrend}%), ${stats.totalUniqueVisitors} unique visitors, ${stats.totalBeersLogged} beers logged, ${stats.crossLocationVisitors} cross-location visitors. View reports at https://app.hoptrack.beer/brewery-admin/brand/${brandId}/reports`,
+  };
+}

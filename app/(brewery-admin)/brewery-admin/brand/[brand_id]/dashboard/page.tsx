@@ -47,7 +47,7 @@ export default async function BrandDashboardPage({ params }: { params: Promise<{
   // Fetch locations
   const { data: locations } = await (supabase
     .from("breweries")
-    .select("id, name, city, state, logo_url, latitude, longitude")
+    .select("id, name, city, state, cover_image_url, latitude, longitude")
     .eq("brand_id", brand_id)
     .order("name") as any);
 

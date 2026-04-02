@@ -17,7 +17,7 @@ interface Location {
   name: string;
   city: string;
   state: string;
-  logo_url: string | null;
+  cover_image_url: string | null;
 }
 
 interface BeerLocation {

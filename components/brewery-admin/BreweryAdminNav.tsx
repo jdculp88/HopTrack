@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, List, BarChart2, Gift, Settings, ChevronDown, ExternalLink, Rewind, LogOut, Calendar, QrCode, CreditCard, Users, FileText, Mail, Trophy, BookOpen, Activity, Code2, Tv, RefreshCw, Megaphone, Crown, Building2 } from "lucide-react";
+import { LayoutDashboard, List, BarChart2, BarChart3, Gift, Settings, ChevronDown, ExternalLink, Rewind, LogOut, Calendar, QrCode, CreditCard, Users, FileText, Mail, Trophy, BookOpen, Activity, Code2, Tv, RefreshCw, Megaphone, Crown, Building2 } from "lucide-react";
 import { HopMark } from "@/components/ui/HopMark";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
@@ -44,7 +44,16 @@ export function BreweryAdminNav({ accounts, brandAccounts = [] }: { accounts: an
   }
 
   // Find active brewery from URL
-  const activeBreweryId = pathname.split("/brewery-admin/")[1]?.split("/")[0];
+  const pathSegment = pathname.split("/brewery-admin/")[1]?.split("/")[0];
+  const isBrandPage = pathSegment === "brand";
+  const activeBrandId = isBrandPage ? pathname.split("/brand/")[1]?.split("/")[0] : null;
+
+  // When on a brand page, find the first brewery that belongs to that brand
+  let activeBreweryId = pathSegment;
+  if (isBrandPage && activeBrandId) {
+    const brandBrewery = accounts.find((a: any) => a.brewery?.brand?.id === activeBrandId);
+    activeBreweryId = brandBrewery?.brewery_id ?? accounts[0]?.brewery_id;
+  }
   const activeAccount = accounts.find((a: any) => a.brewery_id === activeBreweryId) ?? accounts[0];
   const brewery = activeAccount?.brewery;
 
@@ -68,10 +77,21 @@ export function BreweryAdminNav({ accounts, brandAccounts = [] }: { accounts: an
                 className="w-full flex items-center gap-3 p-2 rounded-xl transition-colors text-left"
                 style={{ background: "var(--surface-2)" }}
               >
-                <BreweryAvatar name={brewery?.name ?? ""} />
+                {isBrandPage && brewery?.brand ? (
+                  <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
+                    style={{ background: "color-mix(in srgb, var(--accent-gold) 15%, transparent)" }}>
+                    <Building2 size={16} style={{ color: "var(--accent-gold)" }} />
+                  </div>
+                ) : (
+                  <BreweryAvatar name={brewery?.name ?? ""} />
+                )}
                 <div className="flex-1 min-w-0">
-                  <p className="font-display font-semibold text-sm truncate" style={{ color: "var(--text-primary)" }}>{brewery?.name}</p>
-                  <p className="text-xs truncate" style={{ color: "var(--text-muted)" }}>{brewery?.city}, {brewery?.state}</p>
+                  <p className="font-display font-semibold text-sm truncate" style={{ color: isBrandPage ? "var(--accent-gold)" : "var(--text-primary)" }}>
+                    {isBrandPage && brewery?.brand ? brewery.brand.name : brewery?.name}
+                  </p>
+                  <p className="text-xs truncate" style={{ color: "var(--text-muted)" }}>
+                    {isBrandPage ? "Brand Management" : `${brewery?.city}, ${brewery?.state}`}
+                  </p>
                 </div>
                 <ChevronDown size={14} style={{ color: "var(--text-muted)" }} className={cn("transition-transform", open && "rotate-180")} />
               </button>
@@ -170,6 +190,22 @@ export function BreweryAdminNav({ accounts, brandAccounts = [] }: { accounts: an
               >
                 <Building2 size={16} />
                 Brand Dashboard
+              </Link>
+              <Link
+                href={`/brewery-admin/brand/${brewery.brand.id}/reports`}
+                className={cn(
+                  "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all",
+                  pathname.includes(`/brand/${brewery.brand.id}/reports`)
+                    ? "text-[var(--bg)] font-semibold"
+                    : "hover:opacity-80"
+                )}
+                style={pathname.includes(`/brand/${brewery.brand.id}/reports`)
+                  ? { background: "var(--accent-gold)", color: "var(--bg)" }
+                  : { color: "var(--accent-gold)", background: "color-mix(in srgb, var(--accent-gold) 10%, transparent)" }
+                }
+              >
+                <BarChart3 size={16} />
+                Brand Reports
               </Link>
               <Link
                 href={`/brewery-admin/brand/${brewery.brand.id}/catalog`}

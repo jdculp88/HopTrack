@@ -244,6 +244,69 @@ export async function onWeeklyDigest(breweryId: string) {
   }
 }
 
+// ── Brand weekly digest (multi-location) ──
+
+export async function onBrandWeeklyDigest(brandId: string) {
+  try {
+    const supabase = await createClient();
+
+    // Fetch brand
+    const { data: brand } = await supabase
+      .from("brewery_brands")
+      .select("name")
+      .eq("id", brandId)
+      .single() as any;
+
+    if (!brand) {
+      console.warn("[email-trigger] onBrandWeeklyDigest: brand not found", brandId);
+      return;
+    }
+
+    // Find brand owner
+    const { data: accounts } = await supabase
+      .from("brand_accounts")
+      .select("user_id, role")
+      .eq("brand_id", brandId)
+      .eq("role", "owner") as any;
+
+    if (!accounts?.length) {
+      console.warn("[email-trigger] onBrandWeeklyDigest: no owner for brand", brandId);
+      return;
+    }
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("display_name, email")
+      .eq("id", accounts[0].user_id)
+      .single() as any;
+
+    if (!profile?.email) {
+      console.warn("[email-trigger] onBrandWeeklyDigest: no email for owner of brand", brandId);
+      return;
+    }
+
+    const { calculateBrandDigestStats } = await import("@/lib/brand-digest");
+    const { stats } = await calculateBrandDigestStats(brandId);
+
+    const { brandDigestEmail } = await import("@/lib/email-templates");
+    const template = brandDigestEmail({
+      brandName: brand.name,
+      ownerName: profile.display_name || "Brewmaster",
+      brandId,
+      stats,
+    });
+
+    await sendEmail({
+      to: profile.email,
+      subject: template.subject,
+      html: template.html,
+      text: template.text,
+    });
+  } catch (err: any) {
+    console.error("[email-trigger] onBrandWeeklyDigest failed:", err.message);
+  }
+}
+
 // ── Password reset ──
 
 export async function onPasswordReset(email: string, resetUrl: string) {

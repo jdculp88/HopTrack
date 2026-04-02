@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import {
   Users, Beer, TrendingUp, BarChart3, MapPin, Activity,
   ArrowUpRight, ArrowDownRight, Minus, Eye, Heart, Star,
-  GlassWater, ArrowRight,
+  GlassWater, ArrowRight, Download,
 } from "lucide-react";
 import Link from "next/link";
 import { Sparkline, RecentActivityFeed } from "@/app/(brewery-admin)/brewery-admin/[brewery_id]/DashboardClient";
@@ -24,7 +24,7 @@ interface BrandAnalytics {
     name: string;
     city: string;
     state: string;
-    logo_url: string | null;
+    cover_image_url: string | null;
     latitude: number | null;
     longitude: number | null;
   }>;
@@ -144,9 +144,20 @@ export function BrandDashboardClient({ brandId, initialData, tapStats }: BrandDa
           <h2 className="font-display text-lg font-bold" style={{ color: "var(--text-primary)" }}>
             Today Across All Locations
           </h2>
-          <span className="text-xs font-mono px-2.5 py-1 rounded-full" style={{ background: "var(--surface-2)", color: "var(--text-muted)" }}>
-            {locations.length} location{locations.length !== 1 ? "s" : ""}
-          </span>
+          <div className="flex items-center gap-2">
+            <a
+              href={`/api/brand/${brandId}/analytics/export?range=all`}
+              download
+              className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold transition-opacity hover:opacity-80"
+              style={{ background: "color-mix(in srgb, var(--accent-gold) 12%, transparent)", color: "var(--accent-gold)" }}
+            >
+              <Download size={12} />
+              CSV
+            </a>
+            <span className="text-xs font-mono px-2.5 py-1 rounded-full" style={{ background: "var(--surface-2)", color: "var(--text-muted)" }}>
+              {locations.length} location{locations.length !== 1 ? "s" : ""}
+            </span>
+          </div>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <div>

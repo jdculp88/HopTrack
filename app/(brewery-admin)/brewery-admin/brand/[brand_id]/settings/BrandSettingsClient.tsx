@@ -164,9 +164,9 @@ export function BrandSettingsClient({ brand, locations: initialLocations, userRo
             <div key={loc.id} className="rounded-xl border p-3" style={{ background: "var(--surface-2)", borderColor: "var(--border)" }}>
               <div className="flex items-center justify-between">
                 <Link href={`/brewery-admin/${loc.id}`} className="flex items-center gap-3 flex-1 min-w-0">
-                  {loc.logo_url || loc.cover_image_url ? (
+                  {loc.cover_image_url ? (
                     <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 relative">
-                      <Image src={loc.logo_url || loc.cover_image_url} alt={loc.name} fill className="object-cover" sizes="40px" />
+                      <Image src={loc.cover_image_url} alt={loc.name} fill className="object-cover" sizes="40px" />
                     </div>
                   ) : (
                     <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"

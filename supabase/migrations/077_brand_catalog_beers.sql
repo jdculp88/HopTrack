@@ -27,9 +27,12 @@ CREATE TABLE IF NOT EXISTS brand_catalog_beers (
   is_active       boolean NOT NULL DEFAULT true,
   created_by      uuid REFERENCES auth.users(id) ON DELETE SET NULL,
   created_at      timestamptz DEFAULT now(),
-  updated_at      timestamptz DEFAULT now(),
-  UNIQUE (brand_id, lower(name))
+  updated_at      timestamptz DEFAULT now()
 );
+
+-- Unique index on brand_id + lowercased name (prevents duplicate beer names per brand)
+CREATE UNIQUE INDEX IF NOT EXISTS idx_brand_catalog_beers_brand_name
+  ON brand_catalog_beers(brand_id, lower(name));
 
 -- Indexes
 CREATE INDEX IF NOT EXISTS idx_brand_catalog_beers_brand_id
@@ -129,7 +132,7 @@ JOIN breweries br ON b.brewery_id = br.id
 WHERE br.brand_id IS NOT NULL
   AND b.is_active = true
 ORDER BY br.brand_id, lower(b.name), b.created_at ASC
-ON CONFLICT (brand_id, lower(name)) DO NOTHING;
+ON CONFLICT DO NOTHING;
 
 -- Step 2: Link existing location beers back to their catalog entries.
 UPDATE beers b

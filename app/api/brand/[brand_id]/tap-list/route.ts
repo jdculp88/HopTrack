@@ -30,7 +30,7 @@ export async function GET(
   // Fetch locations
   const { data: locations } = await (supabase
     .from("breweries")
-    .select("id, name, city, state, logo_url")
+    .select("id, name, city, state, cover_image_url")
     .eq("brand_id", brand_id)
     .order("name") as any);
 
