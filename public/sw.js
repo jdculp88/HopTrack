@@ -1,23 +1,16 @@
-const CACHE_NAME = "hoptrack-v2";
-const STATIC_ASSETS = [
-  "/",
-  "/home",
-  "/explore",
-  "/offline",
-];
+// HopTrack Service Worker — push notifications only.
+// We intentionally do NOT cache any pages or static assets here.
+// Next.js handles its own caching via HTTP headers; SW caching of
+// /_next/static/ chunks causes stale JS after deployments → broken hydration.
 
-self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS)).catch(() => {})
-  );
+self.addEventListener("install", () => {
   self.skipWaiting();
 });
 
 self.addEventListener("activate", (event) => {
+  // Nuke every cache left behind by previous SW versions.
   event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
-    )
+    caches.keys().then((keys) => Promise.all(keys.map((k) => caches.delete(k))))
   );
   self.clients.claim();
 });
@@ -49,48 +42,4 @@ self.addEventListener("notificationclick", (event) => {
       return self.clients.openWindow(url);
     })
   );
-});
-
-self.addEventListener("fetch", (event) => {
-  const { request } = event;
-  const url = new URL(request.url);
-
-  // Skip non-GET, cross-origin, and Supabase API requests
-  if (
-    request.method !== "GET" ||
-    url.origin !== self.location.origin ||
-    url.pathname.startsWith("/api/") ||
-    url.hostname.includes("supabase")
-  ) {
-    return;
-  }
-
-  // Network-first for navigation requests
-  if (request.mode === "navigate") {
-    event.respondWith(
-      fetch(request).catch(() =>
-        caches.match("/offline") ?? caches.match("/")
-      )
-    );
-    return;
-  }
-
-  // Cache-first for static assets
-  if (
-    url.pathname.startsWith("/_next/static/") ||
-    url.pathname.startsWith("/icons/") ||
-    url.pathname.endsWith(".png") ||
-    url.pathname.endsWith(".svg") ||
-    url.pathname.endsWith(".woff2")
-  ) {
-    event.respondWith(
-      caches.match(request).then(
-        (cached) => cached ?? fetch(request).then((res) => {
-          const clone = res.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
-          return res;
-        })
-      )
-    );
-  }
 });
