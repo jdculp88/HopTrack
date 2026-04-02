@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { Building2, Settings, MapPin } from "lucide-react";
+import { Building2, Settings, MapPin, GlassWater } from "lucide-react";
 import { BrandDashboardClient } from "./BrandDashboardClient";
 import { formatRelativeTime } from "@/lib/dates";
 
@@ -171,6 +171,30 @@ export default async function BrandDashboardPage({ params }: { params: Promise<{
     });
   }
 
+  // ── Tap stats (lightweight query for dashboard overview card) ──
+  let tapStats: { totalOnTap: number; totalOff: number; uniqueBeers: number; sharedBeers: number } | undefined;
+  if (locationIds.length > 0) {
+    const { data: allBeers } = await (supabase
+      .from("beers")
+      .select("name, brewery_id, is_on_tap")
+      .in("brewery_id", locationIds)
+      .eq("is_active", true) as any);
+
+    if (allBeers && allBeers.length > 0) {
+      const totalOnTap = allBeers.filter((b: any) => b.is_on_tap).length;
+      const totalOff = allBeers.filter((b: any) => !b.is_on_tap).length;
+      const beerNameToLocations: Record<string, Set<string>> = {};
+      allBeers.forEach((b: any) => {
+        const key = b.name.toLowerCase().trim();
+        if (!beerNameToLocations[key]) beerNameToLocations[key] = new Set();
+        beerNameToLocations[key].add(b.brewery_id);
+      });
+      const uniqueBeers = Object.keys(beerNameToLocations).length;
+      const sharedBeers = Object.values(beerNameToLocations).filter(s => s.size > 1).length;
+      tapStats = { totalOnTap, totalOff, uniqueBeers, sharedBeers };
+    }
+  }
+
   return (
     <div className="min-h-screen" style={{ background: "var(--bg)" }}>
       {/* Brand Header */}
@@ -203,14 +227,24 @@ export default async function BrandDashboardPage({ params }: { params: Promise<{
               </Link>
             </div>
           </div>
-          <Link
-            href={`/brewery-admin/brand/${brand_id}/settings`}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold border transition-opacity hover:opacity-80"
-            style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--text-secondary)" }}
-          >
-            <Settings size={14} />
-            Settings
-          </Link>
+          <div className="flex gap-2">
+            <Link
+              href={`/brewery-admin/brand/${brand_id}/tap-list`}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold border transition-opacity hover:opacity-80"
+              style={{ background: "var(--surface)", borderColor: "var(--accent-gold)", color: "var(--accent-gold)" }}
+            >
+              <GlassWater size={14} />
+              Tap List
+            </Link>
+            <Link
+              href={`/brewery-admin/brand/${brand_id}/settings`}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold border transition-opacity hover:opacity-80"
+              style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--text-secondary)" }}
+            >
+              <Settings size={14} />
+              Settings
+            </Link>
+          </div>
         </div>
       </div>
 
@@ -226,6 +260,7 @@ export default async function BrandDashboardPage({ params }: { params: Promise<{
           recentActivity,
           weeklyTrend,
         }}
+        tapStats={tapStats}
       />
     </div>
   );

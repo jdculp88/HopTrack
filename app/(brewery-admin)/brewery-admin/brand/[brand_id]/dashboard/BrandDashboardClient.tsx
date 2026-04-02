@@ -5,7 +5,9 @@ import { motion } from "framer-motion";
 import {
   Users, Beer, TrendingUp, BarChart3, MapPin, Activity,
   ArrowUpRight, ArrowDownRight, Minus, Eye, Heart, Star,
+  GlassWater, ArrowRight,
 } from "lucide-react";
+import Link from "next/link";
 import { Sparkline, RecentActivityFeed } from "@/app/(brewery-admin)/brewery-admin/[brewery_id]/DashboardClient";
 import type { ActivityItem } from "@/app/(brewery-admin)/brewery-admin/[brewery_id]/DashboardClient";
 
@@ -59,9 +61,17 @@ interface BrandAnalytics {
   weeklyTrend: number[];
 }
 
+interface TapStats {
+  totalOnTap: number;
+  totalOff: number;
+  uniqueBeers: number;
+  sharedBeers: number;
+}
+
 interface BrandDashboardClientProps {
   brandId: string;
   initialData: BrandAnalytics;
+  tapStats?: TapStats;
 }
 
 // ── Active Sessions Counter for Brand ──
@@ -116,7 +126,7 @@ function WoWTrend({ current, previous }: { current: number; previous: number }) 
   return <Minus size={14} style={{ color: "var(--text-muted)" }} />;
 }
 
-export function BrandDashboardClient({ brandId, initialData }: BrandDashboardClientProps) {
+export function BrandDashboardClient({ brandId, initialData, tapStats }: BrandDashboardClientProps) {
   const { stats, locationBreakdown, topBeers, recentActivity, weeklyTrend, locations } = initialData;
   const maxLocationSessions = Math.max(...locationBreakdown.map(l => l.sessions), 1);
 
@@ -210,6 +220,44 @@ export function BrandDashboardClient({ brandId, initialData }: BrandDashboardCli
           <p className="text-xs mt-2" style={{ color: "var(--text-muted)" }}>Last 8 weeks across all locations</p>
         </div>
       </div>
+
+      {/* Tap Overview Card */}
+      {tapStats && (
+        <Link
+          href={`/brewery-admin/brand/${brandId}/tap-list`}
+          className="block rounded-2xl border p-5 transition-opacity hover:opacity-90 group"
+          style={{ background: "var(--surface)", borderColor: "var(--border)" }}
+        >
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <GlassWater size={16} style={{ color: "var(--accent-gold)" }} />
+              <h3 className="font-display font-bold" style={{ color: "var(--text-primary)" }}>Tap Overview</h3>
+            </div>
+            <span className="flex items-center gap-1 text-xs font-semibold group-hover:gap-2 transition-all"
+              style={{ color: "var(--accent-gold)" }}>
+              Manage <ArrowRight size={12} />
+            </span>
+          </div>
+          <div className="grid grid-cols-4 gap-3">
+            <div>
+              <p className="font-display text-2xl font-bold" style={{ color: "var(--accent-gold)" }}>{tapStats.totalOnTap}</p>
+              <p className="text-[10px] font-mono uppercase" style={{ color: "var(--text-muted)" }}>On Tap</p>
+            </div>
+            <div>
+              <p className="font-display text-2xl font-bold" style={{ color: "var(--text-muted)" }}>{tapStats.totalOff}</p>
+              <p className="text-[10px] font-mono uppercase" style={{ color: "var(--text-muted)" }}>Off Tap</p>
+            </div>
+            <div>
+              <p className="font-display text-2xl font-bold" style={{ color: "var(--text-primary)" }}>{tapStats.uniqueBeers}</p>
+              <p className="text-[10px] font-mono uppercase" style={{ color: "var(--text-muted)" }}>Unique</p>
+            </div>
+            <div>
+              <p className="font-display text-2xl font-bold" style={{ color: "#4A7C59" }}>{tapStats.sharedBeers}</p>
+              <p className="text-[10px] font-mono uppercase" style={{ color: "var(--text-muted)" }}>Shared</p>
+            </div>
+          </div>
+        </Link>
+      )}
 
       {/* Location Breakdown */}
       {locationBreakdown.length > 0 && (

@@ -260,10 +260,11 @@ scripts/supabase-setup.mjs    — One-time setup script
 
 ## 🗺️ Where We Are
 
-**Last Completed Sprint:** Sprint 117 — The Dashboard ✅
+**Last Completed Sprint:** Sprint 118 — The Tap Network ✅
 **Arc:** Multi-Location (Sprints 114-137)
-**Sprint plan (117):** `docs/plans/sprint-117-plan.md`
-**Retro (117):** `docs/retros/sprint-117-retro.md` (facilitated by Morgan)
+**Sprint plan (118):** `docs/plans/sprint-118-plan.md`
+**Retro (118):** `docs/retros/sprint-118-retro.md` (facilitated by Morgan)
+**Last completed:** Sprint 118 — The Tap Network ✅ — Brand-level tap list management: unified beer catalog across all locations (grouped by lowercase name), per-beer location matrix (colored dots: on tap/off tap/86'd/not listed), filter pills (All/On Tap/Off Tap/Shared/Unique) + search, batch edit mode (on tap/off tap/86/un-86 across locations), push-to-locations (clone beer + pour sizes with dedup protection). 3 new API endpoints (GET aggregated catalog, POST push/clone, PATCH batch). Tap Overview card on brand dashboard. Tap List nav link in brand dashboard header. 7 new files, 2 modified, 0 migrations.
 **Last completed:** Sprint 117 — The Dashboard ✅ — Brand dashboard with aggregated analytics across all locations (Today's Snapshot, 5 KPI cards with WoW trend, cross-location visitors, per-location breakdown with animated progress bars, top beers grouped by name, weekly sparkline, recent activity feed). 2 new API endpoints (brand analytics, brand active sessions). Consumer brand page interactive map (Leaflet, gold pins, auto-center/zoom, BrandMapClient SSR wrapper). Brand admin nav updated: "Brand Dashboard" replaces "Brand Settings" as default entry point. Loading skeleton. 7 new files, 0 migrations.
 **Last completed:** Sprint 116 — The Daily Pour ✅ — Service worker caching fix (30-sprint root cause: cache-first SW for /_next/static/ stripped to push-only, all caches cleared on activate). WishlistOnTapAlert hydration mismatch fixed (useState false → useEffect reveal). Individual notification dismiss fixed (API was always marking all read). You tab spacing (!mt-10 on Your Activity). Migration 076: Friday night at Pint & Pixel (40 test users, 120-150 visitors, 400+ drinks, Joshua wired as owner). seed-next-day.mjs: day simulator script (day-of-week traffic model, auto-advances from last session date, inserts sessions/beer_logs/ratings/reviews/reactions). Sprint close ceremony codified in CLAUDE.md + memory.
 **Retro (115):** `docs/retros/sprint-115-retro.md` (facilitated by Morgan)
