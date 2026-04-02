@@ -91,7 +91,7 @@ Joshua "picked it specifically for security."
 
 ## Sprint 126 — Selected: The Geo (brand location proximity)
 
-- **"The Transfer" — Cross-Location Customer Tools** — Full customer history across all brand locations. Transfer/merge duplicate profiles. "Regulars at your other locations" insight card. Cross-location customer journey visualization. **OPEN**
+- **"The Transfer" — Cross-Location Customer Tools** — Full customer history across all brand locations. Transfer/merge duplicate profiles. "Regulars at your other locations" insight card. Cross-location customer journey visualization. **BUILT — Sprint 129**
 - **"The Polish" — Brand Hardening** — Migration tracking gap fix, brand E2E tests, tier gate audit, slug consistency, brand onboarding wizard, UI integration tests for tier mismatches (the Pint & Pixel bug). **OPEN**
 
 ---
