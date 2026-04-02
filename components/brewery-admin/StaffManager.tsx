@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { UserPlus, Trash2, Shield, ShieldCheck, ShieldAlert, Beer, ChevronDown, X, Loader2 } from "lucide-react";
+import { UserPlus, Trash2, Shield, ShieldCheck, ShieldAlert, Beer, ChevronDown, X, Loader2, Building2 } from "lucide-react";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import { useToast } from "@/components/ui/Toast";
 
@@ -14,6 +14,7 @@ interface StaffMember {
   id: string;
   user_id: string;
   role: StaffRole;
+  propagated_from_brand?: boolean;
   profile: {
     display_name: string | null;
     username?: string;
@@ -318,8 +319,9 @@ export function StaffManager({ breweryId, currentUserRole }: StaffManagerProps) 
               const Icon = cfg.icon;
               const isConfirming = confirmRemoveId === member.id;
               const isRemoving = removingId === member.id;
-              const canChangeRole = isOwner && member.role !== "owner";
-              const canRemove = canManage && member.role !== "owner";
+              const isPropagated = member.propagated_from_brand === true;
+              const canChangeRole = isOwner && member.role !== "owner" && !isPropagated;
+              const canRemove = canManage && member.role !== "owner" && !isPropagated;
 
               return (
                 <motion.div
@@ -390,6 +392,18 @@ export function StaffManager({ breweryId, currentUserRole }: StaffManagerProps) 
                         >
                           <Icon size={12} />
                           {cfg.label}
+                        </div>
+                      )}
+
+                      {/* Propagated badge */}
+                      {isPropagated && (
+                        <div
+                          className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs"
+                          style={{ background: "color-mix(in srgb, var(--accent-gold) 10%, transparent)", color: "var(--accent-gold)" }}
+                          title="Managed at brand level"
+                        >
+                          <Building2 size={10} />
+                          Via Brand
                         </div>
                       )}
 

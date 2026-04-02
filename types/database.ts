@@ -234,6 +234,11 @@ export interface Database {
         Insert: Omit<BrandAccount, "id" | "created_at"> & { id?: string };
         Update: Partial<BrandAccount>;
       };
+      brand_team_activity: {
+        Row: BrandTeamActivity;
+        Insert: Omit<BrandTeamActivity, "id" | "created_at"> & { id?: string };
+        Update: Partial<BrandTeamActivity>;
+      };
     };
   };
 }
@@ -1091,13 +1096,29 @@ export interface BreweryBrand {
   billing_email: string | null;
 }
 
-export type BrandAccountRole = "owner" | "regional_manager";
+export type BrandAccountRole = "owner" | "brand_manager" | "regional_manager";
 
 export interface BrandAccount {
   id: string;
   brand_id: string;
   user_id: string;
   role: BrandAccountRole;
+  created_at: string;
+  invited_at: string | null;
+  invited_by: string | null;
+  location_scope: string[] | null;
+}
+
+export type TeamAction = "added" | "removed" | "role_changed" | "scope_changed";
+
+export interface BrandTeamActivity {
+  id: string;
+  brand_id: string;
+  actor_id: string;
+  target_user_id: string;
+  action: TeamAction;
+  old_value: string | null;
+  new_value: string | null;
   created_at: string;
 }
 

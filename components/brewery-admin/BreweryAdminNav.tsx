@@ -208,6 +208,22 @@ export function BreweryAdminNav({ accounts, brandAccounts = [] }: { accounts: an
                 Brand Reports
               </Link>
               <Link
+                href={`/brewery-admin/brand/${brewery.brand.id}/team`}
+                className={cn(
+                  "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all",
+                  pathname.includes(`/brand/${brewery.brand.id}/team`)
+                    ? "text-[var(--bg)] font-semibold"
+                    : "hover:opacity-80"
+                )}
+                style={pathname.includes(`/brand/${brewery.brand.id}/team`)
+                  ? { background: "var(--accent-gold)", color: "var(--bg)" }
+                  : { color: "var(--accent-gold)", background: "color-mix(in srgb, var(--accent-gold) 10%, transparent)" }
+                }
+              >
+                <Users size={16} />
+                Brand Team
+              </Link>
+              <Link
                 href={`/brewery-admin/brand/${brewery.brand.id}/catalog`}
                 className={cn(
                   "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all",

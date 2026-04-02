@@ -63,6 +63,7 @@ export async function GET(
       user_id,
       role,
       created_at,
+      propagated_from_brand,
       profile:profiles!brewery_accounts_user_id_fkey(
         display_name,
         username,
@@ -87,6 +88,7 @@ export async function GET(
     user_id: s.user_id,
     role: s.role,
     created_at: s.created_at,
+    propagated_from_brand: s.propagated_from_brand ?? false,
     display_name: s.profile?.display_name ?? null,
     username: s.profile?.username ?? null,
     avatar_url: s.profile?.avatar_url ?? null,

@@ -261,8 +261,10 @@ scripts/supabase-setup.mjs    — One-time setup script
 
 ## 🗺️ Where We Are
 
-**Last Completed Sprint:** Sprint 121 — The Ledger ✅
+**Last Completed Sprint:** Sprint 122 — The Crew ✅
 **Arc:** Multi-Location (Sprints 114-137)
+**Retro (122):** `docs/retros/sprint-122-retro.md` (facilitated by Morgan)
+**Last completed:** Sprint 122 — The Crew ✅ — Brand-level team management. Migration 080 (brand_accounts: invited_at, invited_by, location_scope uuid[], brand_manager role; brand_team_activity audit log table; expanded RLS for brand_manager). 3-tier brand role hierarchy (Owner/Brand Manager/Regional Manager). Location scoping for regional managers (null = all, array = specific). `recalculateScopedAccess()` diff-based scope propagation. PATCH handler on members API (role + scope changes). Team activity audit log API. Brand Team page (`/brewery-admin/brand/[brand_id]/team/`) with roster, filter pills, add member form, role change dropdown, LocationScopePicker, activity log. "Brand Team" nav link with Users icon. "Via Brand" propagated badge on StaffManager (disables local controls for brand-propagated members). 9 new files, 6 modified, 1 migration, 12 new tests (744 → 756).
 **Retro (121):** `docs/retros/sprint-121-retro.md` (facilitated by Morgan)
 **Last completed:** Sprint 121 — The Ledger ✅ — Brand-level billing & subscriptions. Migration 079 (billing columns on `brewery_brands`: subscription_tier, stripe_customer_id, trial_ends_at, billing_email). `lib/brand-billing.ts` tier propagation (propagateBrandTier, revertBrandTier, syncLocationTierOnBrandJoin/Leave). `STRIPE_BRAND_PRICES` + `BRAND_ADDON_INFO` ($39/location/mo, $374/location/yr, 20% savings). 3 brand billing API routes (checkout with 2 line items: base barrel + per-location add-on, portal, cancel at period end). Webhook dual-path (`type: "brand"` metadata discriminator, service role client for cross-brewery propagation). Brand Billing page (`/brewery-admin/brand/[brand_id]/billing/`) with active subscription card, location roster, pricing card (monthly/annual toggle), feature list. "Brand Billing" nav link with CreditCard icon. Per-brewery billing redirect ("covered by brand subscription" banner). Location add/remove tier sync. 9 new files, 7 modified, 1 migration, 14 new tests (730 → 744).
 **Retro (120):** `docs/retros/sprint-120-retro.md` (facilitated by Morgan)
