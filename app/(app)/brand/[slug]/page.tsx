@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { MapPin, Globe, Building2 } from "lucide-react";
 import { BrandMapClient } from "./BrandMapClient";
+import { BrandLoyaltyStampCard } from "@/components/loyalty/BrandLoyaltyStampCard";
 
 export const revalidate = 60;
 
@@ -51,6 +52,15 @@ export default async function BrandPage({ params }: { params: Promise<{ slug: st
 
   const locationCount = locations?.length ?? 0;
   const mappableLocations = (locations ?? []).filter((l: any) => l.latitude != null && l.longitude != null);
+
+  // Check for active brand loyalty program
+  const { data: brandLoyaltyPrograms } = await (supabase
+    .from("brand_loyalty_programs")
+    .select("id")
+    .eq("brand_id", brand.id)
+    .eq("is_active", true)
+    .limit(1) as any);
+  const hasBrandLoyalty = (brandLoyaltyPrograms?.length ?? 0) > 0;
 
   return (
     <div className="min-h-screen pb-24" style={{ background: "var(--bg)" }}>
@@ -114,6 +124,16 @@ export default async function BrandPage({ params }: { params: Promise<{ slug: st
             Find a Location
           </h2>
           <BrandMapClient locations={locations ?? []} />
+        </div>
+      )}
+
+      {/* Brand Loyalty Passport */}
+      {hasBrandLoyalty && (
+        <div className="max-w-3xl mx-auto px-4 mb-8">
+          <h2 className="font-display text-xl font-bold mb-4" style={{ color: "var(--text-primary)" }}>
+            Loyalty Passport
+          </h2>
+          <BrandLoyaltyStampCard brandId={brand.id} brandName={brand.name} />
         </div>
       )}
 

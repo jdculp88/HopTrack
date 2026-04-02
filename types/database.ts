@@ -239,6 +239,21 @@ export interface Database {
         Insert: Omit<BrandTeamActivity, "id" | "created_at"> & { id?: string };
         Update: Partial<BrandTeamActivity>;
       };
+      brand_loyalty_programs: {
+        Row: BrandLoyaltyProgram;
+        Insert: Omit<BrandLoyaltyProgram, "id" | "created_at"> & { id?: string };
+        Update: Partial<BrandLoyaltyProgram>;
+      };
+      brand_loyalty_cards: {
+        Row: BrandLoyaltyCard;
+        Insert: Omit<BrandLoyaltyCard, "id" | "created_at"> & { id?: string };
+        Update: Partial<BrandLoyaltyCard>;
+      };
+      brand_loyalty_redemptions: {
+        Row: BrandLoyaltyRedemption;
+        Insert: Omit<BrandLoyaltyRedemption, "id" | "redeemed_at"> & { id?: string };
+        Update: Partial<BrandLoyaltyRedemption>;
+      };
     };
   };
 }
@@ -1063,9 +1078,10 @@ export interface EventRsvp {
 export interface RedemptionCode {
   id: string;
   code: string;
-  type: 'loyalty_reward' | 'mug_club_perk' | 'promotion';
+  type: 'loyalty_reward' | 'mug_club_perk' | 'promotion' | 'brand_loyalty_reward';
   user_id: string;
   brewery_id: string;
+  brand_id: string | null;
   program_id: string | null;
   mug_club_id: string | null;
   perk_index: number | null;
@@ -1120,6 +1136,41 @@ export interface BrandTeamActivity {
   old_value: string | null;
   new_value: string | null;
   created_at: string;
+}
+
+// ─── Brand Loyalty (Sprint 125) ─────────────────────────────────────────────
+export interface BrandLoyaltyProgram {
+  id: string;
+  brand_id: string;
+  name: string;
+  description: string | null;
+  stamps_required: number;
+  reward_description: string;
+  earn_per_session: number;
+  is_active: boolean;
+  created_at: string;
+}
+
+export interface BrandLoyaltyCard {
+  id: string;
+  user_id: string;
+  brand_id: string;
+  program_id: string;
+  stamps: number;
+  lifetime_stamps: number;
+  last_stamp_at: string | null;
+  last_stamp_brewery_id: string | null;
+  created_at: string;
+}
+
+export interface BrandLoyaltyRedemption {
+  id: string;
+  card_id: string;
+  user_id: string;
+  brand_id: string;
+  brewery_id: string;
+  program_id: string;
+  redeemed_at: string;
 }
 
 // ─── Brand Catalog Beers (Sprint 119) ──────────────────────────────────────

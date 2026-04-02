@@ -224,6 +224,22 @@ export function BreweryAdminNav({ accounts, brandAccounts = [] }: { accounts: an
                 Brand Team
               </Link>
               <Link
+                href={`/brewery-admin/brand/${brewery.brand.id}/loyalty`}
+                className={cn(
+                  "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all",
+                  pathname.includes(`/brand/${brewery.brand.id}/loyalty`)
+                    ? "text-[var(--bg)] font-semibold"
+                    : "hover:opacity-80"
+                )}
+                style={pathname.includes(`/brand/${brewery.brand.id}/loyalty`)
+                  ? { background: "var(--accent-gold)", color: "var(--bg)" }
+                  : { color: "var(--accent-gold)", background: "color-mix(in srgb, var(--accent-gold) 10%, transparent)" }
+                }
+              >
+                <Gift size={16} />
+                Brand Loyalty
+              </Link>
+              <Link
                 href={`/brewery-admin/brand/${brewery.brand.id}/catalog`}
                 className={cn(
                   "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all",
@@ -356,6 +372,7 @@ export function BreweryAdminNav({ accounts, brandAccounts = [] }: { accounts: an
               {[
                 { href: `/brewery-admin/brand/${brewery.brand.id}/dashboard`, label: "Brand", icon: Building2 },
                 { href: `/brewery-admin/brand/${brewery.brand.id}/team`, label: "Team", icon: Users },
+                { href: `/brewery-admin/brand/${brewery.brand.id}/loyalty`, label: "Loyalty", icon: Gift },
                 { href: `/brewery-admin/brand/${brewery.brand.id}/catalog`, label: "Catalog", icon: List },
               ].map(({ href: bHref, label: bLabel, icon: BIcon }) => {
                 const bActive = pathname.startsWith(bHref);

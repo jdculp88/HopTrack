@@ -6,6 +6,7 @@ import type { Brewery, BreweryVisit, Profile } from "@/types/database";
 import { BreweryChallenges } from "@/components/brewery/BreweryChallenges";
 import { MugClubSection } from "@/components/brewery/MugClubSection";
 import { LoyaltyStampCard } from "@/components/loyalty/LoyaltyStampCard";
+import { BrandLoyaltyStampCard } from "@/components/loyalty/BrandLoyaltyStampCard";
 import { ClosedBreweryBanner } from "@/components/brewery/ClosedBreweryBanner";
 import { BreweryRatingHeader } from "@/components/brewery/BreweryRatingHeader";
 import { generateGradientFromString } from "@/lib/utils";
@@ -272,6 +273,26 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
         };
       }
     }
+  }
+
+  // ── Brand loyalty ──
+  let brandName: string | null = null;
+  let hasBrandLoyalty = false;
+  if (brewery.brand_id) {
+    const { data: brandRow } = await (supabase
+      .from("brewery_brands")
+      .select("name")
+      .eq("id", brewery.brand_id)
+      .single() as any);
+    brandName = brandRow?.name ?? null;
+    // Check if brand has active loyalty program
+    const { data: blp } = await (supabase
+      .from("brand_loyalty_programs")
+      .select("id")
+      .eq("brand_id", brewery.brand_id)
+      .eq("is_active", true)
+      .limit(1) as any);
+    hasBrandLoyalty = (blp?.length ?? 0) > 0;
   }
 
   // ── Event RSVPs ──
@@ -559,8 +580,23 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
             />
           )}
 
-          {/* Loyalty Programs */}
-          {(loyaltyPrograms ?? []).length > 0 && (
+          {/* Brand-Wide Loyalty (takes precedence when available) */}
+          {hasBrandLoyalty && brewery.brand_id && brandName && (
+            <div>
+              <h2 className="font-display text-2xl font-bold text-[var(--text-primary)] mb-3">
+                {brandName} Passport
+              </h2>
+              <BrandLoyaltyStampCard
+                brandId={brewery.brand_id}
+                brandName={brandName}
+                breweryId={brewery.id}
+                breweryName={brewery.name}
+              />
+            </div>
+          )}
+
+          {/* Per-Location Loyalty Programs (show when no brand loyalty) */}
+          {!hasBrandLoyalty && (loyaltyPrograms ?? []).length > 0 && (
             <div>
               <h2 className="font-display text-2xl font-bold text-[var(--text-primary)] mb-3">
                 Loyalty Program

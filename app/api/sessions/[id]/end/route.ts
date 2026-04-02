@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getLevelFromXP, SESSION_XP } from '@/lib/xp'
 import { sendPushToUser } from '@/lib/push'
 import { triggerLoyaltyNudge } from '@/lib/smart-triggers'
+import { awardBrandStamp } from '@/lib/brand-loyalty'
 import { rateLimitResponse } from '@/lib/rate-limit'
 
 export async function PATCH(
@@ -481,6 +482,57 @@ export async function PATCH(
     .eq('id', sessionId)
     .single()
 
+  // ─── Brand loyalty stamp ──────────────────────────────────────────────────
+  let brandStampAwarded = false
+  if (!isHomeSession && session.brewery_id) {
+    // Check if brewery belongs to a brand with an active loyalty program
+    const { data: breweryRow } = await (supabase
+      .from("breweries")
+      .select("brand_id")
+      .eq("id", session.brewery_id)
+      .single() as any)
+
+    if (breweryRow?.brand_id) {
+      const stampResult = await awardBrandStamp(supabase, user.id, breweryRow.brand_id, session.brewery_id)
+      if (stampResult) {
+        brandStampAwarded = true
+        // Get brand name for notification
+        const { data: brandRow } = await (supabase
+          .from("brewery_brands")
+          .select("name")
+          .eq("id", breweryRow.brand_id)
+          .single() as any)
+        const brandName = brandRow?.name ?? "Brand"
+        const { stamps, lifetime_stamps } = stampResult.card
+
+        // Find program for stamps_required
+        const { data: blp } = await (supabase
+          .from("brand_loyalty_programs")
+          .select("stamps_required")
+          .eq("brand_id", breweryRow.brand_id)
+          .eq("is_active", true)
+          .single() as any)
+        const stampsRequired = blp?.stamps_required ?? 10
+
+        if (stampResult.isRewardReady) {
+          sendPushToUser(supabase, user.id, {
+            title: `${brandName} Passport — Reward Ready!`,
+            body: `You've earned ${stampsRequired} stamps! Redeem your free reward at any ${brandName} location.`,
+            tag: `brand-loyalty-reward-${breweryRow.brand_id}`,
+            data: { url: '/home' },
+          }).catch(() => {})
+        } else {
+          sendPushToUser(supabase, user.id, {
+            title: `${brandName} Passport`,
+            body: `Stamp earned! ${stamps}/${stampsRequired} — ${stampsRequired - stamps} more until your reward.`,
+            tag: `brand-loyalty-stamp-${breweryRow.brand_id}`,
+            data: { url: '/home' },
+          }).catch(() => {})
+        }
+      }
+    }
+  }
+
   // Smart trigger: loyalty nudge (F-019) — check if user is close to a reward
   if (session.brewery_id) {
     const { data: breweryInfo } = await (supabase
@@ -504,5 +556,6 @@ export async function PATCH(
     session: completedSession ?? null,
     beerLogs: completedSession?.beer_logs ?? [],
     streakGraceUsed,
+    brandStampAwarded,
   })
 }

@@ -25,18 +25,36 @@ export async function POST(req: Request) {
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await req.json();
-  const { type, brewery_id, program_id, mug_club_id, perk_index, promotion_id, promo_description } = body;
+  const { type, brewery_id, brand_id, program_id, mug_club_id, perk_index, promotion_id, promo_description } = body;
 
-  if (!type || !brewery_id) {
+  if (!type || (!brewery_id && type !== "brand_loyalty_reward")) {
     return NextResponse.json({ error: "Missing type or brewery_id" }, { status: 400 });
   }
 
-  if (type !== "loyalty_reward" && type !== "mug_club_perk" && type !== "promotion") {
+  const validTypes = ["loyalty_reward", "mug_club_perk", "promotion", "brand_loyalty_reward"];
+  if (!validTypes.includes(type)) {
     return NextResponse.json({ error: "Invalid type" }, { status: 400 });
   }
 
   // Validate eligibility based on type
-  if (type === "loyalty_reward") {
+  if (type === "brand_loyalty_reward") {
+    if (!brand_id) {
+      return NextResponse.json({ error: "Missing brand_id" }, { status: 400 });
+    }
+
+    // Check user has enough stamps on brand card
+    const { data: card } = await (supabase
+      .from("brand_loyalty_cards")
+      .select("id, stamps, program:brand_loyalty_programs(stamps_required)")
+      .eq("user_id", user.id)
+      .eq("brand_id", brand_id)
+      .single() as any);
+
+    const stampsRequired = (card?.program as any)?.stamps_required ?? 0;
+    if (!card || (card.stamps ?? 0) < stampsRequired) {
+      return NextResponse.json({ error: "Not enough stamps to redeem" }, { status: 400 });
+    }
+  } else if (type === "loyalty_reward") {
     if (!program_id) {
       return NextResponse.json({ error: "Missing program_id" }, { status: 400 });
     }
@@ -95,13 +113,22 @@ export async function POST(req: Request) {
     }
   }
 
-  // Cancel any existing pending codes for this user + brewery (prevent accumulation)
-  await supabase
-    .from("redemption_codes")
-    .update({ status: "cancelled" } as any)
-    .eq("user_id", user.id)
-    .eq("brewery_id", brewery_id)
-    .eq("status", "pending");
+  // Cancel any existing pending codes for this user + brewery/brand (prevent accumulation)
+  if (type === "brand_loyalty_reward" && brand_id) {
+    await (supabase
+      .from("redemption_codes")
+      .update({ status: "cancelled" } as any)
+      .eq("user_id", user.id)
+      .eq("brand_id", brand_id)
+      .eq("status", "pending") as any);
+  } else {
+    await supabase
+      .from("redemption_codes")
+      .update({ status: "cancelled" } as any)
+      .eq("user_id", user.id)
+      .eq("brewery_id", brewery_id)
+      .eq("status", "pending");
+  }
 
   // Generate unique code (retry up to 3 times on collision)
   let code = "";
@@ -113,7 +140,8 @@ export async function POST(req: Request) {
         code,
         type,
         user_id: user.id,
-        brewery_id,
+        brewery_id: brewery_id ?? null,
+        brand_id: brand_id ?? null,
         program_id: program_id ?? null,
         mug_club_id: mug_club_id ?? null,
         perk_index: perk_index ?? null,

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { rateLimitResponse } from "@/lib/rate-limit";
+import { redeemBrandReward } from "@/lib/brand-loyalty";
 
 // POST /api/brewery/[brewery_id]/redemptions/confirm — staff confirms a redemption code
 export async function POST(
@@ -43,8 +44,9 @@ export async function POST(
     return NextResponse.json({ error: "Invalid code format" }, { status: 400 });
   }
 
-  // Look up the code
-  const { data: redemption, error: lookupError } = await supabase
+  // Look up the code — first try brewery-scoped, then brand-scoped
+  let redemption: any = null;
+  const { data: breweryCode } = await supabase
     .from("redemption_codes")
     .select("*, profile:profiles!redemption_codes_user_id_fkey(display_name, username)")
     .eq("code", code.toUpperCase())
@@ -52,7 +54,31 @@ export async function POST(
     .eq("status", "pending")
     .single();
 
-  if (lookupError || !redemption) {
+  if (breweryCode) {
+    redemption = breweryCode;
+  } else {
+    // Check if this is a brand loyalty code — look up by code + brand
+    const { data: brewery } = await (supabase
+      .from("breweries")
+      .select("brand_id")
+      .eq("id", brewery_id)
+      .single() as any);
+
+    if (brewery?.brand_id) {
+      const { data: brandCode } = await (supabase
+        .from("redemption_codes")
+        .select("*, profile:profiles!redemption_codes_user_id_fkey(display_name, username)")
+        .eq("code", code.toUpperCase())
+        .eq("brand_id", brewery.brand_id)
+        .eq("type", "brand_loyalty_reward")
+        .eq("status", "pending")
+        .single() as any);
+
+      if (brandCode) redemption = brandCode;
+    }
+  }
+
+  if (!redemption) {
     return NextResponse.json({ error: "Invalid or expired code" }, { status: 404 });
   }
 
@@ -121,6 +147,30 @@ export async function POST(
 
     const perks = (club?.perks ?? []) as string[];
     redeemDescription = perks[redemption.perk_index ?? 0] ?? "Mug club perk";
+  } else if (redemption.type === "brand_loyalty_reward") {
+    // Brand loyalty reward — find user's brand card and redeem
+    const { data: brandCard } = await (supabase
+      .from("brand_loyalty_cards")
+      .select("id, stamps, program:brand_loyalty_programs(stamps_required, reward_description)")
+      .eq("user_id", redemption.user_id)
+      .eq("brand_id", redemption.brand_id)
+      .single() as any);
+
+    if (!brandCard) {
+      return NextResponse.json({ error: "Brand loyalty card not found" }, { status: 404 });
+    }
+
+    const brandProgram = brandCard.program as any;
+    if (!brandProgram || (brandCard.stamps ?? 0) < (brandProgram.stamps_required ?? 0)) {
+      return NextResponse.json({ error: "User no longer has enough stamps" }, { status: 400 });
+    }
+
+    const result = await redeemBrandReward(supabase, brandCard.id, brewery_id);
+    if (!result) {
+      return NextResponse.json({ error: "Failed to redeem brand reward" }, { status: 500 });
+    }
+
+    redeemDescription = brandProgram.reward_description ?? "Brand loyalty reward";
   } else if (redemption.type === "promotion") {
     // Get promotion details
     const promoId = (redemption as any).promotion_id;
