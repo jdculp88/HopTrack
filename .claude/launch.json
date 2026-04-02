@@ -3,7 +3,7 @@
   "configurations": [
     {
       "name": "Next.js Dev",
-      "runtimeExecutable": "/usr/local/Cellar/node@22/22.22.1_3/bin/npx",
+      "runtimeExecutable": "/usr/local/bin/npx",
       "runtimeArgs": ["next", "dev", "--hostname", "0.0.0.0"],
       "port": 3000,
       "autoPort": true

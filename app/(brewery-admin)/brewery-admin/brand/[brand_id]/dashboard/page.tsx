@@ -6,6 +6,7 @@ import { Building2, Settings, MapPin, GlassWater } from "lucide-react";
 import { BrandDashboardClient } from "./BrandDashboardClient";
 import { formatRelativeTime } from "@/lib/dates";
 import { verifyBrandAccess } from "@/lib/brand-auth";
+import { calculateBreweryKPIs, type BreweryKPIs } from "@/lib/kpi";
 
 export const revalidate = 30;
 
@@ -166,6 +167,36 @@ export default async function BrandDashboardPage({ params }: { params: Promise<{
     });
   }
 
+  // ── Brand-level KPIs (Sprint 124) ──
+  let brandKPIs: BreweryKPIs | null = null;
+  if (locationIds.length > 0) {
+    const [
+      { data: allSessionsFull },
+      { data: allBeerLogsFull },
+      { data: brandVisits },
+      { data: brandLoyaltyCards },
+      { data: brandRedemptions },
+      { data: brandFollowers },
+    ] = await Promise.all([
+      supabase.from("sessions").select("id, user_id, started_at, ended_at, is_active").in("brewery_id", locationIds).eq("is_active", false) as any,
+      supabase.from("beer_logs").select("id, beer_id, rating, quantity, logged_at").in("brewery_id", locationIds) as any,
+      supabase.from("brewery_visits").select("user_id, total_visits").in("brewery_id", locationIds) as any,
+      supabase.from("loyalty_cards").select("user_id").in("brewery_id", locationIds) as any,
+      supabase.from("loyalty_redemptions").select("id, redeemed_at").in("brewery_id", locationIds) as any,
+      supabase.from("brewery_follows").select("id, created_at").in("brewery_id", locationIds) as any,
+    ]);
+
+    brandKPIs = calculateBreweryKPIs({
+      sessions: (allSessionsFull as any[]) ?? [],
+      beerLogs: (allBeerLogsFull as any[]) ?? [],
+      breweryVisits: (brandVisits as any[]) ?? [],
+      loyaltyCards: (brandLoyaltyCards as any[]) ?? [],
+      loyaltyRedemptions: (brandRedemptions as any[]) ?? [],
+      followers: (brandFollowers as any[]) ?? [],
+      periodDays: 30,
+    });
+  }
+
   // ── Tap stats (lightweight query for dashboard overview card) ──
   let tapStats: { totalOnTap: number; totalOff: number; uniqueBeers: number; sharedBeers: number } | undefined;
   if (locationIds.length > 0) {
@@ -256,6 +287,7 @@ export default async function BrandDashboardPage({ params }: { params: Promise<{
           weeklyTrend,
         }}
         tapStats={tapStats}
+        brandKPIs={brandKPIs}
       />
     </div>
   );

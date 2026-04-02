@@ -10,6 +10,7 @@ import {
 import Link from "next/link";
 import { Sparkline, RecentActivityFeed } from "@/app/(brewery-admin)/brewery-admin/[brewery_id]/DashboardClient";
 import type { ActivityItem } from "@/app/(brewery-admin)/brewery-admin/[brewery_id]/DashboardClient";
+import { formatDuration, formatTrend, type BreweryKPIs } from "@/lib/kpi";
 
 interface BrandAnalytics {
   brand: {
@@ -72,6 +73,7 @@ interface BrandDashboardClientProps {
   brandId: string;
   initialData: BrandAnalytics;
   tapStats?: TapStats;
+  brandKPIs?: BreweryKPIs | null;
 }
 
 // ── Active Sessions Counter for Brand ──
@@ -126,7 +128,7 @@ function WoWTrend({ current, previous }: { current: number; previous: number }) 
   return <Minus size={14} style={{ color: "var(--text-muted)" }} />;
 }
 
-export function BrandDashboardClient({ brandId, initialData, tapStats }: BrandDashboardClientProps) {
+export function BrandDashboardClient({ brandId, initialData, tapStats, brandKPIs }: BrandDashboardClientProps) {
   const { stats, locationBreakdown, topBeers, recentActivity, weeklyTrend, locations } = initialData;
   const maxLocationSessions = Math.max(...locationBreakdown.map(l => l.sessions), 1);
 
@@ -196,6 +198,57 @@ export function BrandDashboardClient({ brandId, initialData, tapStats }: BrandDa
           </div>
         ))}
       </div>
+
+      {/* Brand KPIs — The Pulse (Sprint 124) */}
+      {brandKPIs && (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="rounded-2xl p-4 border text-center" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
+            <p className="font-display text-2xl font-bold" style={{ color: "var(--accent-gold)" }}>
+              {formatDuration(brandKPIs.avgSessionDuration)}
+            </p>
+            <p className="text-[10px] font-mono uppercase tracking-wider mt-1" style={{ color: "var(--text-muted)" }}>Avg Duration</p>
+            {(() => {
+              const trend = formatTrend(brandKPIs.avgSessionDurationTrend);
+              return trend ? (
+                <p className="text-[10px] font-mono font-bold mt-0.5" style={{ color: trend.color }}>{trend.text} vs prior</p>
+              ) : null;
+            })()}
+          </div>
+          <div className="rounded-2xl p-4 border text-center" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
+            <p className="font-display text-2xl font-bold" style={{ color: "var(--accent-gold)" }}>
+              {brandKPIs.beersPerVisit ?? "—"}
+            </p>
+            <p className="text-[10px] font-mono uppercase tracking-wider mt-1" style={{ color: "var(--text-muted)" }}>Beers / Visit</p>
+            {(() => {
+              const trend = formatTrend(brandKPIs.beersPerVisitTrend);
+              return trend ? (
+                <p className="text-[10px] font-mono font-bold mt-0.5" style={{ color: trend.color }}>{trend.text} vs prior</p>
+              ) : null;
+            })()}
+          </div>
+          <div className="rounded-2xl p-4 border text-center" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
+            <p className="font-display text-2xl font-bold" style={{ color: "var(--accent-gold)" }}>
+              {brandKPIs.retentionRate !== null ? `${brandKPIs.retentionRate}%` : "—"}
+            </p>
+            <p className="text-[10px] font-mono uppercase tracking-wider mt-1" style={{ color: "var(--text-muted)" }}>Retention</p>
+            {(() => {
+              const trend = formatTrend(brandKPIs.retentionTrend, "pp");
+              return trend ? (
+                <p className="text-[10px] font-mono font-bold mt-0.5" style={{ color: trend.color }}>{trend.text} vs prior</p>
+              ) : null;
+            })()}
+          </div>
+          <div className="rounded-2xl p-4 border text-center" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
+            <p className="font-display text-2xl font-bold" style={{ color: "var(--accent-gold)" }}>
+              {brandKPIs.returningVisitorPct !== null ? `${brandKPIs.returningVisitorPct}%` : "—"}
+            </p>
+            <p className="text-[10px] font-mono uppercase tracking-wider mt-1" style={{ color: "var(--text-muted)" }}>Returning</p>
+            <p className="text-[10px] mt-0.5" style={{ color: "var(--text-muted)" }}>
+              {brandKPIs.newVisitorPct !== null ? `${brandKPIs.newVisitorPct}% new` : "All locations"}
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Cross-location insight + Weekly trend */}
       <div className="grid lg:grid-cols-2 gap-4">

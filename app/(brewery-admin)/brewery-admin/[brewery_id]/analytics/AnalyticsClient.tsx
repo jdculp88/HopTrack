@@ -3,13 +3,20 @@
 import { useMemo, useState, useCallback, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, CartesianGrid, PieChart, Pie, Cell } from "recharts";
-import { Download } from "lucide-react";
+import { Download, Clock, Users, Heart, Award, TrendingUp, ShieldCheck } from "lucide-react";
 import { formatDateShort } from "@/lib/dates";
+import { calculateBreweryKPIs, formatDuration, formatTrend } from "@/lib/kpi";
 
 interface AnalyticsClientProps {
   breweryId: string;
   sessions: any[];
   beerLogs: any[];
+  breweryVisits?: any[];
+  loyaltyCards?: any[];
+  loyaltyRedemptions?: any[];
+  followers?: any[];
+  profiles?: Record<string, { display_name?: string; username?: string }>;
+  userSessionCounts?: Record<string, number>;
 }
 
 type TimeRange = "7d" | "30d" | "90d" | "all";
@@ -27,7 +34,16 @@ function isValidRange(v: string | null): v is TimeRange {
   return v === "7d" || v === "30d" || v === "90d" || v === "all";
 }
 
-function AnalyticsInner({ sessions: allSessions, beerLogs: allBeerLogs }: { sessions: any[]; beerLogs: any[] }) {
+function AnalyticsInner({ sessions: allSessions, beerLogs: allBeerLogs, breweryVisits, loyaltyCards, loyaltyRedemptions, followers, profiles, userSessionCounts }: {
+  sessions: any[];
+  beerLogs: any[];
+  breweryVisits?: any[];
+  loyaltyCards?: any[];
+  loyaltyRedemptions?: any[];
+  followers?: any[];
+  profiles?: Record<string, { display_name?: string; username?: string }>;
+  userSessionCounts?: Record<string, number>;
+}) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const rangeParam = searchParams.get("range");
@@ -160,6 +176,33 @@ function AnalyticsInner({ sessions: allSessions, beerLogs: allBeerLogs }: { sess
     return Math.round((repeats / total) * 100);
   }, [sessions]);
 
+  // ── Enhanced KPIs (Sprint 124) ──────────────────────────────────────────
+  const kpis = useMemo(() => {
+    const option = RANGE_OPTIONS.find((o) => o.key === range)!;
+    return calculateBreweryKPIs({
+      sessions: allSessions,
+      beerLogs: allBeerLogs,
+      breweryVisits,
+      loyaltyCards,
+      loyaltyRedemptions,
+      followers,
+      profiles,
+      periodDays: option.days ?? 365,
+    });
+  }, [allSessions, allBeerLogs, breweryVisits, loyaltyCards, loyaltyRedemptions, followers, profiles, range]);
+
+  // Top customers for the Customer Health section
+  const topCustomers = useMemo(() => {
+    if (!userSessionCounts || !profiles) return [];
+    return Object.entries(userSessionCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([userId, visits]) => ({
+        name: profiles[userId]?.display_name ?? profiles[userId]?.username ?? "Anonymous",
+        visits,
+      }));
+  }, [userSessionCounts, profiles]);
+
   // Beer Performance — per-beer engagement metrics with trending direction
   const beerPerformance = useMemo(() => {
     // eslint-disable-next-line react-hooks/purity
@@ -232,11 +275,25 @@ function AnalyticsInner({ sessions: allSessions, beerLogs: allBeerLogs }: { sess
   const xAxisInterval = range === "7d" ? 0 : range === "30d" ? 6 : 14;
 
   function exportCSV() {
-    const rows: string[][] = [
+    // Summary section with KPIs
+    const summaryRows: string[][] = [
+      ["Metric", "Value"],
+      ["Period", rangeLabel],
+      ["Total Visits", String(totalVisits)],
+      ["Unique Visitors", String(uniqueVisitors)],
+      ["Repeat Visitor %", repeatVisitorPct != null ? `${repeatVisitorPct}%` : ""],
+      ["Avg Session Duration", formatDuration(kpis.avgSessionDuration)],
+      ["Beers Per Visit", kpis.beersPerVisit != null ? String(kpis.beersPerVisit) : ""],
+      ["Retention Rate", kpis.retentionRate != null ? `${kpis.retentionRate}%` : ""],
+      ["Loyalty Conversion", kpis.loyaltyConversionRate != null ? `${kpis.loyaltyConversionRate}%` : ""],
+      ["Loyalty Redemptions", String(kpis.loyaltyRedemptions)],
+      ["Follower Growth", kpis.followerGrowthRate != null ? `${kpis.followerGrowthRate}%` : ""],
+      ["Peak Hour", kpis.peakHour?.label ?? ""],
+      [],
       ["Beer Name", "Style", "Total Pours", "Avg Rating", "Rating Count", "Days On Tap", "Trend"],
     ];
     sortedBeerPerf.forEach(b => {
-      rows.push([
+      summaryRows.push([
         b.name,
         b.style ?? "",
         String(b.pours),
@@ -246,7 +303,7 @@ function AnalyticsInner({ sessions: allSessions, beerLogs: allBeerLogs }: { sess
         b.trend,
       ]);
     });
-    const csvContent = rows.map(r => r.map(cell => `"${cell.replace(/"/g, '""')}"`).join(",")).join("\n");
+    const csvContent = summaryRows.map(r => r.map(cell => `"${cell.replace(/"/g, '""')}"`).join(",")).join("\n");
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -440,6 +497,160 @@ function AnalyticsInner({ sessions: allSessions, beerLogs: allBeerLogs }: { sess
             </ResponsiveContainer>
           </div>
 
+          {/* ── Customer Health (Sprint 124) ──────────────────────────── */}
+          <div className="rounded-2xl p-6 border" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
+            <div className="flex items-center gap-2 mb-4">
+              <ShieldCheck size={16} style={{ color: "var(--accent-gold)" }} />
+              <h2 className="font-display font-bold" style={{ color: "var(--text-primary)" }}>Customer Health</h2>
+            </div>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+              {[
+                { label: "Retention Rate", value: kpis.retentionRate !== null ? `${kpis.retentionRate}%` : "—", trend: formatTrend(kpis.retentionTrend, "pp"), sub: "Return rate" },
+                { label: "Avg Duration", value: formatDuration(kpis.avgSessionDuration), trend: formatTrend(kpis.avgSessionDurationTrend), sub: "Per session" },
+                { label: "Beers / Visit", value: kpis.beersPerVisit !== null ? `${kpis.beersPerVisit}` : "—", trend: formatTrend(kpis.beersPerVisitTrend), sub: "Avg pours" },
+                { label: "Peak Hour", value: kpis.peakHour?.label ?? "—", trend: null, sub: kpis.peakHour ? `${kpis.peakHour.count} visits` : "No data" },
+              ].map(({ label, value, trend, sub }) => (
+                <div key={label} className="text-center">
+                  <p className="font-display text-xl sm:text-2xl font-bold" style={{ color: "var(--accent-gold)" }}>{value}</p>
+                  <p className="text-[10px] font-mono uppercase tracking-wider mt-1" style={{ color: "var(--text-muted)" }}>{label}</p>
+                  {trend ? (
+                    <p className="text-[10px] font-mono font-bold mt-0.5" style={{ color: trend.color }}>{trend.text}</p>
+                  ) : (
+                    <p className="text-[10px] mt-0.5" style={{ color: "var(--text-muted)" }}>{sub}</p>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* New vs Returning split bar */}
+            {kpis.newVisitorPct !== null && kpis.returningVisitorPct !== null && (
+              <div className="mb-4">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-xs" style={{ color: "var(--text-secondary)" }}>New vs Returning Visitors</span>
+                  <span className="text-xs font-mono" style={{ color: "var(--text-muted)" }}>
+                    {kpis.newVisitorPct}% new · {kpis.returningVisitorPct}% returning
+                  </span>
+                </div>
+                <div className="flex h-3 rounded-full overflow-hidden" style={{ background: "var(--border)" }}>
+                  <div
+                    className="h-full transition-all"
+                    style={{ width: `${kpis.returningVisitorPct}%`, background: "var(--accent-gold)" }}
+                  />
+                  <div
+                    className="h-full transition-all"
+                    style={{ width: `${kpis.newVisitorPct}%`, background: "color-mix(in srgb, var(--accent-gold) 30%, transparent)" }}
+                  />
+                </div>
+                <div className="flex items-center gap-4 mt-1.5">
+                  <span className="flex items-center gap-1.5 text-[10px]" style={{ color: "var(--text-muted)" }}>
+                    <span className="w-2 h-2 rounded-full inline-block" style={{ background: "var(--accent-gold)" }} /> Returning
+                  </span>
+                  <span className="flex items-center gap-1.5 text-[10px]" style={{ color: "var(--text-muted)" }}>
+                    <span className="w-2 h-2 rounded-full inline-block" style={{ background: "color-mix(in srgb, var(--accent-gold) 30%, transparent)" }} /> New
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Top Customers */}
+            {topCustomers.length > 0 && (
+              <div>
+                <p className="text-xs font-semibold mb-2" style={{ color: "var(--text-secondary)" }}>Top Customers ({rangeLabel})</p>
+                <div className="space-y-1.5">
+                  {topCustomers.map((c, i) => (
+                    <div key={c.name + i} className="flex items-center justify-between px-3 py-2 rounded-xl"
+                      style={{ background: i % 2 === 0 ? "var(--surface-2)" : "transparent" }}>
+                      <div className="flex items-center gap-2.5">
+                        <span className="font-mono text-[10px] w-4 text-right" style={{ color: i < 3 ? "var(--accent-gold)" : "var(--text-muted)" }}>
+                          {i + 1}
+                        </span>
+                        <span className="text-sm" style={{ color: "var(--text-primary)" }}>{c.name}</span>
+                      </div>
+                      <span className="font-mono text-xs" style={{ color: "var(--accent-gold)" }}>
+                        {c.visits} visit{c.visits !== 1 ? "s" : ""}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* ── Loyalty Performance (Sprint 124) ─────────────────────────── */}
+          <div className="rounded-2xl p-6 border" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
+            <div className="flex items-center gap-2 mb-4">
+              <Award size={16} style={{ color: "var(--accent-gold)" }} />
+              <h2 className="font-display font-bold" style={{ color: "var(--text-primary)" }}>Loyalty Performance</h2>
+            </div>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              {[
+                {
+                  label: "Conversion Rate",
+                  value: kpis.loyaltyConversionRate !== null ? `${kpis.loyaltyConversionRate}%` : "—",
+                  sub: "Visitors → Members",
+                },
+                {
+                  label: "Redemptions",
+                  value: `${kpis.loyaltyRedemptions}`,
+                  trend: formatTrend(kpis.loyaltyRedemptionsTrend),
+                  sub: rangeLabel,
+                },
+                {
+                  label: "Avg Rating",
+                  value: kpis.avgRatingTrend !== null
+                    ? `${kpis.avgRatingTrend >= 0 ? "+" : ""}${kpis.avgRatingTrend}`
+                    : "—",
+                  sub: "Rating trend",
+                  color: kpis.avgRatingTrend !== null
+                    ? kpis.avgRatingTrend >= 0 ? "#22c55e" : "#ef4444"
+                    : undefined,
+                },
+                {
+                  label: "Follower Growth",
+                  value: kpis.followerGrowthRate !== null ? `${kpis.followerGrowthRate >= 0 ? "+" : ""}${kpis.followerGrowthRate}%` : "—",
+                  sub: "New followers",
+                  color: kpis.followerGrowthRate !== null
+                    ? kpis.followerGrowthRate >= 0 ? "#22c55e" : "#ef4444"
+                    : undefined,
+                },
+              ].map(({ label, value, trend, sub, color }) => (
+                <div key={label} className="text-center">
+                  <p className="font-display text-xl sm:text-2xl font-bold" style={{ color: color ?? "var(--accent-gold)" }}>{value}</p>
+                  <p className="text-[10px] font-mono uppercase tracking-wider mt-1" style={{ color: "var(--text-muted)" }}>{label}</p>
+                  {trend ? (
+                    <p className="text-[10px] font-mono font-bold mt-0.5" style={{ color: trend.color }}>{trend.text}</p>
+                  ) : (
+                    <p className="text-[10px] mt-0.5" style={{ color: "var(--text-muted)" }}>{sub}</p>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Sentiment breakdown */}
+            {kpis.reviewSentiment && (
+              <div className="mt-4 pt-4" style={{ borderTop: "1px solid var(--border)" }}>
+                <p className="text-xs font-semibold mb-2" style={{ color: "var(--text-secondary)" }}>Review Sentiment</p>
+                <div className="flex items-center gap-4">
+                  {[
+                    { label: "Positive (4-5★)", count: kpis.reviewSentiment.positive, color: "#22c55e" },
+                    { label: "Neutral (2.5-3.5★)", count: kpis.reviewSentiment.neutral, color: "var(--accent-gold)" },
+                    { label: "Negative (<2.5★)", count: kpis.reviewSentiment.negative, color: "#ef4444" },
+                  ].map(({ label, count, color }) => {
+                    const total = kpis.reviewSentiment!.positive + kpis.reviewSentiment!.neutral + kpis.reviewSentiment!.negative;
+                    const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+                    return (
+                      <div key={label} className="flex-1 text-center">
+                        <p className="font-mono text-lg font-bold" style={{ color }}>{pct}%</p>
+                        <p className="text-[10px]" style={{ color: "var(--text-muted)" }}>{label}</p>
+                        <p className="text-[10px] font-mono" style={{ color: "var(--text-muted)" }}>{count} ratings</p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* Beer Performance */}
           {sortedBeerPerf.length > 0 && (
             <div className="rounded-2xl p-6 border" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
@@ -547,7 +758,7 @@ function AnalyticsInner({ sessions: allSessions, beerLogs: allBeerLogs }: { sess
   );
 }
 
-export function AnalyticsClient({ breweryId: _breweryId, sessions, beerLogs }: AnalyticsClientProps) {
+export function AnalyticsClient({ breweryId: _breweryId, sessions, beerLogs, breweryVisits, loyaltyCards, loyaltyRedemptions, followers, profiles, userSessionCounts }: AnalyticsClientProps) {
   return (
     <Suspense fallback={
       <div className="p-6 lg:p-8 max-w-5xl mx-auto pt-16 lg:pt-8">
@@ -557,7 +768,16 @@ export function AnalyticsClient({ breweryId: _breweryId, sessions, beerLogs }: A
         </div>
       </div>
     }>
-      <AnalyticsInner sessions={sessions} beerLogs={beerLogs} />
+      <AnalyticsInner
+        sessions={sessions}
+        beerLogs={beerLogs}
+        breweryVisits={breweryVisits}
+        loyaltyCards={loyaltyCards}
+        loyaltyRedemptions={loyaltyRedemptions}
+        followers={followers}
+        profiles={profiles}
+        userSessionCounts={userSessionCounts}
+      />
     </Suspense>
   );
 }

@@ -11,8 +11,10 @@ import { getLevelProgress } from "@/lib/xp";
 import { generateGradientFromString, formatABV } from "@/lib/utils";
 import { getStyleFamily, getStyleVars } from "@/lib/beerStyleColors";
 import { BeerDNACard } from "@/components/profile/BeerDNACard";
+import { DrinkerStatsCard } from "@/components/profile/DrinkerStatsCard";
 import { PageEnterWrapper } from "@/components/ui/PageEnterWrapper";
 import { MugClubMemberships } from "@/components/profile/MugClubMemberships";
+import { calculateDrinkerKPIs } from "@/lib/kpi";
 
 export async function generateMetadata({ params }: { params: Promise<{ username: string }> }) {
   const { username } = await params;
@@ -97,6 +99,58 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
     .select("id, status, joined_at, expires_at, mug_club:mug_clubs(id, name, brewery_id, annual_fee, perks), brewery:mug_clubs!inner(brewery:breweries(id, name, city, state))")
     .eq("user_id", profile.id)
     .eq("status", "active") as any);
+
+  // ── Drinker KPI data (Sprint 124) ──────────────────────────────────────
+  const [
+    { data: drinkerSessions },
+    { data: drinkerBreweries },
+    { count: friendCount },
+    { count: reactionCount },
+    { count: commentCount },
+    { count: totalAchievementCount },
+  ] = await Promise.all([
+    supabase
+      .from("sessions")
+      .select("id, started_at, ended_at, brewery_id")
+      .eq("user_id", profile.id)
+      .eq("is_active", false) as any,
+    supabase
+      .from("breweries")
+      .select("id, city, state") as any,
+    supabase
+      .from("friendships")
+      .select("id", { count: "exact", head: true })
+      .or(`user_id.eq.${profile.id},friend_id.eq.${profile.id}`)
+      .eq("status", "accepted"),
+    supabase
+      .from("reactions")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", profile.id),
+    supabase
+      .from("session_comments")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", profile.id),
+    supabase
+      .from("achievements")
+      .select("id", { count: "exact", head: true }),
+  ]);
+
+  const drinkerKPIs = calculateDrinkerKPIs({
+    sessions: ((drinkerSessions as any[]) ?? []),
+    beerLogs: ((favBeerRows as any[]) ?? []).map((r: any) => ({
+      beer_id: r.beer_id,
+      rating: r.rating,
+      quantity: r.quantity,
+      logged_at: r.logged_at ?? new Date().toISOString(),
+      beer: r.beer ? { style: r.beer.style, abv: r.beer.abv } : undefined,
+    })),
+    breweries: (drinkerBreweries as any[]) ?? [],
+    friendCount: friendCount ?? 0,
+    reactionCount: reactionCount ?? 0,
+    commentCount: commentCount ?? 0,
+    achievementCount: (userAchievements as any[])?.length ?? 0,
+    totalAchievements: totalAchievementCount ?? 0,
+  });
 
   // Taste DNA — style distribution from beer logs
   const styleDNA = (() => {
@@ -225,6 +279,11 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
               )}
             </div>
           )}
+        </div>
+
+        {/* Drinker Stats (Sprint 124) */}
+        <div className="mb-6">
+          <DrinkerStatsCard kpis={drinkerKPIs} username={username} isOwnProfile={isOwnProfile} />
         </div>
 
         {/* Bio */}

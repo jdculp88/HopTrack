@@ -8,6 +8,7 @@ import {
   List, Clock, Heart, BarChart3, QrCode, Eye, Zap, Gift, RefreshCw,
 } from "lucide-react";
 import { formatRelativeTime } from "@/lib/dates";
+import { calculateBreweryKPIs, calculateBreweryKPISparklines, formatDuration, formatTrend } from "@/lib/kpi";
 import BreweryOnboardingCard from "@/components/brewery-admin/BreweryOnboardingCard";
 import { OnboardingWizard } from "@/components/brewery-admin/onboarding/OnboardingWizard";
 import ROIDashboardCard from "@/components/brewery-admin/ROIDashboardCard";
@@ -134,6 +135,51 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
       .eq("is_active", true) as any,
   ]);
 
+  // Additional data for KPIs — brewery_visits, loyalty_cards, loyalty_redemptions, followers with dates, profiles
+  const [
+    { data: breweryVisits },
+    { data: loyaltyCards },
+    { data: loyaltyRedemptions },
+    { data: allFollowers },
+  ] = await Promise.all([
+    supabase
+      .from("brewery_visits")
+      .select("user_id, total_visits")
+      .eq("brewery_id", brewery_id) as any,
+    supabase
+      .from("loyalty_cards")
+      .select("user_id")
+      .eq("brewery_id", brewery_id) as any,
+    supabase
+      .from("loyalty_redemptions")
+      .select("id, redeemed_at")
+      .eq("brewery_id", brewery_id) as any,
+    supabase
+      .from("brewery_follows")
+      .select("id, created_at")
+      .eq("brewery_id", brewery_id) as any,
+  ]);
+
+  // Build profile lookup for top customer display
+  const topSessionUserIds = Object.entries(
+    ((allSessions as any[]) ?? []).reduce((acc: Record<string, number>, s: any) => {
+      if (s.user_id) acc[s.user_id] = (acc[s.user_id] ?? 0) + 1;
+      return acc;
+    }, {})
+  ).sort((a, b) => (b[1] as number) - (a[1] as number)).slice(0, 3).map(([id]) => id);
+
+  const { data: topProfiles } = topSessionUserIds.length > 0
+    ? await supabase
+        .from("profiles")
+        .select("id, display_name, username")
+        .in("id", topSessionUserIds) as any
+    : { data: [] };
+
+  const profileLookup: Record<string, { display_name?: string; username?: string }> = {};
+  ((topProfiles as any[]) ?? []).forEach((p: any) => {
+    profileLookup[p.id] = { display_name: p.display_name, username: p.username };
+  });
+
   // Follower counts (separate queries for count)
   const { count: totalFollowerCount } = await supabase
     .from("brewery_follows")
@@ -205,6 +251,23 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
 
   const onTapCount = ((beers as any[]) ?? []).filter((b: any) => b.is_on_tap).length;
   const totalBeerCount = ((beers as any[]) ?? []).length;
+
+  // ── Enhanced KPIs (Sprint 124) ────────────────────────────────────────────
+  const kpis = calculateBreweryKPIs({
+    sessions: sessions as any[],
+    beerLogs: beerLogs as any[],
+    breweryVisits: (breweryVisits as any[]) ?? [],
+    loyaltyCards: (loyaltyCards as any[]) ?? [],
+    loyaltyRedemptions: (loyaltyRedemptions as any[]) ?? [],
+    followers: (allFollowers as any[]) ?? [],
+    beers: (beers as any[]) ?? [],
+    profiles: profileLookup,
+    periodDays: 30,
+  });
+  const sparklines = calculateBreweryKPISparklines({
+    sessions: sessions as any[],
+    beerLogs: beerLogs as any[],
+  });
 
   // Onboarding
   const hasBeers = totalBeerCount > 0;
@@ -427,6 +490,105 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
           <p className="text-[10px] mt-2 truncate" style={{ color: (todayNewFollowers ?? 0) > 0 ? "#22c55e" : "var(--text-muted)" }}>
             {(todayNewFollowers ?? 0) > 0 ? `+${todayNewFollowers} today` : "No new followers today"}
           </p>
+        </div>
+      </div>
+
+      {/* ── KPI Cards Row 2 — The Pulse (Sprint 124) ──────────────── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        {/* Avg Session Duration */}
+        <div className="rounded-2xl p-5 border" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-[10px] font-mono uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Avg Duration</p>
+            <Clock size={14} style={{ color: "var(--accent-gold)" }} />
+          </div>
+          <div className="flex items-end justify-between">
+            <p className="font-display text-2xl sm:text-3xl font-bold" style={{ color: "var(--text-primary)" }}>
+              {formatDuration(kpis.avgSessionDuration)}
+            </p>
+            <Sparkline data={sparklines.avgDuration} />
+          </div>
+          {(() => {
+            const trend = formatTrend(kpis.avgSessionDurationTrend);
+            return trend ? (
+              <div className="flex items-center gap-1 mt-2">
+                <span className="text-[10px] font-mono font-bold" style={{ color: trend.color }}>{trend.text}</span>
+                <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>vs prior 30d</span>
+              </div>
+            ) : (
+              <p className="text-[10px] mt-2" style={{ color: "var(--text-muted)" }}>Last 30 days</p>
+            );
+          })()}
+        </div>
+
+        {/* Beers Per Visit */}
+        <div className="rounded-2xl p-5 border" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-[10px] font-mono uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Beers / Visit</p>
+            <Beer size={14} style={{ color: "var(--accent-gold)" }} />
+          </div>
+          <div className="flex items-end justify-between">
+            <p className="font-display text-2xl sm:text-3xl font-bold" style={{ color: "var(--text-primary)" }}>
+              {kpis.beersPerVisit ?? "—"}
+            </p>
+            <Sparkline data={sparklines.beersPerVisit} />
+          </div>
+          {(() => {
+            const trend = formatTrend(kpis.beersPerVisitTrend);
+            return trend ? (
+              <div className="flex items-center gap-1 mt-2">
+                <span className="text-[10px] font-mono font-bold" style={{ color: trend.color }}>{trend.text}</span>
+                <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>vs prior 30d</span>
+              </div>
+            ) : (
+              <p className="text-[10px] mt-2" style={{ color: "var(--text-muted)" }}>Avg pours per session</p>
+            );
+          })()}
+        </div>
+
+        {/* New vs Returning */}
+        <div className="rounded-2xl p-5 border" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-[10px] font-mono uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Returning</p>
+            <RefreshCw size={14} style={{ color: "var(--accent-gold)" }} />
+          </div>
+          <div className="flex items-end justify-between">
+            <p className="font-display text-2xl sm:text-3xl font-bold" style={{ color: "var(--text-primary)" }}>
+              {kpis.returningVisitorPct !== null ? `${kpis.returningVisitorPct}%` : "—"}
+            </p>
+            <Sparkline data={sparklines.returningPct} />
+          </div>
+          {kpis.newVisitorPct !== null ? (
+            <p className="text-[10px] mt-2" style={{ color: "var(--text-muted)" }}>
+              {kpis.newVisitorPct}% new · {kpis.returningVisitorPct}% returning
+            </p>
+          ) : (
+            <p className="text-[10px] mt-2" style={{ color: "var(--text-muted)" }}>Visitor breakdown</p>
+          )}
+        </div>
+
+        {/* Customer Retention */}
+        <div className="rounded-2xl p-5 border" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-[10px] font-mono uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Retention</p>
+            <Award size={14} style={{ color: "var(--accent-gold)" }} />
+          </div>
+          <div className="flex items-end justify-between">
+            <p className="font-display text-2xl sm:text-3xl font-bold" style={{ color: "var(--text-primary)" }}>
+              {kpis.retentionRate !== null ? `${kpis.retentionRate}%` : "—"}
+            </p>
+            <Sparkline data={sparklines.retention} />
+          </div>
+          {(() => {
+            const trend = formatTrend(kpis.retentionTrend, "pp");
+            return trend ? (
+              <div className="flex items-center gap-1 mt-2">
+                <span className="text-[10px] font-mono font-bold" style={{ color: trend.color }}>{trend.text}</span>
+                <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>vs prior period</span>
+              </div>
+            ) : (
+              <p className="text-[10px] mt-2" style={{ color: "var(--text-muted)" }}>30-day return rate</p>
+            );
+          })()}
         </div>
       </div>
 

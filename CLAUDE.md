@@ -262,8 +262,10 @@ scripts/supabase-setup.mjs    — One-time setup script
 
 ## 🗺️ Where We Are
 
-**Last Completed Sprint:** Sprint 123 — The Fix ✅
+**Last Completed Sprint:** Sprint 124 — The Pulse ✅
 **Arc:** Multi-Location (Sprints 114-137)
+**Retro (124):** `docs/retros/sprint-124-retro.md` (facilitated by Morgan)
+**Last completed:** Sprint 124 — The Pulse ✅ — Enhanced KPIs & Analytics (REQ-069 COMPLETE). `lib/kpi.ts` calculation engine: `calculateBreweryKPIs()` (12 metrics: avg duration, beers/visit, new vs returning, retention, loyalty conversion, redemptions, top customer, peak hour, rating trend, sentiment, follower growth, tap freshness), `calculateBreweryKPISparklines()` (7-day daily sparklines), `calculateDrinkerKPIs()` (14 metrics: avg rating, beers/session, favorite style, ABV, total pours, sessions, longest/avg duration, new beers, cities/states, social score, achievements). Brewery dashboard 2nd row of 4 KPI cards with sparklines + WoW trends. Analytics page: Customer Health section (retention, duration, beers/visit, peak hour, top 5 customers, new vs returning split bar) + Loyalty Performance section (conversion, redemptions, rating trend, follower growth, sentiment breakdown). Drinker profile `DrinkerStatsCard` (collapsible, 6+8 stats, Web Share API). Brand dashboard KPI rollup (4 cards: duration, beers/visit, retention, returning %). CSV export enhanced with KPI summary. 3 new files, 6 modified, 0 migrations, 34 new tests (765 → 799).
 **Retro (123):** `docs/retros/sprint-123-retro.md` (facilitated by Morgan)
 **Last completed:** Sprint 123 — The Fix ✅ — Brand hardening sprint. Migration 081: `is_brand_manager_or_owner()` SECURITY DEFINER function fixes RLS recursion on `brand_accounts` (silent zero-row bug since Sprint 122). `lib/brand-auth.ts` shared `verifyBrandAccess()` with brewery_accounts fallback. All 16 brand API routes standardized (removed 3 local auth helpers). Members API FK fix (two-step profile hydration). Mobile brand nav (3 tabs: Brand, Team, Catalog). Brand error boundary. Nav dropdown brand link fix. 3 guardrail tests: RLS safety scanner, route standardization guard, brand-auth unit tests. 22 modified, 5 created, 1 migration, 9 new tests (756 → 765).
 **Retro (122):** `docs/retros/sprint-122-retro.md` (facilitated by Morgan)
