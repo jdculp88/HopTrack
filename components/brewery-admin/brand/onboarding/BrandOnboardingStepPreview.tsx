@@ -39,10 +39,10 @@ export function BrandOnboardingStepPreview({
           <BarChart3 size={20} style={{ color: "var(--accent-gold)" }} />
         </div>
         <h3 className="font-display text-lg font-bold" style={{ color: "var(--text-primary)" }}>
-          You&apos;re almost ready!
+          You're almost ready!
         </h3>
         <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
-          Here&apos;s what you&apos;ve set up for {brandName}.
+          Here's what you've set up for {brandName}.
         </p>
       </div>
 
@@ -102,7 +102,7 @@ export function BrandOnboardingStepPreview({
           <>
             <p className="text-2xl mb-1">🍺</p>
             <p className="font-display font-bold" style={{ color: "var(--text-primary)" }}>
-              No worries — come back and set up when you&apos;re ready.
+              No worries — come back and set up when you're ready.
             </p>
           </>
         )}

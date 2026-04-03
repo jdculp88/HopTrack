@@ -135,7 +135,7 @@ function BeerRow({
             fontSize: fs.style, fontWeight: 800, textTransform: "uppercase",
             letterSpacing: "0.1em", color: C.danger,
           }}>
-            86&apos;D
+            86'D
           </span>
         </div>
       </motion.div>

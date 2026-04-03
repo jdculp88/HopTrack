@@ -268,7 +268,7 @@ export function NotificationsClient({ notifications: initial }: NotificationsCli
             </div>
             <p className="font-display text-xl text-[var(--text-primary)]">The taps are quiet</p>
             <p className="text-[var(--text-secondary)] text-sm max-w-xs mx-auto">
-              No notifications yet -- start a session to get social! Your friends&apos; cheers and comments will show up here.
+              No notifications yet -- start a session to get social! Your friends' cheers and comments will show up here.
             </p>
             <Link
               href="/explore"

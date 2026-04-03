@@ -33,7 +33,7 @@ export function OnboardingCard({ onDismiss }: { onDismiss: () => void }) {
         Welcome to HopTrack!
       </h3>
       <p className="text-sm mb-4" style={{ color: "var(--text-secondary)" }}>
-        Here&rsquo;s how to get started:
+        Here's how to get started:
       </p>
       <div className="space-y-3">
         <button

@@ -423,7 +423,7 @@ export function ExploreClient({
           ) : (
             <>
               <p className="text-sm text-[var(--text-muted)]">
-                {filteredBreweries.length} result{filteredBreweries.length !== 1 ? "s" : ""} for &ldquo;{query}&rdquo;
+                {filteredBreweries.length} result{filteredBreweries.length !== 1 ? "s" : ""} for "{query}"
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {filteredBreweries.map((b: any, i: number) => {
@@ -754,7 +754,7 @@ function SearchEmptyState({ query, onClear }: { query: string; onClear: () => vo
         No breweries found
       </h3>
       <p className="text-sm text-[var(--text-muted)] max-w-sm mb-4">
-        Nothing matched &ldquo;{query}&rdquo;. Try a different name, city, or style.
+        Nothing matched "{query}". Try a different name, city, or style.
       </p>
       <button
         onClick={onClear}

@@ -9,6 +9,8 @@ const withBundleAnalyzer = bundleAnalyzer({
 const nextConfig: NextConfig = {
   // Enabled in Sprint 104 — double-render in dev catches side-effect bugs before prod.
   reactStrictMode: true,
+  // Explicitly disable source maps in production client bundles (Sprint 137 — The Shield)
+  productionBrowserSourceMaps: false,
   experimental: {
     // Brief client-side Router Cache — keeps layout RSC payloads for 30s so
     // tab switches don't re-fetch auth + profile every click. Mutations call
@@ -41,9 +43,25 @@ const nextConfig: NextConfig = {
       },
       {
         // Main app routes: prevent framing by default (override below for embeds)
+        // Content-Security-Policy in Report-Only mode (Sprint 137 — The Shield)
         source: "/((?!embed).*)",
         headers: [
           { key: "X-Frame-Options", value: "SAMEORIGIN" },
+          {
+            key: "Content-Security-Policy-Report-Only",
+            value: [
+              "default-src 'self'",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+              "style-src 'self' 'unsafe-inline'",
+              "img-src 'self' data: blob: https://images.unsplash.com https://*.supabase.co https://lh3.googleusercontent.com https://api.dicebear.com https://i.pravatar.cc https://ui-avatars.com https://picsum.photos https://randomuser.me https://unpkg.com",
+              "font-src 'self' https://fonts.gstatic.com",
+              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.sentry.io",
+              "frame-ancestors 'self'",
+              "object-src 'none'",
+              "base-uri 'self'",
+              "form-action 'self'",
+            ].join("; "),
+          },
         ],
       },
       {

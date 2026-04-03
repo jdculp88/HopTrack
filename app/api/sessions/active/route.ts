@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { apiUnauthorized, apiServerError } from '@/lib/api-response'
+import { rateLimitResponse } from '@/lib/rate-limit'
 
 // GET /api/sessions/active — get the current user's active session
 export async function GET(_request: NextRequest) {
+  const limited = rateLimitResponse(_request, "sessions-active", { limit: 30, windowMs: 60_000 });
+  if (limited) return limited;
+
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return apiUnauthorized()

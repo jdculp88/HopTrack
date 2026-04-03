@@ -104,12 +104,12 @@ export function PromotionsClient({ brewery }: PromotionsClientProps) {
               color: "var(--text-primary)",
             }}
           />
-          <p className="text-xs text-[var(--text-muted)]">{offer.length}/120 — shown on the stop card when a user&apos;s route includes you</p>
+          <p className="text-xs text-[var(--text-muted)]">{offer.length}/120 — shown on the stop card when a user's route includes you</p>
         </div>
 
         {eligible && (
           <div className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs" style={{ background: "color-mix(in srgb, var(--accent-gold) 10%, transparent)", color: "var(--accent-gold)" }}>
-            <Sparkles size={12} /> Taylor&apos;s note: This toggle is the pitch. Breweries can see exactly what their visitors will see.
+            <Sparkles size={12} /> Taylor's note: This toggle is the pitch. Breweries can see exactly what their visitors will see.
           </div>
         )}
       </div>

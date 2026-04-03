@@ -44,7 +44,7 @@ export function StorefrontGate({ children, isUnlocked, sectionName, breweryId }:
             {sectionName}
           </p>
           <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-            This brewery hasn&apos;t claimed their listing yet.
+            This brewery hasn't claimed their listing yet.
           </p>
           <Link
             href={`/brewery-admin/claim?brewery_id=${breweryId}`}

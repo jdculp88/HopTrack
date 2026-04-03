@@ -198,7 +198,7 @@ export function BarcodeScanner({ onBeerFound, onClose }: BarcodeScannerProps) {
             <Camera size={48} className="text-white/40" />
             <p className="text-lg font-display font-bold text-white">Barcode scanning not supported</p>
             <p className="text-sm text-white/60">
-              Your browser doesn&apos;t support barcode detection yet. Try Chrome on Android, or use the beer search to find your beer.
+              Your browser doesn't support barcode detection yet. Try Chrome on Android, or use the beer search to find your beer.
             </p>
             <button
               onClick={onClose}
@@ -229,7 +229,7 @@ export function BarcodeScanner({ onBeerFound, onClose }: BarcodeScannerProps) {
           <div className="absolute inset-0 flex flex-col items-center justify-center" style={{ background: "rgba(0,0,0,0.8)" }}>
             <AlertCircle size={48} style={{ color: "var(--accent-gold)" }} />
             <p className="text-lg font-display font-bold text-white mt-3">Beer not found</p>
-            <p className="text-sm text-white/60 mt-1">This barcode isn&apos;t in our database yet</p>
+            <p className="text-sm text-white/60 mt-1">This barcode isn't in our database yet</p>
             <p className="text-xs text-white/40 mt-1">Scanning again...</p>
           </div>
         )}

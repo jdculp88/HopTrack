@@ -45,7 +45,7 @@ export default async function PunchPage({
           Confirm Code
         </h1>
         <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
-          Enter the customer&apos;s redemption code to confirm their reward.
+          Enter the customer's redemption code to confirm their reward.
         </p>
       </div>
       <CodeEntry breweryId={brewery_id} />

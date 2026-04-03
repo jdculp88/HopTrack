@@ -103,7 +103,7 @@ export function BrandLocationsClient({ locations, brandId }: BrandLocationsClien
               </div>
               <div className="min-w-0">
                 <p className="text-xs font-semibold" style={{ color: "var(--accent-gold)" }}>
-                  You&apos;re closest to
+                  You're closest to
                 </p>
                 <p className="font-display font-bold text-sm truncate" style={{ color: "var(--text-primary)" }}>
                   {nearestLocation.name}

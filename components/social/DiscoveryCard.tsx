@@ -111,7 +111,7 @@ export function TrendingCard({ reviews, index = 0 }: { reviews: TrendingReview[]
             </div>
             {review.comment && (
               <p className="text-[10px] mt-1.5 line-clamp-2" style={{ color: 'var(--text-muted)' }}>
-                &ldquo;{review.comment}&rdquo;
+                "{review.comment}"
               </p>
             )}
           </motion.div>
@@ -153,7 +153,7 @@ export function BreweryReviewCard({ review, index = 0 }: { review: BreweryReview
             </p>
             {review.comment && (
               <p className="text-xs mt-0.5 truncate" style={{ color: 'var(--text-muted)' }}>
-                &ldquo;{review.comment}&rdquo;
+                "{review.comment}"
               </p>
             )}
           </div>

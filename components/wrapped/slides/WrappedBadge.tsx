@@ -110,7 +110,7 @@ export function WrappedBadge({ stats }: { stats: WrappedStats }) {
       >
         <Sparkles size={14} className="mx-auto mb-1.5" style={{ color: "#D4A843" }} />
         <p className="text-xs" style={{ color: "#C4B48A" }}>
-          Here&apos;s to the next pour
+          Here's to the next pour
         </p>
         <p className="text-[10px] font-mono mt-1" style={{ color: "#9E8E6E" }}>
           hoptrack.beer

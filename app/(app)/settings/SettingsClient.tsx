@@ -528,7 +528,7 @@ export function SettingsClient({ profile, userEmail }: SettingsClientProps) {
             <motion.span className="flex items-center justify-between w-full" whileTap={{ scale: 0.98 }} transition={{ type: "spring", stiffness: 400, damping: 30 }}>
               <div>
                 <span className="text-sm font-medium text-[var(--text-primary)] group-hover:text-[var(--danger)]">Sign Out</span>
-                <p className="text-xs text-[var(--text-muted)] mt-0.5">You&apos;ll need to sign in again to access your account</p>
+                <p className="text-xs text-[var(--text-muted)] mt-0.5">You'll need to sign in again to access your account</p>
               </div>
               <ChevronRight size={14} className="text-[var(--text-muted)]" />
             </motion.span>

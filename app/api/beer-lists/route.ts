@@ -1,8 +1,12 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { rateLimitResponse } from "@/lib/rate-limit";
 
 // GET /api/beer-lists?userId=X — list user's beer lists (public if not self)
 export async function GET(req: Request) {
+  const limited = rateLimitResponse(req, "beer-lists", { limit: 30, windowMs: 60_000 });
+  if (limited) return limited;
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -30,6 +34,9 @@ export async function GET(req: Request) {
 
 // POST /api/beer-lists — create a new beer list
 export async function POST(req: Request) {
+  const limited = rateLimitResponse(req, "beer-lists", { limit: 30, windowMs: 60_000 });
+  if (limited) return limited;
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

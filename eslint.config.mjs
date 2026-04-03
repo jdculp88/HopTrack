@@ -13,6 +13,9 @@ const eslintConfig = defineConfig([
       "@typescript-eslint/no-explicit-any": "warn",
       // Project convention: `_`-prefixed variables are intentionally unused
       "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_", "caughtErrorsIgnorePattern": "^_" }],
+      // Disable — React handles literal quotes and apostrophes in JSX text just fine.
+      // The rule is a legacy concern from pre-React 16 HTML entity escaping.
+      "react/no-unescaped-entities": "off",
     },
   },
   // Override default ignores of eslint-config-next.

@@ -1,3 +1,4 @@
+// Copyright 2026 HopTrack. All rights reserved.
 // Stripe integration stub — Quinn + Avery, Sprint 46
 // Install: npm install stripe
 // Docs: https://stripe.com/docs/api

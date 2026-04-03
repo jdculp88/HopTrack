@@ -148,7 +148,7 @@ function NoFriendsEmptyState() {
           className="max-w-xs mx-auto text-sm leading-relaxed"
           style={{ color: "var(--text-secondary)" }}
         >
-          When your friends crack a cold one, you&rsquo;ll see it here. Maybe
+          When your friends crack a cold one, you'll see it here. Maybe
           invite a few?
         </p>
       </div>
@@ -197,7 +197,7 @@ function FriendsNoSessionsEmptyState() {
           className="max-w-xs mx-auto text-sm leading-relaxed"
           style={{ color: "var(--text-secondary)" }}
         >
-          Your friends haven&rsquo;t logged any sessions yet. Someone has to go
+          Your friends haven't logged any sessions yet. Someone has to go
           first.
         </p>
       </div>

@@ -300,7 +300,7 @@ export function BarbackClient({
               No crawl runs yet
             </p>
             <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-              The Barback hasn&apos;t started crawling yet.
+              The Barback hasn't started crawling yet.
             </p>
           </div>
         ) : (

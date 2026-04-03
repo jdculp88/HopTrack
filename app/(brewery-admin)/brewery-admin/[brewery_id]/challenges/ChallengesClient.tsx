@@ -456,7 +456,7 @@ export function ChallengesClient({ breweryId, initialChallenges, tapListBeers, s
                 )}
               </div>
               <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-                Sponsored challenges appear in Discover and Explore — reaching users who haven&apos;t visited your brewery yet.
+                Sponsored challenges appear in Discover and Explore — reaching users who haven't visited your brewery yet.
               </p>
 
               <AnimatePresence>

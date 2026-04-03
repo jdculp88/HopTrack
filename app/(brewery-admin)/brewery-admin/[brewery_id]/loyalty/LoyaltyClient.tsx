@@ -518,7 +518,7 @@ function VerifyRedemptionCard({ breweryId }: { breweryId: string }) {
           </div>
           <div>
             <h3 className="font-display font-bold text-sm" style={{ color: "var(--text-primary)" }}>Verify Redemption</h3>
-            <p className="text-xs" style={{ color: "var(--text-muted)" }}>Enter a customer&apos;s 6-digit code to confirm their reward</p>
+            <p className="text-xs" style={{ color: "var(--text-muted)" }}>Enter a customer's 6-digit code to confirm their reward</p>
           </div>
         </div>
 

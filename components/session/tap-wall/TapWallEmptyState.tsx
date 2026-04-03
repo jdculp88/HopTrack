@@ -9,7 +9,7 @@ export function TapWallEmptyState({ variant, query }: TapWallEmptyStateProps) {
   if (variant === 'no-results') {
     return (
       <p className="text-center py-8 text-sm" style={{ color: 'var(--text-muted)' }}>
-        No beers match &ldquo;{query}&rdquo;
+        No beers match "{query}"
       </p>
     )
   }
@@ -36,7 +36,7 @@ export function TapWallEmptyState({ variant, query }: TapWallEmptyStateProps) {
         No beers on tap yet
       </p>
       <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-        The tap list for this brewery hasn&apos;t been added yet.
+        The tap list for this brewery hasn't been added yet.
       </p>
     </div>
   )

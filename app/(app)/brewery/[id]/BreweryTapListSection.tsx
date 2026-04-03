@@ -133,7 +133,7 @@ export function BreweryTapListSection({
             <p className="text-4xl mb-3">🍺</p>
             <p className="font-display text-lg text-[var(--text-primary)]">Taps are quiet</p>
             <p className="text-sm text-[var(--text-secondary)] mt-1">
-              This brewery hasn&apos;t added anything yet — check back soon.
+              This brewery hasn't added anything yet — check back soon.
             </p>
           </div>
         )}

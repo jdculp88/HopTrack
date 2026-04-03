@@ -175,7 +175,7 @@ export function PintRewindClient({ breweryName, sessions30, beerLogs30, sessions
                       The rush hits at <span style={{ color: "var(--accent-gold)" }}>{stats.busiestHour}</span>
                     </p>
                     <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-                      That&apos;s your busiest hour {scopeLabel.toLowerCase()}. Staff accordingly.
+                      That's your busiest hour {scopeLabel.toLowerCase()}. Staff accordingly.
                     </p>
                   </div>
                 </div>

@@ -10,6 +10,7 @@ export default function robots(): MetadataRoute.Robots {
           "/for-breweries",
           "/privacy",
           "/terms",
+          "/dmca",
           "/help",
           "/login",
           "/signup",

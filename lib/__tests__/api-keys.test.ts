@@ -92,9 +92,9 @@ describe("hashApiKey", () => {
     expect(hash).toMatch(/^[0-9a-f]{64}$/);
   });
 
-  it("matches known SHA-256 for a fixed input", () => {
+  it("matches known SHA-256 for a fixed input", async () => {
     // Pre-computed: SHA-256 of "ht_live_test"
-    const crypto = require("crypto");
+    const crypto = await import("crypto");
     const expected = crypto.createHash("sha256").update("ht_live_test").digest("hex");
     expect(hashApiKey("ht_live_test")).toBe(expected);
   });

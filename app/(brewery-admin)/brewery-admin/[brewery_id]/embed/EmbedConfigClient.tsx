@@ -239,7 +239,7 @@ export function EmbedConfigClient({ breweryId, breweryName, breweryCity, brewery
                 color: theme === "dark" ? "#999" : "#666",
               }}
             >
-              Check out what&apos;s currently on tap. Our menu updates in real-time through HopTrack.
+              Check out what's currently on tap. Our menu updates in real-time through HopTrack.
             </p>
 
             <iframe

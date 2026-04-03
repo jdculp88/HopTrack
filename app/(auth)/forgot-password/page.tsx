@@ -48,7 +48,7 @@ export default function ForgotPasswordPage() {
           Click the link in the email to reset your password.
         </p>
         <p className="text-xs text-[var(--text-muted)]">
-          Didn&apos;t get the email? Check your spam folder or{" "}
+          Didn't get the email? Check your spam folder or{" "}
           <button
             onClick={() => setSent(false)}
             className="text-[var(--accent-gold)] hover:underline"
@@ -83,7 +83,7 @@ export default function ForgotPasswordPage() {
           Reset password
         </h1>
         <p className="text-[var(--text-secondary)] text-sm mt-1.5">
-          Enter your email and we&apos;ll send you a reset link.
+          Enter your email and we'll send you a reset link.
         </p>
       </div>
 

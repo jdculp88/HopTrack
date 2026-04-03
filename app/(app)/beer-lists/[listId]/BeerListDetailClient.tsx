@@ -155,7 +155,7 @@ function SortableItem({
 
             {item.note && (
               <p className="text-xs mt-1.5 italic" style={{ color: "var(--text-secondary)" }}>
-                &ldquo;{item.note}&rdquo;
+                "{item.note}"
               </p>
             )}
           </div>
@@ -192,7 +192,7 @@ function SortableItem({
                 }}
               >
                 <p className="text-xs" style={{ color: "var(--text-secondary)" }}>
-                  Remove &ldquo;{beer?.name}&rdquo; from this list?
+                  Remove "{beer?.name}" from this list?
                 </p>
                 <div className="flex items-center gap-2">
                   <button
@@ -524,7 +524,7 @@ export function BeerListDetailClient({
                 style={{ borderColor: "var(--border)" }}
               >
                 <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-                  Duplicate &ldquo;{list.title}&rdquo;?
+                  Duplicate "{list.title}"?
                 </p>
                 <div className="flex items-center gap-2 flex-shrink-0">
                   <button

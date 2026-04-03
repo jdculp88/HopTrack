@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { apiSuccess, apiUnauthorized, apiForbidden, apiBadRequest, apiServerError } from "@/lib/api-response";
 import { verifyBrandAccess } from "@/lib/brand-auth";
+import { rateLimitResponse } from "@/lib/rate-limit";
 
 // ─── PATCH /api/brand/[brand_id]/tap-list/batch ──────────────────────────────
 // Batch update is_on_tap / is_86d for beers across multiple locations.
@@ -13,6 +14,9 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ brand_id: string }> }
 ) {
+  const limited = rateLimitResponse(request, "brand-tap-list-batch", { limit: 20, windowMs: 60_000 });
+  if (limited) return limited;
+
   const { brand_id } = await params;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();

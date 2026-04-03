@@ -26,7 +26,7 @@ export function FeedEndMessage() {
         className="text-xs font-mono uppercase tracking-widest"
         style={{ color: "var(--text-muted)" }}
       >
-        You&rsquo;re all caught up
+        You're all caught up
       </p>
     </div>
   );

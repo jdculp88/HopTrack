@@ -144,11 +144,11 @@ export function ClaimSearchStep({
               <div className="flex items-center gap-2 mb-2">
                 <PlusCircle size={15} style={{ color: "var(--accent-gold)" }} />
                 <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
-                  Can&apos;t find your brewery?
+                  Can't find your brewery?
                 </p>
               </div>
               <p className="text-xs mb-3" style={{ color: "var(--text-muted)" }}>
-                Not every brewery is in our database yet. Submit yours and we&apos;ll add it within 24 hours.
+                Not every brewery is in our database yet. Submit yours and we'll add it within 24 hours.
               </p>
 
               <AnimatePresence mode="wait">
@@ -160,7 +160,7 @@ export function ClaimSearchStep({
                     className="text-sm font-medium"
                     style={{ color: "var(--accent-gold)" }}
                   >
-                    Thanks! We&apos;ll add your brewery within 24 hours.
+                    Thanks! We'll add your brewery within 24 hours.
                   </motion.p>
                 ) : !showNotFoundForm ? (
                   <motion.div key="cta" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>

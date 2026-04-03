@@ -102,9 +102,9 @@ describe("hashApiKey determinism and format", () => {
     expect(hashApiKey(longKey)).toHaveLength(64);
   });
 
-  it("hash of 'ht_live_test' matches independently computed SHA-256", () => {
+  it("hash of 'ht_live_test' matches independently computed SHA-256", async () => {
     // Verify against Node crypto directly — no magic numbers
-    const { createHash } = require("crypto");
+    const { createHash } = await import("crypto");
     const expected = createHash("sha256").update("ht_live_test").digest("hex");
     expect(hashApiKey("ht_live_test")).toBe(expected);
   });

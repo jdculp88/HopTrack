@@ -77,7 +77,7 @@ export function BatchActionBar({
             style={{ background: "rgba(196,75,58,0.15)", color: "var(--danger)", border: "1px solid rgba(196,75,58,0.3)" }}
           >
             {batchSaving ? <Loader2 size={14} className="animate-spin" /> : <Ban size={14} />}
-            Mark 86&apos;d
+            Mark 86'd
           </button>
           <button
             onClick={() => onMark86(false)}

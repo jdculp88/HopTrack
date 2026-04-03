@@ -370,7 +370,7 @@ export function FriendsClient({
           </AnimatePresence>
 
           {searchQuery.length >= 2 && !searching && filteredSearchResults.length === 0 && filteredFriends.length === 0 && (
-            <p className="text-sm text-center py-4" style={{ color: "var(--text-muted)" }}>No users found for &ldquo;{searchQuery}&rdquo;</p>
+            <p className="text-sm text-center py-4" style={{ color: "var(--text-muted)" }}>No users found for "{searchQuery}"</p>
           )}
 
           {/* Pending incoming requests */}

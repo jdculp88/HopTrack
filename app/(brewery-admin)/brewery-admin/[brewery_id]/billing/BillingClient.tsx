@@ -251,7 +251,7 @@ export function BillingClient({ brewery, brandBilling }: { brewery: Brewery; bra
           >
             <Check size={18} style={{ color: "var(--accent-gold)" }} />
             <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
-              You&apos;re subscribed! Welcome to HopTrack.
+              You're subscribed! Welcome to HopTrack.
             </p>
           </motion.div>
         )}
@@ -262,7 +262,7 @@ export function BillingClient({ brewery, brandBilling }: { brewery: Brewery; bra
             style={{ borderColor: "var(--border)", background: "var(--surface)" }}
           >
             <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-              Checkout cancelled — no charges made. Pick a plan whenever you&apos;re ready.
+              Checkout cancelled — no charges made. Pick a plan whenever you're ready.
             </p>
           </motion.div>
         )}
@@ -290,7 +290,7 @@ export function BillingClient({ brewery, brandBilling }: { brewery: Brewery; bra
           <Building2 size={20} style={{ color: "var(--accent-gold)", flexShrink: 0, marginTop: 1 }} />
           <div className="flex-1 space-y-2">
             <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
-              This location is covered by {brandBilling.name}&apos;s brand subscription
+              This location is covered by {brandBilling.name}'s brand subscription
             </p>
             <p className="text-xs" style={{ color: "var(--text-muted)" }}>
               Billing is managed at the brand level. All locations under {brandBilling.name} share the Barrel plan.
@@ -393,7 +393,7 @@ export function BillingClient({ brewery, brandBilling }: { brewery: Brewery; bra
                     <div>
                       <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>Cancel your subscription?</p>
                       <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>
-                        You&apos;ll keep access until the end of your current billing period. After that, your brewery will switch to read-only mode.
+                        You'll keep access until the end of your current billing period. After that, your brewery will switch to read-only mode.
                       </p>
                     </div>
                   </div>
@@ -570,7 +570,7 @@ export function BillingClient({ brewery, brandBilling }: { brewery: Brewery; bra
             Feature Comparison
           </h3>
           <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
-            See exactly what&apos;s included in each plan
+            See exactly what's included in each plan
           </p>
         </div>
 

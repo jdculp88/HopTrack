@@ -134,7 +134,7 @@ export default function ResourcesPage() {
             <p>The HopTrack Public API lets you display your tap list on your website, connect to POS systems, and build custom integrations.</p>
             <div>
               <p className="font-medium mb-1" style={{ color: "var(--text-primary)" }}>1. Generate an API Key</p>
-              <p>Go to <strong>Settings &rarr; API Keys</strong> and click <em>Create API Key</em>. Copy the key immediately — it&apos;s only shown once.</p>
+              <p>Go to <strong>Settings &rarr; API Keys</strong> and click <em>Create API Key</em>. Copy the key immediately — it's only shown once.</p>
             </div>
             <div>
               <p className="font-medium mb-1" style={{ color: "var(--text-primary)" }}>2. Make Requests</p>

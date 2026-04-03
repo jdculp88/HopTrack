@@ -34,7 +34,7 @@ export function WrappedTaste({ stats }: { stats: WrappedStats }) {
           {stats.personality.archetype}
         </h2>
         <p className="text-sm italic mt-2" style={{ color: "#C4B48A" }}>
-          &ldquo;{stats.personality.tagline}&rdquo;
+          "{stats.personality.tagline}"
         </p>
       </motion.div>
 

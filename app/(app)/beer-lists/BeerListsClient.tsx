@@ -356,7 +356,7 @@ export function BeerListsClient({ userId: _userId, initialLists }: BeerListsClie
                       style={{ borderColor: "var(--border)", background: "color-mix(in srgb, var(--danger) 8%, transparent)" }}
                     >
                       <p className="text-xs" style={{ color: "var(--text-secondary)" }}>
-                        Delete &ldquo;{list.title}&rdquo;? This can&apos;t be undone.
+                        Delete "{list.title}"? This can't be undone.
                       </p>
                       <div className="flex items-center gap-2">
                         <button
@@ -434,7 +434,7 @@ export function BeerListsClient({ userId: _userId, initialLists }: BeerListsClie
                                   </div>
                                   {item.note && (
                                     <p className="text-[11px] italic mt-0.5" style={{ color: "var(--text-secondary)" }}>
-                                      &ldquo;{item.note}&rdquo;
+                                      "{item.note}"
                                     </p>
                                   )}
                                 </div>

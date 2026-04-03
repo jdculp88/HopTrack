@@ -182,7 +182,7 @@ export function HopRouteCardClient({ route: initialRoute }: HopRouteCardClientPr
 
             {nextStop && (
               <div className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs" style={{ background: "color-mix(in srgb, var(--accent-gold) 10%, transparent)", color: "var(--accent-gold)" }}>
-                <Zap size={12} /> You&apos;re here: <strong>{nextStop.brewery?.name ?? "Next stop"}</strong>
+                <Zap size={12} /> You're here: <strong>{nextStop.brewery?.name ?? "Next stop"}</strong>
               </div>
             )}
 

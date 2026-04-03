@@ -9,6 +9,7 @@ import {
   apiServerError,
 } from "@/lib/api-response";
 import { verifyBrandAccess } from "@/lib/brand-auth";
+import { rateLimitResponse } from "@/lib/rate-limit";
 
 // ─── GET /api/brand/[brand_id]/catalog ──────────────────────────────────────
 // Returns all catalog beers for the brand with location overlay data.
@@ -16,6 +17,9 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ brand_id: string }> }
 ) {
+  const limited = rateLimitResponse(request, "brand-catalog", { limit: 20, windowMs: 60_000 });
+  if (limited) return limited;
+
   const { brand_id } = await params;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -155,6 +159,9 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ brand_id: string }> }
 ) {
+  const limited = rateLimitResponse(request, "brand-catalog", { limit: 20, windowMs: 60_000 });
+  if (limited) return limited;
+
   const { brand_id } = await params;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();

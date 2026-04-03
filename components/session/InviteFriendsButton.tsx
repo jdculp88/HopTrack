@@ -293,7 +293,7 @@ export function InviteFriendsButton({ sessionId, isOwner, participants: external
               )}
               {allFriends.length > 0 && filteredFriends.length === 0 && (
                 <p className="px-3 py-4 text-xs text-center" style={{ color: "var(--text-muted)" }}>
-                  No friends match &ldquo;{searchQuery}&rdquo;
+                  No friends match "{searchQuery}"
                 </p>
               )}
               {filteredFriends.map((friend) => {

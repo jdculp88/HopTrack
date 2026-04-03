@@ -105,7 +105,7 @@ export function MugClubSection({ clubs, myMemberships, breweryId, isAuthenticate
                     }}
                   >
                     <Crown size={12} />
-                    You&apos;re a member
+                    You're a member
                     {membership.expires_at && (
                       <span className="font-mono font-normal text-[var(--text-muted)] ml-1">
                         exp {new Date(membership.expires_at).toLocaleDateString("en-US", {

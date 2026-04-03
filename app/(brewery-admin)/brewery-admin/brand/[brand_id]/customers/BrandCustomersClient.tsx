@@ -196,7 +196,7 @@ export function BrandCustomersClient({
                         {r.displayName}
                       </p>
                       <p className="text-[11px] truncate" style={{ color: "var(--text-muted)" }}>
-                        VIP at {r.strongLocations[0]} · hasn&apos;t visited {r.missingLocations[0]}
+                        VIP at {r.strongLocations[0]} · hasn't visited {r.missingLocations[0]}
                       </p>
                     </div>
                   </Link>

@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { verifyBrandAccess } from "@/lib/brand-auth";
 import { apiSuccess, apiUnauthorized, apiForbidden, apiServerError } from "@/lib/api-response";
+import { rateLimitResponse } from "@/lib/rate-limit";
 
 // ─── GET /api/brand/[brand_id]/tap-list ──────────────────────────────────────
 // Aggregated beer catalog across all brand locations with per-location status.
@@ -12,6 +13,9 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ brand_id: string }> }
 ) {
+  const limited = rateLimitResponse(request, "brand-tap-list", { limit: 20, windowMs: 60_000 });
+  if (limited) return limited;
+
   const { brand_id } = await params;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();

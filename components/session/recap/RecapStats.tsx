@@ -99,7 +99,7 @@ export default function RecapStats({
         >
           <span style={{ fontSize: 18, flexShrink: 0, marginTop: 1 }}>📊</span>
           <p style={{ fontSize: 12, color: C.text2, lineHeight: 1.5 }}>
-            You&apos;ve spent{' '}
+            You've spent{' '}
             <strong style={{ color: C.accent, fontWeight: 600 }}>
               {breweryStats.total_time_formatted}
             </strong>{' '}
@@ -115,7 +115,7 @@ export default function RecapStats({
             )}
             {breweryStats.visitor_rank > 0 && breweryStats.visitor_rank <= 10 && (
               <>
-                {' '}You&apos;re their{' '}
+                {' '}You're their{' '}
                 <strong style={{ color: C.accent, fontWeight: 600 }}>
                   #{breweryStats.visitor_rank} most frequent
                 </strong>{' '}

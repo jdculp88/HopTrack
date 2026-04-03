@@ -206,7 +206,7 @@ export function SessionCard({ session, currentUserId, className, reactionCounts,
               className="text-sm italic pl-3 leading-relaxed"
               style={{ color: "var(--text-secondary)" }}
             >
-              &ldquo;{note}&rdquo;
+              "{note}"
             </p>
           </div>
         )}

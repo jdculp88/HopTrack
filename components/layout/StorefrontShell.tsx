@@ -105,6 +105,20 @@ export function StorefrontShell({ children }: StorefrontShellProps) {
                   For Breweries
                 </Link>
                 <Link
+                  href="/privacy"
+                  className="text-xs transition-colors hover:underline"
+                  style={{ color: "var(--text-muted)" }}
+                >
+                  Privacy
+                </Link>
+                <Link
+                  href="/terms"
+                  className="text-xs transition-colors hover:underline"
+                  style={{ color: "var(--text-muted)" }}
+                >
+                  Terms
+                </Link>
+                <Link
                   href={`/signup?next=${encodeURIComponent(pathname)}`}
                   className="text-xs font-semibold transition-colors hover:underline"
                   style={{ color: "var(--accent-gold)" }}

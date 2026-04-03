@@ -140,7 +140,7 @@ export function ClaimBreweryClient({ userEmail, pendingClaim }: ClaimBreweryClie
               Claim Pending
             </h1>
             <p className="text-sm leading-relaxed" style={{ color: "var(--text-secondary)" }}>
-              Your claim is under review. We&apos;ll confirm you&apos;re the owner shortly.
+              Your claim is under review. We'll confirm you're the owner shortly.
             </p>
           </div>
 
@@ -216,7 +216,7 @@ export function ClaimBreweryClient({ userEmail, pendingClaim }: ClaimBreweryClie
                 <p className="text-sm font-semibold" style={{ color: "var(--accent-gold)" }}>14-day free trial included</p>
               </div>
               <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-                Once approved, you&rsquo;ll get full access to the Tap tier — no payment required for 14 days.
+                Once approved, you'll get full access to the Tap tier — no payment required for 14 days.
               </p>
               <div className="grid grid-cols-2 gap-2 pt-1">
                 {TRIAL_FEATURES.slice(0, 4).map(({ icon: Icon, label }) => (
@@ -397,7 +397,7 @@ function SuccessStep({
       </div>
 
       <p className="text-sm leading-relaxed" style={{ color: "var(--text-secondary)" }}>
-        Your claim is submitted. We&apos;ll verify ownership within{" "}
+        Your claim is submitted. We'll verify ownership within{" "}
         <strong style={{ color: "var(--text-primary)" }}>24 hours</strong>.
         In the meantime, your dashboard is ready to explore.
       </p>
@@ -411,7 +411,7 @@ function SuccessStep({
         }}
       >
         <p className="text-xs font-mono uppercase tracking-wider" style={{ color: "var(--accent-gold)" }}>
-          What&apos;s included in your 14-day trial
+          What's included in your 14-day trial
         </p>
         <div className="space-y-3">
           {TRIAL_FEATURES.map(({ icon: Icon, label, desc }, i) => (

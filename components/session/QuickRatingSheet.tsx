@@ -117,7 +117,7 @@ export default function QuickRatingSheet({
 
                 {previousComment && (
                   <p className="text-center text-xs mb-4" style={{ color: 'var(--text-muted)' }}>
-                    &ldquo;{previousComment}&rdquo;
+                    "{previousComment}"
                   </p>
                 )}
 

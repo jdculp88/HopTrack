@@ -427,7 +427,7 @@ export default function EmbedTestPage() {
                     color: theme === "dark" ? "#999" : "#666",
                     marginBottom: 24, maxWidth: 500,
                   }}>
-                    Check out what&apos;s currently on tap. Our menu updates in real-time
+                    Check out what's currently on tap. Our menu updates in real-time
                     through HopTrack.
                   </p>
 

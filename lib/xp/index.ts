@@ -1,3 +1,4 @@
+// Copyright 2026 HopTrack. All rights reserved.
 // Active XP values used by session-end API
 export const SESSION_XP = {
   session_start: 25,

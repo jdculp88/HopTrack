@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
+import { rateLimitResponse } from "@/lib/rate-limit";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -16,6 +17,9 @@ export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ brewery_id: string }> }
 ) {
+  const limited = rateLimitResponse(_req, "public-menu", { limit: 60, windowMs: 60_000 });
+  if (limited) return limited;
+
   const { brewery_id } = await params;
 
   const supabase = await createClient();

@@ -341,9 +341,9 @@ export default function BreweriesContent() {
         <div className="max-w-7xl mx-auto dark-section" style={{ background: C.dark }}>
           <div className="relative z-10 p-6 sm:p-10 lg:p-16 xl:p-20">
             <ScrollReveal className="mb-14">
-              <span className="text-[11px] font-mono uppercase tracking-[0.22em]" style={{ color: C.gold }}>What&apos;s included</span>
+              <span className="text-[11px] font-mono uppercase tracking-[0.22em]" style={{ color: C.gold }}>What's included</span>
               <h2 className="font-display font-bold leading-[0.95] tracking-tight mt-3" style={{ fontSize: "clamp(36px, 4.5vw, 56px)", color: C.creamText }}>
-                Everything in one place.<br /><span className="italic" style={{ color: C.creamMuted }}>Nothing you don&apos;t need.</span>
+                Everything in one place.<br /><span className="italic" style={{ color: C.creamMuted }}>Nothing you don't need.</span>
               </h2>
             </ScrollReveal>
 
@@ -527,6 +527,8 @@ export default function BreweriesContent() {
             <Link href="/" className="hover:text-white transition-colors">Consumer app</Link>
             <Link href="/login" className="hover:text-white transition-colors">Sign in</Link>
             <Link href="/privacy" className="hover:text-white transition-colors">Privacy</Link>
+            <Link href="/terms" className="hover:text-white transition-colors">Terms</Link>
+            <Link href="/dmca" className="hover:text-white transition-colors">DMCA</Link>
             <a href="mailto:sales@hoptrack.beer" className="hover:text-white transition-colors">Contact</a>
           </div>
           <p className="text-xs font-mono" style={{ color: C.creamSubtle }}>© 2026 HopTrack</p>

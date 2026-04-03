@@ -1,3 +1,4 @@
+// Copyright 2026 HopTrack. All rights reserved.
 // Simple in-memory sliding window rate limiter
 // For production scale, replace with Upstash Redis or similar
 

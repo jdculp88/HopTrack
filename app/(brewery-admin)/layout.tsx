@@ -19,7 +19,7 @@ export default async function BreweryAdminLayout({ children }: { children: React
 
   // Fetch all breweries this user manages (verified or pending)
   // Try with brand join; fall back to simple join if schema cache is stale
-  let { data: accounts, error: accountsError } = await supabase
+  let { data: accounts, error: accountsError } = await supabase // eslint-disable-line prefer-const -- accountsError is const but accounts is reassigned below
     .from("brewery_accounts")
     .select("*, brewery:breweries(*, brand:brewery_brands(id, name, slug, logo_url))")
     .eq("user_id", user.id) as any;

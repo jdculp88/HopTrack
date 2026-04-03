@@ -411,7 +411,7 @@ export default function CheckinEntryDrawer({ isOpen, onClose, onSessionStarted, 
               ))}
               {query.trim() && results.length === 0 && !searching && (
                 <p className="text-center py-8 text-sm" style={{ color: 'var(--text-muted)' }}>
-                  No breweries found for &ldquo;{query}&rdquo;
+                  No breweries found for "{query}"
                 </p>
               )}
             </div>

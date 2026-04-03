@@ -83,7 +83,7 @@ export function BreweryRatingFeedCard({
             className="text-[11px] italic mt-1 line-clamp-2"
             style={{ color: "var(--text-muted)" }}
           >
-            &ldquo;{review.comment}&rdquo;
+            "{review.comment}"
           </p>
         )}
 

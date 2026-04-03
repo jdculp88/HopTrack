@@ -1,11 +1,15 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { rateLimitResponse } from "@/lib/rate-limit";
 
 // PATCH /api/sessions/[id] — update session fields (note, share_to_feed)
 export async function PATCH(
   req: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const limited = rateLimitResponse(req, "session-update", { limit: 30, windowMs: 60_000 });
+  if (limited) return limited;
+
   const { id } = await params;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -38,6 +42,9 @@ export async function DELETE(
   _req: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const limited = rateLimitResponse(_req, "session-delete", { limit: 30, windowMs: 60_000 });
+  if (limited) return limited;
+
   const { id } = await params;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();

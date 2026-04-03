@@ -553,7 +553,7 @@ export function HopRouteNewClient({ tasteDna }: HopRouteNewClientProps) {
             ) : (
               <div className="card-bg-hoproute p-4 rounded-2xl border text-center" style={{ borderColor: "var(--border)" }}>
                 <p className="text-sm text-[var(--text-secondary)]">No taste history yet.</p>
-                <p className="text-xs text-[var(--text-muted)] mt-1">We&apos;ll suggest crowd-pleasers for your first HopRoute.</p>
+                <p className="text-xs text-[var(--text-muted)] mt-1">We'll suggest crowd-pleasers for your first HopRoute.</p>
               </div>
             )}
 

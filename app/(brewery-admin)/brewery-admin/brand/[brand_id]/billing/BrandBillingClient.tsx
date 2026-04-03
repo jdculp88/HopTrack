@@ -170,7 +170,7 @@ export function BrandBillingClient({ brand, locations, userRole }: BrandBillingC
             style={{ borderColor: "var(--border)", background: "var(--surface)" }}
           >
             <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-              Checkout cancelled — no charges made. Subscribe whenever you&apos;re ready.
+              Checkout cancelled — no charges made. Subscribe whenever you're ready.
             </p>
           </motion.div>
         )}

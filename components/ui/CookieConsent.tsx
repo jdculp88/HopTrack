@@ -56,6 +56,14 @@ export function CookieConsent() {
             >
               Privacy Policy
             </Link>
+            {" · "}
+            <Link
+              href="/terms"
+              className="underline underline-offset-2"
+              style={{ color: "var(--accent-gold)" }}
+            >
+              Terms
+            </Link>
           </p>
           <div className="flex items-center gap-3">
             <button

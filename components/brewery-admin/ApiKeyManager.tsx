@@ -144,7 +144,7 @@ export function ApiKeyManager({ breweryId }: { breweryId: string }) {
               className="text-xs mt-2 underline"
               style={{ color: "var(--text-muted)" }}
             >
-              I&apos;ve copied it, dismiss
+              I've copied it, dismiss
             </button>
           </motion.div>
         )}

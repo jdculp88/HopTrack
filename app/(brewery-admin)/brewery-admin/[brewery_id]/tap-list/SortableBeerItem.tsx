@@ -119,7 +119,7 @@ export function SortableBeerItem({ beer, confirmDeleteId, deletingId, batchMode,
             {beer.is_86d && (
               <span className="text-xs px-2 py-0.5 rounded-full font-semibold"
                 style={{ background: "rgba(196,75,58,0.15)", color: "var(--danger)" }}>
-                86&apos;d
+                86'd
               </span>
             )}
             {!beer.is_on_tap && !beer.is_86d && (

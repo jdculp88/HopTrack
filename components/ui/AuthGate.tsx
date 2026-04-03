@@ -57,7 +57,7 @@ export function AuthGate({ children, isAuthenticated, featureName, returnPath }:
               style={{ background: "var(--accent-gold)", color: "var(--bg)" }}
             >
               <Beer size={14} />
-              Create Account — It&apos;s Free
+              Create Account — It's Free
             </Link>
             <Link
               href={`/login?next=${encodeURIComponent(returnPath)}`}

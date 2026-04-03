@@ -301,7 +301,7 @@ export function SearchTypeahead({
                   className="px-4 py-8 text-center text-sm"
                   style={{ color: "var(--text-muted)" }}
                 >
-                  No results for &ldquo;{query}&rdquo;
+                  No results for "{query}"
                 </div>
               )}
 

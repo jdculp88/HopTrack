@@ -195,7 +195,7 @@ export default async function BeerListPage({
                   )}
                   {item.note && (
                     <p className="text-xs mt-2 italic" style={{ color: "var(--text-secondary)" }}>
-                      &ldquo;{item.note}&rdquo;
+                      "{item.note}"
                     </p>
                   )}
                 </div>

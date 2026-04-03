@@ -1,3 +1,4 @@
+// Copyright 2026 HopTrack. All rights reserved.
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 // Database type exists at @/types/database but Supabase's .select() inference

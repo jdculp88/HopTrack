@@ -593,7 +593,7 @@ function RecentActivityFeed({ items }: { items: ActivityItem[] }) {
         <CardHeader>
           <CardTitle as="h3">Recent Activity</CardTitle>
         </CardHeader>
-        <p className="text-xs" style={{ color: "var(--text-muted)" }}>No activity yet — once users start checking in, you&apos;ll see everything here.</p>
+        <p className="text-xs" style={{ color: "var(--text-muted)" }}>No activity yet — once users start checking in, you'll see everything here.</p>
       </Card>
     );
   }

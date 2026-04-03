@@ -122,7 +122,7 @@ export default function HelpPage() {
           >
             help@hoptrack.beer
           </a>{" "}
-          and we&apos;ll get back to you within one business day.
+          and we'll get back to you within one business day.
         </p>
         <p className="mt-2">
           Are you a brewery owner?{" "}

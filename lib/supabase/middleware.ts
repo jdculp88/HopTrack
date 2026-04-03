@@ -1,3 +1,4 @@
+// Copyright 2026 HopTrack. All rights reserved.
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 

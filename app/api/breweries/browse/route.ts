@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { rateLimitResponse } from "@/lib/rate-limit";
 
 /**
  * GET /api/breweries/browse?offset=0&limit=200
@@ -7,6 +8,9 @@ import { createClient } from "@/lib/supabase/server";
  * Returns breweries with GPS coordinates, ordered by name.
  */
 export async function GET(request: Request) {
+  const limited = rateLimitResponse(request, "breweries-browse", { limit: 30, windowMs: 60_000 });
+  if (limited) return limited;
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

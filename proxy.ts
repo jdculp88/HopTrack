@@ -1,3 +1,4 @@
+// Copyright 2026 HopTrack. All rights reserved.
 import { type NextRequest } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
 

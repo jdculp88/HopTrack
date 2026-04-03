@@ -43,7 +43,7 @@ export function RatingCard({ rating: review, index = 0 }: { rating: FriendRating
         </p>
         {review.comment && (
           <p className="text-xs mt-0.5 truncate" style={{ color: 'var(--text-muted)' }}>
-            &ldquo;{review.comment}&rdquo;
+            "{review.comment}"
           </p>
         )}
       </div>
