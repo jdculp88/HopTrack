@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Save, Loader2, UtensilsCrossed, Key, Plug, Unplug, RefreshCw, ArrowUpRight, Lock, ChevronDown, ChevronUp, X, Sparkles, Tag, ToggleLeft, ToggleRight } from "lucide-react";
+import { Save, Loader2, UtensilsCrossed, Key, Plug, Unplug, RefreshCw, ArrowUpRight, Lock, ChevronDown, ChevronUp, X, Sparkles, Tag, ToggleLeft, ToggleRight, Beer } from "lucide-react";
+import { InstagramIcon, FacebookIcon, XTwitterIcon } from "@/components/ui/SocialIcons";
 import { AnimatePresence, motion } from "framer-motion";
 import { useToast } from "@/components/ui/Toast";
 import { ImageUpload } from "@/components/ui/ImageUpload";
@@ -33,6 +34,10 @@ export function BrewerySettingsClient({ brewery, role, subscriptionTier = "free"
     description: brewery?.description ?? "",
     cover_image_url: brewery?.cover_image_url ?? "",
     menu_image_url: brewery?.menu_image_url ?? "",
+    instagram_url: brewery?.instagram_url ?? "",
+    facebook_url: brewery?.facebook_url ?? "",
+    twitter_url: brewery?.twitter_url ?? "",
+    untappd_url: brewery?.untappd_url ?? "",
   });
   const [saving, setSaving] = useState(false);
   const { success, error: toastError } = useToast();
@@ -154,6 +159,36 @@ export function BrewerySettingsClient({ brewery, role, subscriptionTier = "free"
           />
           <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>
             Shown on your public brewery page.
+          </p>
+        </div>
+
+        {/* Social Links */}
+        <div className="pt-3 border-t" style={{ borderColor: "var(--border)" }}>
+          <p className="text-xs font-mono uppercase tracking-wider mb-3" style={{ color: "var(--text-muted)" }}>
+            Social Links
+          </p>
+          <div className="space-y-4">
+            {[
+              { key: "instagram_url", label: "Instagram", icon: <InstagramIcon size={14} />, placeholder: "https://instagram.com/yourbrewery" },
+              { key: "facebook_url", label: "Facebook", icon: <FacebookIcon size={14} />, placeholder: "https://facebook.com/yourbrewery" },
+              { key: "twitter_url", label: "X / Twitter", icon: <XTwitterIcon size={14} />, placeholder: "https://x.com/yourbrewery" },
+              { key: "untappd_url", label: "Untappd", icon: <Beer size={14} />, placeholder: "https://untappd.com/v/yourbrewery/123" },
+            ].map(({ key, label, icon, placeholder }) => (
+              <div key={key}>
+                <label className="text-xs font-mono uppercase tracking-wider flex items-center gap-1.5 mb-1.5" style={{ color: "var(--text-muted)" }}>
+                  {icon} {label}
+                </label>
+                <input
+                  value={(form as any)[key]}
+                  onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
+                  placeholder={placeholder}
+                  style={inputStyle}
+                />
+              </div>
+            ))}
+          </div>
+          <p className="text-xs mt-2" style={{ color: "var(--text-muted)" }}>
+            Shown on your public brewery page alongside your website and phone.
           </p>
         </div>
 

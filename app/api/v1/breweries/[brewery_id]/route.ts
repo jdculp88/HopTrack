@@ -22,7 +22,8 @@ export async function GET(
     .select(`
       id, name, brewery_type, street, city, state, postal_code, country,
       phone, website_url, latitude, longitude, description,
-      cover_image_url, verified, created_at
+      cover_image_url, verified, created_at,
+      instagram_url, facebook_url, twitter_url, untappd_url
     `)
     .eq("id", brewery_id)
     .maybeSingle();

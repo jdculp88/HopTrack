@@ -175,3 +175,9 @@ These ideas keep coming back — they're clearly high-value:
 - **Brewery Social Links** — Ability to link to social feeds (X, Facebook, Instagram, etc.) displayed alongside phone number on brewery pages. Simple addition to brewery profile settings + display on public pages. *Owner: Avery (build). Priority: P3 — low effort, nice to have, enhances brewery pages.*
 
 - **Image from Screenshot (Investigation)** — Joshua saw a recommendation (possibly related to Next.js config or image optimization) but is unsure if it's still relevant. Needs investigation — could be about `next/image` remote patterns, OG image generation, or screenshot-to-image tooling. *Owner: Jordan (investigation). Priority: P3 — needs clarification from Joshua before scoping.*
+
+---
+
+## Sprint 132 — Selected: The Clean Slate (data quality + social links)
+
+- **"The Formatter" — City/State/Address Standardization** — Normalize city names (capitalization, abbreviations), state field validation (reject full names, enforce 2-letter), address formatting consistency across 7,177 brewery records. Extend brewery-utils.ts with formatCity(), formatState(), normalizeAddress(). Update brewery creation and settings APIs to auto-format on write. Joshua explicitly requested this as Sprint 133 work. **OPEN**

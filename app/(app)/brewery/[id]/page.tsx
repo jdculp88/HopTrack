@@ -2,6 +2,8 @@ import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { MapPin, Globe, Phone, Star, Users, TrendingUp, Beer, CheckCheck } from "lucide-react";
+import { InstagramIcon, FacebookIcon, XTwitterIcon } from "@/components/ui/SocialIcons";
+import { formatPhone } from "@/lib/brewery-utils";
 import type { Brewery, BreweryVisit, Profile } from "@/types/database";
 import { BreweryChallenges } from "@/components/brewery/BreweryChallenges";
 import { MugClubSection } from "@/components/brewery/MugClubSection";
@@ -441,7 +443,51 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
                 className="flex items-center gap-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
               >
                 <Phone size={14} />
-                {brewery.phone}
+                {formatPhone(brewery.phone)}
+              </a>
+            )}
+            {brewery.instagram_url && (
+              <a
+                href={brewery.instagram_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+              >
+                <InstagramIcon size={14} />
+                Instagram
+              </a>
+            )}
+            {brewery.facebook_url && (
+              <a
+                href={brewery.facebook_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+              >
+                <FacebookIcon size={14} />
+                Facebook
+              </a>
+            )}
+            {brewery.twitter_url && (
+              <a
+                href={brewery.twitter_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+              >
+                <XTwitterIcon size={14} />
+                X
+              </a>
+            )}
+            {brewery.untappd_url && (
+              <a
+                href={brewery.untappd_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+              >
+                <Beer size={14} />
+                Untappd
               </a>
             )}
           </div>

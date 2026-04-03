@@ -354,6 +354,11 @@ export interface Brewery {
   pos_last_sync_at: string | null;
   // Multi-location (Sprint 114)
   brand_id: string | null;
+  // Social links (Sprint 132)
+  instagram_url: string | null;
+  facebook_url: string | null;
+  twitter_url: string | null;
+  untappd_url: string | null;
 }
 export type BreweryInsert = Omit<Brewery, "id" | "created_at"> & { id?: string };
 export type BreweryUpdate = Partial<Brewery>;
