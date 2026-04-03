@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { AppShell } from "@/components/layout/AppShell";
 import { StorefrontShell } from "@/components/layout/StorefrontShell";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
+import { InstallPromptBanner } from "@/components/ui/InstallPromptBanner";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
@@ -40,6 +41,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     <ErrorBoundary context="AppLayout">
       <AppShell username={username}>
         {children}
+        <InstallPromptBanner />
       </AppShell>
     </ErrorBoundary>
   );

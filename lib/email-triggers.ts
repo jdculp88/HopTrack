@@ -6,10 +6,14 @@ import { sendEmail } from "@/lib/email";
 import {
   welcomeEmail,
   breweryWelcomeEmail,
+  claimApprovedEmail,
+  claimRejectedEmail,
   trialWarningEmail,
   trialExpiredEmail,
   passwordResetEmail,
   weeklyDigestEmail,
+  onboardingDay3Email,
+  onboardingDay7Email,
 } from "@/lib/email-templates";
 import { createClient } from "@/lib/supabase/server";
 
@@ -74,6 +78,194 @@ export async function onBreweryClaim(breweryId: string, userId: string) {
     });
   } catch (err: any) {
     console.error("[email-trigger] onBreweryClaim failed:", err.message);
+  }
+}
+
+// ── Claim Approved (Sprint 145) ──
+
+export async function onClaimApproved(claimId: string) {
+  try {
+    const supabase = await createClient();
+
+    const { data: claim } = await supabase
+      .from("brewery_claims")
+      .select("brewery_id, user_id")
+      .eq("id", claimId)
+      .single() as any;
+
+    if (!claim) return;
+
+    const [{ data: brewery }, { data: profile }] = await Promise.all([
+      supabase.from("breweries").select("name").eq("id", claim.brewery_id).single() as any,
+      supabase.from("profiles").select("display_name, email").eq("id", claim.user_id).single() as any,
+    ]);
+
+    if (!profile?.email) {
+      console.warn("[email-trigger] onClaimApproved: no email for user", claim.user_id);
+      return;
+    }
+
+    const template = claimApprovedEmail({
+      breweryName: brewery?.name || "Your Brewery",
+      ownerName: profile.display_name || "Brewmaster",
+      breweryId: claim.brewery_id,
+    });
+
+    await sendEmail({
+      to: profile.email,
+      subject: template.subject,
+      html: template.html,
+      text: template.text,
+    });
+  } catch (err: any) {
+    console.error("[email-trigger] onClaimApproved failed:", err.message);
+  }
+}
+
+// ── Claim Rejected (Sprint 145) ──
+
+export async function onClaimRejected(claimId: string) {
+  try {
+    const supabase = await createClient();
+
+    const { data: claim } = await supabase
+      .from("brewery_claims")
+      .select("brewery_id, user_id")
+      .eq("id", claimId)
+      .single() as any;
+
+    if (!claim) return;
+
+    const [{ data: brewery }, { data: profile }] = await Promise.all([
+      supabase.from("breweries").select("name").eq("id", claim.brewery_id).single() as any,
+      supabase.from("profiles").select("display_name, email").eq("id", claim.user_id).single() as any,
+    ]);
+
+    if (!profile?.email) {
+      console.warn("[email-trigger] onClaimRejected: no email for user", claim.user_id);
+      return;
+    }
+
+    const template = claimRejectedEmail({
+      breweryName: brewery?.name || "Your Brewery",
+      ownerName: profile.display_name || "Brewmaster",
+    });
+
+    await sendEmail({
+      to: profile.email,
+      subject: template.subject,
+      html: template.html,
+      text: template.text,
+    });
+  } catch (err: any) {
+    console.error("[email-trigger] onClaimRejected failed:", err.message);
+  }
+}
+
+// ── Onboarding Day 3 (Sprint 145) ──
+
+export async function onOnboardingDay3(breweryId: string) {
+  try {
+    const supabase = await createClient();
+
+    const { data: brewery } = await supabase
+      .from("breweries")
+      .select("name")
+      .eq("id", breweryId)
+      .single() as any;
+
+    if (!brewery) return;
+
+    const { data: accounts } = await supabase
+      .from("brewery_accounts")
+      .select("user_id, role")
+      .eq("brewery_id", breweryId)
+      .eq("role", "owner") as any;
+
+    if (!accounts?.length) return;
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("display_name, email")
+      .eq("id", accounts[0].user_id)
+      .single() as any;
+
+    if (!profile?.email) return;
+
+    const template = onboardingDay3Email({
+      breweryName: brewery.name,
+      ownerName: profile.display_name || "Brewmaster",
+      breweryId,
+    });
+
+    await sendEmail({
+      to: profile.email,
+      subject: template.subject,
+      html: template.html,
+      text: template.text,
+    });
+  } catch (err: any) {
+    console.error("[email-trigger] onOnboardingDay3 failed:", err.message);
+  }
+}
+
+// ── Onboarding Day 7 (Sprint 145) ──
+
+export async function onOnboardingDay7(breweryId: string) {
+  try {
+    const supabase = await createClient();
+
+    const { data: brewery } = await supabase
+      .from("breweries")
+      .select("name")
+      .eq("id", breweryId)
+      .single() as any;
+
+    if (!brewery) return;
+
+    const { data: accounts } = await supabase
+      .from("brewery_accounts")
+      .select("user_id, role")
+      .eq("brewery_id", breweryId)
+      .eq("role", "owner") as any;
+
+    if (!accounts?.length) return;
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("display_name, email")
+      .eq("id", accounts[0].user_id)
+      .single() as any;
+
+    if (!profile?.email) return;
+
+    // Fetch basic first-week stats
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+    const [sessionsRes, beersRes, followsRes] = await Promise.all([
+      supabase.from("sessions").select("id", { count: "exact", head: true }).eq("brewery_id", breweryId).gte("started_at", sevenDaysAgo),
+      supabase.from("beer_logs").select("id", { count: "exact", head: true }).eq("brewery_id", breweryId).gte("created_at", sevenDaysAgo),
+      supabase.from("brewery_follows").select("id", { count: "exact", head: true }).eq("brewery_id", breweryId),
+    ]);
+
+    const template = onboardingDay7Email({
+      breweryName: brewery.name,
+      ownerName: profile.display_name || "Brewmaster",
+      breweryId,
+      stats: {
+        sessions: sessionsRes.count ?? 0,
+        beersLogged: beersRes.count ?? 0,
+        followers: followsRes.count ?? 0,
+      },
+    });
+
+    await sendEmail({
+      to: profile.email,
+      subject: template.subject,
+      html: template.html,
+      text: template.text,
+    });
+  } catch (err: any) {
+    console.error("[email-trigger] onOnboardingDay7 failed:", err.message);
   }
 }
 

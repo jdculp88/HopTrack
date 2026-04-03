@@ -659,7 +659,7 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
               menuImageUrl={brewery.menu_image_url ?? null}
             />
           ) : (
-            <StorefrontGate isUnlocked={false} sectionName="Tap List" breweryId={id}>
+            <StorefrontGate isUnlocked={hasStorefront} sectionName="Tap List" breweryId={id}>
               <BreweryTapListSection
                 beers={(beers ?? []) as any[]}
                 breweryName={brewery.name}
@@ -672,7 +672,7 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
           {isAuthenticated || hasStorefront ? (
             <BreweryMenusSection menus={breweryMenus ?? []} />
           ) : (breweryMenus ?? []).length > 0 ? (
-            <StorefrontGate isUnlocked={false} sectionName="Menus & Food" breweryId={id}>
+            <StorefrontGate isUnlocked={hasStorefront} sectionName="Menus & Food" breweryId={id}>
               <BreweryMenusSection menus={breweryMenus ?? []} />
             </StorefrontGate>
           ) : null}
@@ -687,7 +687,7 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
                 returnPath={returnPath}
               />
             ) : (
-              <StorefrontGate isUnlocked={false} sectionName="Challenges" breweryId={id}>
+              <StorefrontGate isUnlocked={hasStorefront} sectionName="Challenges" breweryId={id}>
                 <BreweryChallenges
                   challenges={activeChallenges}
                   myParticipations={[]}
@@ -709,7 +709,7 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
                 returnPath={returnPath}
               />
             ) : (
-              <StorefrontGate isUnlocked={false} sectionName="Mug Clubs" breweryId={id}>
+              <StorefrontGate isUnlocked={hasStorefront} sectionName="Mug Clubs" breweryId={id}>
                 <MugClubSection
                   clubs={mugClubs}
                   myMemberships={[]}
@@ -744,7 +744,7 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
                   />
                 </AuthGate>
               ) : (
-                <StorefrontGate isUnlocked={false} sectionName="Loyalty Program" breweryId={id}>
+                <StorefrontGate isUnlocked={hasStorefront} sectionName="Loyalty Program" breweryId={id}>
                   <BrandLoyaltyStampCard
                     brandId={brewery.brand_id}
                     brandName={brandName}
@@ -789,7 +789,7 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
                   </div>
                 </AuthGate>
               ) : (
-                <StorefrontGate isUnlocked={false} sectionName="Loyalty Program" breweryId={id}>
+                <StorefrontGate isUnlocked={hasStorefront} sectionName="Loyalty Program" breweryId={id}>
                   <div className="space-y-4">
                     {(loyaltyPrograms as any[]).map((program: any) => (
                       <LoyaltyStampCard
@@ -815,7 +815,7 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
               returnPath={returnPath}
             />
           ) : upcomingEvents.length > 0 ? (
-            <StorefrontGate isUnlocked={false} sectionName="Events" breweryId={id}>
+            <StorefrontGate isUnlocked={hasStorefront} sectionName="Events" breweryId={id}>
               <BreweryEventsSection
                 events={upcomingEvents}
                 myEventRsvps={{}}

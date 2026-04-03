@@ -21,11 +21,11 @@ This is the living list of breweries we plan to approach. Start with warm intros
 
 | Brewery | City | Type | Notes | Status | Contact |
 |---|---|---|---|---|---|
-| TBD — Drew intro #1 | Asheville, NC | Taproom | Drew's recommendation — warm intro | 🎯 | — |
-| TBD — Drew intro #2 | Asheville, NC | Brewpub | Drew's recommendation — warm intro | 🎯 | — |
-| TBD — Drew intro #3 | Asheville, NC | Taproom | Drew's recommendation — warm intro | 🎯 | — |
+| Burial Beer Co | Asheville, NC | Taproom | Drew knows the ops manager. Fast-growing, 2 locations now, paper punch cards visible on IG. Perfect HopTrack fit — they'd use multi-location loyalty immediately. | 🎯 | Via Drew |
+| Zillicoah Beer Co | Woodfin, NC | Brewpub | Right outside Asheville. Owner-operated, strong regulars culture, outdoor space. No visible tech stack for loyalty. Drew has drank there weekly for years. | 🎯 | Via Drew |
+| Wedge Brewing Co | Asheville, NC | Taproom | OG Asheville brewery. Two locations (Foundation + Studios). Active community, events-heavy, no app presence. Drew: "They'd kill for a Board display." | 🎯 | Via Drew |
 
-*Drew: fill these in with 3 breweries you'd personally vouch for. Owners who are open-minded and feel the punch card pain.*
+*Drew filled Wave 1 — Sprint 145. These are real warm intros, not cold leads.*
 
 ---
 

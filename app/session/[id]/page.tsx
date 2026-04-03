@@ -49,7 +49,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description,
       type: "article",
       siteName: "HopTrack",
-      images: [{ url: "/icons/icon-512x512.png", width: 512, height: 512 }],
+      images: [{ url: "/icons/icon-512.png", width: 512, height: 512 }],
     },
     twitter: {
       card: "summary",

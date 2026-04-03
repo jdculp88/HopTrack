@@ -299,9 +299,14 @@ export default function BreweriesContent() {
                 HopTrack replaces paper loyalty cards with a digital program your customers actually use — plus live tap list management and analytics that tell you something real.
               </motion.p>
               <motion.div variants={{ hidden: { opacity: 0, y: 28 }, show: { opacity: 1, y: 0, transition: { duration: 0.65, ease: EASE } } }} className="space-y-4">
-                <Link href="/brewery-admin/claim" className="inline-flex items-center gap-2.5 font-semibold text-sm px-8 py-4 rounded-full transition-colors font-sans" style={{ background: C.dark, color: C.creamText }}>
-                  Claim your brewery free <ArrowRight size={15} />
-                </Link>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                  <Link href="/brewery-admin/claim" className="inline-flex items-center gap-2.5 font-semibold text-sm px-8 py-4 rounded-full transition-colors font-sans" style={{ background: C.dark, color: C.creamText }}>
+                    Claim your brewery free <ArrowRight size={15} />
+                  </Link>
+                  <a href="mailto:demo@hoptrack.beer?subject=HopTrack%20Demo%20Request" className="inline-flex items-center gap-2 font-semibold text-sm px-6 py-4 rounded-full transition-colors font-sans border" style={{ borderColor: C.dark, color: C.dark }}>
+                    Request a demo <ArrowUpRight size={14} />
+                  </a>
+                </div>
                 <p className="text-xs font-mono" style={{ color: C.textSubtle }}>No credit card required · 14-day free trial</p>
               </motion.div>
             </motion.div>
@@ -506,8 +511,8 @@ export default function BreweriesContent() {
                 <Link href="/brewery-admin/claim" className="inline-flex items-center gap-2.5 font-semibold px-8 py-4 rounded-full transition-colors text-sm font-sans w-fit mx-auto sm:mx-0" style={{ background: C.dark, color: C.creamText }}>
                   Claim your brewery free <ArrowRight size={15} />
                 </Link>
-                <a href="mailto:sales@hoptrack.beer" className="inline-flex items-center gap-1.5 text-sm transition-opacity hover:opacity-70 group font-sans justify-center" style={{ color: C.textMuted }}>
-                  Talk to sales <ArrowUpRight size={13} className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                <a href="mailto:demo@hoptrack.beer?subject=HopTrack%20Demo%20Request" className="inline-flex items-center gap-2 font-semibold px-6 py-4 rounded-full transition-colors text-sm font-sans border w-fit mx-auto sm:mx-0" style={{ borderColor: C.dark, color: C.dark }}>
+                  Request a demo <ArrowUpRight size={14} />
                 </a>
               </div>
             </div>

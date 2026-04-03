@@ -4,7 +4,11 @@ import { ClaimBreweryClient } from "./ClaimBreweryClient";
 
 export const metadata = { title: "Claim Your Brewery | HopTrack" };
 
-export default async function ClaimBreweryPage() {
+export default async function ClaimBreweryPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ brewery_id?: string }>;
+}) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -34,10 +38,23 @@ export default async function ClaimBreweryPage() {
 
   const pendingClaim = (pendingClaimRaw as any[])?.[0] ?? null;
 
+  // Pre-populate search if coming from a public brewery page (StorefrontGate CTA)
+  const params = await searchParams;
+  let prefillBreweryName: string | null = null;
+  if (params.brewery_id) {
+    const { data: brewery } = await supabase
+      .from("breweries")
+      .select("name")
+      .eq("id", params.brewery_id)
+      .single() as any;
+    prefillBreweryName = (brewery as any)?.name ?? null;
+  }
+
   return (
     <ClaimBreweryClient
       userEmail={user.email ?? ""}
       pendingClaim={pendingClaim}
+      prefillBreweryName={prefillBreweryName}
     />
   );
 }

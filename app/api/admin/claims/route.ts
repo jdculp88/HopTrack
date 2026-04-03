@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { onClaimApproved, onClaimRejected } from "@/lib/email-triggers";
 
 export async function PATCH(request: NextRequest) {
   try {
@@ -95,6 +96,17 @@ export async function PATCH(request: NextRequest) {
       target_id: claimId,
       notes: `Claim for brewery ${claim.brewery_id} ${newStatus}`,
     });
+
+    // Fire notification email to the brewery owner (non-blocking)
+    if (action === "approve") {
+      onClaimApproved(claimId).catch((err) =>
+        console.error("[admin/claims] Approved email failed:", err)
+      );
+    } else {
+      onClaimRejected(claimId).catch((err) =>
+        console.error("[admin/claims] Rejected email failed:", err)
+      );
+    }
 
     return NextResponse.json({ success: true, status: newStatus });
   } catch (err) {

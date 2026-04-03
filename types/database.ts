@@ -259,6 +259,11 @@ export interface Database {
         Insert: Omit<BreweryMenu, "id" | "created_at" | "updated_at"> & { id?: string };
         Update: Partial<BreweryMenu>;
       };
+      brewery_submissions: {
+        Row: BrewerySubmission;
+        Insert: Omit<BrewerySubmission, "id" | "created_at" | "updated_at"> & { id?: string };
+        Update: Partial<BrewerySubmission>;
+      };
     };
   };
 }
@@ -344,6 +349,9 @@ export interface Brewery {
   hop_route_eligible?: boolean;
   stripe_customer_id?: string | null;
   trial_ends_at?: string | null;
+  // Trial tracking (Sprint 145)
+  trial_warning_sent_at?: string | null;
+  trial_expired_sent_at?: string | null;
   // Barback crawl (Sprint 79)
   data_source?: string | null;
   last_crawled_at?: string | null;
@@ -1216,6 +1224,22 @@ export interface BreweryMenu {
   image_urls: string[];
   display_order: number;
   is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+// ─── Brewery Submissions (Sprint 145) ──────────────────────────────────────
+export interface BrewerySubmission {
+  id: string;
+  user_id: string;
+  name: string;
+  city: string;
+  state: string;
+  website_url: string | null;
+  notes: string | null;
+  status: "pending" | "approved" | "rejected";
+  reviewed_by: string | null;
+  reviewed_at: string | null;
   created_at: string;
   updated_at: string;
 }

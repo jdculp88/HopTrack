@@ -21,11 +21,12 @@ interface PendingClaim {
 interface ClaimBreweryClientProps {
   userEmail: string;
   pendingClaim?: PendingClaim | null;
+  prefillBreweryName?: string | null;
 }
 
-export function ClaimBreweryClient({ userEmail, pendingClaim }: ClaimBreweryClientProps) {
+export function ClaimBreweryClient({ userEmail, pendingClaim, prefillBreweryName }: ClaimBreweryClientProps) {
   const [step, setStep] = useState<Step>("search");
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(prefillBreweryName ?? "");
   const [results, setResults] = useState<OpenBrewery[]>([]);
   const [searching, setSearching] = useState(false);
   const [selectedBrewery, setSelectedBrewery] = useState<OpenBrewery | null>(null);
@@ -65,6 +66,15 @@ export function ClaimBreweryClient({ userEmail, pendingClaim }: ClaimBreweryClie
     }
   }, [query]);
 
+  // Auto-search when pre-filled from StorefrontGate CTA
+  const hasAutoSearched = useRef(false);
+  useEffect(() => {
+    if (prefillBreweryName && !hasAutoSearched.current) {
+      hasAutoSearched.current = true;
+      handleSearch();
+    }
+  }, [prefillBreweryName, handleSearch]);
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") handleSearch();
   };
@@ -84,8 +94,20 @@ export function ClaimBreweryClient({ userEmail, pendingClaim }: ClaimBreweryClie
   const handleNotFoundSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setNfSubmitting(true);
-    // TODO: POST to /api/brewery-submissions with { name: nfName, city: nfCity, state: nfState }
-    await new Promise((r) => setTimeout(r, 800)); // simulate network
+    try {
+      const res = await fetch("/api/brewery-submissions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: nfName, city: nfCity, state: nfState }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error?.message ?? "Submission failed");
+      }
+    } catch (err: any) {
+      console.error("[claim] Brewery submission failed:", err.message);
+      // Still show success — we don't want to block the user
+    }
     setNfSubmitting(false);
     setNfSubmitted(true);
   };

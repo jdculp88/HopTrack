@@ -14,6 +14,7 @@ import { calculateBreweryKPIs, calculateBreweryKPISparklines, formatDuration, fo
 import BreweryOnboardingCard from "@/components/brewery-admin/BreweryOnboardingCard";
 import { OnboardingWizard } from "@/components/brewery-admin/onboarding/OnboardingWizard";
 import ROIDashboardCard from "@/components/brewery-admin/ROIDashboardCard";
+import { OnboardingChecklist } from "@/components/brewery-admin/OnboardingChecklist";
 import { PosDashboardCard } from "@/components/brewery-admin/PosDashboardCard";
 import { PosSyncAlertBanner } from "@/components/brewery-admin/PosSyncAlertBanner";
 import { Sparkline, ActiveSessionsCounter, RecentActivityFeed } from "./DashboardClient";
@@ -46,7 +47,7 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
   } else {
     const { data: acc } = await supabase
       .from("brewery_accounts")
-      .select("role, verified")
+      .select("role, verified, verified_at")
       .eq("user_id", user.id)
       .eq("brewery_id", brewery_id)
       .maybeSingle() as any;
@@ -425,6 +426,17 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
         hasBeers={hasBeers}
         hasLoyalty={hasLoyalty}
       />
+
+      {/* Onboarding Checklist — persistent for first 14 days after verification */}
+      <div className="mb-4">
+        <OnboardingChecklist
+          breweryId={brewery_id}
+          verifiedAt={(account as any)?.verified_at ?? null}
+          hasLogo={hasLogo}
+          beerCount={totalBeerCount}
+          hasLoyalty={hasLoyalty}
+        />
+      </div>
 
       {/* Help Quick Link */}
       <Link

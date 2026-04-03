@@ -21,8 +21,8 @@ self.addEventListener("push", (event) => {
   const title = data.title || "HopTrack";
   const options = {
     body: data.body || "",
-    icon: "/icons/icon-192x192.png",
-    badge: "/icons/icon-72x72.png",
+    icon: "/icons/icon-192.png",
+    badge: "/icons/icon-192.png",
     tag: data.tag || "hoptrack",
     data: data.data || {},
     actions: data.actions || [],

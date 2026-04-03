@@ -202,6 +202,78 @@ export function trialExpiredEmail(params: { breweryName: string; ownerName: stri
   };
 }
 
+// ── Claim Approved (Sprint 145) ──
+
+export function claimApprovedEmail(params: { breweryName: string; ownerName: string; breweryId: string }) {
+  const { breweryName, ownerName, breweryId } = params;
+  const firstName = ownerName.split(" ")[0] || "there";
+
+  const html = layout(
+    `${breweryName} is verified!`,
+    `
+    <h1 style="margin:0 0 16px;font-family:'Playfair Display',Georgia,serif;font-size:22px;color:${BRAND.text};">
+      You're in, ${firstName}! 🎉
+    </h1>
+    <p style="margin:0 0 12px;font-size:14px;line-height:1.6;color:${BRAND.text};">
+      Great news — your claim for <strong style="color:${BRAND.gold};">${breweryName}</strong> has been verified. Your dashboard is ready and your 14-day free trial has started.
+    </p>
+    <p style="margin:0 0 8px;font-size:14px;color:${BRAND.text};font-weight:600;">
+      Get set up in 5 minutes:
+    </p>
+    <ol style="margin:0 0 16px;padding-left:20px;font-size:14px;line-height:1.8;color:${BRAND.text};">
+      <li>Upload your logo</li>
+      <li>Add your beers to the tap list</li>
+      <li>Set up your loyalty program</li>
+      <li>Preview The Board (your TV display)</li>
+    </ol>
+    ${button("Go to Dashboard", `https://app.hoptrack.beer/brewery-admin/${breweryId}`)}
+    <p style="margin:0;font-size:13px;color:${BRAND.muted};">
+      Full access for 14 days — no credit card required. Questions? Reply to this email.
+    </p>
+  `,
+    `${breweryName} is verified — your 14-day free trial has started!`
+  );
+
+  return {
+    subject: `${breweryName} is verified on HopTrack! 🎉`,
+    html,
+    text: `Great news, ${firstName}! Your claim for ${breweryName} has been verified. Your dashboard is ready at https://app.hoptrack.beer/brewery-admin/${breweryId}. Your 14-day free trial has started.`,
+  };
+}
+
+// ── Claim Rejected (Sprint 145) ──
+
+export function claimRejectedEmail(params: { breweryName: string; ownerName: string }) {
+  const { breweryName, ownerName } = params;
+  const firstName = ownerName.split(" ")[0] || "there";
+
+  const html = layout(
+    "Claim update",
+    `
+    <h1 style="margin:0 0 16px;font-family:'Playfair Display',Georgia,serif;font-size:22px;color:${BRAND.text};">
+      Claim update, ${firstName}
+    </h1>
+    <p style="margin:0 0 12px;font-size:14px;line-height:1.6;color:${BRAND.text};">
+      We weren't able to verify your claim for <strong>${breweryName}</strong> at this time. This usually happens when we can't confirm a connection between your account and the brewery.
+    </p>
+    <p style="margin:0 0 16px;font-size:14px;line-height:1.6;color:${BRAND.text};">
+      If you believe this was a mistake, please reply to this email with additional verification (business license, social media proof, or a photo of your brewery with today's date) and we'll take another look.
+    </p>
+    ${button("Contact Support", "mailto:support@hoptrack.beer?subject=Claim%20Verification%20for%20${encodeURIComponent(breweryName)}")}
+    <p style="margin:0;font-size:13px;color:${BRAND.muted};">
+      We want to get this right. We're here to help.
+    </p>
+  `,
+    `We need a bit more info to verify your claim for ${breweryName}.`
+  );
+
+  return {
+    subject: `Update on your HopTrack claim for ${breweryName}`,
+    html,
+    text: `Hi ${firstName}, we weren't able to verify your claim for ${breweryName} at this time. Please reply with additional verification (business license, social media proof, or a dated photo) and we'll take another look. Contact us at support@hoptrack.beer.`,
+  };
+}
+
 // ── Password Reset ──
 
 export function passwordResetEmail(params: { resetUrl: string }) {
@@ -298,6 +370,94 @@ export function weeklyDigestEmail(params: {
     subject: `${breweryName} — Weekly Report`,
     html,
     text: `This week at ${breweryName}: ${stats.visits} visits (${stats.visitsTrend >= 0 ? "+" : ""}${stats.visitsTrend}%), ${stats.uniqueVisitors} unique visitors, ${stats.beersLogged} beers logged. View full analytics at https://app.hoptrack.beer/brewery-admin/${breweryId}/analytics`,
+  };
+}
+
+// ── Onboarding Day 3 (Sprint 145) ──
+
+export function onboardingDay3Email(params: { breweryName: string; ownerName: string; breweryId: string }) {
+  const { breweryName, ownerName, breweryId } = params;
+  const firstName = ownerName.split(" ")[0] || "there";
+
+  const html = layout(
+    "Have you tried The Board?",
+    `
+    <h1 style="margin:0 0 16px;font-family:'Playfair Display',Georgia,serif;font-size:22px;color:${BRAND.text};">
+      Day 3 tip, ${firstName}
+    </h1>
+    <p style="margin:0 0 12px;font-size:14px;line-height:1.6;color:${BRAND.text};">
+      One of the most popular features brewery owners discover in their first week: <strong style="color:${BRAND.gold};">The Board</strong>.
+    </p>
+    <p style="margin:0 0 12px;font-size:14px;line-height:1.6;color:${BRAND.text};">
+      Put your tap list on any TV or tablet behind the bar. It auto-updates when you edit your beers — no design work, no reprinting.
+    </p>
+    <p style="margin:0 0 16px;font-size:14px;line-height:1.6;color:${BRAND.text};">
+      Just open the link on a browser connected to your TV and go full-screen. That's it.
+    </p>
+    ${button("Preview The Board", `https://app.hoptrack.beer/brewery-admin/${breweryId}/board`)}
+    <p style="margin:0;font-size:13px;color:${BRAND.muted};">
+      Need help getting it set up? Reply to this email — we're here.
+    </p>
+  `,
+    `${breweryName} tip: put your tap list on your bar TV with The Board.`
+  );
+
+  return {
+    subject: `${breweryName} — Have you tried The Board?`,
+    html,
+    text: `Hey ${firstName}, one of the most popular features: The Board. Put your tap list on any TV behind the bar. Preview it at https://app.hoptrack.beer/brewery-admin/${breweryId}/board`,
+  };
+}
+
+// ── Onboarding Day 7 (Sprint 145) ──
+
+export function onboardingDay7Email(params: { breweryName: string; ownerName: string; breweryId: string; stats: { sessions: number; beersLogged: number; followers: number } }) {
+  const { breweryName, ownerName, breweryId, stats } = params;
+  const firstName = ownerName.split(" ")[0] || "there";
+
+  const html = layout(
+    "Your first week on HopTrack",
+    `
+    <h1 style="margin:0 0 16px;font-family:'Playfair Display',Georgia,serif;font-size:22px;color:${BRAND.text};">
+      One week in, ${firstName}!
+    </h1>
+    <p style="margin:0 0 20px;font-size:14px;line-height:1.6;color:${BRAND.text};">
+      Here's how <strong style="color:${BRAND.gold};">${breweryName}</strong> is doing after the first week:
+    </p>
+
+    <!-- Stats -->
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+      <tr>
+        <td width="33%" style="padding:16px;background:#252320;border-radius:12px 0 0 12px;text-align:center;">
+          <p style="margin:0;font-size:28px;font-weight:700;color:${BRAND.gold};font-family:'JetBrains Mono',monospace;">${stats.sessions}</p>
+          <p style="margin:4px 0 0;font-size:11px;color:${BRAND.muted};">Sessions</p>
+        </td>
+        <td width="34%" style="padding:16px;background:#252320;text-align:center;">
+          <p style="margin:0;font-size:28px;font-weight:700;color:${BRAND.text};font-family:'JetBrains Mono',monospace;">${stats.beersLogged}</p>
+          <p style="margin:4px 0 0;font-size:11px;color:${BRAND.muted};">Beers Logged</p>
+        </td>
+        <td width="33%" style="padding:16px;background:#252320;border-radius:0 12px 12px 0;text-align:center;">
+          <p style="margin:0;font-size:28px;font-weight:700;color:${BRAND.text};font-family:'JetBrains Mono',monospace;">${stats.followers}</p>
+          <p style="margin:4px 0 0;font-size:11px;color:${BRAND.muted};">Followers</p>
+        </td>
+      </tr>
+    </table>
+
+    <p style="margin:0 0 16px;font-size:14px;line-height:1.6;color:${BRAND.text};">
+      ${stats.sessions > 0 ? "Great start! Your customers are checking in." : "No sessions yet — that's normal! Share your QR table tent and the check-ins will start rolling in."}
+    </p>
+    ${button("View Full Analytics", `https://app.hoptrack.beer/brewery-admin/${breweryId}/analytics`)}
+    <p style="margin:0;font-size:13px;color:${BRAND.muted};">
+      Your trial has 7 days left. Questions? Reply anytime.
+    </p>
+  `,
+    `${breweryName} first week: ${stats.sessions} sessions, ${stats.beersLogged} beers logged.`
+  );
+
+  return {
+    subject: `${breweryName} — Your first week on HopTrack`,
+    html,
+    text: `Hey ${firstName}, your first week at ${breweryName}: ${stats.sessions} sessions, ${stats.beersLogged} beers logged, ${stats.followers} followers. View analytics at https://app.hoptrack.beer/brewery-admin/${breweryId}/analytics`,
   };
 }
 
