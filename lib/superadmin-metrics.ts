@@ -93,6 +93,7 @@ export interface ActivityItem {
   text: string;
   subtext: string;
   timestamp: string;
+  breweryId?: string;
 }
 
 export interface CommandCenterData {
@@ -262,8 +263,8 @@ export async function calculateCommandCenterMetrics(
 
     // ── Recent activity queries ──
     service.from("profiles").select("id, display_name, username, created_at").order("created_at", { ascending: false }).limit(5) as any,
-    service.from("sessions").select("id, started_at, brewery:breweries(name), profile:profiles(display_name)").eq("is_active", false).order("started_at", { ascending: false }).limit(5) as any,
-    service.from("brewery_claims").select("id, created_at, status, brewery:breweries(name), profile:profiles(display_name)").order("created_at", { ascending: false }).limit(5) as any,
+    service.from("sessions").select("id, started_at, brewery_id, brewery:breweries(id, name), profile:profiles(display_name)").eq("is_active", false).order("started_at", { ascending: false }).limit(5) as any,
+    service.from("brewery_claims").select("id, created_at, status, brewery_id, brewery:breweries(id, name), profile:profiles(display_name)").order("created_at", { ascending: false }).limit(5) as any,
     service.from("user_achievements").select("id, unlocked_at, achievement:achievements(name), profile:profiles(display_name)").order("unlocked_at", { ascending: false }).limit(5) as any,
   ]);
 
@@ -492,6 +493,7 @@ export async function calculateCommandCenterMetrics(
       text: who,
       subtext: `checked in at ${where}`,
       timestamp: row.started_at,
+      breweryId: row.brewery_id ?? row.brewery?.id,
     });
   }
 
@@ -504,6 +506,7 @@ export async function calculateCommandCenterMetrics(
       text: who,
       subtext: `claimed ${where} (${row.status})`,
       timestamp: row.created_at,
+      breweryId: row.brewery_id ?? row.brewery?.id,
     });
   }
 

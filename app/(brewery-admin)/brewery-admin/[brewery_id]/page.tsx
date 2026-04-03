@@ -1,4 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/service";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 export const revalidate = 30; // Revalidate every 30 seconds
@@ -30,14 +32,27 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  // Verify access — use maybeSingle to avoid PostgREST error on 0 rows
-  const { data: account } = await supabase
-    .from("brewery_accounts")
-    .select("role, verified")
-    .eq("user_id", user.id)
-    .eq("brewery_id", brewery_id)
-    .maybeSingle() as any;
-  if (!account) redirect("/brewery-admin/claim");
+  // ── Impersonation detection ─────────────────────────────────────────
+  const cookieStore = await cookies();
+  const isImpersonating = !!cookieStore.get("ht-impersonate")?.value;
+
+  // Use service client during impersonation (superadmin not in brewery_accounts)
+  const queryClient = isImpersonating ? createServiceClient() : supabase;
+
+  // Verify access — skip for impersonation (layout already verified superadmin)
+  let account: any = null;
+  if (isImpersonating) {
+    account = { role: "owner", verified: true };
+  } else {
+    const { data: acc } = await supabase
+      .from("brewery_accounts")
+      .select("role, verified")
+      .eq("user_id", user.id)
+      .eq("brewery_id", brewery_id)
+      .maybeSingle() as any;
+    account = acc;
+    if (!account) redirect("/brewery-admin/claim");
+  }
 
   // ── Fetch all data in parallel ─────────────────────────────────────────────
   const now = new Date();
@@ -57,11 +72,11 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
     { data: recentFollowers },
     { data: _loyaltyProgramsForROI },
   ] = await Promise.all([
-    supabase.from("breweries").select("*").eq("id", brewery_id).single() as any,
-    supabase.from("beers").select("*").eq("brewery_id", brewery_id) as any,
+    queryClient.from("breweries").select("*").eq("id", brewery_id).single() as any,
+    queryClient.from("beers").select("*").eq("brewery_id", brewery_id) as any,
 
     // Recent 10 sessions with beer logs for feed display
-    supabase
+    queryClient
       .from("sessions")
       .select("*, profile:profiles(display_name, username, avatar_url), beer_logs(id, beer_id, rating, quantity, beer:beers(name, style))")
       .eq("brewery_id", brewery_id)
@@ -69,7 +84,7 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
       .order("started_at", { ascending: false })
       .limit(10) as any,
 
-    supabase
+    queryClient
       .from("loyalty_programs")
       .select("*, loyalty_cards(count)")
       .eq("brewery_id", brewery_id)
@@ -77,20 +92,20 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
       .single() as any,
 
     // All sessions for aggregate stats
-    supabase
+    queryClient
       .from("sessions")
       .select("id, user_id, started_at, ended_at, is_active")
       .eq("brewery_id", brewery_id)
       .eq("is_active", false) as any,
 
     // All beer logs for rating + top beer stats
-    supabase
+    queryClient
       .from("beer_logs")
       .select("id, beer_id, rating, quantity, logged_at, beer:beers(name, style)")
       .eq("brewery_id", brewery_id) as any,
 
     // Today's sessions
-    supabase
+    queryClient
       .from("sessions")
       .select("id, user_id, started_at")
       .eq("brewery_id", brewery_id)
@@ -98,21 +113,21 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
       .gte("started_at", todayStart) as any,
 
     // Today's beer logs
-    supabase
+    queryClient
       .from("beer_logs")
       .select("id, quantity")
       .eq("brewery_id", brewery_id)
       .gte("logged_at", todayStart) as any,
 
     // Active sessions right now
-    supabase
+    queryClient
       .from("sessions")
       .select("id")
       .eq("brewery_id", brewery_id)
       .eq("is_active", true) as any,
 
     // Recent reviews for activity feed
-    supabase
+    queryClient
       .from("brewery_reviews")
       .select("id, rating, comment, created_at, profile:profiles!user_id(display_name, username)")
       .eq("brewery_id", brewery_id)
@@ -120,7 +135,7 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
       .limit(5),
 
     // Recent followers for activity feed
-    supabase
+    queryClient
       .from("brewery_follows")
       .select("id, created_at, profile:profiles!user_id(display_name, username)")
       .eq("brewery_id", brewery_id)
@@ -128,7 +143,7 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
       .limit(5),
 
     // Loyalty redemptions this month (for ROI card)
-    supabase
+    queryClient
       .from("loyalty_programs")
       .select("id")
       .eq("brewery_id", brewery_id)
@@ -142,19 +157,19 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
     { data: loyaltyRedemptions },
     { data: allFollowers },
   ] = await Promise.all([
-    supabase
+    queryClient
       .from("brewery_visits")
       .select("user_id, total_visits")
       .eq("brewery_id", brewery_id) as any,
-    supabase
+    queryClient
       .from("loyalty_cards")
       .select("user_id")
       .eq("brewery_id", brewery_id) as any,
-    supabase
+    queryClient
       .from("loyalty_redemptions")
       .select("id, redeemed_at")
       .eq("brewery_id", brewery_id) as any,
-    supabase
+    queryClient
       .from("brewery_follows")
       .select("id, created_at")
       .eq("brewery_id", brewery_id) as any,
@@ -169,7 +184,7 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
   ).sort((a, b) => (b[1] as number) - (a[1] as number)).slice(0, 3).map(([id]) => id);
 
   const { data: topProfiles } = topSessionUserIds.length > 0
-    ? await supabase
+    ? await queryClient
         .from("profiles")
         .select("id, display_name, username")
         .in("id", topSessionUserIds) as any

@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
-import { Beer, CheckCircle, Clock } from "lucide-react";
+import { Beer, CheckCircle, Clock, ChevronRight } from "lucide-react";
 import { formatDate } from "@/lib/dates";
 import { SearchForm } from "@/components/superadmin/SearchForm";
 
@@ -123,11 +123,12 @@ export default async function BreweriesPage({
                 {/* Name / location */}
                 <div className="min-w-0">
                   <Link
-                    href={`/brewery/${brewery.id}`}
-                    className="text-sm font-medium hover:underline truncate block"
+                    href={`/superadmin/breweries/${brewery.id}`}
+                    className="text-sm font-medium hover:underline truncate inline-flex items-center gap-1"
                     style={{ color: "var(--text-primary)" }}
                   >
                     {brewery.name}
+                    <ChevronRight size={12} style={{ color: "var(--text-muted)" }} />
                   </Link>
                   {(brewery.city || brewery.state) && (
                     <span className="text-xs" style={{ color: "var(--text-muted)" }}>

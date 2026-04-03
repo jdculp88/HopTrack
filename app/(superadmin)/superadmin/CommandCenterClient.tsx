@@ -612,30 +612,44 @@ function RecentActivityFeed({ items }: { items: ActivityItem[] }) {
         initial="initial"
         animate="animate"
       >
-        {items.map((item, i) => (
+        {items.map((item, i) => {
+          const content = (
+            <>
+              <span className="text-sm flex-shrink-0">{ACTIVITY_ICONS[item.type] || "📌"}</span>
+              <div className="flex-1 min-w-0">
+                <span className="text-xs font-medium" style={{ color: "var(--text-primary)" }}>
+                  {item.text}
+                </span>{" "}
+                <span className="text-xs" style={{ color: "var(--text-muted)" }}>
+                  {item.subtext}
+                </span>
+              </div>
+              <span className="text-[10px] font-mono flex-shrink-0" style={{ color: "var(--text-muted)" }}>
+                {formatRelativeTime(item.timestamp)}
+              </span>
+            </>
+          );
+
+          const rowClass = "flex items-center gap-3 px-3 py-2 rounded-xl transition-colors hover:bg-[var(--surface-2)]";
+
+          return (
           <motion.div
             key={item.id}
             variants={stagger.item}
             transition={spring.default}
-            className="flex items-center gap-3 px-3 py-2 rounded-xl transition-colors"
+            className={rowClass}
             style={{
               background: i === 0 ? "var(--surface)" : "transparent",
             }}
           >
-            <span className="text-sm flex-shrink-0">{ACTIVITY_ICONS[item.type] || "📌"}</span>
-            <div className="flex-1 min-w-0">
-              <span className="text-xs font-medium" style={{ color: "var(--text-primary)" }}>
-                {item.text}
-              </span>{" "}
-              <span className="text-xs" style={{ color: "var(--text-muted)" }}>
-                {item.subtext}
-              </span>
-            </div>
-            <span className="text-[10px] font-mono flex-shrink-0" style={{ color: "var(--text-muted)" }}>
-              {formatRelativeTime(item.timestamp)}
-            </span>
+            {item.breweryId ? (
+              <Link href={`/superadmin/breweries/${item.breweryId}`} className="flex items-center gap-3 flex-1 min-w-0">
+                {content}
+              </Link>
+            ) : content}
           </motion.div>
-        ))}
+          );
+        })}
       </motion.div>
     </Card>
   );

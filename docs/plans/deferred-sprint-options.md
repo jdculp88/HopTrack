@@ -209,5 +209,12 @@ These ideas keep coming back — they're clearly high-value:
 
 ## Sprint 138 — Selected: The Bartender (real-world ops hardening)
 
-- **"The Bridge" — Superadmin Evolution (Phase 1)** — Brewery account detail pages (full profile: tier, Stripe billing, feature usage, tap list activity, loyalty stats, onboarding status, health score). "View as Brewery" impersonation mode (gold banner, 1-hour timeout, audit logging). Navigation from Command Center → brewery detail → impersonation. Joshua flagged as P0 for launch ops — his Stripe Dashboard moment. **OPEN**
+- **"The Bridge" — Superadmin Evolution (Phase 1)** — **BUILT — Sprint 140**
 - **"The Revenue Push" — Launch Readiness** — Claim funnel optimization (7,177 listings, zero real claims), PWA install prompt (Alex waiting since Sprint 8), Taylor's warm intro kit (first 10 target breweries in Asheville via Drew's network). The "go get a customer" sprint. **OPEN**
+
+---
+
+## Sprint 140 — Selected: The Bridge (superadmin evolution Phase 1)
+
+- **"The Revenue Push" — Launch Readiness** — Claim funnel optimization (7,177 listings, zero real claims), PWA install prompt (Alex waiting since Sprint 8), Taylor's warm intro kit (first 10 target breweries in Asheville via Drew's network). The "go get a customer" sprint. **OPEN**
+- **"The Playwright" — E2E Test Coverage** — Real Playwright E2E tests for critical user journeys: sign up → first check-in → earn XP, brewery claim → onboarding wizard → first tap list, loyalty stamp → redemption code → staff confirm. CI Supabase instance wired. Casey and Reese's dream sprint. **OPEN**
