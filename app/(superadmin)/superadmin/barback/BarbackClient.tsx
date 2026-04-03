@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Beer, Clock } from "lucide-react";
+import { Beer, Clock, Loader2, Bot } from "lucide-react";
 import { formatDateTime } from "@/lib/dates";
 import { BarbackOverview, type BarbackStats } from "./BarbackOverview";
 import { BarbackReviewTable, type CrawledBeer } from "./BarbackReviewTable";
@@ -32,6 +32,53 @@ type Toast = {
 
 // Re-export shared types so the server page only needs one import
 export type { BarbackStats, CrawledBeer };
+
+// ─── Run Crawl Button (Sprint 146) ──────────────────────────────────────────
+
+function RunCrawlButton({ onToast }: { onToast: (msg: string, type: "success" | "error") => void }) {
+  const [loading, setLoading] = useState(false);
+
+  const handleClick = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/superadmin/barback/trigger", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      });
+      if (res.status === 429) {
+        onToast("Rate limited — try again in 5 minutes", "error");
+        return;
+      }
+      const json = await res.json();
+      if (res.ok) {
+        onToast(`Crawl queued: ${json.data?.sourcesQueued ?? 0} sources`, "success");
+      } else {
+        onToast("Failed to trigger crawl", "error");
+      }
+    } catch {
+      onToast("Network error", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <button
+      onClick={handleClick}
+      disabled={loading}
+      className="flex items-center gap-1.5 text-sm font-semibold px-4 py-2 rounded-xl transition-all hover:opacity-80 disabled:opacity-40"
+      style={{
+        background: "color-mix(in srgb, var(--accent-gold) 15%, transparent)",
+        color: "var(--accent-gold)",
+        border: "1px solid color-mix(in srgb, var(--accent-gold) 30%, transparent)",
+      }}
+    >
+      {loading ? <Loader2 size={14} className="animate-spin" /> : <Bot size={14} />}
+      Run Crawl
+    </button>
+  );
+}
 
 // ─── Component ──────────────────────────────────────────────────────────────
 
@@ -225,15 +272,20 @@ export function BarbackClient({
             The Barback
           </p>
         </div>
-        <h1
-          className="font-display text-3xl font-bold"
-          style={{ color: "var(--text-primary)" }}
-        >
-          Beer Review Queue
-        </h1>
-        <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
-          Review AI-crawled beers before they go live
-        </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1
+              className="font-display text-3xl font-bold"
+              style={{ color: "var(--text-primary)" }}
+            >
+              Beer Review Queue
+            </h1>
+            <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
+              Review AI-crawled beers before they go live
+            </p>
+          </div>
+          <RunCrawlButton onToast={showToast} />
+        </div>
       </div>
 
       {/* ─── Overview Stats ─────────────────────────────────────────────── */}

@@ -264,6 +264,16 @@ export interface Database {
         Insert: Omit<BrewerySubmission, "id" | "created_at" | "updated_at"> & { id?: string };
         Update: Partial<BrewerySubmission>;
       };
+      ai_suggestions: {
+        Row: AISuggestion;
+        Insert: Omit<AISuggestion, "id" | "created_at"> & { id?: string };
+        Update: Partial<AISuggestion>;
+      };
+      ai_recommendations: {
+        Row: AIRecommendation;
+        Insert: Omit<AIRecommendation, "id"> & { id?: string };
+        Update: Partial<AIRecommendation>;
+      };
     };
   };
 }
@@ -1242,6 +1252,32 @@ export interface BrewerySubmission {
   reviewed_at: string | null;
   created_at: string;
   updated_at: string;
+}
+
+// ─── AI Suggestions (Sprint 146) ──────────────────────────────────────────
+export interface AISuggestion {
+  id: string;
+  brewery_id: string;
+  suggestions: Json;
+  status: "pending" | "accepted" | "dismissed";
+  generated_at: string;
+  accepted_at: string | null;
+  dismissed_at: string | null;
+  model_used: string;
+  tokens_used: number | null;
+  cost_usd: number | null;
+  created_at: string;
+}
+
+// ─── AI Recommendations (Sprint 146) ──────────────────────────────────────
+export interface AIRecommendation {
+  id: string;
+  user_id: string;
+  recommendations: Json;
+  generated_at: string;
+  expires_at: string;
+  model_used: string;
+  tokens_used: number | null;
 }
 
 // ─── Brand Catalog Beers (Sprint 119) ──────────────────────────────────────

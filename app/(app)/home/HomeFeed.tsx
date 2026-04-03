@@ -33,6 +33,7 @@ import type { FriendBreweryReview } from "@/components/social/BreweryRatingFeedC
 import type { FriendActiveRoute } from "@/components/social/HopRouteCTACard";
 import type { FriendChallengeCompletion } from "@/components/social/ChallengeFeedCard";
 import type { FriendChallengeMilestone } from "@/lib/queries/feed";
+import type { AIRecommendedBeer } from "@/lib/recommendations";
 import { ReactionProvider } from "./ReactionContext";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { WishlistOnTapAlert } from "@/components/wishlist/WishlistOnTapAlert";
@@ -121,6 +122,7 @@ interface HomeFeedProps {
   userReactions?: Record<string, string[]>;
   commentCounts?: Record<string, number>;
   recommendations?: RecommendedBeer[];
+  aiRecommendations?: AIRecommendedBeer[];
   activityHeatmap?: { date: string; count: number }[];
   pastRoutes?: Array<{ id: string; title: string; location_city: string | null; completed_at: string | null; hop_route_stops: Array<{ brewery: { name: string } | null }> }>;
   wishlistOnTapCount?: number;
@@ -152,6 +154,7 @@ export function HomeFeed({
   userReactions,
   commentCounts,
   recommendations,
+  aiRecommendations,
   activityHeatmap,
   pastRoutes,
   wishlistOnTapCount = 0,
@@ -480,6 +483,7 @@ export function HomeFeed({
               communityContent={communityContent}
               hasCommunityContent={!!hasCommunityContent}
               recommendations={recommendations}
+              aiRecommendations={aiRecommendations}
             />
           </motion.div>
         )}

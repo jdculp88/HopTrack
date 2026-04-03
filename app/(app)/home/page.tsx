@@ -16,7 +16,8 @@ import {
   fetchFriendChallengeCompletions,
   fetchFriendChallengeMilestones,
 } from "@/lib/queries/feed";
-import { getRecommendations } from "@/lib/recommendations";
+import { getRecommendations, getAIRecommendations } from "@/lib/recommendations";
+import type { AIRecommendedBeer } from "@/lib/recommendations";
 
 export const metadata = { title: "Feed" };
 
@@ -132,9 +133,10 @@ export default async function HomePage() {
     }
   }
 
-  // Beer recommendations + activity heatmap + past HopRoutes (fault-tolerant)
-  const [recommendations, activityHeatmap, pastRoutesResult] = await Promise.all([
+  // Beer recommendations + AI recommendations + activity heatmap + past HopRoutes (fault-tolerant)
+  const [recommendations, aiRecommendations, activityHeatmap, pastRoutesResult] = await Promise.all([
     getRecommendations(user.id).catch(() => []),
+    getAIRecommendations(user.id).catch(() => [] as AIRecommendedBeer[]),
     fetchActivityHeatmap(supabase, user.id),
     supabase
       .from("hop_routes")
@@ -207,6 +209,7 @@ export default async function HomePage() {
       userReactions={userReactions}
       commentCounts={commentCounts}
       recommendations={recommendations}
+      aiRecommendations={aiRecommendations}
       activityHeatmap={activityHeatmap}
       pastRoutes={pastRoutes}
       wishlistOnTapCount={wishlistOnTapCount}

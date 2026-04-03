@@ -89,6 +89,9 @@ export interface HealthMetrics {
   pendingBeerReviews: number;
   posActiveConnections: number;
   apiKeysActive: number;
+  barbackPendingCount: number;
+  barbackLastCrawl: string | null;
+  barbackTotalCost: number;
 }
 
 export interface ActivityItem {
@@ -224,6 +227,9 @@ export async function calculateCommandCenterMetrics(
     { count: pendingBeerReviews },
     { count: posConnections },
     { count: apiKeysActive },
+    // Barback metrics
+    { data: barbackLastCrawlRows },
+    { data: barbackCostRows },
 
     // Recent activity
     { data: recentSignups },
@@ -269,6 +275,9 @@ export async function calculateCommandCenterMetrics(
     service.from("crawled_beers").select("id", { count: "exact", head: true }).eq("status", "pending") as unknown as CountResult,
     service.from("pos_connections").select("id", { count: "exact", head: true }).eq("is_active", true) as unknown as CountResult,
     service.from("api_keys").select("id", { count: "exact", head: true }).eq("is_active", true) as unknown as CountResult,
+    // Barback AI metrics (Sprint 146)
+    service.from("crawl_jobs").select("completed_at").order("completed_at", { ascending: false, nullsFirst: false }).limit(1) as any,
+    service.from("crawl_jobs").select("cost_usd").not("cost_usd", "is", null) as any,
 
     // ── Recent activity queries ──
     service.from("profiles").select("id, display_name, username, created_at").order("created_at", { ascending: false }).limit(10) as any,
@@ -521,11 +530,20 @@ export async function calculateCommandCenterMetrics(
 
   // ── Compute Health ─────────────────────────────────────────────────
 
+  // Barback metrics
+  const barbackLastCrawl = ((barbackLastCrawlRows as any[]) ?? [])[0]?.completed_at ?? null;
+  const barbackTotalCost = ((barbackCostRows as any[]) ?? []).reduce(
+    (sum: number, r: any) => sum + (Number(r.cost_usd) || 0), 0
+  );
+
   const health: HealthMetrics = {
     pendingClaims: pendingClaims ?? 0,
     pendingBeerReviews: pendingBeerReviews ?? 0,
     posActiveConnections: posConnections ?? 0,
     apiKeysActive: apiKeysActive ?? 0,
+    barbackPendingCount: pendingBeerReviews ?? 0,
+    barbackLastCrawl,
+    barbackTotalCost: Math.round(barbackTotalCost * 100) / 100,
   };
 
   // ── Compute CRM + Churn Distribution ──────────────────────────────

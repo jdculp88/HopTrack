@@ -82,6 +82,7 @@ export const FEATURE_MATRIX = [
   { feature: "POS integration", free: false, tap: false, cask: true, barrel: true, category: "Integrations" },
   { feature: "Public API access", free: false, tap: false, cask: true, barrel: true, category: "Integrations" },
   { feature: "Customer messaging", free: false, tap: false, cask: true, barrel: true, category: "Marketing" },
+  { feature: "AI promotion suggestions", free: false, tap: false, cask: true, barrel: true, category: "Analytics" },
   { feature: "Priority support", free: false, tap: false, cask: true, barrel: true, category: "Support" },
   { feature: "Multi-location management", free: false, tap: false, cask: false, barrel: true, category: "Enterprise" },
   { feature: "Custom integrations", free: false, tap: false, cask: false, barrel: true, category: "Enterprise" },

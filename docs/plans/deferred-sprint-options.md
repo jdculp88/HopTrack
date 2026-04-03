@@ -235,7 +235,21 @@ These ideas keep coming back — they're clearly high-value:
 
 ---
 
-## Recurring Themes Update (Sprint 143)
+## Sprint 145 — Selected: The Revenue Push (claim funnel, PWA install, sales materials)
+
+- **"The Playwright" — E2E Test Coverage** — Real Playwright E2E tests for critical user journeys. Deferred 4x (S140, S142, S143, S145). **OPEN**
+- **"The AI Sprint" — Intelligent Features** — AI promotion suggestions, Barback polish, smart recommendations. **BUILT — Sprint 146**
+
+---
+
+## Sprint 146 — Selected: The AI Sprint (AI promotions, Barback polish, smart recommendations)
+
+- **"The Playwright" — E2E Test Coverage** — Real Playwright E2E tests for critical user journeys. Deferred 5x (S140, S142, S143, S145, S146). **OPEN**
+- **"The Hardening" — Launch Infrastructure** — Turbopack CSS panic fix, Brand Team RLS bug (14 sprints), register crons in GitHub Actions, pre-commit type checks, mobile spot-check, React compiler warnings. **OPEN**
+
+---
+
+## Recurring Themes Update (Sprint 146)
 
 | Theme | Appeared In | Status |
 |-------|------------|--------|

@@ -21,6 +21,8 @@ import {
 } from "@/components/social/DiscoveryCard";
 import type { NewBrewery, RecommendedBeer } from "./HomeFeed";
 import { RecommendationsScroll } from "@/components/social/RecommendationsScroll";
+import { AIRecommendationFeedCard } from "@/components/social/AIRecommendationFeedCard";
+import type { AIRecommendedBeer } from "@/lib/recommendations";
 import { NearbyChallengesSection } from "@/components/social/NearbyChallengesSection";
 import { BreweryAdFeedCard } from "@/components/social/BreweryAdFeedCard";
 import { useFeedAd } from "@/hooks/useFeedAd";
@@ -51,10 +53,12 @@ export function DiscoverTabContent({
   communityContent,
   hasCommunityContent,
   recommendations,
+  aiRecommendations,
 }: {
   communityContent?: CommunityContent;
   hasCommunityContent: boolean;
   recommendations?: RecommendedBeer[];
+  aiRecommendations?: AIRecommendedBeer[];
 }) {
   const feedAd = useFeedAd();
   const hasNewBreweries = (communityContent?.newBreweries?.length ?? 0) > 0;
@@ -150,7 +154,12 @@ export function DiscoverTabContent({
         </div>
       )}
 
-      {/* For You — Personalized Recommendations */}
+      {/* Brewed for You — AI Recommendations (Sprint 146) */}
+      {aiRecommendations && aiRecommendations.length > 0 && (
+        <AIRecommendationFeedCard recommendations={aiRecommendations} />
+      )}
+
+      {/* For You — Algorithmic Recommendations */}
       {recommendations && recommendations.length > 0 && (
         <RecommendationsScroll beers={recommendations} />
       )}

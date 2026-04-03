@@ -513,6 +513,51 @@ function GeographicIntelligence({ data }: { data: CommandCenterData["geo"] }) {
   );
 }
 
+// ── Section: AI Services (Sprint 146) ───────────────────────────────
+
+function AIServicesSection({ health }: { health: CommandCenterData["health"] }) {
+  return (
+    <Card padding="spacious">
+      <CardHeader>
+        <div className="flex items-center gap-2">
+          <Bot size={14} style={{ color: "var(--accent-gold)" }} />
+          <CardTitle as="h3">AI Services</CardTitle>
+        </div>
+      </CardHeader>
+      <div className="grid grid-cols-3 gap-4">
+        <Link href="/superadmin/barback" className="group">
+          <div className="text-center p-3 rounded-xl border transition-colors hover:border-[var(--accent-gold)]/30" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
+            <p className="font-display text-2xl font-bold" style={{ color: health.barbackPendingCount > 0 ? "var(--accent-gold)" : "var(--text-primary)" }}>
+              {health.barbackPendingCount}
+            </p>
+            <p className="text-[10px] font-mono uppercase tracking-wider mt-1" style={{ color: "var(--text-muted)" }}>
+              Pending Review
+            </p>
+          </div>
+        </Link>
+        <div className="text-center p-3 rounded-xl border" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
+          <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
+            {health.barbackLastCrawl
+              ? `${Math.floor((Date.now() - new Date(health.barbackLastCrawl).getTime()) / 3600000)}h ago`
+              : "Never"}
+          </p>
+          <p className="text-[10px] font-mono uppercase tracking-wider mt-1" style={{ color: "var(--text-muted)" }}>
+            Last Crawl
+          </p>
+        </div>
+        <div className="text-center p-3 rounded-xl border" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
+          <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
+            ${health.barbackTotalCost.toFixed(2)}
+          </p>
+          <p className="text-[10px] font-mono uppercase tracking-wider mt-1" style={{ color: "var(--text-muted)" }}>
+            Total AI Cost
+          </p>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
 // ── Section: System Health ──────────────────────────────────────────
 
 function SystemHealth({ data }: { data: CommandCenterData["health"] }) {
@@ -943,6 +988,9 @@ export default function CommandCenterClient({ initialData }: CommandCenterClient
             </Card>
           )}
         </div>
+
+        {/* AI Services (Sprint 146) */}
+        <AIServicesSection health={data.health} />
 
         {/* Geographic + System Health (two columns) */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">

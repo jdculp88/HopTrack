@@ -17,6 +17,7 @@ import ROIDashboardCard from "@/components/brewery-admin/ROIDashboardCard";
 import { OnboardingChecklist } from "@/components/brewery-admin/OnboardingChecklist";
 import { PosDashboardCard } from "@/components/brewery-admin/PosDashboardCard";
 import { PosSyncAlertBanner } from "@/components/brewery-admin/PosSyncAlertBanner";
+import { AISuggestionsCard } from "@/components/brewery-admin/AISuggestionsCard";
 import { Sparkline, ActiveSessionsCounter, RecentActivityFeed } from "./DashboardClient";
 import type { ActivityItem } from "./DashboardClient";
 
@@ -157,6 +158,7 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
     { data: loyaltyCards },
     { data: loyaltyRedemptions },
     { data: allFollowers },
+    { data: latestAISuggestion },
   ] = await Promise.all([
     queryClient
       .from("brewery_visits")
@@ -174,6 +176,13 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
       .from("brewery_follows")
       .select("id, created_at")
       .eq("brewery_id", brewery_id) as any,
+    queryClient
+      .from("ai_suggestions")
+      .select("id, suggestions, generated_at, status")
+      .eq("brewery_id", brewery_id)
+      .order("generated_at", { ascending: false })
+      .limit(1)
+      .maybeSingle() as any,
   ]);
 
   // Build profile lookup for top customer display
@@ -658,6 +667,14 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
           })()}
         </div>
       </div>
+
+      {/* ── AI Suggestions (Sprint 146) ───────────────────────── */}
+      <AISuggestionsCard
+        breweryId={brewery_id}
+        initialSuggestions={((latestAISuggestion as any)?.suggestions as any[]) ?? []}
+        initialId={(latestAISuggestion as any)?.id ?? null}
+        tier={subscriptionTier}
+      />
 
       <div className="grid lg:grid-cols-3 gap-6">
 
