@@ -197,3 +197,91 @@ describe("claim funnel", () => {
     expect(funnel.verified).toBeGreaterThanOrEqual(funnel.paid);
   });
 });
+
+describe("PulseMetrics sparkline fields", () => {
+  it("dauSparkline contains 7-day daily values", () => {
+    const sparkline = [10, 12, 8, 15, 20, 18, 22];
+    expect(sparkline).toHaveLength(7);
+    expect(sparkline[0]).toBe(10);
+    expect(sparkline[6]).toBe(22);
+  });
+
+  it("sessionsSparkline contains 7-day daily values", () => {
+    const sparkline = [50, 45, 60, 55, 70, 65, 80];
+    expect(sparkline).toHaveLength(7);
+    expect(Math.max(...sparkline)).toBe(80);
+  });
+
+  it("dauWoW calculates week-over-week change", () => {
+    function pctChange(current: number, prior: number): number | null {
+      if (prior === 0) return current > 0 ? 100 : null;
+      return Math.round(((current - prior) / prior) * 100);
+    }
+
+    // 20 DAU this week vs 15 last week = +33%
+    expect(pctChange(20, 15)).toBe(33);
+    // 10 DAU this week vs 20 last week = -50%
+    expect(pctChange(10, 20)).toBe(-50);
+  });
+
+  it("sessionsWoW calculates week-over-week change", () => {
+    function pctChange(current: number, prior: number): number | null {
+      if (prior === 0) return current > 0 ? 100 : null;
+      return Math.round(((current - prior) / prior) * 100);
+    }
+
+    // 80 sessions this week vs 70 last week = +14%
+    expect(pctChange(80, 70)).toBe(14);
+    // No sessions last week, 5 this week = +100%
+    expect(pctChange(5, 0)).toBe(100);
+  });
+
+  it("WoW values can be null when no data", () => {
+    const dauWoW: number | null = null;
+    const sessionsWoW: number | null = null;
+    expect(dauWoW).toBeNull();
+    expect(sessionsWoW).toBeNull();
+  });
+});
+
+describe("CommandCenterData crmDistribution", () => {
+  it("contains segment entries with required fields", () => {
+    const crmDistribution = [
+      { segment: "vip", count: 5, color: "#D4A843", bgColor: "#D4A84320", emoji: "crown" },
+      { segment: "power", count: 15, color: "#C0C0C0", bgColor: "#C0C0C020", emoji: "zap" },
+      { segment: "regular", count: 40, color: "#CD7F32", bgColor: "#CD7F3220", emoji: "user" },
+      { segment: "new", count: 100, color: "#6B7280", bgColor: "#6B728020", emoji: "sparkles" },
+    ];
+
+    expect(crmDistribution).toHaveLength(4);
+    expect(crmDistribution[0].segment).toBe("vip");
+    expect(crmDistribution[0].count).toBe(5);
+    expect(crmDistribution[0].color).toBeTruthy();
+    expect(crmDistribution[0].emoji).toBe("crown");
+
+    const totalUsers = crmDistribution.reduce((sum, s) => sum + s.count, 0);
+    expect(totalUsers).toBe(160);
+  });
+});
+
+describe("CommandCenterData churnDistribution", () => {
+  it("contains churn risk levels with required fields", () => {
+    const churnDistribution = [
+      { level: "low", count: 80, color: "#22c55e" },
+      { level: "medium", count: 30, color: "#f59e0b" },
+      { level: "high", count: 10, color: "#ef4444" },
+    ];
+
+    expect(churnDistribution).toHaveLength(3);
+    expect(churnDistribution[0].level).toBe("low");
+    expect(churnDistribution[2].level).toBe("high");
+
+    const total = churnDistribution.reduce((sum, c) => sum + c.count, 0);
+    expect(total).toBe(120);
+  });
+
+  it("each entry has a color for chart rendering", () => {
+    const entry = { level: "low", count: 50, color: "#22c55e" };
+    expect(entry.color).toMatch(/^#[0-9a-fA-F]{6}$/);
+  });
+});

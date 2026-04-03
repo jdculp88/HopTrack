@@ -16,21 +16,11 @@ import { formatDuration, formatTrend } from "@/lib/kpi";
 import { spring, stagger, variants } from "@/lib/animation";
 import type { BreweryDetailData, TeamMember, TimelineItem } from "@/lib/superadmin-brewery";
 
-// ── Tier colors (match CommandCenterClient) ────────────────────────────
+// ── Tier colors (shared constants — Sprint 143) ────────────────────────
 
-const TIER_COLORS: Record<string, string> = {
-  free: "#6B6456",
-  tap: "#D4A843",
-  cask: "#E8841A",
-  barrel: "#4A7C59",
-};
-
-const TIER_LABELS: Record<string, string> = {
-  free: "Free",
-  tap: "Tap ($49/mo)",
-  cask: "Cask ($149/mo)",
-  barrel: "Barrel (Custom)",
-};
+import { SUBSCRIPTION_TIER_COLORS, SUBSCRIPTION_TIER_LABELS } from "@/lib/constants/tiers";
+const TIER_COLORS = SUBSCRIPTION_TIER_COLORS;
+const TIER_LABELS = SUBSCRIPTION_TIER_LABELS;
 
 const ROLE_ICONS: Record<string, typeof Shield> = {
   owner: ShieldAlert,

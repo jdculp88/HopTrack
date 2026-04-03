@@ -54,6 +54,7 @@ import type {
   StateBreweryCount,
 } from "@/lib/superadmin-metrics";
 import Link from "next/link";
+import { SUBSCRIPTION_TIER_COLORS } from "@/lib/constants/tiers";
 
 // ── Constants ──────────────────────────────────────────────────────
 
@@ -63,12 +64,7 @@ const RANGE_OPTIONS: { label: string; value: TimeRange }[] = [
   { label: "90d", value: "90d" },
 ];
 
-const PIE_COLORS: Record<string, string> = {
-  free: "#6B6456",
-  tap: "#D4A843",
-  cask: "#E8841A",
-  barrel: "#4A7C59",
-};
+const PIE_COLORS = SUBSCRIPTION_TIER_COLORS;
 
 const CHART_LINE_COLOR = "#D4A843";
 
@@ -154,51 +150,63 @@ function ChartTooltip({ active, payload, label }: any) {
 
 function PlatformPulse({ data }: { data: CommandCenterData["pulse"] }) {
   const stats = [
-    { label: "DAU", value: formatNumber(data.dau), icon: <Activity size={14} /> },
+    { label: "DAU", value: formatNumber(data.dau), icon: <Activity size={14} />, sparkline: data.dauSparkline, trend: data.dauWoW },
     { label: "WAU", value: formatNumber(data.wau), icon: <Users size={14} /> },
     { label: "MAU", value: formatNumber(data.mau), icon: <TrendingUp size={14} /> },
     {
       label: "Total Users",
       value: formatNumber(data.totalUsers),
       icon: <UserPlus size={14} />,
-      note: data.newUsersWoW !== null ? `${data.newUsersWoW >= 0 ? "+" : ""}${data.newUsersWoW}% WoW` : undefined,
+      trend: data.newUsersWoW,
+      href: "/superadmin/users",
     },
-    { label: "Sessions Today", value: formatNumber(data.sessionsToday), icon: <Beer size={14} /> },
+    { label: "Sessions Today", value: formatNumber(data.sessionsToday), icon: <Beer size={14} />, sparkline: data.sessionsSparkline, trend: data.sessionsWoW },
     { label: "Active Now", value: data.activeSessions, isLive: true },
   ];
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-      {stats.map((s) => (
-        <div
-          key={s.label}
-          className="rounded-2xl p-4 border text-center"
-          style={{ background: "var(--surface)", borderColor: "var(--border)" }}
-        >
-          <div className="flex items-center justify-center gap-1.5 mb-2" style={{ color: "var(--text-muted)" }}>
-            {"icon" in s && s.icon}
-            <span className="text-[10px] font-mono uppercase tracking-wider">{s.label}</span>
-          </div>
-          <div className="flex items-center justify-center gap-1.5">
-            <p className="font-mono text-2xl font-bold" style={{ color: "var(--accent-gold)" }}>
-              {s.value}
-            </p>
-            {"isLive" in s && s.isLive && Number(s.value) > 0 && (
-              <motion.div
-                animate={{ scale: [1, 1.3, 1] }}
-                transition={{ repeat: Infinity, duration: 2 }}
-                className="w-2 h-2 rounded-full flex-shrink-0"
-                style={{ background: "#4A7C59" }}
-              />
+      {stats.map((s) => {
+        const CardWrapper = "href" in s && s.href ? Link : "div";
+        const cardProps = "href" in s && s.href ? { href: s.href as string } : {};
+
+        return (
+          <CardWrapper
+            key={s.label}
+            {...(cardProps as any)}
+            className="rounded-2xl p-4 border text-center transition-colors hover:bg-[var(--surface-2)]"
+            style={{ background: "var(--surface)", borderColor: "var(--border)" }}
+          >
+            <div className="flex items-center justify-center gap-1.5 mb-2" style={{ color: "var(--text-muted)" }}>
+              {"icon" in s && s.icon}
+              <span className="text-[10px] font-mono uppercase tracking-wider">{s.label}</span>
+            </div>
+            <div className="flex items-center justify-center gap-1.5">
+              <p className="font-mono text-2xl font-bold" style={{ color: "var(--accent-gold)" }}>
+                {s.value}
+              </p>
+              {"isLive" in s && s.isLive && Number(s.value) > 0 && (
+                <motion.div
+                  animate={{ scale: [1, 1.3, 1] }}
+                  transition={{ repeat: Infinity, duration: 2 }}
+                  className="w-2 h-2 rounded-full flex-shrink-0"
+                  style={{ background: "#4A7C59" }}
+                />
+              )}
+            </div>
+            {"sparkline" in s && s.sparkline && (s.sparkline as number[]).length >= 2 && (
+              <div className="mt-1 flex justify-center">
+                <Sparkline data={s.sparkline as number[]} width={48} height={16} />
+              </div>
             )}
-          </div>
-          {"note" in s && s.note && (
-            <p className="text-[10px] mt-1 font-mono" style={{ color: "var(--text-secondary)" }}>
-              {s.note}
-            </p>
-          )}
-        </div>
-      ))}
+            {"trend" in s && s.trend !== undefined && (
+              <div className="mt-1 flex justify-center">
+                <TrendBadge value={(s.trend as number | null) ?? null} />
+              </div>
+            )}
+          </CardWrapper>
+        );
+      })}
     </div>
   );
 }
@@ -592,13 +600,27 @@ function SystemHealth({ data }: { data: CommandCenterData["health"] }) {
 // ── Section: Recent Activity Feed ──────────────────────────────────
 
 function RecentActivityFeed({ items }: { items: ActivityItem[] }) {
+  const [feedFilter, setFeedFilter] = useState<string>("all");
+  const [visibleCount, setVisibleCount] = useState(15);
+
+  const FEED_FILTERS = [
+    { label: "All", value: "all" },
+    { label: "Signups", value: "signup" },
+    { label: "Sessions", value: "session" },
+    { label: "Claims", value: "claim" },
+    { label: "Achievements", value: "achievement" },
+  ];
+
+  const filtered = feedFilter === "all" ? items : items.filter(i => i.type === feedFilter);
+  const visible = filtered.slice(0, visibleCount);
+
   if (items.length === 0) {
     return (
       <Card padding="spacious">
         <CardHeader>
           <CardTitle as="h3">Recent Activity</CardTitle>
         </CardHeader>
-        <p className="text-xs" style={{ color: "var(--text-muted)" }}>No activity yet — once users start checking in, you'll see everything here.</p>
+        <p className="text-xs" style={{ color: "var(--text-muted)" }}>No activity yet — once users start checking in, you will see everything here.</p>
       </Card>
     );
   }
@@ -611,13 +633,32 @@ function RecentActivityFeed({ items }: { items: ActivityItem[] }) {
           <CardTitle as="h3">Recent Activity</CardTitle>
         </div>
       </CardHeader>
+
+      {/* Filter Pills */}
+      <div className="flex gap-1.5 mb-4 overflow-x-auto">
+        {FEED_FILTERS.map((f) => (
+          <button
+            key={f.value}
+            onClick={() => { setFeedFilter(f.value); setVisibleCount(15); }}
+            className="px-3 py-1.5 rounded-lg text-xs font-mono whitespace-nowrap transition-colors"
+            style={{
+              background: feedFilter === f.value ? "var(--accent-gold)" : "var(--surface-2)",
+              color: feedFilter === f.value ? "#0F0E0C" : "var(--text-secondary)",
+              fontWeight: feedFilter === f.value ? 600 : 400,
+            }}
+          >
+            {f.label}
+          </button>
+        ))}
+      </div>
+
       <motion.div
         className="space-y-1"
         variants={stagger.container(0.04)}
         initial="initial"
         animate="animate"
       >
-        {items.map((item, i) => {
+        {visible.map((item, i) => {
           const content = (
             <>
               <span className="text-sm flex-shrink-0">{ACTIVITY_ICONS[item.type] || "📌"}</span>
@@ -638,24 +679,33 @@ function RecentActivityFeed({ items }: { items: ActivityItem[] }) {
           const rowClass = "flex items-center gap-3 px-3 py-2 rounded-xl transition-colors hover:bg-[var(--surface-2)]";
 
           return (
-          <motion.div
-            key={item.id}
-            variants={stagger.item}
-            transition={spring.default}
-            className={rowClass}
-            style={{
-              background: i === 0 ? "var(--surface)" : "transparent",
-            }}
-          >
-            {item.breweryId ? (
-              <Link href={`/superadmin/breweries/${item.breweryId}`} className="flex items-center gap-3 flex-1 min-w-0">
-                {content}
-              </Link>
-            ) : content}
-          </motion.div>
+            <motion.div
+              key={item.id}
+              variants={stagger.item}
+              transition={spring.default}
+              className={rowClass}
+              style={{ background: i === 0 ? "var(--surface)" : "transparent" }}
+            >
+              {item.breweryId ? (
+                <Link href={`/superadmin/breweries/${item.breweryId}`} className="flex items-center gap-3 flex-1 min-w-0">
+                  {content}
+                </Link>
+              ) : content}
+            </motion.div>
           );
         })}
       </motion.div>
+
+      {/* Show More */}
+      {filtered.length > visibleCount && (
+        <button
+          onClick={() => setVisibleCount(v => v + 15)}
+          className="w-full mt-3 py-2 rounded-xl text-xs font-mono border transition-colors"
+          style={{ background: "var(--surface-2)", borderColor: "var(--border)", color: "var(--text-secondary)" }}
+        >
+          Show more ({filtered.length - visibleCount} remaining)
+        </button>
+      )}
     </Card>
   );
 }
@@ -795,6 +845,82 @@ export default function CommandCenterClient({ initialData }: CommandCenterClient
           <EngagementMetrics data={data.engagement} />
         </div>
 
+        {/* CRM + Churn Distribution */}
+        {(data.crmDistribution?.length > 0 || data.churnDistribution?.length > 0) && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {/* CRM Segments */}
+            {data.crmDistribution?.length > 0 && (
+              <Card padding="spacious">
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <Users size={14} style={{ color: "var(--accent-gold)" }} />
+                    <CardTitle as="h3">User Segments</CardTitle>
+                  </div>
+                </CardHeader>
+                <div className="space-y-2">
+                  {data.crmDistribution.map((seg) => {
+                    const maxCount = Math.max(...data.crmDistribution.map(s => s.count));
+                    return (
+                      <div key={seg.segment} className="flex items-center gap-3">
+                        <span className="text-sm w-6 text-center">{seg.emoji}</span>
+                        <span className="text-xs font-mono w-14" style={{ color: seg.color }}>{seg.segment.toUpperCase()}</span>
+                        <div className="flex-1 h-4 rounded-full overflow-hidden" style={{ background: "var(--surface-2)" }}>
+                          <motion.div
+                            className="h-full rounded-full"
+                            style={{ background: seg.color }}
+                            initial={{ width: 0 }}
+                            animate={{ width: `${(seg.count / maxCount) * 100}%` }}
+                            transition={spring.gentle}
+                          />
+                        </div>
+                        <span className="text-xs font-mono w-10 text-right" style={{ color: "var(--text-secondary)" }}>
+                          {formatNumber(seg.count)}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </Card>
+            )}
+
+            {/* Churn Risk */}
+            {data.churnDistribution?.length > 0 && (
+              <Card padding="spacious">
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <AlertCircle size={14} style={{ color: "var(--accent-gold)" }} />
+                    <CardTitle as="h3">Churn Risk</CardTitle>
+                  </div>
+                </CardHeader>
+                <div className="space-y-2">
+                  {data.churnDistribution.map((ch) => {
+                    const total = data.churnDistribution.reduce((a, b) => a + b.count, 0);
+                    const pct = total > 0 ? Math.round((ch.count / total) * 100) : 0;
+                    return (
+                      <div key={ch.level} className="flex items-center gap-3">
+                        <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: ch.color }} />
+                        <span className="text-xs font-mono w-16" style={{ color: ch.color }}>{ch.level}</span>
+                        <div className="flex-1 h-4 rounded-full overflow-hidden" style={{ background: "var(--surface-2)" }}>
+                          <motion.div
+                            className="h-full rounded-full"
+                            style={{ background: ch.color }}
+                            initial={{ width: 0 }}
+                            animate={{ width: `${pct}%` }}
+                            transition={spring.gentle}
+                          />
+                        </div>
+                        <span className="text-xs font-mono w-16 text-right" style={{ color: "var(--text-secondary)" }}>
+                          {formatNumber(ch.count)} ({pct}%)
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </Card>
+            )}
+          </div>
+        )}
+
         {/* Growth Trends */}
         <GrowthTrends data={data.growth} />
 
@@ -823,6 +949,54 @@ export default function CommandCenterClient({ initialData }: CommandCenterClient
           <GeographicIntelligence data={data.geo} />
           <SystemHealth data={data.health} />
         </div>
+
+        {/* Quick Actions */}
+        {(data.health.pendingClaims > 0 || data.health.pendingBeerReviews > 0) && (
+          <Card padding="spacious">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Zap size={14} style={{ color: "var(--accent-gold)" }} />
+                <CardTitle as="h3">Needs Attention</CardTitle>
+              </div>
+            </CardHeader>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {data.health.pendingClaims > 0 && (
+                <Link href="/superadmin/claims">
+                  <div
+                    className="flex items-center gap-3 p-4 rounded-xl border transition-colors hover:bg-[var(--surface-2)]"
+                    style={{ borderColor: "var(--danger)", background: "var(--surface)" }}
+                  >
+                    <ClipboardCheck size={18} style={{ color: "var(--danger)" }} />
+                    <div className="flex-1">
+                      <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
+                        {data.health.pendingClaims} pending claim{data.health.pendingClaims !== 1 ? "s" : ""}
+                      </p>
+                      <p className="text-xs" style={{ color: "var(--text-muted)" }}>Review and approve</p>
+                    </div>
+                    <ArrowUpRight size={14} style={{ color: "var(--text-muted)" }} />
+                  </div>
+                </Link>
+              )}
+              {data.health.pendingBeerReviews > 0 && (
+                <Link href="/superadmin/barback">
+                  <div
+                    className="flex items-center gap-3 p-4 rounded-xl border transition-colors hover:bg-[var(--surface-2)]"
+                    style={{ borderColor: "var(--danger)", background: "var(--surface)" }}
+                  >
+                    <Bot size={18} style={{ color: "var(--danger)" }} />
+                    <div className="flex-1">
+                      <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
+                        {data.health.pendingBeerReviews} pending beer{data.health.pendingBeerReviews !== 1 ? "s" : ""}
+                      </p>
+                      <p className="text-xs" style={{ color: "var(--text-muted)" }}>Review AI crawled beers</p>
+                    </div>
+                    <ArrowUpRight size={14} style={{ color: "var(--text-muted)" }} />
+                  </div>
+                </Link>
+              )}
+            </div>
+          </Card>
+        )}
 
         {/* Recent Activity */}
         <RecentActivityFeed items={data.recentActivity} />

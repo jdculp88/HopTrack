@@ -24,6 +24,10 @@ export interface PulseMetrics {
   activeSessions: number;
   newUsersThisWeek: number;
   newUsersWoW: number | null; // % change vs prior week
+  dauSparkline: number[];      // 7-day daily DAU values
+  sessionsSparkline: number[]; // 7-day daily session counts
+  dauWoW: number | null;       // DAU % change vs prior week
+  sessionsWoW: number | null;  // sessions % change vs prior week
 }
 
 export interface TierSlice {
@@ -104,6 +108,8 @@ export interface CommandCenterData {
   growth: GrowthMetrics;
   health: HealthMetrics;
   recentActivity: ActivityItem[];
+  crmDistribution: { segment: string; count: number; color: string; bgColor: string; emoji: string }[];
+  churnDistribution: { level: string; count: number; color: string }[];
   generatedAt: string;
 }
 
@@ -224,6 +230,9 @@ export async function calculateCommandCenterMetrics(
     { data: recentSessionActivity },
     { data: recentClaims },
     { data: recentAchievements },
+
+    // CRM + churn
+    { data: allProfiles },
   ] = await Promise.all([
     // ── Pulse queries ──
     service.from("profiles").select("id", { count: "exact", head: true }) as unknown as CountResult,
@@ -250,10 +259,10 @@ export async function calculateCommandCenterMetrics(
     // ── Geo query ──
     service.from("breweries").select("state").not("state", "is", null).limit(10000) as any,
 
-    // ── Growth queries (always 30-day series) ──
-    service.from("profiles").select("created_at").gte("created_at", thirtyDaysAgo).order("created_at", { ascending: true }).limit(10000) as any,
-    service.from("sessions").select("started_at").eq("is_active", false).gte("started_at", thirtyDaysAgo).order("started_at", { ascending: true }).limit(10000) as any,
-    service.from("brewery_claims").select("created_at").gte("created_at", thirtyDaysAgo).order("created_at", { ascending: true }).limit(1000) as any,
+    // ── Growth queries (scoped to selected range) ──
+    service.from("profiles").select("created_at").gte("created_at", rangeStart).order("created_at", { ascending: true }).limit(10000) as any,
+    service.from("sessions").select("started_at").eq("is_active", false).gte("started_at", rangeStart).order("started_at", { ascending: true }).limit(10000) as any,
+    service.from("brewery_claims").select("created_at").gte("created_at", rangeStart).order("created_at", { ascending: true }).limit(1000) as any,
 
     // ── Health queries ──
     service.from("brewery_claims").select("id", { count: "exact", head: true }).eq("status", "pending") as unknown as CountResult,
@@ -262,10 +271,13 @@ export async function calculateCommandCenterMetrics(
     service.from("api_keys").select("id", { count: "exact", head: true }).eq("is_active", true) as unknown as CountResult,
 
     // ── Recent activity queries ──
-    service.from("profiles").select("id, display_name, username, created_at").order("created_at", { ascending: false }).limit(5) as any,
-    service.from("sessions").select("id, started_at, brewery_id, brewery:breweries(id, name), profile:profiles(display_name)").eq("is_active", false).order("started_at", { ascending: false }).limit(5) as any,
-    service.from("brewery_claims").select("id, created_at, status, brewery_id, brewery:breweries(id, name), profile:profiles(display_name)").order("created_at", { ascending: false }).limit(5) as any,
-    service.from("user_achievements").select("id, unlocked_at, achievement:achievements(name), profile:profiles(display_name)").order("unlocked_at", { ascending: false }).limit(5) as any,
+    service.from("profiles").select("id, display_name, username, created_at").order("created_at", { ascending: false }).limit(10) as any,
+    service.from("sessions").select("id, started_at, brewery_id, brewery:breweries(id, name), profile:profiles(display_name)").eq("is_active", false).order("started_at", { ascending: false }).limit(10) as any,
+    service.from("brewery_claims").select("id, created_at, status, brewery_id, brewery:breweries(id, name), profile:profiles(display_name)").order("created_at", { ascending: false }).limit(10) as any,
+    service.from("user_achievements").select("id, unlocked_at, achievement:achievements(name), profile:profiles(display_name)").order("unlocked_at", { ascending: false }).limit(10) as any,
+
+    // CRM + churn distribution
+    service.from("profiles").select("total_checkins, last_session_date").limit(50000) as any,
   ]);
 
   // ── Compute Pulse ──────────────────────────────────────────────────
@@ -290,6 +302,48 @@ export async function calculateCommandCenterMetrics(
     }
   }
 
+  // Build 7-day sparklines for DAU and sessions
+  const dauSparkline: number[] = [];
+  const sessionsSparkline: number[] = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const key = toDateKey(d.toISOString());
+    const dayUsers = new Set<string>();
+    let daySessions = 0;
+    for (const s of sessions30d) {
+      if (toDateKey(s.started_at) === key) {
+        dayUsers.add(s.user_id);
+        daySessions++;
+      }
+    }
+    dauSparkline.push(dayUsers.size);
+    sessionsSparkline.push(daySessions);
+  }
+
+  // WoW trends for DAU and sessions
+  const priorWeekDauUsers = new Set<string>();
+  let priorWeekSessions = 0;
+  const twoWeeksAgoDate = new Date(Date.now() - 14 * 86400000);
+  for (const s of sessions30d) {
+    const d = new Date(s.started_at);
+    if (d >= twoWeeksAgoDate && d < sevenDaysAgoDate) {
+      if (toDateKey(s.started_at) === toDateKey(twoWeeksAgoDate.toISOString())) {
+        priorWeekDauUsers.add(s.user_id);
+        priorWeekSessions++;
+      }
+    }
+  }
+  const thisWeekDau = dauSparkline.slice(-1)[0] ?? 0;
+  const priorDau = dauSparkline.length >= 8 ? dauSparkline[0] : null;
+  const dauWoW = priorDau !== null && priorDau > 0 ? pctChange(thisWeekDau, priorDau) : null;
+  const thisWeekSessions = sessionsSparkline.reduce((a, b) => a + b, 0);
+  const priorWeekSessionsTotal = sessions30d.filter(s => {
+    const d = new Date(s.started_at);
+    return d >= twoWeeksAgoDate && d < sevenDaysAgoDate;
+  }).length;
+  const sessionsWoW = priorWeekSessionsTotal > 0 ? pctChange(thisWeekSessions, priorWeekSessionsTotal) : null;
+
   const pulse: PulseMetrics = {
     totalUsers: totalUsers ?? 0,
     dau: dauUsers.size,
@@ -299,6 +353,10 @@ export async function calculateCommandCenterMetrics(
     activeSessions: activeSessions ?? 0,
     newUsersThisWeek: newUsersThisWeek ?? 0,
     newUsersWoW: pctChange(newUsersThisWeek ?? 0, newUsersPriorWeek ?? 0),
+    dauSparkline,
+    sessionsSparkline,
+    dauWoW,
+    sessionsWoW,
   };
 
   // ── Compute Revenue ────────────────────────────────────────────────
@@ -448,15 +506,15 @@ export async function calculateCommandCenterMetrics(
 
   const userSignups = bucketByDay(
     ((signupRows ?? []) as { created_at: string }[]).map(r => ({ date_field: r.created_at })),
-    30
+    rangeDays
   );
   const sessionVolume = bucketByDay(
     ((sessionRows ?? []) as { started_at: string }[]).map(r => ({ date_field: r.started_at })),
-    30
+    rangeDays
   );
   const claimTrend = bucketByDay(
     ((claimRows ?? []) as { created_at: string }[]).map(r => ({ date_field: r.created_at })),
-    30
+    rangeDays
   );
 
   const growth: GrowthMetrics = { userSignups, sessionVolume, claimTrend };
@@ -469,6 +527,52 @@ export async function calculateCommandCenterMetrics(
     posActiveConnections: posConnections ?? 0,
     apiKeysActive: apiKeysActive ?? 0,
   };
+
+  // ── Compute CRM + Churn Distribution ──────────────────────────────
+
+  const profileRows = (allProfiles ?? []) as { total_checkins: number; last_session_date: string | null }[];
+  const segmentCounts: Record<string, number> = { vip: 0, power: 0, regular: 0, new: 0 };
+  const churnCounts: Record<string, number> = { active: 0, at_risk: 0, churned: 0 };
+  const CHURN_COLORS: Record<string, string> = { active: "#4A7C59", at_risk: "#E8841A", churned: "#C44B3A" };
+
+  for (const p of profileRows) {
+    // CRM segment
+    const visits = p.total_checkins ?? 0;
+    if (visits >= 10) segmentCounts.vip++;
+    else if (visits >= 5) segmentCounts.power++;
+    else if (visits >= 2) segmentCounts.regular++;
+    else segmentCounts.new++;
+
+    // Churn risk
+    if (p.last_session_date) {
+      const daysSince = Math.floor((Date.now() - new Date(p.last_session_date).getTime()) / 86400000);
+      if (daysSince <= 14) churnCounts.active++;
+      else if (daysSince <= 45) churnCounts.at_risk++;
+      else churnCounts.churned++;
+    } else {
+      churnCounts.churned++;
+    }
+  }
+
+  const CRM_SEGMENT_META: Record<string, { color: string; bgColor: string; emoji: string }> = {
+    vip: { color: "var(--accent-gold)", bgColor: "rgba(212,168,67,0.15)", emoji: "👑" },
+    power: { color: "#a78bfa", bgColor: "rgba(167,139,250,0.15)", emoji: "⚡" },
+    regular: { color: "#60a5fa", bgColor: "rgba(96,165,250,0.15)", emoji: "🍺" },
+    new: { color: "#4ade80", bgColor: "rgba(74,222,128,0.15)", emoji: "🌱" },
+  };
+
+  const crmDistribution = Object.entries(segmentCounts).map(([segment, count]) => ({
+    segment,
+    count,
+    ...CRM_SEGMENT_META[segment],
+  }));
+
+  const CHURN_LABELS: Record<string, string> = { active: "Active", at_risk: "At Risk", churned: "Churned" };
+  const churnDistribution = Object.entries(churnCounts).map(([level, count]) => ({
+    level: CHURN_LABELS[level] || level,
+    count,
+    color: CHURN_COLORS[level],
+  }));
 
   // ── Compute Recent Activity ────────────────────────────────────────
 
@@ -522,10 +626,10 @@ export async function calculateCommandCenterMetrics(
     });
   }
 
-  // Sort all by timestamp descending, take 20
+  // Sort all by timestamp descending, take 30
   const recentActivity = activity
     .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-    .slice(0, 20);
+    .slice(0, 30);
 
   // ── Assemble ───────────────────────────────────────────────────────
 
@@ -537,6 +641,8 @@ export async function calculateCommandCenterMetrics(
     growth,
     health,
     recentActivity,
+    crmDistribution,
+    churnDistribution,
     generatedAt: new Date().toISOString(),
   };
 }

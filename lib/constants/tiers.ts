@@ -51,6 +51,23 @@ export const TIER_STYLES: Record<string, TierStyle> = {
   },
 } as const;
 
+// ─── Subscription Tier Colors & Labels (Superadmin) ────────────────────────
+// Consolidates PIE_COLORS from CommandCenterClient and TIER_COLORS from BreweryDetailClient
+
+export const SUBSCRIPTION_TIER_COLORS: Record<string, string> = {
+  free: "#6B6456",
+  tap: "#D4A843",
+  cask: "#E8841A",
+  barrel: "#4A7C59",
+} as const;
+
+export const SUBSCRIPTION_TIER_LABELS: Record<string, string> = {
+  free: "Free",
+  tap: "Tap ($49/mo)",
+  cask: "Cask ($149/mo)",
+  barrel: "Barrel (Custom)",
+} as const;
+
 // ─── Leaderboard Rank Styles ────────────────────────────────────────────────
 
 export interface RankStyle {
