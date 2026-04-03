@@ -225,3 +225,40 @@ These ideas keep coming back — they're clearly high-value:
 
 - **"The Revenue Push" — Launch Readiness** — Claim funnel optimization (7,177 listings, zero real claims), PWA install prompt (Alex waiting since Sprint 8), Taylor's warm intro kit (first 10 target breweries in Asheville via Drew's network). The "go get a customer" sprint. Deferred 3x (S138, S140, S142). **OPEN**
 - **"The Playwright" — E2E Test Coverage** — Real Playwright E2E tests for critical user journeys. Deferred 2x (S140, S142). **OPEN**
+
+---
+
+## Sprint 143 — Selected: The Superadmin III (breweries list, CC enhancement, stats transformation)
+
+- **"The Revenue Push" — Launch Readiness** — Claim funnel optimization, PWA install prompt, warm intro kit. Deferred 4x (S138, S140, S142, S143). **OPEN**
+- **"The Playwright" — E2E Test Coverage** — Real Playwright E2E tests for critical user journeys. Deferred 3x (S140, S142, S143). **OPEN**
+
+---
+
+## Recurring Themes Update (Sprint 143)
+
+| Theme | Appeared In | Status |
+|-------|------------|--------|
+| **Superadmin Evolution / The Dashboard** | S136, S140, S142, S143 | **ONGOING** — S143 brought all pages to gold standard. Joshua wants continued evolution informed by Salesforce, HubSpot, and other enterprise admin dashboards. |
+
+---
+
+## Standing Ideas (Not Yet Sprint Options)
+
+### Superadmin IV+ — Enterprise Dashboard Research (Joshua requested S143)
+
+Joshua wants future superadmin sprints to be informed by real-world enterprise admin dashboards. Research targets: **Salesforce Admin Console** (multi-tenant management, account health scores, usage analytics, bulk operations), **HubSpot Dashboard** (CRM pipeline visualization, contact lifecycle stages, revenue attribution), **Stripe Dashboard** (real-time revenue waterfall, subscription analytics, invoice management, dispute handling), **Mixpanel/Amplitude** (behavioral cohorts, event funnels, retention curves, A/B test results), **Intercom** (conversation tracking, customer health scores, proactive outreach triggers).
+
+Potential future superadmin features based on industry research:
+- **Customizable dashboard widgets** — drag-and-drop layout, saved views, pinned favorites (Salesforce-style)
+- **Account health scoring** — composite score per brewery combining activity, billing status, feature adoption (HubSpot-style)
+- **Revenue waterfall** — real-time revenue recognition, MRR movement (new/expansion/contraction/churn) (Stripe-style)
+- **Behavioral cohort builder** — custom cohort definitions, retention analysis with arbitrary filters (Mixpanel-style)
+- **Proactive alerts** — configurable thresholds for churn risk, usage drops, billing issues (Intercom-style)
+- **Bulk operations** — mass email, tier changes, feature toggles across multiple breweries
+- **Audit log timeline** — unified per-brewery event log (Stripe-style)
+- **Content moderation queue** — reported reviews, photos, comments with approve/reject workflow
+- **Feature adoption tracking** — which features each brewery actually uses, adoption percentages
+
+*Owner: Sam (competitive research) + Jordan (architecture) + Avery (build). Priority: P1 — multi-sprint initiative, research-driven.*
+*(Added 2026-04-03, requested by Joshua post-S143 close)*
