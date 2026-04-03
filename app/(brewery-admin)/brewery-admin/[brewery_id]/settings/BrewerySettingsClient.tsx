@@ -14,6 +14,7 @@ import { Building2, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { INPUT_STYLE } from "@/lib/constants/ui";
+import { US_STATES } from "@/lib/brewery-utils";
 
 interface BrewerySettingsClientProps {
   brewery: any;
@@ -40,6 +41,7 @@ export function BrewerySettingsClient({ brewery, role, subscriptionTier = "free"
     facebook_url: brewery?.facebook_url ?? "",
     twitter_url: brewery?.twitter_url ?? "",
     untappd_url: brewery?.untappd_url ?? "",
+    postal_code: brewery?.postal_code ?? "",
   });
   const [saving, setSaving] = useState(false);
   const { success, error: toastError } = useToast();
@@ -81,13 +83,58 @@ export function BrewerySettingsClient({ brewery, role, subscriptionTier = "free"
           { key: "name", label: "Brewery Name", required: true, placeholder: "e.g. Trillium Brewing" },
           { key: "street", label: "Street Address", placeholder: "42 Hop Street" },
           { key: "city", label: "City", required: true, placeholder: "Austin" },
-          { key: "state", label: "State / Province", required: true, placeholder: "Texas" },
-          { key: "website_url", label: "Website", placeholder: "https://yourbrewery.com" },
-          { key: "phone", label: "Phone", placeholder: "(512) 555-0142" },
         ].map(({ key, label, required, placeholder }) => (
           <div key={key}>
             <label className="text-xs font-mono uppercase tracking-wider block mb-1.5" style={{ color: "var(--text-muted)" }}>
               {label}{required && " *"}
+            </label>
+            <input
+              value={(form as any)[key]}
+              onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
+              placeholder={placeholder}
+              style={inputStyle}
+            />
+          </div>
+        ))}
+
+        {/* State Dropdown */}
+        <div>
+          <label className="text-xs font-mono uppercase tracking-wider block mb-1.5" style={{ color: "var(--text-muted)" }}>
+            State *
+          </label>
+          <select
+            value={form.state}
+            onChange={e => setForm(f => ({ ...f, state: e.target.value }))}
+            style={{ ...inputStyle, appearance: "none" as const, backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238B7D6E' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center" }}
+          >
+            <option value="">Select state...</option>
+            {US_STATES.map(s => (
+              <option key={s.value} value={s.value}>{s.label}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* Zip Code */}
+        <div>
+          <label className="text-xs font-mono uppercase tracking-wider block mb-1.5" style={{ color: "var(--text-muted)" }}>
+            Zip Code
+          </label>
+          <input
+            value={form.postal_code}
+            onChange={e => setForm(f => ({ ...f, postal_code: e.target.value }))}
+            placeholder="28270"
+            maxLength={5}
+            style={inputStyle}
+          />
+        </div>
+
+        {[
+          { key: "website_url", label: "Website", placeholder: "https://yourbrewery.com" },
+          { key: "phone", label: "Phone", placeholder: "(512) 555-0142" },
+        ].map(({ key, label, placeholder }) => (
+          <div key={key}>
+            <label className="text-xs font-mono uppercase tracking-wider block mb-1.5" style={{ color: "var(--text-muted)" }}>
+              {label}
             </label>
             <input
               value={(form as any)[key]}
@@ -189,7 +236,7 @@ export function BrewerySettingsClient({ brewery, role, subscriptionTier = "free"
         <div className="pt-2">
           <button
             onClick={handleSave}
-            disabled={saving || !form.name.trim() || !form.city.trim()}
+            disabled={saving || !form.name.trim() || !form.city.trim() || !form.state}
             className="w-full py-3.5 rounded-xl font-semibold text-sm transition-all disabled:opacity-50 flex items-center justify-center gap-2"
             style={{ background: "var(--accent-gold)", color: "var(--bg)" }}
           >

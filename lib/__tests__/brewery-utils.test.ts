@@ -8,6 +8,10 @@ import {
   isValidPostalCode,
   isValidUrl,
   isValidSocialUrl,
+  US_STATES,
+  formatCity,
+  formatState,
+  normalizeAddress,
 } from "../brewery-utils";
 
 describe("formatPhone", () => {
@@ -151,5 +155,108 @@ describe("isValidSocialUrl", () => {
   });
   it("rejects non-URL", () => {
     expect(isValidSocialUrl("not-a-url", "instagram")).toBe(false);
+  });
+});
+
+// ─── Sprint 135: Data Standardization ───────────────────────────────────────────
+
+describe("US_STATES", () => {
+  it("contains 51 entries (50 states + DC)", () => {
+    expect(US_STATES).toHaveLength(51);
+  });
+  it("contains North Carolina", () => {
+    expect(US_STATES).toContainEqual({ value: "NC", label: "North Carolina" });
+  });
+  it("is sorted alphabetically by label", () => {
+    const labels = US_STATES.map((s) => s.label);
+    const sorted = [...labels].sort();
+    expect(labels).toEqual(sorted);
+  });
+});
+
+describe("formatCity", () => {
+  it("returns null for null", () => {
+    expect(formatCity(null)).toBeNull();
+  });
+  it("returns null for empty string", () => {
+    expect(formatCity("")).toBeNull();
+  });
+  it("returns null for whitespace-only", () => {
+    expect(formatCity("   ")).toBeNull();
+  });
+  it("title-cases uppercase city", () => {
+    expect(formatCity("CHARLOTTE")).toBe("Charlotte");
+  });
+  it("title-cases lowercase city", () => {
+    expect(formatCity("charlotte")).toBe("Charlotte");
+  });
+  it("handles multi-word city", () => {
+    expect(formatCity("new york")).toBe("New York");
+  });
+  it("handles Mc-prefix", () => {
+    expect(formatCity("mcallen")).toBe("McAllen");
+  });
+  it("handles Mc-prefix from uppercase", () => {
+    expect(formatCity("MCALLEN")).toBe("McAllen");
+  });
+  it("handles apostrophe city", () => {
+    expect(formatCity("o'fallon")).toBe("O'Fallon");
+  });
+  it("handles hyphenated city", () => {
+    expect(formatCity("winston-salem")).toBe("Winston-Salem");
+  });
+  it("handles St. prefix", () => {
+    expect(formatCity("ST. LOUIS")).toBe("St. Louis");
+  });
+  it("collapses multiple spaces", () => {
+    expect(formatCity("  fort   worth  ")).toBe("Fort Worth");
+  });
+});
+
+describe("formatState", () => {
+  it("returns null for null", () => {
+    expect(formatState(null)).toBeNull();
+  });
+  it("returns null for empty string", () => {
+    expect(formatState("")).toBeNull();
+  });
+  it("uppercases 2-letter abbreviation", () => {
+    expect(formatState("nc")).toBe("NC");
+  });
+  it("preserves uppercase abbreviation", () => {
+    expect(formatState("NC")).toBe("NC");
+  });
+  it("converts full state name", () => {
+    expect(formatState("Texas")).toBe("TX");
+  });
+  it("converts lowercase full name", () => {
+    expect(formatState("texas")).toBe("TX");
+  });
+  it("converts multi-word state name", () => {
+    expect(formatState("New Hampshire")).toBe("NH");
+  });
+  it("converts District of Columbia", () => {
+    expect(formatState("District of Columbia")).toBe("DC");
+  });
+  it("passes through unknown input", () => {
+    expect(formatState("Ontario")).toBe("Ontario");
+  });
+});
+
+describe("normalizeAddress", () => {
+  it("returns null for null", () => {
+    expect(normalizeAddress(null)).toBeNull();
+  });
+  it("returns null for empty string", () => {
+    expect(normalizeAddress("")).toBeNull();
+  });
+  it("returns null for whitespace-only", () => {
+    expect(normalizeAddress("   ")).toBeNull();
+  });
+  it("trims whitespace", () => {
+    expect(normalizeAddress("  123 Main St  ")).toBe("123 Main St");
+  });
+  it("collapses multiple spaces", () => {
+    expect(normalizeAddress("456  Elm   Ave  NW")).toBe("456 Elm Ave NW");
   });
 });

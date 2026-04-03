@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { onBreweryClaim } from "@/lib/email-triggers";
 import { rateLimitResponse } from "@/lib/rate-limit";
+import { formatCity, formatState, normalizeAddress, normalizePhone, normalizeWebsiteUrl } from "@/lib/brewery-utils";
 
 export async function POST(request: NextRequest) {
   const rl = rateLimitResponse(request, "brewery-claims", { limit: 5, windowMs: 60_000 });
@@ -52,12 +53,12 @@ export async function POST(request: NextRequest) {
           external_id: brewery.id,
           name: brewery.name,
           brewery_type: brewery.brewery_type ?? null,
-          street: brewery.address_1 ?? null,
-          city: brewery.city ?? null,
-          state: brewery.state_province ?? null,
+          street: normalizeAddress(brewery.address_1),
+          city: formatCity(brewery.city),
+          state: formatState(brewery.state_province),
           country: brewery.country ?? null,
-          phone: brewery.phone ?? null,
-          website_url: brewery.website_url ?? null,
+          phone: normalizePhone(brewery.phone),
+          website_url: normalizeWebsiteUrl(brewery.website_url),
           latitude: brewery.latitude ? parseFloat(brewery.latitude) : null,
           longitude: brewery.longitude ? parseFloat(brewery.longitude) : null,
         },

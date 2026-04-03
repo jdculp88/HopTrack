@@ -3,7 +3,10 @@ import { NextRequest } from "next/server";
 import { rateLimitResponse } from "@/lib/rate-limit";
 import { requireAuth, requireBreweryAdmin } from "@/lib/api-helpers";
 import { apiUnauthorized, apiForbidden, apiBadRequest, apiServerError, apiSuccess } from "@/lib/api-response";
-import { normalizePhone, normalizeWebsiteUrl, isValidSocialUrl } from "@/lib/brewery-utils";
+import {
+  normalizePhone, normalizeWebsiteUrl, isValidSocialUrl,
+  formatCity, formatState, normalizeAddress, isValidState, isValidPostalCode, normalizePostalCode,
+} from "@/lib/brewery-utils";
 
 export async function PATCH(
   request: NextRequest,
@@ -25,10 +28,25 @@ export async function PATCH(
     name, street, city, state, website_url, phone, description,
     cover_image_url, menu_image_url,
     instagram_url, facebook_url, twitter_url, untappd_url,
+    postal_code,
   } = body;
 
   if (!name?.trim() || !city?.trim()) {
     return apiBadRequest("Name and city are required");
+  }
+
+  // Validate state if provided
+  const normalizedState = formatState(state);
+  if (normalizedState && normalizedState.length === 2 && !isValidState(normalizedState)) {
+    return apiBadRequest("Invalid state — select a valid US state", "state");
+  }
+
+  // Validate postal code if provided
+  if (postal_code?.trim()) {
+    const normalizedPostal = normalizePostalCode(postal_code);
+    if (normalizedPostal && !isValidPostalCode(normalizedPostal)) {
+      return apiBadRequest("Invalid zip code — use 5-digit format", "postal_code");
+    }
   }
 
   // Validate social URLs if provided
@@ -48,9 +66,10 @@ export async function PATCH(
     .from("breweries")
     .update({
       name: name.trim(),
-      street: street?.trim() || null,
-      city: city.trim(),
-      state: state?.trim() || null,
+      street: normalizeAddress(street),
+      city: formatCity(city),
+      state: formatState(state),
+      postal_code: normalizePostalCode(postal_code),
       website_url: normalizeWebsiteUrl(website_url),
       phone: normalizePhone(phone),
       description: description?.trim() || null,
