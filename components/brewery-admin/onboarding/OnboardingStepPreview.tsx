@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, X, ExternalLink, Tv } from "lucide-react";
+import { Check, X, ExternalLink, Tv, HelpCircle } from "lucide-react";
 import Link from "next/link";
 
 interface OnboardingStepPreviewProps {
@@ -128,6 +128,14 @@ export function OnboardingStepPreview({
         >
           <ExternalLink size={14} />
           View public brewery page
+        </Link>
+        <Link
+          href={`/brewery-admin/${breweryId}/resources#guides`}
+          className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-xs transition-all"
+          style={{ color: "var(--text-muted)" }}
+        >
+          <HelpCircle size={14} />
+          Browse setup guides
         </Link>
       </div>
     </div>

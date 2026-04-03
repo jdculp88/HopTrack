@@ -73,7 +73,7 @@ export function OnboardingStepLoyalty({ breweryId, onComplete }: OnboardingStepL
           Loyalty program
         </h3>
         <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
-          Reward your regulars. Keep them coming back.
+          Breweries with loyalty programs see 2x more repeat visits. A simple stamp card goes a long way — reward your regulars and keep them coming back.
         </p>
       </div>
 

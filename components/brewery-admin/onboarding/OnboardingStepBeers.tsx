@@ -98,7 +98,7 @@ export function OnboardingStepBeers({ breweryId, onComplete }: OnboardingStepBee
           Add your beers
         </h3>
         <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
-          Add what's on tap right now. You can always edit this later.
+          Your tap list is what customers check before they visit. Add what&apos;s on tap now — you can always edit later.
         </p>
       </div>
 

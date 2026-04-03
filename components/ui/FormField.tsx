@@ -14,11 +14,13 @@ interface FormFieldProps {
   label: string;
   error?: string;
   required?: boolean;
+  /** Optional help text displayed below label, above input */
+  helpText?: string;
   className?: string;
   children: React.ReactNode;
 }
 
-export function FormField({ label, error, required, className, children }: FormFieldProps) {
+export function FormField({ label, error, required, helpText, className, children }: FormFieldProps) {
   return (
     <div className={cn(className)}>
       <label
@@ -28,6 +30,11 @@ export function FormField({ label, error, required, className, children }: FormF
         {label}
         {required && <span style={{ color: "var(--danger)" }}> *</span>}
       </label>
+      {helpText && (
+        <p className="text-xs mb-1.5" style={{ color: "var(--text-muted)" }}>
+          {helpText}
+        </p>
+      )}
       {children}
       {error && (
         <p className="text-xs mt-1" style={{ color: "var(--danger)" }}>

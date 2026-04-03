@@ -9,6 +9,7 @@ import { useToast } from "@/components/ui/Toast";
 import { LoyaltyQRModal } from "@/components/loyalty/LoyaltyQRModal";
 import { formatDate } from "@/lib/dates";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { HelpIcon } from "@/components/ui/HelpIcon";
 import { StatsGrid } from "@/components/ui/StatsGrid";
 import { Card } from "@/components/ui/Card";
 import { INPUT_STYLE, TEXTAREA_STYLE } from "@/lib/constants/ui";
@@ -115,7 +116,7 @@ export function LoyaltyClient({ breweryId, initialPrograms, initialPromotions, b
 
   return (
     <div className="p-6 lg:p-8 max-w-4xl mx-auto pt-16 lg:pt-8">
-      <PageHeader title="Loyalty & Promotions" subtitle="Reward your regulars and drive traffic with targeted offers." />
+      <PageHeader title="Loyalty & Promotions" subtitle="Reward your regulars and drive traffic with targeted offers." helpAction={<HelpIcon tooltip="Set up stamp cards to reward repeat customers" href={`/brewery-admin/${breweryId}/resources#engage`} />} />
 
       {/* Dashboard — summary stats + cards close to reward + recent redemptions */}
       {loyaltyCards.length > 0 && (

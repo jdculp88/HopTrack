@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Check, List, Gift, QrCode, ExternalLink } from "lucide-react";
+import { X, Check, List, Gift, QrCode, ExternalLink, HelpCircle } from "lucide-react";
 
 interface Step {
   label: string;
@@ -170,6 +170,16 @@ export default function BreweryOnboardingCard({
               );
             })}
           </div>
+
+          {/* Help link */}
+          <Link
+            href={`/brewery-admin/${breweryId}/resources#guides`}
+            className="flex items-center gap-1.5 text-xs mt-4 transition-opacity hover:opacity-80"
+            style={{ color: "var(--text-muted)" }}
+          >
+            <HelpCircle size={12} />
+            Need help? Browse our guides
+          </Link>
         </motion.div>
       )}
     </AnimatePresence>

@@ -44,8 +44,7 @@ export function OnboardingStepLogo({ breweryId, onComplete }: OnboardingStepLogo
           Upload your logo
         </h3>
         <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
-          This appears on your Board, brewery page, and customer notifications.
-          JPEG, PNG, or WebP — square works best.
+          Your logo appears on your public page, The Board TV display, and in search results. First impressions matter — JPEG, PNG, or WebP, square works best.
         </p>
       </div>
 

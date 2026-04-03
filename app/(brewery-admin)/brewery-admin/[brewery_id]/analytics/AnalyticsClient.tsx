@@ -7,6 +7,7 @@ import { Download, Clock, Users, Heart, Award, TrendingUp, ShieldCheck } from "l
 import { formatDateShort } from "@/lib/dates";
 import { calculateBreweryKPIs, formatDuration, formatTrend } from "@/lib/kpi";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { HelpIcon } from "@/components/ui/HelpIcon";
 
 interface AnalyticsClientProps {
   breweryId: string;
@@ -35,7 +36,8 @@ function isValidRange(v: string | null): v is TimeRange {
   return v === "7d" || v === "30d" || v === "90d" || v === "all";
 }
 
-function AnalyticsInner({ sessions: allSessions, beerLogs: allBeerLogs, breweryVisits, loyaltyCards, loyaltyRedemptions, followers, profiles, userSessionCounts }: {
+function AnalyticsInner({ breweryId, sessions: allSessions, beerLogs: allBeerLogs, breweryVisits, loyaltyCards, loyaltyRedemptions, followers, profiles, userSessionCounts }: {
+  breweryId: string;
   sessions: any[];
   beerLogs: any[];
   breweryVisits?: any[];
@@ -322,6 +324,7 @@ function AnalyticsInner({ sessions: allSessions, beerLogs: allBeerLogs, breweryV
           title="Analytics"
           subtitle={`${rangeLabel} · ${totalVisits} visit${totalVisits !== 1 ? "s" : ""} · ${totalBeersLogged} beer${totalBeersLogged !== 1 ? "s" : ""} logged by ${uniqueVisitors} visitor${uniqueVisitors !== 1 ? "s" : ""}`}
           className="mb-0"
+          helpAction={<HelpIcon tooltip="Track visits, ratings, and customer behavior" href={`/brewery-admin/${breweryId}/resources#insights`} />}
         />
         {/* Time range pills + CSV export */}
         <div className="flex items-center gap-2">
@@ -758,7 +761,7 @@ function AnalyticsInner({ sessions: allSessions, beerLogs: allBeerLogs, breweryV
   );
 }
 
-export function AnalyticsClient({ breweryId: _breweryId, sessions, beerLogs, breweryVisits, loyaltyCards, loyaltyRedemptions, followers, profiles, userSessionCounts }: AnalyticsClientProps) {
+export function AnalyticsClient({ breweryId, sessions, beerLogs, breweryVisits, loyaltyCards, loyaltyRedemptions, followers, profiles, userSessionCounts }: AnalyticsClientProps) {
   return (
     <Suspense fallback={
       <div className="p-6 lg:p-8 max-w-5xl mx-auto pt-16 lg:pt-8">
@@ -769,6 +772,7 @@ export function AnalyticsClient({ breweryId: _breweryId, sessions, beerLogs, bre
       </div>
     }>
       <AnalyticsInner
+        breweryId={breweryId}
         sessions={sessions}
         beerLogs={beerLogs}
         breweryVisits={breweryVisits}

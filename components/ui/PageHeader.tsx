@@ -16,10 +16,12 @@ interface PageHeaderProps {
   icon?: LucideIcon;
   /** Optional action element (button, etc.) rendered on the right */
   action?: React.ReactNode;
+  /** Optional help element (HelpIcon, etc.) rendered inline after the title */
+  helpAction?: React.ReactNode;
   className?: string;
 }
 
-export function PageHeader({ title, subtitle, icon: Icon, action, className }: PageHeaderProps) {
+export function PageHeader({ title, subtitle, icon: Icon, action, helpAction, className }: PageHeaderProps) {
   return (
     <div className={cn("mb-8", className)}>
       <div className="flex items-start justify-between gap-4">
@@ -32,9 +34,12 @@ export function PageHeader({ title, subtitle, icon: Icon, action, className }: P
               </p>
             </div>
           )}
-          <h1 className="font-display text-3xl font-bold" style={{ color: "var(--text-primary)" }}>
-            {title}
-          </h1>
+          <div className="flex items-center gap-2">
+            <h1 className="font-display text-3xl font-bold" style={{ color: "var(--text-primary)" }}>
+              {title}
+            </h1>
+            {helpAction && <div className="flex-shrink-0">{helpAction}</div>}
+          </div>
           {subtitle && (
             <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
               {subtitle}

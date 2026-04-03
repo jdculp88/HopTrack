@@ -5,7 +5,7 @@ export const revalidate = 30; // Revalidate every 30 seconds
 import Link from "next/link";
 import {
   Beer, Users, TrendingUp, Award, Calendar, ArrowUpRight,
-  List, Clock, Heart, BarChart3, QrCode, Eye, Zap, Gift, RefreshCw, ScanLine,
+  List, Clock, Heart, BarChart3, QrCode, Eye, Zap, Gift, RefreshCw, ScanLine, HelpCircle,
 } from "lucide-react";
 import { formatRelativeTime } from "@/lib/dates";
 import { calculateBreweryKPIs, calculateBreweryKPISparklines, formatDuration, formatTrend } from "@/lib/kpi";
@@ -410,6 +410,16 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
         hasBeers={hasBeers}
         hasLoyalty={hasLoyalty}
       />
+
+      {/* Help Quick Link */}
+      <Link
+        href={`/brewery-admin/${brewery_id}/resources#guides`}
+        className="flex items-center gap-1.5 text-xs font-medium mb-6 transition-opacity hover:opacity-80"
+        style={{ color: "var(--text-muted)" }}
+      >
+        <HelpCircle size={13} />
+        Need help getting started? Browse our guides
+      </Link>
 
       {/* ── Today's Snapshot ─────────────────────────────────────────── */}
       <div

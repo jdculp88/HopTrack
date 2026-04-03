@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Button } from "./Button";
 
@@ -19,6 +20,11 @@ interface EmptyStateProps {
     label: string;
     onClick: () => void;
   };
+  /** Optional help link shown below description */
+  helpLink?: {
+    label: string;
+    href: string;
+  };
   className?: string;
   size?: "sm" | "md" | "lg";
 }
@@ -36,6 +42,7 @@ export function EmptyState({
   description,
   action,
   secondaryAction,
+  helpLink,
   className,
   size = "md",
 }: EmptyStateProps) {
@@ -63,12 +70,22 @@ export function EmptyState({
       </h3>
 
       {description && (
-        <p className={cn("text-[var(--text-muted)] max-w-xs mb-6", s.desc)}>
+        <p className={cn("text-[var(--text-muted)] max-w-xs", helpLink ? "mb-3" : "mb-6", s.desc)}>
           {description}
         </p>
       )}
 
-      {!description && (action || secondaryAction) && <div className="mb-6" />}
+      {helpLink && (
+        <Link
+          href={helpLink.href}
+          className="text-xs font-medium mb-6 transition-opacity hover:opacity-80"
+          style={{ color: "var(--accent-gold)" }}
+        >
+          {helpLink.label} →
+        </Link>
+      )}
+
+      {!description && !helpLink && (action || secondaryAction) && <div className="mb-6" />}
 
       {(action || secondaryAction) && (
         <div className="flex flex-col sm:flex-row gap-3">

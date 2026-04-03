@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, List, BarChart2, BarChart3, Gift, Settings, ChevronDown, ChevronRight, ExternalLink, Rewind, LogOut, Calendar, QrCode, CreditCard, Users, FileText, Mail, Trophy, BookOpen, Activity, Code2, Tv, RefreshCw, Megaphone, Crown, Building2, UtensilsCrossed, MoreHorizontal, X, ScanLine } from "lucide-react";
+import { LayoutDashboard, List, BarChart2, BarChart3, Gift, Settings, ChevronDown, ChevronRight, ExternalLink, Rewind, LogOut, Calendar, QrCode, CreditCard, Users, FileText, Mail, Trophy, BookOpen, Activity, Code2, Tv, RefreshCw, Megaphone, Crown, Building2, UtensilsCrossed, MoreHorizontal, X, ScanLine, HelpCircle } from "lucide-react";
 import { HopMark } from "@/components/ui/HopMark";
 import { cn } from "@/lib/utils";
 import { useState, useEffect, useCallback } from "react";
@@ -60,6 +60,7 @@ const NAV_GROUPS: NavGroup[] = [
     { href: "/settings",  label: "Settings",  icon: Settings },
     { href: "/billing",   label: "Billing",   icon: CreditCard },
     { href: "/resources", label: "Resources", icon: BookOpen },
+    { href: "/resources#guides", label: "Help", icon: HelpCircle },
   ]},
 ];
 

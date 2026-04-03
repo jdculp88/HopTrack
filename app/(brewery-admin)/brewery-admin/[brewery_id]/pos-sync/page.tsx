@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { HelpIcon } from "@/components/ui/HelpIcon";
 import { PosSyncLogClient } from "./PosSyncLogClient";
 
 export async function generateMetadata({ params }: { params: Promise<{ brewery_id: string }> }) {
@@ -45,6 +46,7 @@ export default async function PosSyncLogPage({ params }: { params: Promise<{ bre
         title="POS Sync Log"
         subtitle="Full history of POS sync activity — webhooks, manual syncs, and scheduled runs."
         className="mb-6"
+        helpAction={<HelpIcon tooltip="Connect Toast or Square to auto-sync your tap list" href={`/brewery-admin/${brewery_id}/resources#pos`} />}
       />
 
       <PosSyncLogClient breweryId={brewery_id} />

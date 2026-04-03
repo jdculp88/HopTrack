@@ -1,6 +1,7 @@
 "use client";
 
 import { Plus, Tv, Code2, Package } from "lucide-react";
+import { HelpIcon } from "@/components/ui/HelpIcon";
 
 interface TapListHeaderProps {
   breweryId: string;
@@ -15,7 +16,10 @@ export function TapListHeader({ breweryId, onTapCount, totalCount, onAdd, brandI
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
       <div>
-        <h1 className="font-display text-2xl sm:text-3xl font-bold" style={{ color: "var(--text-primary)" }}>Menu</h1>
+        <div className="flex items-center gap-2">
+          <h1 className="font-display text-2xl sm:text-3xl font-bold" style={{ color: "var(--text-primary)" }}>Menu</h1>
+          <HelpIcon tooltip="Add, edit, and organize your beers on tap" href={`/brewery-admin/${breweryId}/resources#content`} />
+        </div>
         <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
           {onTapCount} on tap &middot; {totalCount} total items
         </p>
