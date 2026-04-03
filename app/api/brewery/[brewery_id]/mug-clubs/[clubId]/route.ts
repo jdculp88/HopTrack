@@ -1,6 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { rateLimitResponse } from "@/lib/rate-limit";
+import { requireAuth, requireBreweryAdmin } from "@/lib/api-helpers";
+import { apiUnauthorized, apiForbidden, apiSuccess, apiServerError } from "@/lib/api-response";
 
 type Params = { params: Promise<{ brewery_id: string; clubId: string }> };
 
@@ -10,22 +12,13 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   if (rl) return rl;
 
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const user = await requireAuth(supabase);
+  if (!user) return apiUnauthorized();
 
   const { brewery_id, clubId } = await params;
 
-  // Verify brewery admin
-  const { data: account } = await supabase
-    .from("brewery_accounts")
-    .select("role")
-    .eq("user_id", user.id)
-    .eq("brewery_id", brewery_id)
-    .maybeSingle() as any;
-
-  if (!account || !["owner", "manager"].includes(account.role)) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
+  const account = await requireBreweryAdmin(supabase, user.id, brewery_id);
+  if (!account) return apiForbidden();
 
   const body = await req.json();
   const { name, description, annual_fee, max_members, perks, is_active } = body;
@@ -46,9 +39,9 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     .select()
     .single() as any;
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return apiServerError(error.message);
 
-  return NextResponse.json({ club });
+  return apiSuccess({ club });
 }
 
 // DELETE /api/brewery/[brewery_id]/mug-clubs/[clubId] — delete a mug club
@@ -57,22 +50,13 @@ export async function DELETE(req: NextRequest, { params }: Params) {
   if (rl) return rl;
 
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const user = await requireAuth(supabase);
+  if (!user) return apiUnauthorized();
 
   const { brewery_id, clubId } = await params;
 
-  // Verify brewery admin
-  const { data: account } = await supabase
-    .from("brewery_accounts")
-    .select("role")
-    .eq("user_id", user.id)
-    .eq("brewery_id", brewery_id)
-    .maybeSingle() as any;
-
-  if (!account || !["owner", "manager"].includes(account.role)) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
+  const account = await requireBreweryAdmin(supabase, user.id, brewery_id);
+  if (!account) return apiForbidden();
 
   const { error } = await supabase
     .from("mug_clubs")
@@ -80,7 +64,7 @@ export async function DELETE(req: NextRequest, { params }: Params) {
     .eq("id", clubId)
     .eq("brewery_id", brewery_id) as any;
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return apiServerError(error.message);
 
-  return NextResponse.json({ success: true });
+  return apiSuccess({ success: true });
 }

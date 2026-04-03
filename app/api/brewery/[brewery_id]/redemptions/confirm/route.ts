@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { rateLimitResponse } from "@/lib/rate-limit";
 import { redeemBrandReward } from "@/lib/brand-loyalty";
+import { requireAuth } from "@/lib/api-helpers";
+import { apiUnauthorized, apiForbidden, apiBadRequest, apiNotFound, apiServerError, apiSuccess, apiError } from "@/lib/api-response";
 
 // POST /api/brewery/[brewery_id]/redemptions/confirm — staff confirms a redemption code
 export async function POST(
@@ -13,8 +15,8 @@ export async function POST(
 
   const { brewery_id } = await params;
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const user = await requireAuth(supabase);
+  if (!user) return apiUnauthorized();
 
   // Verify brewery access (owner, manager, staff, or puncher)
   const { data: account } = await supabase
@@ -33,7 +35,7 @@ export async function POST(
       .single();
 
     if (!brewery || brewery.owner_id !== user.id) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      return apiForbidden();
     }
   }
 
@@ -41,7 +43,7 @@ export async function POST(
   const { code } = body;
 
   if (!code || typeof code !== "string" || (code.length !== 5 && code.length !== 6)) {
-    return NextResponse.json({ error: "Invalid code format" }, { status: 400 });
+    return apiBadRequest("Invalid code format");
   }
 
   // Look up the code — first try brewery-scoped, then brand-scoped
@@ -79,7 +81,7 @@ export async function POST(
   }
 
   if (!redemption) {
-    return NextResponse.json({ error: "Invalid or expired code" }, { status: 404 });
+    return apiNotFound("Invalid or expired code");
   }
 
   // Check expiry
@@ -89,7 +91,7 @@ export async function POST(
       .from("redemption_codes")
       .update({ status: "expired" } as any)
       .eq("id", redemption.id);
-    return NextResponse.json({ error: "Code has expired" }, { status: 410 });
+    return apiError("Code has expired", "EXPIRED", 422);
   }
 
   // Process based on type
@@ -104,7 +106,7 @@ export async function POST(
       .single();
 
     if (!program) {
-      return NextResponse.json({ error: "Program not found" }, { status: 404 });
+      return apiNotFound("Program");
     }
 
     // Decrement stamps on the user's loyalty card
@@ -117,7 +119,7 @@ export async function POST(
       .single();
 
     if (!card || (card.stamps ?? 0) < (program.stamps_required ?? 0)) {
-      return NextResponse.json({ error: "User no longer has enough stamps" }, { status: 400 });
+      return apiBadRequest("User no longer has enough stamps");
     }
 
     // Decrement stamps
@@ -157,17 +159,17 @@ export async function POST(
       .single() as any);
 
     if (!brandCard) {
-      return NextResponse.json({ error: "Brand loyalty card not found" }, { status: 404 });
+      return apiNotFound("Brand loyalty card");
     }
 
     const brandProgram = brandCard.program as any;
     if (!brandProgram || (brandCard.stamps ?? 0) < (brandProgram.stamps_required ?? 0)) {
-      return NextResponse.json({ error: "User no longer has enough stamps" }, { status: 400 });
+      return apiBadRequest("User no longer has enough stamps");
     }
 
     const result = await redeemBrandReward(supabase, brandCard.id, brewery_id);
     if (!result) {
-      return NextResponse.json({ error: "Failed to redeem brand reward" }, { status: 500 });
+      return apiServerError("Failed to redeem brand reward");
     }
 
     redeemDescription = brandProgram.reward_description ?? "Brand loyalty reward";
@@ -227,7 +229,7 @@ export async function POST(
   const profile = redemption.profile as any;
   const displayName = profile?.display_name ?? profile?.username ?? "Customer";
 
-  return NextResponse.json({
+  return apiSuccess({
     success: true,
     customer: displayName,
     type: redemption.type,

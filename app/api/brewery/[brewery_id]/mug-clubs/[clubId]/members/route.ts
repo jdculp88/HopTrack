@@ -1,28 +1,21 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { rateLimitResponse } from "@/lib/rate-limit";
+import { requireAuth, requireBreweryAdmin } from "@/lib/api-helpers";
+import { apiUnauthorized, apiForbidden, apiSuccess, apiServerError, apiBadRequest, apiNotFound, apiConflict } from "@/lib/api-response";
 
 type Params = { params: Promise<{ brewery_id: string; clubId: string }> };
 
 // GET /api/brewery/[brewery_id]/mug-clubs/[clubId]/members — list members
 export async function GET(req: NextRequest, { params }: Params) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const user = await requireAuth(supabase);
+  if (!user) return apiUnauthorized();
 
   const { brewery_id, clubId } = await params;
 
-  // Verify brewery admin
-  const { data: account } = await supabase
-    .from("brewery_accounts")
-    .select("role")
-    .eq("user_id", user.id)
-    .eq("brewery_id", brewery_id)
-    .maybeSingle() as any;
-
-  if (!account || !["owner", "manager"].includes(account.role)) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
+  const account = await requireBreweryAdmin(supabase, user.id, brewery_id);
+  if (!account) return apiForbidden();
 
   const { data: members, error } = await supabase
     .from("mug_club_members")
@@ -30,9 +23,9 @@ export async function GET(req: NextRequest, { params }: Params) {
     .eq("mug_club_id", clubId)
     .order("joined_at", { ascending: false }) as any;
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return apiServerError(error.message);
 
-  return NextResponse.json({ members: members ?? [] });
+  return apiSuccess({ members: members ?? [] });
 }
 
 // POST /api/brewery/[brewery_id]/mug-clubs/[clubId]/members — add a member
@@ -41,22 +34,13 @@ export async function POST(req: NextRequest, { params }: Params) {
   if (rl) return rl;
 
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const user = await requireAuth(supabase);
+  if (!user) return apiUnauthorized();
 
   const { brewery_id, clubId } = await params;
 
-  // Verify brewery admin
-  const { data: account } = await supabase
-    .from("brewery_accounts")
-    .select("role")
-    .eq("user_id", user.id)
-    .eq("brewery_id", brewery_id)
-    .maybeSingle() as any;
-
-  if (!account || !["owner", "manager"].includes(account.role)) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
+  const account = await requireBreweryAdmin(supabase, user.id, brewery_id);
+  if (!account) return apiForbidden();
 
   // Check max_members limit
   const { data: club } = await supabase
@@ -66,7 +50,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     .eq("brewery_id", brewery_id)
     .single() as any;
 
-  if (!club) return NextResponse.json({ error: "Club not found" }, { status: 404 });
+  if (!club) return apiNotFound("Club");
 
   if (club.max_members) {
     const { count } = await supabase
@@ -76,14 +60,14 @@ export async function POST(req: NextRequest, { params }: Params) {
       .eq("status", "active") as any;
 
     if (count >= club.max_members) {
-      return NextResponse.json({ error: "Club is full" }, { status: 400 });
+      return apiBadRequest("Club is full");
     }
   }
 
   const body = await req.json();
   const { user_id, expires_at, notes } = body;
 
-  if (!user_id) return NextResponse.json({ error: "user_id is required" }, { status: 400 });
+  if (!user_id) return apiBadRequest("user_id is required");
 
   const { data: member, error } = await supabase
     .from("mug_club_members")
@@ -98,12 +82,12 @@ export async function POST(req: NextRequest, { params }: Params) {
 
   if (error) {
     if (error.code === "23505") {
-      return NextResponse.json({ error: "User is already a member" }, { status: 409 });
+      return apiConflict("User is already a member");
     }
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return apiServerError(error.message);
   }
 
-  return NextResponse.json({ member }, { status: 201 });
+  return apiSuccess({ member }, 201);
 }
 
 // DELETE /api/brewery/[brewery_id]/mug-clubs/[clubId]/members — remove a member
@@ -112,25 +96,16 @@ export async function DELETE(req: NextRequest, { params }: Params) {
   if (rl) return rl;
 
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const user = await requireAuth(supabase);
+  if (!user) return apiUnauthorized();
 
   const { brewery_id, clubId } = await params;
 
-  // Verify brewery admin
-  const { data: account } = await supabase
-    .from("brewery_accounts")
-    .select("role")
-    .eq("user_id", user.id)
-    .eq("brewery_id", brewery_id)
-    .maybeSingle() as any;
-
-  if (!account || !["owner", "manager"].includes(account.role)) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
+  const account = await requireBreweryAdmin(supabase, user.id, brewery_id);
+  if (!account) return apiForbidden();
 
   const { member_id } = await req.json();
-  if (!member_id) return NextResponse.json({ error: "member_id is required" }, { status: 400 });
+  if (!member_id) return apiBadRequest("member_id is required");
 
   const { error } = await supabase
     .from("mug_club_members")
@@ -138,7 +113,7 @@ export async function DELETE(req: NextRequest, { params }: Params) {
     .eq("id", member_id)
     .eq("mug_club_id", clubId) as any;
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return apiServerError(error.message);
 
-  return NextResponse.json({ success: true });
+  return apiSuccess({ success: true });
 }

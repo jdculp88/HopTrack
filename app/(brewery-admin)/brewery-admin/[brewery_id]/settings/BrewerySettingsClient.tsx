@@ -12,6 +12,8 @@ import { StaffManager } from "@/components/brewery-admin/StaffManager";
 import { CreateBrandWizard } from "@/components/brewery-admin/brand/CreateBrandWizard";
 import { Building2, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { INPUT_STYLE } from "@/lib/constants/ui";
 
 interface BrewerySettingsClientProps {
   brewery: any;
@@ -57,19 +59,11 @@ export function BrewerySettingsClient({ brewery, role, subscriptionTier = "free"
     }
   }
 
-  const inputStyle = {
-    width: "100%", padding: "10px 16px", borderRadius: 12, border: "1px solid var(--border)",
-    background: "var(--surface-2)", color: "var(--text-primary)", fontSize: 14, outline: "none",
-  };
+  const inputStyle = INPUT_STYLE;
 
   return (
     <div className="p-6 lg:p-8 max-w-2xl mx-auto pt-16 lg:pt-8">
-      <div className="mb-8">
-        <h1 className="font-display text-3xl font-bold" style={{ color: "var(--text-primary)" }}>Brewery Settings</h1>
-        <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
-          Update your brewery&apos;s public profile information.
-        </p>
-      </div>
+      <PageHeader title="Brewery Settings" subtitle="Update your brewery's public profile information." />
 
       <div className="rounded-2xl border p-6 space-y-5" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
         <div className="flex items-center justify-between pb-4 border-b" style={{ borderColor: "var(--border)" }}>

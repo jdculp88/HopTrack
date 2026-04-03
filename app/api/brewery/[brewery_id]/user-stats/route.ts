@@ -1,5 +1,6 @@
-import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { requireAuth } from "@/lib/api-helpers";
+import { apiUnauthorized, apiSuccess, apiServerError } from "@/lib/api-response";
 
 // GET /api/brewery/[brewery_id]/user-stats?userId=X
 // Returns aggregated stats for a user at a specific brewery
@@ -9,8 +10,8 @@ export async function GET(
 ) {
   const { brewery_id } = await params;
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const user = await requireAuth(supabase);
+  if (!user) return apiUnauthorized();
 
   const url = new URL(req.url);
   const userId = url.searchParams.get("userId") || user.id;
@@ -25,7 +26,7 @@ export async function GET(
     .order("started_at", { ascending: false });
 
   if (sessionsError) {
-    return NextResponse.json({ error: sessionsError.message }, { status: 500 });
+    return apiServerError(sessionsError.message);
   }
 
   const allSessions = sessions ?? [];
@@ -49,7 +50,7 @@ export async function GET(
     .eq("user_id", userId);
 
   if (logsError) {
-    return NextResponse.json({ error: logsError.message }, { status: 500 });
+    return apiServerError(logsError.message);
   }
 
   const allLogs = beerLogs ?? [];
@@ -92,7 +93,7 @@ export async function GET(
   const mins = Math.round(totalTimeMinutes % 60);
   const totalTimeStr = hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
 
-  return NextResponse.json({
+  return apiSuccess({
     visit_count: visitCount,
     total_time_minutes: Math.round(totalTimeMinutes),
     total_time_formatted: totalTimeStr,

@@ -6,6 +6,7 @@ import { useToast } from "@/components/ui/Toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSearchParams } from "next/navigation";
 import { TIER_INFO, FEATURE_MATRIX } from "@/lib/stripe";
+import { PageHeader } from "@/components/ui/PageHeader";
 
 interface Brewery {
   id: string;

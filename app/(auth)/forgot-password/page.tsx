@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Mail, CheckCircle, ChevronLeft } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { AuthErrorAlert } from "@/components/auth/AuthErrorAlert";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -101,11 +102,7 @@ export default function ForgotPasswordPage() {
           />
         </div>
 
-        {error && (
-          <p className="text-sm text-[#C44B3A] bg-[#C44B3A]/10 border border-[#C44B3A]/20 rounded-xl px-4 py-3">
-            {error}
-          </p>
-        )}
+        <AuthErrorAlert message={error} />
 
         <button
           type="submit"

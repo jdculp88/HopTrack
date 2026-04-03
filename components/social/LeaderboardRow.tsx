@@ -5,13 +5,8 @@ import { motion } from "framer-motion";
 import { TrendingUp, TrendingDown } from "lucide-react";
 import { cn, formatCount } from "@/lib/utils";
 import { UserAvatar } from "@/components/ui/UserAvatar";
+import { RANK_STYLES } from "@/lib/constants/tiers";
 import type { LeaderboardEntry } from "@/types/database";
-
-const RANK_STYLES: Record<number, { bg: string; text: string; label: string }> = {
-  1: { bg: "bg-[var(--accent-gold)]/15", text: "text-[var(--accent-gold)]", label: "🥇" },
-  2: { bg: "bg-[#C0C0C0]/10", text: "text-[#C0C0C0]", label: "🥈" },
-  3: { bg: "bg-[#CD7F32]/10", text: "text-[#CD7F32]", label: "🥉" },
-};
 
 interface LeaderboardRowProps {
   entry: LeaderboardEntry;
@@ -37,9 +32,9 @@ export function LeaderboardRow({ entry, label, currentUserId, index = 0, classNa
             "flex items-center gap-4 px-4 py-3 rounded-2xl transition-colors",
             "hover:bg-[var(--surface-2)] group",
             isCurrentUser && "bg-[var(--accent-gold)]/5 border border-[var(--accent-gold)]/20",
-            rankStyle ? rankStyle.bg : "",
             className
           )}
+          style={rankStyle ? { background: rankStyle.bg } : undefined}
         >
           {/* Rank */}
           <div className="w-8 flex-shrink-0 text-center">

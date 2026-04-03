@@ -1,6 +1,7 @@
-import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { computeSegment, getSegmentById } from "@/lib/crm";
+import { requireAuth, requireBreweryAdmin } from "@/lib/api-helpers";
+import { apiUnauthorized, apiForbidden } from "@/lib/api-response";
 
 // GET /api/brewery/[brewery_id]/customers/export
 // Streams CSV download of customer data for brewery owners
@@ -10,14 +11,12 @@ export async function GET(
 ) {
   const { brewery_id } = await params;
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const user = await requireAuth(supabase);
+  if (!user) return apiUnauthorized();
 
   // Verify brewery admin access
-  const { data: account } = await supabase
-    .from("brewery_accounts").select("role")
-    .eq("user_id", user.id).eq("brewery_id", brewery_id).single() as any;
-  if (!account) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const account = await requireBreweryAdmin(supabase, user.id, brewery_id);
+  if (!account) return apiForbidden();
 
   // Fetch all completed sessions with profile info
   const { data: sessions } = await supabase

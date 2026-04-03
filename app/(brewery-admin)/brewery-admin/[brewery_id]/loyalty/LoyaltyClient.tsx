@@ -8,6 +8,12 @@ import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/Toast";
 import { LoyaltyQRModal } from "@/components/loyalty/LoyaltyQRModal";
 import { formatDate } from "@/lib/dates";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { StatsGrid } from "@/components/ui/StatsGrid";
+import { Card } from "@/components/ui/Card";
+import { INPUT_STYLE, TEXTAREA_STYLE } from "@/lib/constants/ui";
+import { useOptimisticToggle } from "@/hooks/useOptimisticToggle";
+import { useDeleteConfirmation } from "@/hooks/useDeleteConfirmation";
 
 interface LoyaltyClientProps {
   breweryId: string;
@@ -32,10 +38,11 @@ export function LoyaltyClient({ breweryId, initialPrograms, initialPromotions, b
   const [promoForm, setPromoForm] = useState(emptyPromo);
   const [savingProgram, setSavingProgram] = useState(false);
   const [savingPromo, setSavingPromo] = useState(false);
-  const [confirmDeletePromoId, setConfirmDeletePromoId] = useState<string | null>(null);
-  const [deletingPromoId, setDeletingPromoId] = useState<string | null>(null);
   const [qrProgram, setQrProgram] = useState<any | null>(null);
   const supabase = createClient();
+  const toggleProgram = useOptimisticToggle(programs, setPrograms, "loyalty_programs");
+  const togglePromo = useOptimisticToggle(promotions, setPromotions, "promotions");
+  const promoDel = useDeleteConfirmation("promotions", promotions, setPromotions, { success: "Promotion deleted" });
 
   function openAddProgram() {
     setProgramForm(emptyProgram);
@@ -103,69 +110,25 @@ export function LoyaltyClient({ breweryId, initialPrograms, initialPromotions, b
     setPromoForm(emptyPromo);
   }
 
-  async function toggleProgram(prog: any) {
-    const newVal = !prog.is_active;
-    setPrograms(p => p.map(x => x.id === prog.id ? { ...x, is_active: newVal } : x));
-    const { error } = await supabase.from("loyalty_programs").update({ is_active: newVal }).eq("id", prog.id);
-    if (error) {
-      setPrograms(p => p.map(x => x.id === prog.id ? { ...x, is_active: prog.is_active } : x));
-      showError("Failed to update program");
-    } else {
-      success(newVal ? "Program activated" : "Program paused");
-    }
-  }
-
-  async function togglePromo(promo: any) {
-    const newVal = !promo.is_active;
-    setPromotions(p => p.map(x => x.id === promo.id ? { ...x, is_active: newVal } : x));
-    const { error } = await supabase.from("promotions").update({ is_active: newVal }).eq("id", promo.id);
-    if (error) {
-      setPromotions(p => p.map(x => x.id === promo.id ? { ...x, is_active: promo.is_active } : x));
-      showError("Failed to update promotion");
-    } else {
-      success(newVal ? "Promotion activated" : "Promotion paused");
-    }
-  }
-
-  async function deletePromo(id: string) {
-    setDeletingPromoId(id);
-    setConfirmDeletePromoId(null);
-    const { error } = await supabase.from("promotions").delete().eq("id", id);
-    if (error) {
-      showError("Failed to delete promotion");
-    } else {
-      setPromotions(p => p.filter(x => x.id !== id));
-      success("Promotion deleted");
-    }
-    setDeletingPromoId(null);
-  }
+  // toggleProgram, togglePromo provided by useOptimisticToggle hooks
+  // promoDel (confirm/delete promotions) provided by useDeleteConfirmation hook
 
   return (
     <div className="p-6 lg:p-8 max-w-4xl mx-auto pt-16 lg:pt-8">
-      <div className="mb-8">
-        <h1 className="font-display text-3xl font-bold" style={{ color: "var(--text-primary)" }}>Loyalty & Promotions</h1>
-        <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>Reward your regulars and drive traffic with targeted offers.</p>
-      </div>
+      <PageHeader title="Loyalty & Promotions" subtitle="Reward your regulars and drive traffic with targeted offers." />
 
       {/* Dashboard — summary stats + cards close to reward + recent redemptions */}
       {loyaltyCards.length > 0 && (
         <section className="mb-10">
           {/* Summary stats */}
-          <div className="grid grid-cols-3 gap-4 mb-6">
-            {[
+          <StatsGrid
+            stats={[
               { label: "Active Cards", value: loyaltyCards.length, icon: <Users size={16} /> },
               { label: "Total Stamps", value: loyaltyCards.reduce((s: number, c: any) => s + (c.stamps ?? 0), 0), icon: <Stamp size={16} /> },
               { label: "Redemptions", value: recentRedemptions.length, icon: <Gift size={16} /> },
-            ].map(({ label, value, icon }) => (
-              <div key={label} className="rounded-2xl p-5 border text-center" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
-                <div className="flex items-center justify-center gap-1.5 mb-1" style={{ color: "var(--accent-gold)" }}>
-                  {icon}
-                  <p className="font-display text-2xl font-bold">{value}</p>
-                </div>
-                <p className="text-xs font-mono uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>{label}</p>
-              </div>
-            ))}
-          </div>
+            ]}
+            className="mb-6"
+          />
 
           {/* Cards close to reward */}
           {initialPrograms.length > 0 && (() => {
@@ -306,7 +269,7 @@ export function LoyaltyClient({ breweryId, initialPrograms, initialPromotions, b
                     style={{ color: "var(--text-secondary)" }}>
                     <Edit2 size={15} />
                   </button>
-                  <button onClick={() => toggleProgram(prog)} className="flex-shrink-0">
+                  <button onClick={() => toggleProgram(prog.id, "is_active", prog.is_active, { on: "Program activated", off: "Program paused" })} className="flex-shrink-0">
                     {prog.is_active
                       ? <ToggleRight size={26} style={{ color: "var(--accent-gold)" }} />
                       : <ToggleLeft size={26} style={{ color: "var(--text-muted)" }} />}
@@ -341,7 +304,7 @@ export function LoyaltyClient({ breweryId, initialPrograms, initialPromotions, b
           <div className="space-y-3">
             {promotions.map(promo => (
               <div key={promo.id} className="rounded-2xl border overflow-hidden"
-                style={{ background: "var(--surface)", borderColor: confirmDeletePromoId === promo.id ? "var(--danger)" : "var(--border)" }}>
+                style={{ background: "var(--surface)", borderColor: promoDel.confirmingId === promo.id ? "var(--danger)" : "var(--border)" }}>
                 <div className="flex items-center gap-4 p-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
@@ -362,24 +325,24 @@ export function LoyaltyClient({ breweryId, initialPrograms, initialPromotions, b
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <button onClick={() => togglePromo(promo)}>
+                    <button onClick={() => togglePromo(promo.id, "is_active", promo.is_active, { on: "Promotion activated", off: "Promotion paused" })}>
                       {promo.is_active
                         ? <ToggleRight size={24} style={{ color: "var(--accent-gold)" }} />
                         : <ToggleLeft size={24} style={{ color: "var(--text-muted)" }} />}
                     </button>
                     <button
-                      onClick={() => setConfirmDeletePromoId(confirmDeletePromoId === promo.id ? null : promo.id)}
-                      disabled={deletingPromoId === promo.id}
+                      onClick={() => promoDel.confirmingId === promo.id ? promoDel.cancelDelete() : promoDel.requestDelete(promo.id)}
+                      disabled={promoDel.deletingId === promo.id}
                       className="p-1 transition-opacity hover:opacity-70 disabled:opacity-40"
-                      style={{ color: confirmDeletePromoId === promo.id ? "var(--danger)" : "var(--text-secondary)" }}>
-                      {deletingPromoId === promo.id ? <Loader2 size={15} className="animate-spin" /> : <Trash2 size={15} />}
+                      style={{ color: promoDel.confirmingId === promo.id ? "var(--danger)" : "var(--text-secondary)" }}>
+                      {promoDel.deletingId === promo.id ? <Loader2 size={15} className="animate-spin" /> : <Trash2 size={15} />}
                     </button>
                   </div>
                 </div>
 
                 {/* Inline delete confirmation */}
                 <AnimatePresence>
-                  {confirmDeletePromoId === promo.id && (
+                  {promoDel.confirmingId === promo.id && (
                     <motion.div
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: "auto", opacity: 1 }}
@@ -396,12 +359,12 @@ export function LoyaltyClient({ breweryId, initialPrograms, initialPromotions, b
                           </span>
                         </div>
                         <div className="flex gap-2">
-                          <button onClick={() => setConfirmDeletePromoId(null)}
+                          <button onClick={() => promoDel.cancelDelete()}
                             className="px-3 py-1 rounded-lg text-xs font-medium"
                             style={{ color: "var(--text-secondary)", background: "var(--surface-2)" }}>
                             Cancel
                           </button>
-                          <button onClick={() => deletePromo(promo.id)}
+                          <button onClick={() => promoDel.confirmDelete(promo.id)}
                             className="px-3 py-1 rounded-lg text-xs font-semibold"
                             style={{ background: "var(--danger)", color: "#fff" }}>
                             Delete
@@ -428,22 +391,22 @@ export function LoyaltyClient({ breweryId, initialPrograms, initialPromotions, b
             saveLabel={editingProgram ? "Save Changes" : "Create Program"}>
             <Field label="Program Name" required>
               <input value={programForm.name} onChange={e => setProgramForm(f => ({ ...f, name: e.target.value }))}
-                placeholder="e.g. The Hop Club" style={inputStyle} />
+                placeholder="e.g. The Hop Club" style={INPUT_STYLE} />
             </Field>
             <Field label="Stamps Required">
               <input type="number" min="1" max="50" value={programForm.stamps_required}
-                onChange={e => setProgramForm(f => ({ ...f, stamps_required: e.target.value }))} style={inputStyle} />
+                onChange={e => setProgramForm(f => ({ ...f, stamps_required: e.target.value }))} style={INPUT_STYLE} />
             </Field>
             <Field label="Reward" required>
               <input value={programForm.reward_description}
                 onChange={e => setProgramForm(f => ({ ...f, reward_description: e.target.value }))}
-                placeholder="e.g. One free pint of any beer" style={inputStyle} />
+                placeholder="e.g. One free pint of any beer" style={INPUT_STYLE} />
             </Field>
             <Field label="Description">
               <textarea value={programForm.description}
                 onChange={e => setProgramForm(f => ({ ...f, description: e.target.value }))}
                 placeholder="Optional details for your customers..." rows={2}
-                style={{ ...inputStyle, resize: "none" as any }} />
+                style={TEXTAREA_STYLE} />
             </Field>
           </FormModal>
         )}
@@ -452,10 +415,10 @@ export function LoyaltyClient({ breweryId, initialPrograms, initialPromotions, b
             onSave={savePromo} saving={savingPromo} saveLabel="Launch Promo">
             <Field label="Title" required>
               <input value={promoForm.title} onChange={e => setPromoForm(f => ({ ...f, title: e.target.value }))}
-                placeholder="e.g. Happy Hour — $2 Off All Pints" style={inputStyle} />
+                placeholder="e.g. Happy Hour — $2 Off All Pints" style={INPUT_STYLE} />
             </Field>
             <Field label="Discount Type">
-              <select value={promoForm.discount_type} onChange={e => setPromoForm(f => ({ ...f, discount_type: e.target.value as any }))} style={inputStyle}>
+              <select value={promoForm.discount_type} onChange={e => setPromoForm(f => ({ ...f, discount_type: e.target.value as any }))} style={INPUT_STYLE}>
                 <option value="percent">Percentage off</option>
                 <option value="fixed">Fixed $ off</option>
                 <option value="bogo">Buy one get one</option>
@@ -466,21 +429,21 @@ export function LoyaltyClient({ breweryId, initialPrograms, initialPromotions, b
               <Field label={promoForm.discount_type === "percent" ? "Percent Off" : "Dollar Amount Off"}>
                 <input type="number" min="0" step="0.5" value={promoForm.discount_value}
                   onChange={e => setPromoForm(f => ({ ...f, discount_value: e.target.value }))}
-                  placeholder={promoForm.discount_type === "percent" ? "15" : "2.00"} style={inputStyle} />
+                  placeholder={promoForm.discount_type === "percent" ? "15" : "2.00"} style={INPUT_STYLE} />
               </Field>
             )}
             <Field label="Specific Beer (optional)">
-              <select value={promoForm.beer_id} onChange={e => setPromoForm(f => ({ ...f, beer_id: e.target.value }))} style={inputStyle}>
+              <select value={promoForm.beer_id} onChange={e => setPromoForm(f => ({ ...f, beer_id: e.target.value }))} style={INPUT_STYLE}>
                 <option value="">All beers</option>
                 {beers.map((b: any) => <option key={b.id} value={b.id}>{b.name}</option>)}
               </select>
             </Field>
             <Field label="End Date (optional)">
-              <input type="date" value={promoForm.ends_at} onChange={e => setPromoForm(f => ({ ...f, ends_at: e.target.value }))} style={inputStyle} />
+              <input type="date" value={promoForm.ends_at} onChange={e => setPromoForm(f => ({ ...f, ends_at: e.target.value }))} style={INPUT_STYLE} />
             </Field>
             <Field label="Description">
               <textarea value={promoForm.description} onChange={e => setPromoForm(f => ({ ...f, description: e.target.value }))}
-                placeholder="Any additional details..." rows={2} style={{ ...inputStyle, resize: "none" as any }} />
+                placeholder="Any additional details..." rows={2} style={TEXTAREA_STYLE} />
             </Field>
           </FormModal>
         )}
@@ -501,10 +464,6 @@ export function LoyaltyClient({ breweryId, initialPrograms, initialPromotions, b
   );
 }
 
-const inputStyle = {
-  width: "100%", padding: "10px 16px", borderRadius: 12, border: "1px solid var(--border)",
-  background: "var(--surface-2)", color: "var(--text-primary)", fontSize: 14, outline: "none",
-};
 
 function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
   return (

@@ -6,6 +6,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, L
 import { Download, Clock, Users, Heart, Award, TrendingUp, ShieldCheck } from "lucide-react";
 import { formatDateShort } from "@/lib/dates";
 import { calculateBreweryKPIs, formatDuration, formatTrend } from "@/lib/kpi";
+import { PageHeader } from "@/components/ui/PageHeader";
 
 interface AnalyticsClientProps {
   breweryId: string;
@@ -317,12 +318,11 @@ function AnalyticsInner({ sessions: allSessions, beerLogs: allBeerLogs, breweryV
     <div className="p-6 lg:p-8 max-w-5xl mx-auto pt-16 lg:pt-8">
       {/* Header + Range selector */}
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8">
-        <div>
-          <h1 className="font-display text-3xl font-bold" style={{ color: "var(--text-primary)" }}>Analytics</h1>
-          <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
-            {rangeLabel} · {totalVisits} visit{totalVisits !== 1 ? "s" : ""} · {totalBeersLogged} beer{totalBeersLogged !== 1 ? "s" : ""} logged by {uniqueVisitors} visitor{uniqueVisitors !== 1 ? "s" : ""}
-          </p>
-        </div>
+        <PageHeader
+          title="Analytics"
+          subtitle={`${rangeLabel} · ${totalVisits} visit${totalVisits !== 1 ? "s" : ""} · ${totalBeersLogged} beer${totalBeersLogged !== 1 ? "s" : ""} logged by ${uniqueVisitors} visitor${uniqueVisitors !== 1 ? "s" : ""}`}
+          className="mb-0"
+        />
         {/* Time range pills + CSV export */}
         <div className="flex items-center gap-2">
           <div className="flex gap-1.5">

@@ -7,6 +7,7 @@ import { UserAvatar } from "@/components/ui/UserAvatar";
 import { formatRelativeTime } from "@/lib/dates";
 import { SEGMENTS, type CustomerSegment } from "@/lib/crm";
 import type { BrandCustomerRow, RegularsInsight } from "@/lib/brand-crm";
+import { PageHeader } from "@/components/ui/PageHeader";
 
 type SortKey = "visits" | "last_visit" | "locations" | "name";
 type SortDir = "asc" | "desc";
@@ -128,14 +129,11 @@ export function BrandCustomersClient({
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 pt-16 lg:pt-8 space-y-6">
       {/* Page header */}
-      <div>
-        <h1 className="font-display text-2xl sm:text-3xl font-bold" style={{ color: "var(--text-primary)" }}>
-          Brand Customers
-        </h1>
-        <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
-          Cross-location customer intelligence for {brandName}.
-        </p>
-      </div>
+      <PageHeader
+        title="Brand Customers"
+        subtitle={`Cross-location customer intelligence for ${brandName}.`}
+        className="mb-0"
+      />
 
       {/* Insight cards — only on "All" filter */}
       {filter === "all" && customers.length > 0 && (

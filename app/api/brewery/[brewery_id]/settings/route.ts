@@ -1,7 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { rateLimitResponse } from "@/lib/rate-limit";
-import { apiUnauthorized, apiForbidden, apiBadRequest, apiServerError } from "@/lib/api-response";
+import { requireAuth, requireBreweryAdmin } from "@/lib/api-helpers";
+import { apiUnauthorized, apiForbidden, apiBadRequest, apiServerError, apiSuccess } from "@/lib/api-response";
 import { normalizePhone, normalizeWebsiteUrl, isValidSocialUrl } from "@/lib/brewery-utils";
 
 export async function PATCH(
@@ -13,23 +14,11 @@ export async function PATCH(
   const { brewery_id } = await params;
   const supabase = await createClient();
 
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    return apiUnauthorized();
-  }
+  const user = await requireAuth(supabase);
+  if (!user) return apiUnauthorized();
 
-  // Verify the user belongs to this brewery (owner or manager only)
-  const { data: account } = await supabase
-    .from("brewery_accounts")
-    .select("role")
-    .eq("user_id", user.id)
-    .eq("brewery_id", brewery_id)
-    .in("role", ["owner", "manager"])
-    .single();
-
-  if (!account) {
-    return apiForbidden();
-  }
+  const account = await requireBreweryAdmin(supabase, user.id, brewery_id);
+  if (!account) return apiForbidden();
 
   const body = await request.json();
   const {
@@ -78,5 +67,5 @@ export async function PATCH(
     return apiServerError("brewery settings PATCH");
   }
 
-  return NextResponse.json({ success: true });
+  return apiSuccess({ success: true });
 }

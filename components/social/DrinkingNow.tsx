@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Beer, Home } from "lucide-react";
 import { UserAvatar } from "@/components/ui/UserAvatar";
+import { getFirstName } from "@/lib/first-name";
 
 interface ActiveFriend {
   sessionId: string;
@@ -103,7 +104,7 @@ export function DrinkingNow() {
                 <div
                   role="link"
                   tabIndex={0}
-                  aria-label={`View ${f.displayName.split(" ")[0]}'s session`}
+                  aria-label={`View ${getFirstName(f.displayName, f.username)}'s session`}
                   onClick={() => router.push(href)}
                   onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); router.push(href); } }}
                   className="card-bg-live flex flex-col items-center gap-2 p-3 rounded-2xl border transition-all flex-shrink-0 w-[140px] cursor-pointer"
@@ -142,7 +143,7 @@ export function DrinkingNow() {
                       className="text-xs font-semibold text-center truncate w-full"
                       style={{ color: "var(--text-primary)" }}
                     >
-                      {f.displayName.split(" ")[0]}
+                      {getFirstName(f.displayName, f.username)}
                     </p>
 
                     {/* Location */}

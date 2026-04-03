@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { requireAuth, requireBreweryAdmin } from "@/lib/api-helpers";
+import { apiUnauthorized, apiForbidden, apiSuccess, apiServerError, apiBadRequest, apiNotFound } from "@/lib/api-response";
 
 // GET /api/brewery/[brewery_id]/challenges — list all challenges (admin view)
 export async function GET(
@@ -8,17 +10,11 @@ export async function GET(
 ) {
   const { brewery_id } = await params;
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const user = await requireAuth(supabase);
+  if (!user) return apiUnauthorized();
 
-  const { data: account } = await (supabase
-    .from("brewery_accounts")
-    .select("role")
-    .eq("user_id", user.id)
-    .eq("brewery_id", brewery_id)
-    .in("role", ["owner", "manager"])
-    .single() as any);
-  if (!account) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const account = await requireBreweryAdmin(supabase, user.id, brewery_id);
+  if (!account) return apiForbidden();
 
   const { data: challenges, error } = await (supabase
     .from("challenges")
@@ -30,7 +26,7 @@ export async function GET(
     .eq("brewery_id", brewery_id)
     .order("created_at", { ascending: false }) as any);
 
-  if (error) return NextResponse.json({ error: "Failed to fetch challenges" }, { status: 500 });
+  if (error) return apiServerError("Failed to fetch challenges");
 
   // Flatten counts
   const formatted = (challenges ?? []).map((c: any) => ({
@@ -51,17 +47,11 @@ export async function POST(
 ) {
   const { brewery_id } = await params;
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const user = await requireAuth(supabase);
+  if (!user) return apiUnauthorized();
 
-  const { data: account } = await (supabase
-    .from("brewery_accounts")
-    .select("role")
-    .eq("user_id", user.id)
-    .eq("brewery_id", brewery_id)
-    .in("role", ["owner", "manager"])
-    .single() as any);
-  if (!account) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const account = await requireBreweryAdmin(supabase, user.id, brewery_id);
+  if (!account) return apiForbidden();
 
   const body = await request.json();
   const {
@@ -83,16 +73,16 @@ export async function POST(
   } = body;
 
   if (!name?.trim()) {
-    return NextResponse.json({ error: "Name is required" }, { status: 400 });
+    return apiBadRequest("Name is required");
   }
   if (!["beer_count", "specific_beers", "visit_streak", "style_variety"].includes(challenge_type)) {
-    return NextResponse.json({ error: "Invalid challenge type" }, { status: 400 });
+    return apiBadRequest("Invalid challenge type");
   }
   if (!target_value || target_value < 1) {
-    return NextResponse.json({ error: "Target value must be at least 1" }, { status: 400 });
+    return apiBadRequest("Target value must be at least 1");
   }
   if (challenge_type === "specific_beers" && (!target_beer_ids || target_beer_ids.length === 0)) {
-    return NextResponse.json({ error: "Specific beers challenge requires at least one beer" }, { status: 400 });
+    return apiBadRequest("Specific beers challenge requires at least one beer");
   }
 
   const { data: challenge, error } = await (supabase
@@ -118,9 +108,9 @@ export async function POST(
     .select()
     .single() as any);
 
-  if (error) return NextResponse.json({ error: "Failed to create challenge" }, { status: 500 });
+  if (error) return apiServerError("Failed to create challenge");
 
-  return NextResponse.json(challenge, { status: 201 });
+  return apiSuccess(challenge, 201);
 }
 
 // PATCH /api/brewery/[brewery_id]/challenges — update challenge
@@ -130,20 +120,14 @@ export async function PATCH(
 ) {
   const { brewery_id } = await params;
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const user = await requireAuth(supabase);
+  if (!user) return apiUnauthorized();
 
-  const { data: account } = await (supabase
-    .from("brewery_accounts")
-    .select("role")
-    .eq("user_id", user.id)
-    .eq("brewery_id", brewery_id)
-    .in("role", ["owner", "manager"])
-    .single() as any);
-  if (!account) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const account = await requireBreweryAdmin(supabase, user.id, brewery_id);
+  if (!account) return apiForbidden();
 
   const { challenge_id, ...updates } = await request.json();
-  if (!challenge_id) return NextResponse.json({ error: "challenge_id is required" }, { status: 400 });
+  if (!challenge_id) return apiBadRequest("challenge_id is required");
 
   // Verify challenge belongs to this brewery
   const { data: existing } = await (supabase
@@ -152,7 +136,7 @@ export async function PATCH(
     .eq("id", challenge_id)
     .eq("brewery_id", brewery_id)
     .single() as any);
-  if (!existing) return NextResponse.json({ error: "Challenge not found" }, { status: 404 });
+  if (!existing) return apiNotFound("Challenge");
 
   // Whitelist updatable fields
   const allowed = ["name", "description", "icon", "reward_description", "reward_xp", "reward_loyalty_stamps", "ends_at", "is_active", "max_participants", "is_sponsored", "cover_image_url", "geo_radius_km"];
@@ -168,9 +152,9 @@ export async function PATCH(
     .select()
     .single() as any);
 
-  if (error) return NextResponse.json({ error: "Failed to update challenge" }, { status: 500 });
+  if (error) return apiServerError("Failed to update challenge");
 
-  return NextResponse.json(challenge);
+  return apiSuccess(challenge);
 }
 
 // DELETE /api/brewery/[brewery_id]/challenges — delete challenge
@@ -180,20 +164,14 @@ export async function DELETE(
 ) {
   const { brewery_id } = await params;
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const user = await requireAuth(supabase);
+  if (!user) return apiUnauthorized();
 
-  const { data: account } = await (supabase
-    .from("brewery_accounts")
-    .select("role")
-    .eq("user_id", user.id)
-    .eq("brewery_id", brewery_id)
-    .in("role", ["owner", "manager"])
-    .single() as any);
-  if (!account) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const account = await requireBreweryAdmin(supabase, user.id, brewery_id);
+  if (!account) return apiForbidden();
 
   const { challenge_id } = await request.json();
-  if (!challenge_id) return NextResponse.json({ error: "challenge_id is required" }, { status: 400 });
+  if (!challenge_id) return apiBadRequest("challenge_id is required");
 
   const { data: existing } = await (supabase
     .from("challenges")
@@ -201,10 +179,10 @@ export async function DELETE(
     .eq("id", challenge_id)
     .eq("brewery_id", brewery_id)
     .single() as any);
-  if (!existing) return NextResponse.json({ error: "Challenge not found" }, { status: 404 });
+  if (!existing) return apiNotFound("Challenge");
 
   const { error } = await supabase.from("challenges").delete().eq("id", challenge_id);
-  if (error) return NextResponse.json({ error: "Failed to delete challenge" }, { status: 500 });
+  if (error) return apiServerError("Failed to delete challenge");
 
-  return NextResponse.json({ success: true });
+  return apiSuccess({ success: true });
 }

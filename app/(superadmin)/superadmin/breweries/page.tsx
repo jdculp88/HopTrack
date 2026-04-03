@@ -1,7 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
-import { Beer, Search, CheckCircle, Clock } from "lucide-react";
+import { Beer, CheckCircle, Clock } from "lucide-react";
 import { formatDate } from "@/lib/dates";
+import { SearchForm } from "@/components/superadmin/SearchForm";
 
 export const metadata = { title: "Breweries" };
 
@@ -81,21 +82,7 @@ export default async function BreweriesPage({
       </div>
 
       {/* Search */}
-      <form method="GET" className="mb-5">
-        <div
-          className="flex items-center gap-2 px-3 py-2.5 rounded-lg border w-full max-w-sm"
-          style={{ background: "var(--surface)", borderColor: "var(--border)" }}
-        >
-          <Search size={14} style={{ color: "var(--text-muted)" }} />
-          <input
-            name="q"
-            defaultValue={q ?? ""}
-            placeholder="Search by name or city…"
-            className="flex-1 bg-transparent text-sm outline-none"
-            style={{ color: "var(--text-primary)" }}
-          />
-        </div>
-      </form>
+      <SearchForm placeholder="Search by name or city…" defaultValue={q} />
 
       {/* Table */}
       <div

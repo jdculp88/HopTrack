@@ -3,6 +3,8 @@ import { createClient } from "@/lib/supabase/server";
 import { sendPushToUser } from "@/lib/push";
 import type { PushPayload } from "@/lib/push";
 import { computeSegment, type CustomerSegment } from "@/lib/crm";
+import { requireAuth, requireBreweryAdmin } from "@/lib/api-helpers";
+import { apiUnauthorized, apiForbidden, apiBadRequest, apiSuccess } from "@/lib/api-response";
 
 type Tier = "all" | CustomerSegment;
 
@@ -12,14 +14,12 @@ export async function POST(
 ) {
   const { brewery_id } = await params;
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const user = await requireAuth(supabase);
+  if (!user) return apiUnauthorized();
 
   // Verify brewery admin
-  const { data: account } = await supabase
-    .from("brewery_accounts").select("role")
-    .eq("user_id", user.id).eq("brewery_id", brewery_id).single() as any;
-  if (!account) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const account = await requireBreweryAdmin(supabase, user.id, brewery_id);
+  if (!account) return apiForbidden();
 
   const { tier, subject, body: messageBody } = await request.json() as {
     tier: Tier;
@@ -28,7 +28,7 @@ export async function POST(
   };
 
   if (!subject?.trim() || !messageBody?.trim()) {
-    return NextResponse.json({ error: "Subject and body are required" }, { status: 400 });
+    return apiBadRequest("Subject and body are required");
   }
 
   // Rate limit: max 5 sends per brewery per hour
@@ -78,7 +78,7 @@ export async function POST(
   }
 
   if (targetUsers.length === 0) {
-    return NextResponse.json({ error: "No customers in this segment", count: 0 }, { status: 400 });
+    return apiBadRequest("No customers in this segment");
   }
 
   // Create notifications in batch
@@ -121,5 +121,5 @@ export async function POST(
     }
   }
 
-  return NextResponse.json({ success: true, count: inserted, push_count: pushCount });
+  return apiSuccess({ success: true, count: inserted, push_count: pushCount });
 }

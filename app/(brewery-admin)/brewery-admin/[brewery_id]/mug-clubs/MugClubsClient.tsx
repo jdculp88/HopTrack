@@ -6,6 +6,7 @@ import { Plus, Crown, Users, DollarSign, Trash2, Edit3, ChevronDown, ChevronUp, 
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import { useToast } from "@/components/ui/Toast";
 import Link from "next/link";
+import { PageHeader } from "@/components/ui/PageHeader";
 
 interface MugClub {
   id: string;
@@ -79,24 +80,20 @@ export function MugClubsClient({ breweryId, tier, initialClubs }: Props) {
   return (
     <div className="p-6 lg:p-8 max-w-4xl mx-auto pt-16 lg:pt-8">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="font-display text-3xl font-bold" style={{ color: "var(--text-primary)" }}>
-            Mug Clubs
-          </h1>
-          <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>
-            Manage digital memberships for your most loyal regulars.
-          </p>
-        </div>
-        <button
-          onClick={() => { setEditingClub(null); setShowForm(true); }}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-opacity hover:opacity-90"
-          style={{ background: "var(--accent-gold)", color: "var(--bg)" }}
-        >
-          <Plus size={15} />
-          New Club
-        </button>
-      </div>
+      <PageHeader
+        title="Mug Clubs"
+        subtitle="Manage digital memberships for your most loyal regulars."
+        action={
+          <button
+            onClick={() => { setEditingClub(null); setShowForm(true); }}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-opacity hover:opacity-90"
+            style={{ background: "var(--accent-gold)", color: "var(--bg)" }}
+          >
+            <Plus size={15} />
+            New Club
+          </button>
+        }
+      />
 
       {/* Create / Edit Form */}
       <AnimatePresence>

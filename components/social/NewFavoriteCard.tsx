@@ -6,6 +6,7 @@ import { Heart } from 'lucide-react'
 import { formatRelativeTime } from '@/lib/dates'
 import { EmojiPulse } from '@/components/social/EmojiPulse'
 import { StarRating } from '@/components/ui/StarRating'
+import { getFirstName } from '@/lib/first-name'
 
 export interface NewFavoriteItem {
   id: string
@@ -41,7 +42,7 @@ export function NewFavoriteCard({
         <Heart size={11} strokeWidth={2} fill="currentColor" style={{ color: "var(--accent-gold)" }} />
         <p className="text-[11px] leading-none flex-1 min-w-0" style={{ color: "var(--text-muted)" }}>
           <Link href={`/profile/${favorite.username}`} className="font-semibold hover:underline underline-offset-2" style={{ color: "var(--text-primary)" }}>
-            {favorite.displayName.split(' ')[0]}
+            {getFirstName(favorite.displayName, null)}
           </Link>
           {" "}found a new favorite
         </p>

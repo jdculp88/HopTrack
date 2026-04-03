@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { PosSyncLogClient } from "./PosSyncLogClient";
 
 export async function generateMetadata({ params }: { params: Promise<{ brewery_id: string }> }) {
@@ -40,14 +41,11 @@ export default async function PosSyncLogPage({ params }: { params: Promise<{ bre
         <ArrowLeft size={12} /> Back to Dashboard
       </Link>
 
-      <div className="mb-6">
-        <h1 className="font-display text-3xl font-bold" style={{ color: "var(--text-primary)" }}>
-          POS Sync Log
-        </h1>
-        <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
-          Full history of POS sync activity — webhooks, manual syncs, and scheduled runs.
-        </p>
-      </div>
+      <PageHeader
+        title="POS Sync Log"
+        subtitle="Full history of POS sync activity — webhooks, manual syncs, and scheduled runs."
+        className="mb-6"
+      />
 
       <PosSyncLogClient breweryId={brewery_id} />
     </div>

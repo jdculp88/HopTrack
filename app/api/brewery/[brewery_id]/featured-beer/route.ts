@@ -1,6 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { rateLimitResponse } from "@/lib/rate-limit";
+import { requireAuth, requireBreweryAdmin } from "@/lib/api-helpers";
+import { apiUnauthorized, apiForbidden, apiSuccess, apiServerError } from "@/lib/api-response";
 
 // POST /api/brewery/[brewery_id]/featured-beer — set a beer as featured (or clear)
 export async function POST(
@@ -10,22 +12,13 @@ export async function POST(
   const rl = rateLimitResponse(request, "featured-beer", { limit: 10, windowMs: 60_000 });
   if (rl) return rl;
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const user = await requireAuth(supabase);
+  if (!user) return apiUnauthorized();
 
   const { brewery_id } = await params;
 
-  // Verify brewery admin
-  const { data: account } = await supabase
-    .from("brewery_accounts")
-    .select("role")
-    .eq("user_id", user.id)
-    .eq("brewery_id", brewery_id)
-    .single() as any;
-
-  if (!account) {
-    return NextResponse.json({ error: "Not authorized for this brewery" }, { status: 403 });
-  }
+  const account = await requireBreweryAdmin(supabase, user.id, brewery_id);
+  if (!account) return apiForbidden();
 
   const { beer_id } = await request.json();
 
@@ -45,9 +38,9 @@ export async function POST(
       .eq("brewery_id", brewery_id);
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return apiServerError(error.message);
     }
   }
 
-  return NextResponse.json({ action: beer_id ? "featured" : "cleared" });
+  return apiSuccess({ action: beer_id ? "featured" : "cleared" });
 }

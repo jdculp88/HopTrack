@@ -1,6 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { rateLimitResponse } from "@/lib/rate-limit";
+import { requireAuth } from "@/lib/api-helpers";
+import { apiUnauthorized, apiForbidden, apiSuccess, apiServerError, apiBadRequest, apiNotFound, apiConflict } from "@/lib/api-response";
 
 const VALID_ROLES = ["business", "marketing", "staff"] as const;
 type StaffRole = (typeof VALID_ROLES)[number];
@@ -45,15 +47,11 @@ export async function GET(
 ) {
   const { brewery_id } = await params;
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user)
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const user = await requireAuth(supabase);
+  if (!user) return apiUnauthorized();
 
   const callerRole = await getCallerRole(supabase, user.id, brewery_id);
-  if (!isOwnerOrManager(callerRole))
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  if (!isOwnerOrManager(callerRole)) return apiForbidden();
 
   const { data: staff, error } = await (supabase
     .from("brewery_accounts")
@@ -76,10 +74,7 @@ export async function GET(
 
   if (error) {
     console.error("[staff:GET] Failed to fetch staff:", error.message);
-    return NextResponse.json(
-      { error: "Failed to fetch staff" },
-      { status: 500 }
-    );
+    return apiServerError("Failed to fetch staff");
   }
 
   // Flatten the profile join
@@ -94,9 +89,7 @@ export async function GET(
     avatar_url: s.profile?.avatar_url ?? null,
   }));
 
-  return NextResponse.json(formatted, {
-    headers: { "Cache-Control": "no-store" },
-  });
+  return apiSuccess(formatted);
 }
 
 // ─── POST /api/brewery/[brewery_id]/staff ────────────────────────────────────
@@ -113,15 +106,11 @@ export async function POST(
 
   const { brewery_id } = await params;
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user)
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const user = await requireAuth(supabase);
+  if (!user) return apiUnauthorized();
 
   const callerRole = await getCallerRole(supabase, user.id, brewery_id);
-  if (!isOwnerOrManager(callerRole))
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  if (!isOwnerOrManager(callerRole)) return apiForbidden();
 
   const { email_or_username, role } = (await request.json()) as {
     email_or_username: string;
@@ -129,17 +118,11 @@ export async function POST(
   };
 
   if (!email_or_username?.trim()) {
-    return NextResponse.json(
-      { error: "email_or_username is required" },
-      { status: 400 }
-    );
+    return apiBadRequest("email_or_username is required");
   }
 
   if (!VALID_ROLES.includes(role as StaffRole)) {
-    return NextResponse.json(
-      { error: `Invalid role. Must be one of: ${VALID_ROLES.join(", ")}` },
-      { status: 400 }
-    );
+    return apiBadRequest(`Invalid role. Must be one of: ${VALID_ROLES.join(", ")}`);
   }
 
   // Look up user in profiles by username or email
@@ -164,10 +147,7 @@ export async function POST(
   }
 
   if (!profile) {
-    return NextResponse.json(
-      { error: "User not found. They must have a HopTrack account first." },
-      { status: 404 }
-    );
+    return apiNotFound("User not found. They must have a HopTrack account first.");
   }
 
   // Check if already a staff member
@@ -179,12 +159,7 @@ export async function POST(
     .single() as any);
 
   if (existing) {
-    return NextResponse.json(
-      {
-        error: `This user is already a ${existing.role} for this brewery`,
-      },
-      { status: 409 }
-    );
+    return apiConflict(`This user is already a ${existing.role} for this brewery`);
   }
 
   // Insert new staff member
@@ -200,20 +175,17 @@ export async function POST(
 
   if (error) {
     console.error("[staff:POST] Failed to add staff:", error.message);
-    return NextResponse.json(
-      { error: "Failed to add staff member" },
-      { status: 500 }
-    );
+    return apiServerError("Failed to add staff member");
   }
 
-  return NextResponse.json(
+  return apiSuccess(
     {
       ...newAccount,
       display_name: profile.display_name,
       username: profile.username,
       avatar_url: profile.avatar_url,
     },
-    { status: 201 }
+    201,
   );
 }
 
@@ -225,18 +197,12 @@ export async function PATCH(
 ) {
   const { brewery_id } = await params;
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user)
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const user = await requireAuth(supabase);
+  if (!user) return apiUnauthorized();
 
   const callerRole = await getCallerRole(supabase, user.id, brewery_id);
   if (callerRole !== "owner") {
-    return NextResponse.json(
-      { error: "Only the owner can change staff roles" },
-      { status: 403 }
-    );
+    return apiForbidden();
   }
 
   const { user_id, role } = (await request.json()) as {
@@ -245,17 +211,11 @@ export async function PATCH(
   };
 
   if (!user_id?.trim()) {
-    return NextResponse.json(
-      { error: "user_id is required" },
-      { status: 400 }
-    );
+    return apiBadRequest("user_id is required");
   }
 
   if (!VALID_ROLES.includes(role as StaffRole)) {
-    return NextResponse.json(
-      { error: `Invalid role. Must be one of: ${VALID_ROLES.join(", ")}` },
-      { status: 400 }
-    );
+    return apiBadRequest(`Invalid role. Must be one of: ${VALID_ROLES.join(", ")}`);
   }
 
   // Verify the target is an existing staff member (not the owner)
@@ -267,17 +227,11 @@ export async function PATCH(
     .single() as any);
 
   if (!target) {
-    return NextResponse.json(
-      { error: "Staff member not found" },
-      { status: 404 }
-    );
+    return apiNotFound("Staff member");
   }
 
   if (target.role === "owner") {
-    return NextResponse.json(
-      { error: "Cannot change the owner's role" },
-      { status: 400 }
-    );
+    return apiBadRequest("Cannot change the owner's role");
   }
 
   const { data: updated, error } = await (supabase
@@ -289,13 +243,10 @@ export async function PATCH(
 
   if (error) {
     console.error("[staff:PATCH] Failed to update role:", error.message);
-    return NextResponse.json(
-      { error: "Failed to update role" },
-      { status: 500 }
-    );
+    return apiServerError("Failed to update role");
   }
 
-  return NextResponse.json(updated);
+  return apiSuccess(updated);
 }
 
 // ─── DELETE /api/brewery/[brewery_id]/staff ───────────────────────────────────
@@ -306,31 +257,21 @@ export async function DELETE(
 ) {
   const { brewery_id } = await params;
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user)
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const user = await requireAuth(supabase);
+  if (!user) return apiUnauthorized();
 
   const callerRole = await getCallerRole(supabase, user.id, brewery_id);
-  if (!isOwnerOrManager(callerRole))
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  if (!isOwnerOrManager(callerRole)) return apiForbidden();
 
   const { user_id } = (await request.json()) as { user_id: string };
 
   if (!user_id?.trim()) {
-    return NextResponse.json(
-      { error: "user_id is required" },
-      { status: 400 }
-    );
+    return apiBadRequest("user_id is required");
   }
 
   // Cannot remove yourself if you are the owner
   if (user_id === user.id && callerRole === "owner") {
-    return NextResponse.json(
-      { error: "Cannot remove yourself as the owner" },
-      { status: 400 }
-    );
+    return apiBadRequest("Cannot remove yourself as the owner");
   }
 
   // Verify the target exists and is not the owner
@@ -342,25 +283,16 @@ export async function DELETE(
     .single() as any);
 
   if (!target) {
-    return NextResponse.json(
-      { error: "Staff member not found" },
-      { status: 404 }
-    );
+    return apiNotFound("Staff member");
   }
 
   if (target.role === "owner") {
-    return NextResponse.json(
-      { error: "Cannot remove the brewery owner" },
-      { status: 400 }
-    );
+    return apiBadRequest("Cannot remove the brewery owner");
   }
 
   // Business role can't remove other business users — only owner can
   if (callerRole === "business" && target.role === "business") {
-    return NextResponse.json(
-      { error: "Business users cannot remove other business users" },
-      { status: 403 }
-    );
+    return apiForbidden();
   }
 
   const { error } = await (supabase
@@ -370,11 +302,8 @@ export async function DELETE(
 
   if (error) {
     console.error("[staff:DELETE] Failed to remove staff:", error.message);
-    return NextResponse.json(
-      { error: "Failed to remove staff member" },
-      { status: 500 }
-    );
+    return apiServerError("Failed to remove staff member");
   }
 
-  return NextResponse.json({ success: true });
+  return apiSuccess({ success: true });
 }

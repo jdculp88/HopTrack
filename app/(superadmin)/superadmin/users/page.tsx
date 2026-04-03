@@ -1,7 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
-import { Users, ShieldAlert, Search, ExternalLink } from "lucide-react";
+import { Users, ShieldAlert, ExternalLink } from "lucide-react";
 import { formatDate } from "@/lib/dates";
+import { SearchForm } from "@/components/superadmin/SearchForm";
 
 export const metadata = { title: "Users" };
 
@@ -68,21 +69,7 @@ export default async function UsersPage({
       </div>
 
       {/* Search */}
-      <form method="GET" className="mb-5">
-        <div
-          className="flex items-center gap-2 px-3 py-2.5 rounded-lg border w-full max-w-sm"
-          style={{ background: "var(--surface)", borderColor: "var(--border)" }}
-        >
-          <Search size={14} style={{ color: "var(--text-muted)" }} />
-          <input
-            name="q"
-            defaultValue={q ?? ""}
-            placeholder="Search username or name…"
-            className="flex-1 bg-transparent text-sm outline-none"
-            style={{ color: "var(--text-primary)" }}
-          />
-        </div>
-      </form>
+      <SearchForm placeholder="Search username or name…" defaultValue={q} />
 
       {/* Table */}
       <div

@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { ArrowLeft, Download, Printer, QrCode, Check } from "lucide-react";
+import { PageHeader } from "@/components/ui/PageHeader";
 import QRCode from "qrcode";
 import { HopMark } from "@/components/ui/HopMark";
 
@@ -227,12 +228,11 @@ export function QRTentClient({ breweryId, breweryName, breweryCity, breweryState
         >
           <ArrowLeft size={14} /> Back to Dashboard
         </Link>
-        <h1 className="font-display text-3xl font-bold" style={{ color: "var(--text-primary)" }}>
-          QR Table Tent
-        </h1>
-        <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
-          Print or download branded QR codes that link guests directly to your HopTrack page.
-        </p>
+        <PageHeader
+          title="QR Table Tent"
+          subtitle="Print or download branded QR codes that link guests directly to your HopTrack page."
+          className="mb-0"
+        />
       </div>
 
       <div className="grid lg:grid-cols-2 gap-8">

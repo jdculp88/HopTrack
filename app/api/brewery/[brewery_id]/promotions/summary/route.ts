@@ -1,6 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { rateLimitResponse } from "@/lib/rate-limit";
+import { requireAuth, requireBreweryAdmin } from "@/lib/api-helpers";
+import { apiUnauthorized, apiForbidden, apiSuccess, apiServerError } from "@/lib/api-response";
 
 // GET /api/brewery/[brewery_id]/promotions/summary — unified promotion stats
 export async function GET(
@@ -12,19 +14,11 @@ export async function GET(
 
   const { brewery_id } = await params;
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const user = await requireAuth(supabase);
+  if (!user) return apiUnauthorized();
 
-  // Verify admin access
-  const { data: account } = await supabase
-    .from("brewery_accounts")
-    .select("role")
-    .eq("user_id", user.id)
-    .eq("brewery_id", brewery_id)
-    .in("role", ["owner", "manager"])
-    .maybeSingle();
-
-  if (!account) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const account = await requireBreweryAdmin(supabase, user.id, brewery_id);
+  if (!account) return apiForbidden();
 
   // Fetch all promo data in parallel
   const [
@@ -109,7 +103,7 @@ export async function GET(
   // Sort by time, most recent first
   recentActivity.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
 
-  return NextResponse.json({
+  return apiSuccess({
     summary: {
       totalActivePromotions,
       totalImpressions,

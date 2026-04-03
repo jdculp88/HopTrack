@@ -214,6 +214,14 @@ Brilliant product instincts, trusts the team completely, types fast and sometime
 - ❌ Dead buttons — gate unbuilt features with "Coming soon" tooltip/badge
 - ❌ Blank pages — every empty state needs a friendly message + CTA
 - ❌ Silent failures — always surface errors to the user
+- ❌ Inline `["owner", "manager"]` role checks — use `requireBreweryAdmin()` from `lib/api-helpers.ts`
+- ❌ Inline `["cask", "barrel"]` tier checks — use `requirePremiumTier()` from `lib/api-helpers.ts`
+- ❌ Raw `NextResponse.json({ error })` in API routes — use `apiError()`/`apiUnauthorized()`/etc. from `lib/api-response.ts`
+- ❌ Inline `.split(" ")[0]` for first names — use `getFirstName()` from `lib/first-name.ts`
+- ❌ Inline `initial={{ opacity: 0, y: N }}` animation objects — use presets from `lib/animation.ts`
+- ❌ Duplicated tier color/rank maps — import from `lib/constants/tiers.ts`
+- ❌ Duplicated pill toggle styles — import from `lib/constants/ui.ts`
+- ❌ Inline card styling (`rounded-2xl border` + `var(--surface)`) — use `Card` from `components/ui/Card.tsx`
 
 ### UI Patterns — REQUIRED
 - ✅ Inline delete confirmations — AnimatePresence slide-down with Cancel + Confirm
@@ -221,6 +229,25 @@ Brilliant product instincts, trusts the team completely, types fast and sometime
 - ✅ `loading.tsx` skeleton for every data page
 - ✅ Error state in forms (inline, not alert)
 - ✅ Toast notifications for all mutations
+
+### DRY Patterns — REQUIRED (Sprint 134)
+- ✅ API routes: `requireAuth()`, `requireBreweryAdmin()`, `requirePremiumTier()` from `lib/api-helpers.ts`
+- ✅ API responses: `apiSuccess()`, `apiError()`, `apiUnauthorized()`, `apiForbidden()` from `lib/api-response.ts`
+- ✅ Page headers: `PageHeader` component from `components/ui/PageHeader.tsx`
+- ✅ Stat grids: `StatsGrid` component from `components/ui/StatsGrid.tsx`
+- ✅ Feed cards with accent bars: `FeedCardWrapper` from `components/social/FeedCardWrapper.tsx`
+- ✅ Form fields: `FormField` wrapper from `components/ui/FormField.tsx`
+- ✅ Cards: `Card` component from `components/ui/Card.tsx` (padding: compact/default/spacious)
+- ✅ Empty states: `EmptyState` component from `components/ui/EmptyState.tsx`
+- ✅ Badges/pills: `Pill` component from `components/ui/Pill.tsx`
+- ✅ Animations: presets from `lib/animation.ts` (`spring`, `transition`, `variants`, `stagger`, `cardHover`)
+- ✅ Auth pages: `GoogleOAuthButton`, `AuthDivider`, `AuthErrorAlert` from `components/auth/`
+- ✅ Superadmin search: `SearchForm` from `components/superadmin/SearchForm.tsx`
+- ✅ Constants: `lib/constants/tiers.ts` (TIER_COLORS, TIER_STYLES, RANK_STYLES, CATEGORY_LABELS)
+- ✅ Constants: `lib/constants/ui.ts` (PILL_ACTIVE, PILL_INACTIVE, INPUT_STYLE, CLAIM_STATUS_STYLES)
+- ✅ First names: `getFirstName()` from `lib/first-name.ts`
+- ✅ Optimistic toggles: `useOptimisticToggle` hook from `hooks/useOptimisticToggle.ts`
+- ✅ Delete confirmations: `useDeleteConfirmation` hook from `hooks/useDeleteConfirmation.ts`
 
 ---
 
@@ -238,6 +265,11 @@ lib/beerStyleColors.ts        — 26 styles → 6 color families
 lib/pos-crypto.ts             — AES-256-GCM token encryption for POS (S86)
 lib/crm.ts                    — Customer segments, engagement scoring, profile builder (S89)
 lib/pos-sync/                 — POS sync engine: engine, mapper, normalizer, types, mock (S87)
+lib/api-helpers.ts             — requireAuth, requireBreweryAdmin, requirePremiumTier (S134)
+lib/api-response.ts            — apiSuccess, apiError, apiUnauthorized, apiForbidden, etc. (S107)
+lib/constants/tiers.ts         — TIER_COLORS, TIER_STYLES, RANK_STYLES, CATEGORY_LABELS (S134)
+lib/constants/ui.ts            — PILL_ACTIVE, PILL_INACTIVE, INPUT_STYLE, CLAIM_STATUS_STYLES (S134)
+lib/first-name.ts              — getFirstName() utility (S134)
 lib/brand-auth.ts             — Brand access verification with brewery_accounts fallback (S123)
 lib/brand-billing.ts          — Brand tier propagation: propagate, revert, sync on join/leave (S121)
 lib/pint-rewind.ts            — PintRewind data aggregation (extracted S93)
@@ -262,8 +294,10 @@ scripts/supabase-setup.mjs    — One-time setup script
 
 ## 🗺️ Where We Are
 
-**Last Completed Sprint:** Sprint 133 — The Cleanup ✅
+**Last Completed Sprint:** Sprint 134 — The Tidy ✅
 **Arc:** Multi-Location (Sprints 114-137)
+**Retro (134):** `docs/retros/sprint-134-retro.md` (facilitated by Morgan)
+**Last completed:** Sprint 134 — The Tidy ✅ — Codebase DRY-up & modernization. First pure code quality sprint. 6 new shared utilities (`lib/api-helpers.ts`: requireAuth/requireBreweryAdmin/requirePremiumTier; `lib/first-name.ts`: getFirstName(); `lib/constants/tiers.ts`: TIER_COLORS/TIER_STYLES/RANK_STYLES/CATEGORY_LABELS; `lib/constants/ui.ts`: PILL_ACTIVE/PILL_INACTIVE/INPUT_STYLE; `hooks/useOptimisticToggle.ts`; `hooks/useDeleteConfirmation.ts`). 8 new shared components (`PageHeader`, `StatsGrid`, `FeedCardWrapper`, `FormField`, `GoogleOAuthButton`, `AuthDivider`, `AuthErrorAlert`, `SearchForm`). 25 brewery API routes standardized with shared auth + response helpers. 14 admin pages adopted PageHeader. 3 pages adopted StatsGrid. 3 feed cards adopted FeedCardWrapper. 9 files adopted getFirstName(). 6 files consolidated tier/rank constants. 4 auth pages adopted shared auth components. 2 superadmin pages adopted SearchForm. CLAUDE.md updated: 8 new BANNED patterns, 17 new REQUIRED DRY patterns — conventions locked in as law. 17 new files, 100+ modified, 0 migrations, 22 new tests (974 → 996). KNOWN: Brand Team page shows 0 members (pre-existing RLS query issue). 20 pre-existing lint errors remain (captured as P1 roadmap item).
 **Retro (133):** `docs/retros/sprint-133-retro.md` (facilitated by Morgan)
 **Last completed:** Sprint 133 — The Cleanup ✅ — Brewery admin nav reorganization. 22 flat nav items reorganized into 6 semantic groups: Content (Tap List, Menus, Board, Embed), Engage (Messages, Loyalty, Mug Clubs, Challenges, Promo Hub, Ad Campaigns), Insights (Analytics, Customers, Sessions, Report, Pint Rewind), Operations (Events, Table Tent, POS Sync), Account (Settings, Billing, Resources), plus Overview standalone. `NAV_GROUPS` data structure with collapsible desktop sidebar (AnimatePresence expand/collapse, localStorage persistence via `ht-nav-groups` key, auto-expand for active page's group). `BRAND_NAV_ITEMS` array DRY'd 110+ lines of repeated brand link JSX into 7-item `.map()`. `MOBILE_BRAND_ITEMS` condensed labels for mobile. Mobile: priority strip (Overview, Tap List, Analytics, Messages, Loyalty, Settings) + "More" bottom sheet (AnimatePresence slide-up, grouped items, backdrop overlay, tap-outside-to-close). 1 modified file, 1 new test file, 0 migrations, 18 new tests (956 → 974). KNOWN: Brand Team page shows 0 members (pre-existing RLS query issue).
 **Retro (132):** `docs/retros/sprint-132-retro.md` (facilitated by Morgan)

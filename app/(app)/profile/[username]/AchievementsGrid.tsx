@@ -3,20 +3,13 @@
 import { useState, useMemo } from "react";
 import { Trophy } from "lucide-react";
 import { AchievementBadge } from "@/components/achievements/AchievementBadge";
+import { CATEGORY_LABELS } from "@/lib/constants/tiers";
+import { PILL_ACTIVE, PILL_INACTIVE } from "@/lib/constants/ui";
 import type { AchievementTier, AchievementCategory } from "@/types/database";
 
 const TOTAL_ACHIEVEMENTS = 52;
 
 const TIER_ORDER: AchievementTier[] = ["platinum", "gold", "silver", "bronze"];
-
-const CATEGORY_LABELS: Record<AchievementCategory, string> = {
-  explorer: "Explorer",
-  variety: "Variety",
-  quantity: "Quantity",
-  social: "Social",
-  time: "Time",
-  quality: "Quality",
-};
 
 type SortBy = "date" | "tier";
 
@@ -80,19 +73,6 @@ export function AchievementsGrid({ achievements }: AchievementsGridProps) {
 
   const earnedCount = achievements.length;
 
-  // Active pill style helpers
-  const pillActive = {
-    background: "color-mix(in srgb, var(--accent-gold) 15%, transparent)",
-    color: "var(--accent-gold)",
-    borderColor: "color-mix(in srgb, var(--accent-gold) 40%, transparent)",
-  } as React.CSSProperties;
-
-  const pillInactive = {
-    background: "var(--surface-2)",
-    color: "var(--text-muted)",
-    borderColor: "transparent",
-  } as React.CSSProperties;
-
   return (
     <div>
       {/* Header */}
@@ -124,7 +104,7 @@ export function AchievementsGrid({ achievements }: AchievementsGridProps) {
             type="button"
             onClick={() => setSortBy(s)}
             className="px-3 py-1 text-xs font-medium rounded-full border transition-all"
-            style={sortBy === s ? pillActive : pillInactive}
+            style={sortBy === s ? PILL_ACTIVE : PILL_INACTIVE}
           >
             {s === "date" ? "By Date" : "By Tier"}
           </button>
@@ -135,7 +115,7 @@ export function AchievementsGrid({ achievements }: AchievementsGridProps) {
           type="button"
           onClick={() => setShowLocked((v) => !v)}
           className="ml-auto px-3 py-1 text-xs font-medium rounded-full border transition-all"
-          style={showLocked ? pillActive : pillInactive}
+          style={showLocked ? PILL_ACTIVE : PILL_INACTIVE}
         >
           {showLocked ? "Locked On" : "Locked Off"}
         </button>
@@ -147,7 +127,7 @@ export function AchievementsGrid({ achievements }: AchievementsGridProps) {
           type="button"
           onClick={() => setFilterTier("all")}
           className="px-3 py-1 text-xs font-medium rounded-full border transition-all"
-          style={filterTier === "all" ? pillActive : pillInactive}
+          style={filterTier === "all" ? PILL_ACTIVE : PILL_INACTIVE}
         >
           All Tiers
         </button>
@@ -157,7 +137,7 @@ export function AchievementsGrid({ achievements }: AchievementsGridProps) {
             type="button"
             onClick={() => setFilterTier(filterTier === tier ? "all" : tier)}
             className="px-3 py-1 text-xs font-medium rounded-full border capitalize transition-all"
-            style={filterTier === tier ? pillActive : pillInactive}
+            style={filterTier === tier ? PILL_ACTIVE : PILL_INACTIVE}
           >
             {tier}
           </button>
@@ -170,7 +150,7 @@ export function AchievementsGrid({ achievements }: AchievementsGridProps) {
           type="button"
           onClick={() => setFilterCategory("all")}
           className="px-3 py-1 text-xs font-medium rounded-full border transition-all"
-          style={filterCategory === "all" ? pillActive : pillInactive}
+          style={filterCategory === "all" ? PILL_ACTIVE : PILL_INACTIVE}
         >
           All Categories
         </button>
@@ -182,7 +162,7 @@ export function AchievementsGrid({ achievements }: AchievementsGridProps) {
               type="button"
               onClick={() => setFilterCategory(filterCategory === cat ? "all" : cat)}
               className="px-3 py-1 text-xs font-medium rounded-full border transition-all"
-              style={filterCategory === cat ? pillActive : pillInactive}
+              style={filterCategory === cat ? PILL_ACTIVE : PILL_INACTIVE}
             >
               {CATEGORY_LABELS[cat]}
             </button>

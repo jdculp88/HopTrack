@@ -1,6 +1,7 @@
-import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { rateLimitResponse } from "@/lib/rate-limit";
+import { requireAuth, requireBreweryAdmin } from "@/lib/api-helpers";
+import { apiUnauthorized, apiForbidden, apiSuccess } from "@/lib/api-response";
 
 export interface DigestStats {
   visits: number;
@@ -139,25 +140,16 @@ export async function GET(
 
   const { brewery_id } = await params;
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user)
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const user = await requireAuth(supabase);
+  if (!user) return apiUnauthorized();
 
   // Verify brewery admin
-  const { data: account } = (await supabase
-    .from("brewery_accounts")
-    .select("role")
-    .eq("user_id", user.id)
-    .eq("brewery_id", brewery_id)
-    .single()) as any;
-  if (!account)
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const account = await requireBreweryAdmin(supabase, user.id, brewery_id);
+  if (!account) return apiForbidden();
 
   const { breweryName, stats } = await calculateDigestStats(brewery_id);
 
-  return NextResponse.json({
+  return apiSuccess({
     brewery_name: breweryName,
     period: "Last 7 days",
     stats,

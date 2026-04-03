@@ -183,6 +183,12 @@ These ideas keep coming back — they're clearly high-value:
 
 - **Image from Screenshot (Investigation)** — Joshua saw a recommendation (possibly related to Next.js config or image optimization) but is unsure if it's still relevant. Needs investigation — could be about `next/image` remote patterns, OG image generation, or screenshot-to-image tooling. *Owner: Jordan (investigation). Priority: P3 — needs clarification from Joshua before scoping.*
 
+- **Lint Zero — Kill All 20 Pre-Existing Errors** — 20 lint errors remain from pre-Sprint 134: 6 React compiler "Cannot access variable before declared" (hoisting issues in brand components), 4 "setState in effect" (ExploreClient, QuickRatingSheet, RateLimitBanner, BreweryAdminNav), 2 "impure function during render" (brewery detail page), 5 unescaped entities in JSX strings, 2 `require()` imports (Stripe lazy-load), 1 `prefer-const` (layout destructuring). Joshua wants zero errors — clean slate. *Owner: Avery (fixes) + Casey (verification). Priority: P1 — code health, zero tolerance.* *(Added 2026-04-03, requested by Joshua)*
+
+- **Code Protection & IP Security** — Protect HopTrack's source code and intellectual property before going live. Scope: disable source maps in production (`productionBrowserSourceMaps: false`), add Content-Security-Policy headers, add `X-Content-Type-Options: nosniff`, implement anti-scraping rate limits on public pages, add copyright headers to key files, obfuscate client bundles (investigate `next-bundle-analyzer` + `javascript-obfuscator`), protect API endpoints from abuse (bot detection), legal protections (ToS, copyright notices, DMCA policy), lock down Supabase RLS policies audit, ensure no secrets in client bundles, investigate code signing for PWA. *Owner: Riley/Quinn (infra security) + Jordan (code review) + Taylor (legal/ToS). Priority: P1 — must be done before launch, non-negotiable.* *(Added 2026-04-03, requested by Joshua)*
+
+- **Codebase DRY-Up & Modernization** — Systematic audit for copy-paste JSX, repeated patterns, and opportunities to extract into data-driven `.map()` loops. Inspired by Jordan's S133 brand nav cleanup. *Owner: Jordan (audit) + Avery (implementation). Priority: P2 — code health.* *(Added 2026-04-03, requested by Joshua)* **BUILT — Sprint 134 (The Tidy)**
+
 ---
 
 ## Sprint 132 — Selected: The Clean Slate (data quality + social links)

@@ -467,7 +467,6 @@ describe("triggerLoyaltyNudge", () => {
 
   it("returns reason when trigger is disabled in preferences", async () => {
     const supabase = createMockSupabase();
-    let tableCallOrder = 0;
     supabase.from = vi.fn().mockImplementation((table: string) => {
       if (table === "loyalty_programs") {
         return {

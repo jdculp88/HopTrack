@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
-import { NextResponse } from "next/server";
+import { requireAuth } from "@/lib/api-helpers";
+import { apiUnauthorized, apiSuccess, apiServerError } from "@/lib/api-response";
 
 export async function GET(
   _req: Request,
@@ -8,8 +9,8 @@ export async function GET(
   const { brewery_id } = await params;
   const supabase = await createClient();
 
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const user = await requireAuth(supabase);
+  if (!user) return apiUnauthorized();
 
   const { count, error } = await supabase
     .from("sessions")
@@ -17,7 +18,7 @@ export async function GET(
     .eq("brewery_id", brewery_id)
     .eq("is_active", true);
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return apiServerError(error.message);
 
-  return NextResponse.json({ count: count ?? 0 });
+  return apiSuccess({ count: count ?? 0 });
 }

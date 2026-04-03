@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
 import { MapPin } from "lucide-react";
 import { StarRating } from "@/components/ui/StarRating";
 import { EmojiPulse } from "@/components/social/EmojiPulse";
+import { FeedCardWrapper } from "@/components/social/FeedCardWrapper";
+import { getFirstName } from "@/lib/first-name";
 import { formatRelativeTime } from "@/lib/dates";
 
 export interface FriendBreweryReview {
@@ -33,50 +34,15 @@ export function BreweryRatingFeedCard({
   review: FriendBreweryReview;
   index?: number;
 }) {
-  const firstName = (
-    review.profile?.display_name || review.profile?.username || "Someone"
-  ).split(" ")[0];
+  const firstName = getFirstName(review.profile?.display_name, review.profile?.username);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-50px" }}
-      transition={{ type: "spring", stiffness: 400, damping: 30 }}
-      role="article"
-      aria-label={`${review.profile?.display_name || review.profile?.username} visited ${review.brewery?.name}`}
-      className="rounded-2xl overflow-hidden flex relative"
-      style={{
-        background:
-          "linear-gradient(135deg, color-mix(in srgb, var(--accent-gold) 7%, var(--surface)), var(--surface))",
-        border:
-          "1px solid color-mix(in srgb, var(--accent-gold) 18%, var(--border))",
-      }}
+    <FeedCardWrapper
+      accentColor="var(--accent-gold)"
+      icon={<MapPin size={22} strokeWidth={1.75} />}
+      ariaLabel={`${review.profile?.display_name || review.profile?.username} visited ${review.brewery?.name}`}
     >
-
-      {/* Gold accent bar */}
-      <div
-        className="w-1 flex-shrink-0"
-        style={{ background: "var(--accent-gold)", opacity: 0.7 }}
-      />
-
-      {/* Icon column */}
-      <div
-        className="w-14 flex-shrink-0 flex items-center justify-center"
-        style={{
-          background:
-            "color-mix(in srgb, var(--accent-gold) 10%, transparent)",
-        }}
-      >
-        <MapPin
-          size={22}
-          strokeWidth={1.75}
-          style={{ color: "var(--accent-gold)" }}
-        />
-      </div>
-
-      {/* Content */}
-      <div className="flex-1 min-w-0 px-4 py-3">
+      <div className="px-4 py-3">
         {/* Line 1: Name + brewery */}
         <p className="text-sm leading-snug" style={{ color: "var(--text-primary)" }}>
           {review.profile ? (
@@ -124,6 +90,6 @@ export function BreweryRatingFeedCard({
         {/* Line 4: EmojiPulse */}
         <EmojiPulse itemKey={`brewery-review-${review.id}`} />
       </div>
-    </motion.div>
+    </FeedCardWrapper>
   );
 }

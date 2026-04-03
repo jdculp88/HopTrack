@@ -59,7 +59,7 @@ export default async function BrandDashboardPage({ params }: { params: Promise<{
   ]);
 
   // Fetch analytics data server-side for initial render
-  let stats = {
+  const stats = {
     totalSessions: 0, totalBeersLogged: 0, uniqueVisitors: 0,
     thisWeekSessions: 0, lastWeekSessions: 0, todaySessions: 0,
     todayBeers: 0, avgRating: null as number | null, repeatVisitorPct: null as number | null,

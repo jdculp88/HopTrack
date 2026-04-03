@@ -3,7 +3,7 @@ import { verifyBrandAccess } from "../brand-auth";
 
 function mockSupabase(responses: Record<string, any>) {
   const chainBuilder = (table: string) => {
-    let currentResponse = responses[table];
+    const currentResponse = responses[table];
     const chain: any = {
       select: () => chain,
       eq: (_col: string, _val: string) => chain,
@@ -42,7 +42,6 @@ describe("verifyBrandAccess", () => {
   it("returns 'brewery_member' when no brand_accounts but manages a brewery in the brand", async () => {
     // brand_accounts returns null, brewery_accounts returns an account,
     // breweries returns a match
-    let callCount = 0;
     const supabase = {
       from: (table: string) => {
         const chain: any = {

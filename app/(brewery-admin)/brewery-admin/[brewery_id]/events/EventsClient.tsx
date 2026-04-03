@@ -6,6 +6,7 @@ import { Calendar, Plus, X, Save, Loader2, Trash2, AlertTriangle, ToggleLeft, To
 import { createClient } from "@/lib/supabase/client";
 import { useToast } from "@/components/ui/Toast";
 import { formatDate } from "@/lib/dates";
+import { INPUT_STYLE, TEXTAREA_STYLE } from "@/lib/constants/ui";
 
 function getNowDatetimeLocal() {
   const now = new Date();
@@ -338,7 +339,7 @@ export function EventsClient({ breweryId, initialEvents }: EventsClientProps) {
               <Field label="Description">
                 <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
                   placeholder="Tell customers what to expect..." rows={3}
-                  style={{ ...inputStyle, resize: "none" as any }} />
+                  style={TEXTAREA_STYLE} />
               </Field>
 
               <div className="flex gap-3 pt-1">
@@ -448,11 +449,7 @@ function EventCard({ event, onEdit, onToggle, onDelete, confirmDeleteId, setConf
   );
 }
 
-const inputStyle = {
-  width: "100%", padding: "10px 16px", borderRadius: 12, border: "1px solid var(--border)",
-  background: "var(--surface-2)", color: "var(--text-primary)", fontSize: 14, outline: "none",
-};
-
+const inputStyle = INPUT_STYLE;
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>

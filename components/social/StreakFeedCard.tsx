@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { Flame } from "lucide-react";
 import { EmojiPulse } from "@/components/social/EmojiPulse";
+import { getFirstName } from "@/lib/first-name";
 
 export interface StreakData {
   profileId: string;
@@ -58,7 +59,7 @@ export function StreakFeedCard({
         </div>
         <p className="text-sm font-semibold leading-snug" style={{ color: "var(--text-primary)" }}>
           <Link href={`/profile/${streak.username}`} className="hover:underline underline-offset-2">
-            {(streak.displayName || streak.username).split(" ")[0]}
+            {getFirstName(streak.displayName, streak.username)}
           </Link>
           <span style={{ color: "var(--text-muted)" }}> is on a streak</span>
         </p>

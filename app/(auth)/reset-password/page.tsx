@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Lock, Eye, EyeOff, CheckCircle, ChevronLeft } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { AuthErrorAlert } from "@/components/auth/AuthErrorAlert";
 
 export default function ResetPasswordPage() {
   const router = useRouter();
@@ -190,11 +191,7 @@ export default function ResetPasswordPage() {
           </button>
         </div>
 
-        {error && (
-          <p className="text-sm text-[#C44B3A] bg-[#C44B3A]/10 border border-[#C44B3A]/20 rounded-xl px-4 py-3">
-            {error}
-          </p>
-        )}
+        <AuthErrorAlert message={error} />
 
         <button
           type="submit"

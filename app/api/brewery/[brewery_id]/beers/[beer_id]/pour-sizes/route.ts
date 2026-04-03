@@ -1,5 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
+import { requireAuth, requireBreweryAdmin } from "@/lib/api-helpers";
+import { apiUnauthorized, apiForbidden, apiSuccess, apiServerError, apiNotFound } from "@/lib/api-response";
 
 // ── GET /api/brewery/[brewery_id]/beers/[beer_id]/pour-sizes ─────────────────
 export async function GET(
@@ -9,14 +11,11 @@ export async function GET(
   const { brewery_id, beer_id } = await params;
   const supabase = await createClient();
 
-  // Verify caller is a brewery admin
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const user = await requireAuth(supabase);
+  if (!user) return apiUnauthorized();
 
-  const { data: account } = await supabase
-    .from("brewery_accounts").select("role")
-    .eq("user_id", user.id).eq("brewery_id", brewery_id).single();
-  if (!account) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const account = await requireBreweryAdmin(supabase, user.id, brewery_id);
+  if (!account) return apiForbidden();
 
   const { data, error } = await supabase
     .from("beer_pour_sizes")
@@ -24,8 +23,8 @@ export async function GET(
     .eq("beer_id", beer_id)
     .order("display_order", { ascending: true });
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json(data ?? []);
+  if (error) return apiServerError(error.message);
+  return apiSuccess(data ?? []);
 }
 
 // ── POST /api/brewery/[brewery_id]/beers/[beer_id]/pour-sizes ────────────────
@@ -38,18 +37,16 @@ export async function POST(
   const { brewery_id, beer_id } = await params;
   const supabase = await createClient();
 
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const user = await requireAuth(supabase);
+  if (!user) return apiUnauthorized();
 
-  const { data: account } = await supabase
-    .from("brewery_accounts").select("role")
-    .eq("user_id", user.id).eq("brewery_id", brewery_id).single();
-  if (!account) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const account = await requireBreweryAdmin(supabase, user.id, brewery_id);
+  if (!account) return apiForbidden();
 
   // Verify beer belongs to this brewery
   const { data: beer } = await supabase
     .from("beers").select("id").eq("id", beer_id).eq("brewery_id", brewery_id).single();
-  if (!beer) return NextResponse.json({ error: "Beer not found" }, { status: 404 });
+  if (!beer) return apiNotFound("Beer");
 
   const sizes = await req.json() as Array<{
     label: string;
@@ -70,7 +67,7 @@ export async function POST(
       display_order: i,
     }));
     const { error } = await supabase.from("beer_pour_sizes").insert(rows);
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) return apiServerError(error.message);
   }
 
   // Return updated list
@@ -80,5 +77,5 @@ export async function POST(
     .eq("beer_id", beer_id)
     .order("display_order", { ascending: true });
 
-  return NextResponse.json(data ?? []);
+  return apiSuccess(data ?? []);
 }

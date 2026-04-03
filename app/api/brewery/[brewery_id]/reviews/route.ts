@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { rateLimitResponse } from "@/lib/rate-limit";
+import { requireAuth } from "@/lib/api-helpers";
+import { apiUnauthorized, apiSuccess, apiServerError, apiBadRequest } from "@/lib/api-response";
 
 // GET /api/brewery/[brewery_id]/reviews — fetch reviews + user's own review
+// NOTE: This serves anonymous users — auth is optional for the GET handler
 export async function GET(
   _req: Request,
   { params }: { params: Promise<{ brewery_id: string }> },
@@ -18,7 +21,7 @@ export async function GET(
     .order("created_at", { ascending: false })
     .limit(50);
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return apiServerError(error.message);
 
   const userReview = user
     ? (reviews ?? []).find((r: any) => r.user_id === user.id) ?? null
@@ -47,12 +50,12 @@ export async function POST(
   if (rl) return rl;
   const { brewery_id } = await params;
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const user = await requireAuth(supabase);
+  if (!user) return apiUnauthorized();
 
   const { rating, comment } = await req.json();
   if (!rating || rating < 1 || rating > 5) {
-    return NextResponse.json({ error: "Rating must be between 1 and 5" }, { status: 400 });
+    return apiBadRequest("Rating must be between 1 and 5");
   }
 
   // Upsert — one review per user per brewery
@@ -71,9 +74,9 @@ export async function POST(
     .select()
     .single();
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return apiServerError(error.message);
 
-  return NextResponse.json({ review: data }, { status: 201 });
+  return apiSuccess({ review: data }, 201);
 }
 
 // DELETE /api/brewery/[brewery_id]/reviews — delete user's review
@@ -83,8 +86,8 @@ export async function DELETE(
 ) {
   const { brewery_id } = await params;
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const user = await requireAuth(supabase);
+  if (!user) return apiUnauthorized();
 
   const { error } = await supabase
     .from("brewery_reviews")
@@ -92,7 +95,7 @@ export async function DELETE(
     .eq("user_id", user.id)
     .eq("brewery_id", brewery_id);
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return apiServerError(error.message);
 
-  return NextResponse.json({ success: true });
+  return apiSuccess({ success: true });
 }

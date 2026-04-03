@@ -1,5 +1,6 @@
-import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { requireAuth, requireBreweryAdmin } from "@/lib/api-helpers";
+import { apiUnauthorized, apiForbidden, apiSuccess, apiServerError, apiBadRequest, apiNotFound } from "@/lib/api-response";
 
 // PATCH /api/brewery/[brewery_id]/reviews/[review_id]/respond — brewery admin responds to review
 export async function PATCH(
@@ -8,26 +9,16 @@ export async function PATCH(
 ) {
   const { brewery_id, review_id } = await params;
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const user = await requireAuth(supabase);
+  if (!user) return apiUnauthorized();
 
-  // Verify the user is an owner or manager of this brewery
-  const { data: account } = await supabase
-    .from("brewery_accounts")
-    .select("role")
-    .eq("user_id", user.id)
-    .eq("brewery_id", brewery_id)
-    .in("role", ["owner", "manager"])
-    .single();
-
-  if (!account) {
-    return NextResponse.json({ error: "Forbidden — brewery admin access required" }, { status: 403 });
-  }
+  const account = await requireBreweryAdmin(supabase, user.id, brewery_id);
+  if (!account) return apiForbidden();
 
   const { owner_response } = await req.json();
 
   if (!owner_response?.trim()) {
-    return NextResponse.json({ error: "Response text is required" }, { status: 400 });
+    return apiBadRequest("Response text is required");
   }
 
   // Update the review with owner response
@@ -42,10 +33,10 @@ export async function PATCH(
     .select()
     .single();
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  if (!data) return NextResponse.json({ error: "Review not found" }, { status: 404 });
+  if (error) return apiServerError(error.message);
+  if (!data) return apiNotFound("Review");
 
-  return NextResponse.json({ review: data });
+  return apiSuccess({ review: data });
 }
 
 // DELETE /api/brewery/[brewery_id]/reviews/[review_id]/respond — remove owner response
@@ -55,21 +46,11 @@ export async function DELETE(
 ) {
   const { brewery_id, review_id } = await params;
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const user = await requireAuth(supabase);
+  if (!user) return apiUnauthorized();
 
-  // Verify brewery admin
-  const { data: account } = await supabase
-    .from("brewery_accounts")
-    .select("role")
-    .eq("user_id", user.id)
-    .eq("brewery_id", brewery_id)
-    .in("role", ["owner", "manager"])
-    .single();
-
-  if (!account) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
+  const account = await requireBreweryAdmin(supabase, user.id, brewery_id);
+  if (!account) return apiForbidden();
 
   const { error } = await supabase
     .from("brewery_reviews")
@@ -77,7 +58,7 @@ export async function DELETE(
     .eq("id", review_id)
     .eq("brewery_id", brewery_id);
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return apiServerError(error.message);
 
-  return NextResponse.json({ success: true });
+  return apiSuccess({ success: true });
 }

@@ -9,6 +9,9 @@ import { AddLocationModal } from "@/components/brewery-admin/brand/AddLocationMo
 import { BrandTeamManager } from "@/components/brewery-admin/brand/BrandTeamManager";
 import Link from "next/link";
 import Image from "next/image";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { FormField } from "@/components/ui/FormField";
+import { INPUT_STYLE, TEXTAREA_STYLE } from "@/lib/constants/ui";
 
 interface BrandSettingsClientProps {
   brand: any;
@@ -36,11 +39,7 @@ export function BrandSettingsClient({ brand, locations: initialLocations, userRo
 
   const isOwner = userRole === "owner";
 
-  const inputStyle = {
-    width: "100%", padding: "10px 16px", borderRadius: 12,
-    border: "1px solid var(--border)", background: "var(--surface-2)",
-    color: "var(--text-primary)", fontSize: 14, outline: "none",
-  };
+  const inputStyle = INPUT_STYLE;
 
   async function handleSave() {
     setSaving(true);
@@ -95,28 +94,25 @@ export function BrandSettingsClient({ brand, locations: initialLocations, userRo
 
   return (
     <div className="p-6 lg:p-8 max-w-2xl mx-auto pt-16 lg:pt-8">
-      <div className="mb-8">
-        <h1 className="font-display text-3xl font-bold" style={{ color: "var(--text-primary)" }}>Brand Settings</h1>
-        <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
-          Manage {brand.name} — {locations.length} location{locations.length !== 1 ? "s" : ""}
-        </p>
-      </div>
+      <PageHeader
+        title="Brand Settings"
+        subtitle={`Manage ${brand.name} — ${locations.length} location${locations.length !== 1 ? "s" : ""}`}
+      />
 
       {/* ─── Brand Profile ─── */}
       <section className="rounded-2xl border p-6 mb-6" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
         <h2 className="font-display font-bold text-lg mb-4" style={{ color: "var(--text-primary)" }}>Brand Profile</h2>
         <div className="space-y-4">
-          <div>
-            <label className="block text-xs font-semibold mb-1.5" style={{ color: "var(--text-muted)" }}>Brand Name</label>
+          <FormField label="Brand Name">
             <input type="text" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} style={inputStyle} />
-          </div>
+          </FormField>
           <div>
-            <label className="block text-xs font-semibold mb-1.5" style={{ color: "var(--text-muted)" }}>URL Slug</label>
+            <FormField label="URL Slug">
             <input type="text" value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "") })} style={inputStyle} />
+            </FormField>
             <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>hoptrack.beer/brand/{form.slug}</p>
           </div>
-          <div>
-            <label className="block text-xs font-semibold mb-1.5" style={{ color: "var(--text-muted)" }}>Logo</label>
+          <FormField label="Logo">
             <ImageUpload
               bucket="brand-logos"
               folder={userId}
@@ -127,15 +123,13 @@ export function BrandSettingsClient({ brand, locations: initialLocations, userRo
               maxSizeMb={5}
               label="Brand logo"
             />
-          </div>
-          <div>
-            <label className="block text-xs font-semibold mb-1.5" style={{ color: "var(--text-muted)" }}>Description</label>
-            <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} style={{ ...inputStyle, resize: "none" }} maxLength={500} />
-          </div>
-          <div>
-            <label className="block text-xs font-semibold mb-1.5" style={{ color: "var(--text-muted)" }}>Website</label>
+          </FormField>
+          <FormField label="Description">
+            <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} style={TEXTAREA_STYLE} maxLength={500} />
+          </FormField>
+          <FormField label="Website">
             <input type="url" value={form.website_url} onChange={(e) => setForm({ ...form, website_url: e.target.value })} style={inputStyle} placeholder="https://" />
-          </div>
+          </FormField>
           <button onClick={handleSave} disabled={saving} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold" style={{ background: "var(--accent-gold)", color: "var(--bg)" }}>
             {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
             {saving ? "Saving..." : "Save Changes"}

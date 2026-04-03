@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Trophy, Crown } from "lucide-react";
+import { Trophy } from "lucide-react";
 import { UserAvatar } from "@/components/ui/UserAvatar";
+import { RANK_STYLES } from "@/lib/constants/tiers";
 import Link from "next/link";
 
 interface LeaderboardEntry {
@@ -24,12 +25,6 @@ interface LeaderboardClientProps {
   monthly: LeaderboardEntry[];
   currentUserId: string;
 }
-
-const RANK_STYLES: Record<number, { bg: string; text: string; icon?: React.ReactNode }> = {
-  1: { bg: "color-mix(in srgb, var(--accent-gold) 15%, transparent)", text: "var(--accent-gold)", icon: <Crown size={14} /> },
-  2: { bg: "color-mix(in srgb, #C0C0C0 15%, transparent)", text: "#C0C0C0" },
-  3: { bg: "color-mix(in srgb, #CD7F32 15%, transparent)", text: "#CD7F32" },
-};
 
 export function LeaderboardClient({ allTime, monthly, currentUserId }: LeaderboardClientProps) {
   const [period, setPeriod] = useState<"monthly" | "alltime">("monthly");
@@ -98,9 +93,9 @@ export function LeaderboardClient({ allTime, monthly, currentUserId }: Leaderboa
                     className="w-8 text-center font-display font-bold text-sm flex-shrink-0"
                     style={rankStyle ? { color: rankStyle.text } : { color: "var(--text-muted)" }}
                   >
-                    {rankStyle?.icon ? (
-                      <span className="flex items-center justify-center" style={{ color: rankStyle.text }}>
-                        {rankStyle.icon}
+                    {rankStyle?.label ? (
+                      <span className="flex items-center justify-center text-xl">
+                        {rankStyle.label}
                       </span>
                     ) : (
                       `#${entry.rank}`

@@ -1,6 +1,7 @@
 "use client";
 
 import { ImageUpload } from "@/components/ui/ImageUpload";
+import { INPUT_STYLE, TEXTAREA_STYLE } from "@/lib/constants/ui";
 
 interface BrandDetailsStepProps {
   userId: string;
@@ -15,12 +16,6 @@ interface BrandDetailsStepProps {
 export function BrandDetailsStep({
   userId, logoUrl, setLogoUrl, description, setDescription, websiteUrl, setWebsiteUrl,
 }: BrandDetailsStepProps) {
-  const inputStyle = {
-    width: "100%", padding: "10px 16px", borderRadius: 12,
-    border: "1px solid var(--border)", background: "var(--surface-2)",
-    color: "var(--text-primary)", fontSize: 14, outline: "none",
-  };
-
   return (
     <div className="space-y-5">
       <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
@@ -54,7 +49,7 @@ export function BrandDetailsStep({
           onChange={(e) => setDescription(e.target.value)}
           placeholder="Tell people about your brand..."
           rows={3}
-          style={{ ...inputStyle, resize: "none" }}
+          style={TEXTAREA_STYLE}
           maxLength={500}
         />
       </div>
@@ -69,7 +64,7 @@ export function BrandDetailsStep({
           value={websiteUrl}
           onChange={(e) => setWebsiteUrl(e.target.value)}
           placeholder="https://wickedweedbrewing.com"
-          style={inputStyle}
+          style={INPUT_STYLE}
         />
       </div>
     </div>

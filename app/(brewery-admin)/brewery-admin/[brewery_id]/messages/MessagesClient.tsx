@@ -5,6 +5,8 @@ import { Mail, Send, Users, Loader2, CheckCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/components/ui/Toast";
 import { computeSegment, SEGMENTS, type CustomerSegment } from "@/lib/crm";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { Card } from "@/components/ui/Card";
 
 type Audience = "all" | CustomerSegment;
 
@@ -85,17 +87,10 @@ export function MessagesClient({ breweryId, breweryName: _breweryName, customers
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 space-y-6 pt-16 lg:pt-8">
       {/* Header */}
-      <div>
-        <h1 className="font-display text-2xl sm:text-3xl font-bold" style={{ color: "var(--text-primary)" }}>
-          Messages
-        </h1>
-        <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
-          Send in-app notifications to your customers by segment.
-        </p>
-      </div>
+      <PageHeader title="Messages" subtitle="Send in-app notifications to your customers by segment." className="mb-0" />
 
       {/* Segment selector */}
-      <div className="rounded-2xl border p-5 space-y-4" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
+      <Card padding="spacious" className="space-y-4">
         <h2 className="font-display font-bold text-sm" style={{ color: "var(--text-primary)" }}>
           Select audience
         </h2>
@@ -140,10 +135,10 @@ export function MessagesClient({ breweryId, breweryName: _breweryName, customers
             );
           })}
         </div>
-      </div>
+      </Card>
 
       {/* Composer */}
-      <div className="rounded-2xl border p-5 space-y-4" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
+      <Card padding="spacious" className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="font-display font-bold text-sm" style={{ color: "var(--text-primary)" }}>
             Compose message
@@ -246,11 +241,11 @@ export function MessagesClient({ breweryId, breweryName: _breweryName, customers
             )}
           </button>
         </div>
-      </div>
+      </Card>
 
       {/* Empty state */}
       {customers.length === 0 && (
-        <div className="rounded-2xl border p-16 text-center" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
+        <Card className="p-16 text-center">
           <p className="text-4xl mb-3">
             <Mail size={48} style={{ color: "var(--text-muted)", margin: "0 auto" }} />
           </p>
@@ -258,7 +253,7 @@ export function MessagesClient({ breweryId, breweryName: _breweryName, customers
           <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
             When guests start sessions at your brewery, you can message them here.
           </p>
-        </div>
+        </Card>
       )}
     </div>
   );

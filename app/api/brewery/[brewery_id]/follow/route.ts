@@ -1,8 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 import { rateLimitResponse } from "@/lib/rate-limit";
+import { requireAuth } from "@/lib/api-helpers";
+import { apiUnauthorized, apiSuccess, apiServerError } from "@/lib/api-response";
 
 // GET — check if current user follows this brewery + get follow count
+// NOTE: This serves anonymous users — auth is optional for the GET handler
 export async function GET(
   _req: Request,
   { params }: { params: Promise<{ brewery_id: string }> }
@@ -42,8 +45,8 @@ export async function POST(
 
   const { brewery_id } = await params;
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const user = await requireAuth(supabase);
+  if (!user) return apiUnauthorized();
 
   const { error } = await supabase
     .from("brewery_follows")
@@ -51,12 +54,12 @@ export async function POST(
 
   if (error) {
     if (error.code === "23505") {
-      return NextResponse.json({ message: "Already following" }, { status: 200 });
+      return apiSuccess({ message: "Already following" });
     }
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return apiServerError(error.message);
   }
 
-  return NextResponse.json({ success: true }, { status: 201 });
+  return apiSuccess({ success: true }, 201);
 }
 
 // DELETE — unfollow a brewery
@@ -66,8 +69,8 @@ export async function DELETE(
 ) {
   const { brewery_id } = await params;
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const user = await requireAuth(supabase);
+  if (!user) return apiUnauthorized();
 
   await supabase
     .from("brewery_follows")
@@ -75,5 +78,5 @@ export async function DELETE(
     .eq("user_id", user.id)
     .eq("brewery_id", brewery_id);
 
-  return NextResponse.json({ success: true });
+  return apiSuccess({ success: true });
 }

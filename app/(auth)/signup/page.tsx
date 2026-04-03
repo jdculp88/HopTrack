@@ -6,6 +6,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Mail, Lock, User, MapPin, Eye, EyeOff, ArrowRight, ChevronLeft, Check, X, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
+import { GoogleOAuthButton } from "@/components/auth/GoogleOAuthButton";
+import { AuthDivider } from "@/components/auth/AuthDivider";
+import { AuthErrorAlert } from "@/components/auth/AuthErrorAlert";
 
 type SignupStep = "account" | "profile";
 type UsernameStatus = "idle" | "checking" | "available" | "taken" | "invalid";
@@ -167,26 +170,16 @@ export default function SignupPage() {
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0 }}
-              className="mb-6"
             >
-              <button
-                onClick={handleGoogleSignup}
-                className="w-full flex items-center justify-center gap-3 bg-[var(--surface-2)] hover:bg-[var(--surface)] border border-[var(--border)] hover:border-[var(--text-muted)] text-[var(--text-primary)] py-3 rounded-xl transition-all text-sm font-medium"
-              >
-                <GoogleIcon />
-                Continue with Google
-              </button>
+              <GoogleOAuthButton onClick={handleGoogleSignup} />
             </motion.div>
 
             <motion.div
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.05 }}
-              className="flex items-center gap-4 mb-6"
             >
-              <div className="flex-1 h-px bg-[#3A3628]" />
-              <span className="text-xs text-[var(--text-muted)]">or</span>
-              <div className="flex-1 h-px bg-[#3A3628]" />
+              <AuthDivider />
             </motion.div>
 
             <form onSubmit={handleAccountStep} className="space-y-4">
@@ -242,7 +235,7 @@ export default function SignupPage() {
                   </p>
                 )}
               </motion.div>
-              {error && <p className="text-sm text-[#C44B3A] bg-[#C44B3A]/10 border border-[#C44B3A]/20 rounded-xl px-4 py-3">{error}</p>}
+              <AuthErrorAlert message={error} />
               <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
                 <button type="submit" className="w-full flex items-center justify-center gap-2 bg-[#D4A843] hover:bg-[#E8841A] text-[#0F0E0C] font-bold py-3.5 rounded-xl transition-all text-sm">
                   Continue
@@ -330,7 +323,7 @@ export default function SignupPage() {
                   {field}
                 </motion.div>
               ))}
-              {error && <p className="text-sm text-[#C44B3A] bg-[#C44B3A]/10 border border-[#C44B3A]/20 rounded-xl px-4 py-3">{error}</p>}
+              <AuthErrorAlert message={error} />
               <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
                 <button type="submit" disabled={loading || usernameStatus === "taken" || usernameStatus === "checking"} className="w-full bg-[#D4A843] hover:bg-[#E8841A] text-[#0F0E0C] font-bold py-3.5 rounded-xl transition-all disabled:opacity-60 text-sm">
                   {loading ? "Creating account..." : "Create Account"}
@@ -358,16 +351,5 @@ export default function SignupPage() {
         <Link href="/login" className="text-[#D4A843] hover:underline font-medium">Sign in</Link>
       </p>
     </div>
-  );
-}
-
-function GoogleIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-      <path d="M17.64 9.2045c0-.6381-.0573-1.2518-.1636-1.8409H9v3.4814h4.8436c-.2086 1.125-.8427 2.0782-1.7959 2.7164v2.2581h2.9087c1.7018-1.5668 2.6836-3.874 2.6836-6.615z" fill="#4285F4"/>
-      <path d="M9 18c2.43 0 4.4673-.806 5.9564-2.1805l-2.9087-2.2581c-.8064.54-1.8368.859-3.0477.859-2.344 0-4.3282-1.5832-5.036-3.7104H.957v2.3318C2.4382 15.9832 5.4818 18 9 18z" fill="#34A853"/>
-      <path d="M3.964 10.71c-.18-.54-.2818-1.1168-.2818-1.71s.1018-1.17.2818-1.71V4.9582H.957C.3477 6.1731 0 7.5477 0 9s.3477 2.8269.957 4.0418L3.964 10.71z" fill="#FBBC05"/>
-      <path d="M9 3.5795c1.3214 0 2.5077.4541 3.4405 1.346l2.5813-2.5813C13.4627.891 11.4255 0 9 0 5.4818 0 2.4382 2.0168.957 4.9582L3.964 7.29C4.6718 5.1627 6.656 3.5795 9 3.5795z" fill="#EA4335"/>
-    </svg>
   );
 }

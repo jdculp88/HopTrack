@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Star, Clock } from "lucide-react";
 import { formatDateShort } from "@/lib/dates";
+import { PageHeader } from "@/components/ui/PageHeader";
 
 const PAGE_SIZE = 25;
 
@@ -60,12 +61,11 @@ export default async function BrewerySessionsPage({
         >
           <ArrowLeft size={14} /> Back to Dashboard
         </Link>
-        <h1 className="font-display text-3xl font-bold" style={{ color: "var(--text-primary)" }}>
-          All Sessions
-        </h1>
-        <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
-          {(brewery as any)?.name} · {count ?? 0} total session{count !== 1 ? "s" : ""}
-        </p>
+        <PageHeader
+          title="All Sessions"
+          subtitle={`${(brewery as any)?.name} · ${count ?? 0} total session${count !== 1 ? "s" : ""}`}
+          className="mb-0"
+        />
       </div>
 
       <div className="space-y-3">

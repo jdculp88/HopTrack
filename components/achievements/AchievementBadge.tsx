@@ -2,14 +2,8 @@
 
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { TIER_STYLES } from "@/lib/constants/tiers";
 import type { Achievement, AchievementTier } from "@/types/database";
-
-const TIER_STYLES: Record<AchievementTier, { ring: string; glow: string; label: string; color: string }> = {
-  bronze:   { ring: "ring-2",  glow: "shadow-[0_0_12px_rgba(160,120,80,0.3)]",  label: "Bronze",   color: "var(--badge-bronze)" },
-  silver:   { ring: "ring-2",  glow: "shadow-[0_0_12px_rgba(138,144,152,0.3)]", label: "Silver",   color: "var(--badge-silver)" },
-  gold:     { ring: "ring-2",  glow: "shadow-[0_0_12px_rgba(200,148,58,0.4)]",  label: "Gold",     color: "var(--badge-gold)" },
-  platinum: { ring: "ring-2",  glow: "shadow-[0_0_16px_rgba(139,170,191,0.5)]", label: "Platinum", color: "#8BAABF" },
-};
 
 interface AchievementBadgeProps {
   achievement: Achievement;

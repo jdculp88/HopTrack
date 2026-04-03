@@ -6,6 +6,7 @@ import { useToast } from "@/components/ui/Toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSearchParams } from "next/navigation";
 import { FEATURE_MATRIX, BRAND_ADDON_INFO } from "@/lib/stripe";
+import { PageHeader } from "@/components/ui/PageHeader";
 
 interface Brand {
   id: string;

@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef } from "react";
 import { Check, X, Loader2 } from "lucide-react";
+import { INPUT_STYLE } from "@/lib/constants/ui";
 
 interface BrandNameStepProps {
   brandName: string;
@@ -69,12 +70,6 @@ export function BrandNameStep({
     debounceRef.current = setTimeout(() => checkSlug(value), 500);
   }
 
-  const inputStyle = {
-    width: "100%", padding: "10px 16px", borderRadius: 12,
-    border: "1px solid var(--border)", background: "var(--surface-2)",
-    color: "var(--text-primary)", fontSize: 14, outline: "none",
-  };
-
   return (
     <div className="space-y-5">
       <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
@@ -91,7 +86,7 @@ export function BrandNameStep({
           value={brandName}
           onChange={(e) => handleNameChange(e.target.value)}
           placeholder="e.g. Wicked Weed Brewing"
-          style={inputStyle}
+          style={INPUT_STYLE}
           maxLength={100}
           autoFocus
         />
@@ -108,7 +103,7 @@ export function BrandNameStep({
             value={slug}
             onChange={(e) => handleSlugChange(e.target.value)}
             placeholder="wicked-weed-brewing"
-            style={inputStyle}
+            style={INPUT_STYLE}
             maxLength={64}
           />
           <div className="absolute right-3 top-1/2 -translate-y-1/2">

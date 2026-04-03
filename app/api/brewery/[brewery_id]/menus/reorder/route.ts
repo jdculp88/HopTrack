@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest } from "next/server";
 import { rateLimitResponse } from "@/lib/rate-limit";
+import { requireAuth, requireBreweryAdmin } from "@/lib/api-helpers";
 import { apiSuccess, apiUnauthorized, apiForbidden, apiBadRequest, apiServerError } from "@/lib/api-response";
 
 export async function PATCH(
@@ -12,16 +13,10 @@ export async function PATCH(
   const { brewery_id } = await params;
   const supabase = await createClient();
 
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await requireAuth(supabase);
   if (!user) return apiUnauthorized();
 
-  const { data: account } = await supabase
-    .from("brewery_accounts")
-    .select("role")
-    .eq("user_id", user.id)
-    .eq("brewery_id", brewery_id)
-    .in("role", ["owner", "manager", "admin"])
-    .single();
+  const account = await requireBreweryAdmin(supabase, user.id, brewery_id);
   if (!account) return apiForbidden();
 
   const body = await request.json();

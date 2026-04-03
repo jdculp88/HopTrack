@@ -3,6 +3,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Gift, Users, Trophy, ArrowUpRight, Loader2, AlertTriangle, Download } from "lucide-react";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { StatsGrid } from "@/components/ui/StatsGrid";
 
 interface BrandLoyaltyClientProps {
   brandId: string;
@@ -170,31 +172,18 @@ export function BrandLoyaltyClient({ brandId, brandName, tier, hasAccess }: Bran
       </AnimatePresence>
 
       {/* Header */}
-      <div>
-        <h1 className="font-display text-2xl font-bold" style={{ color: "var(--text-primary)" }}>
-          Brand Loyalty — {brandName}
-        </h1>
-        <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>
-          Earn stamps at any location, redeem at any location.
-        </p>
-      </div>
+      <PageHeader
+        title={`Brand Loyalty — ${brandName}`}
+        subtitle="Earn stamps at any location, redeem at any location."
+        className="mb-0"
+      />
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-4">
-        {[
-          { label: "Active Cards", value: stats.totalCards, icon: Users },
-          { label: "Total Stamps", value: stats.totalStamps, icon: Gift },
-          { label: "Redemptions", value: stats.totalRedemptions, icon: Trophy },
-        ].map(({ label, value, icon: Icon }) => (
-          <div key={label} className="rounded-2xl p-4" style={{ background: "var(--surface-2)", border: "1px solid var(--border)" }}>
-            <div className="flex items-center gap-2 mb-2">
-              <Icon size={14} style={{ color: "var(--accent-gold)" }} />
-              <span className="text-xs font-mono uppercase" style={{ color: "var(--text-muted)" }}>{label}</span>
-            </div>
-            <p className="font-display text-2xl font-bold" style={{ color: "var(--text-primary)" }}>{value}</p>
-          </div>
-        ))}
-      </div>
+      <StatsGrid stats={[
+        { label: "Active Cards", value: stats.totalCards, icon: <Users size={16} /> },
+        { label: "Total Stamps", value: stats.totalStamps, icon: <Gift size={16} /> },
+        { label: "Redemptions", value: stats.totalRedemptions, icon: <Trophy size={16} /> },
+      ]} />
 
       {/* Program Setup */}
       <div className="rounded-2xl p-6" style={{ background: "var(--surface-2)", border: "1px solid var(--border)" }}>

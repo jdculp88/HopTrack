@@ -1,5 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { requireAuth, requireBreweryAdmin } from "@/lib/api-helpers";
+import { apiUnauthorized, apiForbidden, apiSuccess, apiServerError } from "@/lib/api-response";
 
 // GET /api/brewery/[brewery_id]/challenges/participants — participant stats for all challenges
 export async function GET(
@@ -8,17 +10,11 @@ export async function GET(
 ) {
   const { brewery_id } = await params;
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const user = await requireAuth(supabase);
+  if (!user) return apiUnauthorized();
 
-  const { data: account } = await (supabase
-    .from("brewery_accounts")
-    .select("role")
-    .eq("user_id", user.id)
-    .eq("brewery_id", brewery_id)
-    .in("role", ["owner", "manager"])
-    .single() as any);
-  if (!account) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const account = await requireBreweryAdmin(supabase, user.id, brewery_id);
+  if (!account) return apiForbidden();
 
   const url = new URL(request.url);
   const challenge_id = url.searchParams.get("challenge_id");
@@ -41,12 +37,12 @@ export async function GET(
       .select("id")
       .eq("brewery_id", brewery_id) as any);
     const ids = (challengeIds ?? []).map((c: any) => c.id);
-    if (ids.length === 0) return NextResponse.json([]);
+    if (ids.length === 0) return apiSuccess([]);
     query = query.in("challenge_id", ids);
   }
 
   const { data, error } = await query;
-  if (error) return NextResponse.json({ error: "Failed to fetch participants" }, { status: 500 });
+  if (error) return apiServerError("Failed to fetch participants");
 
-  return NextResponse.json(data ?? []);
+  return apiSuccess(data ?? []);
 }

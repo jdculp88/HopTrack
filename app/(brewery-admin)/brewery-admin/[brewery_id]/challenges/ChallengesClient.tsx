@@ -4,6 +4,8 @@ import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Trophy, Plus, Trash2, Edit2, Users, CheckCircle, X, Eye, Sparkles, Globe, Lock } from "lucide-react";
 import { useToast } from "@/components/ui/Toast";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { StatsGrid } from "@/components/ui/StatsGrid";
 
 const CHALLENGE_ICONS = ["🍺", "🏆", "🔥", "⭐", "🎯", "🍻", "🌟", "💪", "🎉", "🏅", "👑", "🍁", "❄️", "☀️", "🌙", "🎃"];
 
@@ -207,39 +209,28 @@ export function ChallengesClient({ breweryId, initialChallenges, tapListBeers, s
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 space-y-8">
       {/* Header */}
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-2xl font-display font-bold flex items-center gap-2" style={{ color: "var(--text-primary)" }}>
-            <Trophy size={24} style={{ color: "var(--accent-gold)" }} />
-            Challenges
-          </h1>
-          <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
-            Create challenges that keep customers coming back.
-          </p>
-        </div>
-        <button
-          onClick={openCreate}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-opacity hover:opacity-90"
-          style={{ background: "var(--accent-gold)", color: "var(--bg)" }}
-        >
-          <Plus size={16} />
-          New Challenge
-        </button>
-      </div>
+      <PageHeader
+        title="Challenges"
+        subtitle="Create challenges that keep customers coming back."
+        icon={Trophy}
+        action={
+          <button
+            onClick={openCreate}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-opacity hover:opacity-90"
+            style={{ background: "var(--accent-gold)", color: "var(--bg)" }}
+          >
+            <Plus size={16} />
+            New Challenge
+          </button>
+        }
+      />
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-4">
-        {[
-          { label: "Active", value: activeCount },
-          { label: "Participants", value: totalParticipants },
-          { label: "Completions", value: totalCompleted },
-        ].map(({ label, value }) => (
-          <div key={label} className="rounded-2xl p-4 text-center" style={{ background: "var(--surface-2)" }}>
-            <p className="text-2xl font-bold font-mono" style={{ color: "var(--accent-gold)" }}>{value}</p>
-            <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>{label}</p>
-          </div>
-        ))}
-      </div>
+      <StatsGrid stats={[
+        { label: "Active", value: activeCount },
+        { label: "Participants", value: totalParticipants },
+        { label: "Completions", value: totalCompleted },
+      ]} />
 
       {/* Create / Edit Form */}
       <AnimatePresence>

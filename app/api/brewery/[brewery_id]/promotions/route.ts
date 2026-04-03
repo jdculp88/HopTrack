@@ -1,5 +1,6 @@
-import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { requireAuth, requireBreweryAdmin } from "@/lib/api-helpers";
+import { apiUnauthorized, apiForbidden, apiSuccess, apiServerError, apiBadRequest } from "@/lib/api-response";
 
 // PATCH /api/brewery/[brewery_id]/promotions — update HopRoute eligibility and offer
 export async function PATCH(
@@ -8,21 +9,11 @@ export async function PATCH(
 ) {
   const { brewery_id } = await params;
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const user = await requireAuth(supabase);
+  if (!user) return apiUnauthorized();
 
-  // Verify admin access
-  const { data: account } = await supabase
-    .from("brewery_accounts")
-    .select("role")
-    .eq("user_id", user.id)
-    .eq("brewery_id", brewery_id)
-    .in("role", ["owner", "manager"])
-    .single();
-
-  if (!account) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const account = await requireBreweryAdmin(supabase, user.id, brewery_id);
+  if (!account) return apiForbidden();
 
   const { hop_route_eligible, hop_route_offer, vibe_tags } = await request.json();
 
@@ -32,7 +23,7 @@ export async function PATCH(
   if (Array.isArray(vibe_tags)) updates.vibe_tags = vibe_tags;
 
   if (Object.keys(updates).length === 0) {
-    return NextResponse.json({ error: "No valid fields to update" }, { status: 400 });
+    return apiBadRequest("No valid fields to update");
   }
 
   const { data, error } = await supabase
@@ -42,6 +33,6 @@ export async function PATCH(
     .select("hop_route_eligible, hop_route_offer, vibe_tags")
     .single();
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json(data);
+  if (error) return apiServerError(error.message);
+  return apiSuccess(data);
 }

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Map, Route } from "lucide-react";
+import { getFirstName } from "@/lib/first-name";
 
 export interface FriendActiveRoute {
   routeId: string;
@@ -40,7 +41,7 @@ export function HopRouteCTACard({ route, index = 0 }: { route: FriendActiveRoute
       {/* Route info */}
       <p className="text-sm relative z-10" style={{ color: "var(--text-primary)" }}>
         <Link href={`/profile/${route.friendUsername}`} className="font-semibold hover:underline underline-offset-2">
-          {route.friendName.split(" ")[0]}
+          {getFirstName(route.friendName, null)}
         </Link>
         <span style={{ color: "var(--text-muted)" }}> is on a route</span>
       </p>
@@ -73,7 +74,7 @@ export function HopRouteCTACard({ route, index = 0 }: { route: FriendActiveRoute
         style={{ background: "var(--accent-gold)", color: "var(--bg)" }}
       >
         <Route size={14} />
-        Join {route.friendName.split(" ")[0]} on this route
+        Join {getFirstName(route.friendName, null)} on this route
       </Link>
     </motion.div>
   );

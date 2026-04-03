@@ -1,5 +1,6 @@
 import { ExternalLink, BookOpen, GlassWater, Code2, Key, BarChart3, Beer, CalendarDays, Search, LayoutGrid, Plug, RefreshCw, ArrowRight, AlertTriangle, CheckCircle2, Settings } from "lucide-react";
 import { Metadata } from "next";
+import { PageHeader } from "@/components/ui/PageHeader";
 
 export const metadata: Metadata = { title: "Resources" };
 
@@ -49,17 +50,11 @@ const GUIDES = [
 export default function ResourcesPage() {
   return (
     <div className="p-6 lg:p-8 max-w-2xl mx-auto pt-16 lg:pt-8">
-      <div className="mb-8">
-        <div className="flex items-center gap-2 mb-2">
-          <BookOpen size={20} style={{ color: "var(--accent-gold)" }} />
-          <h1 className="font-display text-3xl font-bold" style={{ color: "var(--text-primary)" }}>
-            Resources
-          </h1>
-        </div>
-        <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-          Reference guides for your team — glassware, API documentation, and more.
-        </p>
-      </div>
+      <PageHeader
+        title="Resources"
+        subtitle="Reference guides for your team — glassware, API documentation, and more."
+        icon={BookOpen}
+      />
 
       {/* Glassware Guides */}
       <div className="mb-4">

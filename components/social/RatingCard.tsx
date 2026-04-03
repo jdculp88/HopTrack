@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { StarRating } from '@/components/ui/StarRating'
 import { UserAvatar } from '@/components/ui/UserAvatar'
 import { formatRelativeTime } from '@/lib/dates'
+import { getFirstName } from '@/lib/first-name'
 
 export interface FriendRating {
   id: string
@@ -36,7 +37,7 @@ export function RatingCard({ rating: review, index = 0 }: { rating: FriendRating
       />
       <div className="flex-1 min-w-0">
         <p className="text-sm leading-tight" style={{ color: 'var(--text-primary)' }}>
-          <span className="font-semibold">{review.profile.display_name.split(' ')[0]}</span>
+          <span className="font-semibold">{getFirstName(review.profile.display_name, review.profile.username)}</span>
           <span style={{ color: 'var(--text-muted)' }}> rated </span>
           <span className="font-medium">{review.beer.name}</span>
         </p>

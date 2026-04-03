@@ -7,6 +7,7 @@ import { StarRating } from '@/components/ui/StarRating'
 import { UserAvatar } from '@/components/ui/UserAvatar'
 import { useToast } from '@/components/ui/Toast'
 import { getStyleFamily, getStyleVars } from '@/lib/beerStyleColors'
+import { getFirstName } from '@/lib/first-name'
 
 export interface BreweryReviewItem {
   id: string
@@ -89,7 +90,7 @@ export function TrendingCard({ reviews, index = 0 }: { reviews: TrendingReview[]
               {review.beer?.name || 'Unknown'}
             </p>
             <p className="text-[11px] mt-1 truncate" style={{ color: 'var(--text-muted)' }}>
-              {review.profile?.display_name?.split(' ')[0] || 'Someone'}
+              {getFirstName(review.profile?.display_name, review.profile?.username)}
             </p>
             {review.beer?.style && (() => {
               const sv = getStyleVars(review.beer.style)
@@ -146,7 +147,7 @@ export function BreweryReviewCard({ review, index = 0 }: { review: BreweryReview
           />
           <div className="flex-1 min-w-0">
             <p className="text-sm" style={{ color: 'var(--text-primary)' }}>
-              <span className="font-semibold">{review.profile.display_name.split(' ')[0]}</span>
+              <span className="font-semibold">{getFirstName(review.profile.display_name, review.profile.username)}</span>
               <span style={{ color: 'var(--text-muted)' }}> reviewed </span>
               <span className="font-medium">{review.brewery.name}</span>
             </p>
