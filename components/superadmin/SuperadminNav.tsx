@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
-  LayoutDashboard,
+  Monitor,
   Users,
   Beer,
   ClipboardCheck,
@@ -39,7 +39,7 @@ export function SuperadminNav({ pendingClaimsCount, pendingBarbackCount = 0 }: S
   }
 
   const NAV_ITEMS: NavItem[] = [
-    { href: "/superadmin",           label: "Overview",       icon: LayoutDashboard },
+    { href: "/superadmin",           label: "Command Center", icon: Monitor },
     { href: "/superadmin/users",     label: "Users",          icon: Users },
     { href: "/superadmin/breweries", label: "Breweries",      icon: Beer },
     { href: "/superadmin/claims",    label: "Claims Queue",   icon: ClipboardCheck, badge: pendingClaimsCount },

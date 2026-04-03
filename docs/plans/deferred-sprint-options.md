@@ -189,6 +189,16 @@ These ideas keep coming back — they're clearly high-value:
 
 - **Codebase DRY-Up & Modernization** — Systematic audit for copy-paste JSX, repeated patterns, and opportunities to extract into data-driven `.map()` loops. Inspired by Jordan's S133 brand nav cleanup. *Owner: Jordan (audit) + Avery (implementation). Priority: P2 — code health.* *(Added 2026-04-03, requested by Joshua)* **BUILT — Sprint 134 (The Tidy)**
 
+- **Superadmin Evolution — The Full Bridge** — Expand the Command Center (S136) into a comprehensive platform operations suite. Inspired by Stripe Dashboard, Shopify Admin, and Toast Admin patterns. Key initiatives:
+  - **Brewery Account Detail Pages** — Click into any brewery from superadmin → see everything: subscription tier, billing history, Stripe invoices, plan changes, feature usage metrics, tap list activity, loyalty program stats, support requests, admin actions log, onboarding status, account health score. Modeled on Stripe's customer detail page. *Priority: P0 — Joshua's top request.*
+  - **Consumer Account Detail Pages** — View any user's profile: check-in history, XP/level, achievements, social connections, sessions, reported content. Read-only for now, moderation actions later. *Priority: P1.*
+  - **Brewery Impersonation** — "View as Brewery" button on account detail page. Opens the brewery dashboard as if logged in as that brewery's owner. Gold banner at top: "You are viewing as [Brewery Name] — Exit Impersonation". 1-hour session timeout, full audit logging, email notification to brewery owner. Essential for support and debugging. *Priority: P1 — critical for launch support, founders need this on day one.*
+  - **Communications & Activity Timeline** — Unified timeline per brewery: emails sent (welcome, digest, trial warnings), admin actions, subscription changes, support notes (free-text notes from Joshua). Think Stripe's event log. *Priority: P1.*
+  - **Advanced Platform Metrics** — Cohort analysis (weekly cohorts, retention curves), revenue forecasting, LTV estimation, churn prediction, funnel conversion rates over time. Customizable date ranges. CSV/PDF export. *Priority: P2.*
+  - **Operational Tools** — Bulk actions (mass email, tier changes), feature flags (enable/disable features per brewery), content moderation queue (reported reviews/sessions/photos), announcement system (banner messages to all brewery admins). *Priority: P2.*
+  - **Customizable Dashboard** — Drag-and-drop widget layout, saved views, favorite breweries pinned, configurable alert thresholds. The "next level" of the command center. *Priority: P3.*
+  *Owner: Sam (requirements) + Jordan (architecture) + Avery (build). Multi-sprint initiative — scope 2-4 sprints.* *(Added 2026-04-03, requested by Joshua, informed by Stripe/Shopify/Toast research)*
+
 ---
 
 ## Sprint 132 — Selected: The Clean Slate (data quality + social links)

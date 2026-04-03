@@ -1,0 +1,780 @@
+"use client";
+
+import { useState, useEffect, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Monitor,
+  RefreshCw,
+  Users,
+  Beer,
+  Activity,
+  TrendingUp,
+  TrendingDown,
+  ArrowUpRight,
+  ArrowDownRight,
+  Minus,
+  DollarSign,
+  Shield,
+  ClipboardCheck,
+  Bot,
+  Key,
+  Zap,
+  MapPin,
+  Trophy,
+  UserPlus,
+  AlertCircle,
+} from "lucide-react";
+import {
+  LineChart,
+  Line,
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Tooltip,
+} from "recharts";
+import { Card, CardHeader, CardTitle } from "@/components/ui/Card";
+import { Sparkline } from "@/components/ui/Sparkline";
+import { stagger, spring } from "@/lib/animation";
+import type {
+  CommandCenterData,
+  TimeRange,
+  ActivityItem,
+  TopItem,
+  TierSlice,
+  DailyDataPoint,
+  StateBreweryCount,
+} from "@/lib/superadmin-metrics";
+import Link from "next/link";
+
+// ── Constants ──────────────────────────────────────────────────────
+
+const RANGE_OPTIONS: { label: string; value: TimeRange }[] = [
+  { label: "7d", value: "7d" },
+  { label: "30d", value: "30d" },
+  { label: "90d", value: "90d" },
+];
+
+const PIE_COLORS: Record<string, string> = {
+  free: "#6B6456",
+  tap: "#D4A843",
+  cask: "#E8841A",
+  barrel: "#4A7C59",
+};
+
+const CHART_LINE_COLOR = "#D4A843";
+
+const ACTIVITY_ICONS: Record<string, string> = {
+  signup: "👤",
+  session: "🍺",
+  claim: "📋",
+  achievement: "🏆",
+};
+
+// ── Helpers ────────────────────────────────────────────────────────
+
+function formatRelativeTime(iso: string): string {
+  const diff = Date.now() - new Date(iso).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.floor(hrs / 24);
+  return `${days}d ago`;
+}
+
+function formatMRR(n: number): string {
+  if (n === 0) return "$0";
+  if (n >= 1000) return `$${(n / 1000).toFixed(1)}k`;
+  return `$${n}`;
+}
+
+function formatNumber(n: number): string {
+  if (n >= 1000000) return `${(n / 1000000).toFixed(1)}M`;
+  if (n >= 1000) return `${(n / 1000).toFixed(1)}k`;
+  return n.toLocaleString();
+}
+
+function formatDuration(minutes: number | null): string {
+  if (minutes === null) return "—";
+  if (minutes < 60) return `${minutes}m`;
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return m > 0 ? `${h}h ${m}m` : `${h}h`;
+}
+
+// ── Trend Indicator ────────────────────────────────────────────────
+
+function TrendBadge({ value }: { value: number | null }) {
+  if (value === null) return null;
+  if (value === 0) {
+    return (
+      <span className="flex items-center gap-0.5 text-[10px] font-mono" style={{ color: "var(--text-muted)" }}>
+        <Minus size={10} /> 0%
+      </span>
+    );
+  }
+  const isUp = value > 0;
+  return (
+    <span
+      className="flex items-center gap-0.5 text-[10px] font-mono"
+      style={{ color: isUp ? "#4A7C59" : "#C44B3A" }}
+    >
+      {isUp ? <ArrowUpRight size={10} /> : <ArrowDownRight size={10} />}
+      {Math.abs(value)}%
+    </span>
+  );
+}
+
+// ── Chart Tooltip ──────────────────────────────────────────────────
+
+function ChartTooltip({ active, payload, label }: any) {
+  if (!active || !payload?.length) return null;
+  return (
+    <div
+      className="rounded-xl border px-3 py-2 text-xs"
+      style={{ background: "var(--surface)", borderColor: "var(--border)" }}
+    >
+      <p className="font-mono" style={{ color: "var(--text-muted)" }}>{label}</p>
+      <p className="font-bold" style={{ color: "var(--accent-gold)" }}>{payload[0].value}</p>
+    </div>
+  );
+}
+
+// ── Section: Platform Pulse ────────────────────────────────────────
+
+function PlatformPulse({ data }: { data: CommandCenterData["pulse"] }) {
+  const stats = [
+    { label: "DAU", value: formatNumber(data.dau), icon: <Activity size={14} /> },
+    { label: "WAU", value: formatNumber(data.wau), icon: <Users size={14} /> },
+    { label: "MAU", value: formatNumber(data.mau), icon: <TrendingUp size={14} /> },
+    {
+      label: "Total Users",
+      value: formatNumber(data.totalUsers),
+      icon: <UserPlus size={14} />,
+      note: data.newUsersWoW !== null ? `${data.newUsersWoW >= 0 ? "+" : ""}${data.newUsersWoW}% WoW` : undefined,
+    },
+    { label: "Sessions Today", value: formatNumber(data.sessionsToday), icon: <Beer size={14} /> },
+    { label: "Active Now", value: data.activeSessions, isLive: true },
+  ];
+
+  return (
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+      {stats.map((s) => (
+        <div
+          key={s.label}
+          className="rounded-2xl p-4 border text-center"
+          style={{ background: "var(--surface)", borderColor: "var(--border)" }}
+        >
+          <div className="flex items-center justify-center gap-1.5 mb-2" style={{ color: "var(--text-muted)" }}>
+            {"icon" in s && s.icon}
+            <span className="text-[10px] font-mono uppercase tracking-wider">{s.label}</span>
+          </div>
+          <div className="flex items-center justify-center gap-1.5">
+            <p className="font-mono text-2xl font-bold" style={{ color: "var(--accent-gold)" }}>
+              {s.value}
+            </p>
+            {"isLive" in s && s.isLive && Number(s.value) > 0 && (
+              <motion.div
+                animate={{ scale: [1, 1.3, 1] }}
+                transition={{ repeat: Infinity, duration: 2 }}
+                className="w-2 h-2 rounded-full flex-shrink-0"
+                style={{ background: "#4A7C59" }}
+              />
+            )}
+          </div>
+          {"note" in s && s.note && (
+            <p className="text-[10px] mt-1 font-mono" style={{ color: "var(--text-secondary)" }}>
+              {s.note}
+            </p>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ── Section: Revenue Intelligence ──────────────────────────────────
+
+function RevenueIntelligence({ data }: { data: CommandCenterData["revenue"] }) {
+  const { mrrEstimate, tierDistribution, trialCount, paidCount, claimFunnel } = data;
+  const funnelMax = claimFunnel.totalBreweries || 1;
+
+  const funnelSteps = [
+    { label: "Listed", value: claimFunnel.totalBreweries, color: "#6B6456" },
+    { label: "Claimed", value: claimFunnel.claimed, color: "#A89F8C" },
+    { label: "Verified", value: claimFunnel.verified, color: "#E8841A" },
+    { label: "Paid", value: claimFunnel.paid, color: "#D4A843" },
+  ];
+
+  return (
+    <Card padding="spacious">
+      <CardHeader>
+        <CardTitle as="h3">Revenue Intelligence</CardTitle>
+      </CardHeader>
+
+      {/* MRR Hero */}
+      <div className="text-center mb-5">
+        <p className="text-[10px] font-mono uppercase tracking-wider mb-1" style={{ color: "var(--text-muted)" }}>
+          Estimated MRR
+        </p>
+        <p className="font-display text-4xl font-bold" style={{ color: "var(--accent-gold)" }}>
+          {formatMRR(mrrEstimate)}
+        </p>
+        <div className="flex items-center justify-center gap-4 mt-2 text-xs" style={{ color: "var(--text-secondary)" }}>
+          <span>{paidCount} paid</span>
+          <span>{trialCount} trials</span>
+        </div>
+      </div>
+
+      {/* Tier Distribution Pie */}
+      {tierDistribution.length > 0 && (
+        <div className="flex justify-center mb-5">
+          <ResponsiveContainer width={160} height={160}>
+            <PieChart>
+              <Pie
+                data={tierDistribution}
+                dataKey="count"
+                nameKey="label"
+                cx="50%"
+                cy="50%"
+                innerRadius={40}
+                outerRadius={65}
+                paddingAngle={2}
+                strokeWidth={0}
+              >
+                {tierDistribution.map((entry) => (
+                  <Cell key={entry.tier} fill={PIE_COLORS[entry.tier] || "#6B6456"} />
+                ))}
+              </Pie>
+              <Tooltip
+                content={({ active, payload }: any) => {
+                  if (!active || !payload?.length) return null;
+                  return (
+                    <div
+                      className="rounded-xl border px-3 py-2 text-xs"
+                      style={{ background: "var(--surface)", borderColor: "var(--border)" }}
+                    >
+                      <p style={{ color: "var(--text-primary)" }}>{payload[0].name}</p>
+                      <p className="font-bold" style={{ color: payload[0].payload.fill }}>
+                        {payload[0].value} breweries
+                      </p>
+                    </div>
+                  );
+                }}
+              />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+
+      {/* Tier Legend */}
+      <div className="flex flex-wrap justify-center gap-3 mb-5">
+        {tierDistribution.map((t) => (
+          <div key={t.tier} className="flex items-center gap-1.5 text-xs">
+            <div className="w-2.5 h-2.5 rounded-full" style={{ background: PIE_COLORS[t.tier] || "#6B6456" }} />
+            <span style={{ color: "var(--text-secondary)" }}>{t.label}: {t.count}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Claim Funnel */}
+      <div className="space-y-2">
+        <p className="text-[10px] font-mono uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
+          Claim Funnel
+        </p>
+        {funnelSteps.map((step) => (
+          <div key={step.label} className="flex items-center gap-3">
+            <span className="text-xs w-16 text-right font-mono" style={{ color: "var(--text-secondary)" }}>
+              {step.label}
+            </span>
+            <div className="flex-1 h-5 rounded-full overflow-hidden" style={{ background: "var(--surface-2)" }}>
+              <motion.div
+                className="h-full rounded-full"
+                style={{ background: step.color }}
+                initial={{ width: 0 }}
+                animate={{ width: `${Math.max((step.value / funnelMax) * 100, 1)}%` }}
+                transition={{ ...spring.gentle, delay: 0.2 }}
+              />
+            </div>
+            <span className="text-xs font-mono w-14" style={{ color: "var(--text-primary)" }}>
+              {formatNumber(step.value)}
+            </span>
+          </div>
+        ))}
+      </div>
+    </Card>
+  );
+}
+
+// ── Section: Engagement Metrics ────────────────────────────────────
+
+function EngagementMetrics({ data }: { data: CommandCenterData["engagement"] }) {
+  const miniStats = [
+    { label: "Sessions/User", value: data.avgSessionsPerUser?.toFixed(1) ?? "—" },
+    { label: "Beers/Session", value: data.avgBeersPerSession?.toFixed(1) ?? "—" },
+    { label: "Avg Duration", value: formatDuration(data.avgSessionDurationMin) },
+    { label: "Loyalty Adoption", value: data.loyaltyAdoptionRate !== null ? `${data.loyaltyAdoptionRate}%` : "—" },
+  ];
+
+  return (
+    <Card padding="spacious">
+      <CardHeader>
+        <CardTitle as="h3">Engagement Metrics</CardTitle>
+      </CardHeader>
+
+      {/* Mini Stats 2×2 */}
+      <div className="grid grid-cols-2 gap-3 mb-5">
+        {miniStats.map((s) => (
+          <div
+            key={s.label}
+            className="rounded-xl p-3 text-center border"
+            style={{ background: "var(--bg)", borderColor: "var(--border)" }}
+          >
+            <p className="font-mono text-lg font-bold" style={{ color: "var(--accent-gold)" }}>{s.value}</p>
+            <p className="text-[10px] font-mono" style={{ color: "var(--text-muted)" }}>{s.label}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Top Lists */}
+      <TopList title="Top Beers" items={data.topBeers} icon={<Beer size={12} />} />
+      <TopList title="Top Breweries" items={data.topBreweries} icon={<MapPin size={12} />} />
+    </Card>
+  );
+}
+
+function TopList({ title, items, icon }: { title: string; items: TopItem[]; icon: React.ReactNode }) {
+  if (items.length === 0) {
+    return (
+      <div className="mb-4">
+        <p className="text-[10px] font-mono uppercase tracking-wider mb-2" style={{ color: "var(--text-muted)" }}>
+          {title}
+        </p>
+        <p className="text-xs" style={{ color: "var(--text-muted)" }}>No data yet</p>
+      </div>
+    );
+  }
+  const maxCount = items[0].count;
+
+  return (
+    <div className="mb-4 last:mb-0">
+      <p className="text-[10px] font-mono uppercase tracking-wider mb-2" style={{ color: "var(--text-muted)" }}>
+        {title}
+      </p>
+      <div className="space-y-1.5">
+        {items.map((item, i) => (
+          <div key={item.name} className="flex items-center gap-2">
+            <span className="text-[10px] font-mono w-4 text-right" style={{ color: "var(--text-muted)" }}>
+              {i + 1}
+            </span>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-1.5">
+                <span style={{ color: "var(--text-muted)" }}>{icon}</span>
+                <span className="text-xs truncate" style={{ color: "var(--text-primary)" }}>{item.name}</span>
+              </div>
+              {item.subtitle && (
+                <span className="text-[10px] ml-5" style={{ color: "var(--text-muted)" }}>{item.subtitle}</span>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-16 h-1.5 rounded-full overflow-hidden" style={{ background: "var(--surface-2)" }}>
+                <div
+                  className="h-full rounded-full"
+                  style={{ background: "var(--accent-gold)", width: `${(item.count / maxCount) * 100}%` }}
+                />
+              </div>
+              <span className="text-[10px] font-mono w-8 text-right" style={{ color: "var(--text-secondary)" }}>
+                {item.count}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── Section: Growth Trends ─────────────────────────────────────────
+
+function GrowthTrends({ data }: { data: CommandCenterData["growth"] }) {
+  const charts = [
+    { title: "User Signups", data: data.userSignups, icon: <UserPlus size={14} /> },
+    { title: "Session Volume", data: data.sessionVolume, icon: <Activity size={14} /> },
+    { title: "Claim Trend", data: data.claimTrend, icon: <ClipboardCheck size={14} /> },
+  ];
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      {charts.map(({ title, data: chartData, icon }) => (
+        <Card key={title} padding="default">
+          <div className="flex items-center gap-2 mb-3">
+            <span style={{ color: "var(--accent-gold)" }}>{icon}</span>
+            <p className="text-xs font-mono uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
+              {title}
+            </p>
+            {/* Mini sparkline summary */}
+            <div className="ml-auto">
+              <Sparkline data={chartData.map(d => d.count)} width={48} height={20} />
+            </div>
+          </div>
+          <ResponsiveContainer width="100%" height={120}>
+            <LineChart data={chartData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+              <XAxis
+                dataKey="date"
+                tick={false}
+                axisLine={false}
+                tickLine={false}
+              />
+              <YAxis hide />
+              <Tooltip content={<ChartTooltip />} />
+              <Line
+                type="monotone"
+                dataKey="count"
+                stroke={CHART_LINE_COLOR}
+                strokeWidth={2}
+                dot={false}
+                activeDot={{ r: 3, fill: CHART_LINE_COLOR }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
+// ── Section: Geographic Intelligence ───────────────────────────────
+
+function GeographicIntelligence({ data }: { data: CommandCenterData["geo"] }) {
+  const { stateDistribution } = data;
+  if (stateDistribution.length === 0) {
+    return (
+      <Card padding="spacious">
+        <CardHeader>
+          <CardTitle as="h3">Geographic Intelligence</CardTitle>
+        </CardHeader>
+        <p className="text-xs" style={{ color: "var(--text-muted)" }}>No brewery data yet</p>
+      </Card>
+    );
+  }
+
+  const maxCount = stateDistribution[0].count;
+
+  return (
+    <Card padding="spacious">
+      <CardHeader>
+        <div className="flex items-center gap-2">
+          <MapPin size={14} style={{ color: "var(--accent-gold)" }} />
+          <CardTitle as="h3">Geographic Intelligence</CardTitle>
+        </div>
+      </CardHeader>
+      <div className="space-y-1.5">
+        {stateDistribution.map((s, i) => (
+          <div key={s.state} className="flex items-center gap-3">
+            <span className="text-[10px] font-mono w-4 text-right" style={{ color: "var(--text-muted)" }}>
+              {i + 1}
+            </span>
+            <span className="text-xs font-mono w-6" style={{ color: "var(--text-primary)" }}>{s.state}</span>
+            <div className="flex-1 h-4 rounded-full overflow-hidden" style={{ background: "var(--surface-2)" }}>
+              <motion.div
+                className="h-full rounded-full"
+                style={{ background: "var(--accent-gold)" }}
+                initial={{ width: 0 }}
+                animate={{ width: `${(s.count / maxCount) * 100}%` }}
+                transition={{ ...spring.gentle, delay: i * 0.03 }}
+              />
+            </div>
+            <span className="text-xs font-mono w-12 text-right" style={{ color: "var(--text-secondary)" }}>
+              {formatNumber(s.count)}
+            </span>
+          </div>
+        ))}
+      </div>
+    </Card>
+  );
+}
+
+// ── Section: System Health ──────────────────────────────────────────
+
+function SystemHealth({ data }: { data: CommandCenterData["health"] }) {
+  const indicators = [
+    {
+      label: "Pending Claims",
+      value: data.pendingClaims,
+      icon: <ClipboardCheck size={14} />,
+      href: "/superadmin/claims",
+      isAlert: data.pendingClaims > 0,
+    },
+    {
+      label: "Pending Beer Reviews",
+      value: data.pendingBeerReviews,
+      icon: <Bot size={14} />,
+      href: "/superadmin/barback",
+      isAlert: data.pendingBeerReviews > 0,
+    },
+    {
+      label: "Active POS Connections",
+      value: data.posActiveConnections,
+      icon: <Zap size={14} />,
+      isAlert: false,
+    },
+    {
+      label: "Active API Keys",
+      value: data.apiKeysActive,
+      icon: <Key size={14} />,
+      isAlert: false,
+    },
+  ];
+
+  return (
+    <Card padding="spacious">
+      <CardHeader>
+        <div className="flex items-center gap-2">
+          <Shield size={14} style={{ color: "var(--accent-gold)" }} />
+          <CardTitle as="h3">System Health</CardTitle>
+        </div>
+      </CardHeader>
+      <div className="space-y-3">
+        {indicators.map((ind) => {
+          const content = (
+            <div
+              key={ind.label}
+              className="flex items-center gap-3 p-3 rounded-xl border transition-colors"
+              style={{
+                background: "var(--bg)",
+                borderColor: ind.isAlert ? "var(--danger)" : "var(--border)",
+              }}
+            >
+              {/* Status dot */}
+              <div
+                className="w-2 h-2 rounded-full flex-shrink-0"
+                style={{ background: ind.isAlert ? "#C44B3A" : "#4A7C59" }}
+              />
+              <span style={{ color: ind.isAlert ? "var(--danger)" : "var(--text-muted)" }}>
+                {ind.icon}
+              </span>
+              <span className="text-xs flex-1" style={{ color: "var(--text-primary)" }}>
+                {ind.label}
+              </span>
+              <span
+                className="font-mono text-sm font-bold"
+                style={{ color: ind.isAlert ? "var(--danger)" : "var(--accent-gold)" }}
+              >
+                {ind.value}
+              </span>
+              {"href" in ind && ind.href && (
+                <ArrowUpRight size={12} style={{ color: "var(--text-muted)" }} />
+              )}
+            </div>
+          );
+
+          if ("href" in ind && ind.href) {
+            return <Link key={ind.label} href={ind.href}>{content}</Link>;
+          }
+          return <div key={ind.label}>{content}</div>;
+        })}
+      </div>
+    </Card>
+  );
+}
+
+// ── Section: Recent Activity Feed ──────────────────────────────────
+
+function RecentActivityFeed({ items }: { items: ActivityItem[] }) {
+  if (items.length === 0) {
+    return (
+      <Card padding="spacious">
+        <CardHeader>
+          <CardTitle as="h3">Recent Activity</CardTitle>
+        </CardHeader>
+        <p className="text-xs" style={{ color: "var(--text-muted)" }}>No activity yet — once users start checking in, you&apos;ll see everything here.</p>
+      </Card>
+    );
+  }
+
+  return (
+    <Card padding="spacious">
+      <CardHeader>
+        <div className="flex items-center gap-2">
+          <Activity size={14} style={{ color: "var(--accent-gold)" }} />
+          <CardTitle as="h3">Recent Activity</CardTitle>
+        </div>
+      </CardHeader>
+      <motion.div
+        className="space-y-1"
+        variants={stagger.container(0.04)}
+        initial="initial"
+        animate="animate"
+      >
+        {items.map((item, i) => (
+          <motion.div
+            key={item.id}
+            variants={stagger.item}
+            transition={spring.default}
+            className="flex items-center gap-3 px-3 py-2 rounded-xl transition-colors"
+            style={{
+              background: i === 0 ? "var(--surface)" : "transparent",
+            }}
+          >
+            <span className="text-sm flex-shrink-0">{ACTIVITY_ICONS[item.type] || "📌"}</span>
+            <div className="flex-1 min-w-0">
+              <span className="text-xs font-medium" style={{ color: "var(--text-primary)" }}>
+                {item.text}
+              </span>{" "}
+              <span className="text-xs" style={{ color: "var(--text-muted)" }}>
+                {item.subtext}
+              </span>
+            </div>
+            <span className="text-[10px] font-mono flex-shrink-0" style={{ color: "var(--text-muted)" }}>
+              {formatRelativeTime(item.timestamp)}
+            </span>
+          </motion.div>
+        ))}
+      </motion.div>
+    </Card>
+  );
+}
+
+// ── Main Component ─────────────────────────────────────────────────
+
+interface CommandCenterClientProps {
+  initialData: CommandCenterData;
+}
+
+export default function CommandCenterClient({ initialData }: CommandCenterClientProps) {
+  const [data, setData] = useState(initialData);
+  const [range, setRange] = useState<TimeRange>("30d");
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState(new Date());
+
+  const fetchData = useCallback(async (selectedRange: TimeRange, isManual = false) => {
+    if (isManual) setIsRefreshing(true);
+    try {
+      const res = await fetch(`/api/superadmin/command-center?range=${selectedRange}`);
+      if (res.ok) {
+        const json = await res.json();
+        if (json.data) {
+          setData(json.data);
+          setLastUpdated(new Date());
+        }
+      }
+    } catch {
+      // Silently fail — keep showing last known data
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, []);
+
+  // Auto-refresh every 60s
+  useEffect(() => {
+    const interval = setInterval(() => fetchData(range), 60_000);
+    return () => clearInterval(interval);
+  }, [range, fetchData]);
+
+  // Fetch on range change
+  const handleRangeChange = useCallback(
+    (newRange: TimeRange) => {
+      setRange(newRange);
+      fetchData(newRange, true);
+    },
+    [fetchData]
+  );
+
+  const attentionCount = data.health.pendingClaims + data.health.pendingBeerReviews;
+  const minutesAgo = Math.floor((Date.now() - lastUpdated.getTime()) / 60000);
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 py-6">
+      {/* ── Header ──────────────────────────────────────────── */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <Monitor size={18} style={{ color: "var(--accent-gold)" }} />
+            <span className="text-[10px] font-mono uppercase tracking-widest" style={{ color: "var(--accent-gold)" }}>
+              Command Center
+            </span>
+          </div>
+          <h1 className="font-display text-3xl font-bold" style={{ color: "var(--text-primary)" }}>
+            Platform Overview
+          </h1>
+          <p className="text-xs mt-1" style={{ color: attentionCount > 0 ? "var(--danger)" : "var(--text-muted)" }}>
+            {attentionCount > 0 ? (
+              <>
+                <AlertCircle size={10} className="inline mr-1" />
+                {attentionCount} item{attentionCount !== 1 ? "s" : ""} need attention
+              </>
+            ) : (
+              "All systems nominal"
+            )}
+          </p>
+        </div>
+
+        <div className="flex items-center gap-3">
+          {/* Time Range Pills */}
+          <div className="flex rounded-xl border overflow-hidden" style={{ borderColor: "var(--border)" }}>
+            {RANGE_OPTIONS.map(({ label, value }) => (
+              <button
+                key={value}
+                onClick={() => handleRangeChange(value)}
+                className="px-3 py-1.5 text-xs font-mono transition-colors"
+                style={{
+                  background: range === value ? "var(--accent-gold)" : "var(--surface)",
+                  color: range === value ? "var(--bg)" : "var(--text-muted)",
+                }}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
+          {/* Refresh Button */}
+          <button
+            onClick={() => fetchData(range, true)}
+            disabled={isRefreshing}
+            className="p-2 rounded-xl border transition-colors"
+            style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+          >
+            <motion.div animate={isRefreshing ? { rotate: 360 } : {}} transition={{ repeat: isRefreshing ? Infinity : 0, duration: 1 }}>
+              <RefreshCw size={14} style={{ color: "var(--text-muted)" }} />
+            </motion.div>
+          </button>
+
+          {/* Updated Timestamp */}
+          <span className="text-[10px] font-mono hidden sm:inline" style={{ color: "var(--text-muted)" }}>
+            {minutesAgo < 1 ? "just now" : `${minutesAgo}m ago`}
+          </span>
+        </div>
+      </div>
+
+      {/* ── Dashboard Sections ──────────────────────────────── */}
+      <div className="space-y-6">
+        {/* Platform Pulse */}
+        <PlatformPulse data={data.pulse} />
+
+        {/* Revenue + Engagement (two columns) */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <RevenueIntelligence data={data.revenue} />
+          <EngagementMetrics data={data.engagement} />
+        </div>
+
+        {/* Growth Trends */}
+        <GrowthTrends data={data.growth} />
+
+        {/* Geographic + System Health (two columns) */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <GeographicIntelligence data={data.geo} />
+          <SystemHealth data={data.health} />
+        </div>
+
+        {/* Recent Activity */}
+        <RecentActivityFeed items={data.recentActivity} />
+      </div>
+    </div>
+  );
+}
