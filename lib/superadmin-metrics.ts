@@ -540,3 +540,236 @@ export async function calculateCommandCenterMetrics(
     generatedAt: new Date().toISOString(),
   };
 }
+
+// ── Retention Cohort Analysis ─────────────────────────────────────────
+// Sprint 142 — The Superadmin II
+
+export interface RetentionCohort {
+  cohortWeek: string;      // "2026-W14"
+  cohortStart: string;     // YYYY-MM-DD (Monday of that week)
+  userCount: number;
+  retention: (number | null)[];  // Week 0 through Week 12
+}
+
+export interface RetentionData {
+  cohorts: RetentionCohort[];
+  generatedAt: string;
+}
+
+function getISOWeekKey(dateStr: string): { key: string; monday: string } {
+  const d = new Date(dateStr);
+  const day = d.getDay();
+  // Adjust to Monday (ISO weeks start Monday)
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+  const monday = new Date(d);
+  monday.setDate(diff);
+  monday.setHours(0, 0, 0, 0);
+
+  // ISO week number
+  const jan1 = new Date(monday.getFullYear(), 0, 1);
+  const weekNum = Math.ceil(((monday.getTime() - jan1.getTime()) / 86400000 + jan1.getDay() + 1) / 7);
+  const key = `${monday.getFullYear()}-W${String(weekNum).padStart(2, "0")}`;
+  return { key, monday: monday.toISOString().slice(0, 10) };
+}
+
+export async function calculateRetentionCohorts(
+  service: SupabaseClient
+): Promise<RetentionData> {
+  const lookback = 91; // ~13 weeks
+  const maxWeek = 12;
+
+  // Fetch users created in last 91 days
+  const [{ data: usersRaw }, { data: sessionsRaw }] = await Promise.all([
+    service
+      .from("profiles")
+      .select("id, created_at")
+      .gte("created_at", daysAgo(lookback))
+      .limit(10000) as any,
+    service
+      .from("sessions")
+      .select("user_id, started_at")
+      .eq("is_active", false)
+      .gte("started_at", daysAgo(lookback + 7 * maxWeek))
+      .limit(50000) as any,
+  ]);
+
+  const users = (usersRaw as any[]) ?? [];
+  const sessions = (sessionsRaw as any[]) ?? [];
+
+  // Build user → set of active week keys
+  const userWeeks = new Map<string, Set<string>>();
+  for (const s of sessions) {
+    if (!userWeeks.has(s.user_id)) userWeeks.set(s.user_id, new Set());
+    userWeeks.get(s.user_id)!.add(getISOWeekKey(s.started_at).key);
+  }
+
+  // Group users into cohorts by signup week
+  const cohortMap = new Map<string, { monday: string; userIds: string[] }>();
+  for (const u of users) {
+    const { key, monday } = getISOWeekKey(u.created_at);
+    if (!cohortMap.has(key)) cohortMap.set(key, { monday, userIds: [] });
+    cohortMap.get(key)!.userIds.push(u.id);
+  }
+
+  // Build retention matrix
+  const now = new Date();
+  const nowWeek = getISOWeekKey(now.toISOString());
+
+  const cohorts: RetentionCohort[] = [];
+
+  // Sort cohorts chronologically
+  const sortedKeys = [...cohortMap.keys()].sort();
+  for (const cohortKey of sortedKeys) {
+    const { monday, userIds } = cohortMap.get(cohortKey)!;
+    const retention: (number | null)[] = [];
+
+    for (let w = 0; w <= maxWeek; w++) {
+      // Calculate the target week key
+      const targetDate = new Date(monday);
+      targetDate.setDate(targetDate.getDate() + w * 7);
+      const targetWeek = getISOWeekKey(targetDate.toISOString());
+
+      // If target week is in the future, mark as null
+      if (targetWeek.key > nowWeek.key) {
+        retention.push(null);
+        continue;
+      }
+
+      // Count users active in target week
+      let active = 0;
+      for (const uid of userIds) {
+        if (userWeeks.get(uid)?.has(targetWeek.key)) active++;
+      }
+      retention.push(userIds.length > 0 ? Math.round((active / userIds.length) * 100) : 0);
+    }
+
+    cohorts.push({
+      cohortWeek: cohortKey,
+      cohortStart: monday,
+      userCount: userIds.length,
+      retention,
+    });
+  }
+
+  return {
+    cohorts,
+    generatedAt: new Date().toISOString(),
+  };
+}
+
+// ── User Funnel Analysis ──────────────────────────────────────────────
+
+export interface FunnelStep {
+  label: string;
+  count: number;
+  pct: number;         // % of step 0
+  dropoffPct: number;  // % drop from previous step
+}
+
+export interface FunnelData {
+  steps: FunnelStep[];
+  generatedAt: string;
+}
+
+export async function calculateUserFunnel(
+  service: SupabaseClient
+): Promise<FunnelData> {
+  // 7 parallel count queries
+  const [
+    { count: totalUsers },
+    { count: profileComplete },
+    { count: firstSession },
+    { count: secondSession },
+    { data: reviewerIds },
+    { data: friendUserIds },
+    { count: fivePlusSessions },
+  ] = await Promise.all([
+    // 1. Signed up (all profiles)
+    service
+      .from("profiles")
+      .select("id", { count: "exact", head: true }) as any,
+
+    // 2. Completed profile (has display_name AND avatar)
+    service
+      .from("profiles")
+      .select("id", { count: "exact", head: true })
+      .not("display_name", "is", null)
+      .not("avatar_url", "is", null) as any,
+
+    // 3. First session (total_checkins >= 1)
+    service
+      .from("profiles")
+      .select("id", { count: "exact", head: true })
+      .gte("total_checkins", 1) as any,
+
+    // 4. Second session (total_checkins >= 2)
+    service
+      .from("profiles")
+      .select("id", { count: "exact", head: true })
+      .gte("total_checkins", 2) as any,
+
+    // 5. Reviewed a beer (distinct user_ids with rating > 0)
+    service
+      .from("beer_logs")
+      .select("user_id")
+      .gt("rating", 0)
+      .limit(50000) as any,
+
+    // 6. Added a friend (distinct user_ids with accepted friendships)
+    service
+      .from("friendships")
+      .select("requester_id, addressee_id")
+      .eq("status", "accepted")
+      .limit(50000) as any,
+
+    // 7. 5+ sessions
+    service
+      .from("profiles")
+      .select("id", { count: "exact", head: true })
+      .gte("total_checkins", 5) as any,
+  ]);
+
+  // Compute distinct counts for reviewers and friends
+  const reviewerCount = new Set(((reviewerIds as any[]) ?? []).map((r: any) => r.user_id)).size;
+  const friendIds = new Set<string>();
+  for (const f of ((friendUserIds as any[]) ?? [])) {
+    friendIds.add(f.requester_id);
+    friendIds.add(f.addressee_id);
+  }
+  const friendCount = friendIds.size;
+
+  const total = totalUsers ?? 0;
+  const counts = [
+    total,
+    profileComplete ?? 0,
+    firstSession ?? 0,
+    secondSession ?? 0,
+    reviewerCount,
+    friendCount,
+    fivePlusSessions ?? 0,
+  ];
+
+  const labels = [
+    "Signed Up",
+    "Profile Complete",
+    "First Session",
+    "Second Session",
+    "Reviewed a Beer",
+    "Added a Friend",
+    "5+ Sessions",
+  ];
+
+  const steps: FunnelStep[] = counts.map((count, i) => ({
+    label: labels[i],
+    count,
+    pct: total > 0 ? Math.round((count / total) * 100) : 0,
+    dropoffPct: i === 0 ? 0 : (counts[i - 1] > 0
+      ? Math.round(((counts[i - 1] - count) / counts[i - 1]) * 100)
+      : 0),
+  }));
+
+  return {
+    steps,
+    generatedAt: new Date().toISOString(),
+  };
+}

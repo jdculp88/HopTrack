@@ -1,8 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
-import { Users, ShieldAlert, ExternalLink } from "lucide-react";
-import { formatDate } from "@/lib/dates";
+import { Users, ShieldAlert, ChevronRight } from "lucide-react";
+import { formatDate, formatRelativeTime } from "@/lib/dates";
 import { SearchForm } from "@/components/superadmin/SearchForm";
+import { computeSegment, getSegmentConfig } from "@/lib/crm";
 
 export const metadata = { title: "Users" };
 
@@ -27,7 +28,7 @@ export default async function UsersPage({
   let query = supabase
     .from("profiles")
     .select(
-      "id, username, display_name, avatar_url, home_city, total_checkins, xp, level, created_at, is_superadmin",
+      "id, username, display_name, avatar_url, home_city, total_checkins, xp, level, created_at, is_superadmin, last_session_date",
       { count: "exact" }
     )
     .order("created_at", { ascending: false })
@@ -78,7 +79,7 @@ export default async function UsersPage({
       >
         {/* Header row */}
         <div
-          className="grid grid-cols-[auto_1fr_auto_auto_auto_auto_auto] gap-4 px-5 py-3 text-xs font-mono uppercase tracking-wider border-b"
+          className="grid grid-cols-[auto_1fr_auto_auto_auto_auto_auto_auto] gap-4 px-5 py-3 text-xs font-mono uppercase tracking-wider border-b"
           style={{
             color: "var(--text-muted)",
             borderColor: "var(--border)",
@@ -87,11 +88,12 @@ export default async function UsersPage({
         >
           <span className="w-8" />
           <span>User</span>
-          <span className="w-20 text-right">Sessions</span>
+          <span className="w-16 text-right">Sessions</span>
+          <span className="w-16 text-center hidden sm:block">Segment</span>
           <span className="w-16 text-right">Level</span>
-          <span className="w-16 text-right hidden sm:block">XP</span>
-          <span className="w-24 text-right hidden md:block">Joined</span>
-          <span className="w-8" />
+          <span className="w-20 text-right hidden md:block">Last Active</span>
+          <span className="w-20 text-right hidden lg:block">Joined</span>
+          <span className="w-6" />
         </div>
 
         {userList.length === 0 ? (
@@ -99,100 +101,110 @@ export default async function UsersPage({
             No users found
           </div>
         ) : (
-          userList.map((user: any, i: number) => (
-            <div
-              key={user.id}
-              className="grid grid-cols-[auto_1fr_auto_auto_auto_auto_auto] gap-4 px-5 py-3.5 items-center"
-              style={{
-                borderTop: i > 0 ? "1px solid var(--border)" : undefined,
-              }}
-            >
-              {/* Avatar */}
-              <div
-                className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold flex-shrink-0"
-                style={{ background: "var(--surface-2)", color: "var(--text-secondary)" }}
-              >
-                {(user.display_name ?? user.username ?? "?")[0].toUpperCase()}
-              </div>
-
-              {/* Name / username */}
-              <div className="min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span
-                    className="text-sm font-medium truncate"
-                    style={{ color: "var(--text-primary)" }}
-                  >
-                    {user.display_name ?? user.username}
-                  </span>
-                  {user.is_superadmin && (
-                    <span
-                      className="inline-flex items-center gap-1 text-xs font-mono px-1.5 py-0.5 rounded"
-                      style={{
-                        background: "rgba(196,75,58,0.1)",
-                        color: "var(--danger)",
-                      }}
-                    >
-                      <ShieldAlert size={10} />
-                      admin
-                    </span>
-                  )}
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs" style={{ color: "var(--text-muted)" }}>
-                    @{user.username}
-                  </span>
-                  {user.home_city && (
-                    <span className="text-xs" style={{ color: "var(--text-muted)" }}>
-                      · {user.home_city}
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              {/* Check-ins */}
-              <span
-                className="text-sm font-mono text-right w-20"
-                style={{ color: "var(--text-secondary)" }}
-              >
-                {(user.total_checkins ?? 0).toLocaleString()}
-              </span>
-
-              {/* Level */}
-              <span
-                className="text-sm font-mono text-right w-16"
-                style={{ color: "var(--text-secondary)" }}
-              >
-                {user.level ?? 1}
-              </span>
-
-              {/* XP */}
-              <span
-                className="text-sm font-mono text-right w-16 hidden sm:block"
-                style={{ color: "var(--text-muted)" }}
-              >
-                {(user.xp ?? 0).toLocaleString()}
-              </span>
-
-              {/* Joined */}
-              <span
-                className="text-xs text-right w-24 hidden md:block"
-                style={{ color: "var(--text-muted)" }}
-              >
-                {formatDate(user.created_at)}
-              </span>
-
-              {/* View profile */}
+          userList.map((user: any, i: number) => {
+            const segConfig = getSegmentConfig(user.total_checkins ?? 0);
+            return (
               <Link
-                href={`/profile/${user.username}`}
-                target="_blank"
-                className="w-8 flex items-center justify-center transition-opacity hover:opacity-70"
-                style={{ color: "var(--text-muted)" }}
-                title="View profile"
+                key={user.id}
+                href={`/superadmin/users/${user.id}`}
+                className="grid grid-cols-[auto_1fr_auto_auto_auto_auto_auto_auto] gap-4 px-5 py-3.5 items-center transition-colors hover:bg-[var(--surface-2)]"
+                style={{
+                  borderTop: i > 0 ? "1px solid var(--border)" : undefined,
+                }}
               >
-                <ExternalLink size={13} />
+                {/* Avatar */}
+                <div
+                  className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold flex-shrink-0 overflow-hidden"
+                  style={{ background: "var(--surface-2)", color: "var(--text-secondary)" }}
+                >
+                  {user.avatar_url ? (
+                    <img src={user.avatar_url} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    (user.display_name ?? user.username ?? "?")[0].toUpperCase()
+                  )}
+                </div>
+
+                {/* Name / username */}
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span
+                      className="text-sm font-medium truncate"
+                      style={{ color: "var(--text-primary)" }}
+                    >
+                      {user.display_name ?? user.username}
+                    </span>
+                    {user.is_superadmin && (
+                      <span
+                        className="inline-flex items-center gap-1 text-xs font-mono px-1.5 py-0.5 rounded"
+                        style={{
+                          background: "rgba(196,75,58,0.1)",
+                          color: "var(--danger)",
+                        }}
+                      >
+                        <ShieldAlert size={10} />
+                        admin
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs" style={{ color: "var(--text-muted)" }}>
+                      @{user.username}
+                    </span>
+                    {user.home_city && (
+                      <span className="text-xs" style={{ color: "var(--text-muted)" }}>
+                        · {user.home_city}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Sessions */}
+                <span
+                  className="text-sm font-mono text-right w-16"
+                  style={{ color: "var(--text-secondary)" }}
+                >
+                  {(user.total_checkins ?? 0).toLocaleString()}
+                </span>
+
+                {/* Segment badge */}
+                <span className="w-16 hidden sm:flex justify-center">
+                  <span
+                    className="inline-flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded-full"
+                    style={{ background: segConfig.bgColor, color: segConfig.color }}
+                  >
+                    {segConfig.emoji} {segConfig.label}
+                  </span>
+                </span>
+
+                {/* Level */}
+                <span
+                  className="text-sm font-mono text-right w-16"
+                  style={{ color: "var(--text-secondary)" }}
+                >
+                  {user.level ?? 1}
+                </span>
+
+                {/* Last Active */}
+                <span
+                  className="text-xs text-right w-20 hidden md:block"
+                  style={{ color: "var(--text-muted)" }}
+                >
+                  {user.last_session_date ? formatRelativeTime(user.last_session_date) : "Never"}
+                </span>
+
+                {/* Joined */}
+                <span
+                  className="text-xs text-right w-20 hidden lg:block"
+                  style={{ color: "var(--text-muted)" }}
+                >
+                  {formatDate(user.created_at)}
+                </span>
+
+                {/* Arrow */}
+                <ChevronRight size={14} style={{ color: "var(--text-muted)" }} />
               </Link>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
 

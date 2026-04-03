@@ -38,11 +38,16 @@ import {
 } from "recharts";
 import { Card, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Sparkline } from "@/components/ui/Sparkline";
+import { RetentionHeatmap } from "@/components/superadmin/RetentionHeatmap";
+import { UserFunnel } from "@/components/superadmin/UserFunnel";
+import { Skeleton } from "@/components/ui/SkeletonLoader";
 import { stagger, spring } from "@/lib/animation";
 import type {
   CommandCenterData,
   TimeRange,
   ActivityItem,
+  RetentionData,
+  FunnelData,
   TopItem,
   TierSlice,
   DailyDataPoint,
@@ -666,6 +671,8 @@ export default function CommandCenterClient({ initialData }: CommandCenterClient
   const [range, setRange] = useState<TimeRange>("30d");
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(new Date());
+  const [retentionData, setRetentionData] = useState<RetentionData | null>(null);
+  const [funnelData, setFunnelData] = useState<FunnelData | null>(null);
 
   const fetchData = useCallback(async (selectedRange: TimeRange, isManual = false) => {
     if (isManual) setIsRefreshing(true);
@@ -690,6 +697,17 @@ export default function CommandCenterClient({ initialData }: CommandCenterClient
     const interval = setInterval(() => fetchData(range), 60_000);
     return () => clearInterval(interval);
   }, [range, fetchData]);
+
+  // Lazy-load retention + funnel (non-blocking)
+  useEffect(() => {
+    Promise.all([
+      fetch("/api/superadmin/metrics/retention").then(r => r.ok ? r.json() : null),
+      fetch("/api/superadmin/metrics/funnel").then(r => r.ok ? r.json() : null),
+    ]).then(([retRes, funRes]) => {
+      if (retRes?.data) setRetentionData(retRes.data);
+      if (funRes?.data) setFunnelData(funRes.data);
+    }).catch(() => {});
+  }, []);
 
   // Fetch on range change
   const handleRangeChange = useCallback(
@@ -779,6 +797,26 @@ export default function CommandCenterClient({ initialData }: CommandCenterClient
 
         {/* Growth Trends */}
         <GrowthTrends data={data.growth} />
+
+        {/* Advanced Analytics — Retention + Funnel (lazy-loaded) */}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+          {retentionData ? (
+            <RetentionHeatmap cohorts={retentionData.cohorts} />
+          ) : (
+            <Card padding="spacious">
+              <CardHeader><CardTitle as="h3">Cohort Retention</CardTitle></CardHeader>
+              <Skeleton className="h-48 mx-5 mb-5 rounded-xl" />
+            </Card>
+          )}
+          {funnelData ? (
+            <UserFunnel steps={funnelData.steps} />
+          ) : (
+            <Card padding="spacious">
+              <CardHeader><CardTitle as="h3">User Funnel</CardTitle></CardHeader>
+              <Skeleton className="h-48 mx-5 mb-5 rounded-xl" />
+            </Card>
+          )}
+        </div>
 
         {/* Geographic + System Health (two columns) */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
