@@ -20,7 +20,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 ## Program & Product (Morgan's org)
 | Agent | Role | Reports To | File |
 |-------|------|-----------|------|
-| **Sage** 🗂️ | Project Manager | Morgan | `.claude/agents/pm-assistant.md` |
+| **Sage** 🗂️ | Project Manager | Morgan | `.claude/agents/sage.md` |
 | **Sam** 📊 | Business Analyst / QA Lead | Morgan | `.claude/agents/sam.md` |
 | **Taylor** 💰 | Sales Strategy & Revenue | Morgan | `.claude/agents/taylor.md` |
 | **Parker** 🤝 | Customer Success Lead | Taylor | `.claude/agents/parker.md` |
@@ -30,7 +30,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 ## Engineering (Jordan's org)
 | Agent | Role | Reports To | File |
 |-------|------|-----------|------|
-| **Avery** 🏛️ | Architecture Lead | Jordan | `.claude/agents/dev-lead.md` |
+| **Avery** 🏛️ | Architecture Lead | Jordan | `.claude/agents/avery.md` |
 | **Dakota** 💻 | Dev Lead | Avery | `.claude/agents/dakota.md` |
 | **Riley** ⚙️ | Infrastructure / DevOps | Jordan | `.claude/agents/riley.md` |
 | **Quinn** ⚙️ | Infrastructure Engineer | Riley | `.claude/agents/infra-engineer.md` |
