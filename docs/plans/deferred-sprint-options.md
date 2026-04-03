@@ -204,3 +204,10 @@ These ideas keep coming back — they're clearly high-value:
 ## Sprint 132 — Selected: The Clean Slate (data quality + social links)
 
 - **"The Formatter" — City/State/Address Standardization** — Normalize city names (capitalization, abbreviations), state field validation (reject full names, enforce 2-letter), address formatting consistency across 7,177 brewery records. Extend brewery-utils.ts with formatCity(), formatState(), normalizeAddress(). Update brewery creation and settings APIs to auto-format on write. Joshua explicitly requested this as Sprint 133 work. **OPEN**
+
+---
+
+## Sprint 138 — Selected: The Bartender (real-world ops hardening)
+
+- **"The Bridge" — Superadmin Evolution (Phase 1)** — Brewery account detail pages (full profile: tier, Stripe billing, feature usage, tap list activity, loyalty stats, onboarding status, health score). "View as Brewery" impersonation mode (gold banner, 1-hour timeout, audit logging). Navigation from Command Center → brewery detail → impersonation. Joshua flagged as P0 for launch ops — his Stripe Dashboard moment. **OPEN**
+- **"The Revenue Push" — Launch Readiness** — Claim funnel optimization (7,177 listings, zero real claims), PWA install prompt (Alex waiting since Sprint 8), Taylor's warm intro kit (first 10 target breweries in Asheville via Drew's network). The "go get a customer" sprint. **OPEN**

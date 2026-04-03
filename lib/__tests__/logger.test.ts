@@ -9,13 +9,13 @@ describe("createLogger", () => {
 
   beforeEach(() => {
     // In production mode, logger writes to stdout
-    process.env.NODE_ENV = "production";
+    (process.env as Record<string, string>).NODE_ENV = "production";
     stdoutSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
   });
 
   afterEach(() => {
     vi.restoreAllMocks();
-    process.env.NODE_ENV = "test";
+    (process.env as Record<string, string>).NODE_ENV = "test";
   });
 
   it("creates a logger with the given context", () => {
@@ -54,7 +54,7 @@ describe("createLogger", () => {
     log.error("error msg");
 
     expect(stdoutSpy).toHaveBeenCalledTimes(4);
-    const levels = stdoutSpy.mock.calls.map(call => JSON.parse(call[0] as string).level);
+    const levels = stdoutSpy.mock.calls.map((call: unknown[]) => JSON.parse(call[0] as string).level);
     expect(levels).toEqual(["debug", "info", "warn", "error"]);
   });
 

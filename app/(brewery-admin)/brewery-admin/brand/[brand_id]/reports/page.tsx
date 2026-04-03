@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Building2, MapPin, ArrowLeft } from "lucide-react";
 import { BrandReportsClient } from "./BrandReportsClient";
-import { verifyBrandAccess } from "@/lib/brand-auth";
+import { verifyBrandAccessWithScope } from "@/lib/brand-auth";
 
 export const revalidate = 30;
 
@@ -26,8 +26,9 @@ export default async function BrandReportsPage({ params }: { params: Promise<{ b
   if (!user) redirect("/login");
 
   // Verify brand membership (shared utility — handles RLS fallback)
-  const brandRole = await verifyBrandAccess(supabase, brand_id, user.id);
-  if (!brandRole) redirect("/brewery-admin");
+  const brandAccess = await verifyBrandAccessWithScope(supabase, brand_id, user.id);
+  if (!brandAccess) redirect("/brewery-admin");
+  const { locationScope } = brandAccess;
 
   // Fetch brand + locations
   const { data: brand } = await (supabase
@@ -220,6 +221,8 @@ export default async function BrandReportsPage({ params }: { params: Promise<{ b
         brandSlug={brand.slug}
         initialData={initialData}
         locationCount={(locations ?? []).length}
+        locations={(locations ?? []).map((l: any) => ({ id: l.id, name: l.name, city: l.city, state: l.state }))}
+        locationScope={locationScope}
       />
     </div>
   );

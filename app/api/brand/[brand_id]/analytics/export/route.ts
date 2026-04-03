@@ -33,7 +33,15 @@ export async function GET(
     .eq("brand_id", brand_id)
     .order("name") as any);
 
-  const locationIds = (locations ?? []).map((l: any) => l.id);
+  const allLocationIds = (locations ?? []).map((l: any) => l.id);
+
+  // Optional location filter — validate it belongs to this brand
+  const locationFilter = request.nextUrl.searchParams.get("location");
+  if (locationFilter && !allLocationIds.includes(locationFilter)) {
+    return NextResponse.json({ error: "Location not part of this brand" }, { status: 403 });
+  }
+
+  const locationIds = locationFilter ? [locationFilter] : allLocationIds;
 
   // Parse range
   const range = request.nextUrl.searchParams.get("range") || "all";
@@ -103,7 +111,11 @@ export async function GET(
 
   const rows: string[] = [];
 
-  for (const loc of (locations ?? []) as any[]) {
+  const filteredLocations = locationFilter
+    ? (locations ?? []).filter((l: any) => l.id === locationFilter)
+    : (locations ?? []);
+
+  for (const loc of filteredLocations as any[]) {
     const locSessions = allSessions.filter((s: any) => s.brewery_id === loc.id);
     const locBeers = allBeerLogs.filter((l: any) => l.brewery_id === loc.id);
     const locFollowers = (followers ?? []).filter((f: any) => f.brewery_id === loc.id);

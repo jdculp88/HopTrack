@@ -49,13 +49,14 @@ export async function GET(req: Request) {
       .select("id, name, style, abv, brewery:breweries!brewery_id(id, name)")
       .ilike("name", `%${q}%`)
       .eq("is_active", true)
-      .order("total_ratings", { ascending: false })
-      .limit(beerLimit),
+      .order("name", { ascending: true })
+      .limit(5),
     (supabase as any)
       .from("breweries")
       .select("id, name, city, state, brewery_type")
       .or(`name.ilike.%${q}%,city.ilike.%${q}%`)
-      .limit(breweryLimit),
+      .order("name", { ascending: true })
+      .limit(5),
   ]);
 
   const beers = (beerResult.data ?? []).map((b: any) => ({

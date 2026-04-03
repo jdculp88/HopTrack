@@ -26,7 +26,7 @@ vi.mock("next/navigation", () => ({
 
 describe("Brand Onboarding Wizard — module exports", () => {
   it("BrandOnboardingWizard exports a default or named function", async () => {
-    const mod = await import(
+    const mod: Record<string, unknown> = await import(
       "@/components/brewery-admin/brand/onboarding/BrandOnboardingWizard"
     );
     const exported = mod.default ?? mod.BrandOnboardingWizard;
@@ -34,7 +34,7 @@ describe("Brand Onboarding Wizard — module exports", () => {
   });
 
   it("BrandOnboardingStepLocations exports a function", async () => {
-    const mod = await import(
+    const mod: Record<string, unknown> = await import(
       "@/components/brewery-admin/brand/onboarding/BrandOnboardingStepLocations"
     );
     const exported = mod.default ?? mod.BrandOnboardingStepLocations;
@@ -42,7 +42,7 @@ describe("Brand Onboarding Wizard — module exports", () => {
   });
 
   it("BrandOnboardingStepLoyalty exports a function", async () => {
-    const mod = await import(
+    const mod: Record<string, unknown> = await import(
       "@/components/brewery-admin/brand/onboarding/BrandOnboardingStepLoyalty"
     );
     const exported = mod.default ?? mod.BrandOnboardingStepLoyalty;
@@ -50,7 +50,7 @@ describe("Brand Onboarding Wizard — module exports", () => {
   });
 
   it("BrandOnboardingStepTeam exports a function", async () => {
-    const mod = await import(
+    const mod: Record<string, unknown> = await import(
       "@/components/brewery-admin/brand/onboarding/BrandOnboardingStepTeam"
     );
     const exported = mod.default ?? mod.BrandOnboardingStepTeam;
@@ -58,7 +58,7 @@ describe("Brand Onboarding Wizard — module exports", () => {
   });
 
   it("BrandOnboardingStepPreview exports a function", async () => {
-    const mod = await import(
+    const mod: Record<string, unknown> = await import(
       "@/components/brewery-admin/brand/onboarding/BrandOnboardingStepPreview"
     );
     const exported = mod.default ?? mod.BrandOnboardingStepPreview;

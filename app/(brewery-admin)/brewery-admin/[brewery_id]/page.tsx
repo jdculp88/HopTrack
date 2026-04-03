@@ -5,7 +5,7 @@ export const revalidate = 30; // Revalidate every 30 seconds
 import Link from "next/link";
 import {
   Beer, Users, TrendingUp, Award, Calendar, ArrowUpRight,
-  List, Clock, Heart, BarChart3, QrCode, Eye, Zap, Gift, RefreshCw,
+  List, Clock, Heart, BarChart3, QrCode, Eye, Zap, Gift, RefreshCw, ScanLine,
 } from "lucide-react";
 import { formatRelativeTime } from "@/lib/dates";
 import { calculateBreweryKPIs, calculateBreweryKPISparklines, formatDuration, formatTrend } from "@/lib/kpi";
@@ -373,6 +373,36 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
           {(brewery as any)?.city}, {(brewery as any)?.state} · {(brewery as any)?.brewery_type?.replace(/_/g, " ")}
         </p>
       </div>
+
+      {/* Staff Quick Action — prominent card for bar staff */}
+      {(account as any)?.role === "staff" && (
+        <Link
+          href={`/brewery-admin/${brewery_id}/punch`}
+          className="block rounded-2xl border p-6 mb-6 transition-all hover:border-[var(--accent-gold)] group"
+          style={{
+            background: "color-mix(in srgb, var(--accent-gold) 8%, var(--surface))",
+            borderColor: "var(--border)",
+          }}
+        >
+          <div className="flex items-center gap-4">
+            <div
+              className="flex h-14 w-14 items-center justify-center rounded-2xl flex-shrink-0"
+              style={{ background: "var(--accent-gold)" }}
+            >
+              <ScanLine className="h-7 w-7" style={{ color: "var(--bg)" }} />
+            </div>
+            <div>
+              <h2 className="font-display text-xl font-bold" style={{ color: "var(--text-primary)" }}>
+                Enter Customer Code
+              </h2>
+              <p className="text-sm mt-0.5" style={{ color: "var(--text-muted)" }}>
+                Confirm loyalty rewards, mug club perks, and promotions
+              </p>
+            </div>
+            <ArrowUpRight size={20} className="ml-auto flex-shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" style={{ color: "var(--accent-gold)" }} />
+          </div>
+        </Link>
+      )}
 
       {/* Onboarding Card */}
       <BreweryOnboardingCard

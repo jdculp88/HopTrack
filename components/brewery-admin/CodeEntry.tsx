@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, Loader2, Copy, AlertCircle } from "lucide-react";
+import { Check, Loader2, Copy, AlertCircle, ScanLine } from "lucide-react";
 import { useToast } from "@/components/ui/Toast";
 
 interface CodeEntryProps {
@@ -34,6 +34,11 @@ export function CodeEntry({ breweryId }: CodeEntryProps) {
   const [copied, setCopied] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const { success: toastSuccess, error: toastError } = useToast();
+
+  // Auto-focus input on mount
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
 
   const handleSubmit = useCallback(
     async (e?: React.FormEvent) => {
@@ -209,16 +214,24 @@ export function CodeEntry({ breweryId }: CodeEntryProps) {
             onSubmit={handleSubmit}
             className="flex flex-col items-center gap-5"
           >
-            <div className="text-center space-y-1">
-              <h2
-                className="text-lg font-semibold"
-                style={{ color: "var(--text-primary)" }}
+            <div className="flex flex-col items-center gap-3">
+              <div
+                className="flex h-12 w-12 items-center justify-center rounded-2xl"
+                style={{ background: "color-mix(in srgb, var(--accent-gold) 15%, transparent)" }}
               >
-                Enter Redemption Code
-              </h2>
-              <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-                Type the 5-character code from the customer
-              </p>
+                <ScanLine className="h-6 w-6" style={{ color: "var(--accent-gold)" }} />
+              </div>
+              <div className="text-center space-y-1">
+                <h2
+                  className="text-xl font-display font-bold"
+                  style={{ color: "var(--text-primary)" }}
+                >
+                  Enter Customer Code
+                </h2>
+                <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+                  Type the 5-character code shown on their phone
+                </p>
+              </div>
             </div>
 
             {/* Code input */}
@@ -287,6 +300,10 @@ export function CodeEntry({ breweryId }: CodeEntryProps) {
                 "Confirm Code"
               )}
             </motion.button>
+
+            <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+              Press <kbd className="px-1.5 py-0.5 rounded font-mono text-[10px] border" style={{ borderColor: "var(--border)", background: "var(--surface-2)" }}>Enter</kbd> to submit
+            </p>
           </motion.form>
         )}
       </AnimatePresence>

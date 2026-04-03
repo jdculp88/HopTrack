@@ -11,6 +11,7 @@ import {
 import Link from "next/link";
 import Image from "next/image";
 import { BreweryCard, getBreweryPlaceholder } from "@/components/brewery/BreweryCard";
+import { SearchTypeahead } from "@/components/ui/SearchTypeahead";
 import { SkeletonCard } from "@/components/ui/SkeletonLoader";
 import { useToast } from "@/components/ui/Toast";
 import type { BreweryWithStats, BreweryType } from "@/types/database";
@@ -263,28 +264,14 @@ export function ExploreClient({
           </div>
         </div>
 
-        {/* Large search bar */}
-        <div className="relative">
-          <Search size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none" />
-          <input
-            ref={searchInputRef}
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search by name, city, state, or zip code..."
-            className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-2xl pl-12 pr-12 py-4 text-lg text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent-gold)] transition-colors"
-          />
-          {searching && (
-            <Loader2 size={18} className="absolute right-4 top-1/2 -translate-y-1/2 animate-spin" style={{ color: "var(--accent-gold)" }} />
-          )}
-          {!searching && query.trim() && (
-            <button
-              onClick={() => { setQuery(""); searchInputRef.current?.focus(); }}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
-            >
-              <X size={18} />
-            </button>
-          )}
-        </div>
+        {/* Smart search with typeahead */}
+        <SearchTypeahead
+          placeholder="Search by name, city, state, or zip code..."
+          onSelectBeer={(beer) => router.push(`/beer/${beer.id}`)}
+          onSelectBrewery={(brewery) => router.push(`/brewery/${brewery.id}`)}
+          onQueryChange={(q) => setQuery(q)}
+          className="w-full"
+        />
 
         {/* Filter bar — collapsible below search */}
         <div className="flex items-center gap-2 flex-wrap">

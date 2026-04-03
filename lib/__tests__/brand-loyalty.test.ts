@@ -1,5 +1,6 @@
 // Brand loyalty unit tests — Reese, Sprint 125
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import type { BrandLoyaltyProgram, BrandLoyaltyCard, BrandLoyaltyRedemption, RedemptionCode } from "@/types/database";
 
 // We test the pure logic by mocking Supabase
 // The actual DB interactions are tested via integration tests
@@ -113,10 +114,9 @@ describe("Brand Loyalty Program Logic", () => {
 });
 
 describe("Brand Loyalty Database Types", () => {
-  it("BrandLoyaltyProgram type is registered in Database", async () => {
-    const types = await import("@/types/database");
+  it("BrandLoyaltyProgram type is registered in Database", () => {
     // Verify the type exists by checking the interface shape
-    const program: types.BrandLoyaltyProgram = {
+    const program: BrandLoyaltyProgram = {
       id: "test",
       brand_id: "test",
       name: "Test",
@@ -131,9 +131,8 @@ describe("Brand Loyalty Database Types", () => {
     expect(program.earn_per_session).toBe(1);
   });
 
-  it("BrandLoyaltyCard type is registered in Database", async () => {
-    const types = await import("@/types/database");
-    const card: types.BrandLoyaltyCard = {
+  it("BrandLoyaltyCard type is registered in Database", () => {
+    const card: BrandLoyaltyCard = {
       id: "test",
       user_id: "test",
       brand_id: "test",
@@ -148,9 +147,8 @@ describe("Brand Loyalty Database Types", () => {
     expect(card.lifetime_stamps).toBe(12);
   });
 
-  it("BrandLoyaltyRedemption type is registered in Database", async () => {
-    const types = await import("@/types/database");
-    const redemption: types.BrandLoyaltyRedemption = {
+  it("BrandLoyaltyRedemption type is registered in Database", () => {
+    const redemption: BrandLoyaltyRedemption = {
       id: "test",
       card_id: "test",
       user_id: "test",
@@ -162,9 +160,8 @@ describe("Brand Loyalty Database Types", () => {
     expect(redemption.brewery_id).toBe("test");
   });
 
-  it("RedemptionCode type includes brand_loyalty_reward", async () => {
-    const types = await import("@/types/database");
-    const code: types.RedemptionCode = {
+  it("RedemptionCode type includes brand_loyalty_reward", () => {
+    const code: RedemptionCode = {
       id: "test",
       code: "ABC12",
       type: "brand_loyalty_reward",

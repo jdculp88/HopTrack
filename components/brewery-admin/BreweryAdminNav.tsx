@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, List, BarChart2, BarChart3, Gift, Settings, ChevronDown, ChevronRight, ExternalLink, Rewind, LogOut, Calendar, QrCode, CreditCard, Users, FileText, Mail, Trophy, BookOpen, Activity, Code2, Tv, RefreshCw, Megaphone, Crown, Building2, UtensilsCrossed, MoreHorizontal, X } from "lucide-react";
+import { LayoutDashboard, List, BarChart2, BarChart3, Gift, Settings, ChevronDown, ChevronRight, ExternalLink, Rewind, LogOut, Calendar, QrCode, CreditCard, Users, FileText, Mail, Trophy, BookOpen, Activity, Code2, Tv, RefreshCw, Megaphone, Crown, Building2, UtensilsCrossed, MoreHorizontal, X, ScanLine } from "lucide-react";
 import { HopMark } from "@/components/ui/HopMark";
 import { cn } from "@/lib/utils";
 import { useState, useEffect, useCallback } from "react";
@@ -51,6 +51,7 @@ const NAV_GROUPS: NavGroup[] = [
     { href: "/pint-rewind", label: "Pint Rewind",  icon: Rewind },
   ]},
   { id: "operations", label: "Operations", icon: Calendar, items: [
+    { href: "/punch",    label: "Punch",      icon: ScanLine },
     { href: "/events",    label: "Events",     icon: Calendar },
     { href: "/qr",        label: "Table Tent", icon: QrCode },
     { href: "/pos-sync",  label: "POS Sync",   icon: RefreshCw },
@@ -87,6 +88,7 @@ const MOBILE_BRAND_ITEMS = [
 
 // Mobile priority items (shown in the strip, rest go in "More" sheet)
 const MOBILE_PRIORITY_HREFS = ["", "/tap-list", "/analytics", "/messages", "/loyalty", "/settings"];
+const STAFF_MOBILE_HREFS = ["", "/punch"];
 
 const STORAGE_KEY = "ht-nav-groups";
 
@@ -148,7 +150,21 @@ export function BreweryAdminNav({ accounts, brandAccounts = [] }: { accounts: an
   }
   const activeAccount = accounts.find((a: any) => a.brewery_id === activeBreweryId) ?? accounts[0];
   const brewery = activeAccount?.brewery;
-  const hasBrand = brewery?.brand && brandAccounts.some((ba: any) => ba.brand_id === brewery.brand.id);
+  const currentUserRole = activeAccount?.role as string | undefined;
+  const isStaffRole = currentUserRole === "staff";
+  const hasBrand = !isStaffRole && brewery?.brand && brandAccounts.some((ba: any) => ba.brand_id === brewery.brand.id);
+
+  // Staff role: only see Overview + Punch (Operations group with punch only)
+  const STAFF_NAV_GROUPS: NavGroup[] = [
+    { id: "overview", items: [
+      { href: "",         label: "Overview",  icon: LayoutDashboard },
+    ]},
+    { id: "operations", label: "Operations", icon: ScanLine, items: [
+      { href: "/punch",   label: "Punch",     icon: ScanLine },
+    ]},
+  ];
+
+  const visibleNavGroups = isStaffRole ? STAFF_NAV_GROUPS : NAV_GROUPS;
 
   // Active link helper
   function isItemActive(href: string) {
@@ -311,7 +327,7 @@ export function BreweryAdminNav({ accounts, brandAccounts = [] }: { accounts: an
           )}
 
           {/* Grouped brewery nav */}
-          {NAV_GROUPS.map(group => {
+          {visibleNavGroups.map(group => {
             // Overview group renders standalone (no header, no collapse)
             if (group.id === "overview") {
               const item = group.items[0];
@@ -417,7 +433,7 @@ export function BreweryAdminNav({ accounts, brandAccounts = [] }: { accounts: an
               style={activeAccount?.verified ? {} : { background: "var(--accent-gold)" }}
             />
             <span className="text-xs" style={{ color: "var(--text-muted)" }}>
-              {activeAccount?.role === "owner" ? "Owner" : "Manager"} ·{" "}
+              {activeAccount?.role === "owner" ? "Owner" : activeAccount?.role === "staff" ? "Staff" : "Manager"} ·{" "}
               {activeAccount?.verified ? "Verified" : "Pending Verification"}
             </span>
           </div>
@@ -491,7 +507,10 @@ export function BreweryAdminNav({ accounts, brandAccounts = [] }: { accounts: an
             )}
 
             {/* Priority brewery tabs */}
-            {ALL_NAV_ITEMS.filter(item => MOBILE_PRIORITY_HREFS.includes(item.href)).map(({ href, label, icon: Icon }) => {
+            {(isStaffRole
+              ? STAFF_NAV_GROUPS.flatMap(g => g.items)
+              : ALL_NAV_ITEMS.filter(item => MOBILE_PRIORITY_HREFS.includes(item.href))
+            ).map(({ href, label, icon: Icon }) => {
               const fullHref = `/brewery-admin/${activeBreweryId}${href}`;
               const active = isItemActive(href);
               return (
@@ -510,8 +529,8 @@ export function BreweryAdminNav({ accounts, brandAccounts = [] }: { accounts: an
               );
             })}
 
-            {/* "More" pill */}
-            <button
+            {/* "More" pill — hidden for staff role */}
+            {!isStaffRole && <button
               onClick={() => setMoreOpen(true)}
               className="flex items-center gap-1.5 px-4 py-2.5 text-xs font-medium whitespace-nowrap border-b-2 transition-all flex-shrink-0"
               style={{
@@ -525,7 +544,7 @@ export function BreweryAdminNav({ accounts, brandAccounts = [] }: { accounts: an
             >
               <MoreHorizontal size={13} />
               More
-            </button>
+            </button>}
           </div>
         </div>
       </div>
@@ -562,7 +581,7 @@ export function BreweryAdminNav({ accounts, brandAccounts = [] }: { accounts: an
               </div>
               {/* Grouped items */}
               <div className="px-3 py-3 space-y-4">
-                {NAV_GROUPS.filter(g => g.id !== "overview").map(group => (
+                {visibleNavGroups.filter(g => g.id !== "overview").map(group => (
                   <div key={group.id}>
                     <p className="px-3 pb-1.5 text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
                       {group.label}

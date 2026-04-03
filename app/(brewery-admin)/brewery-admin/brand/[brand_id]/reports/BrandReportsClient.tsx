@@ -10,6 +10,7 @@ import {
   ArrowUpRight, ArrowDownRight, Minus, TrendingUp, TrendingDown,
   ChevronDown,
 } from "lucide-react";
+import { LocationSelector } from "@/components/brewery-admin/brand/LocationSelector";
 
 // ── Types ──
 
@@ -125,25 +126,36 @@ function ChartTooltip({ active, payload, label }: any) {
 
 // ── Main Component ──
 
+interface LocationOption {
+  id: string;
+  name: string;
+  city?: string;
+  state?: string;
+}
+
 interface BrandReportsClientProps {
   brandId: string;
   brandSlug: string;
   initialData: ComparisonData | null;
   locationCount: number;
+  locations?: LocationOption[];
+  locationScope?: string[] | null;
 }
 
-export function BrandReportsClient({ brandId, brandSlug: _brandSlug, initialData, locationCount }: BrandReportsClientProps) {
+export function BrandReportsClient({ brandId, brandSlug: _brandSlug, initialData, locationCount, locations: locationsList, locationScope }: BrandReportsClientProps) {
   const [data, setData] = useState<ComparisonData | null>(initialData);
   const [range, setRange] = useState<TimeRange>("30d");
   const [loading, setLoading] = useState(false);
   const [sortBy, setSortBy] = useState<SortMetric>("sessions");
   const [benchmarkExpanded, setBenchmarkExpanded] = useState(true);
+  const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
 
-  const fetchData = useCallback(async (newRange: TimeRange) => {
+  const fetchData = useCallback(async (newRange: TimeRange, locationId?: string | null) => {
     setRange(newRange);
     setLoading(true);
     try {
-      const res = await fetch(`/api/brand/${brandId}/analytics/comparison?range=${newRange}`);
+      const locParam = locationId ? `&location=${locationId}` : "";
+      const res = await fetch(`/api/brand/${brandId}/analytics/comparison?range=${newRange}${locParam}`);
       if (res.ok) {
         const json = await res.json();
         if (json.data) setData(json.data);
@@ -151,6 +163,11 @@ export function BrandReportsClient({ brandId, brandSlug: _brandSlug, initialData
     } catch { /* keep existing data */ }
     setLoading(false);
   }, [brandId]);
+
+  const handleLocationChange = useCallback((id: string | null) => {
+    setSelectedLocation(id);
+    fetchData(range, id);
+  }, [fetchData, range]);
 
   if (!data || locationCount === 0) {
     return (
@@ -185,13 +202,25 @@ export function BrandReportsClient({ brandId, brandSlug: _brandSlug, initialData
 
   return (
     <div className="p-6 lg:p-8 max-w-5xl mx-auto pt-16 lg:pt-8 space-y-6">
+      {/* Location Filter */}
+      {locationsList && locationsList.length > 1 && (
+        <div style={{ opacity: loading ? 0.6 : 1, transition: "opacity 0.2s" }}>
+          <LocationSelector
+            locations={locationsList}
+            selectedLocationId={selectedLocation}
+            onLocationChange={handleLocationChange}
+            locationScope={locationScope}
+          />
+        </div>
+      )}
+
       {/* Controls: Time Range + Export */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex gap-1.5">
           {RANGE_OPTIONS.map(opt => (
             <button
               key={opt.key}
-              onClick={() => fetchData(opt.key)}
+              onClick={() => fetchData(opt.key, selectedLocation)}
               disabled={loading}
               className="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all"
               style={{
@@ -207,7 +236,7 @@ export function BrandReportsClient({ brandId, brandSlug: _brandSlug, initialData
         </div>
         <div className="flex gap-2">
           <a
-            href={`/api/brand/${brandId}/analytics/export?range=${range}`}
+            href={`/api/brand/${brandId}/analytics/export?range=${range}${selectedLocation ? `&location=${selectedLocation}` : ""}`}
             download
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-opacity hover:opacity-80"
             style={{ background: "var(--surface)", borderColor: "var(--accent-gold)", color: "var(--accent-gold)" }}

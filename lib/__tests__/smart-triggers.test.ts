@@ -39,7 +39,7 @@ function createMockSupabase(overrides: Record<string, any> = {}) {
   // Make chainable methods return chainable by default
   const proxy = new Proxy(chainable, {
     get(target, prop) {
-      const val = target[prop as string];
+      const val = (target as Record<string, unknown>)[prop as string];
       if (typeof val === "function") return val;
       return val;
     },

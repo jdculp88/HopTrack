@@ -39,7 +39,7 @@ describe("BRAND_FEATURE_GATES", () => {
 
   it("every gate includes 'barrel' tier", async () => {
     const { BRAND_FEATURE_GATES } = await import("@/lib/stripe");
-    for (const [key, tiers] of Object.entries(BRAND_FEATURE_GATES as Record<string, string[]>)) {
+    for (const [key, tiers] of Object.entries(BRAND_FEATURE_GATES as Record<string, readonly string[]>)) {
       expect(tiers, `${key} should include 'barrel'`).toContain("barrel");
     }
   });

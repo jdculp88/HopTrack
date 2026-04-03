@@ -2,8 +2,48 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Loader2, Beer as BeerIcon, MapPin, X } from "lucide-react";
+import { Search, Loader2, Beer as BeerIcon, MapPin, X, Clock } from "lucide-react";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+
+const RECENT_SEARCHES_KEY = "ht-recent-searches";
+const MAX_RECENT = 5;
+
+interface RecentSearch {
+  type: "beer" | "brewery";
+  id: string;
+  name: string;
+  subtitle: string;
+}
+
+function getRecentSearches(): RecentSearch[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem(RECENT_SEARCHES_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveRecentSearch(item: RecentSearch) {
+  try {
+    const existing = getRecentSearches().filter(
+      (r) => !(r.type === item.type && r.id === item.id)
+    );
+    const updated = [item, ...existing].slice(0, MAX_RECENT);
+    localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(updated));
+  } catch {
+    // localStorage unavailable
+  }
+}
+
+function clearRecentSearches() {
+  try {
+    localStorage.removeItem(RECENT_SEARCHES_KEY);
+  } catch {
+    // localStorage unavailable
+  }
+}
 
 interface BeerResult {
   id: string;
@@ -60,6 +100,8 @@ export function SearchTypeahead({
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
+  const [recentSearches, setRecentSearches] = useState<RecentSearch[]>([]);
+  const [showRecent, setShowRecent] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -80,6 +122,13 @@ export function SearchTypeahead({
       flatItems.push({ type: "brewery", item: brewery });
     }
   }
+
+  // Hide recent searches when user starts typing
+  useEffect(() => {
+    if (query.length > 0) {
+      setShowRecent(false);
+    }
+  }, [query]);
 
   // Fetch results when debounced query changes
   useEffect(() => {
@@ -135,6 +184,7 @@ export function SearchTypeahead({
         !containerRef.current.contains(e.target as Node)
       ) {
         setIsOpen(false);
+        setShowRecent(false);
         setActiveIndex(-1);
       }
     }
@@ -152,14 +202,27 @@ export function SearchTypeahead({
   const handleSelect = useCallback(
     (entry: (typeof flatItems)[number]) => {
       if (entry.type === "beer") {
+        const beer = entry.item as BeerResult;
+        saveRecentSearch({
+          type: "beer",
+          id: beer.id,
+          name: beer.name,
+          subtitle: [beer.brewery?.name, beer.style].filter(Boolean).join(" · "),
+        });
         onSelectBeer?.({
-          id: entry.item.id,
-          name: entry.item.name,
-          style: (entry.item as BeerResult).style,
-          brewery: (entry.item as BeerResult).brewery,
+          id: beer.id,
+          name: beer.name,
+          style: beer.style,
+          brewery: beer.brewery,
         });
       } else {
         const b = entry.item as BreweryResult;
+        saveRecentSearch({
+          type: "brewery",
+          id: b.id,
+          name: b.name,
+          subtitle: [b.city, b.state].filter(Boolean).join(", "),
+        });
         onSelectBrewery?.({
           id: b.id,
           name: b.name,
@@ -169,6 +232,28 @@ export function SearchTypeahead({
       }
       setQuery("");
       setIsOpen(false);
+      setShowRecent(false);
+      setActiveIndex(-1);
+    },
+    [onSelectBeer, onSelectBrewery]
+  );
+
+  const handleSelectRecent = useCallback(
+    (item: RecentSearch) => {
+      if (item.type === "beer") {
+        onSelectBeer?.({ id: item.id, name: item.name, style: null });
+      } else {
+        const parts = item.subtitle.split(", ");
+        onSelectBrewery?.({
+          id: item.id,
+          name: item.name,
+          city: parts[0] || null,
+          state: parts[1] || null,
+        });
+      }
+      setQuery("");
+      setIsOpen(false);
+      setShowRecent(false);
       setActiveIndex(-1);
     },
     [onSelectBeer, onSelectBrewery]
@@ -178,6 +263,7 @@ export function SearchTypeahead({
     if (!isOpen || flatItems.length === 0) {
       if (e.key === "Escape") {
         setQuery("");
+        setShowRecent(false);
         inputRef.current?.blur();
       }
       return;
@@ -232,7 +318,13 @@ export function SearchTypeahead({
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => {
-            if (results && query.length >= 2) setIsOpen(true);
+            if (results && query.length >= 2) {
+              setIsOpen(true);
+            } else if (query.length === 0) {
+              const recent = getRecentSearches();
+              setRecentSearches(recent);
+              setShowRecent(recent.length > 0);
+            }
           }}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
@@ -275,6 +367,91 @@ export function SearchTypeahead({
           ) : null}
         </div>
       </div>
+
+      {/* Recent searches dropdown */}
+      <AnimatePresence>
+        {showRecent && !isOpen && recentSearches.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: -8, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -8, scale: 0.98 }}
+            transition={spring}
+            className="absolute left-0 right-0 mt-2 z-50 rounded-2xl border overflow-hidden shadow-lg"
+            style={{
+              backgroundColor: "var(--surface)",
+              borderColor: "var(--border)",
+            }}
+          >
+            <div className="max-h-80 overflow-y-auto">
+              <div className="flex items-center justify-between px-3 py-2">
+                <span
+                  className="text-xs font-semibold uppercase tracking-wider"
+                  style={{ color: "var(--text-muted)" }}
+                >
+                  Recent
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    clearRecentSearches();
+                    setRecentSearches([]);
+                    setShowRecent(false);
+                  }}
+                  className="text-xs px-2 py-0.5 rounded-md transition-opacity hover:opacity-80"
+                  style={{ color: "var(--accent-gold)" }}
+                >
+                  Clear
+                </button>
+              </div>
+              {recentSearches.map((item) => (
+                <button
+                  key={`${item.type}-${item.id}`}
+                  type="button"
+                  className="w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors cursor-pointer hover:bg-[var(--surface-2)]"
+                  onClick={() => handleSelectRecent(item)}
+                >
+                  <div
+                    className="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center"
+                    style={{ backgroundColor: "var(--surface-2)" }}
+                  >
+                    {item.type === "beer" ? (
+                      <BeerIcon
+                        className="w-4 h-4"
+                        style={{ color: "var(--accent-gold)" }}
+                      />
+                    ) : (
+                      <MapPin
+                        className="w-4 h-4"
+                        style={{ color: "var(--accent-gold)" }}
+                      />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <span
+                      className="text-sm font-medium truncate block"
+                      style={{ color: "var(--text-primary)" }}
+                    >
+                      {item.name}
+                    </span>
+                    {item.subtitle && (
+                      <span
+                        className="text-xs mt-0.5 truncate block"
+                        style={{ color: "var(--text-muted)" }}
+                      >
+                        {item.subtitle}
+                      </span>
+                    )}
+                  </div>
+                  <Clock
+                    className="w-3.5 h-3.5 flex-shrink-0"
+                    style={{ color: "var(--text-muted)" }}
+                  />
+                </button>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Dropdown */}
       <AnimatePresence>

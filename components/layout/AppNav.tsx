@@ -9,6 +9,8 @@ import {
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { createClient } from "@/lib/supabase/client";
 import { HopMark } from "@/components/ui/HopMark";
+import { GlobalSearch } from "@/components/layout/GlobalSearch";
+import { SearchTypeahead } from "@/components/ui/SearchTypeahead";
 
 const NAV_ITEMS = [
   { href: "/home",         label: "Feed",         icon: Home },
@@ -58,17 +60,20 @@ export function AppNav({ username, unreadNotifications = 0, onCheckin }: AppNavP
               HopTrack
             </span>
           </Link>
-          <Link href={`/profile/${username}`} aria-label="Profile">
-            <div
-              className="w-8 h-8 rounded-full flex items-center justify-center transition-colors"
-              style={{
-                background: "color-mix(in srgb, var(--accent-gold) 12%, transparent)",
-                color: "var(--accent-gold)",
-              }}
-            >
-              <User size={16} />
-            </div>
-          </Link>
+          <div className="flex items-center gap-1">
+            <GlobalSearch />
+            <Link href={`/profile/${username}`} aria-label="Profile">
+              <div
+                className="w-8 h-8 rounded-full flex items-center justify-center transition-colors"
+                style={{
+                  background: "color-mix(in srgb, var(--accent-gold) 12%, transparent)",
+                  color: "var(--accent-gold)",
+                }}
+              >
+                <User size={16} />
+              </div>
+            </Link>
+          </div>
         </div>
       </div>
 
@@ -96,6 +101,15 @@ export function AppNav({ username, unreadNotifications = 0, onCheckin }: AppNavP
             <PlusCircle size={18} />
             Start Session
           </button>
+        </div>
+
+        {/* Desktop search */}
+        <div className="px-4 pb-2">
+          <SearchTypeahead
+            placeholder="Search..."
+            onSelectBeer={(beer) => router.push(`/beer/${beer.id}`)}
+            onSelectBrewery={(brewery) => router.push(`/brewery/${brewery.id}`)}
+          />
         </div>
 
         {/* Nav links */}

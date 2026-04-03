@@ -42,7 +42,15 @@ export async function GET(
     .eq("brand_id", brand_id)
     .order("name") as any);
 
-  const locationIds = (locations ?? []).map((l: any) => l.id);
+  const allLocationIds = (locations ?? []).map((l: any) => l.id);
+
+  // Optional location filter — validate it belongs to this brand
+  const locationFilter = request.nextUrl.searchParams.get("location");
+  if (locationFilter && !allLocationIds.includes(locationFilter)) {
+    return apiForbidden();
+  }
+
+  const locationIds = locationFilter ? [locationFilter] : allLocationIds;
 
   if (locationIds.length === 0) {
     return apiSuccess({

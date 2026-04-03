@@ -11,6 +11,7 @@ import Link from "next/link";
 import { Sparkline, RecentActivityFeed } from "@/app/(brewery-admin)/brewery-admin/[brewery_id]/DashboardClient";
 import type { ActivityItem } from "@/app/(brewery-admin)/brewery-admin/[brewery_id]/DashboardClient";
 import { formatDuration, formatTrend, type BreweryKPIs } from "@/lib/kpi";
+import { LocationSelector } from "@/components/brewery-admin/brand/LocationSelector";
 
 interface BrandAnalytics {
   brand: {
@@ -130,7 +131,30 @@ function WoWTrend({ current, previous }: { current: number; previous: number }) 
 }
 
 export function BrandDashboardClient({ brandId, initialData, tapStats, brandKPIs, locationScope }: BrandDashboardClientProps) {
-  const { stats, locationBreakdown, topBeers, recentActivity, weeklyTrend, locations } = initialData;
+  const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
+  const [filteredData, setFilteredData] = useState<BrandAnalytics | null>(null);
+  const [locationLoading, setLocationLoading] = useState(false);
+
+  // When a location is selected, fetch filtered data; when "All" is selected, use initialData
+  useEffect(() => {
+    if (selectedLocation === null) {
+      setFilteredData(null);
+      return;
+    }
+    let cancelled = false;
+    setLocationLoading(true);
+    fetch(`/api/brand/${brandId}/analytics?location=${selectedLocation}`)
+      .then((res) => res.ok ? res.json() : null)
+      .then((json) => {
+        if (!cancelled && json?.data) setFilteredData(json.data);
+      })
+      .catch(() => {})
+      .finally(() => { if (!cancelled) setLocationLoading(false); });
+    return () => { cancelled = true; };
+  }, [brandId, selectedLocation]);
+
+  const activeData = filteredData ?? initialData;
+  const { stats, locationBreakdown, topBeers, recentActivity, weeklyTrend, locations } = activeData;
   const maxLocationSessions = Math.max(...locationBreakdown.map(l => l.sessions), 1);
 
   return (
@@ -148,6 +172,18 @@ export function BrandDashboardClient({ brandId, initialData, tapStats, brandKPIs
         </div>
       )}
 
+      {/* Location Filter */}
+      {initialData.locations.length > 1 && (
+        <div style={{ opacity: locationLoading ? 0.6 : 1, transition: "opacity 0.2s" }}>
+          <LocationSelector
+            locations={initialData.locations}
+            selectedLocationId={selectedLocation}
+            onLocationChange={setSelectedLocation}
+            locationScope={locationScope}
+          />
+        </div>
+      )}
+
       {/* Today's Snapshot */}
       <div
         className="rounded-2xl border p-5 sm:p-6"
@@ -162,7 +198,7 @@ export function BrandDashboardClient({ brandId, initialData, tapStats, brandKPIs
           </h2>
           <div className="flex items-center gap-2">
             <a
-              href={`/api/brand/${brandId}/analytics/export?range=all`}
+              href={`/api/brand/${brandId}/analytics/export?range=all${selectedLocation ? `&location=${selectedLocation}` : ""}`}
               download
               className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold transition-opacity hover:opacity-80"
               style={{ background: "color-mix(in srgb, var(--accent-gold) 12%, transparent)", color: "var(--accent-gold)" }}
