@@ -112,6 +112,13 @@ Joshua explicitly backlogged both deferred options "way into the future":
 
 ---
 
+## Sprint 133 — Selected: The Cleanup (brewery admin nav reorganization)
+
+- **"The Formatter" — Data Standardization + Address Seeding** — Normalize city/state/address across 7,177 breweries. Seed missing addresses. Extend brewery-utils.ts with formatCity(), formatState(), normalizeAddress(). Auto-format on write in brewery creation + settings APIs. **Joshua's addition:** Need deeper input validation — type-ahead/predictive search or field-level errors in Settings so data is ALWAYS standardized on input, not just via batch migration. "We need to seed addresses for breweries and we need it standardized." **OPEN**
+- **"The Command Center" — Superadmin Enhancement** — Founder dashboard for launch ops: user growth, brewery claims, revenue tracking, system health, Barback crawl status. P1 for launch. Taylor: "How do we know if the business is working if Joshua can't see the numbers?" **OPEN**
+
+---
+
 ## Recurring Themes (appeared in multiple sprints)
 
 These ideas keep coming back — they're clearly high-value:

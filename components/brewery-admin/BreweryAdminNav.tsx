@@ -2,41 +2,133 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, List, BarChart2, BarChart3, Gift, Settings, ChevronDown, ExternalLink, Rewind, LogOut, Calendar, QrCode, CreditCard, Users, FileText, Mail, Trophy, BookOpen, Activity, Code2, Tv, RefreshCw, Megaphone, Crown, Building2, UtensilsCrossed } from "lucide-react";
+import { LayoutDashboard, List, BarChart2, BarChart3, Gift, Settings, ChevronDown, ChevronRight, ExternalLink, Rewind, LogOut, Calendar, QrCode, CreditCard, Users, FileText, Mail, Trophy, BookOpen, Activity, Code2, Tv, RefreshCw, Megaphone, Crown, Building2, UtensilsCrossed, MoreHorizontal, X } from "lucide-react";
 import { HopMark } from "@/components/ui/HopMark";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { motion, AnimatePresence } from "framer-motion";
+import type { LucideIcon } from "lucide-react";
 
-const NAV_ITEMS = [
-  { href: "",           label: "Overview",   icon: LayoutDashboard },
-  { href: "/tap-list",  label: "Tap List",   icon: List },
-  { href: "/analytics", label: "Analytics",  icon: BarChart2 },
-  { href: "/customers", label: "Customers",  icon: Users },
-  { href: "/messages",  label: "Messages",   icon: Mail },
-  { href: "/loyalty",        label: "Loyalty",      icon: Gift },
-  { href: "/mug-clubs",     label: "Mug Clubs",    icon: Crown },
-  { href: "/challenges",     label: "Challenges",   icon: Trophy },
-  { href: "/menus",         label: "Menus",        icon: UtensilsCrossed },
-  { href: "/events",        label: "Events",       icon: Calendar },
-  { href: "/qr",            label: "Table Tent",   icon: QrCode },
-  { href: "/report",        label: "Report",       icon: FileText },
-  { href: "/sessions",      label: "Sessions",     icon: Activity },
-  { href: "/promotions",    label: "Promo Hub",    icon: Megaphone },
-  { href: "/ads",           label: "Ad Campaigns", icon: Megaphone },
-  { href: "/embed",         label: "Embed",        icon: Code2 },
-  { href: "/board",         label: "Board",        icon: Tv },
-  { href: "/pos-sync",      label: "POS Sync",     icon: RefreshCw },
-  { href: "/pint-rewind",   label: "Pint Rewind",  icon: Rewind },
-  { href: "/settings",      label: "Settings",     icon: Settings },
-  { href: "/billing",       label: "Billing",      icon: CreditCard },
-  { href: "/resources",     label: "Resources",    icon: BookOpen },
+// --- Nav Data Structure ---
+
+interface NavItem {
+  href: string;
+  label: string;
+  icon: LucideIcon;
+}
+
+interface NavGroup {
+  id: string;
+  label?: string;
+  icon?: LucideIcon;
+  items: NavItem[];
+}
+
+const NAV_GROUPS: NavGroup[] = [
+  { id: "overview", items: [
+    { href: "",           label: "Overview",   icon: LayoutDashboard },
+  ]},
+  { id: "content", label: "Content", icon: List, items: [
+    { href: "/tap-list",  label: "Tap List",   icon: List },
+    { href: "/menus",     label: "Menus",      icon: UtensilsCrossed },
+    { href: "/board",     label: "Board",      icon: Tv },
+    { href: "/embed",     label: "Embed",      icon: Code2 },
+  ]},
+  { id: "engage", label: "Engage", icon: Mail, items: [
+    { href: "/messages",    label: "Messages",     icon: Mail },
+    { href: "/loyalty",     label: "Loyalty",      icon: Gift },
+    { href: "/mug-clubs",   label: "Mug Clubs",    icon: Crown },
+    { href: "/challenges",  label: "Challenges",   icon: Trophy },
+    { href: "/promotions",  label: "Promo Hub",    icon: Megaphone },
+    { href: "/ads",         label: "Ad Campaigns", icon: Megaphone },
+  ]},
+  { id: "insights", label: "Insights", icon: BarChart2, items: [
+    { href: "/analytics",   label: "Analytics",    icon: BarChart2 },
+    { href: "/customers",   label: "Customers",    icon: Users },
+    { href: "/sessions",    label: "Sessions",     icon: Activity },
+    { href: "/report",      label: "Report",       icon: FileText },
+    { href: "/pint-rewind", label: "Pint Rewind",  icon: Rewind },
+  ]},
+  { id: "operations", label: "Operations", icon: Calendar, items: [
+    { href: "/events",    label: "Events",     icon: Calendar },
+    { href: "/qr",        label: "Table Tent", icon: QrCode },
+    { href: "/pos-sync",  label: "POS Sync",   icon: RefreshCw },
+  ]},
+  { id: "account", label: "Account", icon: Settings, items: [
+    { href: "/settings",  label: "Settings",  icon: Settings },
+    { href: "/billing",   label: "Billing",   icon: CreditCard },
+    { href: "/resources", label: "Resources", icon: BookOpen },
+  ]},
 ];
+
+// Flat list for convenience
+const ALL_NAV_ITEMS = NAV_GROUPS.flatMap(g => g.items);
+
+// Brand nav items (DRY — was 110+ lines of repeated JSX)
+const BRAND_NAV_ITEMS = [
+  { path: "dashboard",  label: "Brand Dashboard", icon: Building2 },
+  { path: "reports",    label: "Brand Reports",   icon: BarChart3 },
+  { path: "customers",  label: "Brand Customers", icon: Users },
+  { path: "team",       label: "Brand Team",      icon: Users },
+  { path: "loyalty",    label: "Brand Loyalty",    icon: Gift },
+  { path: "catalog",    label: "Brand Catalog",    icon: List },
+  { path: "billing",    label: "Brand Billing",    icon: CreditCard },
+];
+
+// Mobile brand tabs (condensed labels)
+const MOBILE_BRAND_ITEMS = [
+  { path: "dashboard",  label: "Brand",     icon: Building2 },
+  { path: "customers",  label: "Customers", icon: Users },
+  { path: "team",       label: "Team",      icon: Users },
+  { path: "loyalty",    label: "Loyalty",    icon: Gift },
+  { path: "catalog",    label: "Catalog",    icon: List },
+];
+
+// Mobile priority items (shown in the strip, rest go in "More" sheet)
+const MOBILE_PRIORITY_HREFS = ["", "/tap-list", "/analytics", "/messages", "/loyalty", "/settings"];
+
+const STORAGE_KEY = "ht-nav-groups";
+
+function getStoredGroups(): Record<string, boolean> {
+  if (typeof window === "undefined") return {};
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+  } catch {
+    return {};
+  }
+}
+
+function storeGroups(state: Record<string, boolean>) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch {
+    // localStorage full or unavailable
+  }
+}
+
+// --- Main Component ---
 
 export function BreweryAdminNav({ accounts, brandAccounts = [] }: { accounts: any[]; brandAccounts?: any[] }) {
   const pathname = usePathname();
   const router = useRouter();
-  const [open, setOpen] = useState(false);
+  const [selectorOpen, setSelectorOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
+
+  // Collapsible group state
+  const [groupState, setGroupState] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    setGroupState(getStoredGroups());
+  }, []);
+
+  const toggleGroup = useCallback((groupId: string) => {
+    setGroupState(prev => {
+      const next = { ...prev, [groupId]: !prev[groupId] };
+      storeGroups(next);
+      return next;
+    });
+  }, []);
 
   async function handleLogout() {
     const supabase = createClient();
@@ -49,7 +141,6 @@ export function BreweryAdminNav({ accounts, brandAccounts = [] }: { accounts: an
   const isBrandPage = pathSegment === "brand";
   const activeBrandId = isBrandPage ? pathname.split("/brand/")[1]?.split("/")[0] : null;
 
-  // When on a brand page, find the first brewery that belongs to that brand
   let activeBreweryId = pathSegment;
   if (isBrandPage && activeBrandId) {
     const brandBrewery = accounts.find((a: any) => a.brewery?.brand?.id === activeBrandId);
@@ -57,6 +148,26 @@ export function BreweryAdminNav({ accounts, brandAccounts = [] }: { accounts: an
   }
   const activeAccount = accounts.find((a: any) => a.brewery_id === activeBreweryId) ?? accounts[0];
   const brewery = activeAccount?.brewery;
+  const hasBrand = brewery?.brand && brandAccounts.some((ba: any) => ba.brand_id === brewery.brand.id);
+
+  // Active link helper
+  function isItemActive(href: string) {
+    const fullHref = `/brewery-admin/${activeBreweryId}${href}`;
+    return href === ""
+      ? pathname === `/brewery-admin/${activeBreweryId}`
+      : pathname.startsWith(fullHref);
+  }
+
+  function isGroupActive(group: NavGroup) {
+    return group.items.some(item => isItemActive(item.href));
+  }
+
+  function isGroupExpanded(group: NavGroup) {
+    // Always expanded if it contains the active page
+    if (isGroupActive(group)) return true;
+    // Use stored preference, default to expanded
+    return groupState[group.id] !== false;
+  }
 
   return (
     <>
@@ -74,7 +185,7 @@ export function BreweryAdminNav({ accounts, brandAccounts = [] }: { accounts: an
           {accounts.length > 1 ? (
             <div className="relative">
               <button
-                onClick={() => setOpen(!open)}
+                onClick={() => setSelectorOpen(!selectorOpen)}
                 className="w-full flex items-center gap-3 p-2 rounded-xl transition-colors text-left"
                 style={{ background: "var(--surface-2)" }}
               >
@@ -94,13 +205,12 @@ export function BreweryAdminNav({ accounts, brandAccounts = [] }: { accounts: an
                     {isBrandPage ? "Brand Management" : `${brewery?.city}, ${brewery?.state}`}
                   </p>
                 </div>
-                <ChevronDown size={14} style={{ color: "var(--text-muted)" }} className={cn("transition-transform", open && "rotate-180")} />
+                <ChevronDown size={14} style={{ color: "var(--text-muted)" }} className={cn("transition-transform", selectorOpen && "rotate-180")} />
               </button>
-              {open && (
+              {selectorOpen && (
                 <div className="absolute top-full left-0 right-0 mt-1 rounded-xl border shadow-xl z-50 overflow-hidden max-h-72 overflow-y-auto"
                   style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
                   {(() => {
-                    // Group accounts by brand
                     const branded = accounts.filter((a: any) => a.brewery?.brand);
                     const independent = accounts.filter((a: any) => !a.brewery?.brand);
                     const brandGroups = new Map<string, { brand: any; locations: any[] }>();
@@ -116,7 +226,7 @@ export function BreweryAdminNav({ accounts, brandAccounts = [] }: { accounts: an
                           <div key={b.id}>
                             <Link
                               href={`/brewery-admin/brand/${b.id}/dashboard`}
-                              onClick={() => setOpen(false)}
+                              onClick={() => setSelectorOpen(false)}
                               className="flex items-center justify-between px-3 py-2.5 border-b transition-colors"
                               style={{ borderColor: "var(--border)", background: activeBrandId === b.id ? "color-mix(in srgb, var(--accent-gold) 12%, transparent)" : undefined }}
                               onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "color-mix(in srgb, var(--accent-gold) 12%, transparent)"}
@@ -132,7 +242,7 @@ export function BreweryAdminNav({ accounts, brandAccounts = [] }: { accounts: an
                               <Link
                                 key={a.brewery_id}
                                 href={`/brewery-admin/${a.brewery_id}`}
-                                onClick={() => setOpen(false)}
+                                onClick={() => setSelectorOpen(false)}
                                 className="flex items-center gap-3 px-3 py-2.5 pl-7 transition-colors"
                                 style={{ color: "var(--text-primary)" }}
                               >
@@ -146,7 +256,7 @@ export function BreweryAdminNav({ accounts, brandAccounts = [] }: { accounts: an
                           <Link
                             key={a.brewery_id}
                             href={`/brewery-admin/${a.brewery_id}`}
-                            onClick={() => setOpen(false)}
+                            onClick={() => setSelectorOpen(false)}
                             className="flex items-center gap-3 px-3 py-2.5 transition-colors"
                             style={{ color: "var(--text-primary)" }}
                           >
@@ -172,147 +282,119 @@ export function BreweryAdminNav({ accounts, brandAccounts = [] }: { accounts: an
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 px-3 py-4 space-y-1">
-          {/* Brand links — only when brewery belongs to a brand */}
-          {brewery?.brand && brandAccounts.some((ba: any) => ba.brand_id === brewery.brand.id) && (
-            <div className="mb-2 space-y-1">
-              <Link
-                href={`/brewery-admin/brand/${brewery.brand.id}/dashboard`}
-                className={cn(
-                  "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all",
-                  pathname.includes(`/brand/${brewery.brand.id}/dashboard`)
-                    ? "text-[var(--bg)] font-semibold"
-                    : "hover:opacity-80"
-                )}
-                style={pathname.includes(`/brand/${brewery.brand.id}/dashboard`)
-                  ? { background: "var(--accent-gold)", color: "var(--bg)" }
-                  : { color: "var(--accent-gold)", background: "color-mix(in srgb, var(--accent-gold) 10%, transparent)" }
-                }
-              >
-                <Building2 size={16} />
-                Brand Dashboard
-              </Link>
-              <Link
-                href={`/brewery-admin/brand/${brewery.brand.id}/reports`}
-                className={cn(
-                  "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all",
-                  pathname.includes(`/brand/${brewery.brand.id}/reports`)
-                    ? "text-[var(--bg)] font-semibold"
-                    : "hover:opacity-80"
-                )}
-                style={pathname.includes(`/brand/${brewery.brand.id}/reports`)
-                  ? { background: "var(--accent-gold)", color: "var(--bg)" }
-                  : { color: "var(--accent-gold)", background: "color-mix(in srgb, var(--accent-gold) 10%, transparent)" }
-                }
-              >
-                <BarChart3 size={16} />
-                Brand Reports
-              </Link>
-              <Link
-                href={`/brewery-admin/brand/${brewery.brand.id}/customers`}
-                className={cn(
-                  "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all",
-                  pathname.includes(`/brand/${brewery.brand.id}/customers`)
-                    ? "text-[var(--bg)] font-semibold"
-                    : "hover:opacity-80"
-                )}
-                style={pathname.includes(`/brand/${brewery.brand.id}/customers`)
-                  ? { background: "var(--accent-gold)", color: "var(--bg)" }
-                  : { color: "var(--accent-gold)", background: "color-mix(in srgb, var(--accent-gold) 10%, transparent)" }
-                }
-              >
-                <Users size={16} />
-                Brand Customers
-              </Link>
-              <Link
-                href={`/brewery-admin/brand/${brewery.brand.id}/team`}
-                className={cn(
-                  "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all",
-                  pathname.includes(`/brand/${brewery.brand.id}/team`)
-                    ? "text-[var(--bg)] font-semibold"
-                    : "hover:opacity-80"
-                )}
-                style={pathname.includes(`/brand/${brewery.brand.id}/team`)
-                  ? { background: "var(--accent-gold)", color: "var(--bg)" }
-                  : { color: "var(--accent-gold)", background: "color-mix(in srgb, var(--accent-gold) 10%, transparent)" }
-                }
-              >
-                <Users size={16} />
-                Brand Team
-              </Link>
-              <Link
-                href={`/brewery-admin/brand/${brewery.brand.id}/loyalty`}
-                className={cn(
-                  "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all",
-                  pathname.includes(`/brand/${brewery.brand.id}/loyalty`)
-                    ? "text-[var(--bg)] font-semibold"
-                    : "hover:opacity-80"
-                )}
-                style={pathname.includes(`/brand/${brewery.brand.id}/loyalty`)
-                  ? { background: "var(--accent-gold)", color: "var(--bg)" }
-                  : { color: "var(--accent-gold)", background: "color-mix(in srgb, var(--accent-gold) 10%, transparent)" }
-                }
-              >
-                <Gift size={16} />
-                Brand Loyalty
-              </Link>
-              <Link
-                href={`/brewery-admin/brand/${brewery.brand.id}/catalog`}
-                className={cn(
-                  "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all",
-                  pathname.includes(`/brand/${brewery.brand.id}/catalog`)
-                    ? "text-[var(--bg)] font-semibold"
-                    : "hover:opacity-80"
-                )}
-                style={pathname.includes(`/brand/${brewery.brand.id}/catalog`)
-                  ? { background: "var(--accent-gold)", color: "var(--bg)" }
-                  : { color: "var(--accent-gold)", background: "color-mix(in srgb, var(--accent-gold) 10%, transparent)" }
-                }
-              >
-                <List size={16} />
-                Brand Catalog
-              </Link>
-              <Link
-                href={`/brewery-admin/brand/${brewery.brand.id}/billing`}
-                className={cn(
-                  "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all",
-                  pathname.includes(`/brand/${brewery.brand.id}/billing`)
-                    ? "text-[var(--bg)] font-semibold"
-                    : "hover:opacity-80"
-                )}
-                style={pathname.includes(`/brand/${brewery.brand.id}/billing`)
-                  ? { background: "var(--accent-gold)", color: "var(--bg)" }
-                  : { color: "var(--accent-gold)", background: "color-mix(in srgb, var(--accent-gold) 10%, transparent)" }
-                }
-              >
-                <CreditCard size={16} />
-                Brand Billing
-              </Link>
+        <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
+          {/* Brand links */}
+          {hasBrand && (
+            <div className="mb-3 space-y-1">
+              {BRAND_NAV_ITEMS.map(({ path, label, icon: Icon }) => {
+                const bHref = `/brewery-admin/brand/${brewery.brand.id}/${path}`;
+                const bActive = pathname.includes(`/brand/${brewery.brand.id}/${path}`);
+                return (
+                  <Link
+                    key={path}
+                    href={bHref}
+                    className={cn(
+                      "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all",
+                      bActive ? "text-[var(--bg)] font-semibold" : "hover:opacity-80"
+                    )}
+                    style={bActive
+                      ? { background: "var(--accent-gold)", color: "var(--bg)" }
+                      : { color: "var(--accent-gold)", background: "color-mix(in srgb, var(--accent-gold) 10%, transparent)" }
+                    }
+                  >
+                    <Icon size={16} />
+                    {label}
+                  </Link>
+                );
+              })}
             </div>
           )}
-          {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
-            const fullHref = `/brewery-admin/${activeBreweryId}${href}`;
-            const isActive = href === ""
-              ? pathname === `/brewery-admin/${activeBreweryId}`
-              : pathname.startsWith(fullHref);
+
+          {/* Grouped brewery nav */}
+          {NAV_GROUPS.map(group => {
+            // Overview group renders standalone (no header, no collapse)
+            if (group.id === "overview") {
+              const item = group.items[0];
+              const fullHref = `/brewery-admin/${activeBreweryId}${item.href}`;
+              const active = isItemActive(item.href);
+              return (
+                <Link
+                  key={item.href}
+                  href={fullHref}
+                  className={cn(
+                    "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all mb-2",
+                    active ? "text-[var(--bg)] font-semibold" : "hover:opacity-80"
+                  )}
+                  style={active
+                    ? { background: "var(--accent-gold)", color: "var(--bg)" }
+                    : { color: "var(--text-secondary)" }
+                  }
+                >
+                  <item.icon size={16} />
+                  {item.label}
+                </Link>
+              );
+            }
+
+            const expanded = isGroupExpanded(group);
+            const active = isGroupActive(group);
+            const GroupIcon = group.icon!;
+
             return (
-              <Link
-                key={href}
-                href={fullHref}
-                className={cn(
-                  "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all",
-                  isActive
-                    ? "text-[var(--bg)] font-semibold"
-                    : "hover:opacity-80"
-                )}
-                style={isActive
-                  ? { background: "var(--accent-gold)", color: "var(--bg)" }
-                  : { color: "var(--text-secondary)" }
-                }
-              >
-                <Icon size={16} />
-                {label}
-              </Link>
+              <div key={group.id} className="mb-1">
+                {/* Group header */}
+                <button
+                  onClick={() => toggleGroup(group.id)}
+                  className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-[11px] font-semibold uppercase tracking-wider transition-colors"
+                  style={{ color: active ? "var(--accent-gold)" : "var(--text-muted)" }}
+                >
+                  <GroupIcon size={13} style={{ opacity: 0.7 }} />
+                  <span className="flex-1 text-left">{group.label}</span>
+                  <motion.div
+                    animate={{ rotate: expanded ? 90 : 0 }}
+                    transition={{ duration: 0.15 }}
+                  >
+                    <ChevronRight size={12} style={{ opacity: 0.5 }} />
+                  </motion.div>
+                </button>
+
+                {/* Group items */}
+                <AnimatePresence initial={false}>
+                  {expanded && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2, ease: "easeInOut" }}
+                      className="overflow-hidden"
+                    >
+                      <div className="space-y-0.5 pb-1">
+                        {group.items.map(({ href, label, icon: Icon }) => {
+                          const fullHref = `/brewery-admin/${activeBreweryId}${href}`;
+                          const itemActive = isItemActive(href);
+                          return (
+                            <Link
+                              key={href}
+                              href={fullHref}
+                              className={cn(
+                                "flex items-center gap-3 pl-6 pr-3 py-2 rounded-xl text-sm font-medium transition-all",
+                                itemActive ? "text-[var(--bg)] font-semibold" : "hover:opacity-80"
+                              )}
+                              style={itemActive
+                                ? { background: "var(--accent-gold)", color: "var(--bg)" }
+                                : { color: "var(--text-secondary)" }
+                              }
+                            >
+                              <Icon size={15} />
+                              {label}
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             );
           })}
         </nav>
@@ -377,64 +459,147 @@ export function BreweryAdminNav({ accounts, brandAccounts = [] }: { accounts: an
         </div>
         {/* Scrollable tab strip */}
         <div className="relative border-t" style={{ borderColor: "var(--border)" }}>
-        {/* Fade indicator — hints there are more tabs to the right */}
-        <div
-          className="pointer-events-none absolute right-0 top-0 bottom-0 w-12 z-10"
-          style={{ background: "linear-gradient(to right, transparent, var(--surface))" }}
-        />
-        <div className="flex overflow-x-auto scrollbar-hide">
-          {/* Brand tabs (mobile) */}
-          {brewery?.brand && brandAccounts.some((ba: any) => ba.brand_id === brewery.brand.id) && (
-            <>
-              {[
-                { href: `/brewery-admin/brand/${brewery.brand.id}/dashboard`, label: "Brand", icon: Building2 },
-                { href: `/brewery-admin/brand/${brewery.brand.id}/customers`, label: "Customers", icon: Users },
-                { href: `/brewery-admin/brand/${brewery.brand.id}/team`, label: "Team", icon: Users },
-                { href: `/brewery-admin/brand/${brewery.brand.id}/loyalty`, label: "Loyalty", icon: Gift },
-                { href: `/brewery-admin/brand/${brewery.brand.id}/catalog`, label: "Catalog", icon: List },
-              ].map(({ href: bHref, label: bLabel, icon: BIcon }) => {
-                const bActive = pathname.startsWith(bHref);
-                return (
-                  <Link
-                    key={bHref}
-                    href={bHref}
-                    className="flex items-center gap-1.5 px-4 py-2.5 text-xs font-medium whitespace-nowrap border-b-2 transition-all flex-shrink-0"
-                    style={bActive
-                      ? { color: "var(--accent-gold)", borderColor: "var(--accent-gold)" }
-                      : { color: "var(--accent-gold)", borderColor: "transparent", opacity: 0.6 }
-                    }
-                  >
-                    <BIcon size={13} />
-                    {bLabel}
-                  </Link>
-                );
-              })}
-              <div className="w-px my-2 flex-shrink-0" style={{ background: "var(--border)" }} />
-            </>
-          )}
-          {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
-            const fullHref = `/brewery-admin/${activeBreweryId}${href}`;
-            const isActive = href === ""
-              ? pathname === `/brewery-admin/${activeBreweryId}`
-              : pathname.startsWith(fullHref);
-            return (
-              <Link
-                key={href}
-                href={fullHref}
-                className="flex items-center gap-1.5 px-4 py-2.5 text-xs font-medium whitespace-nowrap border-b-2 transition-all flex-shrink-0"
-                style={isActive
-                  ? { color: "var(--accent-gold)", borderColor: "var(--accent-gold)" }
-                  : { color: "var(--text-muted)", borderColor: "transparent" }
-                }
-              >
-                <Icon size={13} />
-                {label}
-              </Link>
-            );
-          })}
-        </div>
+          {/* Fade indicator */}
+          <div
+            className="pointer-events-none absolute right-0 top-0 bottom-0 w-12 z-10"
+            style={{ background: "linear-gradient(to right, transparent, var(--surface))" }}
+          />
+          <div className="flex overflow-x-auto scrollbar-hide">
+            {/* Brand tabs (mobile) */}
+            {hasBrand && (
+              <>
+                {MOBILE_BRAND_ITEMS.map(({ path, label, icon: BIcon }) => {
+                  const bHref = `/brewery-admin/brand/${brewery.brand.id}/${path}`;
+                  const bActive = pathname.startsWith(bHref);
+                  return (
+                    <Link
+                      key={bHref}
+                      href={bHref}
+                      className="flex items-center gap-1.5 px-4 py-2.5 text-xs font-medium whitespace-nowrap border-b-2 transition-all flex-shrink-0"
+                      style={bActive
+                        ? { color: "var(--accent-gold)", borderColor: "var(--accent-gold)" }
+                        : { color: "var(--accent-gold)", borderColor: "transparent", opacity: 0.6 }
+                      }
+                    >
+                      <BIcon size={13} />
+                      {label}
+                    </Link>
+                  );
+                })}
+                <div className="w-px my-2 flex-shrink-0" style={{ background: "var(--border)" }} />
+              </>
+            )}
+
+            {/* Priority brewery tabs */}
+            {ALL_NAV_ITEMS.filter(item => MOBILE_PRIORITY_HREFS.includes(item.href)).map(({ href, label, icon: Icon }) => {
+              const fullHref = `/brewery-admin/${activeBreweryId}${href}`;
+              const active = isItemActive(href);
+              return (
+                <Link
+                  key={href}
+                  href={fullHref}
+                  className="flex items-center gap-1.5 px-4 py-2.5 text-xs font-medium whitespace-nowrap border-b-2 transition-all flex-shrink-0"
+                  style={active
+                    ? { color: "var(--accent-gold)", borderColor: "var(--accent-gold)" }
+                    : { color: "var(--text-muted)", borderColor: "transparent" }
+                  }
+                >
+                  <Icon size={13} />
+                  {label}
+                </Link>
+              );
+            })}
+
+            {/* "More" pill */}
+            <button
+              onClick={() => setMoreOpen(true)}
+              className="flex items-center gap-1.5 px-4 py-2.5 text-xs font-medium whitespace-nowrap border-b-2 transition-all flex-shrink-0"
+              style={{
+                color: ALL_NAV_ITEMS.some(item => !MOBILE_PRIORITY_HREFS.includes(item.href) && isItemActive(item.href))
+                  ? "var(--accent-gold)"
+                  : "var(--text-muted)",
+                borderColor: ALL_NAV_ITEMS.some(item => !MOBILE_PRIORITY_HREFS.includes(item.href) && isItemActive(item.href))
+                  ? "var(--accent-gold)"
+                  : "transparent",
+              }}
+            >
+              <MoreHorizontal size={13} />
+              More
+            </button>
+          </div>
         </div>
       </div>
+
+      {/* Mobile "More" bottom sheet */}
+      <AnimatePresence>
+        {moreOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="lg:hidden fixed inset-0 z-[60]"
+              style={{ background: "rgba(0,0,0,0.5)" }}
+              onClick={() => setMoreOpen(false)}
+            />
+            {/* Sheet */}
+            <motion.div
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ type: "spring", stiffness: 400, damping: 30 }}
+              className="lg:hidden fixed bottom-0 left-0 right-0 z-[61] rounded-t-2xl border-t max-h-[75vh] overflow-y-auto"
+              style={{ background: "var(--surface)", borderColor: "var(--border)" }}
+            >
+              {/* Sheet header */}
+              <div className="flex items-center justify-between px-5 py-4 border-b sticky top-0" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
+                <span className="font-display font-semibold text-sm" style={{ color: "var(--text-primary)" }}>All Pages</span>
+                <button onClick={() => setMoreOpen(false)} className="p-1 rounded-lg" style={{ color: "var(--text-muted)" }}>
+                  <X size={18} />
+                </button>
+              </div>
+              {/* Grouped items */}
+              <div className="px-3 py-3 space-y-4">
+                {NAV_GROUPS.filter(g => g.id !== "overview").map(group => (
+                  <div key={group.id}>
+                    <p className="px-3 pb-1.5 text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
+                      {group.label}
+                    </p>
+                    <div className="space-y-0.5">
+                      {group.items.map(({ href, label, icon: Icon }) => {
+                        const fullHref = `/brewery-admin/${activeBreweryId}${href}`;
+                        const active = isItemActive(href);
+                        return (
+                          <Link
+                            key={href}
+                            href={fullHref}
+                            onClick={() => setMoreOpen(false)}
+                            className={cn(
+                              "flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium transition-all",
+                              active ? "font-semibold" : "hover:opacity-80"
+                            )}
+                            style={active
+                              ? { background: "color-mix(in srgb, var(--accent-gold) 15%, transparent)", color: "var(--accent-gold)" }
+                              : { color: "var(--text-secondary)" }
+                            }
+                          >
+                            <Icon size={16} />
+                            {label}
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {/* Safe area spacer for iOS */}
+              <div className="h-8" />
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </>
   );
 }
