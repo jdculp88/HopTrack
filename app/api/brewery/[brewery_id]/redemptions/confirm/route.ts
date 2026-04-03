@@ -81,7 +81,26 @@ export async function POST(
   }
 
   if (!redemption) {
-    return apiNotFound("Invalid or expired code");
+    // Look up code in ANY status to give specific error messages
+    const { data: anyCode } = await supabase
+      .from("redemption_codes")
+      .select("status")
+      .eq("code", code.toUpperCase())
+      .single();
+
+    if (!anyCode) {
+      return apiNotFound("Code not found — please check and try again");
+    }
+    if (anyCode.status === "confirmed") {
+      return apiError("This code has already been redeemed", "ALREADY_REDEEMED", 422);
+    }
+    if (anyCode.status === "expired") {
+      return apiError("This code has expired — ask the customer to generate a new one", "EXPIRED", 422);
+    }
+    if (anyCode.status === "cancelled") {
+      return apiError("This code was cancelled", "CANCELLED", 422);
+    }
+    return apiNotFound("Code not found — please check and try again");
   }
 
   // Check expiry
@@ -224,6 +243,16 @@ export async function POST(
     .eq("id", redemption.id)
     .select("pos_reference")
     .single();
+
+  // Notify the customer that their reward was redeemed
+  await supabase.from("notifications").insert({
+    user_id: redemption.user_id,
+    type: "reward_redeemed" as any,
+    title: "Reward redeemed!",
+    body: redeemDescription || "Your reward has been confirmed",
+    data: { brewery_id, reward_type: redemption.type, url: "/rewards" },
+    read: false,
+  } as any);
 
   // Build user display info
   const profile = redemption.profile as any;

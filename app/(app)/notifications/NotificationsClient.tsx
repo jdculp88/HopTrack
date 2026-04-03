@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Bell, Trophy, Users, Beer, Heart, TrendingUp, MessageCircle, Check, X, ExternalLink, ChevronDown } from "lucide-react";
+import { Bell, Trophy, Users, Beer, Heart, TrendingUp, MessageCircle, Check, X, ExternalLink, ChevronDown, Gift } from "lucide-react";
 import Link from "next/link";
 import { formatRelativeTime } from "@/lib/utils";
 import { useToast } from "@/components/ui/Toast";
@@ -23,6 +23,7 @@ const ICONS: Record<NotificationType, { icon: React.ReactNode; color: string }> 
   new_event:           { icon: <Bell size={16} />,          color: "#5B8DEF" },
   first_referral:      { icon: <Users size={16} />,         color: "var(--accent-gold)" },
   group_invite:        { icon: <Users size={16} />,         color: "#5B8DEF" },
+  reward_redeemed:     { icon: <Gift size={16} />,          color: "var(--accent-gold)" },
 };
 
 // Types that can be grouped when targeting the same session within 1 hour
@@ -737,6 +738,14 @@ function SingleNotification({
               className="inline-flex items-center gap-1.5 text-xs font-mono text-[var(--text-muted)] hover:text-[var(--accent-gold)] transition-colors"
             >
               <ExternalLink size={11} /> View Invite Stats
+            </Link>
+          )}
+          {n.type === "reward_redeemed" && (
+            <Link
+              href="/rewards"
+              className="inline-flex items-center gap-1.5 text-xs font-mono text-[var(--text-muted)] hover:text-[var(--accent-gold)] transition-colors"
+            >
+              <ExternalLink size={11} /> View Rewards
             </Link>
           )}
         </div>

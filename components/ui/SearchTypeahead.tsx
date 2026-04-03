@@ -201,6 +201,8 @@ export function SearchTypeahead({
 
   const handleSelect = useCallback(
     (entry: (typeof flatItems)[number]) => {
+      // Fire navigation callback FIRST, then defer state cleanup
+      // so router.push() initiates before onQueryChange fires from setQuery("")
       if (entry.type === "beer") {
         const beer = entry.item as BeerResult;
         saveRecentSearch({
@@ -230,16 +232,20 @@ export function SearchTypeahead({
           state: b.state,
         });
       }
-      setQuery("");
-      setIsOpen(false);
-      setShowRecent(false);
-      setActiveIndex(-1);
+      // Defer state cleanup so navigation completes before re-render
+      requestAnimationFrame(() => {
+        setQuery("");
+        setIsOpen(false);
+        setShowRecent(false);
+        setActiveIndex(-1);
+      });
     },
     [onSelectBeer, onSelectBrewery]
   );
 
   const handleSelectRecent = useCallback(
     (item: RecentSearch) => {
+      // Fire navigation callback FIRST
       if (item.type === "beer") {
         onSelectBeer?.({ id: item.id, name: item.name, style: null });
       } else {
@@ -251,10 +257,13 @@ export function SearchTypeahead({
           state: parts[1] || null,
         });
       }
-      setQuery("");
-      setIsOpen(false);
-      setShowRecent(false);
-      setActiveIndex(-1);
+      // Defer state cleanup so navigation completes before re-render
+      requestAnimationFrame(() => {
+        setQuery("");
+        setIsOpen(false);
+        setShowRecent(false);
+        setActiveIndex(-1);
+      });
     },
     [onSelectBeer, onSelectBrewery]
   );

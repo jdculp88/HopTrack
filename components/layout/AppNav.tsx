@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   Home, Compass, User, Trophy, Users, Bell, Settings,
-  PlusCircle, LogOut,
+  PlusCircle, LogOut, Gift,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { createClient } from "@/lib/supabase/client";
@@ -161,10 +161,11 @@ export function AppNav({ username, unreadNotifications = 0, onCheckin }: AppNavP
               exact: true,
               badge: unreadNotifications > 0 ? (unreadNotifications > 9 ? "9+" : String(unreadNotifications)) : null,
             },
-            { href: `/profile/${username}`, label: "Profile",  icon: User,     exact: false },
-            { href: "/settings",            label: "Settings", icon: Settings, exact: true  },
+            { href: "/rewards",             label: "Rewards",  icon: Gift,     exact: true,  badge: null },
+            { href: `/profile/${username}`, label: "Profile",  icon: User,     exact: false, badge: null },
+            { href: "/settings",            label: "Settings", icon: Settings, exact: true,  badge: null },
           ].map(({ href, label, icon: Icon, exact, badge }) => {
-            const isActive = exact ? pathname === href : pathname.startsWith("/profile");
+            const isActive = exact ? pathname === href : pathname.startsWith(href);
             const linkAriaLabel = badge ? `${label}, ${badge} unread` : label;
             return (
               <Link key={href} href={href} aria-label={linkAriaLabel} aria-current={isActive ? "page" : undefined}>

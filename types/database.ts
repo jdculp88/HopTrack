@@ -542,7 +542,8 @@ export type NotificationType =
   | "new_tap"
   | "new_event"
   | "first_referral"
-  | "group_invite";
+  | "group_invite"
+  | "reward_redeemed";
 
 export interface Notification {
   id: string;

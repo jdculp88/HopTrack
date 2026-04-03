@@ -97,6 +97,9 @@ export function PassportGrid({ stamps, totalBeers, totalStyles, totalBreweries }
             </div>
           ))}
         </div>
+        <p className="text-xs text-[var(--text-muted)] mt-4 leading-relaxed">
+          Every unique beer you check in earns a stamp. Explore new styles and breweries to grow your collection.
+        </p>
       </motion.div>
 
       {/* Search + sort row */}

@@ -55,14 +55,14 @@ export async function GET(
     .in("brewery_id", locationIds)
     .eq("is_active", false);
   if (rangeStart) sessionsQuery = sessionsQuery.gte("started_at", rangeStart);
-  const { data: sessions } = await (sessionsQuery as any);
+  const { data: sessions } = await ((sessionsQuery as any).limit(50000));
 
   let beerLogsQuery = supabase
     .from("beer_logs")
     .select("id, beer_id, rating, quantity, brewery_id, beer:beers(name)")
     .in("brewery_id", locationIds);
   if (rangeStart) beerLogsQuery = beerLogsQuery.gte("logged_at", rangeStart);
-  const { data: beerLogs } = await (beerLogsQuery as any);
+  const { data: beerLogs } = await ((beerLogsQuery as any).limit(50000));
 
   // Followers (all-time — not date-filterable)
   const { data: followers } = await (supabase

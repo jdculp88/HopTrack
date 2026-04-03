@@ -233,7 +233,7 @@ export async function calculateCommandCenterMetrics(
     service.from("profiles").select("id", { count: "exact", head: true }).gte("created_at", twoWeeksAgo).lt("created_at", oneWeekAgo) as unknown as CountResult,
 
     // ── Revenue queries ──
-    service.from("brewery_accounts").select("subscription_tier, subscription_status, trial_ends_at, verified") as any,
+    service.from("brewery_accounts").select("subscription_tier, subscription_status, trial_ends_at, verified").limit(5000) as any,
     service.from("breweries").select("id", { count: "exact", head: true }) as unknown as CountResult,
     service.from("brewery_claims").select("id", { count: "exact", head: true }).eq("status", "approved") as unknown as CountResult,
     service.from("brewery_accounts").select("id", { count: "exact", head: true }).eq("verified", true) as unknown as CountResult,
@@ -248,7 +248,7 @@ export async function calculateCommandCenterMetrics(
     service.from("sessions").select("brewery:breweries(id, name, city, state)").eq("is_active", false).gte("started_at", rangeStart).limit(5000) as any,
 
     // ── Geo query ──
-    service.from("breweries").select("state").not("state", "is", null) as any,
+    service.from("breweries").select("state").not("state", "is", null).limit(10000) as any,
 
     // ── Growth queries (always 30-day series) ──
     service.from("profiles").select("created_at").gte("created_at", thirtyDaysAgo).order("created_at", { ascending: true }).limit(10000) as any,

@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, Loader2, Copy, AlertCircle, ScanLine } from "lucide-react";
+import { Check, Loader2, Copy, AlertCircle, ScanLine, Clock, XCircle } from "lucide-react";
 import { useToast } from "@/components/ui/Toast";
 
 interface CodeEntryProps {
@@ -15,6 +15,12 @@ interface RedemptionResult {
   description: string;
   pos_reference: string;
 }
+
+const ERROR_ICONS: Record<string, React.ReactNode> = {
+  EXPIRED: <Clock className="h-4 w-4 flex-shrink-0" style={{ color: "var(--accent-amber)" }} />,
+  ALREADY_REDEEMED: <XCircle className="h-4 w-4 flex-shrink-0" style={{ color: "var(--text-muted)" }} />,
+  CANCELLED: <XCircle className="h-4 w-4 flex-shrink-0" style={{ color: "var(--text-muted)" }} />,
+};
 
 const spring = { type: "spring" as const, stiffness: 400, damping: 30 };
 
@@ -30,6 +36,7 @@ export function CodeEntry({ breweryId }: CodeEntryProps) {
     "idle" | "loading" | "success" | "error"
   >("idle");
   const [error, setError] = useState("");
+  const [errorCode, setErrorCode] = useState("");
   const [result, setResult] = useState<RedemptionResult | null>(null);
   const [copied, setCopied] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -48,6 +55,7 @@ export function CodeEntry({ breweryId }: CodeEntryProps) {
 
       setStatus("loading");
       setError("");
+      setErrorCode("");
 
       try {
         const res = await fetch(
@@ -64,6 +72,7 @@ export function CodeEntry({ breweryId }: CodeEntryProps) {
         if (!res.ok || !data.success) {
           setStatus("error");
           setError(data.error || "Invalid code. Please try again.");
+          setErrorCode(data.code || "");
           return;
         }
 
@@ -99,6 +108,7 @@ export function CodeEntry({ breweryId }: CodeEntryProps) {
     setCode("");
     setStatus("idle");
     setError("");
+    setErrorCode("");
     setResult(null);
     setCopied(false);
     setTimeout(() => inputRef.current?.focus(), 50);
@@ -134,18 +144,21 @@ export function CodeEntry({ breweryId }: CodeEntryProps) {
             </motion.div>
 
             {/* Customer & reward */}
-            <div className="space-y-1">
+            <div className="space-y-2">
               <p
                 className="text-lg font-semibold"
                 style={{ color: "var(--text-primary)" }}
               >
                 {result.customer}
               </p>
-              <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+              <span
+                className="inline-block text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-md"
+                style={{ backgroundColor: "var(--surface-2)", color: "var(--text-muted)" }}
+              >
                 {TYPE_LABELS[result.type] || result.type}
-              </p>
+              </span>
               <p
-                className="text-base font-medium"
+                className="text-xl font-display font-bold"
                 style={{ color: "var(--accent-gold)" }}
               >
                 {result.description}
@@ -269,11 +282,13 @@ export function CodeEntry({ breweryId }: CodeEntryProps) {
                   exit={{ opacity: 0, height: 0 }}
                   className="flex w-full items-center gap-2 overflow-hidden"
                 >
-                  <AlertCircle
-                    className="h-4 w-4 flex-shrink-0"
-                    style={{ color: "var(--danger)" }}
-                  />
-                  <p className="text-sm" style={{ color: "var(--danger)" }}>
+                  {ERROR_ICONS[errorCode] || (
+                    <AlertCircle
+                      className="h-4 w-4 flex-shrink-0"
+                      style={{ color: "var(--danger)" }}
+                    />
+                  )}
+                  <p className="text-sm" style={{ color: errorCode === "EXPIRED" ? "var(--accent-amber)" : "var(--danger)" }}>
                     {error}
                   </p>
                 </motion.div>

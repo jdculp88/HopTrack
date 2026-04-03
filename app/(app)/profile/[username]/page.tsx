@@ -11,6 +11,7 @@ import { getLevelProgress } from "@/lib/xp";
 import { generateGradientFromString, formatABV } from "@/lib/utils";
 import { getStyleFamily, getStyleVars } from "@/lib/beerStyleColors";
 import { BeerDNACard } from "@/components/profile/BeerDNACard";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { DrinkerStatsCard } from "@/components/profile/DrinkerStatsCard";
 import { PageEnterWrapper } from "@/components/ui/PageEnterWrapper";
 import { MugClubMemberships } from "@/components/profile/MugClubMemberships";
@@ -307,17 +308,27 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
           </div>
           <div className="flex-1">
             <p className="font-display font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-gold)] transition-colors">Beer Passport</p>
-            <p className="text-xs text-[var(--text-muted)]">{profile.unique_beers} unique beers collected</p>
+            <p className="text-xs text-[var(--text-muted)]">{profile.unique_beers} unique beers &middot; {styleDNA.length} of 26 styles explored</p>
+            <div className="mt-1.5 h-1 rounded-full overflow-hidden" style={{ backgroundColor: "var(--surface-2)" }}>
+              <div className="h-full rounded-full transition-all" style={{ width: `${Math.min((styleDNA.length / 26) * 100, 100)}%`, backgroundColor: "var(--accent-gold)" }} />
+            </div>
           </div>
           <span className="text-[var(--text-muted)] text-sm">→</span>
         </Link>
 
         {/* Beer DNA */}
-        {styleDNA.length >= 3 && (
-          <div className="mb-8">
+        <div className="mb-8">
+          {styleDNA.length >= 3 ? (
             <BeerDNACard styleDNA={styleDNA} username={username} />
-          </div>
-        )}
+          ) : (
+            <EmptyState
+              emoji="🧬"
+              title="Unlock Your Beer DNA"
+              description="Check in 3+ different beer styles to reveal your taste profile"
+              size="sm"
+            />
+          )}
+        </div>
 
         {/* Want to Try (Wishlist) */}
         {isOwnProfile && (
@@ -428,11 +439,18 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
         </div>
 
         {/* Mug Club Memberships */}
-        {mugClubMemberships && mugClubMemberships.length > 0 && (
-          <div className="mb-8">
+        <div className="mb-8">
+          {mugClubMemberships && mugClubMemberships.length > 0 ? (
             <MugClubMemberships memberships={mugClubMemberships as any[]} />
-          </div>
-        )}
+          ) : (
+            <EmptyState
+              emoji="🍺"
+              title="Join a Mug Club"
+              description="Members get exclusive perks at their favorite breweries"
+              size="sm"
+            />
+          )}
+        </div>
 
         {/* Top Breweries */}
         <div className="mb-8">

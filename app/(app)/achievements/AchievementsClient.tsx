@@ -126,31 +126,44 @@ export function AchievementsClient({ achievements, totalEarned, total }: Achieve
       </p>
 
       {/* Achievement grid */}
-      <motion.div
-        layout
-        className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4"
-      >
-        <AnimatePresence mode="popLayout">
-          {filtered.map((achievement, i) => (
-            <motion.div
-              key={achievement.id}
-              layout
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              transition={{ delay: i * 0.02, type: "spring", stiffness: 300, damping: 25 }}
-            >
-              <AchievementBadge
-                achievement={achievement}
-                earned={achievement.earned}
-                earnedAt={achievement.earned_at ?? undefined}
-                size="md"
-                onClick={() => setSelected(achievement)}
-              />
-            </motion.div>
-          ))}
-        </AnimatePresence>
-      </motion.div>
+      {filtered.length === 0 ? (
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ type: "spring", stiffness: 300, damping: 28 }}
+          className="text-center py-12"
+        >
+          <p className="text-3xl mb-3">{CATEGORIES.find(c => c.key === category)?.emoji ?? "🏆"}</p>
+          <p className="font-display text-base text-[var(--text-primary)]">No achievements in this category yet</p>
+          <p className="text-sm text-[var(--text-muted)] mt-1">Keep exploring to unlock badges here</p>
+        </motion.div>
+      ) : (
+        <motion.div
+          layout
+          className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4"
+        >
+          <AnimatePresence mode="popLayout">
+            {filtered.map((achievement, i) => (
+              <motion.div
+                key={achievement.id}
+                layout
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                transition={{ delay: i * 0.02, type: "spring", stiffness: 300, damping: 25 }}
+              >
+                <AchievementBadge
+                  achievement={achievement}
+                  earned={achievement.earned}
+                  earnedAt={achievement.earned_at ?? undefined}
+                  size="md"
+                  onClick={() => setSelected(achievement)}
+                />
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </motion.div>
+      )}
 
       {/* Achievement detail modal */}
       <Modal
