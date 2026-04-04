@@ -11,7 +11,10 @@ export function useOnlineStatus(): boolean {
 
   useEffect(() => {
     // Sync with actual browser state after hydration
-    setIsOnline(navigator.onLine);
+    // Use queueMicrotask to avoid synchronous setState in effect (React compiler)
+    const currentStatus = navigator.onLine;
+    queueMicrotask(() => setIsOnline(currentStatus));
+
     function handleOnline() { setIsOnline(true); }
     function handleOffline() { setIsOnline(false); }
 

@@ -287,17 +287,10 @@ function PromotionCard({ promo }: { promo: Promotion }) {
 // ─── Main Component ─────────────────────────────────────────────────────────
 
 export function RewardsClient({ activeCodes, history, loyaltyCards, promotions }: RewardsClientProps) {
-  const [tab, setTab] = useState<Tab>("Active");
-
-  // Auto-select best tab based on data
-  const defaultTab = activeCodes.length > 0 ? "Active" : loyaltyCards.length > 0 ? "Loyalty" : "Active";
-  const [initialized, setInitialized] = useState(false);
-  useEffect(() => {
-    if (!initialized) {
-      setTab(defaultTab);
-      setInitialized(true);
-    }
-  }, [defaultTab, initialized]);
+  // Auto-select best tab based on data — computed as initial state, no effect needed
+  const [tab, setTab] = useState<Tab>(() =>
+    activeCodes.length > 0 ? "Active" : loyaltyCards.length > 0 ? "Loyalty" : "Active"
+  );
 
   const renderTabContent = useCallback(() => {
     switch (tab) {

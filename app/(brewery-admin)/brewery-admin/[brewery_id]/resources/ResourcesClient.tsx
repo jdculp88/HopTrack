@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, ExternalLink, GlassWater, Code2, Plug, HelpCircle, Key, LayoutGrid, Beer, CalendarDays, Search, BarChart3, RefreshCw, ArrowRight, AlertTriangle, CheckCircle2, Settings } from "lucide-react";
 import { transition } from "@/lib/animation";
@@ -645,16 +645,17 @@ function PosTab() {
 // ─── Main ResourcesClient ────────────────────────────────────────────────────
 
 export default function ResourcesClient() {
-  const [activeTab, setActiveTab] = useState<TabId>("guides");
-  const [searchQuery, setSearchQuery] = useState("");
-
-  // Sync with URL hash on mount
-  useEffect(() => {
-    const hash = window.location.hash.slice(1) as TabId;
-    if (TABS.some((t) => t.id === hash)) {
-      setActiveTab(hash);
+  const [activeTab, setActiveTab] = useState<TabId>(() => {
+    // Sync with URL hash on mount — using initializer avoids setState in effect
+    if (typeof window !== "undefined") {
+      const hash = window.location.hash.slice(1) as TabId;
+      if (TABS.some((t) => t.id === hash)) {
+        return hash;
+      }
     }
-  }, []);
+    return "guides";
+  });
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Update hash when tab changes
   function handleTabChange(tabId: TabId) {

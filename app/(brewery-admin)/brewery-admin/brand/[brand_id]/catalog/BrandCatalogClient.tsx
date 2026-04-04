@@ -81,10 +81,8 @@ export function BrandCatalogClient({ brandId }: { brandId: string }) {
   const [pushing, setPushing] = useState(false);
   const { success: toastSuccess, error: toastError } = useToast();
 
-  useEffect(() => { fetchData(); }, [brandId]);
-
-  async function fetchData() {
-    setLoading(true);
+  async function fetchData(showLoading = false) {
+    if (showLoading) setLoading(true);
     try {
       const res = await fetch(`/api/brand/${brandId}/catalog`);
       if (res.ok) {
@@ -94,6 +92,9 @@ export function BrandCatalogClient({ brandId }: { brandId: string }) {
     } catch { /* keep loading */ }
     setLoading(false);
   }
+
+  // eslint-disable-next-line react-hooks/rules-of-hooks -- async fetch pattern, setState is after await
+  useEffect(() => { void fetchData(); }, [brandId]); // loading starts true
 
   // ── Filtered catalog ──
   const filtered = useMemo(() => {
@@ -150,7 +151,7 @@ export function BrandCatalogClient({ brandId }: { brandId: string }) {
         toastSuccess(editingBeer ? `Updated ${form.name}` : `Added ${form.name} to catalog`);
         setShowForm(false);
         setEditingBeer(null);
-        fetchData();
+        fetchData(true);
         return true;
       } else {
         const json = await res.json();
@@ -169,7 +170,7 @@ export function BrandCatalogClient({ brandId }: { brandId: string }) {
       const res = await fetch(`/api/brand/${brandId}/catalog/${item.id}`, { method: "DELETE" });
       if (res.ok) {
         toastSuccess(`${item.name} retired from catalog`);
-        fetchData();
+        fetchData(true);
       } else {
         toastError("Failed to retire beer");
       }
@@ -188,7 +189,7 @@ export function BrandCatalogClient({ brandId }: { brandId: string }) {
       });
       if (res.ok) {
         toastSuccess(`${item.name} restored to catalog`);
-        fetchData();
+        fetchData(true);
       }
     } catch {
       toastError("Failed to restore beer");
@@ -211,7 +212,7 @@ export function BrandCatalogClient({ brandId }: { brandId: string }) {
         toastSuccess(`${pushModal.name} — ${d.created} created, ${d.linked} linked, ${d.skipped} skipped`);
         setPushModal(null);
         setPushTargets(new Set());
-        fetchData();
+        fetchData(true);
       } else {
         toastError("Failed to push to locations");
       }

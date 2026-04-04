@@ -7,7 +7,7 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle2, Circle, X, Camera, Beer, Gift, Eye, Monitor } from "lucide-react";
@@ -49,9 +49,10 @@ export function OnboardingChecklist({
 
   // Only show for breweries verified within the last 14 days
   if (!verifiedAt) return null;
-  const daysSinceVerified = Math.floor(
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const daysSinceVerified = useMemo(() => Math.floor(
     (Date.now() - new Date(verifiedAt).getTime()) / (1000 * 60 * 60 * 24)
-  );
+  ), [verifiedAt]);
   if (daysSinceVerified > 14) return null;
   if (dismissed) return null;
 

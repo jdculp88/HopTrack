@@ -548,6 +548,24 @@ function OverviewTab({ data, chartData }: { data: UserDetailData; chartData: { d
   );
 }
 
+// ── Sort Header (extracted to module scope for React compiler) ──────────
+
+function SortHeader({ sKey, label, width, sortKey, sortDir, toggleSort }: {
+  sKey: SortKey; label: string; width: string;
+  sortKey: SortKey; sortDir: SortDir; toggleSort: (key: SortKey) => void;
+}) {
+  return (
+    <button
+      onClick={() => toggleSort(sKey)}
+      className={`${width} text-right text-xs font-mono uppercase tracking-wider flex items-center justify-end gap-1`}
+      style={{ color: sortKey === sKey ? "var(--accent-gold)" : "var(--text-muted)" }}
+    >
+      {label}
+      {sortKey === sKey && <span>{sortDir === "desc" ? "↓" : "↑"}</span>}
+    </button>
+  );
+}
+
 // ── Sessions Tab ──────────────────────────────────────────────────────
 
 function SessionsTab({
@@ -559,17 +577,6 @@ function SessionsTab({
   sortDir: SortDir;
   toggleSort: (key: SortKey) => void;
 }) {
-  const SortHeader = ({ sKey, label, width }: { sKey: SortKey; label: string; width: string }) => (
-    <button
-      onClick={() => toggleSort(sKey)}
-      className={`${width} text-right text-xs font-mono uppercase tracking-wider flex items-center justify-end gap-1`}
-      style={{ color: sortKey === sKey ? "var(--accent-gold)" : "var(--text-muted)" }}
-    >
-      {label}
-      {sortKey === sKey && <span>{sortDir === "desc" ? "↓" : "↑"}</span>}
-    </button>
-  );
-
   return (
     <div className="space-y-4">
       <SessionHeatmap data={heatmap} />
@@ -582,11 +589,11 @@ function SessionsTab({
             className="grid grid-cols-[1fr_auto_auto_auto_auto] gap-4 px-5 py-3 border-b"
             style={{ borderColor: "var(--border)", background: "var(--surface-2)" }}
           >
-            <SortHeader sKey="date" label="Date" width="text-left" />
-            <SortHeader sKey="brewery" label="Brewery" width="w-32" />
-            <SortHeader sKey="duration" label="Duration" width="w-20" />
-            <SortHeader sKey="beers" label="Beers" width="w-16" />
-            <SortHeader sKey="rating" label="Rating" width="w-16" />
+            <SortHeader sKey="date" label="Date" width="text-left" sortKey={sortKey} sortDir={sortDir} toggleSort={toggleSort} />
+            <SortHeader sKey="brewery" label="Brewery" width="w-32" sortKey={sortKey} sortDir={sortDir} toggleSort={toggleSort} />
+            <SortHeader sKey="duration" label="Duration" width="w-20" sortKey={sortKey} sortDir={sortDir} toggleSort={toggleSort} />
+            <SortHeader sKey="beers" label="Beers" width="w-16" sortKey={sortKey} sortDir={sortDir} toggleSort={toggleSort} />
+            <SortHeader sKey="rating" label="Rating" width="w-16" sortKey={sortKey} sortDir={sortDir} toggleSort={toggleSort} />
           </div>
 
           {sessions.length === 0 ? (

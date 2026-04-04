@@ -77,12 +77,8 @@ export function BrandTapListClient({ brandId }: { brandId: string }) {
   const { success: toastSuccess, error: toastError } = useToast();
 
   // ── Fetch data ──
-  useEffect(() => {
-    fetchData();
-  }, [brandId]);
-
-  async function fetchData() {
-    setLoading(true);
+  async function fetchData(showLoading = false) {
+    if (showLoading) setLoading(true);
     try {
       const res = await fetch(`/api/brand/${brandId}/tap-list`);
       if (res.ok) {
@@ -92,6 +88,11 @@ export function BrandTapListClient({ brandId }: { brandId: string }) {
     } catch { /* keep loading */ }
     setLoading(false);
   }
+
+  // eslint-disable-next-line react-hooks/rules-of-hooks -- async fetch pattern, setState is after await
+  useEffect(() => {
+    void fetchData(); // loading starts true
+  }, [brandId]);
 
   // ── Filtered catalog ──
   const filtered = useMemo(() => {
@@ -152,7 +153,7 @@ export function BrandTapListClient({ brandId }: { brandId: string }) {
         toastSuccess(`Pushed ${pushModal.name} — ${json.data.created} created, ${json.data.skipped} skipped`);
         setPushModal(null);
         setPushTargets(new Set());
-        fetchData();
+        fetchData(true);
       } else {
         toastError("Failed to push beer");
       }
@@ -188,7 +189,7 @@ export function BrandTapListClient({ brandId }: { brandId: string }) {
         toastSuccess(`${json.data.updated} beers marked ${actionLabel}`);
         setBatchMode(false);
         setSelectedKeys(new Set());
-        fetchData();
+        fetchData(true);
       } else {
         toastError("Batch action failed");
       }

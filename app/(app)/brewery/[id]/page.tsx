@@ -141,6 +141,7 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
   // ── Friends Here Now (auth only) ──
   let friendsHere: ActiveFriendSession[] = [];
   if (user) {
+    // eslint-disable-next-line react-hooks/rules-of-hooks -- server component, Date.now() is fine
     const sixHoursAgo = new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString();
     const { data: friendshipsRaw } = await supabase
       .from("friendships")
@@ -512,6 +513,7 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
                 </span>
               </div>
               <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide -mx-1 px-1">
+                {/* eslint-disable-next-line react-hooks/rules-of-hooks -- server component */}
                 {friendsHere.map((s) => {
                   const diffMs = Date.now() - new Date(s.started_at).getTime();
                   const mins = Math.floor(diffMs / 60000);

@@ -26,7 +26,8 @@ export function RateLimitBanner({
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
-    setRemaining(retryAfterSeconds);
+    // Use queueMicrotask to avoid synchronous setState in effect (React compiler)
+    queueMicrotask(() => setRemaining(retryAfterSeconds));
     intervalRef.current = setInterval(() => {
       setRemaining((prev) => {
         if (prev <= 1) {

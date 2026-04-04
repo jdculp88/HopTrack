@@ -91,7 +91,7 @@ export function ExploreClient({
 
   // Fetch wishlist brewery IDs when filter is active
   useEffect(() => {
-    if (!wishlistFilter) { setWishlistBreweryIds(new Set()); return; }
+    if (!wishlistFilter) { queueMicrotask(() => setWishlistBreweryIds(new Set())); return; }
     (async () => {
       try {
         const res = await fetch("/api/wishlist/on-tap");

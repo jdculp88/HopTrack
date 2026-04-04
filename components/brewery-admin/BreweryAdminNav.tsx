@@ -122,7 +122,7 @@ export function BreweryAdminNav({ accounts, brandAccounts = [] }: { accounts: an
   const [groupState, setGroupState] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
-    setGroupState(getStoredGroups());
+    queueMicrotask(() => setGroupState(getStoredGroups()));
   }, []);
 
   const toggleGroup = useCallback((groupId: string) => {

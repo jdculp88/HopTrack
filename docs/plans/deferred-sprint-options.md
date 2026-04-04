@@ -249,6 +249,19 @@ These ideas keep coming back — they're clearly high-value:
 
 ---
 
+## Sprint 147 — The Hardening (Selected: Option B)
+
+**Selected:** Option B — The Hardening (12-3-2 vote)
+- Lint zero, Brand Team RLS fix, Turbopack/Leaflet, cron tests, env config
+
+**Deferred — Option A: "The Playwright"** 🧪
+E2E test coverage for critical user journeys. Playwright suite, CI integration, flaky test detection. **Promised for Sprint 149.**
+
+**Deferred — Option C: "The Closer"** 💰
+First customer acquisition infrastructure. Demo mode, pricing page polish, onboarding email refinement, Drew's warm intro toolkit. **Promised for Sprint 148.**
+
+---
+
 ## Recurring Themes Update (Sprint 146)
 
 | Theme | Appeared In | Status |

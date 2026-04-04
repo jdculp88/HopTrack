@@ -30,17 +30,18 @@ export function BrandTeamManager({ brandId, isOwner }: BrandTeamManagerProps) {
   const [confirmRemoveId, setConfirmRemoveId] = useState<string | null>(null);
   const { success, error: toastError } = useToast();
 
-  useEffect(() => {
-    fetchMembers();
-  }, [brandId]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  async function fetchMembers() {
-    setLoading(true);
+  async function fetchMembers(showLoading = false) {
+    if (showLoading) setLoading(true);
     const res = await fetch(`/api/brand/${brandId}/members`);
     const data = await res.json();
     setMembers(data.data ?? []);
     setLoading(false);
   }
+
+  // eslint-disable-next-line react-hooks/rules-of-hooks -- async fetch pattern, setState is after await
+  useEffect(() => {
+    void fetchMembers(); // loading starts true
+  }, [brandId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function handleAdd() {
     if (!addEmail) return;

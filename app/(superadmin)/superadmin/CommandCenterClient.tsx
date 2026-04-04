@@ -537,9 +537,11 @@ function AIServicesSection({ health }: { health: CommandCenterData["health"] }) 
         </Link>
         <div className="text-center p-3 rounded-xl border" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
           <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
-            {health.barbackLastCrawl
-              ? `${Math.floor((Date.now() - new Date(health.barbackLastCrawl).getTime()) / 3600000)}h ago`
-              : "Never"}
+            {(() => {
+              if (!health.barbackLastCrawl) return "Never";
+              const hours = Math.floor((new Date().getTime() - new Date(health.barbackLastCrawl).getTime()) / 3600000);
+              return `${hours}h ago`;
+            })()}
           </p>
           <p className="text-[10px] font-mono uppercase tracking-wider mt-1" style={{ color: "var(--text-muted)" }}>
             Last Crawl

@@ -104,13 +104,8 @@ export function BrandTeamClient({ brandId, brandName, locations, userRole, userI
   const canManage = userRole === "owner" || userRole === "brand_manager";
   const isOwner = userRole === "owner";
 
-  useEffect(() => {
-    fetchMembers();
-    if (canManage) fetchActivity();
-  }, [brandId]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  async function fetchMembers() {
-    setLoading(true);
+  async function fetchMembers(showLoading = false) {
+    if (showLoading) setLoading(true);
     const res = await fetch(`/api/brand/${brandId}/members`);
     const data = await res.json();
     setMembers(data.data ?? []);
@@ -122,6 +117,13 @@ export function BrandTeamClient({ brandId, brandName, locations, userRole, userI
     const data = await res.json();
     setActivity(data.data ?? []);
   }
+
+  /* eslint-disable react-hooks/rules-of-hooks -- async fetch pattern, setState is after await */
+  useEffect(() => {
+    void fetchMembers(); // loading starts true
+    if (canManage) void fetchActivity();
+  }, [brandId]); // eslint-disable-line react-hooks/exhaustive-deps
+  /* eslint-enable react-hooks/rules-of-hooks */
 
   async function handleAdd() {
     if (!addInput.trim()) return;

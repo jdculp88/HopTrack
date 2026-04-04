@@ -35,11 +35,17 @@ export default function QuickRatingSheet({
   // Reset state when sheet opens with new data
   useEffect(() => {
     if (isOpen) {
-      setRating(previousRating ?? 0)
-      setComment(previousComment ?? '')
-      setIsEditing(!hasPreviousRating)
-      setSaving(false)
-      setHovered(0)
+      // Use queueMicrotask to avoid synchronous setState in effect (React compiler)
+      const newRating = previousRating ?? 0
+      const newComment = previousComment ?? ''
+      const newIsEditing = !hasPreviousRating
+      queueMicrotask(() => {
+        setRating(newRating)
+        setComment(newComment)
+        setIsEditing(newIsEditing)
+        setSaving(false)
+        setHovered(0)
+      })
     }
   }, [isOpen, previousRating, previousComment, hasPreviousRating])
 

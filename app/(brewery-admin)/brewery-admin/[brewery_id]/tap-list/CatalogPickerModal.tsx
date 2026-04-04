@@ -30,20 +30,21 @@ export function CatalogPickerModal({ brandId, breweryId, existingBeerNames, onCl
   const [adding, setAdding] = useState(false);
 
   useEffect(() => {
-    fetchCatalog();
+    let cancelled = false;
+    // loading is already true from initial state; for brandId changes the fetch resolves quickly
+    fetch(`/api/brand/${brandId}/catalog`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((json) => {
+        if (!cancelled && json?.data) {
+          setCatalog(json.data.catalog ?? []);
+        }
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => { cancelled = true; };
   }, [brandId]);
-
-  async function fetchCatalog() {
-    setLoading(true);
-    try {
-      const res = await fetch(`/api/brand/${brandId}/catalog`);
-      if (res.ok) {
-        const json = await res.json();
-        setCatalog(json.data.catalog ?? []);
-      }
-    } catch { /* keep loading */ }
-    setLoading(false);
-  }
 
   // Filter out beers already at this location
   const existingLower = new Set(existingBeerNames.map(n => n.toLowerCase().trim()));

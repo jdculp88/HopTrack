@@ -136,13 +136,19 @@ export function BrandDashboardClient({ brandId, initialData, tapStats, brandKPIs
   const [locationLoading, setLocationLoading] = useState(false);
 
   // When a location is selected, fetch filtered data; when "All" is selected, use initialData
-  useEffect(() => {
-    if (selectedLocation === null) {
+  function handleLocationChange(locationId: string | null) {
+    setSelectedLocation(locationId);
+    if (locationId === null) {
       setFilteredData(null);
-      return;
+      setLocationLoading(false);
+    } else {
+      setLocationLoading(true);
     }
+  }
+
+  useEffect(() => {
+    if (selectedLocation === null) return;
     let cancelled = false;
-    setLocationLoading(true);
     fetch(`/api/brand/${brandId}/analytics?location=${selectedLocation}`)
       .then((res) => res.ok ? res.json() : null)
       .then((json) => {
@@ -178,7 +184,7 @@ export function BrandDashboardClient({ brandId, initialData, tapStats, brandKPIs
           <LocationSelector
             locations={initialData.locations}
             selectedLocationId={selectedLocation}
-            onLocationChange={setSelectedLocation}
+            onLocationChange={handleLocationChange}
             locationScope={locationScope}
           />
         </div>

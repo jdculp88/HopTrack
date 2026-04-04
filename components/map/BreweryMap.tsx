@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
-import "leaflet/dist/leaflet.css";
+// leaflet.css imported in app/globals.css (avoids Turbopack CSS module panic)
 import type { BreweryWithStats } from "@/types/database";
 
 // Fix Leaflet's default icon paths (broken in bundled environments)

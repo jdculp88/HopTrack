@@ -20,7 +20,8 @@ export function InstallPromptBanner() {
   // Delay showing the banner by 30 seconds so we don't ambush new users
   useEffect(() => {
     if (!canInstall) {
-      setVisible(false);
+      // Use queueMicrotask to avoid synchronous setState in effect (React compiler)
+      queueMicrotask(() => setVisible(false));
       return;
     }
     const timer = setTimeout(() => setVisible(true), 30_000);

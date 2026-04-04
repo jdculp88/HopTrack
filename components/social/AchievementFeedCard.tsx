@@ -44,8 +44,9 @@ const CATEGORY_ICONS: Record<string, LucideIcon> = {
   default:    Beer,        // fallback
 };
 
-function getCategoryIcon(category: string): LucideIcon {
-  return CATEGORY_ICONS[category] ?? CATEGORY_ICONS.default;
+function getCategoryIconElement(category: string): React.ReactElement {
+  const Icon = CATEGORY_ICONS[category] ?? CATEGORY_ICONS.default;
+  return <Icon size={22} strokeWidth={1.75} />;
 }
 
 export function AchievementFeedCard({
@@ -58,8 +59,8 @@ export function AchievementFeedCard({
 }) {
   const tier = achievement.achievement.tier;
   const tierColor = TIER_COLORS[tier] ?? "var(--badge-gold)";
-   
-  const CategoryIcon = getCategoryIcon(achievement.achievement.category);
+
+  const categoryIcon = getCategoryIconElement(achievement.achievement.category);
   const [showCelebration, setShowCelebration] = useState(() =>
     isNewAchievement(achievement.earned_at)
   );
@@ -68,7 +69,7 @@ export function AchievementFeedCard({
   return (
     <FeedCardWrapper
       accentColor={tierColor}
-      icon={<CategoryIcon size={22} strokeWidth={1.75} />}
+      icon={categoryIcon}
       ariaLabel={`${achievement.profile.display_name || achievement.profile.username} earned ${achievement.achievement.name}`}
       bgClass="card-bg-achievement"
       backgroundStyle={{

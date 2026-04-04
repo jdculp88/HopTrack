@@ -227,7 +227,7 @@ export async function fetchBreweryDetail(
 
   // Build profile lookup for top customer
   const userIds = [...new Set(sessions.map((s: any) => s.user_id).filter(Boolean))];
-  let profiles: Record<string, { display_name?: string; username?: string }> = {};
+  const profiles: Record<string, { display_name?: string; username?: string }> = {};
   if (userIds.length > 0) {
     const { data: profilesRaw } = await service
       .from("profiles")
