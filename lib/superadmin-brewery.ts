@@ -156,19 +156,22 @@ export async function fetchBreweryDetail(
     service
       .from("loyalty_cards")
       .select("user_id")
-      .eq("brewery_id", breweryId) as any,
+      .eq("brewery_id", breweryId)
+      .limit(50000) as any,
 
     // 9. Loyalty redemptions
     service
       .from("loyalty_redemptions")
       .select("id, redeemed_at")
-      .eq("brewery_id", breweryId) as any,
+      .eq("brewery_id", breweryId)
+      .limit(50000) as any,
 
     // 10. All followers (for KPIs + count)
     service
       .from("brewery_follows")
       .select("id, created_at")
-      .eq("brewery_id", breweryId) as any,
+      .eq("brewery_id", breweryId)
+      .limit(50000) as any,
 
     // 11. Recent sessions (timeline) — last 10 with profile
     service

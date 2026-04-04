@@ -11,6 +11,11 @@ import { globSync } from "glob";
  *
  * Bug discovered Sprint 153: Brand dashboard showed "1000" for all stats
  * because queries hit the default 1000-row limit.
+ *
+ * Bug rediscovered Sprint 155: PostgREST max-rows setting caps at 1000 even
+ * WITH .limit(50000). Count-display stats MUST use { count: "exact", head: true }.
+ * Also: "today" queries must have an upper bound (.lt(tomorrowStart)) to avoid
+ * counting future-dated seed data.
  */
 
 // Files that contain dashboard/stats queries and use .length on results
@@ -21,7 +26,14 @@ const STATS_FILES = [
   "app/(brewery-admin)/brewery-admin/brand/[brand_id]/reports/page.tsx",
   "app/(brewery-admin)/brewery-admin/brand/[brand_id]/customers/page.tsx",
   "app/api/brand/[brand_id]/analytics/route.ts",
+  "app/api/brand/[brand_id]/analytics/comparison/route.ts",
+  "app/api/brewery/[brewery_id]/digest/route.ts",
+  "app/api/brewery/[brewery_id]/user-stats/route.ts",
+  "app/api/v1/breweries/[brewery_id]/stats/route.ts",
   "app/(app)/brewery/[id]/page.tsx",
+  "app/(brewery-admin)/brewery-admin/[brewery_id]/analytics/page.tsx",
+  "app/(brewery-admin)/brewery-admin/[brewery_id]/customers/page.tsx",
+  "app/(brewery-admin)/brewery-admin/[brewery_id]/pint-rewind/page.tsx",
 ];
 
 // Superadmin files with stat queries
@@ -128,6 +140,46 @@ describe("Stats query limit safety (S153 regression)", () => {
     }
   });
 
+  describe("Today queries must have upper bound (S155 regression)", () => {
+    const TODAY_FILES = [
+      "app/(brewery-admin)/brewery-admin/[brewery_id]/page.tsx",
+      "app/demo/dashboard/page.tsx",
+      "app/(brewery-admin)/brewery-admin/brand/[brand_id]/dashboard/page.tsx",
+      "app/api/brand/[brand_id]/analytics/route.ts",
+    ];
+
+    for (const filePath of TODAY_FILES) {
+      it(`${filePath} — todayStart queries have upper bound`, () => {
+        const content = readFile(filePath);
+        const lines = content.split("\n");
+
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i];
+          // Look for .gte("started_at", todayStart) or .gte("logged_at", todayStart)
+          if (line.includes("todayStart") && (line.includes('.gte("started_at"') || line.includes('.gte("logged_at"'))) {
+            // Build the full query chain
+            let queryChain = line;
+            let j = i + 1;
+            while (j < lines.length && (lines[j].trim().startsWith(".") || lines[j].trim() === "")) {
+              queryChain += " " + lines[j].trim();
+              if (lines[j].includes(" as any") || lines[j].includes("),") || lines[j].includes(";")) break;
+              j++;
+            }
+
+            // Must have .lt(tomorrowStart) or similar upper bound
+            if (!queryChain.includes("tomorrowStart") && !queryChain.includes(".lt(")) {
+              throw new Error(
+                `UNSAFE: "today" query at ${filePath}:${i + 1} has no upper bound.\n` +
+                `  Add .lt("started_at", tomorrowStart) to prevent counting future-dated data.\n` +
+                `  Query: ${queryChain.trim().slice(0, 120)}...`
+              );
+            }
+          }
+        }
+      });
+    }
+  });
+
   describe("KPI calculations handle large datasets", () => {
     it("calculateBreweryKPIs works with >1000 sessions", async () => {
       const { calculateBreweryKPIs } = await import("../kpi");
@@ -186,5 +238,64 @@ describe("Stats query limit safety (S153 regression)", () => {
       expect(result.newVisitorPct).toBe(100);
       expect(result.returningVisitorPct).toBe(0);
     });
+  });
+
+  describe("Infrastructure: PostgREST max_rows (S155)", () => {
+    it("supabase/config.toml max_rows must be >= 10000", () => {
+      const content = readFile("supabase/config.toml");
+      const match = content.match(/max_rows\s*=\s*(\d+)/);
+      expect(match).not.toBeNull();
+      const maxRows = parseInt(match![1], 10);
+      expect(maxRows).toBeGreaterThanOrEqual(10000);
+    });
+  });
+
+  describe("All date-range queries must have upper bounds (S155)", () => {
+    const ALL_TRACKED_FILES = [...STATS_FILES, ...SUPERADMIN_FILES];
+
+    for (const filePath of ALL_TRACKED_FILES) {
+      it(`${filePath} — .gte() date queries have .lt() upper bound`, () => {
+        let content: string;
+        try {
+          content = readFile(filePath);
+        } catch {
+          return; // File doesn't exist yet — skip
+        }
+        const lines = content.split("\n");
+
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i];
+          // Look for .gte("started_at" or .gte("logged_at" or .gte("created_at" or .gte("redeemed_at"
+          const gteMatch = line.match(/\.gte\("(started_at|logged_at|created_at|redeemed_at)"/);
+          if (!gteMatch) continue;
+          const field = gteMatch[1];
+
+          // Build the full query chain
+          let queryChain = line;
+          let j = i + 1;
+          while (j < lines.length && (lines[j].trim().startsWith(".") || lines[j].trim() === "")) {
+            queryChain += " " + lines[j].trim();
+            if (lines[j].includes(" as any") || lines[j].includes("),") || lines[j].includes(";")) break;
+            j++;
+          }
+
+          // Skip if the query already has a .lt() on the same field
+          if (queryChain.includes(`.lt("${field}"`)) continue;
+          // Skip if the query has count: "exact" (head-only, no data returned)
+          if (queryChain.includes('count: "exact"')) continue;
+          // Skip if this is a "previous period" query that already has an upper bound via another .lt()
+          if (queryChain.includes(".lt(")) continue;
+          // Skip if bounded by a small limit (display queries like .limit(5), .limit(10), .limit(15))
+          const limitMatch = queryChain.match(/\.limit\((\d+)\)/);
+          if (limitMatch && parseInt(limitMatch[1], 10) <= 100) continue;
+
+          throw new Error(
+            `UNSAFE: .gte("${field}") at ${filePath}:${i + 1} has no .lt() upper bound.\n` +
+            `  Future-dated data will be included. Add .lt("${field}", nowISO) or similar.\n` +
+            `  Query: ${queryChain.trim().slice(0, 140)}...`
+          );
+        }
+      });
+    }
   });
 });

@@ -31,13 +31,15 @@ export default async function CustomersPage({ params }: { params: Promise<{ brew
     .select("id, user_id, started_at, ended_at, profile:profiles!user_id(display_name, username, avatar_url)")
     .eq("brewery_id", brewery_id)
     .eq("is_active", false)
-    .order("started_at", { ascending: false }) as any;
+    .order("started_at", { ascending: false })
+    .limit(50000) as any;
 
   // Fetch beer_logs to compute favorite beer per user
   const { data: beerLogs } = await supabase
     .from("beer_logs")
     .select("user_id, beer:beers(name)")
-    .eq("brewery_id", brewery_id) as any;
+    .eq("brewery_id", brewery_id)
+    .limit(50000) as any;
 
   // Aggregate per user
   const userMap = new Map<string, {

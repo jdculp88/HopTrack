@@ -95,6 +95,7 @@ export async function fetchPlatformStats(
   range: StatsTimeRange = "30d"
 ): Promise<PlatformStatsData> {
   const rangeDays = { "7d": 7, "30d": 30, "90d": 90 }[range];
+  const nowISO = new Date().toISOString();
   const rangeStart = daysAgo(rangeDays);
   const sevenDaysAgo = daysAgo(7);
   const todayStart = new Date();
@@ -142,22 +143,22 @@ export async function fetchPlatformStats(
     service.from("session_comments").select("id", { count: "exact", head: true }) as unknown as CountResult,
 
     // Sparklines
-    service.from("profiles").select("created_at").gte("created_at", sevenDaysAgo).limit(50000) as any,
-    service.from("sessions").select("started_at").eq("is_active", false).gte("started_at", sevenDaysAgo).limit(50000) as any,
+    service.from("profiles").select("created_at").gte("created_at", sevenDaysAgo).lt("created_at", nowISO).limit(50000) as any,
+    service.from("sessions").select("started_at").eq("is_active", false).gte("started_at", sevenDaysAgo).lt("started_at", nowISO).limit(50000) as any,
 
     // Ratios
-    service.from("sessions").select("id, user_id, started_at").eq("is_active", false).gte("started_at", rangeStart).limit(50000) as any,
-    service.from("beer_logs").select("id, session_id").gte("logged_at", rangeStart).limit(50000) as any,
+    service.from("sessions").select("id, user_id, started_at").eq("is_active", false).gte("started_at", rangeStart).lt("started_at", nowISO).limit(50000) as any,
+    service.from("beer_logs").select("id, session_id").gte("logged_at", rangeStart).lt("logged_at", nowISO).limit(50000) as any,
 
     // CRM
     service.from("profiles").select("total_checkins, last_session_date").limit(50000) as any,
 
     // Styles
-    service.from("beer_logs").select("beer:beers(style)").gte("logged_at", rangeStart).limit(50000) as any,
+    service.from("beer_logs").select("beer:beers(style)").gte("logged_at", rangeStart).lt("logged_at", nowISO).limit(50000) as any,
 
     // Leaderboards
-    service.from("sessions").select("brewery:breweries(id, name, city, state)").eq("is_active", false).gte("started_at", rangeStart).limit(50000) as any,
-    service.from("beer_logs").select("beer:beers(id, name, style)").gte("logged_at", rangeStart).limit(50000) as any,
+    service.from("sessions").select("brewery:breweries(id, name, city, state)").eq("is_active", false).gte("started_at", rangeStart).lt("started_at", nowISO).limit(50000) as any,
+    service.from("beer_logs").select("beer:beers(id, name, style)").gte("logged_at", rangeStart).lt("logged_at", nowISO).limit(50000) as any,
   ]);
 
   // ── Build sparklines ──────────────────────────────────────────────

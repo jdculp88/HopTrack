@@ -57,6 +57,7 @@
 | Staging Supabase provisioned | ✅ | Joshua | **Paid tier provisioned (S77)** — team has access |
 | Production environment variables documented | ✅ | Riley | `.env.production.example` created (S77/S79) |
 | Supabase connection pooling configured | ✅ | Riley / Quinn | **Sprint 151** — documented in `docs/connection-pooling.md`. Supabase JS uses REST API → PostgREST → Supavisor (automatic pooling on paid tiers) |
+| PostgREST max_rows set to 10000+ | ⬜ | Riley | **Sprint 155** — Dashboard → API Settings. Default 1000 silently caps query results. Local config.toml updated to 10000 |
 | CDN / edge caching configured | 🔄 | Riley | ISR configured on brewery pages (S49), Vercel edge review pending |
 | Uptime monitoring configured | ✅ | Riley | **Sprint 151** — `docs/uptime-monitoring.md` created. Health endpoint enhanced with `checks` object. UptimeRobot guide ready to execute |
 

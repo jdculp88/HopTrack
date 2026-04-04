@@ -23,34 +23,24 @@ export async function calculateDigestStats(
   const supabase = await createClient();
 
   const now = Date.now();
+  const nowISO = new Date(now).toISOString();
   const weekAgo = new Date(now - 7 * 86400000).toISOString();
   const twoWeeksAgo = new Date(now - 14 * 86400000).toISOString();
 
-  // ── Sessions this week ──
-  const { data: sessionsThisWeek } = await supabase
-    .from("sessions")
-    .select("id, user_id")
-    .eq("brewery_id", breweryId)
-    .eq("is_active", false)
-    .gte("started_at", weekAgo) as any;
-
-  // ── Sessions last week (for trend) ──
-  const { data: sessionsLastWeek } = await supabase
-    .from("sessions")
-    .select("id")
-    .eq("brewery_id", breweryId)
-    .eq("is_active", false)
-    .gte("started_at", twoWeeksAgo)
-    .lt("started_at", weekAgo) as any;
-
-  const visits = (sessionsThisWeek ?? []).length;
-  const lastWeekVisits = (sessionsLastWeek ?? []).length;
+  // ── Sessions this week (count + data for unique visitors) ──
+  const [{ count: visits }, { data: sessionsThisWeek }, { count: lastWeekVisits }] = await Promise.all([
+    supabase.from("sessions").select("id", { count: "exact", head: true }).eq("brewery_id", breweryId).eq("is_active", false).gte("started_at", weekAgo) as any,
+    supabase.from("sessions").select("id, user_id").eq("brewery_id", breweryId).eq("is_active", false).gte("started_at", weekAgo).lt("started_at", nowISO).limit(50000) as any,
+    supabase.from("sessions").select("id", { count: "exact", head: true }).eq("brewery_id", breweryId).eq("is_active", false).gte("started_at", twoWeeksAgo).lt("started_at", weekAgo) as any,
+  ]);
+  const visitsCount = visits ?? 0;
+  const lastWeekCount = lastWeekVisits ?? 0;
   const visitsTrend =
-    lastWeekVisits === 0
-      ? visits > 0
+    lastWeekCount === 0
+      ? visitsCount > 0
         ? 100
         : 0
-      : Math.round(((visits - lastWeekVisits) / lastWeekVisits) * 100);
+      : Math.round(((visitsCount - lastWeekCount) / lastWeekCount) * 100);
 
   const uniqueVisitors = new Set(
     (sessionsThisWeek ?? []).map((s: any) => s.user_id),
@@ -61,7 +51,9 @@ export async function calculateDigestStats(
     .from("beer_logs")
     .select("beer_id, quantity, beer:beers(name)")
     .eq("brewery_id", breweryId)
-    .gte("logged_at", weekAgo) as any;
+    .gte("logged_at", weekAgo)
+    .lt("logged_at", nowISO)
+    .limit(50000) as any;
 
   const beersLogged = (beerLogs ?? []).reduce(
     (sum: number, l: any) => sum + (l.quantity ?? 1),
@@ -94,7 +86,8 @@ export async function calculateDigestStats(
       .from("loyalty_redemptions")
       .select("id", { count: "exact", head: true })
       .in("program_id", programIds)
-      .gte("redeemed_at", weekAgo) as any;
+      .gte("redeemed_at", weekAgo)
+      .lt("redeemed_at", nowISO) as any;
     loyaltyRedemptions = count ?? 0;
   }
 
@@ -103,7 +96,8 @@ export async function calculateDigestStats(
     .from("brewery_follows")
     .select("id", { count: "exact", head: true })
     .eq("brewery_id", breweryId)
-    .gte("created_at", weekAgo) as any;
+    .gte("created_at", weekAgo)
+    .lt("created_at", nowISO) as any;
 
   // ── Brewery name ──
   const { data: brewery } = await supabase
@@ -115,7 +109,7 @@ export async function calculateDigestStats(
   return {
     breweryName: brewery?.name ?? "Your Brewery",
     stats: {
-      visits,
+      visits: visitsCount,
       visitsTrend,
       uniqueVisitors,
       beersLogged,

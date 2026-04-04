@@ -73,36 +73,46 @@ export default async function BrandDashboardPage({ params }: { params: Promise<{
   if (locationIds.length > 0) {
     const now = new Date();
     const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+    const tomorrowStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).toISOString();
     const weekAgo = new Date(now.getTime() - 7 * 86400000).toISOString();
     const twoWeeksAgo = new Date(now.getTime() - 14 * 86400000).toISOString();
 
     const [
       { data: allSessions },
       { data: allBeerLogs },
-      { data: todaySessions },
-      { data: todayBeerLogs },
+      { count: todaySessionCount },
+      { count: todayBeerCount },
       { data: recentSessions },
       { count: followersCount },
+      { count: totalSessionCount },
+      { count: totalBeerLogCount },
+      { count: thisWeekSessionCount },
+      { count: lastWeekSessionCount },
     ] = await Promise.all([
       supabase.from("sessions").select("id, user_id, brewery_id, started_at").in("brewery_id", locationIds).eq("is_active", false).limit(50000) as any,
       supabase.from("beer_logs").select("id, beer_id, rating, quantity, logged_at, brewery_id, beer:beers(name, style)").in("brewery_id", locationIds).limit(50000) as any,
-      supabase.from("sessions").select("id, user_id").in("brewery_id", locationIds).eq("is_active", false).gte("started_at", todayStart).limit(50000) as any,
-      supabase.from("beer_logs").select("id, quantity").in("brewery_id", locationIds).gte("logged_at", todayStart).limit(50000) as any,
+      supabase.from("sessions").select("id", { count: "exact", head: true }).in("brewery_id", locationIds).eq("is_active", false).gte("started_at", todayStart).lt("started_at", tomorrowStart) as any,
+      supabase.from("beer_logs").select("id", { count: "exact", head: true }).in("brewery_id", locationIds).gte("logged_at", todayStart).lt("logged_at", tomorrowStart) as any,
       supabase.from("sessions").select("id, brewery_id, started_at, profile:profiles(display_name, username), beer_logs(id, beer_id, beer:beers(name))").in("brewery_id", locationIds).eq("is_active", false).order("started_at", { ascending: false }).limit(15) as any,
       supabase.from("brewery_followers").select("id", { count: "exact", head: true }).in("brewery_id", locationIds) as any,
+      // Accurate counts (bypass PostgREST max-rows cap — S155 P0 fix)
+      supabase.from("sessions").select("id", { count: "exact", head: true }).in("brewery_id", locationIds).eq("is_active", false) as any,
+      supabase.from("beer_logs").select("id", { count: "exact", head: true }).in("brewery_id", locationIds) as any,
+      supabase.from("sessions").select("id", { count: "exact", head: true }).in("brewery_id", locationIds).eq("is_active", false).gte("started_at", weekAgo).lt("started_at", tomorrowStart) as any,
+      supabase.from("sessions").select("id", { count: "exact", head: true }).in("brewery_id", locationIds).eq("is_active", false).gte("started_at", twoWeeksAgo).lt("started_at", weekAgo) as any,
     ]);
 
     const sessions = allSessions ?? [];
     const beerLogs = allBeerLogs ?? [];
 
-    // Aggregate stats
-    stats.totalSessions = sessions.length;
-    stats.totalBeersLogged = beerLogs.reduce((sum: number, l: any) => sum + (l.quantity ?? 1), 0);
+    // Aggregate stats (count queries bypass PostgREST max-rows cap)
+    stats.totalSessions = totalSessionCount ?? 0;
+    stats.totalBeersLogged = totalBeerLogCount ?? 0;
     stats.uniqueVisitors = new Set(sessions.map((s: any) => s.user_id).filter(Boolean)).size;
-    stats.thisWeekSessions = sessions.filter((s: any) => s.started_at >= weekAgo).length;
-    stats.lastWeekSessions = sessions.filter((s: any) => s.started_at >= twoWeeksAgo && s.started_at < weekAgo).length;
-    stats.todaySessions = (todaySessions ?? []).length;
-    stats.todayBeers = (todayBeerLogs ?? []).reduce((sum: number, l: any) => sum + (l.quantity ?? 1), 0);
+    stats.thisWeekSessions = thisWeekSessionCount ?? 0;
+    stats.lastWeekSessions = lastWeekSessionCount ?? 0;
+    stats.todaySessions = todaySessionCount ?? 0;
+    stats.todayBeers = todayBeerCount ?? 0;
     stats.totalFollowers = followersCount ?? 0;
 
     const rated = beerLogs.filter((l: any) => l.rating > 0);

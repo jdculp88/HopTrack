@@ -23,7 +23,8 @@ export async function GET(
     .eq("brewery_id", brewery_id)
     .eq("user_id", userId)
     .eq("is_active", false)
-    .order("started_at", { ascending: false });
+    .order("started_at", { ascending: false })
+    .limit(50000);
 
   if (sessionsError) {
     return apiServerError(sessionsError.message);
@@ -47,7 +48,8 @@ export async function GET(
     .from("beer_logs")
     .select("beer_id, quantity, beer:beers!beer_id(name)")
     .eq("brewery_id", brewery_id)
-    .eq("user_id", userId);
+    .eq("user_id", userId)
+    .limit(50000);
 
   if (logsError) {
     return apiServerError(logsError.message);
@@ -80,7 +82,8 @@ export async function GET(
     .from("brewery_visits")
     .select("user_id, total_visits")
     .eq("brewery_id", brewery_id)
-    .order("total_visits", { ascending: false });
+    .order("total_visits", { ascending: false })
+    .limit(50000);
 
   let visitorRank = 0;
   if (allVisits) {

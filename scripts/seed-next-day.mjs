@@ -281,6 +281,21 @@ async function main() {
   const nextDay = new Date(lastSeededDate.getTime());
   nextDay.setUTCDate(nextDay.getUTCDate() + 1);
 
+  // Never seed future data — cap at today (seed today if not done, skip if already seeded)
+  const todayUTC = new Date(Date.UTC(
+    new Date().getUTCFullYear(),
+    new Date().getUTCMonth(),
+    new Date().getUTCDate(),
+  ));
+  const tomorrowUTC = new Date(todayUTC.getTime() + 86400000);
+
+  if (nextDay >= tomorrowUTC) {
+    const lastDateStr = lastSeededDate.toISOString().split('T')[0];
+    console.log(`\nAlready seeded today (last seeded: ${lastDateStr}).`);
+    console.log('Nothing to seed — run again tomorrow.');
+    process.exit(0);
+  }
+
   const dow = nextDay.getUTCDay(); // 0=Sun, 6=Sat
   const dayName = DAY_NAMES[dow];
   const dateStr = nextDay.toISOString().split('T')[0];

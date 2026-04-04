@@ -22,13 +22,16 @@ export default async function PintRewindPage({ params }: { params: Promise<{ bre
   // Last 30 days — sessions
   // eslint-disable-next-line react-hooks/purity
   const since30 = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+  const nowISO = new Date().toISOString();
   const { data: sessions30 } = await supabase
     .from("sessions")
     .select("id, user_id, started_at, ended_at")
     .eq("brewery_id", brewery_id)
     .eq("is_active", false)
     .gte("started_at", since30)
-    .order("started_at") as any;
+    .lt("started_at", nowISO)
+    .order("started_at")
+    .limit(50000) as any;
 
   // Last 30 days — beer logs
   const { data: beerLogs30 } = await supabase
@@ -36,7 +39,9 @@ export default async function PintRewindPage({ params }: { params: Promise<{ bre
     .select("id, beer_id, rating, quantity, logged_at, user_id, beer:beers(name, style)")
     .eq("brewery_id", brewery_id)
     .gte("logged_at", since30)
-    .order("logged_at") as any;
+    .lt("logged_at", nowISO)
+    .order("logged_at")
+    .limit(50000) as any;
 
   // All-time — sessions
   const { data: sessionsAll } = await supabase
@@ -44,14 +49,16 @@ export default async function PintRewindPage({ params }: { params: Promise<{ bre
     .select("id, user_id, started_at, ended_at")
     .eq("brewery_id", brewery_id)
     .eq("is_active", false)
-    .order("started_at") as any;
+    .order("started_at")
+    .limit(50000) as any;
 
   // All-time — beer logs
   const { data: beerLogsAll } = await supabase
     .from("beer_logs")
     .select("id, beer_id, rating, quantity, logged_at, user_id, beer:beers(name, style)")
     .eq("brewery_id", brewery_id)
-    .order("logged_at") as any;
+    .order("logged_at")
+    .limit(50000) as any;
 
   // Most loyal visitor (all-time) — user with most sessions
   const visitorCounts: Record<string, number> = {};

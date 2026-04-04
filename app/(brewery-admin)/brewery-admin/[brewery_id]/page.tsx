@@ -57,6 +57,9 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
   // ── Fetch all data in parallel ─────────────────────────────────────────────
   const now = new Date();
   const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+  const tomorrowStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).toISOString();
+  const weekAgoStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6).toISOString();
+  const twoWeeksAgoStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 13).toISOString();
 
   const [
     { data: brewery },
@@ -65,9 +68,9 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
     { data: loyaltyProgram },
     { data: allSessions },
     { data: allBeerLogs },
-    { data: todaySessions },
-    { data: todayBeerLogs },
-    { data: activeSessions },
+    { count: todayVisitCountRaw },
+    { count: todayBeerCountRaw },
+    { count: activeCountRaw },
     { data: recentReviews },
     { data: recentFollowers },
     { data: _loyaltyProgramsForROI },
@@ -106,30 +109,29 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
       .eq("brewery_id", brewery_id)
       .limit(50000) as any,
 
-    // Today's sessions
+    // Today's sessions (count only — bypasses PostgREST max-rows cap)
     queryClient
       .from("sessions")
-      .select("id, user_id, started_at")
+      .select("id", { count: "exact", head: true })
       .eq("brewery_id", brewery_id)
       .eq("is_active", false)
       .gte("started_at", todayStart)
-      .limit(50000) as any,
+      .lt("started_at", tomorrowStart) as any,
 
-    // Today's beer logs
+    // Today's beer logs (count only)
     queryClient
       .from("beer_logs")
-      .select("id, quantity")
+      .select("id", { count: "exact", head: true })
       .eq("brewery_id", brewery_id)
       .gte("logged_at", todayStart)
-      .limit(50000) as any,
+      .lt("logged_at", tomorrowStart) as any,
 
-    // Active sessions right now
+    // Active sessions right now (count only)
     queryClient
       .from("sessions")
-      .select("id")
+      .select("id", { count: "exact", head: true })
       .eq("brewery_id", brewery_id)
-      .eq("is_active", true)
-      .limit(50000) as any,
+      .eq("is_active", true) as any,
 
     // Recent reviews for activity feed
     queryClient
@@ -162,6 +164,10 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
     { data: loyaltyRedemptions },
     { data: allFollowers },
     { data: latestAISuggestion },
+    { count: totalVisitCountRaw },
+    { count: totalBeerCountRaw },
+    { count: thisWeekCountRaw },
+    { count: lastWeekCountRaw },
   ] = await Promise.all([
     queryClient
       .from("brewery_visits")
@@ -190,6 +196,31 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
       .order("generated_at", { ascending: false })
       .limit(1)
       .maybeSingle() as any,
+
+    // Accurate counts — bypasses PostgREST max-rows cap (S155 P0 fix)
+    queryClient
+      .from("sessions")
+      .select("id", { count: "exact", head: true })
+      .eq("brewery_id", brewery_id)
+      .eq("is_active", false) as any,
+    queryClient
+      .from("beer_logs")
+      .select("id", { count: "exact", head: true })
+      .eq("brewery_id", brewery_id) as any,
+    queryClient
+      .from("sessions")
+      .select("id", { count: "exact", head: true })
+      .eq("brewery_id", brewery_id)
+      .eq("is_active", false)
+      .gte("started_at", weekAgoStart)
+      .lt("started_at", tomorrowStart) as any,
+    queryClient
+      .from("sessions")
+      .select("id", { count: "exact", head: true })
+      .eq("brewery_id", brewery_id)
+      .eq("is_active", false)
+      .gte("started_at", twoWeeksAgoStart)
+      .lt("started_at", weekAgoStart) as any,
   ]);
 
   // Build profile lookup for top customer display
@@ -222,28 +253,30 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
     .from("brewery_follows")
     .select("id", { count: "exact", head: true })
     .eq("brewery_id", brewery_id)
-    .gte("created_at", todayStart);
+    .gte("created_at", todayStart)
+    .lt("created_at", tomorrowStart);
 
   // ── Compute stats ─────────────────────────────────────────────────────────
+  // NOTE: allSessions/allBeerLogs may be capped by PostgREST max-rows (default 1000).
+  // All visible totals use { count: "exact", head: true } queries for accuracy.
+  // Data arrays are used only for KPIs, sparklines, and top beers.
   const sessions = (allSessions as any[]) ?? [];
   const beerLogs = (allBeerLogs as any[]) ?? [];
 
-  const totalVisits = sessions.length;
-  const totalBeersLogged = beerLogs.reduce((sum: number, l: any) => sum + (l.quantity ?? 1), 0);
+  const totalVisits = totalVisitCountRaw ?? 0;
+  const totalBeersLogged = totalBeerCountRaw ?? 0;
   const uniqueVisitors = new Set(sessions.map((s: any) => s.user_id)).size;
   const ratings = beerLogs.filter((l: any) => l.rating > 0).map((l: any) => l.rating);
   const avgRating = ratings.length > 0
     ? (ratings.reduce((a: number, b: number) => a + b, 0) / ratings.length).toFixed(1)
     : null;
 
-  // Today stats
-  const todayVisitCount = ((todaySessions as any[]) ?? []).length;
-  const todayBeersCount = ((todayBeerLogs as any[]) ?? []).reduce(
-    (sum: number, l: any) => sum + (l.quantity ?? 1), 0
-  );
-  const activeSessionCount = ((activeSessions as any[]) ?? []).length;
+  // Today stats (from count queries — accurate regardless of row limits)
+  const todayVisitCount = todayVisitCountRaw ?? 0;
+  const todayBeersCount = todayBeerCountRaw ?? 0;
+  const activeSessionCount = activeCountRaw ?? 0;
 
-  // Weekly trend — visits per day for last 7 days (sparkline data)
+  // Weekly trend — sparkline uses capped data (relative shape is representative)
   const weeklyData: number[] = [];
   for (let i = 6; i >= 0; i--) {
     const dayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
@@ -255,15 +288,11 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
     weeklyData.push(dayCount);
   }
 
-  const thisWeekTotal = weeklyData.reduce((a, b) => a + b, 0);
-  const lastWeekSessions = sessions.filter((s: any) => {
-    const d = new Date(s.started_at);
-    const lastWeekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 13);
-    const lastWeekEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6);
-    return d >= lastWeekStart && d < lastWeekEnd;
-  }).length;
-  const weekTrend = lastWeekSessions > 0
-    ? Math.round(((thisWeekTotal - lastWeekSessions) / lastWeekSessions) * 100)
+  // This week / last week totals (from count queries — accurate)
+  const thisWeekTotal = thisWeekCountRaw ?? 0;
+  const lastWeekTotal = lastWeekCountRaw ?? 0;
+  const weekTrend = lastWeekTotal > 0
+    ? Math.round(((thisWeekTotal - lastWeekTotal) / lastWeekTotal) * 100)
     : null;
 
   // Top 3 beers

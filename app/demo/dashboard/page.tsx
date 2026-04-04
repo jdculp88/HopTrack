@@ -14,6 +14,9 @@ export default async function DemoDashboardPage() {
 
   const now = new Date();
   const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+  const tomorrowStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).toISOString();
+  const weekAgoStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6).toISOString();
+  const twoWeeksAgoStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 13).toISOString();
 
   // ── Fetch all data in parallel (mirrors brewery dashboard) ────────────
   const [
@@ -23,9 +26,9 @@ export default async function DemoDashboardPage() {
     { data: loyaltyProgram },
     { data: allSessions },
     { data: allBeerLogs },
-    { data: todaySessions },
-    { data: todayBeerLogs },
-    { data: activeSessions },
+    { count: todayVisitCountRaw },
+    { count: todayBeerCountRaw },
+    { count: activeCountRaw },
     { data: recentReviews },
     { data: recentFollowers },
   ] = await Promise.all([
@@ -57,23 +60,22 @@ export default async function DemoDashboardPage() {
       .limit(50000) as any,
     supabase
       .from("sessions")
-      .select("id, user_id, started_at")
+      .select("id", { count: "exact", head: true })
       .eq("brewery_id", breweryId)
       .eq("is_active", false)
       .gte("started_at", todayStart)
-      .limit(50000) as any,
+      .lt("started_at", tomorrowStart) as any,
     supabase
       .from("beer_logs")
-      .select("id, quantity")
+      .select("id", { count: "exact", head: true })
       .eq("brewery_id", breweryId)
       .gte("logged_at", todayStart)
-      .limit(50000) as any,
+      .lt("logged_at", tomorrowStart) as any,
     supabase
       .from("sessions")
-      .select("id")
+      .select("id", { count: "exact", head: true })
       .eq("brewery_id", breweryId)
-      .eq("is_active", true)
-      .limit(50000) as any,
+      .eq("is_active", true) as any,
     supabase
       .from("brewery_reviews")
       .select("id, rating, comment, created_at, profile:profiles!user_id(display_name, username)")
@@ -94,11 +96,21 @@ export default async function DemoDashboardPage() {
     { data: loyaltyCards },
     { data: loyaltyRedemptions },
     { data: allFollowers },
+    { count: totalVisitCountRaw },
+    { count: totalBeerCountRaw },
+    { count: thisWeekCountRaw },
+    { count: lastWeekCountRaw },
   ] = await Promise.all([
     supabase.from("brewery_visits").select("user_id, total_visits").eq("brewery_id", breweryId).limit(50000) as any,
     supabase.from("loyalty_cards").select("user_id").eq("brewery_id", breweryId).limit(50000) as any,
     supabase.from("loyalty_redemptions").select("id, redeemed_at").eq("brewery_id", breweryId).limit(50000) as any,
     supabase.from("brewery_follows").select("id, created_at").eq("brewery_id", breweryId).limit(50000) as any,
+
+    // Accurate counts (bypass PostgREST max-rows cap — S155 P0 fix)
+    supabase.from("sessions").select("id", { count: "exact", head: true }).eq("brewery_id", breweryId).eq("is_active", false) as any,
+    supabase.from("beer_logs").select("id", { count: "exact", head: true }).eq("brewery_id", breweryId) as any,
+    supabase.from("sessions").select("id", { count: "exact", head: true }).eq("brewery_id", breweryId).eq("is_active", false).gte("started_at", weekAgoStart).lt("started_at", tomorrowStart) as any,
+    supabase.from("sessions").select("id", { count: "exact", head: true }).eq("brewery_id", breweryId).eq("is_active", false).gte("started_at", twoWeeksAgoStart).lt("started_at", weekAgoStart) as any,
   ]);
 
   // Build profile lookup for top customer
@@ -127,23 +139,22 @@ export default async function DemoDashboardPage() {
     .from("brewery_follows")
     .select("id", { count: "exact", head: true })
     .eq("brewery_id", breweryId)
-    .gte("created_at", todayStart);
+    .gte("created_at", todayStart)
+    .lt("created_at", tomorrowStart);
 
   // ── Compute stats ─────────────────────────────────────────────────────
   const sessions = (allSessions as any[]) ?? [];
   const beerLogs = (allBeerLogs as any[]) ?? [];
 
-  const totalVisits = sessions.length;
-  const totalBeersLogged = beerLogs.reduce((sum: number, l: any) => sum + (l.quantity ?? 1), 0);
+  const totalVisits = totalVisitCountRaw ?? 0;
+  const totalBeersLogged = totalBeerCountRaw ?? 0;
   const uniqueVisitors = new Set(sessions.map((s: any) => s.user_id)).size;
 
-  const todayVisitCount = ((todaySessions as any[]) ?? []).length;
-  const todayBeersCount = ((todayBeerLogs as any[]) ?? []).reduce(
-    (sum: number, l: any) => sum + (l.quantity ?? 1), 0
-  );
-  const activeSessionCount = ((activeSessions as any[]) ?? []).length;
+  const todayVisitCount = todayVisitCountRaw ?? 0;
+  const todayBeersCount = todayBeerCountRaw ?? 0;
+  const activeSessionCount = activeCountRaw ?? 0;
 
-  // Weekly sparkline
+  // Weekly sparkline (uses capped data — relative shape is representative)
   const weeklyData: number[] = [];
   for (let i = 6; i >= 0; i--) {
     const dayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
@@ -155,15 +166,10 @@ export default async function DemoDashboardPage() {
     weeklyData.push(dayCount);
   }
 
-  const thisWeekTotal = weeklyData.reduce((a, b) => a + b, 0);
-  const lastWeekSessions = sessions.filter((s: any) => {
-    const d = new Date(s.started_at);
-    const lastWeekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 13);
-    const lastWeekEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6);
-    return d >= lastWeekStart && d < lastWeekEnd;
-  }).length;
-  const weekTrend = lastWeekSessions > 0
-    ? Math.round(((thisWeekTotal - lastWeekSessions) / lastWeekSessions) * 100)
+  const thisWeekTotal = thisWeekCountRaw ?? 0;
+  const lastWeekTotal = lastWeekCountRaw ?? 0;
+  const weekTrend = lastWeekTotal > 0
+    ? Math.round(((thisWeekTotal - lastWeekTotal) / lastWeekTotal) * 100)
     : null;
 
   // Top 3 beers

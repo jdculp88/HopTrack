@@ -71,6 +71,7 @@ export async function GET(
   try {
     const now = new Date();
     const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+    const tomorrowStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).toISOString();
     const weekAgo = new Date(now.getTime() - 7 * 86400000).toISOString();
     const twoWeeksAgo = new Date(now.getTime() - 14 * 86400000).toISOString();
 
@@ -78,10 +79,14 @@ export async function GET(
     const [
       { data: allSessions },
       { data: allBeerLogs },
-      { data: todaySessions },
-      { data: todayBeerLogs },
+      { count: todaySessionCount },
+      { count: todayBeerCount },
       { data: recentSessions },
       { count: followersCount },
+      { count: totalSessionCount },
+      { count: totalBeerLogCount },
+      { count: thisWeekSessionCount },
+      { count: lastWeekSessionCount },
     ] = await Promise.all([
       supabase
         .from("sessions")
@@ -94,19 +99,8 @@ export async function GET(
         .select("id, beer_id, rating, quantity, logged_at, brewery_id, beer:beers(name, style)")
         .in("brewery_id", locationIds)
         .limit(50000) as any,
-      supabase
-        .from("sessions")
-        .select("id, user_id")
-        .in("brewery_id", locationIds)
-        .eq("is_active", false)
-        .gte("started_at", todayStart)
-        .limit(50000) as any,
-      supabase
-        .from("beer_logs")
-        .select("id, quantity")
-        .in("brewery_id", locationIds)
-        .gte("logged_at", todayStart)
-        .limit(50000) as any,
+      supabase.from("sessions").select("id", { count: "exact", head: true }).in("brewery_id", locationIds).eq("is_active", false).gte("started_at", todayStart).lt("started_at", tomorrowStart) as any,
+      supabase.from("beer_logs").select("id", { count: "exact", head: true }).in("brewery_id", locationIds).gte("logged_at", todayStart).lt("logged_at", tomorrowStart) as any,
       supabase
         .from("sessions")
         .select("id, brewery_id, started_at, profile:profiles(display_name, username), beer_logs(id, beer_id, beer:beers(name))")
@@ -114,26 +108,28 @@ export async function GET(
         .eq("is_active", false)
         .order("started_at", { ascending: false })
         .limit(15) as any,
-      supabase
-        .from("brewery_followers")
-        .select("id", { count: "exact", head: true })
-        .in("brewery_id", locationIds) as any,
+      supabase.from("brewery_followers").select("id", { count: "exact", head: true }).in("brewery_id", locationIds) as any,
+      // Accurate counts (bypass PostgREST max-rows cap — S155 P0 fix)
+      supabase.from("sessions").select("id", { count: "exact", head: true }).in("brewery_id", locationIds).eq("is_active", false) as any,
+      supabase.from("beer_logs").select("id", { count: "exact", head: true }).in("brewery_id", locationIds) as any,
+      supabase.from("sessions").select("id", { count: "exact", head: true }).in("brewery_id", locationIds).eq("is_active", false).gte("started_at", weekAgo).lt("started_at", tomorrowStart) as any,
+      supabase.from("sessions").select("id", { count: "exact", head: true }).in("brewery_id", locationIds).eq("is_active", false).gte("started_at", twoWeeksAgo).lt("started_at", weekAgo) as any,
     ]);
 
     const sessions = allSessions ?? [];
     const beerLogs = allBeerLogs ?? [];
 
-    // ── Aggregate stats ──
-    const totalSessions = sessions.length;
-    const totalBeersLogged = beerLogs.reduce((sum: number, l: any) => sum + (l.quantity ?? 1), 0);
+    // ── Aggregate stats (count queries bypass PostgREST max-rows cap) ──
+    const totalSessions = totalSessionCount ?? 0;
+    const totalBeersLogged = totalBeerLogCount ?? 0;
     const uniqueVisitorSet = new Set(sessions.map((s: any) => s.user_id).filter(Boolean));
     const uniqueVisitors = uniqueVisitorSet.size;
 
-    const thisWeekSessions = sessions.filter((s: any) => s.started_at >= weekAgo).length;
-    const lastWeekSessions = sessions.filter((s: any) => s.started_at >= twoWeeksAgo && s.started_at < weekAgo).length;
+    const thisWeekSessions = thisWeekSessionCount ?? 0;
+    const lastWeekSessions = lastWeekSessionCount ?? 0;
 
-    const todayCount = (todaySessions ?? []).length;
-    const todayBeers = (todayBeerLogs ?? []).reduce((sum: number, l: any) => sum + (l.quantity ?? 1), 0);
+    const todayCount = todaySessionCount ?? 0;
+    const todayBeers = todayBeerCount ?? 0;
 
     // Avg rating
     const rated = beerLogs.filter((l: any) => l.rating > 0);

@@ -163,7 +163,8 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
         .in("user_id", friendIds)
         .eq("brewery_id", id)
         .eq("is_active", true)
-        .gte("started_at", sixHoursAgo);
+        .gte("started_at", sixHoursAgo)
+        .lt("started_at", new Date().toISOString());
       friendsHere = ((activeSessions ?? []) as unknown as ActiveFriendSession[]).filter((s) => {
         const prefs = s.profile?.notification_preferences ?? {};
         return prefs.share_live !== false;
@@ -184,14 +185,11 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
   }
 
   // ── Brewery stats (public) ──
-  const { data: brewerySessionsRaw } = await supabase // supabase join shape
-    .from("sessions")
-    .select("user_id")
-    .eq("brewery_id", id)
-    .eq("is_active", false)
-    .limit(50000);
+  const [{ count: totalCheckins }, { data: brewerySessionsRaw }] = await Promise.all([
+    supabase.from("sessions").select("id", { count: "exact", head: true }).eq("brewery_id", id).eq("is_active", false) as any,
+    supabase.from("sessions").select("user_id").eq("brewery_id", id).eq("is_active", false).limit(50000),
+  ]);
   const brewerySessions = (brewerySessionsRaw ?? []) as { user_id: string }[];
-  const totalCheckins = brewerySessions.length;
   const uniqueVisitors = new Set(brewerySessions.map((s) => s.user_id)).size;
 
   const { data: breweryLogsRaw } = await supabase // supabase join shape

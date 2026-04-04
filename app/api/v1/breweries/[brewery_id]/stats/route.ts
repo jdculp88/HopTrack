@@ -40,6 +40,7 @@ export async function GET(
   else if (period === "90d") daysBack = 90;
   else if (period === "all") daysBack = 3650; // ~10 years
   const since = new Date(Date.now() - daysBack * 86400000).toISOString();
+  const nowISO = new Date().toISOString();
 
   // Parallel queries
   const [sessionsRes, beersRes, followsRes, reviewsRes] = await Promise.all([
@@ -48,13 +49,16 @@ export async function GET(
       .from("sessions")
       .select("id", { count: "exact", head: true })
       .eq("brewery_id", brewery_id)
-      .gte("started_at", since),
+      .gte("started_at", since)
+      .lt("started_at", nowISO),
     // Unique beers logged
     (supabase as any)
       .from("beer_logs")
       .select("beer_id")
       .eq("brewery_id", brewery_id)
-      .gte("logged_at", since),
+      .gte("logged_at", since)
+      .lt("logged_at", nowISO)
+      .limit(50000),
     // Follower count
     (supabase as any)
       .from("brewery_follows")
@@ -64,7 +68,8 @@ export async function GET(
     (supabase as any)
       .from("brewery_reviews")
       .select("rating")
-      .eq("brewery_id", brewery_id),
+      .eq("brewery_id", brewery_id)
+      .limit(50000),
   ]);
 
   const totalVisits = sessionsRes.count ?? 0;

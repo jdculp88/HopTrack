@@ -29,28 +29,34 @@ export default async function AnalyticsPage({ params }: { params: Promise<{ brew
       .select("id, user_id, started_at, ended_at, is_active")
       .eq("brewery_id", brewery_id)
       .eq("is_active", false)
-      .order("started_at") as any,
+      .order("started_at")
+      .limit(50000) as any,
     supabase
       .from("beer_logs")
       .select("id, beer_id, rating, quantity, logged_at, user_id, beer:beers(name, style)")
       .eq("brewery_id", brewery_id)
-      .order("logged_at") as any,
+      .order("logged_at")
+      .limit(50000) as any,
     supabase
       .from("brewery_visits")
       .select("user_id, total_visits")
-      .eq("brewery_id", brewery_id) as any,
+      .eq("brewery_id", brewery_id)
+      .limit(50000) as any,
     supabase
       .from("loyalty_cards")
       .select("user_id")
-      .eq("brewery_id", brewery_id) as any,
+      .eq("brewery_id", brewery_id)
+      .limit(50000) as any,
     supabase
       .from("loyalty_redemptions")
       .select("id, redeemed_at")
-      .eq("brewery_id", brewery_id) as any,
+      .eq("brewery_id", brewery_id)
+      .limit(50000) as any,
     supabase
       .from("brewery_follows")
       .select("id, created_at")
-      .eq("brewery_id", brewery_id) as any,
+      .eq("brewery_id", brewery_id)
+      .limit(50000) as any,
   ]);
 
   // Build profile lookup for top customers

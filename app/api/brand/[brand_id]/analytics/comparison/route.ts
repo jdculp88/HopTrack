@@ -64,6 +64,7 @@ export async function GET(
 
   try {
     const now = new Date();
+    const nowISO = now.toISOString();
     const rangeStart = new Date(now.getTime() - rangeDays * 86400000).toISOString();
     const prevRangeStart = new Date(now.getTime() - rangeDays * 2 * 86400000).toISOString();
 
@@ -80,23 +81,29 @@ export async function GET(
         .select("id, user_id, brewery_id, started_at")
         .in("brewery_id", locationIds)
         .eq("is_active", false)
-        .gte("started_at", rangeStart) as any,
+        .gte("started_at", rangeStart)
+        .lt("started_at", nowISO)
+        .limit(50000) as any,
       supabase
         .from("sessions")
         .select("id, user_id, brewery_id")
         .in("brewery_id", locationIds)
         .eq("is_active", false)
         .gte("started_at", prevRangeStart)
-        .lt("started_at", rangeStart) as any,
+        .lt("started_at", rangeStart)
+        .limit(50000) as any,
       supabase
         .from("beer_logs")
         .select("id, beer_id, rating, quantity, brewery_id, beer:beers(name, style)")
         .in("brewery_id", locationIds)
-        .gte("logged_at", rangeStart) as any,
+        .gte("logged_at", rangeStart)
+        .lt("logged_at", nowISO)
+        .limit(50000) as any,
       supabase
         .from("brewery_followers")
         .select("id, brewery_id")
-        .in("brewery_id", locationIds) as any,
+        .in("brewery_id", locationIds)
+        .limit(50000) as any,
       supabase
         .from("loyalty_programs")
         .select("id, brewery_id")
@@ -119,7 +126,9 @@ export async function GET(
         .from("loyalty_redemptions")
         .select("id, program_id")
         .in("program_id", programIds)
-        .gte("redeemed_at", rangeStart) as any);
+        .gte("redeemed_at", rangeStart)
+        .lt("redeemed_at", nowISO)
+        .limit(50000) as any);
 
       (redemptions ?? []).forEach((r: any) => {
         const breweryId = programToBrewery[r.program_id];

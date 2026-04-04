@@ -196,6 +196,7 @@ export async function calculateCommandCenterMetrics(
   range: TimeRange = "30d"
 ): Promise<CommandCenterData> {
   const rangeDays = { "7d": 7, "30d": 30, "90d": 90 }[range];
+  const nowISO = new Date().toISOString();
   const rangeStart = daysAgo(rangeDays);
   const oneWeekAgo = daysAgo(7);
   const twoWeeksAgo = daysAgo(14);
@@ -261,9 +262,9 @@ export async function calculateCommandCenterMetrics(
   ] = await Promise.all([
     // ── Pulse queries ──
     service.from("profiles").select("id", { count: "exact", head: true }) as unknown as CountResult,
-    service.from("sessions").select("user_id, started_at").gte("started_at", thirtyDaysAgo).limit(50000) as any,
+    service.from("sessions").select("user_id, started_at").gte("started_at", thirtyDaysAgo).lt("started_at", nowISO).limit(50000) as any,
     service.from("sessions").select("id", { count: "exact", head: true }).eq("is_active", true) as unknown as CountResult,
-    service.from("profiles").select("id", { count: "exact", head: true }).gte("created_at", oneWeekAgo) as unknown as CountResult,
+    service.from("profiles").select("id", { count: "exact", head: true }).gte("created_at", oneWeekAgo).lt("created_at", nowISO) as unknown as CountResult,
     service.from("profiles").select("id", { count: "exact", head: true }).gte("created_at", twoWeeksAgo).lt("created_at", oneWeekAgo) as unknown as CountResult,
 
     // ── Revenue queries ──
@@ -273,21 +274,21 @@ export async function calculateCommandCenterMetrics(
     service.from("brewery_accounts").select("id", { count: "exact", head: true }).eq("verified", true) as unknown as CountResult,
 
     // ── Engagement queries ──
-    service.from("sessions").select("id, user_id, started_at, ended_at").eq("is_active", false).gte("started_at", rangeStart).limit(50000) as any,
-    service.from("beer_logs").select("id, session_id, beer_id").gte("logged_at", rangeStart).limit(50000) as any,
+    service.from("sessions").select("id, user_id, started_at, ended_at").eq("is_active", false).gte("started_at", rangeStart).lt("started_at", nowISO).limit(50000) as any,
+    service.from("beer_logs").select("id, session_id, beer_id").gte("logged_at", rangeStart).lt("logged_at", nowISO).limit(50000) as any,
     service.from("loyalty_programs").select("id", { count: "exact", head: true }).eq("is_active", true) as unknown as CountResult,
     // Top beers: fetch beer_logs with beer name, group in JS
-    service.from("beer_logs").select("beer:beers(id, name, style)").gte("logged_at", rangeStart).limit(50000) as any,
+    service.from("beer_logs").select("beer:beers(id, name, style)").gte("logged_at", rangeStart).lt("logged_at", nowISO).limit(50000) as any,
     // Top breweries: fetch sessions with brewery name, group in JS
-    service.from("sessions").select("brewery:breweries(id, name, city, state)").eq("is_active", false).gte("started_at", rangeStart).limit(50000) as any,
+    service.from("sessions").select("brewery:breweries(id, name, city, state)").eq("is_active", false).gte("started_at", rangeStart).lt("started_at", nowISO).limit(50000) as any,
 
     // ── Geo query ──
     service.from("breweries").select("state").not("state", "is", null).limit(50000) as any,
 
     // ── Growth queries (scoped to selected range) ──
-    service.from("profiles").select("created_at").gte("created_at", rangeStart).order("created_at", { ascending: true }).limit(50000) as any,
-    service.from("sessions").select("started_at").eq("is_active", false).gte("started_at", rangeStart).order("started_at", { ascending: true }).limit(50000) as any,
-    service.from("brewery_claims").select("created_at").gte("created_at", rangeStart).order("created_at", { ascending: true }).limit(50000) as any,
+    service.from("profiles").select("created_at").gte("created_at", rangeStart).lt("created_at", nowISO).order("created_at", { ascending: true }).limit(50000) as any,
+    service.from("sessions").select("started_at").eq("is_active", false).gte("started_at", rangeStart).lt("started_at", nowISO).order("started_at", { ascending: true }).limit(50000) as any,
+    service.from("brewery_claims").select("created_at").gte("created_at", rangeStart).lt("created_at", nowISO).order("created_at", { ascending: true }).limit(50000) as any,
 
     // ── Health queries ──
     service.from("brewery_claims").select("id", { count: "exact", head: true }).eq("status", "pending") as unknown as CountResult,
@@ -311,7 +312,7 @@ export async function calculateCommandCenterMetrics(
     service.from("profiles").select("id", { count: "exact", head: true }).lt("total_checkins", 2) as unknown as CountResult,
 
     // Churn distribution counts (14d active, 45d at-risk, rest churned)
-    service.from("profiles").select("id", { count: "exact", head: true }).gte("last_session_date", daysAgo(14)) as unknown as CountResult,
+    service.from("profiles").select("id", { count: "exact", head: true }).gte("last_session_date", daysAgo(14)).lt("last_session_date", nowISO) as unknown as CountResult,
     service.from("profiles").select("id", { count: "exact", head: true }).gte("last_session_date", daysAgo(45)).lt("last_session_date", daysAgo(14)) as unknown as CountResult,
     service.from("profiles").select("id", { count: "exact", head: true }).or(`last_session_date.is.null,last_session_date.lt.${daysAgo(45)}`) as unknown as CountResult,
   ]);
@@ -723,17 +724,20 @@ export async function calculateRetentionCohorts(
   const maxWeek = 12;
 
   // Fetch users created in last 91 days
+  const nowISO = new Date().toISOString();
   const [{ data: usersRaw }, { data: sessionsRaw }] = await Promise.all([
     service
       .from("profiles")
       .select("id, created_at")
       .gte("created_at", daysAgo(lookback))
+      .lt("created_at", nowISO)
       .limit(50000) as any,
     service
       .from("sessions")
       .select("user_id, started_at")
       .eq("is_active", false)
       .gte("started_at", daysAgo(lookback + 7 * maxWeek))
+      .lt("started_at", nowISO)
       .limit(50000) as any,
   ]);
 
