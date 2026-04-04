@@ -386,17 +386,35 @@ export function onboardingDay3Email(params: { breweryName: string; ownerName: st
       Day 3 tip, ${firstName}
     </h1>
     <p style="margin:0 0 12px;font-size:14px;line-height:1.6;color:${BRAND.text};">
-      One of the most popular features brewery owners discover in their first week: <strong style="color:${BRAND.gold};">The Board</strong>.
+      Quick wins to get the most out of your first week:
     </p>
-    <p style="margin:0 0 12px;font-size:14px;line-height:1.6;color:${BRAND.text};">
-      Put your tap list on any TV or tablet behind the bar. It auto-updates when you edit your beers — no design work, no reprinting.
-    </p>
-    <p style="margin:0 0 16px;font-size:14px;line-height:1.6;color:${BRAND.text};">
-      Just open the link on a browser connected to your TV and go full-screen. That's it.
-    </p>
-    ${button("Preview The Board", `https://app.hoptrack.beer/brewery-admin/${breweryId}/board`)}
+
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;">
+      <tr>
+        <td style="padding:12px 16px;background:#252320;border-radius:12px;margin-bottom:8px;">
+          <p style="margin:0 0 4px;font-size:14px;font-weight:700;color:${BRAND.gold};">1. Add your beers to the tap list</p>
+          <p style="margin:0;font-size:13px;color:${BRAND.muted};">Takes 5 minutes. Your customers can see what's on tap before they walk in.</p>
+        </td>
+      </tr>
+      <tr><td style="height:8px;"></td></tr>
+      <tr>
+        <td style="padding:12px 16px;background:#252320;border-radius:12px;margin-bottom:8px;">
+          <p style="margin:0 0 4px;font-size:14px;font-weight:700;color:${BRAND.gold};">2. Set up your loyalty program</p>
+          <p style="margin:0;font-size:13px;color:${BRAND.muted};">Digital stamp cards in 3 minutes. No printing, no lost cards, customers love it.</p>
+        </td>
+      </tr>
+      <tr><td style="height:8px;"></td></tr>
+      <tr>
+        <td style="padding:12px 16px;background:#252320;border-radius:12px;">
+          <p style="margin:0 0 4px;font-size:14px;font-weight:700;color:${BRAND.gold};">3. Try The Board on your bar TV</p>
+          <p style="margin:0;font-size:13px;color:${BRAND.muted};">Open the link on any browser, go full-screen. Auto-updates when you edit beers.</p>
+        </td>
+      </tr>
+    </table>
+
+    ${button("Open Your Dashboard", `https://app.hoptrack.beer/brewery-admin/${breweryId}`)}
     <p style="margin:0;font-size:13px;color:${BRAND.muted};">
-      Need help getting it set up? Reply to this email — we're here.
+      Need help? Reply to this email — we're here.
     </p>
   `,
     `${breweryName} tip: put your tap list on your bar TV with The Board.`
@@ -444,11 +462,18 @@ export function onboardingDay7Email(params: { breweryName: string; ownerName: st
     </table>
 
     <p style="margin:0 0 16px;font-size:14px;line-height:1.6;color:${BRAND.text};">
-      ${stats.sessions > 0 ? "Great start! Your customers are checking in." : "No sessions yet — that's normal! Share your QR table tent and the check-ins will start rolling in."}
+      ${stats.sessions > 0
+        ? "Your customers are checking in — you're building real data about who visits, what they drink, and when they come back."
+        : "No sessions yet — that's normal! Print your QR table tents and the check-ins will start rolling in. Once they do, you'll see your busiest nights, top beers, and most loyal regulars."}
     </p>
+    ${stats.sessions > 0 ? `
+    <p style="margin:0 0 16px;font-size:14px;line-height:1.6;color:${BRAND.text};">
+      Your analytics dashboard now shows: <strong style="color:${BRAND.gold};">peak hours</strong>, <strong style="color:${BRAND.gold};">top beers by rating</strong>, <strong style="color:${BRAND.gold};">new vs. returning visitors</strong>, and <strong style="color:${BRAND.gold};">customer retention rate</strong>. Data that used to require expensive POS add-ons.
+    </p>
+    ` : ""}
     ${button("View Full Analytics", `https://app.hoptrack.beer/brewery-admin/${breweryId}/analytics`)}
     <p style="margin:0;font-size:13px;color:${BRAND.muted};">
-      Your trial has 7 days left. Questions? Reply anytime.
+      Your trial has 7 days left. Want to keep going? Subscribe anytime from Settings → Billing. Questions? Reply anytime.
     </p>
   `,
     `${breweryName} first week: ${stats.sessions} sessions, ${stats.beersLogged} beers logged.`

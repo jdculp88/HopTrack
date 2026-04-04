@@ -103,6 +103,16 @@ export interface ActivityItem {
   breweryId?: string;
 }
 
+export interface SalesPipelineMetrics {
+  totalClaims: number;
+  pending: number;
+  approved: number;
+  inTrial: number; // verified, no paid tier, trial not expired
+  converted: number; // has paid subscription_tier
+  churned: number; // trial expired, no paid tier
+  trialExpiringSoon: { breweryId: string; name: string; daysLeft: number }[];
+}
+
 export interface CommandCenterData {
   pulse: PulseMetrics;
   revenue: RevenueMetrics;
@@ -113,6 +123,7 @@ export interface CommandCenterData {
   recentActivity: ActivityItem[];
   crmDistribution: { segment: string; count: number; color: string; bgColor: string; emoji: string }[];
   churnDistribution: { level: string; count: number; color: string }[];
+  salesPipeline: SalesPipelineMetrics;
   generatedAt: string;
 }
 
@@ -649,6 +660,9 @@ export async function calculateCommandCenterMetrics(
     .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
     .slice(0, 30);
 
+  // ── Sales Pipeline (Sprint 148) ──────────────────────────────────────
+  const salesPipeline = await calculateSalesPipeline(service);
+
   // ── Assemble ───────────────────────────────────────────────────────
 
   return {
@@ -661,6 +675,7 @@ export async function calculateCommandCenterMetrics(
     recentActivity,
     crmDistribution,
     churnDistribution,
+    salesPipeline,
     generatedAt: new Date().toISOString(),
   };
 }
@@ -895,5 +910,78 @@ export async function calculateUserFunnel(
   return {
     steps,
     generatedAt: new Date().toISOString(),
+  };
+}
+
+// ── Sales Pipeline ────────────────────────────────────────────────────
+// Sprint 148 — The Closer
+
+export async function calculateSalesPipeline(
+  service: SupabaseClient
+): Promise<SalesPipelineMetrics> {
+  const now = new Date();
+
+  const [
+    { count: totalClaims },
+    { count: pending },
+    { count: approved },
+    { data: verifiedAccounts },
+  ] = await Promise.all([
+    service.from("brewery_claims").select("id", { count: "exact", head: true }),
+    service.from("brewery_claims").select("id", { count: "exact", head: true }).eq("status", "pending"),
+    service.from("brewery_claims").select("id", { count: "exact", head: true }).eq("status", "approved"),
+    // All verified brewery accounts with their brewery subscription data
+    service
+      .from("brewery_accounts")
+      .select("brewery_id, verified, verified_at, brewery:breweries(id, name, subscription_tier, trial_ends_at)")
+      .eq("verified", true)
+      .eq("role", "owner") as any,
+  ]);
+
+  const accounts = (verifiedAccounts as any[]) ?? [];
+
+  let inTrial = 0;
+  let converted = 0;
+  let churned = 0;
+  const trialExpiringSoon: SalesPipelineMetrics["trialExpiringSoon"] = [];
+
+  for (const acc of accounts) {
+    const brewery = acc.brewery as any;
+    if (!brewery) continue;
+
+    const tier = brewery.subscription_tier;
+    const trialEndsAt = brewery.trial_ends_at ? new Date(brewery.trial_ends_at) : null;
+    const isPaid = tier && !["free", null].includes(tier);
+
+    if (isPaid) {
+      converted++;
+    } else if (trialEndsAt && trialEndsAt > now) {
+      // Active trial
+      inTrial++;
+      const daysLeft = Math.ceil((trialEndsAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+      if (daysLeft <= 7) {
+        trialExpiringSoon.push({
+          breweryId: brewery.id,
+          name: brewery.name ?? "Unknown",
+          daysLeft,
+        });
+      }
+    } else if (trialEndsAt && trialEndsAt <= now) {
+      // Trial expired, not paid
+      churned++;
+    }
+  }
+
+  // Sort expiring soon by days left (most urgent first)
+  trialExpiringSoon.sort((a, b) => a.daysLeft - b.daysLeft);
+
+  return {
+    totalClaims: totalClaims ?? 0,
+    pending: pending ?? 0,
+    approved: approved ?? 0,
+    inTrial,
+    converted,
+    churned,
+    trialExpiringSoon,
   };
 }

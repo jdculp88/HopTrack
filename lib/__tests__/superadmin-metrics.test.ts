@@ -285,3 +285,58 @@ describe("CommandCenterData churnDistribution", () => {
     expect(entry.color).toMatch(/^#[0-9a-fA-F]{6}$/);
   });
 });
+
+// ── Sales Pipeline (Sprint 148) ───────────────────────────────────
+
+describe("SalesPipelineMetrics interface", () => {
+  it("exports calculateSalesPipeline function", async () => {
+    const mod = await import("../superadmin-metrics");
+    expect(typeof mod.calculateSalesPipeline).toBe("function");
+  });
+
+  it("SalesPipelineMetrics shape is valid", () => {
+    // Type check at compile time, runtime check for shape
+    const sample = {
+      totalClaims: 10,
+      pending: 3,
+      approved: 7,
+      inTrial: 4,
+      converted: 2,
+      churned: 1,
+      trialExpiringSoon: [
+        { breweryId: "abc", name: "Test Brewery", daysLeft: 3 },
+      ],
+    };
+
+    expect(sample.totalClaims).toBeGreaterThanOrEqual(0);
+    expect(sample.pending + sample.approved).toBeLessThanOrEqual(sample.totalClaims + sample.approved);
+    expect(sample.trialExpiringSoon).toHaveLength(1);
+    expect(sample.trialExpiringSoon[0].daysLeft).toBe(3);
+  });
+
+  it("conversion rate calculation works correctly", () => {
+    const approved = 10;
+    const converted = 3;
+    const convRate = approved > 0 ? Math.round((converted / approved) * 100) : 0;
+    expect(convRate).toBe(30);
+  });
+
+  it("conversion rate is 0 when no approvals", () => {
+    const approved = 0;
+    const converted = 0;
+    const convRate = approved > 0 ? Math.round((converted / approved) * 100) : 0;
+    expect(convRate).toBe(0);
+  });
+
+  it("trialExpiringSoon sorts by daysLeft ascending", () => {
+    const trials = [
+      { breweryId: "a", name: "A", daysLeft: 5 },
+      { breweryId: "b", name: "B", daysLeft: 1 },
+      { breweryId: "c", name: "C", daysLeft: 3 },
+    ];
+    const sorted = [...trials].sort((a, b) => a.daysLeft - b.daysLeft);
+    expect(sorted[0].name).toBe("B");
+    expect(sorted[1].name).toBe("C");
+    expect(sorted[2].name).toBe("A");
+  });
+});

@@ -19,7 +19,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import {
   ArrowRight, Check, BarChart2, Gift, List,
-  Smartphone, Zap, HeartHandshake, ArrowUpRight, ChevronDown,
+  Smartphone, Zap, HeartHandshake, ArrowUpRight, ChevronDown, Eye,
 } from "lucide-react";
 import { HopMark } from "@/components/ui/HopMark";
 import { useEffect, useState } from "react";
@@ -303,9 +303,9 @@ export default function BreweriesContent() {
                   <Link href="/brewery-admin/claim" className="inline-flex items-center gap-2.5 font-semibold text-sm px-8 py-4 rounded-full transition-colors font-sans" style={{ background: C.dark, color: C.creamText }}>
                     Claim your brewery free <ArrowRight size={15} />
                   </Link>
-                  <a href="mailto:demo@hoptrack.beer?subject=HopTrack%20Demo%20Request" className="inline-flex items-center gap-2 font-semibold text-sm px-6 py-4 rounded-full transition-colors font-sans border" style={{ borderColor: C.dark, color: C.dark }}>
-                    Request a demo <ArrowUpRight size={14} />
-                  </a>
+                  <Link href="/demo/dashboard" className="inline-flex items-center gap-2 font-semibold text-sm px-6 py-4 rounded-full transition-colors font-sans border" style={{ borderColor: C.dark, color: C.dark }}>
+                    See it in action <Eye size={14} />
+                  </Link>
                 </div>
                 <p className="text-xs font-mono" style={{ color: C.textSubtle }}>No credit card required · 14-day free trial</p>
               </motion.div>
@@ -325,7 +325,7 @@ export default function BreweriesContent() {
         <section className="py-12 px-6 lg:px-10">
           <div className="max-w-7xl mx-auto flex flex-wrap items-baseline gap-x-6 sm:gap-x-10 gap-y-4 sm:gap-y-5">
             {[
-              { value: "7,000+", label: "breweries listed" },
+              { value: "7,177", label: "breweries listed" },
               { value: "$49", label: "starting per month" },
               { value: "20 min", label: "average setup time" },
             ].map((s, i) => (
@@ -414,6 +414,36 @@ export default function BreweriesContent() {
 
       <PourConnector />
 
+      {/* ── Live Tap List Preview ──────────────────────────────────────── */}
+      <section className="px-6 lg:px-10 py-10">
+        <div className="max-w-7xl mx-auto dark-section" style={{ background: C.dark }}>
+          <div className="relative z-10 p-6 sm:p-10 lg:p-14">
+            <ScrollReveal className="mb-8 text-center">
+              <span className="text-[11px] font-mono uppercase tracking-[0.22em]" style={{ color: C.gold }}>Live Preview</span>
+              <h2 className="font-display font-bold leading-[0.95] tracking-tight mt-3" style={{ fontSize: "clamp(28px, 4vw, 44px)", color: C.creamText }}>
+                A real tap list.<br /><span className="italic" style={{ color: C.creamMuted }}>Updated in real time.</span>
+              </h2>
+              <p className="text-sm mt-3 mx-auto max-w-md font-sans" style={{ color: C.creamSubtle }}>
+                This is a live embed from Pint & Pixel Brewing Co. Every brewery gets one — embed it on your website, put it on a TV, or share the link.
+              </p>
+            </ScrollReveal>
+            <ScrollReveal>
+              <div className="rounded-2xl overflow-hidden border mx-auto max-w-2xl" style={{ borderColor: C.darkBorder }}>
+                <iframe
+                  src="/embed/a1b2c3d4-e5f6-7890-abcd-ef1234567890/menu?theme=dark"
+                  className="w-full border-0"
+                  style={{ height: 420 }}
+                  title="Live tap list preview"
+                  loading="lazy"
+                />
+              </div>
+            </ScrollReveal>
+          </div>
+        </div>
+      </section>
+
+      <PourConnector />
+
       {/* ── Pricing — DARK floating section with tap handles ─────────────── */}
       <section className="px-6 lg:px-10 py-10" id="pricing">
         <div className="max-w-7xl mx-auto dark-section" style={{ background: C.dark }}>
@@ -473,6 +503,11 @@ export default function BreweriesContent() {
                 ))}
               </div>
               <p className="text-xs font-mono mt-5 text-center" style={{ color: C.creamSubtle }}>No long-term contracts · Cancel any time</p>
+              <div className="mt-4 text-center">
+                <Link href="/demo/dashboard" className="text-xs font-semibold font-sans transition-opacity hover:opacity-80" style={{ color: C.gold }}>
+                  See a live dashboard demo <ArrowUpRight size={11} className="inline ml-0.5" />
+                </Link>
+              </div>
             </ScrollReveal>
           </div>
         </div>

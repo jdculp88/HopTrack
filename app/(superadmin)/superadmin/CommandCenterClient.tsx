@@ -52,6 +52,7 @@ import type {
   TierSlice,
   DailyDataPoint,
   StateBreweryCount,
+  SalesPipelineMetrics,
 } from "@/lib/superadmin-metrics";
 import Link from "next/link";
 import { SUBSCRIPTION_TIER_COLORS } from "@/lib/constants/tiers";
@@ -208,6 +209,92 @@ function PlatformPulse({ data }: { data: CommandCenterData["pulse"] }) {
         );
       })}
     </div>
+  );
+}
+
+// ── Section: Sales Pipeline (Sprint 148) ──────────────────────────────
+
+function SalesPipeline({ data }: { data: SalesPipelineMetrics }) {
+  const funnelSteps = [
+    { label: "Claims", count: data.totalClaims, color: "var(--text-muted)" },
+    { label: "Approved", count: data.approved, color: "var(--accent-gold)" },
+    { label: "In Trial", count: data.inTrial, color: "#3b82f6" },
+    { label: "Converted", count: data.converted, color: "#22c55e" },
+  ];
+  const maxCount = Math.max(...funnelSteps.map(s => s.count), 1);
+
+  return (
+    <Card padding="spacious">
+      <CardHeader>
+        <div className="flex items-center gap-2">
+          <DollarSign size={14} style={{ color: "var(--accent-gold)" }} />
+          <CardTitle as="h3">Sales Pipeline</CardTitle>
+        </div>
+      </CardHeader>
+
+      {/* Funnel bars */}
+      <div className="space-y-3 mb-4">
+        {funnelSteps.map((step) => (
+          <div key={step.label}>
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-xs font-medium" style={{ color: "var(--text-primary)" }}>{step.label}</span>
+              <span className="text-xs font-mono font-bold" style={{ color: "var(--text-primary)" }}>{step.count}</span>
+            </div>
+            <div className="h-2 rounded-full" style={{ background: "var(--border)" }}>
+              <motion.div
+                className="h-2 rounded-full"
+                style={{ background: step.color }}
+                initial={{ width: 0 }}
+                animate={{ width: `${Math.max(3, (step.count / maxCount) * 100)}%` }}
+                transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Summary stats */}
+      <div className="grid grid-cols-3 gap-3 pt-3 border-t" style={{ borderColor: "var(--border)" }}>
+        <div>
+          <p className="text-[10px] font-mono" style={{ color: "var(--text-muted)" }}>Pending</p>
+          <p className="text-sm font-bold" style={{ color: data.pending > 0 ? "var(--accent-gold)" : "var(--text-primary)" }}>
+            {data.pending}
+          </p>
+        </div>
+        <div>
+          <p className="text-[10px] font-mono" style={{ color: "var(--text-muted)" }}>Churned</p>
+          <p className="text-sm font-bold" style={{ color: data.churned > 0 ? "#ef4444" : "var(--text-primary)" }}>
+            {data.churned}
+          </p>
+        </div>
+        <div>
+          <p className="text-[10px] font-mono" style={{ color: "var(--text-muted)" }}>Conv. Rate</p>
+          <p className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>
+            {data.approved > 0 ? Math.round((data.converted / data.approved) * 100) : 0}%
+          </p>
+        </div>
+      </div>
+
+      {/* Trial Expiring Soon */}
+      {data.trialExpiringSoon.length > 0 && (
+        <div className="mt-4 pt-3 border-t" style={{ borderColor: "var(--border)" }}>
+          <p className="text-xs font-mono uppercase tracking-wider mb-2" style={{ color: "#f59e0b" }}>
+            <AlertCircle size={11} className="inline mr-1" />
+            Trial Expiring Soon
+          </p>
+          <div className="space-y-1.5">
+            {data.trialExpiringSoon.slice(0, 5).map((b) => (
+              <div key={b.breweryId} className="flex items-center justify-between text-xs">
+                <span className="truncate" style={{ color: "var(--text-primary)" }}>{b.name}</span>
+                <span className="font-mono font-bold flex-shrink-0 ml-2" style={{ color: b.daysLeft <= 3 ? "#ef4444" : "#f59e0b" }}>
+                  {b.daysLeft}d left
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </Card>
   );
 }
 
@@ -886,9 +973,14 @@ export default function CommandCenterClient({ initialData }: CommandCenterClient
         {/* Platform Pulse */}
         <PlatformPulse data={data.pulse} />
 
-        {/* Revenue + Engagement (two columns) */}
+        {/* Sales Pipeline + Revenue (two columns) */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <SalesPipeline data={data.salesPipeline} />
           <RevenueIntelligence data={data.revenue} />
+        </div>
+
+        {/* Engagement */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <EngagementMetrics data={data.engagement} />
         </div>
 
