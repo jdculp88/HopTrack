@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { Compass, Beer } from "lucide-react";
 import {
   BeerOfTheWeekCard,
@@ -27,6 +27,7 @@ import { NearbyChallengesSection } from "@/components/social/NearbyChallengesSec
 import { TrendingSection } from "@/components/social/TrendingSection";
 import { BreweryAdFeedCard } from "@/components/social/BreweryAdFeedCard";
 import { useFeedAd } from "@/hooks/useFeedAd";
+import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 
 export interface CommunityContent {
   featuredBeers: FeaturedBeer[];
@@ -55,11 +56,13 @@ export function DiscoverTabContent({
   hasCommunityContent,
   recommendations,
   aiRecommendations,
+  homeCity,
 }: {
   communityContent?: CommunityContent;
   hasCommunityContent: boolean;
   recommendations?: RecommendedBeer[];
   aiRecommendations?: AIRecommendedBeer[];
+  homeCity?: string | null;
 }) {
   const feedAd = useFeedAd();
   const hasNewBreweries = (communityContent?.newBreweries?.length ?? 0) > 0;
@@ -142,7 +145,9 @@ export function DiscoverTabContent({
       </Link>
 
       {/* Challenges Near You — sponsored challenge discovery */}
-      <NearbyChallengesSection />
+      <ErrorBoundary inline context="NearbyChallenges">
+        <NearbyChallengesSection />
+      </ErrorBoundary>
 
       {/* Sponsored Ad */}
       {feedAd && <BreweryAdFeedCard ad={feedAd} />}
@@ -155,18 +160,22 @@ export function DiscoverTabContent({
         </div>
       )}
 
-      {/* Trending Near You — Sprint 156 */}
-      <TrendingSection />
+      {/* Trending Near You — Sprint 156, enhanced Sprint 157 */}
+      <ErrorBoundary inline context="TrendingSection">
+        <TrendingSection defaultCity={homeCity ?? undefined} />
+      </ErrorBoundary>
 
       {/* Brewed for You — AI Recommendations (Sprint 146) */}
-      {aiRecommendations && aiRecommendations.length > 0 && (
-        <AIRecommendationFeedCard recommendations={aiRecommendations} />
-      )}
+      <ErrorBoundary inline context="AIRecommendations">
+        {aiRecommendations && aiRecommendations.length > 0 && (
+          <AIRecommendationFeedCard recommendations={aiRecommendations} />
+        )}
 
-      {/* For You — Algorithmic Recommendations */}
-      {recommendations && recommendations.length > 0 && (
-        <RecommendationsScroll beers={recommendations} />
-      )}
+        {/* For You — Algorithmic Recommendations */}
+        {recommendations && recommendations.length > 0 && (
+          <RecommendationsScroll beers={recommendations} />
+        )}
+      </ErrorBoundary>
 
       {/* Trending beer reviews */}
       {communityContent.topReviews.length > 0 && (

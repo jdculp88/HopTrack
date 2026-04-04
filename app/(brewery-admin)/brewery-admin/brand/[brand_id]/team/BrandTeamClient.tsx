@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Users, UserPlus, Trash2, Loader2, Shield, ShieldCheck, ShieldAlert, ChevronDown, Clock, X, MapPin } from "lucide-react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion } from "motion/react";
 import { useToast } from "@/components/ui/Toast";
 import { LocationScopePicker } from "@/components/brewery-admin/brand/LocationScopePicker";
 

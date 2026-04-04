@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { AlertTriangle, X } from "lucide-react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
 
 interface PosSyncAlertBannerProps {

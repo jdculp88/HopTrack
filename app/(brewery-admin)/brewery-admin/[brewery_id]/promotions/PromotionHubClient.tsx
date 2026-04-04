@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { Megaphone, Trophy, Crown, Eye, MousePointerClick, Users, TrendingUp, Plus, Lock, ArrowUpRight, Sparkles, Activity } from "lucide-react";
 import Link from "next/link";
 

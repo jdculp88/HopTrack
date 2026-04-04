@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { Map, Route } from "lucide-react";
 import { getFirstName } from "@/lib/first-name";
 

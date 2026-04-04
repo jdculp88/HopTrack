@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { Crown, Check, Users, Loader2, Gift } from "lucide-react";
 import { useToast } from "@/components/ui/Toast";
 import type { MugClub, MugClubMember } from "@/types/database";

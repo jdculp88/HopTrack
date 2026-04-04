@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { useRouter } from "next/navigation";
 import { MapPin, Clock, Users, Zap, Navigation, ChevronRight, Loader2, Beer } from "lucide-react";
 import { useToast } from "@/components/ui/Toast";

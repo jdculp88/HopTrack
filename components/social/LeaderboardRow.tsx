@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { TrendingUp, TrendingDown } from "lucide-react";
 import { cn, formatCount } from "@/lib/utils";
 import { UserAvatar } from "@/components/ui/UserAvatar";

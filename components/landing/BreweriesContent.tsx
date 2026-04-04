@@ -15,7 +15,7 @@
 
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import Link from "next/link";
 import {
   ArrowRight, Check, BarChart2, Gift, List,

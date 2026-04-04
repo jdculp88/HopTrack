@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { Plus, Award, Tag, ToggleLeft, ToggleRight, X, Save, Loader2, Trash2, Edit2, AlertTriangle, QrCode, Users, Stamp, Gift, TrendingUp } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";

@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { getStyleVars } from "@/lib/beerStyleColors";
 import type { WrappedStats } from "@/lib/wrapped";
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { Star, Send, Trash2, MessageSquare } from "lucide-react";
 import { StarRating } from "@/components/ui/StarRating";
 import { UserAvatar } from "@/components/ui/UserAvatar";

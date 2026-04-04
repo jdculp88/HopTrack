@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Image from "next/image";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "@/components/charts/LazyRecharts";
 import { TrendingUp, Users, Beer, Star, Trophy, Calendar, Share2 } from "lucide-react";
 import { PintRewindShareCard } from "@/components/brewery-admin/PintRewindShareCard";

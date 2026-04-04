@@ -3,7 +3,9 @@ import { createClient } from '@/lib/supabase/server'
 import { sendPushToUser } from '@/lib/push'
 import { triggerFriendSession } from '@/lib/smart-triggers'
 import { rateLimitResponse } from '@/lib/rate-limit'
-import { apiUnauthorized, apiBadRequest, apiServerError } from '@/lib/api-response'
+import { apiUnauthorized, apiServerError } from '@/lib/api-response'
+import { parseRequestBody } from '@/lib/schemas'
+import { sessionCreateSchema } from '@/lib/schemas/sessions'
 
 // POST /api/sessions — start a new session (check-in at brewery or home)
 export async function POST(request: NextRequest) {
@@ -15,12 +17,9 @@ export async function POST(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return apiUnauthorized()
 
-  const body = await request.json()
-  const { brewery_id, share_to_feed = true, note, context = 'brewery', session_latitude, session_longitude } = body
-
-  if (context === 'brewery' && !brewery_id) {
-    return apiBadRequest('brewery_id is required for brewery sessions', 'brewery_id')
-  }
+  const result = await parseRequestBody(request, sessionCreateSchema)
+  if (result.error) return result.error
+  const { brewery_id, share_to_feed, note, context, session_latitude, session_longitude } = result.data
 
   // Close any existing active session for this user before starting a new one
   await supabase
@@ -63,7 +62,7 @@ export async function POST(request: NextRequest) {
 
   // Notify friends that this user started a session (fire and forget)
   if (share_to_feed) {
-    notifyFriendsSessionStarted(supabase, user.id, session.id, brewery_id).catch(() => {})
+    notifyFriendsSessionStarted(supabase, user.id, session.id, brewery_id ?? null).catch(() => {})
   }
 
   return NextResponse.json({ session }, { status: 201 })

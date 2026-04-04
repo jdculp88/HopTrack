@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { Share2, Check } from "lucide-react";
 import { getStyleVars } from "@/lib/beerStyleColors";
 

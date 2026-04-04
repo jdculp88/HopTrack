@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 import { TIER_STYLES } from "@/lib/constants/tiers";
 import type { Achievement, AchievementTier } from "@/types/database";

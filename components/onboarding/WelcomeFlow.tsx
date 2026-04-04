@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { Beer, MapPin, Trophy, ChevronRight } from "lucide-react";
 import { HopMark } from "@/components/ui/HopMark";
 import Link from "next/link";

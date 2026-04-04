@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { Shield, X, Eye } from "lucide-react";
 import { variants, spring } from "@/lib/animation";
 

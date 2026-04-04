@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import dynamic from "next/dynamic";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import {
   Search, Map, List, Loader2, SlidersHorizontal, X, Sparkles,
   Navigation, ChevronDown, ChevronUp, MapPin, Users, Calendar, Clock, Bookmark,

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import {
   UtensilsCrossed, Clock, Wine, Martini, GlassWater,
   Sparkles, Baby, Coffee, ChevronUp, ChevronDown,

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion } from "motion/react";
 import { Trophy, ChevronRight, X, Check, Loader2 } from "lucide-react";
 import { useToast } from "@/components/ui/Toast";
 

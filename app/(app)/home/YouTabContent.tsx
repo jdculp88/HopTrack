@@ -2,7 +2,7 @@
 
 import { useMemo, type RefObject } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { Beer, MapPin, Route, Gift } from "lucide-react";
 import { getStyleFamily, getStyleVars } from "@/lib/beerStyleColors";
 import { ActivityHeatmap } from "@/components/profile/ActivityHeatmap";

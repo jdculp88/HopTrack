@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { Edit2, Trash2, ToggleLeft, ToggleRight, AlertTriangle, Award, GripVertical, Ban, CheckSquare, Square, Loader2 } from "lucide-react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";

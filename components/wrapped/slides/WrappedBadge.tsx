@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { Trophy, Flame, Users, Sparkles } from "lucide-react";
 import type { WrappedStats } from "@/lib/wrapped";
 

@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { cn, formatABV, generateGradientFromString } from "@/lib/utils";
+import { beerTransitionName } from "@/lib/view-transitions";
 import { BeerStyleBadge } from "@/components/ui/BeerStyleBadge";
 import { StarRating } from "@/components/ui/StarRating";
 import type { BeerWithBrewery } from "@/types/database";
@@ -88,7 +89,10 @@ export function BeerCard({ beer, variant = "default", className }: BeerCardProps
         </div>
 
         <div className="p-3 space-y-2">
-          <h3 className="font-display font-semibold text-[var(--text-primary)] text-sm leading-tight group-hover:text-[var(--accent-gold)] transition-colors line-clamp-2">
+          <h3
+            className="font-display font-semibold text-[var(--text-primary)] text-sm leading-tight group-hover:text-[var(--accent-gold)] transition-colors line-clamp-2"
+            style={beerTransitionName(beer.id)}
+          >
             {beer.name}
           </h3>
 

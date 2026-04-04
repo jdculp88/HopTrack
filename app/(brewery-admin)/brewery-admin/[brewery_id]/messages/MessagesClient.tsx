@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { Mail, Send, Users, Loader2, CheckCircle } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { useToast } from "@/components/ui/Toast";
 import { computeSegment, SEGMENTS, type CustomerSegment } from "@/lib/crm";
 import { PageHeader } from "@/components/ui/PageHeader";

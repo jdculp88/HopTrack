@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Save, Loader2, Building2, MapPin, Trash2, Plus } from "lucide-react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion } from "motion/react";
 import { useToast } from "@/components/ui/Toast";
 import { ImageUpload } from "@/components/ui/ImageUpload";
 import { AddLocationModal } from "@/components/brewery-admin/brand/AddLocationModal";

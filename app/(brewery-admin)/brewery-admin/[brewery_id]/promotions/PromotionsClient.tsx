@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { Beer, Tag, ToggleLeft, ToggleRight, Save, Sparkles } from "lucide-react";
 import { useToast } from "@/components/ui/Toast";
 import { useParams } from "next/navigation";

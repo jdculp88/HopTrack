@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Save, Loader2, UtensilsCrossed, Key, Plug, Unplug, RefreshCw, ArrowUpRight, Lock, ChevronDown, ChevronUp, X, Sparkles, Tag, ToggleLeft, ToggleRight, Beer } from "lucide-react";
 import { InstagramIcon, FacebookIcon, XTwitterIcon } from "@/components/ui/SocialIcons";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion } from "motion/react";
 import { useToast } from "@/components/ui/Toast";
 import { ImageUpload } from "@/components/ui/ImageUpload";
 import { MenuUpload } from "@/components/ui/MenuUpload";

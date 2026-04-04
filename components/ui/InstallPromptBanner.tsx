@@ -8,7 +8,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { Download, X } from "lucide-react";
 import { useInstallPrompt } from "@/hooks/useInstallPrompt";
 import { spring, variants } from "@/lib/animation";

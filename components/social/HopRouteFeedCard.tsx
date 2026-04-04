@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { MapPin, Beer, Copy } from "lucide-react";
 import Link from "next/link";
 import { UserAvatar } from "@/components/ui/UserAvatar";

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { Plus, Crown, Users, DollarSign, Trash2, Edit3, ChevronDown, ChevronUp, X, Search, Gift, ArrowUpRight } from "lucide-react";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import { useToast } from "@/components/ui/Toast";

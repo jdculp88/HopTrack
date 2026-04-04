@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { Loader2, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, AlertTriangle } from "lucide-react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion } from "motion/react";
 
 interface SyncLog {
   id: string;

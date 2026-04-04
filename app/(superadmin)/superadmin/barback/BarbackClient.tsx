@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { Beer, Clock, Loader2, Bot } from "lucide-react";
 import { formatDateTime } from "@/lib/dates";
 import { BarbackOverview, type BarbackStats } from "./BarbackOverview";

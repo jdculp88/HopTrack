@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { Gift, Users, Trophy, ArrowUpRight, Loader2, AlertTriangle, Download } from "lucide-react";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { StatsGrid } from "@/components/ui/StatsGrid";

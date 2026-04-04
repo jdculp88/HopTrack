@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { Beer, MapPin, UserPlus, X } from "lucide-react";
 
 export function OnboardingCard({ onDismiss }: { onDismiss: () => void }) {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { X, Save, Loader2, AlertTriangle } from "lucide-react";
 import { ITEM_TYPE_LABELS } from "@/types/database";
 import type { BeerStyle, ItemType } from "@/types/database";

@@ -1,7 +1,7 @@
 "use client";
 
 import { Settings } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { C, type BoardSettings, type FontSize } from "./board-types";
 
 interface BoardHeaderProps {

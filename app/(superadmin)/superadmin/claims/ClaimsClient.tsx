@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { CheckCircle, XCircle, Clock, Building2, Mail, User, Calendar, Search } from "lucide-react";
 import { formatDate } from "@/lib/dates";
 

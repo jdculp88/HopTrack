@@ -3,7 +3,7 @@
 import { useState, useCallback, useRef, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import {
   ArrowLeft, ExternalLink, Copy, Check, User, Star, Flame, Zap,
   Beer, Trophy, Heart, MessageSquare, MapPin, Clock, Calendar,

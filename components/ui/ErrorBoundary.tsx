@@ -1,7 +1,7 @@
 "use client";
 
 import React, { Component, type ReactNode, type ErrorInfo } from "react";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { AlertTriangle, RefreshCw, Home } from "lucide-react";
 import Link from "next/link";
 

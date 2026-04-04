@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { X, ChevronLeft, ChevronRight, Check } from "lucide-react";
 import { OnboardingStepLogo } from "./OnboardingStepLogo";
 import { OnboardingStepBeers } from "./OnboardingStepBeers";

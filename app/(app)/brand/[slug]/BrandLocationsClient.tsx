@@ -4,7 +4,7 @@ import { useEffect, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { MapPin, Navigation } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { haversineDistance, formatDistance } from "@/lib/geo";
 import { BrandMapClient } from "./BrandMapClient";

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useCallback, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { X, Share2, Copy, Star, Beer, Download, QrCode, Smartphone } from "lucide-react";
 import { HopMark } from "@/components/ui/HopMark";
 import QRCode from "react-qr-code";

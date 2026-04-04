@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion } from "motion/react";
 import { ChevronLeft, ChevronRight, Share2, Check, X } from "lucide-react";
 import type { WrappedStats } from "@/lib/wrapped";
 import { getShareText, getWrappedColors } from "@/lib/wrapped";

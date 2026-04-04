@@ -17,6 +17,7 @@ import { PosSyncAlertBanner } from "@/components/brewery-admin/PosSyncAlertBanne
 import { AISuggestionsCard } from "@/components/brewery-admin/AISuggestionsCard";
 import { Sparkline, ActiveSessionsCounter, RecentActivityFeed } from "./DashboardClient";
 import type { ActivityItem } from "./DashboardClient";
+import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 
 export async function generateMetadata({ params }: { params: Promise<{ brewery_id: string }> }) {
   const { brewery_id } = await params;
@@ -513,6 +514,7 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
       )}
 
       {/* ── KPI Cards ────────────────────────────────────────────────── */}
+      <ErrorBoundary inline context="DashboardKPICards">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {/* Today's Visits */}
         <div className="rounded-2xl p-5 border" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
@@ -582,6 +584,7 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
 
       {/* ── KPI Cards Row 2 — The Pulse (Sprint 124) ──────────────── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+
         {/* Avg Session Duration */}
         <div className="rounded-2xl p-5 border" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
           <div className="flex items-center justify-between mb-3">
@@ -678,6 +681,7 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
           })()}
         </div>
       </div>
+      </ErrorBoundary>
 
       {/* ── AI Suggestions (Sprint 146) ───────────────────────── */}
       <AISuggestionsCard
@@ -693,17 +697,19 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
         <div className="lg:col-span-2 space-y-6">
 
           {/* Recent Activity Feed */}
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="font-display text-lg font-bold" style={{ color: "var(--text-primary)" }}>Recent Activity</h2>
-              <Link href={`/brewery-admin/${brewery_id}/sessions`}
-                className="text-xs flex items-center gap-1 transition-opacity hover:opacity-70"
-                style={{ color: "var(--accent-gold)" }}>
-                All sessions <ArrowUpRight size={12} />
-              </Link>
+          <ErrorBoundary inline context="DashboardActivityFeed">
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="font-display text-lg font-bold" style={{ color: "var(--text-primary)" }}>Recent Activity</h2>
+                <Link href={`/brewery-admin/${brewery_id}/sessions`}
+                  className="text-xs flex items-center gap-1 transition-opacity hover:opacity-70"
+                  style={{ color: "var(--accent-gold)" }}>
+                  All sessions <ArrowUpRight size={12} />
+                </Link>
+              </div>
+              <RecentActivityFeed items={activityFeed} />
             </div>
-            <RecentActivityFeed items={activityFeed} />
-          </div>
+          </ErrorBoundary>
 
           {/* Top Beers */}
           {topBeersList.length > 0 && (
@@ -821,6 +827,7 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
         </div>
 
         {/* ── Right Column ────────────────────────────────────────────── */}
+        <ErrorBoundary inline context="DashboardRightColumn">
         <div className="space-y-6">
 
           {/* ROI Card */}
@@ -907,6 +914,7 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
           </div>
 
         </div>
+        </ErrorBoundary>
       </div>
     </div>
   );

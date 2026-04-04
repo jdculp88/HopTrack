@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { Trophy, Lock } from "lucide-react";
 import { AchievementBadge } from "@/components/achievements/AchievementBadge";
 import { Modal } from "@/components/ui/Modal";

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { MapPin, Clock, Users, ChevronDown, ChevronUp, Beer, Share2, Sparkles, ArrowRight, Star, Play, CheckCircle2, Zap } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";

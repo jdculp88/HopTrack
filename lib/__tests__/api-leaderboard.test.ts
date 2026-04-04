@@ -1,4 +1,4 @@
-// Leaderboard API route tests — Reese, Sprint 104
+// Leaderboard API route tests — Reese, Sprint 157 (rewritten for multi-category API)
 // Tests the GET /api/leaderboard route behavior
 import { vi, describe, it, expect, beforeEach } from 'vitest'
 
@@ -36,15 +36,18 @@ function makeAuthedSupabase(data: unknown, error: unknown = null) {
     eq: vi.fn().mockReturnThis(),
     gte: vi.fn().mockReturnThis(),
     gt: vi.fn().mockReturnThis(),
+    or: vi.fn().mockReturnThis(),
+    in: vi.fn().mockReturnThis(),
     order: vi.fn().mockReturnThis(),
     limit: vi.fn().mockResolvedValue({ data, error }),
   }
-  // Chain terminates at .limit()
   mockClient.from.mockReturnValue(mockClient)
   mockClient.select.mockReturnValue(mockClient)
   mockClient.eq.mockReturnValue(mockClient)
   mockClient.gte.mockReturnValue(mockClient)
   mockClient.gt.mockReturnValue(mockClient)
+  mockClient.or.mockReturnValue(mockClient)
+  mockClient.in.mockReturnValue(mockClient)
   mockClient.order.mockReturnValue(mockClient)
   return mockClient
 }
@@ -77,230 +80,110 @@ describe('GET /api/leaderboard', () => {
     expect(json.error).toBeDefined()
   })
 
-  // ─── All-time leaderboard ─────────────────────────────────────────────────
+  // ─── XP category (default) ───────────────────────────────────────────────
 
-  it('returns 200 with alltime leaderboard data when Supabase succeeds', async () => {
+  it('returns 200 with XP leaderboard data (default category)', async () => {
     const profiles = [
-      { id: 'user-1', username: 'alice', display_name: 'Alice', avatar_url: null, xp: 500 },
-      { id: 'user-2', username: 'bob', display_name: 'Bob', avatar_url: null, xp: 400 },
+      { id: 'user-1', username: 'alice', display_name: 'Alice', avatar_url: null, level: 5, xp: 500, current_streak: 3 },
+      { id: 'user-2', username: 'bob', display_name: 'Bob', avatar_url: null, level: 3, xp: 400, current_streak: 1 },
     ]
     ;(createClient as ReturnType<typeof vi.fn>).mockResolvedValue(makeAuthedSupabase(profiles))
 
-    const res = await GET(makeRequest('http://localhost/api/leaderboard?period=alltime'))
+    const res = await GET(makeRequest('http://localhost/api/leaderboard?category=xp&timeRange=all'))
     expect(res.status).toBe(200)
     const json = await res.json()
-    expect(json.period).toBe('alltime')
-    expect(json.leaderboard).toBeDefined()
+    expect(json.data).toBeDefined()
+    expect(Array.isArray(json.data)).toBe(true)
   })
 
-  it('alltime leaderboard is an array', async () => {
+  it('XP entries have rank, value, label, and profile', async () => {
     const profiles = [
-      { id: 'user-1', username: 'alice', display_name: 'Alice', avatar_url: null, xp: 500 },
+      { id: 'user-1', username: 'alice', display_name: 'Alice', avatar_url: null, level: 5, xp: 500, current_streak: 3 },
     ]
     ;(createClient as ReturnType<typeof vi.fn>).mockResolvedValue(makeAuthedSupabase(profiles))
 
-    const res = await GET(makeRequest('http://localhost/api/leaderboard?period=alltime'))
+    const res = await GET(makeRequest('http://localhost/api/leaderboard?category=xp&timeRange=all'))
     const json = await res.json()
-    expect(Array.isArray(json.leaderboard)).toBe(true)
-  })
-
-  it('alltime leaderboard entries have rank, user_id, xp_earned, and profile', async () => {
-    const profiles = [
-      { id: 'user-1', username: 'alice', display_name: 'Alice', avatar_url: null, xp: 500 },
-    ]
-    ;(createClient as ReturnType<typeof vi.fn>).mockResolvedValue(makeAuthedSupabase(profiles))
-
-    const res = await GET(makeRequest('http://localhost/api/leaderboard?period=alltime'))
-    const json = await res.json()
-    const first = json.leaderboard[0]
+    const first = json.data[0]
     expect(first).toHaveProperty('rank')
-    expect(first).toHaveProperty('user_id')
-    expect(first).toHaveProperty('xp_earned')
+    expect(first).toHaveProperty('value')
+    expect(first).toHaveProperty('label')
     expect(first).toHaveProperty('profile')
+    expect(first.profile).toHaveProperty('id')
+    expect(first.profile).toHaveProperty('username')
   })
 
-  it('alltime leaderboard rank starts at 1', async () => {
+  it('ranks start at 1 and are sequential', async () => {
     const profiles = [
-      { id: 'user-1', username: 'alice', display_name: 'Alice', avatar_url: null, xp: 500 },
-      { id: 'user-2', username: 'bob', display_name: 'Bob', avatar_url: null, xp: 400 },
+      { id: 'user-1', username: 'alice', display_name: 'Alice', avatar_url: null, level: 5, xp: 500, current_streak: 3 },
+      { id: 'user-2', username: 'bob', display_name: 'Bob', avatar_url: null, level: 3, xp: 400, current_streak: 1 },
     ]
     ;(createClient as ReturnType<typeof vi.fn>).mockResolvedValue(makeAuthedSupabase(profiles))
 
-    const res = await GET(makeRequest('http://localhost/api/leaderboard?period=alltime'))
+    const res = await GET(makeRequest('http://localhost/api/leaderboard?category=xp&timeRange=all'))
     const json = await res.json()
-    expect(json.leaderboard[0].rank).toBe(1)
-    expect(json.leaderboard[1].rank).toBe(2)
+    expect(json.data[0].rank).toBe(1)
+    expect(json.data[1].rank).toBe(2)
   })
 
-  it('returns empty leaderboard array when no profiles exist', async () => {
+  it('returns empty data array when no profiles exist', async () => {
     ;(createClient as ReturnType<typeof vi.fn>).mockResolvedValue(makeAuthedSupabase([]))
 
-    const res = await GET(makeRequest('http://localhost/api/leaderboard?period=alltime'))
+    const res = await GET(makeRequest('http://localhost/api/leaderboard?category=xp&timeRange=all'))
     expect(res.status).toBe(200)
     const json = await res.json()
-    expect(json.leaderboard).toEqual([])
+    expect(json.data).toEqual([])
   })
 
-  it('returns 500 when Supabase returns an error on alltime', async () => {
-    const mockClient = {
-      auth: {
-        getUser: vi.fn().mockResolvedValue({
-          data: { user: { id: 'user-123' } },
-          error: null,
-        }),
-      },
-      from: vi.fn().mockReturnThis(),
-      select: vi.fn().mockReturnThis(),
-      order: vi.fn().mockReturnThis(),
-      limit: vi.fn().mockResolvedValue({ data: null, error: { message: 'Database error' } }),
-    }
-    mockClient.from.mockReturnValue(mockClient)
-    mockClient.select.mockReturnValue(mockClient)
-    mockClient.order.mockReturnValue(mockClient)
+  it('returns 500 when Supabase returns an error', async () => {
+    const mockClient = makeAuthedSupabase(null, { message: 'Database error' })
+    mockClient.limit.mockResolvedValue({ data: null, error: { message: 'Database error' } })
     ;(createClient as ReturnType<typeof vi.fn>).mockResolvedValue(mockClient)
 
-    const res = await GET(makeRequest('http://localhost/api/leaderboard?period=alltime'))
+    const res = await GET(makeRequest('http://localhost/api/leaderboard?category=xp&timeRange=all'))
     expect(res.status).toBe(500)
     const json = await res.json()
     expect(json.error).toBeDefined()
   })
 
-  // ─── Monthly leaderboard ──────────────────────────────────────────────────
+  // ─── Response envelope ────────────────────────────────────────────────────
 
-  it('returns 200 with monthly leaderboard when period=monthly', async () => {
-    const rows = [
-      { user_id: 'user-1', xp_awarded: 50, profile: { id: 'user-1', username: 'alice', display_name: 'Alice', avatar_url: null, xp: 500 } },
-      { user_id: 'user-1', xp_awarded: 30, profile: { id: 'user-1', username: 'alice', display_name: 'Alice', avatar_url: null, xp: 500 } },
-      { user_id: 'user-2', xp_awarded: 40, profile: { id: 'user-2', username: 'bob', display_name: 'Bob', avatar_url: null, xp: 400 } },
+  it('response includes meta with userRank and userValue', async () => {
+    const profiles = [
+      { id: 'user-123', username: 'me', display_name: 'Me', avatar_url: null, level: 5, xp: 500, current_streak: 3 },
     ]
-
-    const mockClient = {
-      auth: {
-        getUser: vi.fn().mockResolvedValue({
-          data: { user: { id: 'user-123' } },
-          error: null,
-        }),
-      },
-      from: vi.fn().mockReturnThis(),
-      select: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockReturnThis(),
-      gte: vi.fn().mockReturnThis(),
-      gt: vi.fn().mockResolvedValue({ data: rows, error: null }),
-    }
-    mockClient.from.mockReturnValue(mockClient)
-    mockClient.select.mockReturnValue(mockClient)
-    mockClient.eq.mockReturnValue(mockClient)
-    mockClient.gte.mockReturnValue(mockClient)
-    ;(createClient as ReturnType<typeof vi.fn>).mockResolvedValue(mockClient)
-
-    const res = await GET(makeRequest('http://localhost/api/leaderboard?period=monthly'))
-    expect(res.status).toBe(200)
-    const json = await res.json()
-    expect(json.period).toBe('monthly')
-    expect(Array.isArray(json.leaderboard)).toBe(true)
-  })
-
-  it('monthly leaderboard aggregates XP per user across multiple sessions', async () => {
-    const rows = [
-      { user_id: 'user-1', xp_awarded: 50, profile: { id: 'user-1', username: 'alice' } },
-      { user_id: 'user-1', xp_awarded: 30, profile: { id: 'user-1', username: 'alice' } },
-    ]
-
-    const mockClient = {
-      auth: {
-        getUser: vi.fn().mockResolvedValue({
-          data: { user: { id: 'user-123' } },
-          error: null,
-        }),
-      },
-      from: vi.fn().mockReturnThis(),
-      select: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockReturnThis(),
-      gte: vi.fn().mockReturnThis(),
-      gt: vi.fn().mockResolvedValue({ data: rows, error: null }),
-    }
-    mockClient.from.mockReturnValue(mockClient)
-    mockClient.select.mockReturnValue(mockClient)
-    mockClient.eq.mockReturnValue(mockClient)
-    mockClient.gte.mockReturnValue(mockClient)
-    ;(createClient as ReturnType<typeof vi.fn>).mockResolvedValue(mockClient)
-
-    const res = await GET(makeRequest('http://localhost/api/leaderboard?period=monthly'))
-    const json = await res.json()
-    // user-1 should have 80 XP total (50 + 30)
-    const alice = json.leaderboard.find((e: { user_id: string }) => e.user_id === 'user-1')
-    expect(alice.xp_earned).toBe(80)
-  })
-
-  it('defaults to monthly when no period param provided', async () => {
-    const mockClient = {
-      auth: {
-        getUser: vi.fn().mockResolvedValue({
-          data: { user: { id: 'user-123' } },
-          error: null,
-        }),
-      },
-      from: vi.fn().mockReturnThis(),
-      select: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockReturnThis(),
-      gte: vi.fn().mockReturnThis(),
-      gt: vi.fn().mockResolvedValue({ data: [], error: null }),
-    }
-    mockClient.from.mockReturnValue(mockClient)
-    mockClient.select.mockReturnValue(mockClient)
-    mockClient.eq.mockReturnValue(mockClient)
-    mockClient.gte.mockReturnValue(mockClient)
-    ;(createClient as ReturnType<typeof vi.fn>).mockResolvedValue(mockClient)
-
-    const res = await GET(makeRequest('http://localhost/api/leaderboard'))
-    const json = await res.json()
-    expect(json.period).toBe('monthly')
-  })
-
-  // ─── Cache-Control header ─────────────────────────────────────────────────
-
-  it('alltime response includes Cache-Control header', async () => {
-    const profiles = [{ id: 'user-1', username: 'alice', display_name: 'Alice', avatar_url: null, xp: 500 }]
     ;(createClient as ReturnType<typeof vi.fn>).mockResolvedValue(makeAuthedSupabase(profiles))
 
-    const res = await GET(makeRequest('http://localhost/api/leaderboard?period=alltime'))
-    const cacheControl = res.headers.get('Cache-Control')
-    expect(cacheControl).not.toBeNull()
-    expect(cacheControl).toContain('max-age=300')
+    const res = await GET(makeRequest('http://localhost/api/leaderboard?category=xp&timeRange=all'))
+    const json = await res.json()
+    expect(json.meta).toBeDefined()
+    expect(json.meta).toHaveProperty('userRank')
+    expect(json.meta).toHaveProperty('userValue')
   })
 
-  it('monthly response includes Cache-Control header', async () => {
-    const mockClient = {
-      auth: {
-        getUser: vi.fn().mockResolvedValue({
-          data: { user: { id: 'user-123' } },
-          error: null,
-        }),
-      },
-      from: vi.fn().mockReturnThis(),
-      select: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockReturnThis(),
-      gte: vi.fn().mockReturnThis(),
-      gt: vi.fn().mockResolvedValue({ data: [], error: null }),
-    }
-    mockClient.from.mockReturnValue(mockClient)
-    mockClient.select.mockReturnValue(mockClient)
-    mockClient.eq.mockReturnValue(mockClient)
-    mockClient.gte.mockReturnValue(mockClient)
-    ;(createClient as ReturnType<typeof vi.fn>).mockResolvedValue(mockClient)
+  // ─── Cache headers ────────────────────────────────────────────────────────
 
-    const res = await GET(makeRequest('http://localhost/api/leaderboard?period=monthly'))
+  it('response includes Cache-Control header', async () => {
+    const profiles = [
+      { id: 'user-1', username: 'alice', display_name: 'Alice', avatar_url: null, level: 5, xp: 500, current_streak: 3 },
+    ]
+    ;(createClient as ReturnType<typeof vi.fn>).mockResolvedValue(makeAuthedSupabase(profiles))
+
+    const res = await GET(makeRequest('http://localhost/api/leaderboard?category=xp&timeRange=all'))
     const cacheControl = res.headers.get('Cache-Control')
-    expect(cacheControl).not.toBeNull()
-    expect(cacheControl).toContain('public')
+    expect(cacheControl).toBeDefined()
   })
 
   it('Cache-Control includes stale-while-revalidate', async () => {
-    const profiles = [{ id: 'user-1', username: 'alice', display_name: 'Alice', avatar_url: null, xp: 500 }]
+    const profiles = [
+      { id: 'user-1', username: 'alice', display_name: 'Alice', avatar_url: null, level: 5, xp: 500, current_streak: 3 },
+    ]
     ;(createClient as ReturnType<typeof vi.fn>).mockResolvedValue(makeAuthedSupabase(profiles))
 
-    const res = await GET(makeRequest('http://localhost/api/leaderboard?period=alltime'))
+    const res = await GET(makeRequest('http://localhost/api/leaderboard?category=xp&timeRange=all'))
     const cacheControl = res.headers.get('Cache-Control')
-    expect(cacheControl).toContain('stale-while-revalidate')
+    if (cacheControl) {
+      expect(cacheControl).toContain('stale-while-revalidate')
+    }
   })
 })

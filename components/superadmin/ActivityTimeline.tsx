@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { Card, CardHeader, CardTitle } from "@/components/ui/Card";
 import { spring, stagger } from "@/lib/animation";
 import { formatRelativeTime } from "@/lib/dates";

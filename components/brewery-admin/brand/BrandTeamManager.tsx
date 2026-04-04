@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { UserPlus, Trash2, Loader2, Shield, Users } from "lucide-react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion } from "motion/react";
 import { useToast } from "@/components/ui/Toast";
 
 interface BrandTeamManagerProps {

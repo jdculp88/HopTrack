@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion } from "motion/react";
 import {
   isStreakMilestone,
   isStreakSeen,
@@ -37,6 +37,7 @@ import type { AIRecommendedBeer } from "@/lib/recommendations";
 import { ReactionProvider } from "./ReactionContext";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { WishlistOnTapAlert } from "@/components/wishlist/WishlistOnTapAlert";
+import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 
 // ─── Exported Types ─────────────────────────────────────────────────────────
 
@@ -449,24 +450,26 @@ export function HomeFeed({
             transition={{ duration: 0.15 }}
             className="space-y-5"
           >
-            <ReactionProvider
-              value={{
-                reactionCounts: friendsPagination.reactionCounts,
-                userReactions: friendsPagination.userReactions,
-                commentCounts: friendsPagination.commentCounts,
-              }}
-            >
-              <FriendsTabContent
-                profile={profile}
-                feedItems={friendsFeed}
-                currentUserId={currentUserId}
-                friendCount={friendCount}
-                activeFriendCount={activeFriendSessions.length}
-                loading={friendsPagination.loading}
-                hasMore={friendsPagination.hasMore}
-                sentinelRef={friendsPagination.sentinelRef}
-              />
-            </ReactionProvider>
+            <ErrorBoundary inline context="FriendsTab">
+              <ReactionProvider
+                value={{
+                  reactionCounts: friendsPagination.reactionCounts,
+                  userReactions: friendsPagination.userReactions,
+                  commentCounts: friendsPagination.commentCounts,
+                }}
+              >
+                <FriendsTabContent
+                  profile={profile}
+                  feedItems={friendsFeed}
+                  currentUserId={currentUserId}
+                  friendCount={friendCount}
+                  activeFriendCount={activeFriendSessions.length}
+                  loading={friendsPagination.loading}
+                  hasMore={friendsPagination.hasMore}
+                  sentinelRef={friendsPagination.sentinelRef}
+                />
+              </ReactionProvider>
+            </ErrorBoundary>
           </motion.div>
         )}
 
@@ -479,12 +482,15 @@ export function HomeFeed({
             transition={{ duration: 0.15 }}
             className="space-y-5"
           >
-            <DiscoverTabContent
-              communityContent={communityContent}
-              hasCommunityContent={!!hasCommunityContent}
-              recommendations={recommendations}
-              aiRecommendations={aiRecommendations}
-            />
+            <ErrorBoundary inline context="DiscoverTab">
+              <DiscoverTabContent
+                communityContent={communityContent}
+                hasCommunityContent={!!hasCommunityContent}
+                recommendations={recommendations}
+                aiRecommendations={aiRecommendations}
+                homeCity={profile?.home_city}
+              />
+            </ErrorBoundary>
           </motion.div>
         )}
 
@@ -497,28 +503,30 @@ export function HomeFeed({
             transition={{ duration: 0.15 }}
             className="space-y-5"
           >
-            <ReactionProvider
-              value={{
-                reactionCounts: youPagination.reactionCounts,
-                userReactions: youPagination.userReactions,
-                commentCounts: youPagination.commentCounts,
-              }}
-            >
-              <YouTabContent
-                profile={profile}
-                sessions={youPagination.sessions}
-                weekStats={weekStats}
-                currentUserId={currentUserId}
-                userAchievements={userAchievements}
-                wishlist={wishlist}
-                styleDNA={styleDNA}
-                loading={youPagination.loading}
-                hasMore={youPagination.hasMore}
-                sentinelRef={youPagination.sentinelRef}
-                activityHeatmap={activityHeatmap}
-                pastRoutes={pastRoutes}
-              />
-            </ReactionProvider>
+            <ErrorBoundary inline context="YouTab">
+              <ReactionProvider
+                value={{
+                  reactionCounts: youPagination.reactionCounts,
+                  userReactions: youPagination.userReactions,
+                  commentCounts: youPagination.commentCounts,
+                }}
+              >
+                <YouTabContent
+                  profile={profile}
+                  sessions={youPagination.sessions}
+                  weekStats={weekStats}
+                  currentUserId={currentUserId}
+                  userAchievements={userAchievements}
+                  wishlist={wishlist}
+                  styleDNA={styleDNA}
+                  loading={youPagination.loading}
+                  hasMore={youPagination.hasMore}
+                  sentinelRef={youPagination.sentinelRef}
+                  activityHeatmap={activityHeatmap}
+                  pastRoutes={pastRoutes}
+                />
+              </ReactionProvider>
+            </ErrorBoundary>
           </motion.div>
         )}
       </AnimatePresence>

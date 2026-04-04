@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { ChevronDown, ExternalLink, GlassWater, Code2, Plug, HelpCircle, Key, LayoutGrid, Beer, CalendarDays, Search, BarChart3, RefreshCw, ArrowRight, AlertTriangle, CheckCircle2, Settings } from "lucide-react";
 import { transition } from "@/lib/animation";
 import { PILL_ACTIVE, PILL_INACTIVE } from "@/lib/constants/ui";

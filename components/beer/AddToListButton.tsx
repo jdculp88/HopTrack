@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { List, Plus, Check, X } from "lucide-react";
 import { useToast } from "@/components/ui/Toast";
 

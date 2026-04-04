@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { MapPin, ExternalLink } from "lucide-react";
 import { cardHover } from "@/lib/animation";
 import Link from "next/link";

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { Bookmark, BookmarkCheck } from "lucide-react";
 import { useToast } from "@/components/ui/Toast";
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import {
   Package, Search, Plus, Check, X, ChevronDown, ChevronUp,
   MapPin, Pencil, Archive, Send, GlassWater, Leaf,

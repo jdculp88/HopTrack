@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Check, Crown, Building2, Rocket, Settings, AlertTriangle, Zap, X, Minus, Beer } from "lucide-react";
 import { useToast } from "@/components/ui/Toast";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { useSearchParams } from "next/navigation";
 import { TIER_INFO, FEATURE_MATRIX } from "@/lib/stripe";
 import { PageHeader } from "@/components/ui/PageHeader";

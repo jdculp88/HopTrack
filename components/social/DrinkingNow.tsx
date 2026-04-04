@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { Beer, Home } from "lucide-react";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import { getFirstName } from "@/lib/first-name";

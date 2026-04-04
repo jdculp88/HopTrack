@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { Plus, ChevronRight, Lock, Globe, Trash2, Beer, X } from "lucide-react";
 import { useToast } from "@/components/ui/Toast";
 import type { BeerList } from "@/types/database";

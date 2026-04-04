@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import {
   Users, Beer, TrendingUp, BarChart3, MapPin, Activity,
   ArrowUpRight, ArrowDownRight, Minus, Eye, Heart, Star,

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { ChevronDown, ChevronUp, Share2, Beer, Clock, MapPin, Trophy, Star, Zap, Calendar } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import type { DrinkerKPIs } from "@/lib/kpi";
 import { formatDuration } from "@/lib/kpi";
 

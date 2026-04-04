@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { MapPin, ChevronDown, Check } from "lucide-react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion } from "motion/react";
 
 interface Location {
   id: string;

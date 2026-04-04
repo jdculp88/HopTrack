@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Check, Building2, Settings, X, MapPin, CreditCard, Zap } from "lucide-react";
 import { useToast } from "@/components/ui/Toast";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { useSearchParams } from "next/navigation";
 import { FEATURE_MATRIX, BRAND_ADDON_INFO } from "@/lib/stripe";
 import { PageHeader } from "@/components/ui/PageHeader";

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { X, ChevronLeft, ChevronRight, Check } from "lucide-react";
 import { BrandNameStep } from "./BrandNameStep";
 import { BrandDetailsStep } from "./BrandDetailsStep";

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { Plug, RefreshCw, Loader2, ArrowUpRight, AlertTriangle } from "lucide-react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion } from "motion/react";
 import { useToast } from "@/components/ui/Toast";
 import Link from "next/link";
 

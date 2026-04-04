@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { Trash2, ToggleRight, Ban, CheckSquare, Square, Loader2, AlertTriangle } from "lucide-react";
 
 interface BatchActionBarProps {

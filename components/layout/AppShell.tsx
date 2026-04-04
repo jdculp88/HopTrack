@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence } from "motion/react";
 import { AppNav } from "@/components/layout/AppNav";
 import { createClient } from "@/lib/supabase/client";
 import { ToastProvider } from "@/components/ui/Toast";

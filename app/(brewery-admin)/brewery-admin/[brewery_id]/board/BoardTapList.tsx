@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { getGlass, getGlassSvgContent } from "@/lib/glassware";
 import {
   C, EASE, FS, BOARD_SECTION_LABELS, formatPrice,

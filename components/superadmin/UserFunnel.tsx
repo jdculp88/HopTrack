@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { Card, CardHeader, CardTitle } from "@/components/ui/Card";
 import { spring } from "@/lib/animation";
 import type { FunnelStep } from "@/lib/superadmin-metrics";

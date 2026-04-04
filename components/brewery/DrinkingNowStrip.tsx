@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { Users } from "lucide-react";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import { useBreweryPresence } from "@/hooks/useBreweryPresence";

@@ -3,7 +3,7 @@
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Users, Trophy, Search, UserPlus, Loader2, UserX, Clock, X, Beer } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { LeaderboardRow } from "@/components/social/LeaderboardRow";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import { useToast } from "@/components/ui/Toast";

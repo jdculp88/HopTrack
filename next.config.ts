@@ -19,6 +19,8 @@ const nextConfig: NextConfig = {
       dynamic: 30,
       static: 300,
     },
+    // Enable CSS View Transitions API for smooth page navigation (Sprint 157)
+    viewTransition: true,
   },
   async headers() {
     return [

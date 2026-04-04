@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { X, Search, Plus, Loader2, MapPin } from "lucide-react";
 import { useToast } from "@/components/ui/Toast";
 

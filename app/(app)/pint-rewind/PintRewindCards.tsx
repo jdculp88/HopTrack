@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { ChevronLeft, ChevronRight, Home } from "lucide-react";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/SkeletonLoader";

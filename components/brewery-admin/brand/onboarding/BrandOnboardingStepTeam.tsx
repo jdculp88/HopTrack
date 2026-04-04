@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Users, Plus, Loader2, X } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { useToast } from "@/components/ui/Toast";
 
 interface BrandOnboardingStepTeamProps {

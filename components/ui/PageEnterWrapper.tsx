@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 
 /** Wraps server-component page content with a consistent enter animation. */
 export function PageEnterWrapper({ children }: { children: React.ReactNode }) {

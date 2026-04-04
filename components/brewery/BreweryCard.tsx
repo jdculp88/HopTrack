@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { MapPin, Users, Calendar } from "lucide-react";
 import { cn, formatCount } from "@/lib/utils";
+import { breweryTransitionName } from "@/lib/view-transitions";
 import type { BreweryWithStats } from "@/types/database";
 
 const BREWERY_PLACEHOLDER_IMAGES = [
@@ -120,7 +121,10 @@ export function BreweryCard({ brewery, distance, variant = "default", className 
                 {typeLabel}
               </span>
             )}
-            <h3 className="font-display text-2xl font-bold text-[var(--text-primary)] mb-1">
+            <h3
+              className="font-display text-2xl font-bold text-[var(--text-primary)] mb-1"
+              style={breweryTransitionName(brewery.id)}
+            >
               {brewery.name}
             </h3>
             <div className="flex items-center gap-3 text-sm text-[var(--text-secondary)]">
@@ -178,7 +182,10 @@ export function BreweryCard({ brewery, distance, variant = "default", className 
 
         <div className="p-4 flex flex-col flex-1 gap-2">
           <div className="flex items-start justify-between gap-2">
-            <h3 className="font-display font-semibold text-[var(--text-primary)] leading-tight group-hover:text-[var(--accent-gold)] transition-colors line-clamp-2">
+            <h3
+              className="font-display font-semibold text-[var(--text-primary)] leading-tight group-hover:text-[var(--accent-gold)] transition-colors line-clamp-2"
+              style={breweryTransitionName(brewery.id)}
+            >
               {brewery.name}
             </h3>
             {typeLabel && (

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { Bell, Trophy, Users, Beer, Heart, TrendingUp, MessageCircle, Check, X, ExternalLink, ChevronDown, Gift } from "lucide-react";
 import Link from "next/link";
 import { formatRelativeTime } from "@/lib/utils";

@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { MapPin, Heart } from "lucide-react";
 import type { WrappedStats } from "@/lib/wrapped";
 

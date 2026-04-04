@@ -20,7 +20,7 @@
 
 "use client";
 
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import Link from "next/link";
 import { ArrowRight, ArrowUpRight, Beer, Star, Trophy } from "lucide-react";
 import { HopMark } from "@/components/ui/HopMark";

@@ -8,6 +8,7 @@ import { BeerStyleBadge } from "@/components/ui/BeerStyleBadge";
 import { RatingDisplay } from "@/components/ui/StarRating";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import { generateGradientFromString, formatABV } from "@/lib/utils";
+import { beerTransitionName } from "@/lib/view-transitions";
 import { BeerReviewSection } from "@/components/beer/BeerReviewSection";
 import { getSimilarBeers } from "@/lib/recommendations";
 import { getStyleFamily } from "@/lib/beerStyleColors";
@@ -115,7 +116,7 @@ export default async function BeerPage({ params }: { params: Promise<{ id: strin
         <div className="p-6 -mt-8 relative">
           <div className="flex items-start justify-between gap-4 mb-3">
             <div>
-              <h1 className="font-display text-3xl font-bold text-[var(--text-primary)] leading-tight">{beer.name}</h1>
+              <h1 className="font-display text-3xl font-bold text-[var(--text-primary)] leading-tight" style={beerTransitionName(id)}>{beer.name}</h1>
               <Link href={`/brewery/${beer.brewery_id}`}>
                 <p className="hover:underline text-sm mt-1" style={{ color: "var(--accent-gold)" }}>{brewery?.name}</p>
               </Link>

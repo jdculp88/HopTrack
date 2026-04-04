@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { CheckCircle, AlertCircle, Info, X } from "lucide-react";
 
 // ─── Types ─────────────────────────────────────────────────────────────────────

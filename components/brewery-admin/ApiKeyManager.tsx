@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { Key, Plus, Trash2, Copy, Check, Loader2, AlertTriangle } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { useToast } from "@/components/ui/Toast";
 
 interface ApiKeyEntry {

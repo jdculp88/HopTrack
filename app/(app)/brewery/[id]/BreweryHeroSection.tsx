@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { MapPin, Beer } from "lucide-react";
 import type { Brewery, BreweryVisit } from "@/types/database";
+import { breweryTransitionName } from "@/lib/view-transitions";
 import BreweryCheckinButton from "@/components/session/BreweryCheckinButton";
 import { FollowBreweryButton } from "@/components/brewery/FollowBreweryButton";
 
@@ -57,7 +58,10 @@ export function BreweryHeroSection({
             {brewery.brewery_type}
           </span>
         )}
-        <h1 className="font-display text-4xl sm:text-5xl font-bold text-white leading-tight drop-shadow-lg">
+        <h1
+          className="font-display text-4xl sm:text-5xl font-bold text-white leading-tight drop-shadow-lg"
+          style={breweryTransitionName(brewery.id)}
+        >
           {brewery.name}
         </h1>
         <div className="flex items-center gap-3 mt-2 text-sm text-white/80">

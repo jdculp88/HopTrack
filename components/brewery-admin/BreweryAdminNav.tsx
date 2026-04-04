@@ -7,7 +7,7 @@ import { HopMark } from "@/components/ui/HopMark";
 import { cn } from "@/lib/utils";
 import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import type { LucideIcon } from "lucide-react";
 
 // --- Nav Data Structure ---

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { Search, Loader2, Beer as BeerIcon, MapPin, X, Clock } from "lucide-react";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 
