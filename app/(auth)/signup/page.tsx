@@ -9,6 +9,7 @@ import { createClient } from "@/lib/supabase/client";
 import { GoogleOAuthButton } from "@/components/auth/GoogleOAuthButton";
 import { AuthDivider } from "@/components/auth/AuthDivider";
 import { AuthErrorAlert } from "@/components/auth/AuthErrorAlert";
+import { DOBInput } from "@/components/auth/DOBInput";
 
 type SignupStep = "account" | "profile";
 type UsernameStatus = "idle" | "checking" | "available" | "taken" | "invalid";
@@ -27,6 +28,8 @@ export default function SignupPage() {
   const [error, setError] = useState<string | null>(null);
   const [usernameStatus, setUsernameStatus] = useState<UsernameStatus>("idle");
   const [emailError, setEmailError] = useState<string | null>(null);
+  const [dateOfBirth, setDateOfBirth] = useState("");
+  const [dobError, setDobError] = useState<string | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const checkUsername = useCallback(async (value: string) => {
@@ -87,7 +90,18 @@ export default function SignupPage() {
     if (!email || !password) return;
     if (!validateEmail(email)) { setEmailError("Please enter a valid email address."); return; }
     if (password.length < 8) { setError("Password must be at least 8 characters."); return; }
+    if (!dateOfBirth) { setDobError("Date of birth is required."); return; }
+    // Age gate: must be 21+
+    const dob = new Date(dateOfBirth + "T00:00:00");
+    const today = new Date();
+    let age = today.getFullYear() - dob.getFullYear();
+    const monthDiff = today.getMonth() - dob.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+      age--;
+    }
+    if (age < 21) { setDobError("You must be 21 or older to use HopTrack"); return; }
     setEmailError(null);
+    setDobError(null);
     setError(null);
     setStep("profile");
   }
@@ -105,7 +119,7 @@ export default function SignupPage() {
       email,
       password,
       options: {
-        data: { username: username.toLowerCase(), display_name: displayName, home_city: homeCity },
+        data: { username: username.toLowerCase(), display_name: displayName, home_city: homeCity, date_of_birth: dateOfBirth },
       },
     });
 
@@ -235,9 +249,23 @@ export default function SignupPage() {
                   </p>
                 )}
               </motion.div>
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+              >
+                <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1.5 ml-1">
+                  Date of Birth
+                </label>
+                <DOBInput
+                  value={dateOfBirth}
+                  onChange={(d) => { setDateOfBirth(d); if (dobError) setDobError(null); }}
+                  error={dobError}
+                />
+              </motion.div>
               <AuthErrorAlert message={error} />
-              <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-                <button type="submit" className="w-full flex items-center justify-center gap-2 bg-[#D4A843] hover:bg-[#E8841A] text-[#0F0E0C] font-bold py-3.5 rounded-xl transition-all text-sm">
+              <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
+                <button type="submit" disabled={!dateOfBirth} className="w-full flex items-center justify-center gap-2 bg-[#D4A843] hover:bg-[#E8841A] text-[#0F0E0C] font-bold py-3.5 rounded-xl transition-all disabled:opacity-60 text-sm">
                   Continue
                   <ArrowRight size={16} />
                 </button>

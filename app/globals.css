@@ -174,6 +174,22 @@
   --badge-gold:             #b07828;
 }
 
+/* ── View Transitions — Sprint 156 ────────────────────────────────────────── */
+::view-transition-old(root) {
+  animation: vt-fade-out 200ms ease-out;
+}
+::view-transition-new(root) {
+  animation: vt-fade-in 200ms ease-in;
+}
+@keyframes vt-fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+@keyframes vt-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
 /* ── Dark floating section tokens (used on cream pages) ────────────────────── */
 :root {
   --dark-bg:         #0F0E0C;

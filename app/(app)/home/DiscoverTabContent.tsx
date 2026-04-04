@@ -24,6 +24,7 @@ import { RecommendationsScroll } from "@/components/social/RecommendationsScroll
 import { AIRecommendationFeedCard } from "@/components/social/AIRecommendationFeedCard";
 import type { AIRecommendedBeer } from "@/lib/recommendations";
 import { NearbyChallengesSection } from "@/components/social/NearbyChallengesSection";
+import { TrendingSection } from "@/components/social/TrendingSection";
 import { BreweryAdFeedCard } from "@/components/social/BreweryAdFeedCard";
 import { useFeedAd } from "@/hooks/useFeedAd";
 
@@ -153,6 +154,9 @@ export function DiscoverTabContent({
           <BeerOfTheWeekCard beer={communityContent.featuredBeers[0]} index={0} />
         </div>
       )}
+
+      {/* Trending Near You — Sprint 156 */}
+      <TrendingSection />
 
       {/* Brewed for You — AI Recommendations (Sprint 146) */}
       {aiRecommendations && aiRecommendations.length > 0 && (

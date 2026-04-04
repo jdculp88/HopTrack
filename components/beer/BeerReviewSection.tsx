@@ -5,7 +5,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Star, Send, Trash2, MessageSquare } from "lucide-react";
 import { StarRating } from "@/components/ui/StarRating";
 import { UserAvatar } from "@/components/ui/UserAvatar";
+import { ReportButton } from "@/components/ui/ReportButton";
 import { formatRelativeTime } from "@/lib/utils";
+import { RatingDisclosure } from "@/components/ui/RatingDisclosure";
 
 interface BeerReviewSectionProps {
   beerId: string;
@@ -25,7 +27,7 @@ interface Review {
   };
 }
 
-export function BeerReviewSection({ beerId }: BeerReviewSectionProps) {
+export function BeerReviewSection({ beerId, currentUserId }: BeerReviewSectionProps) {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [userReview, setUserReview] = useState<Review | null>(null);
   const [avgRating, setAvgRating] = useState<number | null>(null);
@@ -143,6 +145,7 @@ export function BeerReviewSection({ beerId }: BeerReviewSectionProps) {
                   <span className="font-mono text-sm" style={{ color: "var(--text-muted)" }}>{formRating}/5</span>
                 )}
               </div>
+              <RatingDisclosure />
 
               <AnimatePresence>
                 {showComment && formRating > 0 && (
@@ -241,6 +244,9 @@ export function BeerReviewSection({ beerId }: BeerReviewSectionProps) {
                     <span className="text-xs" style={{ color: "var(--text-muted)" }}>
                       {formatRelativeTime(review.created_at)}
                     </span>
+                    {currentUserId && review.user_id !== currentUserId && (
+                      <ReportButton reviewId={review.id} reviewType="beer" />
+                    )}
                   </div>
                   {review.comment && (
                     <p className="text-sm mt-1 leading-relaxed" style={{ color: "var(--text-secondary)" }}>

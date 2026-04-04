@@ -50,12 +50,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description,
       type: "article",
       siteName: "HopTrack",
-      images: [{ url: "/icons/icon-512.png", width: 512, height: 512 }],
+      images: [{ url: `/og/session?session_id=${id}`, width: 1200, height: 630 }],
     },
     twitter: {
-      card: "summary",
+      card: "summary_large_image",
       title,
       description,
+      images: [`/og/session?session_id=${id}`],
     },
   };
 }

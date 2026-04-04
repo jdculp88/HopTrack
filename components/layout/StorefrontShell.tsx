@@ -58,7 +58,7 @@ export function StorefrontShell({ children }: StorefrontShellProps) {
         </header>
 
         {/* Page content — full width, no sidebar */}
-        <main className="flex-1">
+        <main id="main-content" className="flex-1">
           {children}
         </main>
 

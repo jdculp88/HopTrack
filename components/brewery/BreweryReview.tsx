@@ -4,7 +4,9 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Star, Send, Trash2, MessageSquare } from "lucide-react";
 import { UserAvatar } from "@/components/ui/UserAvatar";
+import { ReportButton } from "@/components/ui/ReportButton";
 import { formatRelativeTime } from "@/lib/utils";
+import { RatingDisclosure } from "@/components/ui/RatingDisclosure";
 
 interface BreweryReviewProps {
   breweryId: string;
@@ -30,7 +32,7 @@ interface Review {
   };
 }
 
-export function BreweryReview({ breweryId, currentUserId: _currentUserId, isBreweryAdmin, isAuthenticated = true, returnPath }: BreweryReviewProps) {
+export function BreweryReview({ breweryId, currentUserId, isBreweryAdmin, isAuthenticated = true, returnPath }: BreweryReviewProps) {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [userReview, setUserReview] = useState<Review | null>(null);
   const [avgRating, setAvgRating] = useState<number | null>(null);
@@ -200,6 +202,8 @@ export function BreweryReview({ breweryId, currentUserId: _currentUserId, isBrew
                 )}
               </div>
 
+              <RatingDisclosure />
+
               {/* Comment */}
               <textarea
                 value={comment}
@@ -305,6 +309,9 @@ export function BreweryReview({ breweryId, currentUserId: _currentUserId, isBrew
                     <span className="text-xs" style={{ color: "var(--text-muted)" }}>
                       {formatRelativeTime(review.created_at)}
                     </span>
+                    {currentUserId && review.user_id !== currentUserId && (
+                      <ReportButton reviewId={review.id} reviewType="brewery" />
+                    )}
                   </div>
                   {review.comment && (
                     <p className="text-sm mt-1 leading-relaxed" style={{ color: "var(--text-secondary)" }}>

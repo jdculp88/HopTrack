@@ -3,7 +3,6 @@ import { createServiceClient } from "@/lib/supabase/service";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-export const revalidate = 30; // Revalidate every 30 seconds
 import Link from "next/link";
 import {
   Beer, Users, TrendingUp, Award, Calendar, ArrowUpRight,
@@ -26,8 +25,11 @@ export async function generateMetadata({ params }: { params: Promise<{ brewery_i
   return { title: `${(data as any)?.name ?? "Brewery"} Dashboard — HopTrack` };
 }
 
+export const revalidate = 30;
+
 export default async function BreweryDashboardPage({ params }: { params: Promise<{ brewery_id: string }> }) {
   const { brewery_id } = await params;
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");

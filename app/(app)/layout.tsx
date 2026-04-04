@@ -23,6 +23,13 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     return (
       <ReducedMotionProvider>
         <ErrorBoundary context="StorefrontLayout">
+          <a
+            href="#main-content"
+            className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:top-4 focus:left-4 focus:px-4 focus:py-2 focus:rounded-xl focus:text-sm focus:font-semibold"
+            style={{ background: "var(--accent-gold)", color: "var(--bg)" }}
+          >
+            Skip to main content
+          </a>
           <StorefrontShell>
             {children}
           </StorefrontShell>

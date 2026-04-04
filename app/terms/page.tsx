@@ -73,7 +73,21 @@ export default function TermsPage() {
             </ul>
           </Section>
 
-          <Section title="6. Acceptable Use">
+          <Section title="6. Incentivized Reviews &amp; XP">
+            <p>
+              HopTrack awards experience points (XP) to users who rate beers, complete check-in sessions,
+              and engage with the platform. Specifically, users earn 10 XP for each beer rating submitted.
+              This means that reviews and ratings on HopTrack are incentivized.
+            </p>
+            <p className="mt-2">
+              All ratings and reviews must reflect the honest opinion of the user, regardless of any XP
+              earned. HopTrack does not offer additional incentives for positive or negative ratings.
+              Users who submit fake, misleading, or purchased reviews may have their accounts suspended
+              or terminated. This disclosure is made in compliance with the FTC Consumer Review Rule.
+            </p>
+          </Section>
+
+          <Section title="7. Acceptable Use">
             <p>You agree not to:</p>
             <ul className="list-disc pl-5 space-y-1 mt-2">
               <li>Scrape, crawl, or use automated means to access the Service without authorization</li>
@@ -87,7 +101,7 @@ export default function TermsPage() {
             </ul>
           </Section>
 
-          <Section title="7. Brewery Partner Terms">
+          <Section title="8. Brewery Partner Terms">
             <p>
               Brewery owners and operators who use the brewery dashboard are subject to additional terms
               governing their use of business tools, analytics, and customer data. Brewery partners agree
@@ -96,7 +110,7 @@ export default function TermsPage() {
             </p>
           </Section>
 
-          <Section title="8. Intellectual Property">
+          <Section title="9. Intellectual Property">
             <p>
               HopTrack, including its name, logo, design, code, algorithms, and all associated branding,
               is the property of HopTrack and protected by intellectual property laws. You may not use our
@@ -105,7 +119,7 @@ export default function TermsPage() {
             </p>
           </Section>
 
-          <Section title="9. Termination">
+          <Section title="10. Termination">
             <p>
               Either party may terminate your account at any time. We may suspend or terminate accounts
               that violate these terms without prior notice. Upon termination, your right to use the
@@ -114,7 +128,7 @@ export default function TermsPage() {
             </p>
           </Section>
 
-          <Section title="10. Disclaimers">
+          <Section title="11. Disclaimers">
             <p>
               The Service is provided "as is" and "as available" without warranties of any kind, either
               express or implied. HopTrack does not warrant that the Service will be uninterrupted, secure,
@@ -123,7 +137,7 @@ export default function TermsPage() {
             </p>
           </Section>
 
-          <Section title="11. Limitation of Liability">
+          <Section title="12. Limitation of Liability">
             <p>
               To the maximum extent permitted by law, HopTrack shall not be liable for any indirect,
               incidental, special, consequential, or punitive damages, or any loss of profits or revenues,
@@ -131,14 +145,14 @@ export default function TermsPage() {
             </p>
           </Section>
 
-          <Section title="12. Changes to Terms">
+          <Section title="13. Changes to Terms">
             <p>
               We may modify these terms at any time. We will notify users of material changes through
               the Service or via email. Your continued use after changes are posted constitutes acceptance.
             </p>
           </Section>
 
-          <Section title="13. Contact">
+          <Section title="14. Contact">
             <p>
               Questions about these terms? Email us at{" "}
               <a href="mailto:legal@hoptrack.beer" className="underline" style={{ color: "var(--accent-gold)" }}>

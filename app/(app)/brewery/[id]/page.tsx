@@ -19,6 +19,7 @@ import { BreweryEventsSection } from "./BreweryEventsSection";
 import { BreweryReviewsSection } from "./BreweryReviewsSection";
 import { AuthGate } from "@/components/ui/AuthGate";
 import { StorefrontGate } from "@/components/ui/StorefrontGate";
+import { DrinkingNowStrip } from "@/components/brewery/DrinkingNowStrip";
 
 // ─── Supabase join shapes ────────────────────────────────────────────────────
 
@@ -56,10 +57,6 @@ interface BreweryBeerLog {
 interface TopVisitor extends BreweryVisit {
   profile: Profile;
 }
-
-// ─── ISR ─────────────────────────────────────────────────────────────────────
-
-export const revalidate = 60; // 1-minute ISR
 
 // ─── Metadata ────────────────────────────────────────────────────────────────
 
@@ -103,8 +100,11 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
+export const revalidate = 60;
+
 export default async function BreweryPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+
   const supabase = await createClient();
   const {
     data: { user },
@@ -653,10 +653,14 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
             </div>
           </div>
 
+          {/* Drinking Now — Realtime presence strip */}
+          <DrinkingNowStrip breweryId={id} />
+
           {/* Tap List + Food Menu — gated for unclaimed/free-tier on public view */}
           {isAuthenticated || hasStorefront ? (
             <BreweryTapListSection
               beers={(beers ?? []) as any[]}
+              breweryId={id}
               breweryName={brewery.name}
               menuImageUrl={brewery.menu_image_url ?? null}
             />
@@ -664,6 +668,7 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
             <StorefrontGate isUnlocked={hasStorefront} sectionName="Tap List" breweryId={id}>
               <BreweryTapListSection
                 beers={(beers ?? []) as any[]}
+                breweryId={id}
                 breweryName={brewery.name}
                 menuImageUrl={brewery.menu_image_url ?? null}
               />

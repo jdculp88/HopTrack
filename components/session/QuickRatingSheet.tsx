@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Star, X, Edit3 } from 'lucide-react'
 import { BeerLog } from '@/types/database'
+import { RatingDisclosure } from '@/components/ui/RatingDisclosure'
 
 interface QuickRatingSheetProps {
   beerLog: BeerLog
@@ -196,8 +197,11 @@ export default function QuickRatingSheet({
                 </button>
               </div>
 
+              {/* FTC disclosure */}
+              <RatingDisclosure />
+
               {/* Stars */}
-              <div className="flex items-center justify-center gap-3 mb-3">
+              <div className="flex items-center justify-center gap-3 mb-3 mt-3">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <button
                     key={star}

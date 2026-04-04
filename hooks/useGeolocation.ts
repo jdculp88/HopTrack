@@ -8,11 +8,20 @@ interface GeolocationState {
   loading: boolean;
   error: string | null;
   enabled: boolean;
+  /** True when the user has not yet granted location consent via the modal */
+  needsConsent: boolean;
+}
+
+function hasLocationConsent(): boolean {
+  if (typeof window === "undefined") return false;
+  return localStorage.getItem("ht-location-consent") === "true";
 }
 
 /**
  * Hook for managing geolocation state.
  * Caches coordinates for the session to avoid re-prompting.
+ * Requires location consent (ht-location-consent in localStorage)
+ * before calling the browser geolocation API.
  */
 export function useGeolocation() {
   const [state, setState] = useState<GeolocationState>({
@@ -21,22 +30,12 @@ export function useGeolocation() {
     loading: false,
     error: null,
     enabled: false,
+    needsConsent: !hasLocationConsent(),
   });
 
   const cached = useRef<{ lat: number; lng: number } | null>(null);
 
-  const requestLocation = useCallback(() => {
-    if (cached.current) {
-      setState({
-        latitude: cached.current.lat,
-        longitude: cached.current.lng,
-        loading: false,
-        error: null,
-        enabled: true,
-      });
-      return;
-    }
-
+  const fetchPosition = useCallback(() => {
     if (!("geolocation" in navigator)) {
       setState((prev) => ({ ...prev, error: "Geolocation not supported", loading: false }));
       return;
@@ -54,6 +53,7 @@ export function useGeolocation() {
           loading: false,
           error: null,
           enabled: true,
+          needsConsent: false,
         });
       },
       (err) => {
@@ -68,6 +68,38 @@ export function useGeolocation() {
     );
   }, []);
 
+  const requestLocation = useCallback(() => {
+    if (cached.current) {
+      setState({
+        latitude: cached.current.lat,
+        longitude: cached.current.lng,
+        loading: false,
+        error: null,
+        enabled: true,
+        needsConsent: false,
+      });
+      return;
+    }
+
+    // Check consent before calling browser API
+    if (!hasLocationConsent()) {
+      setState((prev) => ({ ...prev, needsConsent: true }));
+      return;
+    }
+
+    fetchPosition();
+  }, [fetchPosition]);
+
+  /**
+   * Called after the user grants consent via LocationConsentModal.
+   * Sets localStorage and immediately requests the browser position.
+   */
+  const grantConsent = useCallback(() => {
+    localStorage.setItem("ht-location-consent", "true");
+    setState((prev) => ({ ...prev, needsConsent: false }));
+    fetchPosition();
+  }, [fetchPosition]);
+
   const disable = useCallback(() => {
     setState({
       latitude: null,
@@ -75,8 +107,9 @@ export function useGeolocation() {
       loading: false,
       error: null,
       enabled: false,
+      needsConsent: false,
     });
   }, []);
 
-  return { ...state, requestLocation, disable };
+  return { ...state, requestLocation, grantConsent, disable };
 }
