@@ -81,5 +81,7 @@ export async function GET() {
       startedAt: s.started_at,
     }));
 
-  return NextResponse.json({ activeFriends });
+  return NextResponse.json({ activeFriends }, {
+    headers: { "Cache-Control": "private, max-age=15" },
+  });
 }

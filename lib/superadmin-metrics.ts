@@ -248,8 +248,16 @@ export async function calculateCommandCenterMetrics(
     { data: recentClaims },
     { data: recentAchievements },
 
-    // CRM + churn
-    { data: allProfiles },
+    // CRM segment counts (replaces 50K-row bulk fetch)
+    { count: crmVipCount },
+    { count: crmPowerCount },
+    { count: crmRegularCount },
+    { count: crmNewCount },
+
+    // Churn distribution counts
+    { count: churnActiveCount },
+    { count: churnAtRiskCount },
+    { count: churnChurnedCount },
   ] = await Promise.all([
     // ── Pulse queries ──
     service.from("profiles").select("id", { count: "exact", head: true }) as unknown as CountResult,
@@ -296,8 +304,16 @@ export async function calculateCommandCenterMetrics(
     service.from("brewery_claims").select("id, created_at, status, brewery_id, brewery:breweries(id, name), profile:profiles(display_name)").order("created_at", { ascending: false }).limit(10) as any,
     service.from("user_achievements").select("id, unlocked_at, achievement:achievements(name), profile:profiles(display_name)").order("unlocked_at", { ascending: false }).limit(10) as any,
 
-    // CRM + churn distribution
-    service.from("profiles").select("total_checkins, last_session_date").limit(50000) as any,
+    // CRM segment counts (boundaries match lib/crm.ts computeSegment)
+    service.from("profiles").select("id", { count: "exact", head: true }).gte("total_checkins", 10) as unknown as CountResult,
+    service.from("profiles").select("id", { count: "exact", head: true }).gte("total_checkins", 5).lt("total_checkins", 10) as unknown as CountResult,
+    service.from("profiles").select("id", { count: "exact", head: true }).gte("total_checkins", 2).lt("total_checkins", 5) as unknown as CountResult,
+    service.from("profiles").select("id", { count: "exact", head: true }).lt("total_checkins", 2) as unknown as CountResult,
+
+    // Churn distribution counts (14d active, 45d at-risk, rest churned)
+    service.from("profiles").select("id", { count: "exact", head: true }).gte("last_session_date", daysAgo(14)) as unknown as CountResult,
+    service.from("profiles").select("id", { count: "exact", head: true }).gte("last_session_date", daysAgo(45)).lt("last_session_date", daysAgo(14)) as unknown as CountResult,
+    service.from("profiles").select("id", { count: "exact", head: true }).or(`last_session_date.is.null,last_session_date.lt.${daysAgo(45)}`) as unknown as CountResult,
   ]);
 
   // ── Compute Pulse ──────────────────────────────────────────────────
@@ -559,29 +575,18 @@ export async function calculateCommandCenterMetrics(
 
   // ── Compute CRM + Churn Distribution ──────────────────────────────
 
-  const profileRows = (allProfiles ?? []) as { total_checkins: number; last_session_date: string | null }[];
-  const segmentCounts: Record<string, number> = { vip: 0, power: 0, regular: 0, new: 0 };
-  const churnCounts: Record<string, number> = { active: 0, at_risk: 0, churned: 0 };
+  const segmentCounts: Record<string, number> = {
+    vip: crmVipCount ?? 0,
+    power: crmPowerCount ?? 0,
+    regular: crmRegularCount ?? 0,
+    new: crmNewCount ?? 0,
+  };
+  const churnCounts: Record<string, number> = {
+    active: churnActiveCount ?? 0,
+    at_risk: churnAtRiskCount ?? 0,
+    churned: churnChurnedCount ?? 0,
+  };
   const CHURN_COLORS: Record<string, string> = { active: "#4A7C59", at_risk: "#E8841A", churned: "#C44B3A" };
-
-  for (const p of profileRows) {
-    // CRM segment
-    const visits = p.total_checkins ?? 0;
-    if (visits >= 10) segmentCounts.vip++;
-    else if (visits >= 5) segmentCounts.power++;
-    else if (visits >= 2) segmentCounts.regular++;
-    else segmentCounts.new++;
-
-    // Churn risk
-    if (p.last_session_date) {
-      const daysSince = Math.floor((Date.now() - new Date(p.last_session_date).getTime()) / 86400000);
-      if (daysSince <= 14) churnCounts.active++;
-      else if (daysSince <= 45) churnCounts.at_risk++;
-      else churnCounts.churned++;
-    } else {
-      churnCounts.churned++;
-    }
-  }
 
   const CRM_SEGMENT_META: Record<string, { color: string; bgColor: string; emoji: string }> = {
     vip: { color: "var(--accent-gold)", bgColor: "rgba(212,168,67,0.15)", emoji: "👑" },

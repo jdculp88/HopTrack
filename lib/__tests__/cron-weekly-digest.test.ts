@@ -185,8 +185,8 @@ describe("POST /api/cron/weekly-digest", () => {
       sessions: [{ brewery_id: "brew-1" }],
       breweries: [{ id: "brew-1", name: "Test Brewery" }],
       brandLocations: [], // no brand locations
-      breweryAccounts: [{ user_id: "user-1", role: "owner" }],
-      profile: { display_name: "Test Owner", email: "owner@test.com" },
+      breweryAccounts: [{ brewery_id: "brew-1", user_id: "user-1", role: "owner" }],
+      profile: { id: "user-1", display_name: "Test Owner", email: "owner@test.com" },
     });
 
     const res = await POST(buildRequest("test-secret-123"));

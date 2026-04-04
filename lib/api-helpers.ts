@@ -75,3 +75,33 @@ export async function requirePremiumTier(
 
   return !!brewery && tiers.includes(brewery.subscription_tier);
 }
+
+/**
+ * Check if a brewery is covered by its brand's subscription.
+ * Returns { covered: true, brandName } if the brewery belongs to a brand
+ * with a non-free subscription_tier, otherwise { covered: false }.
+ */
+export async function checkBrandCovered(
+  supabase: SupabaseClient,
+  breweryId: string
+): Promise<{ covered: boolean; brandName?: string }> {
+  const { data: brewery } = await supabase
+    .from("breweries")
+    .select("brand_id")
+    .eq("id", breweryId)
+    .single() as any;
+
+  if (!brewery?.brand_id) return { covered: false };
+
+  const { data: brand } = await supabase
+    .from("brewery_brands")
+    .select("name, subscription_tier")
+    .eq("id", brewery.brand_id)
+    .single() as any;
+
+  if (brand && brand.subscription_tier && brand.subscription_tier !== "free") {
+    return { covered: true, brandName: brand.name };
+  }
+
+  return { covered: false };
+}

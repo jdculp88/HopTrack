@@ -114,32 +114,50 @@ export async function POST(req: Request) {
     }
   }
 
+  // ── Batch-fetch brewery owners and profiles (avoid N+1 per-brewery queries) ──
+  const breweryIds = (breweries as any[]).map((b: any) => b.id);
+  const { data: allOwnerAccounts } = await supabase
+    .from("brewery_accounts")
+    .select("brewery_id, user_id, role")
+    .in("brewery_id", breweryIds)
+    .eq("role", "owner") as any;
+
+  const ownerByBrewery = new Map<string, string>();
+  for (const acct of (allOwnerAccounts ?? []) as any[]) {
+    if (!ownerByBrewery.has(acct.brewery_id)) {
+      ownerByBrewery.set(acct.brewery_id, acct.user_id);
+    }
+  }
+
+  const ownerIds = [...new Set(ownerByBrewery.values())];
+  const { data: ownerProfiles } = ownerIds.length > 0
+    ? await supabase
+        .from("profiles")
+        .select("id, display_name, email")
+        .in("id", ownerIds) as any
+    : { data: [] };
+
+  const profileByUserId = new Map<string, any>();
+  const profileList = Array.isArray(ownerProfiles) ? ownerProfiles : ownerProfiles ? [ownerProfiles] : [];
+  for (const p of profileList as any[]) {
+    if (p?.id) profileByUserId.set(p.id, p);
+  }
+
   // ── Per-brewery digests — skip brand owners (they got the brand digest) ──
   for (const brewery of breweries as any[]) {
     try {
-      // Find brewery owner
-      const { data: accounts } = await supabase
-        .from("brewery_accounts")
-        .select("user_id, role")
-        .eq("brewery_id", brewery.id)
-        .eq("role", "owner") as any;
-
-      if (!accounts?.length) {
+      const ownerId = ownerByBrewery.get(brewery.id);
+      if (!ownerId) {
         // No owner — skip (manager-only breweries don't get digest)
         continue;
       }
 
       // Dedup: skip if this owner already received a brand digest
-      if (brandOwnerUserIds.has(accounts[0].user_id)) {
+      if (brandOwnerUserIds.has(ownerId)) {
         continue;
       }
 
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("display_name, email")
-        .eq("id", accounts[0].user_id)
-        .single() as any;
-
+      const profile = profileByUserId.get(ownerId);
       if (!profile?.email) {
         console.warn(
           `[weekly-digest] No email for owner of brewery ${brewery.id}`,

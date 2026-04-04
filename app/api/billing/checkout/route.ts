@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getStripe, STRIPE_PRICES, isStripeConfigured } from "@/lib/stripe";
 import { rateLimitResponse } from "@/lib/rate-limit";
+import { checkBrandCovered } from "@/lib/api-helpers";
 
 export async function POST(req: NextRequest) {
   const rl = rateLimitResponse(req, "billing-checkout", { limit: 5, windowMs: 60_000 });
@@ -37,6 +38,15 @@ export async function POST(req: NextRequest) {
 
     if (!account) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    // Block checkout if brewery is covered by brand subscription
+    const brandCheck = await checkBrandCovered(supabase, brewery_id);
+    if (brandCheck.covered) {
+      return NextResponse.json(
+        { error: `This location's billing is managed by ${brandCheck.brandName}. Contact your brand administrator.` },
+        { status: 403 }
+      );
     }
 
     const { data: brewery } = await supabase

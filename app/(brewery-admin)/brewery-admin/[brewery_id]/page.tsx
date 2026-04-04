@@ -7,12 +7,10 @@ export const revalidate = 30; // Revalidate every 30 seconds
 import Link from "next/link";
 import {
   Beer, Users, TrendingUp, Award, Calendar, ArrowUpRight,
-  List, Clock, Heart, BarChart3, QrCode, Eye, Zap, Gift, RefreshCw, ScanLine, HelpCircle,
+  List, Clock, Heart, BarChart3, QrCode, Eye, Zap, Gift, RefreshCw, ScanLine,
 } from "lucide-react";
 import { formatRelativeTime } from "@/lib/dates";
 import { calculateBreweryKPIs, calculateBreweryKPISparklines, formatDuration, formatTrend } from "@/lib/kpi";
-import BreweryOnboardingCard from "@/components/brewery-admin/BreweryOnboardingCard";
-import { OnboardingWizard } from "@/components/brewery-admin/onboarding/OnboardingWizard";
 import ROIDashboardCard from "@/components/brewery-admin/ROIDashboardCard";
 import { OnboardingChecklist } from "@/components/brewery-admin/OnboardingChecklist";
 import { PosDashboardCard } from "@/components/brewery-admin/PosDashboardCard";
@@ -298,8 +296,6 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
   const hasBeers = totalBeerCount > 0;
   const hasLoyalty = !!loyaltyProgram;
   const hasLogo = !!(brewery as any)?.logo_url;
-  const showWizard = !hasBeers && !hasLogo;
-
   // ── ROI card data ──────────────────────────────────────────────────
   // Count sessions where a loyalty stamp was earned this month
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
@@ -378,14 +374,6 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
   return (
     <div className="p-6 lg:p-8 max-w-6xl mx-auto pt-16 lg:pt-8">
 
-      {/* Onboarding Wizard — shows for freshly claimed breweries */}
-      {showWizard && (
-        <OnboardingWizard
-          breweryId={brewery_id}
-          breweryName={(brewery as any)?.name ?? "Your Brewery"}
-        />
-      )}
-
       {/* Header */}
       <div className="mb-6">
         <p className="text-xs font-mono uppercase tracking-wider mb-1" style={{ color: "var(--accent-gold)" }}>
@@ -429,13 +417,6 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
         </Link>
       )}
 
-      {/* Onboarding Card */}
-      <BreweryOnboardingCard
-        breweryId={brewery_id}
-        hasBeers={hasBeers}
-        hasLoyalty={hasLoyalty}
-      />
-
       {/* Onboarding Checklist — persistent for first 14 days after verification */}
       <div className="mb-4">
         <OnboardingChecklist
@@ -446,16 +427,6 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
           hasLoyalty={hasLoyalty}
         />
       </div>
-
-      {/* Help Quick Link */}
-      <Link
-        href={`/brewery-admin/${brewery_id}/resources#guides`}
-        className="flex items-center gap-1.5 text-xs font-medium mb-6 transition-opacity hover:opacity-80"
-        style={{ color: "var(--text-muted)" }}
-      >
-        <HelpCircle size={13} />
-        Need help getting started? Browse our guides
-      </Link>
 
       {/* ── Today's Snapshot ─────────────────────────────────────────── */}
       <div

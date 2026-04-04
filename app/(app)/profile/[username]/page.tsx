@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
-import { MapPin, Settings, Star, Bookmark, Stamp, Flame } from "lucide-react";
+import { MapPin, Settings, Star, Bookmark, Flame } from "lucide-react";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import { ProfileBanner } from "@/components/profile/ProfileBanner";
 import { BeerStyleBadge } from "@/components/ui/BeerStyleBadge";
@@ -297,24 +297,6 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
             {profile.home_city}
           </p>
         )}
-
-        {/* Beer Passport Link */}
-        <Link
-          href={`/profile/${username}/passport`}
-          className="card-bg-featured flex items-center gap-3 p-4 mb-8 border border-[var(--border)] hover:border-[var(--accent-gold)]/40 rounded-2xl transition-all group"
-        >
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "linear-gradient(135deg, var(--accent-gold), var(--accent-amber))" }}>
-            <Stamp size={18} className="text-[var(--bg)]" />
-          </div>
-          <div className="flex-1">
-            <p className="font-display font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-gold)] transition-colors">Beer Passport</p>
-            <p className="text-xs text-[var(--text-muted)]">{profile.unique_beers} unique beers &middot; {styleDNA.length} of 26 styles explored</p>
-            <div className="mt-1.5 h-1 rounded-full overflow-hidden" style={{ backgroundColor: "var(--surface-2)" }}>
-              <div className="h-full rounded-full transition-all" style={{ width: `${Math.min((styleDNA.length / 26) * 100, 100)}%`, backgroundColor: "var(--accent-gold)" }} />
-            </div>
-          </div>
-          <span className="text-[var(--text-muted)] text-sm">→</span>
-        </Link>
 
         {/* Beer DNA */}
         <div className="mb-8">

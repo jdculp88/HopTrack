@@ -5,6 +5,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { StorefrontShell } from "@/components/layout/StorefrontShell";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { InstallPromptBanner } from "@/components/ui/InstallPromptBanner";
+import { ReducedMotionProvider } from "@/components/ui/ReducedMotionProvider";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
@@ -20,11 +21,13 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   // Unauthenticated brewery visitors get the StorefrontShell (no app nav)
   if (!user && isBreweryRoute) {
     return (
-      <ErrorBoundary context="StorefrontLayout">
-        <StorefrontShell>
-          {children}
-        </StorefrontShell>
-      </ErrorBoundary>
+      <ReducedMotionProvider>
+        <ErrorBoundary context="StorefrontLayout">
+          <StorefrontShell>
+            {children}
+          </StorefrontShell>
+        </ErrorBoundary>
+      </ReducedMotionProvider>
     );
   }
 
@@ -38,11 +41,13 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const username = profile?.username ?? user!.email?.split("@")[0] ?? "me";
 
   return (
-    <ErrorBoundary context="AppLayout">
-      <AppShell username={username}>
-        {children}
-        <InstallPromptBanner />
-      </AppShell>
-    </ErrorBoundary>
+    <ReducedMotionProvider>
+      <ErrorBoundary context="AppLayout">
+        <AppShell username={username}>
+          {children}
+          <InstallPromptBanner />
+        </AppShell>
+      </ErrorBoundary>
+    </ReducedMotionProvider>
   );
 }

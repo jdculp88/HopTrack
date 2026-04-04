@@ -8,7 +8,7 @@ import { formatRelativeTime } from "@/lib/dates";
 import { verifyBrandAccessWithScope } from "@/lib/brand-auth";
 import { calculateBreweryKPIs, type BreweryKPIs } from "@/lib/kpi";
 import { BrandOnboardingWizard } from "@/components/brewery-admin/brand/onboarding/BrandOnboardingWizard";
-import BrandOnboardingCard from "@/components/brewery-admin/brand/onboarding/BrandOnboardingCard";
+
 
 export const revalidate = 30;
 
@@ -281,17 +281,6 @@ export default async function BrandDashboardPage({ params }: { params: Promise<{
             </Link>
           </div>
         </div>
-      </div>
-
-      {/* Brand Onboarding */}
-      <div className="max-w-5xl mx-auto px-6 lg:px-8 pt-6">
-        <BrandOnboardingCard
-          brandId={brand_id}
-          brandSlug={brand.slug ?? ""}
-          locationCount={(locations ?? []).length}
-          hasLoyalty={!!(brandLoyalty && brandLoyalty.length > 0)}
-          teamSize={teamCount ?? 1}
-        />
       </div>
 
       {/* Onboarding Wizard (auto-shows for brands with < 2 locations) */}

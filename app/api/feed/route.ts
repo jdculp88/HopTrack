@@ -121,5 +121,7 @@ export async function GET(request: NextRequest) {
     userReactions,
     commentCounts,
     hasMore,
+  }, {
+    headers: { "Cache-Control": "private, max-age=15, stale-while-revalidate=30" },
   });
 }

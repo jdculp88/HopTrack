@@ -315,3 +315,16 @@ Revenue readiness. Claim funnel UX audit + friction removal, trial lifecycle ema
 
 **Deferred — Option C: "The Native Feel"** 📱
 Consumer app polish. Core Web Vitals / Lighthouse audit → 90+ scores, PWA install prompt improvements, image optimization pass, mobile gesture and interaction polish, offline-ready foundations, App Store screenshot prep, accessibility re-audit. The "make it feel native" sprint. **OPEN**
+
+---
+
+### Beer Passport Redesign (Deferred Sprint 152)
+**Original feature:** Beer Passport — collectible stamp grid of every unique beer a user checked in, shown at `/profile/[username]/passport`. Built Sprint 13, polished Sprint 141.
+**Why removed:** Too easy to cheat — self-reported check-ins mean users can inflate their passport without verification.
+**Files preserved:** `components/brewery-admin/onboarding/OnboardingWizard.tsx` (unrelated, kept for re-enable). Passport files deleted.
+**Redesign requirements when revisited:**
+- Verification mechanism (bartender confirmation, QR scan, proximity check, or POS integration)
+- Consider making it brewery-verified only (stamps earned at verified locations)
+- Explore gamification balance — should be achievable but not trivially fakeable
+- Evaluate whether to integrate with existing loyalty system instead of standalone
+**Related files to reference:** `lib/beerStyleColors.ts` (style families still used by BeerDNACard), `app/(app)/home/YouTabContent.tsx` (Brewery Passport section — different feature, still live)

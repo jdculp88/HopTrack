@@ -5,7 +5,7 @@
  */
 
 import { describe, test, expect, vi, beforeEach } from "vitest";
-import { ADMIN_ROLES, STAFF_ROLES, PREMIUM_TIERS, requireAuth, requireBreweryAdmin, requirePremiumTier } from "@/lib/api-helpers";
+import { ADMIN_ROLES, STAFF_ROLES, PREMIUM_TIERS, requireAuth, requireBreweryAdmin, requirePremiumTier, checkBrandCovered } from "@/lib/api-helpers";
 
 describe("API Helper Constants", () => {
   test("ADMIN_ROLES contains owner and manager", () => {
@@ -322,5 +322,97 @@ describe("requirePremiumTier()", () => {
     // Custom tiers including tap — should pass
     const customResult = await requirePremiumTier(supabase, breweryId, ["tap", "cask", "barrel"]);
     expect(customResult).toBe(true);
+  });
+});
+
+// ─── checkBrandCovered Tests (Sprint 152) ─────────────────────────────────────
+
+function buildBrandMockSupabase(overrides: {
+  breweryData?: any;
+  brandData?: any;
+} = {}) {
+  return {
+    from: vi.fn().mockImplementation((table: string) => {
+      const chain: any = {};
+      chain.select = vi.fn().mockReturnValue(chain);
+      chain.eq = vi.fn().mockReturnValue(chain);
+      chain.single = vi.fn().mockResolvedValue({
+        data: table === "breweries"
+          ? (overrides.breweryData ?? null)
+          : table === "brewery_brands"
+            ? (overrides.brandData ?? null)
+            : null,
+      });
+      return chain;
+    }),
+  } as any;
+}
+
+describe("checkBrandCovered()", () => {
+  const breweryId = "brewery-123";
+
+  test("returns covered: false when brewery has no brand_id", async () => {
+    const supabase = buildBrandMockSupabase({
+      breweryData: { brand_id: null },
+    });
+
+    const result = await checkBrandCovered(supabase, breweryId);
+
+    expect(result).toEqual({ covered: false });
+  });
+
+  test("returns covered: false when brand has free tier", async () => {
+    const supabase = buildBrandMockSupabase({
+      breweryData: { brand_id: "brand-1" },
+      brandData: { name: "Test Brand", subscription_tier: "free" },
+    });
+
+    const result = await checkBrandCovered(supabase, breweryId);
+
+    expect(result).toEqual({ covered: false });
+  });
+
+  test("returns covered: true with brandName when brand has barrel tier", async () => {
+    const supabase = buildBrandMockSupabase({
+      breweryData: { brand_id: "brand-1" },
+      brandData: { name: "Pint & Pixel", subscription_tier: "barrel" },
+    });
+
+    const result = await checkBrandCovered(supabase, breweryId);
+
+    expect(result).toEqual({ covered: true, brandName: "Pint & Pixel" });
+  });
+
+  test("returns covered: false when brewery not found", async () => {
+    const supabase = buildBrandMockSupabase({
+      breweryData: null,
+    });
+
+    const result = await checkBrandCovered(supabase, breweryId);
+
+    expect(result).toEqual({ covered: false });
+  });
+
+  test("returns covered: false when brand not found", async () => {
+    const supabase = buildBrandMockSupabase({
+      breweryData: { brand_id: "brand-1" },
+      brandData: null,
+    });
+
+    const result = await checkBrandCovered(supabase, breweryId);
+
+    expect(result).toEqual({ covered: false });
+  });
+
+  test("queries breweries table first, then brewery_brands", async () => {
+    const supabase = buildBrandMockSupabase({
+      breweryData: { brand_id: "brand-1" },
+      brandData: { name: "Test", subscription_tier: "barrel" },
+    });
+
+    await checkBrandCovered(supabase, breweryId);
+
+    expect(supabase.from).toHaveBeenCalledWith("breweries");
+    expect(supabase.from).toHaveBeenCalledWith("brewery_brands");
   });
 });

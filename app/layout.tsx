@@ -2,15 +2,15 @@ import type { Metadata, Viewport } from "next";
 import { Playfair_Display, JetBrains_Mono, DM_Sans } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
-import { MotionConfig } from "framer-motion";
 import Script from "next/script";
-import { CookieConsent } from "@/components/ui/CookieConsent";
+import dynamic from "next/dynamic";
+const CookieConsent = dynamic(() => import("@/components/ui/CookieConsent").then(m => ({ default: m.CookieConsent })));
 
 // Kept for The Board (editorial menu aesthetic)
 const playfair = Playfair_Display({
   variable: "--font-playfair",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800", "900"],
+  weight: ["400", "700"],
   style: ["normal", "italic"],
   display: "swap",
 });
@@ -18,7 +18,7 @@ const playfair = Playfair_Display({
 const jetbrainsMono = JetBrains_Mono({
   variable: "--font-jetbrains",
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
+  weight: ["400"],
   display: "swap",
 });
 
@@ -96,12 +96,10 @@ export default function RootLayout({
       data-scroll-behavior="smooth"
     >
       <body className="min-h-screen antialiased" suppressHydrationWarning>
-        <MotionConfig reducedMotion="user">
-          <ThemeProvider>
-            {children}
-            <CookieConsent />
-          </ThemeProvider>
-        </MotionConfig>
+        <ThemeProvider>
+          {children}
+          <CookieConsent />
+        </ThemeProvider>
         <Script
           id="sw-registration"
           strategy="afterInteractive"

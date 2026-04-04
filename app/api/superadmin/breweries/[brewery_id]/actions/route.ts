@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { apiSuccess, apiError, apiBadRequest } from "@/lib/api-response";
-import { requireAuth } from "@/lib/api-helpers";
+import { requireAuth, checkBrandCovered } from "@/lib/api-helpers";
 
 const VALID_TIERS = ["free", "tap", "cask", "barrel"] as const;
 const VALID_ACTIONS = ["force_verify", "change_tier"] as const;
@@ -73,6 +73,16 @@ export async function POST(
       const tier = payload?.tier;
       if (!tier || !VALID_TIERS.includes(tier)) {
         return apiBadRequest(`Invalid tier. Must be one of: ${VALID_TIERS.join(", ")}`, "tier");
+      }
+
+      // Prevent overriding brand-managed tier
+      const brandCheck = await checkBrandCovered(service, brewery_id);
+      if (brandCheck.covered) {
+        return apiError(
+          `Cannot change tier: ${brewery.name} is covered by ${brandCheck.brandName}'s brand subscription. Change the brand subscription instead.`,
+          "BRAND_COVERED",
+          403
+        );
       }
 
       // Update brewery subscription_tier

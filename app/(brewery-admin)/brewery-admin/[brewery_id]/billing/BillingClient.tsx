@@ -145,6 +145,7 @@ export function BillingClient({ brewery, brandBilling }: { brewery: Brewery; bra
   }
 
   async function handleSelectPlan(tier: typeof TIERS[number]) {
+    if (brandBilling) return; // Brand-covered locations cannot change plans
     if (tier.key === currentTier) return;
     if (tier.key === "free") return; // Can't downgrade to free via checkout
     if (tier.key === "barrel") {
@@ -546,7 +547,7 @@ export function BillingClient({ brewery, brandBilling }: { brewery: Brewery; bra
               {/* CTA */}
               <button
                 onClick={() => handleSelectPlan(tier)}
-                disabled={isCurrent || loadingTier === tier.name || tier.key === "free"}
+                disabled={isCurrent || loadingTier === tier.name || tier.key === "free" || !!brandBilling}
                 className="w-full py-2.5 rounded-xl font-semibold text-sm transition-opacity hover:opacity-90 disabled:opacity-60"
                 style={
                   isCurrent

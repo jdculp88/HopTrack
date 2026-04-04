@@ -5,6 +5,7 @@ import { createServiceClient } from "@/lib/supabase/service";
 import { BreweryAdminNav } from "@/components/brewery-admin/BreweryAdminNav";
 import { ImpersonationBanner } from "@/components/superadmin/ImpersonationBanner";
 import { ToastProvider } from "@/components/ui/Toast";
+import { ReducedMotionProvider } from "@/components/ui/ReducedMotionProvider";
 
 export const metadata = { title: { default: "Brewery Dashboard | HopTrack", template: "%s | HopTrack Brewery" } };
 
@@ -112,15 +113,18 @@ export default async function BreweryAdminLayout({ children }: { children: React
   // On the claim page or board: render without the sidebar nav
   if (isClaiming || isBoard || !accounts || accounts.length === 0) {
     return (
-      <ToastProvider>
-        <div style={{ background: "var(--bg)" }}>
-          {children}
-        </div>
-      </ToastProvider>
+      <ReducedMotionProvider>
+        <ToastProvider>
+          <div style={{ background: "var(--bg)" }}>
+            {children}
+          </div>
+        </ToastProvider>
+      </ReducedMotionProvider>
     );
   }
 
   return (
+    <ReducedMotionProvider>
     <ToastProvider>
       <div className="min-h-screen flex" style={{ background: "var(--bg)" }}>
         {isImpersonating && (
@@ -139,5 +143,6 @@ export default async function BreweryAdminLayout({ children }: { children: React
         </main>
       </div>
     </ToastProvider>
+    </ReducedMotionProvider>
   );
 }

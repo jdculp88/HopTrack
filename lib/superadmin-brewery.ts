@@ -134,13 +134,15 @@ export async function fetchBreweryDetail(
     service
       .from("beers")
       .select("id, name, style, is_on_tap, created_at")
-      .eq("brewery_id", breweryId) as any,
+      .eq("brewery_id", breweryId)
+      .limit(500) as any,
 
     // 6. Brewery visits (visitor KPIs)
     service
       .from("brewery_visits")
       .select("user_id, total_visits")
-      .eq("brewery_id", breweryId) as any,
+      .eq("brewery_id", breweryId)
+      .limit(1000) as any,
 
     // 7. Active loyalty program
     service

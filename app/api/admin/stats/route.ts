@@ -87,6 +87,8 @@ export async function GET(_request: NextRequest) {
         rejected: rejectedClaims ?? 0,
       },
       generatedAt: new Date().toISOString(),
+    }, {
+      headers: { "Cache-Control": "private, max-age=60" },
     });
   } catch (err) {
     console.error("/api/admin/stats GET error:", err);

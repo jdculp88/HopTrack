@@ -23,7 +23,9 @@ export async function GET(_request: Request) {
     return { ...rest, profile };
   });
 
-  return NextResponse.json({ friendships });
+  return NextResponse.json({ friendships }, {
+    headers: { "Cache-Control": "private, max-age=30" },
+  });
 }
 
 export async function POST(request: Request) {
