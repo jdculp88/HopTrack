@@ -1,22 +1,45 @@
 # HopTrack Launch Day Operations
 **Owner:** Morgan (coordination) · Riley (infrastructure)
 **Created:** Sprint 77 — The Countdown
+**Updated:** Sprint 151 — The Ops Room
 **Status:** Ready to execute when launch date is set
+
+---
+
+## T-7d: Pre-Launch Week
+
+### Infrastructure Preparation
+- [ ] Verify all UptimeRobot monitors are green (see `docs/uptime-monitoring.md`)
+- [ ] Confirm alert contacts receive test notifications
+- [ ] Status page accessible at `status.hoptrack.beer`
+- [ ] DNS records for `hoptrack.beer` verified (`dig A hoptrack.beer`, `dig MX hoptrack.beer`)
+- [ ] Support email routing configured and tested (see `docs/email-routing.md`)
+- [ ] Connection pooling verified in Supabase Dashboard (see `docs/connection-pooling.md`)
+- [ ] Trigger each cron workflow manually from GitHub Actions → confirm expected 401/200
+
+### Team Preparation
+- [ ] On-call rotation confirmed with Riley, Quinn, Avery, Jordan
+- [ ] All team members have access to: Supabase Dashboard, Sentry, Vercel, Stripe Dashboard
+- [ ] Incident response runbook walk-through completed (30-min team session)
+- [ ] Launch day communication channel set up (Slack #launch or similar)
 
 ---
 
 ## T-24h: Pre-Launch Checklist
 
 ### Infrastructure Verification
-- [ ] All production env vars set in Vercel (see `.env.production.example`)
+- [ ] All production env vars set in Vercel (see `.env.production.example` audit section)
 - [ ] Supabase production project healthy (Dashboard → Project → Health)
-- [ ] All 47 migrations applied to production
+- [ ] All migrations applied to production (`supabase db push`)
 - [ ] `NOTIFY pgrst, 'reload schema';` run in production SQL editor
 - [ ] Realtime enabled on `beers` and `beer_pour_sizes` tables
 - [ ] Storage buckets (`avatars`, `session-photos`) have RLS policies
 - [ ] Stripe webhook registered: `https://hoptrack.beer/api/billing/webhook`
 - [ ] Resend domain verified, sending works
 - [ ] Sentry DSN set and receiving events
+- [ ] Email health check: `curl -H "Authorization: Bearer $CRON_SECRET" https://hoptrack.beer/api/health/email`
+- [ ] Health endpoint: `curl https://hoptrack.beer/api/health` → all checks "configured"
+- [ ] UptimeRobot monitors all green
 
 ### Application Verification
 - [ ] `npm run build` passes clean locally
@@ -39,7 +62,7 @@
 - [ ] All team members aware of launch time
 - [ ] On-call rotation confirmed (see below)
 - [ ] Incident response runbook reviewed by all
-- [ ] Support email routing verified
+- [ ] Support email routing verified (`support@`, `help@`, `sales@hoptrack.beer`)
 
 ---
 
@@ -118,7 +141,23 @@
 1. Check Resend Dashboard → Logs
 2. Verify domain is still verified
 3. Check `RESEND_API_KEY` env var
-4. Fallback: emails log to console — no user-facing failure, just delayed delivery
+4. Run email health check: `curl -H "Authorization: Bearer $CRON_SECRET" https://hoptrack.beer/api/health/email`
+5. Fallback: emails log to console — no user-facing failure, just delayed delivery
+
+**Scheduled jobs not running:**
+1. Check GitHub Actions → Workflows tab for the failing workflow
+2. Verify workflow schedule is correct (cron expression, UTC times)
+3. Check workflow logs for curl errors or HTTP 4xx/5xx responses
+4. Verify `CRON_SECRET` matches in both GitHub Actions secrets AND Vercel env vars
+5. Manual trigger: use `workflow_dispatch` from GitHub Actions UI to test
+6. If endpoint returns 500: check Vercel Functions logs for the cron route
+
+**Connection pool exhaustion:**
+1. Check Supabase Dashboard → Settings → Database → Active Connections
+2. Run: `SELECT count(*) FROM pg_stat_activity;` in SQL Editor
+3. Look for long-running queries: `SELECT * FROM pg_stat_activity WHERE state = 'active' ORDER BY query_start;`
+4. Cancel stuck queries: `SELECT pg_cancel_backend(pid) FROM pg_stat_activity WHERE state = 'active' AND query_start < NOW() - INTERVAL '5 minutes';`
+5. See `docs/connection-pooling.md` for architecture details
 
 ---
 

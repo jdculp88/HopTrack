@@ -17,7 +17,7 @@ export default function PrivacyPage() {
             Privacy Policy
           </h1>
           <p className="text-sm mt-2" style={{ color: "#A89F8C" }}>
-            Last updated: March 26, 2026
+            Last updated: April 4, 2026
           </p>
         </div>
 
@@ -65,6 +65,34 @@ export default function PrivacyPage() {
             <p>
               We use Supabase with Row Level Security (RLS) to ensure your data is only
               accessible to you and authorized parties. All connections use HTTPS/TLS encryption.
+            </p>
+          </Section>
+
+          <Section title="Data Retention">
+            <ul className="list-disc pl-5 space-y-1">
+              <li>Session and beer log data: retained indefinitely (core product feature)</li>
+              <li>Account data: deleted permanently when you delete your account</li>
+              <li>Error tracking data (Sentry): retained for 90 days</li>
+              <li>Billing records: retained for 7 years per legal requirements (when applicable)</li>
+              <li>Email logs: retained for 30 days for delivery troubleshooting</li>
+            </ul>
+          </Section>
+
+          <Section title="California Residents (CCPA)">
+            <p>
+              If you are a California resident, you have the right to:
+            </p>
+            <ul className="list-disc pl-5 space-y-1 mt-2">
+              <li>Know what personal information we collect about you</li>
+              <li>Request deletion of your personal information</li>
+              <li>Opt out of the sale of your personal information (we do not sell personal data)</li>
+              <li>Not be discriminated against for exercising your rights</li>
+            </ul>
+            <p className="mt-2">
+              To exercise these rights, use the account deletion feature in Settings or email{" "}
+              <a href="mailto:privacy@hoptrack.beer" className="underline" style={{ color: "var(--accent-gold)" }}>
+                privacy@hoptrack.beer
+              </a>.
             </p>
           </Section>
 

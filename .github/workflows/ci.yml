@@ -1,4 +1,14 @@
 name: CI
+# Sprint 151 — The Ops Room
+#
+# Pipeline: lint → type check → unit tests (HARD-FAIL) → build → E2E
+#
+# E2E secrets (set in GitHub repo > Settings > Secrets and variables > Actions):
+#   E2E_SUPABASE_URL          — Supabase project URL for E2E test instance
+#   E2E_SUPABASE_ANON_KEY     — Supabase anon key for E2E test instance
+#   E2E_SUPABASE_SERVICE_ROLE_KEY — Supabase service role key for E2E test instance
+#
+# If E2E secrets are not configured, the E2E job skips gracefully via health gate.
 
 on:
   push:
@@ -30,7 +40,14 @@ jobs:
         run: npx tsc --noEmit
 
       - name: Unit tests
+        id: unit-tests
         run: npm run test:coverage
+
+      - name: Unit test failure gate
+        if: steps.unit-tests.outcome == 'failure'
+        run: |
+          echo "::error::Unit tests failed — build blocked. Fix failing tests before merging."
+          exit 1
 
       - name: Upload coverage report
         if: always()

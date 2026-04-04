@@ -1,0 +1,30 @@
+name: Onboarding Drip
+
+on:
+  schedule:
+    # Daily 9am ET = 14:00 UTC (EST+5) / 13:00 UTC (EDT+4)
+    # Using 14:00 UTC covers EST; during EDT it arrives at 10am — close enough
+    - cron: "0 14 * * *"
+  workflow_dispatch: # Manual trigger from GitHub UI
+
+jobs:
+  send-onboarding-drip:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send onboarding drip emails
+        run: |
+          response=$(curl -s -w "\n%{http_code}" -X POST \
+            "${{ secrets.ONBOARDING_DRIP_ENDPOINT_URL }}" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            -H "Content-Type: application/json")
+
+          http_code=$(echo "$response" | tail -1)
+          body=$(echo "$response" | head -n -1)
+
+          echo "HTTP $http_code"
+          echo "$body"
+
+          if [ "$http_code" -ge 400 ]; then
+            echo "::error::Onboarding drip request failed with HTTP $http_code"
+            exit 1
+          fi

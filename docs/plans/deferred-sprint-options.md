@@ -302,3 +302,16 @@ Potential future superadmin features based on industry research:
 
 *Owner: Sam (competitive research) + Jordan (architecture) + Avery (build). Priority: P1 — multi-sprint initiative, research-driven.*
 *(Added 2026-04-03, requested by Joshua post-S143 close)*
+
+---
+
+## Sprint 151 — Selected: The Ops Room (Option A)
+
+**Selected:** Option A — The Ops Room
+- Launch operations: CI hardening, cron workflows, health enhancement, uptime monitoring, connection pooling, email health, GDPR/CCPA, env audit, email routing, launch day ops
+
+**Deferred — Option B: "The Close"** 💰
+Revenue readiness. Claim funnel UX audit + friction removal, trial lifecycle emails end-to-end test, demo dashboard polish, pitch deck slides, warm intro playbook for Asheville Wave 1 (Drew's contacts), onboarding wizard refinements, first-brewery-close simulation. The "hand Drew the keys for warm intros" sprint. **OPEN**
+
+**Deferred — Option C: "The Native Feel"** 📱
+Consumer app polish. Core Web Vitals / Lighthouse audit → 90+ scores, PWA install prompt improvements, image optimization pass, mobile gesture and interaction polish, offline-ready foundations, App Store screenshot prep, accessibility re-audit. The "make it feel native" sprint. **OPEN**

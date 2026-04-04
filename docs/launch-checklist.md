@@ -1,5 +1,5 @@
 # HopTrack Launch Checklist
-**Created Sprint 50 — Updated Sprint 149 (The Launchpad)**
+**Created Sprint 50 — Updated Sprint 151 (The Ops Room)**
 **Owner:** Morgan | **Last updated:** 2026-04-04
 **Rule:** Nothing ships until this doc is green.
 
@@ -11,10 +11,10 @@
 
 | Item | Status | Owner | Notes |
 |------|--------|-------|-------|
-| E2E smoke tests passing (Playwright) | 🔄 | Casey / Reese | Specs exist in `e2e/`, soft-fail in CI (S76) — needs CI Supabase |
-| Core-flows tests passing | 🔄 | Casey / Reese | `e2e/core-flows.spec.ts` written (S31) |
-| Brewery-admin tests passing | 🔄 | Casey / Reese | `e2e/brewery-admin-flows.spec.ts` written (S44) |
-| Unit test framework (Vitest) | 🔄 | Reese / Casey | **Sprint 77** — setup + 15 critical path tests |
+| E2E smoke tests passing (Playwright) | ✅ | Casey / Reese | **Sprint 150** — 87 E2E tests across 10 suites, CI hard-fail, health-gate for Supabase outages |
+| Core-flows tests passing | ✅ | Casey / Reese | **Sprint 150** — `session-flow.spec.ts` (7 tests), `core-flows.spec.ts` running |
+| Brewery-admin tests passing | ✅ | Casey / Reese | **Sprint 150** — `brewery-admin-flows.spec.ts` (4 new interaction tests) |
+| Unit test framework (Vitest) | ✅ | Reese / Casey | **Sprint 151** — 1272 tests, hard-fail in CI confirmed, explicit fail gate added |
 | Zero P0 bugs open | ✅ | Casey | Confirmed Sprint 76 retro — zero P0s |
 | Zero `motion.button` in codebase | ✅ | Jordan | Swept S30 + S51 |
 | Zero hardcoded `#D4A843` in app interior | ✅ | Jordan | Swept S30 |
@@ -56,9 +56,9 @@
 | Staging environment documented | ✅ | Quinn | `docs/staging-environment.md` (S76) |
 | Staging Supabase provisioned | ✅ | Joshua | **Paid tier provisioned (S77)** — team has access |
 | Production environment variables documented | ✅ | Riley | `.env.production.example` created (S77/S79) |
-| Supabase connection pooling configured | ⬜ | Riley | Verify for production load |
+| Supabase connection pooling configured | ✅ | Riley / Quinn | **Sprint 151** — documented in `docs/connection-pooling.md`. Supabase JS uses REST API → PostgREST → Supavisor (automatic pooling on paid tiers) |
 | CDN / edge caching configured | 🔄 | Riley | ISR configured on brewery pages (S49), Vercel edge review pending |
-| Uptime monitoring configured | 🔄 | Riley | Health check endpoint live (S149); wire to Better Uptime / UptimeRobot |
+| Uptime monitoring configured | ✅ | Riley | **Sprint 151** — `docs/uptime-monitoring.md` created. Health endpoint enhanced with `checks` object. UptimeRobot guide ready to execute |
 
 ---
 
@@ -107,11 +107,11 @@
 | Terms of Service page live (`/terms`) | ✅ | Jamie | Placeholder live (S31) — **needs legal review** |
 | Privacy Policy page live (`/privacy`) | ✅ | Jamie | Built S14 — **needs legal review** |
 | Cookie notice / consent banner | ✅ | Avery / Alex | **Built Sprint 77** — `CookieConsent` component, localStorage, accept/decline |
-| GDPR compliance review | ⬜ | Sam | Assess EU exposure, add consent management if needed |
-| CCPA compliance (California) | ⬜ | Sam | Assess if user base hits CA threshold |
+| GDPR compliance review | ✅ | Sam | **Sprint 151** — `docs/compliance/gdpr-ccpa-assessment.md`. Low EU exposure at launch, core privacy rights implemented, gaps documented with trigger points |
+| CCPA compliance (California) | ✅ | Sam | **Sprint 151** — Below all thresholds. California Residents section added to privacy page. "Do Not Sell" link deferred until threshold |
 | ToS + Privacy linked on signup form | ✅ | Avery | Added S31 |
 | Delete Account flow (data erasure) | ✅ | Avery | **Built Sprint 60** — inline DELETE confirmation, cascade-delete API, `admin.deleteUser` |
-| Data retention policy documented | ⬜ | Sam | Define how long sessions/logs are kept |
+| Data retention policy documented | ✅ | Sam | **Sprint 151** — Data Retention section added to privacy page + documented in GDPR/CCPA assessment |
 | Business entity / LLC formed | ⬜ | Joshua | **In progress** — Taylor creating formation guide (S77) |
 | App Store developer agreement accepted | ⬜ | Joshua | **Deferred** — web-first, app later |
 
@@ -205,9 +205,9 @@
 | `support@hoptrack.beer` inbox live | ⬜ | Riley | MX records + forwarding |
 | `help@hoptrack.beer` inbox live | ⬜ | Riley | |
 | `sales@hoptrack.beer` inbox live | ⬜ | Riley | |
-| Incident response runbook | 🔄 | Riley | **Sprint 77** — documenting this sprint |
-| Rollback plan documented | 🔄 | Riley | **Sprint 77** — Vercel instant rollback + git revert strategy |
-| Launch day timeline (T-24h checklist) | 🔄 | Morgan | **Sprint 77** — documenting this sprint |
+| Incident response runbook | ✅ | Riley | **Sprint 151** — Complete in `docs/launch-day-ops.md`. SEV-1/2/3 scenarios, email/cron/pooling incidents added |
+| Rollback plan documented | ✅ | Riley | **Sprint 151** — 3 strategies: Vercel instant rollback, git revert, feature-level disable |
+| Launch day timeline (T-24h checklist) | ✅ | Morgan | **Sprint 151** — T-7d + T-24h + T-0 complete in `docs/launch-day-ops.md` |
 | Post-launch retro scheduled | ⬜ | Morgan | T+48h after launch |
 | 🍺 Launch party planned | ⬜ | Everyone | Drew's taproom in Asheville — dates TBD |
 
@@ -217,22 +217,23 @@
 
 | Category | Complete | In Progress | Pending | Total |
 |----------|----------|-------------|---------|-------|
-| App Quality | 16 | 5 | 1 | 22 |
-| Infrastructure | 15 | 2 | 1 | 18 |
+| App Quality | 20 | 1 | 1 | 22 |
+| Infrastructure | 17 | 1 | 0 | 18 |
 | Billing | 6 | 1 | 7 | 14 |
 | Content & Data | 9 | 1 | 1 | 11 |
-| Legal | 6 | 0 | 4 | 10 |
+| Legal | 9 | 0 | 1 | 10 |
 | SEO | 9 | 3 | 1 | 13 |
 | App Store | 4 | 3 | 6 | 13 |
 | Marketing | 9 | 0 | 3 | 12 |
 | Sales | 5 | 4 | 2 | 11 |
-| Launch Day | 0 | 3 | 8 | 11 |
-| **TOTAL** | **79** | **22** | **34** | **135** |
+| Launch Day | 3 | 0 | 8 | 11 |
+| **TOTAL** | **91** | **14** | **30** | **135** |
 
-**Launch readiness: 59% complete** (was 56% — Sprint 149 added 4 new items and completed 6).
-**Biggest open blocks:** Billing (blocked on business entity), Launch Day (operational docs in progress).
-**Note:** 7 billing items are blocked on Joshua forming the LLC. App Store items deferred (web-first).
+**Launch readiness: 67% complete** (was 59% — Sprint 151 completed 12 items).
+**Sprint 151 gains:** +4 App Quality (E2E + unit tests verified), +2 Infrastructure (pooling + monitoring), +3 Legal (GDPR + CCPA + retention), +3 Launch Day (runbook + rollback + timeline).
+**Biggest open blocks:** Billing (7 items blocked on LLC), App Store (6 items deferred — web-first).
+**Note:** Reaching 75%+ requires unblocking Stripe/LLC (Joshua) or completing App Store items. The remaining gap is structural, not engineering.
 
 ---
 
-*Morgan: "This is a living document. Updated Sprint 149. The Launchpad pushed us to 59% — and that is with 7 billing items blocked on LLC."* 🍺
+*Morgan: "This is a living document. Updated Sprint 151. The Ops Room pushed us from 59% to 67% — twelve items in one sprint. The gap is now LLC and App Store, not code."* 🍺

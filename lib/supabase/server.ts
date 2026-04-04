@@ -4,6 +4,10 @@ import { cookies } from "next/headers";
 // Database type exists at @/types/database but Supabase's .select() inference
 // doesn't handle partial columns or complex joins — returns 'never'.
 // Revisit adding Database generic when Supabase TS SDK improves.
+//
+// Connection pooling: The Supabase JS client uses the REST API (PostgREST),
+// which connects through Supavisor automatically on paid tiers.
+// No client-side pooling config needed. See docs/connection-pooling.md.
 
 export async function createClient() {
   const cookieStore = await cookies();

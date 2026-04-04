@@ -1,0 +1,30 @@
+name: AI Suggestions
+
+on:
+  schedule:
+    # Wednesday 3am ET = 08:00 UTC (EST+5) / 07:00 UTC (EDT+4)
+    # Using 08:00 UTC covers EST; during EDT it arrives at 4am — close enough
+    - cron: "0 8 * * 3"
+  workflow_dispatch: # Manual trigger from GitHub UI
+
+jobs:
+  generate-ai-suggestions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate AI promotion suggestions
+        run: |
+          response=$(curl -s -w "\n%{http_code}" -X POST \
+            "${{ secrets.AI_SUGGESTIONS_ENDPOINT_URL }}" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            -H "Content-Type: application/json")
+
+          http_code=$(echo "$response" | tail -1)
+          body=$(echo "$response" | head -n -1)
+
+          echo "HTTP $http_code"
+          echo "$body"
+
+          if [ "$http_code" -ge 400 ]; then
+            echo "::error::AI suggestions request failed with HTTP $http_code"
+            exit 1
+          fi
