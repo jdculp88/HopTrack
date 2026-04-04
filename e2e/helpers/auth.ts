@@ -15,6 +15,8 @@ export const BREWERIES = {
   mountainRidge: "dd000001-0000-0000-0000-000000000001",
   riverBend: "dd000001-0000-0000-0000-000000000002",
   smokyBarrel: "dd000001-0000-0000-0000-000000000003",
+  // Pint & Pixel — primary test brewery (Joshua's, has full seed data)
+  pintAndPixel: "dd000001-0000-0000-0000-000000000001",
 } as const;
 
 /**

@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 jobs:
-  ci:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -48,22 +48,66 @@ jobs:
           NEXT_PUBLIC_SUPABASE_URL: "https://placeholder.supabase.co"
           NEXT_PUBLIC_SUPABASE_ANON_KEY: "placeholder"
 
+  e2e:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
+      - name: Health check gate
+        id: health-gate
+        run: |
+          # Build first with real credentials so the dev server can connect
+          npm run build
+          # Start server in background and wait for it
+          npm run start &
+          SERVER_PID=$!
+          sleep 5
+
+          # Check if server responds
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/api/health || echo "000")
+
+          if [ "$HTTP_CODE" = "200" ]; then
+            echo "Health check passed (HTTP $HTTP_CODE)"
+            echo "healthy=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::Health check returned HTTP $HTTP_CODE — Supabase may be unreachable. Skipping E2E."
+            echo "healthy=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          # Stop the server
+          kill $SERVER_PID 2>/dev/null || true
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.E2E_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.E2E_SUPABASE_SERVICE_ROLE_KEY }}
+
       - name: Run E2E tests
-        # E2E tests require a running Supabase instance and dev server.
-        # In CI, the Playwright webServer config starts `npm run dev`, but without
-        # real Supabase credentials the app can't connect to a database.
-        # We run them as continue-on-error so the workflow still reports lint/type/build
-        # status accurately. Once a CI-accessible Supabase instance is configured,
-        # remove continue-on-error to make E2E failures block the build.
-        continue-on-error: true
+        if: steps.health-gate.outputs.healthy == 'true'
         run: npm run test:e2e
         env:
           CI: true
-          NEXT_PUBLIC_SUPABASE_URL: "https://placeholder.supabase.co"
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: "placeholder"
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.E2E_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.E2E_SUPABASE_SERVICE_ROLE_KEY }}
+
+      - name: Skip notice
+        if: steps.health-gate.outputs.healthy != 'true'
+        run: echo "::warning::E2E tests skipped — Supabase health check failed. Configure E2E_SUPABASE_URL, E2E_SUPABASE_ANON_KEY, and E2E_SUPABASE_SERVICE_ROLE_KEY secrets."
 
       - name: Upload Playwright report
         if: always()
