@@ -48,27 +48,32 @@ export default async function DemoDashboardPage() {
       .from("sessions")
       .select("id, user_id, started_at, ended_at, is_active")
       .eq("brewery_id", breweryId)
-      .eq("is_active", false) as any,
+      .eq("is_active", false)
+      .limit(50000) as any,
     supabase
       .from("beer_logs")
       .select("id, beer_id, rating, quantity, logged_at, beer:beers(name, style)")
-      .eq("brewery_id", breweryId) as any,
+      .eq("brewery_id", breweryId)
+      .limit(50000) as any,
     supabase
       .from("sessions")
       .select("id, user_id, started_at")
       .eq("brewery_id", breweryId)
       .eq("is_active", false)
-      .gte("started_at", todayStart) as any,
+      .gte("started_at", todayStart)
+      .limit(50000) as any,
     supabase
       .from("beer_logs")
       .select("id, quantity")
       .eq("brewery_id", breweryId)
-      .gte("logged_at", todayStart) as any,
+      .gte("logged_at", todayStart)
+      .limit(50000) as any,
     supabase
       .from("sessions")
       .select("id")
       .eq("brewery_id", breweryId)
-      .eq("is_active", true) as any,
+      .eq("is_active", true)
+      .limit(50000) as any,
     supabase
       .from("brewery_reviews")
       .select("id, rating, comment, created_at, profile:profiles!user_id(display_name, username)")
@@ -90,10 +95,10 @@ export default async function DemoDashboardPage() {
     { data: loyaltyRedemptions },
     { data: allFollowers },
   ] = await Promise.all([
-    supabase.from("brewery_visits").select("user_id, total_visits").eq("brewery_id", breweryId) as any,
-    supabase.from("loyalty_cards").select("user_id").eq("brewery_id", breweryId) as any,
-    supabase.from("loyalty_redemptions").select("id, redeemed_at").eq("brewery_id", breweryId) as any,
-    supabase.from("brewery_follows").select("id, created_at").eq("brewery_id", breweryId) as any,
+    supabase.from("brewery_visits").select("user_id, total_visits").eq("brewery_id", breweryId).limit(50000) as any,
+    supabase.from("loyalty_cards").select("user_id").eq("brewery_id", breweryId).limit(50000) as any,
+    supabase.from("loyalty_redemptions").select("id, redeemed_at").eq("brewery_id", breweryId).limit(50000) as any,
+    supabase.from("brewery_follows").select("id, created_at").eq("brewery_id", breweryId).limit(50000) as any,
   ]);
 
   // Build profile lookup for top customer

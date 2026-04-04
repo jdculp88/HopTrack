@@ -65,17 +65,19 @@ export default async function BrandCustomersPage({ params }: { params: Promise<{
     supabase
       .from("brewery_visits")
       .select("user_id, brewery_id, total_visits, unique_beers_tried, first_visit_at, last_visit_at")
-      .in("brewery_id", locationIds) as any,
+      .in("brewery_id", locationIds)
+      .limit(50000) as any,
     supabase
       .from("brand_loyalty_cards")
       .select("user_id, stamps")
-      .eq("brand_id", brand_id) as any,
+      .eq("brand_id", brand_id)
+      .limit(50000) as any,
   ]);
 
   // Get profiles for all unique users
   const userIds = [...new Set((breweryVisits ?? []).map((v: any) => v.user_id).filter(Boolean))];
   const { data: profiles } = userIds.length > 0
-    ? await (supabase.from("profiles").select("id, display_name, username, avatar_url").in("id", userIds) as any)
+    ? await (supabase.from("profiles").select("id, display_name, username, avatar_url").in("id", userIds).limit(50000) as any)
     : { data: [] };
 
   const customers = buildBrandCustomerList(

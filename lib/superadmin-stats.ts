@@ -142,8 +142,8 @@ export async function fetchPlatformStats(
     service.from("session_comments").select("id", { count: "exact", head: true }) as unknown as CountResult,
 
     // Sparklines
-    service.from("profiles").select("created_at").gte("created_at", sevenDaysAgo).limit(10000) as any,
-    service.from("sessions").select("started_at").eq("is_active", false).gte("started_at", sevenDaysAgo).limit(10000) as any,
+    service.from("profiles").select("created_at").gte("created_at", sevenDaysAgo).limit(50000) as any,
+    service.from("sessions").select("started_at").eq("is_active", false).gte("started_at", sevenDaysAgo).limit(50000) as any,
 
     // Ratios
     service.from("sessions").select("id, user_id, started_at").eq("is_active", false).gte("started_at", rangeStart).limit(50000) as any,
@@ -153,11 +153,11 @@ export async function fetchPlatformStats(
     service.from("profiles").select("total_checkins, last_session_date").limit(50000) as any,
 
     // Styles
-    service.from("beer_logs").select("beer:beers(style)").gte("logged_at", rangeStart).limit(10000) as any,
+    service.from("beer_logs").select("beer:beers(style)").gte("logged_at", rangeStart).limit(50000) as any,
 
     // Leaderboards
-    service.from("sessions").select("brewery:breweries(id, name, city, state)").eq("is_active", false).gte("started_at", rangeStart).limit(5000) as any,
-    service.from("beer_logs").select("beer:beers(id, name, style)").gte("logged_at", rangeStart).limit(5000) as any,
+    service.from("sessions").select("brewery:breweries(id, name, city, state)").eq("is_active", false).gte("started_at", rangeStart).limit(50000) as any,
+    service.from("beer_logs").select("beer:beers(id, name, style)").gte("logged_at", rangeStart).limit(50000) as any,
   ]);
 
   // ── Build sparklines ──────────────────────────────────────────────

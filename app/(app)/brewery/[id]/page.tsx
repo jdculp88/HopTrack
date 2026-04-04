@@ -188,7 +188,8 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
     .from("sessions")
     .select("user_id")
     .eq("brewery_id", id)
-    .eq("is_active", false);
+    .eq("is_active", false)
+    .limit(50000);
   const brewerySessions = (brewerySessionsRaw ?? []) as { user_id: string }[];
   const totalCheckins = brewerySessions.length;
   const uniqueVisitors = new Set(brewerySessions.map((s) => s.user_id)).size;
@@ -196,7 +197,8 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
   const { data: breweryLogsRaw } = await supabase // supabase join shape
     .from("beer_logs")
     .select("beer_id, rating, quantity, beer:beers(name)")
-    .eq("brewery_id", id);
+    .eq("brewery_id", id)
+    .limit(50000);
   const breweryLogs = (breweryLogsRaw ?? []) as unknown as BreweryBeerLog[];
   const ratingsWithValue = breweryLogs.filter((l) => l.rating != null && l.rating > 0);
   const avgRating =

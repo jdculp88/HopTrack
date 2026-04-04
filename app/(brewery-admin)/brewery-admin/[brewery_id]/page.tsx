@@ -96,13 +96,15 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
       .from("sessions")
       .select("id, user_id, started_at, ended_at, is_active")
       .eq("brewery_id", brewery_id)
-      .eq("is_active", false) as any,
+      .eq("is_active", false)
+      .limit(50000) as any,
 
     // All beer logs for rating + top beer stats
     queryClient
       .from("beer_logs")
       .select("id, beer_id, rating, quantity, logged_at, beer:beers(name, style)")
-      .eq("brewery_id", brewery_id) as any,
+      .eq("brewery_id", brewery_id)
+      .limit(50000) as any,
 
     // Today's sessions
     queryClient
@@ -110,21 +112,24 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
       .select("id, user_id, started_at")
       .eq("brewery_id", brewery_id)
       .eq("is_active", false)
-      .gte("started_at", todayStart) as any,
+      .gte("started_at", todayStart)
+      .limit(50000) as any,
 
     // Today's beer logs
     queryClient
       .from("beer_logs")
       .select("id, quantity")
       .eq("brewery_id", brewery_id)
-      .gte("logged_at", todayStart) as any,
+      .gte("logged_at", todayStart)
+      .limit(50000) as any,
 
     // Active sessions right now
     queryClient
       .from("sessions")
       .select("id")
       .eq("brewery_id", brewery_id)
-      .eq("is_active", true) as any,
+      .eq("is_active", true)
+      .limit(50000) as any,
 
     // Recent reviews for activity feed
     queryClient
@@ -161,19 +166,23 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
     queryClient
       .from("brewery_visits")
       .select("user_id, total_visits")
-      .eq("brewery_id", brewery_id) as any,
+      .eq("brewery_id", brewery_id)
+      .limit(50000) as any,
     queryClient
       .from("loyalty_cards")
       .select("user_id")
-      .eq("brewery_id", brewery_id) as any,
+      .eq("brewery_id", brewery_id)
+      .limit(50000) as any,
     queryClient
       .from("loyalty_redemptions")
       .select("id, redeemed_at")
-      .eq("brewery_id", brewery_id) as any,
+      .eq("brewery_id", brewery_id)
+      .limit(50000) as any,
     queryClient
       .from("brewery_follows")
       .select("id, created_at")
-      .eq("brewery_id", brewery_id) as any,
+      .eq("brewery_id", brewery_id)
+      .limit(50000) as any,
     queryClient
       .from("ai_suggestions")
       .select("id, suggestions, generated_at, status")

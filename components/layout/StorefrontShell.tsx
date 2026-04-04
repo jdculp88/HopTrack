@@ -32,6 +32,13 @@ export function StorefrontShell({ children }: StorefrontShellProps) {
             </Link>
             <div className="flex items-center gap-2">
               <Link
+                href="/for-breweries"
+                className="hidden sm:inline-flex px-3 py-2 rounded-xl text-xs font-medium transition-colors hover:opacity-80"
+                style={{ color: "var(--accent-gold)" }}
+              >
+                Own a brewery?
+              </Link>
+              <Link
                 href={`/login?next=${encodeURIComponent(pathname)}`}
                 className="px-4 py-2 rounded-xl text-sm font-medium transition-colors"
                 style={{ color: "var(--text-secondary)" }}

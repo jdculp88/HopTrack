@@ -160,7 +160,7 @@ export function ClaimSearchStep({
                     className="text-sm font-medium"
                     style={{ color: "var(--accent-gold)" }}
                   >
-                    Thanks! We'll add your brewery within 24 hours.
+                    Submitted! We'll review and add your brewery within 24 hours. You'll receive an email when your listing is ready to claim.
                   </motion.p>
                 ) : !showNotFoundForm ? (
                   <motion.div key="cta" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>

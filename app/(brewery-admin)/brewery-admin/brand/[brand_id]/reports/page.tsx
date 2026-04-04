@@ -61,10 +61,10 @@ export default async function BrandReportsPage({ params }: { params: Promise<{ b
       { data: followers },
       { data: loyaltyPrograms },
     ] = await Promise.all([
-      supabase.from("sessions").select("id, user_id, brewery_id, started_at").in("brewery_id", locationIds).eq("is_active", false).gte("started_at", rangeStart) as any,
-      supabase.from("sessions").select("id, user_id, brewery_id").in("brewery_id", locationIds).eq("is_active", false).gte("started_at", prevRangeStart).lt("started_at", rangeStart) as any,
-      supabase.from("beer_logs").select("id, beer_id, rating, quantity, brewery_id, beer:beers(name, style)").in("brewery_id", locationIds).gte("logged_at", rangeStart) as any,
-      supabase.from("brewery_followers").select("id, brewery_id").in("brewery_id", locationIds) as any,
+      supabase.from("sessions").select("id, user_id, brewery_id, started_at").in("brewery_id", locationIds).eq("is_active", false).gte("started_at", rangeStart).limit(50000) as any,
+      supabase.from("sessions").select("id, user_id, brewery_id").in("brewery_id", locationIds).eq("is_active", false).gte("started_at", prevRangeStart).lt("started_at", rangeStart).limit(50000) as any,
+      supabase.from("beer_logs").select("id, beer_id, rating, quantity, brewery_id, beer:beers(name, style)").in("brewery_id", locationIds).gte("logged_at", rangeStart).limit(50000) as any,
+      supabase.from("brewery_followers").select("id, brewery_id").in("brewery_id", locationIds).limit(50000) as any,
       supabase.from("loyalty_programs").select("id, brewery_id").in("brewery_id", locationIds).eq("is_active", true) as any,
     ]);
 
@@ -78,7 +78,7 @@ export default async function BrandReportsPage({ params }: { params: Promise<{ b
     (loyaltyPrograms ?? []).forEach((p: any) => { programToBrewery[p.id] = p.brewery_id; });
     const redemptionsByBrewery: Record<string, number> = {};
     if (programIds.length > 0) {
-      const { data: redemptions } = await (supabase.from("loyalty_redemptions").select("id, program_id").in("program_id", programIds).gte("redeemed_at", rangeStart) as any);
+      const { data: redemptions } = await (supabase.from("loyalty_redemptions").select("id, program_id").in("program_id", programIds).gte("redeemed_at", rangeStart).limit(50000) as any);
       (redemptions ?? []).forEach((r: any) => {
         const bid = programToBrewery[r.program_id];
         if (bid) redemptionsByBrewery[bid] = (redemptionsByBrewery[bid] ?? 0) + 1;

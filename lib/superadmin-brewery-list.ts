@@ -166,10 +166,10 @@ export async function fetchBreweryList(
   const [accountsRes, sessionsRes, lastSessionRes, followsRes, beersRes, brandsRes] =
     await Promise.all([
       (service as any).from("brewery_accounts").select("brewery_id, subscription_tier, verified").in("brewery_id", ids),
-      (service as any).from("sessions").select("brewery_id").in("brewery_id", ids).limit(10000),
-      (service as any).from("sessions").select("brewery_id, started_at").in("brewery_id", ids).order("started_at", { ascending: false }).limit(10000),
-      (service as any).from("brewery_follows").select("brewery_id").in("brewery_id", ids).limit(10000),
-      (service as any).from("beers").select("brewery_id").in("brewery_id", ids).limit(10000),
+      (service as any).from("sessions").select("brewery_id").in("brewery_id", ids).limit(50000),
+      (service as any).from("sessions").select("brewery_id, started_at").in("brewery_id", ids).order("started_at", { ascending: false }).limit(50000),
+      (service as any).from("brewery_follows").select("brewery_id").in("brewery_id", ids).limit(50000),
+      (service as any).from("beers").select("brewery_id").in("brewery_id", ids).limit(50000),
       (service as any).from("brewery_brands").select("id, name"),
     ]);
 

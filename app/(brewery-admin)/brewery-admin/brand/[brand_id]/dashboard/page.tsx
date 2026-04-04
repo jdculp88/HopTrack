@@ -82,14 +82,14 @@ export default async function BrandDashboardPage({ params }: { params: Promise<{
       { data: todaySessions },
       { data: todayBeerLogs },
       { data: recentSessions },
-      { data: followers },
+      { count: followersCount },
     ] = await Promise.all([
-      supabase.from("sessions").select("id, user_id, brewery_id, started_at").in("brewery_id", locationIds).eq("is_active", false) as any,
-      supabase.from("beer_logs").select("id, beer_id, rating, quantity, logged_at, brewery_id, beer:beers(name, style)").in("brewery_id", locationIds) as any,
-      supabase.from("sessions").select("id, user_id").in("brewery_id", locationIds).eq("is_active", false).gte("started_at", todayStart) as any,
-      supabase.from("beer_logs").select("id, quantity").in("brewery_id", locationIds).gte("logged_at", todayStart) as any,
+      supabase.from("sessions").select("id, user_id, brewery_id, started_at").in("brewery_id", locationIds).eq("is_active", false).limit(50000) as any,
+      supabase.from("beer_logs").select("id, beer_id, rating, quantity, logged_at, brewery_id, beer:beers(name, style)").in("brewery_id", locationIds).limit(50000) as any,
+      supabase.from("sessions").select("id, user_id").in("brewery_id", locationIds).eq("is_active", false).gte("started_at", todayStart).limit(50000) as any,
+      supabase.from("beer_logs").select("id, quantity").in("brewery_id", locationIds).gte("logged_at", todayStart).limit(50000) as any,
       supabase.from("sessions").select("id, brewery_id, started_at, profile:profiles(display_name, username), beer_logs(id, beer_id, beer:beers(name))").in("brewery_id", locationIds).eq("is_active", false).order("started_at", { ascending: false }).limit(15) as any,
-      supabase.from("brewery_followers").select("id").in("brewery_id", locationIds) as any,
+      supabase.from("brewery_followers").select("id", { count: "exact", head: true }).in("brewery_id", locationIds) as any,
     ]);
 
     const sessions = allSessions ?? [];
@@ -103,7 +103,7 @@ export default async function BrandDashboardPage({ params }: { params: Promise<{
     stats.lastWeekSessions = sessions.filter((s: any) => s.started_at >= twoWeeksAgo && s.started_at < weekAgo).length;
     stats.todaySessions = (todaySessions ?? []).length;
     stats.todayBeers = (todayBeerLogs ?? []).reduce((sum: number, l: any) => sum + (l.quantity ?? 1), 0);
-    stats.totalFollowers = (followers ?? []).length;
+    stats.totalFollowers = followersCount ?? 0;
 
     const rated = beerLogs.filter((l: any) => l.rating > 0);
     stats.avgRating = rated.length > 0 ? parseFloat((rated.reduce((a: number, l: any) => a + l.rating, 0) / rated.length).toFixed(2)) : null;
@@ -187,12 +187,12 @@ export default async function BrandDashboardPage({ params }: { params: Promise<{
       { data: brandRedemptions },
       { data: brandFollowers },
     ] = await Promise.all([
-      supabase.from("sessions").select("id, user_id, started_at, ended_at, is_active").in("brewery_id", locationIds).eq("is_active", false) as any,
-      supabase.from("beer_logs").select("id, beer_id, rating, quantity, logged_at").in("brewery_id", locationIds) as any,
-      supabase.from("brewery_visits").select("user_id, total_visits").in("brewery_id", locationIds) as any,
-      supabase.from("loyalty_cards").select("user_id").in("brewery_id", locationIds) as any,
-      supabase.from("loyalty_redemptions").select("id, redeemed_at").in("brewery_id", locationIds) as any,
-      supabase.from("brewery_follows").select("id, created_at").in("brewery_id", locationIds) as any,
+      supabase.from("sessions").select("id, user_id, started_at, ended_at, is_active").in("brewery_id", locationIds).eq("is_active", false).limit(50000) as any,
+      supabase.from("beer_logs").select("id, beer_id, rating, quantity, logged_at").in("brewery_id", locationIds).limit(50000) as any,
+      supabase.from("brewery_visits").select("user_id, total_visits").in("brewery_id", locationIds).limit(50000) as any,
+      supabase.from("loyalty_cards").select("user_id").in("brewery_id", locationIds).limit(50000) as any,
+      supabase.from("loyalty_redemptions").select("id, redeemed_at").in("brewery_id", locationIds).limit(50000) as any,
+      supabase.from("brewery_follows").select("id, created_at").in("brewery_id", locationIds).limit(50000) as any,
     ]);
 
     brandKPIs = calculateBreweryKPIs({

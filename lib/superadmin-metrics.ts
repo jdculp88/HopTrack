@@ -261,33 +261,33 @@ export async function calculateCommandCenterMetrics(
   ] = await Promise.all([
     // ── Pulse queries ──
     service.from("profiles").select("id", { count: "exact", head: true }) as unknown as CountResult,
-    service.from("sessions").select("user_id, started_at").gte("started_at", thirtyDaysAgo).limit(10000) as any,
+    service.from("sessions").select("user_id, started_at").gte("started_at", thirtyDaysAgo).limit(50000) as any,
     service.from("sessions").select("id", { count: "exact", head: true }).eq("is_active", true) as unknown as CountResult,
     service.from("profiles").select("id", { count: "exact", head: true }).gte("created_at", oneWeekAgo) as unknown as CountResult,
     service.from("profiles").select("id", { count: "exact", head: true }).gte("created_at", twoWeeksAgo).lt("created_at", oneWeekAgo) as unknown as CountResult,
 
     // ── Revenue queries ──
-    service.from("brewery_accounts").select("subscription_tier, subscription_status, trial_ends_at, verified").limit(5000) as any,
+    service.from("brewery_accounts").select("subscription_tier, subscription_status, trial_ends_at, verified").limit(50000) as any,
     service.from("breweries").select("id", { count: "exact", head: true }) as unknown as CountResult,
     service.from("brewery_claims").select("id", { count: "exact", head: true }).eq("status", "approved") as unknown as CountResult,
     service.from("brewery_accounts").select("id", { count: "exact", head: true }).eq("verified", true) as unknown as CountResult,
 
     // ── Engagement queries ──
-    service.from("sessions").select("id, user_id, started_at, ended_at").eq("is_active", false).gte("started_at", rangeStart).limit(5000) as any,
-    service.from("beer_logs").select("id, session_id, beer_id").gte("logged_at", rangeStart).limit(10000) as any,
+    service.from("sessions").select("id, user_id, started_at, ended_at").eq("is_active", false).gte("started_at", rangeStart).limit(50000) as any,
+    service.from("beer_logs").select("id, session_id, beer_id").gte("logged_at", rangeStart).limit(50000) as any,
     service.from("loyalty_programs").select("id", { count: "exact", head: true }).eq("is_active", true) as unknown as CountResult,
     // Top beers: fetch beer_logs with beer name, group in JS
-    service.from("beer_logs").select("beer:beers(id, name, style)").gte("logged_at", rangeStart).limit(5000) as any,
+    service.from("beer_logs").select("beer:beers(id, name, style)").gte("logged_at", rangeStart).limit(50000) as any,
     // Top breweries: fetch sessions with brewery name, group in JS
-    service.from("sessions").select("brewery:breweries(id, name, city, state)").eq("is_active", false).gte("started_at", rangeStart).limit(5000) as any,
+    service.from("sessions").select("brewery:breweries(id, name, city, state)").eq("is_active", false).gte("started_at", rangeStart).limit(50000) as any,
 
     // ── Geo query ──
-    service.from("breweries").select("state").not("state", "is", null).limit(10000) as any,
+    service.from("breweries").select("state").not("state", "is", null).limit(50000) as any,
 
     // ── Growth queries (scoped to selected range) ──
-    service.from("profiles").select("created_at").gte("created_at", rangeStart).order("created_at", { ascending: true }).limit(10000) as any,
-    service.from("sessions").select("started_at").eq("is_active", false).gte("started_at", rangeStart).order("started_at", { ascending: true }).limit(10000) as any,
-    service.from("brewery_claims").select("created_at").gte("created_at", rangeStart).order("created_at", { ascending: true }).limit(1000) as any,
+    service.from("profiles").select("created_at").gte("created_at", rangeStart).order("created_at", { ascending: true }).limit(50000) as any,
+    service.from("sessions").select("started_at").eq("is_active", false).gte("started_at", rangeStart).order("started_at", { ascending: true }).limit(50000) as any,
+    service.from("brewery_claims").select("created_at").gte("created_at", rangeStart).order("created_at", { ascending: true }).limit(50000) as any,
 
     // ── Health queries ──
     service.from("brewery_claims").select("id", { count: "exact", head: true }).eq("status", "pending") as unknown as CountResult,
@@ -296,7 +296,7 @@ export async function calculateCommandCenterMetrics(
     service.from("api_keys").select("id", { count: "exact", head: true }).eq("is_active", true) as unknown as CountResult,
     // Barback AI metrics (Sprint 146)
     service.from("crawl_jobs").select("completed_at").order("completed_at", { ascending: false, nullsFirst: false }).limit(1) as any,
-    service.from("crawl_jobs").select("cost_usd").not("cost_usd", "is", null).limit(10000) as any,
+    service.from("crawl_jobs").select("cost_usd").not("cost_usd", "is", null).limit(50000) as any,
 
     // ── Recent activity queries ──
     service.from("profiles").select("id, display_name, username, created_at").order("created_at", { ascending: false }).limit(10) as any,
@@ -728,7 +728,7 @@ export async function calculateRetentionCohorts(
       .from("profiles")
       .select("id, created_at")
       .gte("created_at", daysAgo(lookback))
-      .limit(10000) as any,
+      .limit(50000) as any,
     service
       .from("sessions")
       .select("user_id, started_at")

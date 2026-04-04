@@ -121,14 +121,14 @@ export async function fetchBreweryDetail(
       .select("id, user_id, started_at, ended_at, is_active")
       .eq("brewery_id", breweryId)
       .eq("is_active", false)
-      .limit(10000) as any,
+      .limit(50000) as any,
 
     // 4. All beer logs (for KPIs)
     service
       .from("beer_logs")
       .select("id, beer_id, user_id, rating, quantity, logged_at, session_id, beer:beers(name, style, abv, created_at)")
       .eq("brewery_id", breweryId)
-      .limit(10000) as any,
+      .limit(50000) as any,
 
     // 5. Beers (tap list snapshot)
     service
@@ -142,7 +142,7 @@ export async function fetchBreweryDetail(
       .from("brewery_visits")
       .select("user_id, total_visits")
       .eq("brewery_id", breweryId)
-      .limit(1000) as any,
+      .limit(50000) as any,
 
     // 7. Active loyalty program
     service

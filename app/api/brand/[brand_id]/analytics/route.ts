@@ -81,28 +81,32 @@ export async function GET(
       { data: todaySessions },
       { data: todayBeerLogs },
       { data: recentSessions },
-      { data: followers },
+      { count: followersCount },
     ] = await Promise.all([
       supabase
         .from("sessions")
         .select("id, user_id, brewery_id, started_at, ended_at, is_active")
         .in("brewery_id", locationIds)
-        .eq("is_active", false) as any,
+        .eq("is_active", false)
+        .limit(50000) as any,
       supabase
         .from("beer_logs")
         .select("id, beer_id, rating, quantity, logged_at, brewery_id, beer:beers(name, style)")
-        .in("brewery_id", locationIds) as any,
+        .in("brewery_id", locationIds)
+        .limit(50000) as any,
       supabase
         .from("sessions")
         .select("id, user_id")
         .in("brewery_id", locationIds)
         .eq("is_active", false)
-        .gte("started_at", todayStart) as any,
+        .gte("started_at", todayStart)
+        .limit(50000) as any,
       supabase
         .from("beer_logs")
         .select("id, quantity")
         .in("brewery_id", locationIds)
-        .gte("logged_at", todayStart) as any,
+        .gte("logged_at", todayStart)
+        .limit(50000) as any,
       supabase
         .from("sessions")
         .select("id, brewery_id, started_at, profile:profiles(display_name, username), beer_logs(id, beer_id, beer:beers(name))")
@@ -112,7 +116,7 @@ export async function GET(
         .limit(15) as any,
       supabase
         .from("brewery_followers")
-        .select("id")
+        .select("id", { count: "exact", head: true })
         .in("brewery_id", locationIds) as any,
     ]);
 
@@ -231,7 +235,7 @@ export async function GET(
         avgRating,
         repeatVisitorPct,
         crossLocationVisitors,
-        totalFollowers: (followers ?? []).length,
+        totalFollowers: followersCount ?? 0,
       },
       locationBreakdown,
       topBeers,
