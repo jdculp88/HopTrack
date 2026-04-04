@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -92,7 +93,7 @@ export default async function SessionSharePage({ params }: Props) {
           <div className="p-6" style={{ background: "linear-gradient(to right, color-mix(in srgb, var(--accent-gold) 10%, transparent), transparent)", borderBottom: "1px solid var(--border)" }}>
             <div className="flex items-center gap-3 mb-3">
               {session.profile?.avatar_url ? (
-                <img src={session.profile.avatar_url} alt="" className="w-10 h-10 rounded-full object-cover" />
+                <Image src={session.profile.avatar_url} alt="" width={40} height={40} className="w-10 h-10 rounded-full object-cover" />
               ) : (
                 <div className="w-10 h-10 rounded-full bg-[var(--accent-gold)]/20 flex items-center justify-center text-[var(--accent-gold)] font-bold text-sm">
                   {displayName.charAt(0).toUpperCase()}

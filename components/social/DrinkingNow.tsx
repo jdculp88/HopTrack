@@ -86,7 +86,7 @@ export function DrinkingNow() {
         </div>
 
         {/* Horizontal scroll strip — wider cards */}
-        <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide -mx-1 px-1">
+        <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide -mx-1 px-1 snap-x">
           {friends.map((f, i) => {
             const href = f.isHome
               ? `/profile/${f.username}`
@@ -107,7 +107,7 @@ export function DrinkingNow() {
                   aria-label={`View ${getFirstName(f.displayName, f.username)}'s session`}
                   onClick={() => router.push(href)}
                   onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); router.push(href); } }}
-                  className="card-bg-live flex flex-col items-center gap-2 p-3 rounded-2xl border transition-all flex-shrink-0 w-[140px] cursor-pointer"
+                  className="card-bg-live flex flex-col items-center gap-2 p-3 rounded-2xl border transition-all flex-shrink-0 w-[140px] cursor-pointer snap-start"
                   style={{ borderColor: "var(--border)" }}
                 >
                     {/* Avatar with subtle pulse ring */}

@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef, useMemo } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft, ExternalLink, Copy, Check, User, Star, Flame, Zap,
@@ -11,7 +12,7 @@ import {
 } from "lucide-react";
 import {
   AreaChart, Area, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid,
-} from "recharts";
+} from "@/components/charts/LazyRecharts";
 import { Card, CardHeader, CardTitle } from "@/components/ui/Card";
 import { StatsGrid } from "@/components/ui/StatsGrid";
 import { Sparkline } from "@/components/ui/Sparkline";
@@ -179,7 +180,7 @@ export function UserDetailClient({ data }: { data: UserDetailData }) {
             style={{ background: "var(--surface-2)", borderColor: "var(--border)" }}
           >
             {profile.avatar_url ? (
-              <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
+              <Image src={profile.avatar_url} alt="" width={64} height={64} className="w-full h-full object-cover" />
             ) : (
               <User size={28} style={{ color: "var(--text-muted)" }} />
             )}

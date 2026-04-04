@@ -84,7 +84,7 @@ export function NearbyChallengesSection() {
           Challenges Near You
         </p>
       </div>
-      <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
+      <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide snap-x">
         {challenges.map((challenge, i) => (
           <motion.div
             key={challenge.id}

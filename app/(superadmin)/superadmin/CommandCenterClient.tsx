@@ -35,7 +35,7 @@ import {
   XAxis,
   YAxis,
   Tooltip,
-} from "recharts";
+} from "@/components/charts/LazyRecharts";
 import { Card, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Sparkline } from "@/components/ui/Sparkline";
 import { RetentionHeatmap } from "@/components/superadmin/RetentionHeatmap";

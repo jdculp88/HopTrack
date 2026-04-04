@@ -62,7 +62,7 @@ export function BreweryMenusSection({ menus }: Props) {
 
       <div className="card-bg-featured border rounded-2xl overflow-hidden" style={{ borderColor: "var(--border)" }}>
         {/* Category pills */}
-        <div className="flex overflow-x-auto scrollbar-hide gap-2 px-4 pt-4 pb-2">
+        <div className="flex overflow-x-auto scrollbar-hide gap-2 px-4 pt-4 pb-2 snap-x">
           {activeMenus.map((menu) => {
             const Icon = CATEGORY_ICONS[menu.category];
             const isActive = selectedCategory === menu.category;

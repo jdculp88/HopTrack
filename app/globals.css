@@ -457,12 +457,35 @@ body {
 /* ── Font size floor (16px prevents iOS zoom on inputs) ──────────────────── */
 input, select, textarea { font-size: max(16px, 1em); }
 
+/* ── Overscroll containment — prevents scroll chaining (feels native) ───── */
+body { overscroll-behavior-y: contain; }
+
+/* ── Scroll snap — horizontal carousels snap to items ──────────────────── */
+.snap-x { scroll-snap-type: x proximity; -webkit-overflow-scrolling: touch; }
+.snap-start { scroll-snap-align: start; }
+.snap-center { scroll-snap-align: center; }
+
 /* ── Reduced motion — respect OS accessibility preference ────────────────── */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+/* ── PWA Standalone mode — feels native when installed ─────────────────── */
+@media (display-mode: standalone) {
+  body {
+    -webkit-user-select: none;
+    user-select: none;
+    overscroll-behavior: none;
+  }
+  /* Preserve text selection in content areas */
+  p, article, textarea, input, .selectable,
+  [role="article"], [contenteditable] {
+    -webkit-user-select: text;
+    user-select: text;
   }
 }
 

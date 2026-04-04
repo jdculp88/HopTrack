@@ -118,7 +118,7 @@ export function Modal({ open, onClose, title, children, size = "md", className }
                 </button>
               </div>
             )}
-            <div className="flex-1 overflow-y-auto">{children}</div>
+            <div className="flex-1 overflow-y-auto overscroll-contain">{children}</div>
           </motion.div>
         </div>
       )}

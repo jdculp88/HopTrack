@@ -1,8 +1,9 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "@/components/charts/LazyRecharts";
 import { TrendingUp, Users, Beer, Star, Trophy, Calendar, Share2 } from "lucide-react";
 import { PintRewindShareCard } from "@/components/brewery-admin/PintRewindShareCard";
 
@@ -229,7 +230,7 @@ export function PintRewindClient({ breweryName, sessions30, beerLogs30, sessions
                   </h2>
                   <div className="flex items-center gap-4">
                     {topVisitor.avatar_url ? (
-                      <img src={topVisitor.avatar_url} alt={topVisitor.username} className="w-12 h-12 rounded-full object-cover" />
+                      <Image src={topVisitor.avatar_url} alt={topVisitor.username} width={48} height={48} className="w-12 h-12 rounded-full object-cover" />
                     ) : (
                       <div className="w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold"
                         style={{ background: "rgba(212,168,67,0.15)", color: "var(--accent-gold)" }}>

@@ -38,14 +38,14 @@ export function RecommendationsScroll({ beers }: { beers: RecommendedBeer[] }) {
         {firstReason}
       </p>
 
-      <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1">
+      <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1 snap-x">
         {beers.slice(0, 8).map((beer, i) => (
           <motion.div
             key={beer.id}
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: i * 0.05 }}
-            className="flex-shrink-0"
+            className="flex-shrink-0 snap-start"
           >
             <Link href={`/beer/${beer.id}`}>
               <div

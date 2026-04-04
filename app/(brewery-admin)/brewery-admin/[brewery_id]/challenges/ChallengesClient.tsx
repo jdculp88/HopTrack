@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 import { Trophy, Plus, Trash2, Edit2, Users, CheckCircle, X, Eye, Sparkles, Globe, Lock } from "lucide-react";
 import { useToast } from "@/components/ui/Toast";
@@ -478,8 +479,8 @@ export function ChallengesClient({ breweryId, initialChallenges, tapListBeers, s
                         onChange={e => setForm(prev => ({ ...prev, cover_image_url: e.target.value }))}
                       />
                       {form.cover_image_url && (
-                        <div className="mt-2 h-20 rounded-xl overflow-hidden">
-                          <img src={form.cover_image_url} alt="Preview" className="w-full h-full object-cover" />
+                        <div className="mt-2 h-20 rounded-xl overflow-hidden relative">
+                          <Image src={form.cover_image_url} alt="Preview" fill className="object-cover" unoptimized />
                         </div>
                       )}
                     </div>

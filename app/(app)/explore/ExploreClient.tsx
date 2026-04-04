@@ -464,7 +464,7 @@ export function ExploreClient({
                 <Navigation size={16} style={{ color: "var(--accent-gold)" }} />
                 <h2 className="font-sans text-xl font-bold text-[var(--text-primary)]">Near Me</h2>
               </div>
-              <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
+              <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide snap-x">
                 {nearMeBreweries.map((b, i) => (
                   <NearMeCard
                     key={b.id}
@@ -486,7 +486,7 @@ export function ExploreClient({
                 <Clock size={16} style={{ color: "var(--accent-gold)" }} />
                 <h2 className="font-sans text-xl font-bold text-[var(--text-primary)]">Recently Visited</h2>
               </div>
-              <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
+              <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide snap-x">
                 {recentBreweries.map((b, i) => (
                   <NearMeCard
                     key={b.id}

@@ -49,7 +49,7 @@ export function useInstallPrompt() {
       setIsInstalled(true);
       setCanInstall(false);
       deferredPrompt.current = null;
-      console.log("[pwa] App installed successfully");
+      // PWA installed — no user-facing action needed
     };
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstall);

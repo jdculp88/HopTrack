@@ -33,7 +33,6 @@ export const viewport: Viewport = {
   themeColor: "#D4A843",
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
   viewportFit: "cover",
 };
 
@@ -89,12 +88,25 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseHost = supabaseUrl ? new URL(supabaseUrl).origin : null;
+
   return (
     <html
       lang="en"
       className={`${playfair.variable} ${jetbrainsMono.variable} ${dmSans.variable}`}
       data-scroll-behavior="smooth"
     >
+      <head>
+        {supabaseHost && (
+          <>
+            <link rel="preconnect" href={supabaseHost} />
+            <link rel="dns-prefetch" href={supabaseHost} />
+          </>
+        )}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+      </head>
       <body className="min-h-screen antialiased" suppressHydrationWarning>
         <ThemeProvider>
           {children}

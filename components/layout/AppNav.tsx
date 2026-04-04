@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { createClient } from "@/lib/supabase/client";
+import { useHaptic } from "@/hooks/useHaptic";
 import { HopMark } from "@/components/ui/HopMark";
 import { GlobalSearch } from "@/components/layout/GlobalSearch";
 import { SearchTypeahead } from "@/components/ui/SearchTypeahead";
@@ -36,6 +37,7 @@ interface AppNavProps {
 export function AppNav({ username, unreadNotifications = 0, onCheckin }: AppNavProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const { haptic } = useHaptic();
 
   async function handleLogout() {
     const supabase = createClient();
@@ -242,7 +244,7 @@ export function AppNav({ username, unreadNotifications = 0, onCheckin }: AppNavP
           {MOBILE_NAV_ITEMS.slice(0, 2).map(({ href, label, icon: Icon }) => {
             const isActive = pathname.startsWith(href);
             return (
-              <Link key={href} href={href} className="flex-1" aria-label={label} aria-current={isActive ? "page" : undefined}>
+              <Link key={href} href={href} className="flex-1" aria-label={label} aria-current={isActive ? "page" : undefined} onClick={() => haptic("selection")}>
                 <div
                   className="flex flex-col items-center gap-1 py-1 rounded-xl transition-colors"
                   style={{ color: isActive ? "var(--accent-gold)" : "var(--text-muted)" }}
@@ -255,7 +257,7 @@ export function AppNav({ username, unreadNotifications = 0, onCheckin }: AppNavP
           })}
 
           {/* Center check-in FAB */}
-          <button onClick={onCheckin} className="flex-shrink-0 mx-2" aria-label="Start Session" aria-expanded={false}>
+          <button onClick={() => { haptic("press"); onCheckin(); }} className="flex-shrink-0 mx-2" aria-label="Start Session" aria-expanded={false}>
             <div
               className="w-12 h-12 rounded-2xl flex items-center justify-center active:scale-95 transition-transform"
               style={{
@@ -275,7 +277,7 @@ export function AppNav({ username, unreadNotifications = 0, onCheckin }: AppNavP
               : null;
             const mobileLinkAriaLabel = mobileNotifBadge ? `${label}, ${mobileNotifBadge} unread` : label;
             return (
-              <Link key={href} href={href} className="flex-1" aria-label={mobileLinkAriaLabel} aria-current={isActive ? "page" : undefined}>
+              <Link key={href} href={href} className="flex-1" aria-label={mobileLinkAriaLabel} aria-current={isActive ? "page" : undefined} onClick={() => haptic("selection")}>
                 <div
                   className="flex flex-col items-center gap-1 py-1 rounded-xl transition-colors"
                   style={{ color: isActive ? "var(--accent-gold)" : "var(--text-muted)" }}

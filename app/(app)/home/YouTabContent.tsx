@@ -238,9 +238,9 @@ export function YouTabContent({
               View All
             </Link>
           </div>
-          <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide">
+          <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide snap-x">
             {userAchievements.map((ua) => (
-              <div key={ua.id} className="flex flex-col items-center gap-1.5 flex-shrink-0 w-16">
+              <div key={ua.id} className="flex flex-col items-center gap-1.5 flex-shrink-0 w-16 snap-start">
                 <div
                   className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl"
                   style={{ background: "color-mix(in srgb, var(--accent-gold) 10%, transparent)" }}

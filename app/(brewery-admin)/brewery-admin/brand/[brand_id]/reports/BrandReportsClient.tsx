@@ -4,7 +4,7 @@ import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell,
-} from "recharts";
+} from "@/components/charts/LazyRecharts";
 import {
   Users, Beer, Star, Trophy, Download, Printer,
   ArrowUpRight, ArrowDownRight, Minus, TrendingUp, TrendingDown,

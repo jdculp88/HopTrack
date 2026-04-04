@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
+import Image from "next/image";
 import { Users, ShieldAlert, ChevronRight } from "lucide-react";
 import { formatDate, formatRelativeTime } from "@/lib/dates";
 import { SearchForm } from "@/components/superadmin/SearchForm";
@@ -118,7 +119,7 @@ export default async function UsersPage({
                   style={{ background: "var(--surface-2)", color: "var(--text-secondary)" }}
                 >
                   {user.avatar_url ? (
-                    <img src={user.avatar_url} alt="" className="w-full h-full object-cover" />
+                    <Image src={user.avatar_url} alt="" width={32} height={32} className="w-full h-full object-cover" />
                   ) : (
                     (user.display_name ?? user.username ?? "?")[0].toUpperCase()
                   )}

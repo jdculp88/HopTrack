@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useCallback, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, CartesianGrid, PieChart, Pie, Cell } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, CartesianGrid, PieChart, Pie, Cell } from "@/components/charts/LazyRecharts";
 import { Download, Clock, Users, Heart, Award, TrendingUp, ShieldCheck } from "lucide-react";
 import { formatDateShort } from "@/lib/dates";
 import { calculateBreweryKPIs, formatDuration, formatTrend } from "@/lib/kpi";

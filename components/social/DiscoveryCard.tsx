@@ -71,14 +71,14 @@ export function TrendingCard({ reviews, index = 0 }: { reviews: TrendingReview[]
           Trending Near You
         </span>
       </div>
-      <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide">
+      <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide snap-x">
         {reviews.map((review, i) => (
           <motion.div
             key={review.id}
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 + i * 0.05, duration: 0.25 }}
-            className="card-bg-reco rounded-xl p-3.5 flex-shrink-0"
+            className="card-bg-reco rounded-xl p-3.5 flex-shrink-0 snap-start"
             data-style={getStyleFamily(review.beer?.style)}
             style={{
               border: '1px solid var(--surface-warm-border)',
@@ -221,7 +221,7 @@ export function SeasonalBeersScroll({ beers }: { beers: SeasonalBeer[] }) {
       <p className="text-[10px] font-mono uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)' }}>
         New & Noteworthy
       </p>
-      <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide">
+      <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide snap-x">
         {beers.map((beer, i) => (
           <motion.div
             key={beer.id}

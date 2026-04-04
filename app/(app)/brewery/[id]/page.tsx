@@ -514,7 +514,7 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
                   {friendsHere.length} drinking
                 </span>
               </div>
-              <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide -mx-1 px-1">
+              <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide -mx-1 px-1 snap-x">
                 {/* eslint-disable-next-line react-hooks/rules-of-hooks -- server component */}
                 {friendsHere.map((s) => {
                   const diffMs = Date.now() - new Date(s.started_at).getTime();

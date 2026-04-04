@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft, ExternalLink, Eye, Shield, ShieldCheck, ShieldAlert,
@@ -59,7 +60,7 @@ export function BreweryDetailClient({ data }: { data: BreweryDetailData }) {
           style={{ background: "var(--surface-2)", borderColor: "var(--border)" }}
         >
           {brewery.cover_image_url ? (
-            <img src={brewery.cover_image_url} alt="" className="w-full h-full object-cover" />
+            <Image src={brewery.cover_image_url} alt="" width={64} height={64} className="w-full h-full object-cover" />
           ) : (
             <Building2 size={28} style={{ color: "var(--text-muted)" }} />
           )}
@@ -354,7 +355,7 @@ function TeamRow({ member }: { member: TeamMember }) {
         style={{ background: "var(--surface-2)", color: "var(--text-muted)" }}
       >
         {member.profile?.avatar_url ? (
-          <img src={member.profile.avatar_url} alt="" className="w-full h-full rounded-full object-cover" />
+          <Image src={member.profile.avatar_url} alt="" width={32} height={32} className="w-full h-full rounded-full object-cover" />
         ) : (
           name.charAt(0).toUpperCase()
         )}
