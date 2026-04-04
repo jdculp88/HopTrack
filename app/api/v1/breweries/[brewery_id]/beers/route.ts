@@ -77,5 +77,5 @@ export async function GET(
     page,
     per_page: perPage,
     on_tap_only: onTapOnly,
-  });
+  }, 200, 300);
 }

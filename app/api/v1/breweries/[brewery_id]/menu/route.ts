@@ -88,5 +88,5 @@ export async function GET(
     total_items: items.length,
     categories: Object.keys(grouped),
     featured: items.find((b: any) => b.is_featured)?.name ?? null,
-  });
+  }, 200, 300);
 }

@@ -1,5 +1,14 @@
+import Image from "next/image";
 import { cn, getInitials, generateGradientFromString } from "@/lib/utils";
 import { getLevelFromXP } from "@/lib/xp";
+
+const IMAGE_SIZES: Record<string, string> = {
+  xs: "24px",
+  sm: "32px",
+  md: "40px",
+  lg: "56px",
+  xl: "80px",
+};
 
 interface UserAvatarProps {
   profile: {
@@ -40,11 +49,12 @@ export function UserAvatar({ profile, size = "md", showLevel = false, className 
         style={!profile.avatar_url ? { background: gradient } : undefined}
       >
         {profile.avatar_url ? (
-          /* eslint-disable-next-line @next/next/no-img-element */
-          <img
+          <Image
             src={profile.avatar_url}
             alt={displayName}
-            className="w-full h-full object-cover rounded-full"
+            fill
+            sizes={IMAGE_SIZES[size]}
+            className="object-cover rounded-full"
           />
         ) : (
           <span className={cn("font-display font-bold text-white/90", s.text)}>

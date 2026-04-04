@@ -262,7 +262,20 @@ First customer acquisition infrastructure. Demo mode, pricing page polish, onboa
 
 ---
 
-## Recurring Themes Update (Sprint 146)
+## Sprint 149 — The Launchpad (Selected: Option B)
+
+**Selected:** Option B — The Launchpad
+- Production hardening: unbounded query fix, v1 cache tuning, font swap, next/image avatar, 404 page, health endpoint, launch checklist burndown
+
+**Deferred — Option A: "The Playwright"** 🧪
+E2E test coverage for critical user journeys. Playwright suite, CI Supabase integration, flaky test detection. Deferred 7x (S140, S142, S143, S145, S146, S147, S149). **Casey says Sprint 150 or else.**
+
+**Deferred — Option C: "The Sticky"** 🍻
+Consumer retention features. Push notification personalization, check-in streak rewards, consumer weekly recap email, friend activity highlights, WelcomeFlow refresh. **OPEN**
+
+---
+
+## Recurring Themes Update (Sprint 149)
 
 | Theme | Appeared In | Status |
 |-------|------------|--------|

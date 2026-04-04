@@ -48,5 +48,5 @@ export async function GET(
 
   if (error) return apiError("Internal server error", 500, "db_error");
 
-  return apiResponse(events ?? [], { total: count ?? 0, page, per_page: perPage });
+  return apiResponse(events ?? [], { total: count ?? 0, page, per_page: perPage }, 200, 120);
 }

@@ -1,6 +1,6 @@
 # HopTrack Launch Checklist
-**Created Sprint 50 — Updated Sprint 77 (The Countdown)**
-**Owner:** Morgan | **Last updated:** 2026-03-31
+**Created Sprint 50 — Updated Sprint 149 (The Launchpad)**
+**Owner:** Morgan | **Last updated:** 2026-04-04
 **Rule:** Nothing ships until this doc is green.
 
 > This is a living document. Items are marked ✅ COMPLETE, 🔄 IN PROGRESS, or ⬜ PENDING.
@@ -22,13 +22,17 @@
 | All dead-end buttons gated with "Coming soon" | ✅ | Avery | Delete Account + others (S30) |
 | Rate limits on all mutating endpoints | ✅ | Riley | 8 endpoints rate-limited (S44) |
 | Rate limits on auth endpoints | ✅ | Riley / Sam | **S77 audit:** Auth is Supabase-native (rate-limited upstream). `/api/auth/welcome` rate-limited (5/min). `check-username` already limited (20/min). |
-| `loading.tsx` on every data page (~95% coverage) | ✅ | Avery | S15 sweep + S23 + S51 extras |
+| `loading.tsx` on every data page (~98% coverage) | ✅ | Avery | S15 sweep + S23 + S51 extras + S149 (brand loyalty, punch) |
 | `error.tsx` on all route groups | ✅ | Avery | `(app)`, `(brewery-admin)`, `(superadmin)`, `(auth)` (S23) |
 | Sentry error reporting active | ✅ | Riley | Configured S13, reporting live |
 | No `as any` casts in critical paths | 🔄 | Jordan | Reduced S57 (~250→~30 in critical paths), 292 files total still have casts |
 | TypeScript build passes with no errors | ✅ | Avery | **Confirmed S77** — `npm run build` passes clean (64 pages, 0 errors) |
 | All loading skeletons use `<Skeleton />` component | ✅ | Avery | Standard component `@/components/ui/SkeletonLoader` |
 | CI/CD pipeline running | ✅ | Quinn / Riley | GitHub Actions CI on push to main (S76) |
+| Custom 404 page (branded) | ✅ | Avery | **Sprint 149** — `app/not-found.tsx`, beer-themed, brand-styled |
+| Font `display: swap` on all fonts | ✅ | Avery | **Sprint 149** — JetBrains Mono was blocking render |
+| UserAvatar uses `next/image` | ✅ | Avery | **Sprint 149** — WebP/AVIF negotiation, lazy loading, responsive sizing |
+| Health check endpoint (`/api/health`) | ✅ | Riley | **Sprint 149** — Supabase connectivity check, latency, version tracking |
 
 ---
 
@@ -51,10 +55,10 @@
 | Staging CI pipeline | ✅ | Quinn | `.github/workflows/staging.yml` — lint, type check, build (S76) |
 | Staging environment documented | ✅ | Quinn | `docs/staging-environment.md` (S76) |
 | Staging Supabase provisioned | ✅ | Joshua | **Paid tier provisioned (S77)** — team has access |
-| Production environment variables documented | ⬜ | Riley | Create `.env.production.example` — **Sprint 77** |
+| Production environment variables documented | ✅ | Riley | `.env.production.example` created (S77/S79) |
 | Supabase connection pooling configured | ⬜ | Riley | Verify for production load |
 | CDN / edge caching configured | 🔄 | Riley | ISR configured on brewery pages (S49), Vercel edge review pending |
-| Uptime monitoring configured | ⬜ | Riley | Set up Better Uptime or similar |
+| Uptime monitoring configured | 🔄 | Riley | Health check endpoint live (S149); wire to Better Uptime / UptimeRobot |
 
 ---
 
@@ -102,7 +106,7 @@
 |------|--------|-------|-------|
 | Terms of Service page live (`/terms`) | ✅ | Jamie | Placeholder live (S31) — **needs legal review** |
 | Privacy Policy page live (`/privacy`) | ✅ | Jamie | Built S14 — **needs legal review** |
-| Cookie notice / consent banner | 🔄 | Avery / Alex | **Sprint 77** — building this sprint |
+| Cookie notice / consent banner | ✅ | Avery / Alex | **Built Sprint 77** — `CookieConsent` component, localStorage, accept/decline |
 | GDPR compliance review | ⬜ | Sam | Assess EU exposure, add consent management if needed |
 | CCPA compliance (California) | ⬜ | Sam | Assess if user base hits CA threshold |
 | ToS + Privacy linked on signup form | ✅ | Avery | Added S31 |
@@ -213,22 +217,22 @@
 
 | Category | Complete | In Progress | Pending | Total |
 |----------|----------|-------------|---------|-------|
-| App Quality | 12 | 5 | 1 | 18 |
-| Infrastructure | 14 | 1 | 3 | 18 |
+| App Quality | 16 | 5 | 1 | 22 |
+| Infrastructure | 15 | 2 | 1 | 18 |
 | Billing | 6 | 1 | 7 | 14 |
 | Content & Data | 9 | 1 | 1 | 11 |
-| Legal | 5 | 1 | 4 | 10 |
+| Legal | 6 | 0 | 4 | 10 |
 | SEO | 9 | 3 | 1 | 13 |
 | App Store | 4 | 3 | 6 | 13 |
 | Marketing | 9 | 0 | 3 | 12 |
 | Sales | 5 | 4 | 2 | 11 |
 | Launch Day | 0 | 3 | 8 | 11 |
-| **TOTAL** | **73** | **22** | **36** | **131** |
+| **TOTAL** | **79** | **22** | **34** | **135** |
 
-**Launch readiness: 56% complete** (was 44% — 19 items corrected from stale statuses).
+**Launch readiness: 59% complete** (was 56% — Sprint 149 added 4 new items and completed 6).
 **Biggest open blocks:** Billing (blocked on business entity), Launch Day (operational docs in progress).
 **Note:** 7 billing items are blocked on Joshua forming the LLC. App Store items deferred (web-first).
 
 ---
 
-*Morgan: "This is a living document. Updated Sprint 77. The number was always higher than 44% — we just weren't keeping score."* 🍺
+*Morgan: "This is a living document. Updated Sprint 149. The Launchpad pushed us to 59% — and that is with 7 billing items blocked on LLC."* 🍺

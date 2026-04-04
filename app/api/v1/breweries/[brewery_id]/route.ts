@@ -31,5 +31,5 @@ export async function GET(
   if (error) return apiError("Internal server error", 500, "db_error");
   if (!brewery) return apiError("Brewery not found", 404, "not_found");
 
-  return apiResponse(brewery);
+  return apiResponse(brewery, undefined, 200, 300);
 }

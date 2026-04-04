@@ -288,7 +288,7 @@ export async function calculateCommandCenterMetrics(
     service.from("api_keys").select("id", { count: "exact", head: true }).eq("is_active", true) as unknown as CountResult,
     // Barback AI metrics (Sprint 146)
     service.from("crawl_jobs").select("completed_at").order("completed_at", { ascending: false, nullsFirst: false }).limit(1) as any,
-    service.from("crawl_jobs").select("cost_usd").not("cost_usd", "is", null) as any,
+    service.from("crawl_jobs").select("cost_usd").not("cost_usd", "is", null).limit(10000) as any,
 
     // ── Recent activity queries ──
     service.from("profiles").select("id, display_name, username, created_at").order("created_at", { ascending: false }).limit(10) as any,

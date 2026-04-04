@@ -67,7 +67,10 @@ export async function validateApiKey(req: Request): Promise<ValidatedApiKey | nu
 /**
  * Standard API v1 JSON response envelope.
  */
-export function apiResponse(data: any, meta?: Record<string, any>, status = 200) {
+export function apiResponse(data: any, meta?: Record<string, any>, status = 200, cacheSeconds?: number) {
+  const cacheControl = cacheSeconds
+    ? `public, s-maxage=${cacheSeconds}, stale-while-revalidate=${cacheSeconds * 2}`
+    : "public, s-maxage=60, stale-while-revalidate=300";
   return new Response(
     JSON.stringify({ data, meta: meta ?? {}, error: null }),
     {
@@ -77,7 +80,7 @@ export function apiResponse(data: any, meta?: Record<string, any>, status = 200)
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Methods": "GET, OPTIONS",
         "Access-Control-Allow-Headers": "Content-Type, Authorization",
-        "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+        "Cache-Control": cacheControl,
       },
     }
   );
