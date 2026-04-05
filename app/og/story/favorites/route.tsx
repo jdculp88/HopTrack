@@ -102,11 +102,11 @@ export async function GET(request: Request) {
           </div>
         </div>
 
-        {/* 2×2 Beer grid */}
+        {/* 2×2 Beer grid (flex-wrap since next/og doesn't support grid) */}
         <div
           style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
+            display: "flex",
+            flexWrap: "wrap",
             gap: "32px",
             flex: 1,
           }}
@@ -123,6 +123,7 @@ export async function GET(request: Request) {
                 padding: "48px 36px",
                 justifyContent: "space-between",
                 minHeight: "400px",
+                width: "calc(50% - 16px)",
               }}
             >
               <div
