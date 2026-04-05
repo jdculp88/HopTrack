@@ -1,25 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
-import Link from "next/link";
-import { MapPin, Globe, Phone, Star, Users, TrendingUp, Beer, CheckCheck } from "lucide-react";
-import { InstagramIcon, FacebookIcon, XTwitterIcon } from "@/components/ui/SocialIcons";
-import { formatPhone } from "@/lib/brewery-utils";
 import type { Brewery, BreweryVisit, Profile } from "@/types/database";
-import { BreweryChallenges } from "@/components/brewery/BreweryChallenges";
-import { MugClubSection } from "@/components/brewery/MugClubSection";
-import { LoyaltyStampCard } from "@/components/loyalty/LoyaltyStampCard";
-import { BrandLoyaltyStampCard } from "@/components/loyalty/BrandLoyaltyStampCard";
-import { ClosedBreweryBanner } from "@/components/brewery/ClosedBreweryBanner";
-import { BreweryRatingHeader } from "@/components/brewery/BreweryRatingHeader";
 import { generateGradientFromString } from "@/lib/utils";
 import { BreweryHeroSection } from "./BreweryHeroSection";
-import { BreweryTapListSection } from "./BreweryTapListSection";
-import { BreweryMenusSection } from "@/components/brewery/BreweryMenusSection";
-import { BreweryEventsSection } from "./BreweryEventsSection";
-import { BreweryReviewsSection } from "./BreweryReviewsSection";
-import { AuthGate } from "@/components/ui/AuthGate";
-import { StorefrontGate } from "@/components/ui/StorefrontGate";
-import { DrinkingNowStrip } from "@/components/brewery/DrinkingNowStrip";
+import { BreweryHeroShrink } from "./BreweryHeroShrink";
+import { BreweryDetailClient } from "./BreweryDetailClient";
 import { getCachedBreweryDetailMetadata, getCachedBreweryPublicData } from "@/lib/cached-data";
 
 // ─── Supabase join shapes ────────────────────────────────────────────────────
@@ -396,454 +381,47 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <div className="max-w-4xl mx-auto">
-        {/* Hero */}
-        <BreweryHeroSection
-          brewery={brewery}
-          userVisit={userVisit}
-          gradient={gradient}
-          isAuthenticated={isAuthenticated}
-          returnPath={returnPath}
-        />
-
-        <div className="px-4 sm:px-6 py-6 space-y-8">
-          {/* Closed Brewery Banner */}
-          {isClosed && <ClosedBreweryBanner breweryName={brewery.name} />}
-
-          {/* Contact info */}
-          <div className="flex flex-wrap gap-4 text-sm">
-            {brewery.website_url && (
-              <a
-                href={brewery.website_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1.5 text-[var(--accent-gold)] hover:underline"
-              >
-                <Globe size={14} />
-                Website
-              </a>
-            )}
-            {brewery.phone && (
-              <a
-                href={`tel:${brewery.phone}`}
-                className="flex items-center gap-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
-              >
-                <Phone size={14} />
-                {formatPhone(brewery.phone)}
-              </a>
-            )}
-            {brewery.instagram_url && (
-              <a
-                href={brewery.instagram_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
-              >
-                <InstagramIcon size={14} />
-                Instagram
-              </a>
-            )}
-            {brewery.facebook_url && (
-              <a
-                href={brewery.facebook_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
-              >
-                <FacebookIcon size={14} />
-                Facebook
-              </a>
-            )}
-            {brewery.twitter_url && (
-              <a
-                href={brewery.twitter_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
-              >
-                <XTwitterIcon size={14} />
-                X
-              </a>
-            )}
-            {brewery.untappd_url && (
-              <a
-                href={brewery.untappd_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
-              >
-                <Beer size={14} />
-                Untappd
-              </a>
-            )}
-          </div>
-
-          {brewery.description && (
-            <p className="text-[var(--text-secondary)] leading-relaxed">{brewery.description}</p>
-          )}
-
-          {/* Friends Here Now — auth only */}
-          {isAuthenticated && friendsHere.length > 0 && (
-            <div className="card-bg-live border border-[var(--accent-gold)]/20 rounded-2xl p-4">
-              <div className="flex items-center gap-2 mb-3">
-                <span
-                  className="w-2.5 h-2.5 rounded-full animate-pulse flex-shrink-0"
-                  style={{ background: "var(--live-green)" }}
-                />
-                <h2 className="font-display text-xl font-bold text-[var(--text-primary)]">
-                  Friends Here Now
-                </h2>
-                <span className="text-xs font-mono text-[var(--accent-gold)] ml-auto">
-                  {friendsHere.length} drinking
-                </span>
-              </div>
-              <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide -mx-1 px-1 snap-x">
-                {/* eslint-disable-next-line react-hooks/rules-of-hooks -- server component */}
-                {friendsHere.map((s) => {
-                  const diffMs = Date.now() - new Date(s.started_at).getTime();
-                  const mins = Math.floor(diffMs / 60000);
-                  const elapsed =
-                    mins < 60 ? `${mins}m` : `${Math.floor(mins / 60)}h ${mins % 60}m`;
-                  const beerCount = Array.isArray(s.beer_logs) ? s.beer_logs.length : 0;
-                  return (
-                    <Link
-                      key={s.id}
-                      href={`/profile/${s.profile?.username}`}
-                      className="flex flex-col items-center gap-2 p-3 rounded-2xl border flex-shrink-0 w-[100px] hover:border-[var(--accent-gold)]/40 transition-colors"
-                      style={{ background: "var(--surface)", borderColor: "var(--border)" }}
-                    >
-                      <div className="relative">
-                        <div
-                          className="w-10 h-10 rounded-full overflow-hidden bg-[var(--surface-2)] flex items-center justify-center font-bold text-sm"
-                          style={{ color: "var(--accent-gold)" }}
-                        >
-                          {s.profile?.avatar_url ? (
-                            <img
-                              src={s.profile.avatar_url}
-                              alt=""
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            (
-                              s.profile?.display_name ??
-                              s.profile?.username ??
-                              "?"
-                            )[0].toUpperCase()
-                          )}
-                        </div>
-                        <span
-                          className="absolute bottom-0 right-0 w-3 h-3 rounded-full border-2"
-                          style={{
-                            background: "var(--live-green)",
-                            borderColor: "var(--surface)",
-                          }}
-                        />
-                      </div>
-                      <p
-                        className="text-xs font-medium text-center truncate w-full"
-                        style={{ color: "var(--text-primary)" }}
-                      >
-                        {(
-                          s.profile?.display_name ??
-                          s.profile?.username ??
-                          "Friend"
-                        ).split(" ")[0]}
-                      </p>
-                      <p
-                        className="text-[10px] font-mono text-center"
-                        style={{ color: "var(--live-green)" }}
-                      >
-                        {beerCount} pours · {elapsed}
-                      </p>
-                    </Link>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Brewery Rating */}
-          <BreweryRatingHeader
-            breweryId={id}
-            currentUserId={user?.id ?? null}
+        {/* Hero with scroll-linked darkening */}
+        <BreweryHeroShrink>
+          <BreweryHeroSection
+            brewery={brewery}
+            userVisit={userVisit}
+            gradient={gradient}
             isAuthenticated={isAuthenticated}
             returnPath={returnPath}
           />
+        </BreweryHeroShrink>
 
-          {/* Stats Bar */}
-          <div
-            className="grid grid-cols-2 sm:grid-cols-5 gap-3"
-            role="region"
-            aria-label="Brewery statistics"
-          >
-            <div className="card-bg-stats border border-[var(--border)] rounded-2xl p-4 flex flex-col gap-1">
-              <div className="flex items-center gap-1.5 text-[var(--text-muted)]">
-                <CheckCheck size={13} />
-                <span className="text-xs font-mono uppercase tracking-wider">Visits</span>
-              </div>
-              <p className="font-display text-2xl font-bold text-[var(--text-primary)] leading-none">
-                {totalCheckins.toLocaleString()}
-              </p>
-            </div>
-            <div className="card-bg-stats border border-[var(--border)] rounded-2xl p-4 flex flex-col gap-1">
-              <div className="flex items-center gap-1.5 text-[var(--text-muted)]">
-                <Users size={13} />
-                <span className="text-xs font-mono uppercase tracking-wider">Visitors</span>
-              </div>
-              <p className="font-display text-2xl font-bold text-[var(--text-primary)] leading-none">
-                {uniqueVisitors.toLocaleString()}
-              </p>
-            </div>
-            <div className="card-bg-stats border border-[var(--border)] rounded-2xl p-4 flex flex-col gap-1">
-              <div className="flex items-center gap-1.5 text-[var(--text-muted)]">
-                <Star size={13} />
-                <span className="text-xs font-mono uppercase tracking-wider">Avg Rating</span>
-              </div>
-              {avgRating != null ? (
-                <p className="font-display text-2xl font-bold text-[var(--accent-gold)] leading-none">
-                  {avgRating.toFixed(1)}
-                  <span className="text-sm font-sans font-normal text-[var(--text-muted)] ml-1">
-                    /5
-                  </span>
-                </p>
-              ) : (
-                <p className="font-display text-2xl font-bold text-[var(--text-muted)] leading-none">
-                  —
-                </p>
-              )}
-            </div>
-            <div className="card-bg-stats border border-[var(--border)] rounded-2xl p-4 flex flex-col gap-1 col-span-2 sm:col-span-1">
-              <div className="flex items-center gap-1.5 text-[var(--text-muted)]">
-                <TrendingUp size={13} />
-                <span className="text-xs font-mono uppercase tracking-wider">Top Beer</span>
-              </div>
-              {mostPopularBeer ? (
-                <p className="font-display text-sm font-bold text-[var(--text-primary)] leading-tight line-clamp-2">
-                  {mostPopularBeer.name}
-                </p>
-              ) : (
-                <p className="font-display text-sm font-bold text-[var(--text-muted)] leading-none">
-                  —
-                </p>
-              )}
-            </div>
-            <div className="card-bg-stats border border-[var(--border)] rounded-2xl p-4 flex flex-col gap-1">
-              <div className="flex items-center gap-1.5 text-[var(--text-muted)]">
-                <Beer size={13} />
-                <span className="text-xs font-mono uppercase tracking-wider">On Tap</span>
-              </div>
-              <p className="font-display text-2xl font-bold text-[var(--text-primary)] leading-none">
-                {beersOnTap}
-              </p>
-            </div>
-          </div>
-
-          {/* Drinking Now — Realtime presence strip */}
-          <DrinkingNowStrip breweryId={id} />
-
-          {/* Tap List + Food Menu — gated for unclaimed/free-tier on public view */}
-          {isAuthenticated || hasStorefront ? (
-            <BreweryTapListSection
-              beers={(beers ?? []) as any[]}
-              breweryId={id}
-              breweryName={brewery.name}
-              menuImageUrl={brewery.menu_image_url ?? null}
-            />
-          ) : (
-            <StorefrontGate isUnlocked={hasStorefront} sectionName="Tap List" breweryId={id}>
-              <BreweryTapListSection
-                beers={(beers ?? []) as any[]}
-                breweryId={id}
-                breweryName={brewery.name}
-                menuImageUrl={brewery.menu_image_url ?? null}
-              />
-            </StorefrontGate>
-          )}
-
-          {/* Menus — gated for unclaimed/free-tier on public view */}
-          {isAuthenticated || hasStorefront ? (
-            <BreweryMenusSection menus={breweryMenus ?? []} />
-          ) : (breweryMenus ?? []).length > 0 ? (
-            <StorefrontGate isUnlocked={hasStorefront} sectionName="Menus & Food" breweryId={id}>
-              <BreweryMenusSection menus={breweryMenus ?? []} />
-            </StorefrontGate>
-          ) : null}
-
-          {/* Challenges — gated for unclaimed/free-tier on public view */}
-          {activeChallenges.length > 0 && (
-            isAuthenticated || hasStorefront ? (
-              <BreweryChallenges
-                challenges={activeChallenges}
-                myParticipations={myParticipations}
-                isAuthenticated={isAuthenticated}
-                returnPath={returnPath}
-              />
-            ) : (
-              <StorefrontGate isUnlocked={hasStorefront} sectionName="Challenges" breweryId={id}>
-                <BreweryChallenges
-                  challenges={activeChallenges}
-                  myParticipations={[]}
-                  isAuthenticated={false}
-                  returnPath={returnPath}
-                />
-              </StorefrontGate>
-            )
-          )}
-
-          {/* Mug Clubs — gated for unclaimed/free-tier on public view */}
-          {mugClubs.length > 0 && (
-            isAuthenticated || hasStorefront ? (
-              <MugClubSection
-                clubs={mugClubs}
-                myMemberships={myMugMemberships}
-                breweryId={brewery.id}
-                isAuthenticated={isAuthenticated}
-                returnPath={returnPath}
-              />
-            ) : (
-              <StorefrontGate isUnlocked={hasStorefront} sectionName="Mug Clubs" breweryId={id}>
-                <MugClubSection
-                  clubs={mugClubs}
-                  myMemberships={[]}
-                  breweryId={brewery.id}
-                  isAuthenticated={false}
-                  returnPath={returnPath}
-                />
-              </StorefrontGate>
-            )
-          )}
-
-          {/* Brand-Wide Loyalty — gated for unclaimed/free-tier on public view */}
-          {hasBrandLoyalty && brewery.brand_id && brandName && (
-            <div>
-              <h2 className="font-display text-2xl font-bold text-[var(--text-primary)] mb-3">
-                {brandName} Passport
-              </h2>
-              {isAuthenticated ? (
-                <BrandLoyaltyStampCard
-                  brandId={brewery.brand_id}
-                  brandName={brandName}
-                  breweryId={brewery.id}
-                  breweryName={brewery.name}
-                />
-              ) : hasStorefront ? (
-                <AuthGate isAuthenticated={false} featureName="track loyalty stamps" returnPath={returnPath}>
-                  <BrandLoyaltyStampCard
-                    brandId={brewery.brand_id}
-                    brandName={brandName}
-                    breweryId={brewery.id}
-                    breweryName={brewery.name}
-                  />
-                </AuthGate>
-              ) : (
-                <StorefrontGate isUnlocked={hasStorefront} sectionName="Loyalty Program" breweryId={id}>
-                  <BrandLoyaltyStampCard
-                    brandId={brewery.brand_id}
-                    brandName={brandName}
-                    breweryId={brewery.id}
-                    breweryName={brewery.name}
-                  />
-                </StorefrontGate>
-              )}
-            </div>
-          )}
-
-          {/* Per-Location Loyalty Programs — gated for unclaimed/free-tier on public view */}
-          {!hasBrandLoyalty && (loyaltyPrograms ?? []).length > 0 && (
-            <div>
-              <h2 className="font-display text-2xl font-bold text-[var(--text-primary)] mb-3">
-                Loyalty Program
-              </h2>
-              {isAuthenticated ? (
-                <div className="space-y-4">
-                  {(loyaltyPrograms as any[]).map((program: any) => (
-                    <LoyaltyStampCard
-                      key={program.id}
-                      program={program}
-                      card={myLoyaltyCards[program.id] ?? null}
-                      breweryName={brewery.name}
-                      breweryId={brewery.id}
-                    />
-                  ))}
-                </div>
-              ) : hasStorefront ? (
-                <AuthGate isAuthenticated={false} featureName="earn loyalty stamps" returnPath={returnPath}>
-                  <div className="space-y-4">
-                    {(loyaltyPrograms as any[]).map((program: any) => (
-                      <LoyaltyStampCard
-                        key={program.id}
-                        program={program}
-                        card={null}
-                        breweryName={brewery.name}
-                        breweryId={brewery.id}
-                      />
-                    ))}
-                  </div>
-                </AuthGate>
-              ) : (
-                <StorefrontGate isUnlocked={hasStorefront} sectionName="Loyalty Program" breweryId={id}>
-                  <div className="space-y-4">
-                    {(loyaltyPrograms as any[]).map((program: any) => (
-                      <LoyaltyStampCard
-                        key={program.id}
-                        program={program}
-                        card={null}
-                        breweryName={brewery.name}
-                        breweryId={brewery.id}
-                      />
-                    ))}
-                  </div>
-                </StorefrontGate>
-              )}
-            </div>
-          )}
-
-          {/* Events — gated for unclaimed/free-tier on public view */}
-          {isAuthenticated || hasStorefront ? (
-            <BreweryEventsSection
-              events={upcomingEvents}
-              myEventRsvps={myEventRsvps}
-              isAuthenticated={isAuthenticated}
-              returnPath={returnPath}
-            />
-          ) : upcomingEvents.length > 0 ? (
-            <StorefrontGate isUnlocked={hasStorefront} sectionName="Events" breweryId={id}>
-              <BreweryEventsSection
-                events={upcomingEvents}
-                myEventRsvps={{}}
-                isAuthenticated={false}
-                returnPath={returnPath}
-              />
-            </StorefrontGate>
-          ) : null}
-
-          {/* Reviews + Top Visitors */}
-          <BreweryReviewsSection
-            breweryId={id}
+        <div className="py-6">
+          <BreweryDetailClient
+            brewery={brewery}
+            userVisit={userVisit}
+            isAuthenticated={isAuthenticated}
             currentUserId={user?.id ?? null}
+            returnPath={returnPath}
+            hasAdmin={hasAdmin}
+            hasStorefront={hasStorefront}
+            isClosed={isClosed}
+            totalCheckins={totalCheckins ?? 0}
+            uniqueVisitors={uniqueVisitors}
+            avgRating={avgRating}
+            mostPopularBeer={mostPopularBeer}
+            beersOnTap={beersOnTap}
+            friendsHere={friendsHere as any}
             topVisitors={topVisitors}
-            isAuthenticated={isAuthenticated}
-            returnPath={returnPath}
+            beers={beers ?? []}
+            breweryMenus={breweryMenus ?? []}
+            upcomingEvents={upcomingEvents}
+            activeChallenges={activeChallenges}
+            myParticipations={myParticipations}
+            myEventRsvps={myEventRsvps}
+            mugClubs={mugClubs}
+            myMugMemberships={myMugMemberships}
+            loyaltyPrograms={loyaltyPrograms ?? null}
+            myLoyaltyCards={myLoyaltyCards}
+            brandName={brandName}
+            hasBrandLoyalty={hasBrandLoyalty}
           />
-
-          {/* Claim This Brewery CTA */}
-          {!hasAdmin && (
-            <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-6 text-center space-y-3">
-              <p className="text-2xl">🍺</p>
-              <h3 className="font-display text-lg font-bold text-[var(--text-primary)]">
-                Own this brewery?
-              </h3>
-              <p className="text-sm text-[var(--text-secondary)] max-w-sm mx-auto">
-                Claim your listing to manage your tap list, run loyalty programs, and see
-                analytics.
-              </p>
-              <Link
-                href={`/brewery-admin/claim?brewery_id=${id}`}
-                className="inline-flex items-center gap-2 border border-[var(--accent-gold)] text-[var(--accent-gold)] hover:bg-[var(--accent-gold)] hover:text-[var(--bg)] font-semibold text-sm px-5 py-2.5 rounded-xl transition-all"
-              >
-                Is this your brewery? Claim it →
-              </Link>
-            </div>
-          )}
         </div>
       </div>
     </>

@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { ExploreClient } from "./ExploreClient";
+import { ExploreShell } from "./ExploreShell";
 import { SkeletonCard } from "@/components/ui/SkeletonLoader";
 
 export const metadata = { title: "Explore" };
@@ -10,6 +10,13 @@ export default async function ExplorePage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
+
+  // Pull user's home_city for default trending scope
+  const { data: userProfile } = await supabase
+    .from("profiles")
+    .select("home_city")
+    .eq("id", user.id)
+    .single();
 
   // Fetch breweries for the list view (initial load — 200 for good "Near Me" coverage)
   const { data: breweriesRaw } = await supabase
@@ -84,7 +91,7 @@ export default async function ExplorePage() {
 
   return (
     <Suspense fallback={<div className="max-w-5xl mx-auto px-4 py-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">{Array.from({length:6}).map((_,i)=><SkeletonCard key={i}/>)}</div>}>
-      <ExploreClient
+      <ExploreShell
         breweries={(breweries ?? []).map((b) => ({
           ...b,
           user_visit: visitedIds.has(b.id) ? { brewery_id: b.id } : undefined,
@@ -94,6 +101,7 @@ export default async function ExplorePage() {
         followerCounts={followerCountMap}
         recentBreweryIds={recentBreweryIds}
         totalBreweryCount={totalBreweryCount ?? 0}
+        defaultCity={(userProfile as any)?.home_city ?? undefined}
       />
     </Suspense>
   );

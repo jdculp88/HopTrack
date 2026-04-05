@@ -13,10 +13,14 @@ import { join } from 'path'
  */
 
 const BREWERY_PAGE_PATH = join(process.cwd(), 'app/(app)/brewery/[id]/page.tsx')
+const BREWERY_DETAIL_CLIENT_PATH = join(process.cwd(), 'app/(app)/brewery/[id]/BreweryDetailClient.tsx')
 const CACHED_DATA_PATH = join(process.cwd(), 'lib/cached-data.ts')
 
 describe('Brewery Detail Page — Data Safety', () => {
-  const source = readFileSync(BREWERY_PAGE_PATH, 'utf-8')
+  const pageSource = readFileSync(BREWERY_PAGE_PATH, 'utf-8')
+  const clientSource = readFileSync(BREWERY_DETAIL_CLIENT_PATH, 'utf-8')
+  // S160: Rendering logic moved to BreweryDetailClient; guard lives there now.
+  const renderSource = clientSource
 
   it('beer query uses narrow brewery select (not wildcard)', () => {
     // Sprint 158: beers query moved to lib/cached-data.ts (getCachedBreweryPublicData)
@@ -33,17 +37,17 @@ describe('Brewery Detail Page — Data Safety', () => {
   it('brand data is fetched separately (not joined on main brewery query)', () => {
     // The main brewery query should use .select("*") without brand join
     // Brand data should be fetched in a separate query from brewery_brands
-    expect(source).toContain('.from("brewery_brands")')
-    expect(source).toContain('brewery.brand_id')
+    expect(pageSource).toContain('.from("brewery_brands")')
+    expect(pageSource).toContain('brewery.brand_id')
   })
 
   it('BrandLoyaltyStampCard has triple null guard', () => {
     // Must check: hasBrandLoyalty && brewery.brand_id && brandName
-    expect(source).toMatch(/hasBrandLoyalty\s*&&\s*brewery\.brand_id\s*&&\s*brandName/)
+    expect(renderSource).toMatch(/hasBrandLoyalty\s*&&\s*brewery\.brand_id\s*&&\s*brandName/)
   })
 
   it('brandName is extracted as string, not object', () => {
     // brandName should be set from brandRow?.name (string), not brandRow (object)
-    expect(source).toContain('brandRow?.name')
+    expect(pageSource).toContain('brandRow?.name')
   })
 })
