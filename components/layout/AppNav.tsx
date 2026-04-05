@@ -1,11 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   Home, Compass, User, Trophy, Users, Bell, Settings,
   PlusCircle, LogOut, Gift,
 } from "lucide-react";
+import { motion, useScroll, useMotionValueEvent, useReducedMotion } from "motion/react";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { createClient } from "@/lib/supabase/client";
 import { useHaptic } from "@/hooks/useHaptic";
@@ -34,10 +36,99 @@ interface AppNavProps {
   onCheckin: () => void;
 }
 
+// Sprint 161 — Arc-style phase animation check-in FAB
+function CheckinFAB({ onCheckin, haptic }: { onCheckin: () => void; haptic: (p: "press" | "success") => void }) {
+  const [phase, setPhase] = useState<"idle" | "press" | "expand" | "return">("idle");
+
+  const handleClick = () => {
+    haptic("press");
+    // Phase morph: press → expand → return → fire
+    setPhase("press");
+    setTimeout(() => setPhase("expand"), 80);
+    setTimeout(() => setPhase("return"), 260);
+    setTimeout(() => {
+      setPhase("idle");
+      onCheckin();
+    }, 380);
+  };
+
+  // Target scale per phase
+  const scaleByPhase = {
+    idle: 1,
+    press: 0.92,
+    expand: 1.12,
+    return: 1,
+  } as const;
+
+  // Inner icon rotation
+  const iconRotate = phase === "expand" || phase === "return" ? 90 : 0;
+
+  return (
+    <button
+      onClick={handleClick}
+      className="flex-shrink-0 mx-2 relative"
+      aria-label="Start Session"
+      aria-expanded={false}
+    >
+      {/* Ripple expansion on expand phase */}
+      <motion.span
+        aria-hidden="true"
+        className="absolute inset-0 rounded-2xl pointer-events-none"
+        initial={false}
+        animate={{
+          scale: phase === "expand" ? 1.8 : 1,
+          opacity: phase === "expand" ? 0 : 0.35,
+        }}
+        transition={{ duration: 0.3, ease: "easeOut" }}
+        style={{
+          background: "radial-gradient(circle, var(--accent-gold) 0%, transparent 70%)",
+        }}
+      />
+      <motion.div
+        className="relative w-12 h-12 rounded-2xl flex items-center justify-center"
+        animate={{ scale: scaleByPhase[phase] }}
+        transition={{ type: "spring", stiffness: 600, damping: 20 }}
+        style={{
+          background: "var(--accent-gold)",
+          boxShadow:
+            phase === "expand"
+              ? "0 8px 28px color-mix(in srgb, var(--accent-gold) 60%, transparent), 0 0 0 4px color-mix(in srgb, var(--accent-gold) 25%, transparent)"
+              : "0 4px 14px color-mix(in srgb, var(--accent-gold) 35%, transparent)",
+        }}
+      >
+        <motion.div
+          animate={{ rotate: iconRotate }}
+          transition={{ type: "spring", stiffness: 450, damping: 22 }}
+          style={{ color: "var(--bg)" }}
+        >
+          <PlusCircle size={22} />
+        </motion.div>
+      </motion.div>
+    </button>
+  );
+}
+
 export function AppNav({ username, unreadNotifications = 0, onCheckin }: AppNavProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { haptic } = useHaptic();
+
+  // Sprint 161 — The Vibe: scroll-hide bottom nav on scroll-down
+  const { scrollY } = useScroll();
+  const [navHidden, setNavHidden] = useState(false);
+  const reducedMotion = useReducedMotion();
+
+  useMotionValueEvent(scrollY, "change", (latest) => {
+    if (reducedMotion) return;
+    const previous = scrollY.getPrevious() ?? 0;
+    const delta = latest - previous;
+    // Hide when scrolling down past 120px; show when scrolling up or near top
+    if (delta > 4 && latest > 120) {
+      setNavHidden(true);
+    } else if (delta < -4 || latest < 80) {
+      setNavHidden(false);
+    }
+  });
 
   async function handleLogout() {
     const supabase = createClient();
@@ -47,10 +138,14 @@ export function AppNav({ username, unreadNotifications = 0, onCheckin }: AppNavP
 
   return (
     <>
-      {/* ── Mobile top header (branding) ──────────────────────────────────── */}
+      {/* ── Mobile top header (branding) — Liquid Glass (Sprint 161) ──────── */}
       <div
-        className="lg:hidden fixed top-0 left-0 right-0 z-40 backdrop-blur-md border-b"
-        style={{ background: "color-mix(in srgb, var(--surface) 92%, transparent)", borderColor: "var(--border)" }}
+        className="lg:hidden fixed top-0 left-0 right-0 z-40 backdrop-blur-xl border-b"
+        style={{
+          background: "color-mix(in srgb, var(--surface) 72%, transparent)",
+          borderColor: "color-mix(in srgb, var(--accent-gold) 15%, var(--border))",
+          boxShadow: "inset 0 -1px 0 rgba(255,255,255,0.06)",
+        }}
       >
         <div className="flex items-center justify-between px-4 py-2.5">
           <Link href="/home" className="flex items-center gap-2 transition-opacity hover:opacity-80">
@@ -233,12 +328,18 @@ export function AppNav({ username, unreadNotifications = 0, onCheckin }: AppNavP
         </div>
       </aside>
 
-      {/* ── Mobile bottom nav ───────────────────────────────────────────────── */}
-      <div
+      {/* ── Mobile bottom nav (Sprint 161 — Liquid Glass + scroll-hide) ─────── */}
+      <motion.div
         role="navigation"
         aria-label="Bottom navigation"
-        className="lg:hidden fixed bottom-0 left-0 right-0 z-40 backdrop-blur-md border-t"
-        style={{ background: "color-mix(in srgb, var(--surface) 95%, transparent)", borderColor: "var(--border)" }}
+        animate={{ y: navHidden ? 90 : 0 }}
+        transition={{ type: "spring", stiffness: 420, damping: 34 }}
+        className="lg:hidden fixed bottom-0 left-0 right-0 z-40 backdrop-blur-xl border-t"
+        style={{
+          background: "color-mix(in srgb, var(--surface) 72%, transparent)",
+          borderColor: "color-mix(in srgb, var(--accent-gold) 18%, var(--border))",
+          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08), 0 -8px 32px rgba(0,0,0,0.35)",
+        }}
       >
         <div className="flex items-center justify-around px-2 py-2 pb-safe-nav">
           {MOBILE_NAV_ITEMS.slice(0, 2).map(({ href, label, icon: Icon }) => {
@@ -256,18 +357,8 @@ export function AppNav({ username, unreadNotifications = 0, onCheckin }: AppNavP
             );
           })}
 
-          {/* Center check-in FAB */}
-          <button onClick={() => { haptic("press"); onCheckin(); }} className="flex-shrink-0 mx-2" aria-label="Start Session" aria-expanded={false}>
-            <div
-              className="w-12 h-12 rounded-2xl flex items-center justify-center active:scale-95 transition-transform"
-              style={{
-                background: "var(--accent-gold)",
-                boxShadow: "0 4px 14px color-mix(in srgb, var(--accent-gold) 35%, transparent)",
-              }}
-            >
-              <PlusCircle size={22} style={{ color: "var(--bg)" }} />
-            </div>
-          </button>
+          {/* Center check-in FAB — Arc-style phase animation (Sprint 161) */}
+          <CheckinFAB onCheckin={onCheckin} haptic={haptic} />
 
           {MOBILE_NAV_ITEMS.slice(2).map(({ href, label, icon: Icon }) => {
             const isActive = href === "/notifications" ? pathname === href : pathname.startsWith(href);
@@ -299,7 +390,7 @@ export function AppNav({ username, unreadNotifications = 0, onCheckin }: AppNavP
             );
           })}
         </div>
-      </div>
+      </motion.div>
     </>
   );
 }

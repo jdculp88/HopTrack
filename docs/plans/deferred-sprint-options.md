@@ -328,3 +328,21 @@ Consumer app polish. Core Web Vitals / Lighthouse audit → 90+ scores, PWA inst
 - Explore gamification balance — should be achievable but not trivially fakeable
 - Evaluate whether to integrate with existing loyalty system instead of standalone
 **Related files to reference:** `lib/beerStyleColors.ts` (style families still used by BeerDNACard), `app/(app)/home/YouTabContent.tsx` (Brewery Passport section — different feature, still live)
+
+---
+
+## Sprint 161 — Selected: The Vibe (Option A, minus audio)
+
+**Selected:** Option A — The Vibe 🎵
+- Sensory layer (no audio per Joshua). Liquid Glass rollout, mesh gradients + noise on all cards, variable XP rewards, celebration trifecta (confetti + haptic), Arc-style phase animations, long-press context menus, horizontal swipe between Feed sub-tabs.
+
+**Deferred — Option B: "The Identity"** 🎭 **OPEN**
+Stats that WOW. Beer Personality 4-letter archetype ("You're The Hop Hunter"), Four Favorites pinned on profile, half-star ratings (0.5 increments, migration required), percentile framing + rarity scores, temporal stories ("Your Beer Thursday"), "Your Round" weekly hero page (Wrapped-of-the-Week), shareable stat cards (OG images, Instagram Story format), count-up animations. **Leads:** Sam + Finley + Dakota. Fills the Profile/Stats tabs that S160 restructured with the WOW content they deserve. **Originally Joshua's S161 pitch — carried forward intact.**
+
+**Deferred — Option C: "The Glass"** 🥃 **OPEN**
+Facelift Arc Track 2 narrower play. Active Session Detent Sheet (iOS-style 3-detent sheet: peek/half/full, deferred from S160 per Avery's scope call) + finish Liquid Glass rollout across BottomNav/modals/toasts + motion consistency pass + PillTabs adoption audit (deploy to Discover, Notifications, Settings). **Leads:** Avery + Alex + Dakota. Note: Some Liquid Glass scope overlaps with The Vibe — if The Vibe ships the nav rollout, The Glass narrows to Active Session Detent Sheet + consistency audit only.
+
+---
+
+### Sprint 161 Kickoff — Standing Rule Established
+Joshua established a new rule at S161 kickoff: **unpicked options carry forward to next sprint's kickoff**. Both The Identity and The Glass must appear as options at S162 kickoff (alongside any new options Morgan wants to add). See `feedback_carry_options_forward.md` memory.

@@ -69,7 +69,18 @@ function AppShellInner({ children, username, unreadNotifications: initialUnread 
   }, []);
 
   const [preselectedBrewery, setPreselectedBrewery] = useState<Brewery | null>(null);
-  const [sessionResult, setSessionResult] = useState<{ xpGained: number; newAchievements: any[]; session?: any; beerLogs?: any[] } | null>(null);
+  const [sessionResult, setSessionResult] = useState<{
+    xpGained: number
+    newAchievements: any[]
+    session?: any
+    beerLogs?: any[]
+    xpBase?: number
+    xpTier?: 'normal' | 'lucky' | 'golden'
+    xpMultiplier?: number
+    leveledUp?: boolean
+    newLevelInfo?: { level: number; name: string } | null
+    streakMilestone?: number | null
+  } | null>(null);
   const [shareOpen, setShareOpen] = useState(false);
 
   // Listen for session state broadcast from any page
@@ -169,7 +180,18 @@ function AppShellInner({ children, username, unreadNotifications: initialUnread 
     }));
   }, [setActiveSession, setTapWallMode]);
 
-  const handleSessionEnd = useCallback((result: { xpGained: number; newAchievements: any[]; session?: any; beerLogs?: any[] }) => {
+  const handleSessionEnd = useCallback((result: {
+    xpGained: number
+    newAchievements: any[]
+    session?: any
+    beerLogs?: any[]
+    xpBase?: number
+    xpTier?: 'normal' | 'lucky' | 'golden'
+    xpMultiplier?: number
+    leveledUp?: boolean
+    newLevelInfo?: { level: number; name: string } | null
+    streakMilestone?: number | null
+  }) => {
     clearSession();
     setSessionResult(result);
     setRecapOpen(true);
@@ -280,6 +302,12 @@ function AppShellInner({ children, username, unreadNotifications: initialUnread 
         beerLogs={sessionResult?.beerLogs ?? []}
         xpGained={sessionResult?.xpGained ?? 0}
         newAchievements={sessionResult?.newAchievements ?? []}
+        xpBase={sessionResult?.xpBase}
+        xpTier={sessionResult?.xpTier}
+        xpMultiplier={sessionResult?.xpMultiplier}
+        leveledUp={sessionResult?.leveledUp}
+        newLevelInfo={sessionResult?.newLevelInfo}
+        streakMilestone={sessionResult?.streakMilestone}
         onClose={() => { setRecapOpen(false); setSessionResult(null); setShareOpen(false); }}
         onShare={() => setShareOpen(true)}
       />

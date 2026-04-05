@@ -1,12 +1,16 @@
 "use client";
 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "motion/react";
-import { MapPin, Users, Calendar } from "lucide-react";
+import { MapPin, Users, Calendar, Eye, Share2, Copy, Compass } from "lucide-react";
 import { cn, formatCount } from "@/lib/utils";
 import { breweryTransitionName } from "@/lib/view-transitions";
 import type { BreweryWithStats } from "@/types/database";
+import { useLongPress } from "@/hooks/useLongPress";
+import { ContextMenu, type ContextMenuItem } from "@/components/ui/ContextMenu";
 
 const BREWERY_PLACEHOLDER_IMAGES = [
   "https://picsum.photos/seed/brewery1/400/200",
@@ -146,9 +150,85 @@ export function BreweryCard({ brewery, distance, variant = "default", className 
     );
   }
 
-  // Default card
+  // Default card (with long-press context menu — Sprint 161)
   return (
-    <Link href={`/brewery/${brewery.id}`} aria-label={brewery.name}>
+    <DefaultBreweryCard
+      brewery={brewery}
+      coverSrc={coverSrc}
+      typeLabel={typeLabel}
+      className={className}
+    />
+  );
+}
+
+function DefaultBreweryCard({
+  brewery,
+  coverSrc,
+  typeLabel,
+  className,
+}: {
+  brewery: BreweryWithStats;
+  coverSrc: string;
+  typeLabel: string | null;
+  className?: string;
+}) {
+  const router = useRouter();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [menuAnchor, setMenuAnchor] = useState<{ x: number; y: number } | null>(null);
+
+  const longPress = useLongPress({
+    onLongPress: (coords) => {
+      setMenuAnchor(coords);
+      setMenuOpen(true);
+    },
+  });
+
+  const breweryUrl =
+    typeof window !== "undefined"
+      ? `${window.location.origin}/brewery/${brewery.id}`
+      : `/brewery/${brewery.id}`;
+
+  const menuItems: ContextMenuItem[] = [
+    {
+      label: "View Details",
+      icon: <Eye size={16} />,
+      onSelect: () => router.push(`/brewery/${brewery.id}`),
+    },
+    {
+      label: "Find on Map",
+      icon: <Compass size={16} />,
+      onSelect: () => router.push(`/explore?b=${brewery.id}`),
+    },
+    {
+      label: "Share",
+      icon: <Share2 size={16} />,
+      onSelect: async () => {
+        if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
+          try {
+            await navigator.share({ title: brewery.name, url: breweryUrl });
+            return;
+          } catch {
+            // User cancelled or share failed — fall through to clipboard
+          }
+        }
+        if (typeof navigator !== "undefined" && navigator.clipboard) {
+          navigator.clipboard.writeText(breweryUrl).catch(() => {});
+        }
+      },
+    },
+    {
+      label: "Copy Link",
+      icon: <Copy size={16} />,
+      onSelect: () => {
+        if (typeof navigator !== "undefined" && navigator.clipboard) {
+          navigator.clipboard.writeText(breweryUrl).catch(() => {});
+        }
+      },
+    },
+  ];
+
+  return (
+    <>
       <motion.div
         whileHover={{ y: -3, scale: 1.01 }}
         transition={{ type: "spring", stiffness: 400, damping: 30 }}
@@ -158,60 +238,85 @@ export function BreweryCard({ brewery, distance, variant = "default", className 
           "transition-colors duration-150 group",
           className
         )}
+        onPointerDown={longPress.onPointerDown}
+        onPointerMove={longPress.onPointerMove}
+        onPointerUp={longPress.onPointerUp}
+        onPointerLeave={longPress.onPointerLeave}
+        onPointerCancel={longPress.onPointerCancel}
+        onContextMenu={longPress.onContextMenu}
       >
-        {/* Cover */}
-        <div className="h-36 w-full relative overflow-hidden flex-shrink-0">
-          <Image
-            src={coverSrc}
-            alt={brewery.name}
-            fill
-            className="object-cover group-hover:scale-105 transition-transform duration-500"
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-          />
-          {brewery.user_visit && (
-            <div className="absolute top-3 right-3 bg-[#3D7A52]/90 text-white text-xs font-mono px-2 py-0.5 rounded-full">
-              ✓ Visited
-            </div>
-          )}
-          {brewery.has_upcoming_events && !brewery.user_visit && (
-            <div className="absolute top-3 right-3 flex items-center gap-1 bg-[#5B8DEF]/90 text-white text-xs font-mono px-2 py-0.5 rounded-full">
-              <Calendar size={10} /> Event
-            </div>
-          )}
-        </div>
+        <Link
+          href={`/brewery/${brewery.id}`}
+          aria-label={brewery.name}
+          onClickCapture={(e) => {
+            if (longPress.didFire()) {
+              e.preventDefault();
+              e.stopPropagation();
+              longPress.reset();
+            }
+          }}
+        >
+          {/* Cover */}
+          <div className="h-36 w-full relative overflow-hidden flex-shrink-0">
+            <Image
+              src={coverSrc}
+              alt={brewery.name}
+              fill
+              className="object-cover group-hover:scale-105 transition-transform duration-500"
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            />
+            {brewery.user_visit && (
+              <div className="absolute top-3 right-3 bg-[#3D7A52]/90 text-white text-xs font-mono px-2 py-0.5 rounded-full">
+                ✓ Visited
+              </div>
+            )}
+            {brewery.has_upcoming_events && !brewery.user_visit && (
+              <div className="absolute top-3 right-3 flex items-center gap-1 bg-[#5B8DEF]/90 text-white text-xs font-mono px-2 py-0.5 rounded-full">
+                <Calendar size={10} /> Event
+              </div>
+            )}
+          </div>
 
-        <div className="p-4 flex flex-col flex-1 gap-2">
-          <div className="flex items-start justify-between gap-2">
-            <h3
-              className="font-display font-semibold text-[var(--text-primary)] leading-tight group-hover:text-[var(--accent-gold)] transition-colors line-clamp-2"
-              style={breweryTransitionName(brewery.id)}
-            >
-              {brewery.name}
-            </h3>
-            {typeLabel && (
-              <span className="text-xs text-[var(--text-secondary)] bg-[var(--surface-2)] px-2 py-0.5 rounded-full flex-shrink-0">
-                {typeLabel}
+          <div className="p-4 flex flex-col flex-1 gap-2">
+            <div className="flex items-start justify-between gap-2">
+              <h3
+                className="font-display font-semibold text-[var(--text-primary)] leading-tight group-hover:text-[var(--accent-gold)] transition-colors line-clamp-2"
+                style={breweryTransitionName(brewery.id)}
+              >
+                {brewery.name}
+              </h3>
+              {typeLabel && (
+                <span className="text-xs text-[var(--text-secondary)] bg-[var(--surface-2)] px-2 py-0.5 rounded-full flex-shrink-0">
+                  {typeLabel}
+                </span>
+              )}
+            </div>
+
+            <div className="flex items-center gap-1 text-sm text-[var(--text-muted)]">
+              <MapPin size={12} className="flex-shrink-0" />
+              <span className="truncate">
+                {brewery.city}{brewery.state ? `, ${brewery.state}` : ""}
               </span>
-            )}
-          </div>
+            </div>
 
-          <div className="flex items-center gap-1 text-sm text-[var(--text-muted)]">
-            <MapPin size={12} className="flex-shrink-0" />
-            <span className="truncate">
-              {brewery.city}{brewery.state ? `, ${brewery.state}` : ""}
-            </span>
+            {/* Spacer pushes bottom content down for equal-height grid alignment */}
+            <div className="mt-auto">
+              {brewery.beer_count !== undefined && brewery.beer_count > 0 && (
+                <p className="text-xs text-[var(--text-muted)]">
+                  {brewery.beer_count} beer{brewery.beer_count !== 1 ? "s" : ""} on tap
+                </p>
+              )}
+            </div>
           </div>
-
-          {/* Spacer pushes bottom content down for equal-height grid alignment */}
-          <div className="mt-auto">
-            {brewery.beer_count !== undefined && brewery.beer_count > 0 && (
-              <p className="text-xs text-[var(--text-muted)]">
-                {brewery.beer_count} beer{brewery.beer_count !== 1 ? "s" : ""} on tap
-              </p>
-            )}
-          </div>
-        </div>
+        </Link>
       </motion.div>
-    </Link>
+
+      <ContextMenu
+        open={menuOpen}
+        anchor={menuAnchor}
+        items={menuItems}
+        onClose={() => setMenuOpen(false)}
+      />
+    </>
   );
 }

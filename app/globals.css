@@ -512,11 +512,19 @@ body { overscroll-behavior-y: contain; }
    All pseudo-elements: position absolute, pointer-events none.
    ══════════════════════════════════════════════════════════════════════════ */
 
+/* Sprint 161 — The Vibe: shared grain texture for all card-bg-* surfaces */
+:root {
+  --card-noise: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+}
+[data-theme="light"] {
+  --card-noise: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+}
+
 /* ── 1. ACHIEVEMENT — Concentric arcs radiating from badge icon ─────────── */
 .card-bg-achievement {
   position: relative;
   overflow: hidden;
-  background: radial-gradient(circle at 28px 50%,
+  background: var(--card-noise), radial-gradient(circle at 28px 50%,
     color-mix(in srgb, var(--badge-bronze) 6%, transparent) 0%,
     color-mix(in srgb, var(--badge-bronze) 2%, transparent) 40%,
     transparent 65%);
@@ -540,7 +548,7 @@ body { overscroll-behavior-y: contain; }
   pointer-events: none;
 }
 .card-bg-achievement[data-tier="silver"] {
-  background: radial-gradient(circle at 28px 50%,
+  background: var(--card-noise), radial-gradient(circle at 28px 50%,
     color-mix(in srgb, var(--badge-silver) 6%, transparent) 0%,
     color-mix(in srgb, var(--badge-silver) 2%, transparent) 40%,
     transparent 65%);
@@ -549,7 +557,7 @@ body { overscroll-behavior-y: contain; }
 .card-bg-achievement[data-tier="silver"]::after  { border-color: color-mix(in srgb, var(--badge-silver) 4%, transparent); }
 .card-bg-achievement[data-tier="gold"],
 .card-bg-achievement[data-tier="platinum"] {
-  background: radial-gradient(circle at 28px 50%,
+  background: var(--card-noise), radial-gradient(circle at 28px 50%,
     color-mix(in srgb, var(--badge-gold) 6%, transparent) 0%,
     color-mix(in srgb, var(--badge-gold) 2%, transparent) 40%,
     transparent 65%);
@@ -563,7 +571,7 @@ body { overscroll-behavior-y: contain; }
 .card-bg-live {
   position: relative;
   overflow: hidden;
-  background: radial-gradient(ellipse at 50% 40%,
+  background: var(--card-noise), radial-gradient(ellipse at 50% 40%,
     color-mix(in srgb, var(--live-green) 7%, transparent) 0%,
     transparent 60%),
     var(--surface);
@@ -590,6 +598,7 @@ body { overscroll-behavior-y: contain; }
   position: relative;
   overflow: hidden;
   background:
+    var(--card-noise),
     repeating-linear-gradient(
       90deg,
       transparent,
@@ -613,7 +622,7 @@ body { overscroll-behavior-y: contain; }
 .card-bg-streak {
   position: relative;
   overflow: hidden;
-  background: radial-gradient(ellipse at 20% 50%,
+  background: var(--card-noise), radial-gradient(ellipse at 20% 50%,
     color-mix(in srgb, var(--streak-flame) 8%, transparent) 0%,
     transparent 55%),
     var(--surface);
@@ -625,6 +634,7 @@ body { overscroll-behavior-y: contain; }
   position: relative;
   overflow: hidden;
   background:
+    var(--card-noise),
     radial-gradient(ellipse at 30% 30%, color-mix(in srgb, var(--accent-gold) 9%, transparent) 0%, transparent 50%),
     radial-gradient(ellipse at 80% 80%, color-mix(in srgb, var(--accent-amber) 5%, transparent) 0%, transparent 40%),
     var(--surface);
@@ -645,6 +655,7 @@ body { overscroll-behavior-y: contain; }
   position: relative;
   overflow: hidden;
   background:
+    var(--card-noise),
     repeating-linear-gradient(
       165deg,
       transparent,
@@ -678,7 +689,7 @@ body { overscroll-behavior-y: contain; }
 .card-bg-taste-dna {
   position: relative;
   overflow: hidden;
-  background: linear-gradient(180deg, var(--surface) 0%, color-mix(in srgb, var(--accent-gold) 4%, var(--surface)) 50%, var(--surface) 100%);
+  background: var(--card-noise), linear-gradient(180deg, var(--surface) 0%, color-mix(in srgb, var(--accent-gold) 4%, var(--surface)) 50%, var(--surface) 100%);
 }
 .card-bg-taste-dna::before {
   content: '';
@@ -718,7 +729,7 @@ body { overscroll-behavior-y: contain; }
 .card-bg-notification {
   position: relative;
   overflow: hidden;
-  background: linear-gradient(135deg,
+  background: var(--card-noise), linear-gradient(135deg,
     color-mix(in srgb, var(--accent-gold) 7%, transparent) 0%,
     transparent 40%),
     var(--surface);
@@ -730,19 +741,32 @@ body { overscroll-behavior-y: contain; }
   position: relative;
   overflow: hidden;
 }
-.card-bg-reco[data-style="ipa"]    { background: linear-gradient(135deg, color-mix(in srgb, var(--ipa-green) 8%, var(--surface)) 0%, var(--surface) 60%); border-color: color-mix(in srgb, var(--ipa-green) 10%, var(--border)) !important; }
-.card-bg-reco[data-style="stout"]  { background: linear-gradient(135deg, color-mix(in srgb, var(--stout-espresso-mid) 8%, var(--surface)) 0%, var(--surface) 60%); border-color: color-mix(in srgb, var(--stout-espresso-mid) 10%, var(--border)) !important; }
-.card-bg-reco[data-style="sour"]   { background: linear-gradient(135deg, color-mix(in srgb, var(--sour-berry) 8%, var(--surface)) 0%, var(--surface) 60%); border-color: color-mix(in srgb, var(--sour-berry) 10%, var(--border)) !important; }
-.card-bg-reco[data-style="porter"] { background: linear-gradient(135deg, color-mix(in srgb, var(--porter-plum) 8%, var(--surface)) 0%, var(--surface) 60%); border-color: color-mix(in srgb, var(--porter-plum) 10%, var(--border)) !important; }
-.card-bg-reco[data-style="lager"]  { background: linear-gradient(135deg, color-mix(in srgb, var(--lager-sky) 8%, var(--surface)) 0%, var(--surface) 60%); border-color: color-mix(in srgb, var(--lager-sky) 10%, var(--border)) !important; }
-.card-bg-reco[data-style="saison"] { background: linear-gradient(135deg, color-mix(in srgb, var(--saison-peach) 8%, var(--surface)) 0%, var(--surface) 60%); border-color: color-mix(in srgb, var(--saison-peach) 10%, var(--border)) !important; }
-.card-bg-reco[data-style="cider"]    { background: linear-gradient(135deg, color-mix(in srgb, var(--cider-rose) 8%, var(--surface)) 0%, var(--surface) 60%); border-color: color-mix(in srgb, var(--cider-rose) 10%, var(--border)) !important; }
-.card-bg-reco[data-style="wine"]     { background: linear-gradient(135deg, color-mix(in srgb, var(--wine-burgundy) 8%, var(--surface)) 0%, var(--surface) 60%); border-color: color-mix(in srgb, var(--wine-burgundy) 10%, var(--border)) !important; }
-.card-bg-reco[data-style="cocktail"] { background: linear-gradient(135deg, color-mix(in srgb, var(--cocktail-teal) 8%, var(--surface)) 0%, var(--surface) 60%); border-color: color-mix(in srgb, var(--cocktail-teal) 10%, var(--border)) !important; }
-.card-bg-reco[data-style="na"]       { background: linear-gradient(135deg, color-mix(in srgb, var(--na-lemon) 8%, var(--surface)) 0%, var(--surface) 60%); border-color: color-mix(in srgb, var(--na-lemon) 10%, var(--border)) !important; }
+.card-bg-reco[data-style="ipa"]    { background: var(--card-noise), linear-gradient(135deg, color-mix(in srgb, var(--ipa-green) 8%, var(--surface)) 0%, var(--surface) 60%); border-color: color-mix(in srgb, var(--ipa-green) 10%, var(--border)) !important; }
+.card-bg-reco[data-style="stout"]  { background: var(--card-noise), linear-gradient(135deg, color-mix(in srgb, var(--stout-espresso-mid) 8%, var(--surface)) 0%, var(--surface) 60%); border-color: color-mix(in srgb, var(--stout-espresso-mid) 10%, var(--border)) !important; }
+.card-bg-reco[data-style="sour"]   { background: var(--card-noise), linear-gradient(135deg, color-mix(in srgb, var(--sour-berry) 8%, var(--surface)) 0%, var(--surface) 60%); border-color: color-mix(in srgb, var(--sour-berry) 10%, var(--border)) !important; }
+.card-bg-reco[data-style="porter"] { background: var(--card-noise), linear-gradient(135deg, color-mix(in srgb, var(--porter-plum) 8%, var(--surface)) 0%, var(--surface) 60%); border-color: color-mix(in srgb, var(--porter-plum) 10%, var(--border)) !important; }
+.card-bg-reco[data-style="lager"]  { background: var(--card-noise), linear-gradient(135deg, color-mix(in srgb, var(--lager-sky) 8%, var(--surface)) 0%, var(--surface) 60%); border-color: color-mix(in srgb, var(--lager-sky) 10%, var(--border)) !important; }
+.card-bg-reco[data-style="saison"] { background: var(--card-noise), linear-gradient(135deg, color-mix(in srgb, var(--saison-peach) 8%, var(--surface)) 0%, var(--surface) 60%); border-color: color-mix(in srgb, var(--saison-peach) 10%, var(--border)) !important; }
+.card-bg-reco[data-style="cider"]    { background: var(--card-noise), linear-gradient(135deg, color-mix(in srgb, var(--cider-rose) 8%, var(--surface)) 0%, var(--surface) 60%); border-color: color-mix(in srgb, var(--cider-rose) 10%, var(--border)) !important; }
+.card-bg-reco[data-style="wine"]     { background: var(--card-noise), linear-gradient(135deg, color-mix(in srgb, var(--wine-burgundy) 8%, var(--surface)) 0%, var(--surface) 60%); border-color: color-mix(in srgb, var(--wine-burgundy) 10%, var(--border)) !important; }
+.card-bg-reco[data-style="cocktail"] { background: var(--card-noise), linear-gradient(135deg, color-mix(in srgb, var(--cocktail-teal) 8%, var(--surface)) 0%, var(--surface) 60%); border-color: color-mix(in srgb, var(--cocktail-teal) 10%, var(--border)) !important; }
+.card-bg-reco[data-style="na"]       { background: var(--card-noise), linear-gradient(135deg, color-mix(in srgb, var(--na-lemon) 8%, var(--surface)) 0%, var(--surface) 60%); border-color: color-mix(in srgb, var(--na-lemon) 10%, var(--border)) !important; }
 
 /* ── 10. SOCIAL — Intentionally bare ────────────────────────────────────── */
 /* No styles needed — restraint IS the design */
+
+/* ── HERO MESH — Full mesh-gradient hero surface (Sprint 161) ───────────── */
+.card-bg-hero {
+  position: relative;
+  overflow: hidden;
+  background:
+    var(--card-noise),
+    radial-gradient(ellipse at 20% 30%, color-mix(in srgb, var(--accent-gold) 22%, transparent) 0%, transparent 55%),
+    radial-gradient(ellipse at 80% 65%, color-mix(in srgb, var(--accent-amber) 18%, transparent) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 100%, color-mix(in srgb, var(--saison-peach) 15%, transparent) 0%, transparent 60%),
+    linear-gradient(135deg, var(--surface) 0%, color-mix(in srgb, var(--accent-gold) 6%, var(--surface)) 100%);
+  border-color: color-mix(in srgb, var(--accent-gold) 20%, var(--border)) !important;
+}
 
 /* ── SEASONAL BLOB — Organic shape corner accent ────────────────────────── */
 .card-bg-seasonal {

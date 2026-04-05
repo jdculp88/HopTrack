@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { getLevelFromXP, SESSION_XP } from '@/lib/xp'
+import { getLevelFromXP, SESSION_XP, applyXpMultiplier, type XpTier } from '@/lib/xp'
 import { sendPushToUser } from '@/lib/push'
 import { triggerLoyaltyNudge } from '@/lib/smart-triggers'
 import { awardBrandStamp } from '@/lib/brand-loyalty'
@@ -42,11 +42,11 @@ export async function PATCH(
   const ratedCount = beerLogs.filter((b: any) => b.rating != null).length
   const isHomeSession = session.context === 'home'
 
-  // Calculate XP
-  let xpGained = SESSION_XP.session_start
-  xpGained += beerCount * SESSION_XP.per_beer
-  xpGained += ratedCount * SESSION_XP.per_rating
-  if (beerCount >= 3) xpGained += SESSION_XP.three_plus_beers_bonus
+  // Calculate base XP (pre-multiplier)
+  let baseXp = SESSION_XP.session_start
+  baseXp += beerCount * SESSION_XP.per_beer
+  baseXp += ratedCount * SESSION_XP.per_rating
+  if (beerCount >= 3) baseXp += SESSION_XP.three_plus_beers_bonus
 
   // First visit bonus only applies to brewery sessions
   let isFirstVisit = false
@@ -60,8 +60,12 @@ export async function PATCH(
       .limit(1)
 
     isFirstVisit = !existingSessions || existingSessions.length === 0
-    if (isFirstVisit) xpGained += SESSION_XP.first_visit_bonus
+    if (isFirstVisit) baseXp += SESSION_XP.first_visit_bonus
   }
+
+  // Apply variable XP multiplier (Sprint 161 — The Vibe)
+  // 94% normal (±20% variance), 5% lucky (2×), 1% golden (5×)
+  const { finalXp: xpGained, tier: xpTier, multiplier: xpMultiplier } = applyXpMultiplier(baseXp)
 
   // End the session
   const { error: endError } = await supabase
@@ -70,7 +74,8 @@ export async function PATCH(
       is_active: false,
       ended_at: new Date().toISOString(),
       xp_awarded: xpGained,
-    })
+      xp_tier: xpTier,
+    } as any)
     .eq('id', sessionId)
 
   if (endError) {
@@ -131,8 +136,11 @@ export async function PATCH(
   }
 
   // Atomic XP increment via RPC — no race condition
+  const oldLevel = profile?.level || 1
   const newXp = (profile?.xp || 0) + xpGained
-  const newLevel = getLevelFromXP(newXp).level
+  const newLevelInfo = getLevelFromXP(newXp)
+  const newLevel = newLevelInfo.level
+  const leveledUp = newLevel > oldLevel
 
   const { error: rpcError } = await supabase
     .rpc('increment_xp', {
@@ -546,12 +554,25 @@ export async function PATCH(
     }
   }
 
+  // Streak milestone detection (Sprint 161 — The Vibe)
+  const STREAK_MILESTONES = [3, 5, 7, 14, 21, 30, 50, 100] as const
+  const currentStreakValue = streakUpdates?.current_streak ?? profile?.current_streak ?? 0
+  const streakMilestone = STREAK_MILESTONES.includes(currentStreakValue as 3 | 5 | 7 | 14 | 21 | 30 | 50 | 100)
+    ? currentStreakValue
+    : null
+
   return NextResponse.json({
     xpGained,
+    xpBase: baseXp,
+    xpTier,
+    xpMultiplier,
     isFirstVisit,
     beerCount,
     newAchievements,
     completedChallenges,
+    leveledUp,
+    newLevelInfo: leveledUp ? newLevelInfo : null,
+    streakMilestone,
     sessionId,
     session: completedSession ?? null,
     beerLogs: completedSession?.beer_logs ?? [],

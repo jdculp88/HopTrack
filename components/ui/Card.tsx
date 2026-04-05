@@ -10,6 +10,8 @@ interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   padding?: "compact" | "default" | "spacious";
   /** Whether to show hover state border highlight */
   hoverable?: boolean;
+  /** Sprint 161 — The Vibe: apply mesh gradient hero treatment */
+  mesh?: boolean;
   children: React.ReactNode;
 }
 
@@ -20,18 +22,19 @@ const paddingClasses = {
 };
 
 export const Card = forwardRef<HTMLDivElement, CardProps>(
-  ({ bgClass, padding = "default", hoverable = false, className, children, ...props }, ref) => {
+  ({ bgClass, padding = "default", hoverable = false, mesh = false, className, children, ...props }, ref) => {
+    const resolvedBgClass = mesh ? "card-bg-hero" : bgClass;
     return (
       <div
         ref={ref}
         className={cn(
           "rounded-2xl border",
           paddingClasses[padding],
-          bgClass,
+          resolvedBgClass,
           hoverable
             ? "border-[var(--border)] hover:border-[var(--accent-gold)]/30 transition-colors"
             : "border-[var(--border)]",
-          !bgClass && "bg-[var(--surface)]",
+          !resolvedBgClass && "bg-[var(--surface)]",
           className
         )}
         {...props}

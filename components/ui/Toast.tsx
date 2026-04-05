@@ -121,11 +121,12 @@ function ToastItem({ toast: t, onDismiss }: { toast: ToastItem; onDismiss: (id: 
       animate={{ opacity: 1, x: 0, scale: 1 }}
       exit={{ opacity: 0, x: 60, scale: 0.92 }}
       transition={{ type: "spring", stiffness: 420, damping: 32 }}
-      className="pointer-events-auto flex items-start gap-3 px-4 py-3.5 rounded-2xl"
+      className="pointer-events-auto flex items-start gap-3 px-4 py-3.5 rounded-2xl backdrop-blur-md"
       style={{
-        background: "var(--surface)",
+        background: "color-mix(in srgb, var(--surface) 82%, transparent)",
         border: `1px solid ${border}`,
-        boxShadow: `0 8px 32px rgba(0,0,0,0.35)`,
+        boxShadow:
+          `inset 0 1px 0 rgba(255,255,255,0.08), 0 8px 32px rgba(0,0,0,0.4)`,
       }}
     >
       <Icon size={16} style={{ color: icon, flexShrink: 0, marginTop: 2 }} />

@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion, type PanInfo } from "motion/react";
+import { useHaptic } from "@/hooks/useHaptic";
 import {
   isStreakMilestone,
   isStreakSeen,
@@ -183,6 +184,28 @@ export function HomeFeed({
       });
     },
     [activeTab]
+  );
+
+  // Sprint 161 — The Vibe: horizontal swipe between feed sub-tabs
+  const reducedMotion = useReducedMotion();
+  const { haptic } = useHaptic();
+  const TAB_ORDER: FeedTab[] = useMemo(() => ["friends", "discover", "you"], []);
+
+  const handleSwipeEnd = useCallback(
+    (_: unknown, info: PanInfo) => {
+      if (reducedMotion) return;
+      const swipe = info.offset.x * info.velocity.x;
+      const idx = TAB_ORDER.indexOf(activeTab);
+      // Threshold matches PintRewindCards pattern (S47)
+      if (swipe < -5000 && idx < TAB_ORDER.length - 1) {
+        haptic("selection");
+        handleTabChange(TAB_ORDER[idx + 1]);
+      } else if (swipe > 5000 && idx > 0) {
+        haptic("selection");
+        handleTabChange(TAB_ORDER[idx - 1]);
+      }
+    },
+    [activeTab, TAB_ORDER, reducedMotion, haptic, handleTabChange]
   );
 
   const { getActiveSession } = useSession();
@@ -439,7 +462,14 @@ export function HomeFeed({
       {/* Feed Tab Bar */}
       <FeedTabBar activeTab={activeTab} onChange={handleTabChange} />
 
-      {/* Tab Content */}
+      {/* Tab Content — Sprint 161 swipe wrapper */}
+      <motion.div
+        drag={reducedMotion ? false : "x"}
+        dragConstraints={{ left: 0, right: 0 }}
+        dragElastic={0.15}
+        dragDirectionLock
+        onDragEnd={handleSwipeEnd}
+      >
       <AnimatePresence mode="wait">
         {activeTab === "friends" && (
           <motion.div
@@ -530,6 +560,7 @@ export function HomeFeed({
           </motion.div>
         )}
       </AnimatePresence>
+      </motion.div>
     </div>
     </motion.div>
   );

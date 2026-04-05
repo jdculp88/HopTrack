@@ -20,7 +20,18 @@ interface TapWallSheetProps {
   breweryName: string
   breweryId: string | null
   homeMode?: boolean
-  onSessionEnd: (result: { xpGained: number; newAchievements: any[]; session?: any; beerLogs?: any[] }) => void
+  onSessionEnd: (result: {
+    xpGained: number
+    newAchievements: any[]
+    session?: any
+    beerLogs?: any[]
+    xpBase?: number
+    xpTier?: 'normal' | 'lucky' | 'golden'
+    xpMultiplier?: number
+    leveledUp?: boolean
+    newLevelInfo?: { level: number; name: string } | null
+    streakMilestone?: number | null
+  }) => void
   onSessionCancelled?: () => void
 }
 
@@ -253,7 +264,18 @@ export default function TapWallSheet({
     setEnding(false)
     setShowEndConfirm(false)
     if (result) {
-      onSessionEnd({ xpGained: result.xpGained, newAchievements: result.newAchievements, session: result.session, beerLogs: result.beerLogs })
+      onSessionEnd({
+        xpGained: result.xpGained,
+        newAchievements: result.newAchievements,
+        session: result.session,
+        beerLogs: result.beerLogs,
+        xpBase: result.xpBase,
+        xpTier: result.xpTier,
+        xpMultiplier: result.xpMultiplier,
+        leveledUp: result.leveledUp,
+        newLevelInfo: result.newLevelInfo,
+        streakMilestone: result.streakMilestone,
+      })
     }
   }
 

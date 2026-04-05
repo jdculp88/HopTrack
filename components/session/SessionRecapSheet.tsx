@@ -1,9 +1,9 @@
 'use client'
 
 import { useEffect, useState, useCallback, useMemo } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence } from 'motion/react'
 import { Session, BeerLog } from '@/types/database'
-import { SESSION_XP } from '@/lib/xp'
+import { SESSION_XP, type XpTier } from '@/lib/xp'
 import { C, formatDuration, formatSessionDate, getOrdinalSuffix } from './recap/recapUtils'
 import RecapHeader from './recap/RecapHeader'
 import RecapPhotoGallery from './recap/RecapPhotoGallery'
@@ -13,6 +13,11 @@ import RecapBeerLogs from './recap/RecapBeerLogs'
 import RecapAchievements from './recap/RecapAchievements'
 import RecapShareActions from './recap/RecapShareActions'
 import type { BreweryStats } from './recap/recapUtils'
+import { XpTierCelebration } from '@/components/celebrations/XpTierCelebration'
+import { LevelUpCelebration } from '@/components/celebrations/LevelUpCelebration'
+import { StreakMilestoneCelebration } from '@/components/celebrations/StreakMilestoneCelebration'
+
+type CelebrationKind = 'xpTier' | 'levelUp' | 'streak' | null
 
 interface SessionRecapSheetProps {
   isOpen: boolean
@@ -21,6 +26,13 @@ interface SessionRecapSheetProps {
   beerLogs: BeerLog[]
   xpGained: number
   newAchievements: Array<{ id: string; name: string; icon?: string; xp_reward: number }>
+  // Sprint 161 — The Vibe (all optional for backward compat)
+  xpTier?: XpTier
+  xpMultiplier?: number
+  xpBase?: number
+  leveledUp?: boolean
+  newLevelInfo?: { level: number; name: string } | null
+  streakMilestone?: number | null
   onClose: () => void
   onShare?: () => void
 }
@@ -32,10 +44,18 @@ export default function SessionRecapSheet({
   beerLogs,
   xpGained,
   newAchievements,
+  xpTier = 'normal',
+  xpMultiplier = 1,
+  xpBase = xpGained,
+  leveledUp = false,
+  newLevelInfo = null,
+  streakMilestone = null,
   onClose,
   onShare,
 }: SessionRecapSheetProps) {
   const [fired, setFired] = useState(false)
+  const [activeCelebration, setActiveCelebration] = useState<CelebrationKind>(null)
+  const [celebrationQueue, setCelebrationQueue] = useState<Exclude<CelebrationKind, null>[]>([])
   const [recapRatings, setRecapRatings] = useState<Record<string, number>>({})
   const [beerNotes, setBeerNotes] = useState<Record<string, string>>({})
   const [breweryRating, setBreweryRating] = useState(0)
@@ -118,15 +138,31 @@ export default function SessionRecapSheet({
   useEffect(() => {
     if (isOpen && !fired) {
       setFired(true)
-      setTimeout(() => {
-        import('canvas-confetti').then(m =>
-          m.default({ particleCount: 80, spread: 70, origin: { y: 0.4 }, colors: ['#c8943a', '#b7522f', '#fff'] })
-        )
-      }, 300)
+
+      // Build celebration queue (Sprint 161 — The Vibe)
+      const queue: Exclude<CelebrationKind, null>[] = []
+      if (xpTier !== 'normal') queue.push('xpTier')
+      if (leveledUp && newLevelInfo) queue.push('levelUp')
+      if (streakMilestone) queue.push('streak')
+
+      if (queue.length > 0) {
+        setCelebrationQueue(queue)
+        setActiveCelebration(queue[0])
+      } else {
+        // No special celebration — fall back to standard confetti burst
+        setTimeout(() => {
+          import('canvas-confetti').then(m =>
+            m.default({ particleCount: 80, spread: 70, origin: { y: 0.4 }, colors: ['#c8943a', '#b7522f', '#fff'] })
+          )
+        }, 300)
+      }
+
       setTimeout(() => setProgressAnimated(true), 800)
     }
     if (!isOpen) {
       setFired(false)
+      setActiveCelebration(null)
+      setCelebrationQueue([])
       setRecapRatings({})
       setBeerNotes({})
       setBreweryRating(0)
@@ -139,7 +175,16 @@ export default function SessionRecapSheet({
       setBeerHistory({})
       setSessionPhotos([])
     }
-  }, [isOpen, fired])
+  }, [isOpen, fired, xpTier, leveledUp, newLevelInfo, streakMilestone])
+
+  // Advance the celebration queue
+  const handleCelebrationDismiss = useCallback(() => {
+    setCelebrationQueue((prev) => {
+      const next = prev.slice(1)
+      setActiveCelebration(next[0] ?? null)
+      return next
+    })
+  }, [])
 
   // ── Handlers ──────────────────────────────────────────────────────────────
 
@@ -191,8 +236,36 @@ export default function SessionRecapSheet({
   // ── Render ────────────────────────────────────────────────────────────────
 
   return (
-    <AnimatePresence>
-      {isOpen && (
+    <>
+      {/* Celebration queue — stacks above the sheet (z-[200]) */}
+      {(xpTier === 'lucky' || xpTier === 'golden') && (
+        <XpTierCelebration
+          show={activeCelebration === 'xpTier'}
+          tier={xpTier}
+          multiplier={xpMultiplier}
+          baseXp={xpBase}
+          finalXp={xpGained}
+          onDismiss={handleCelebrationDismiss}
+        />
+      )}
+      {leveledUp && newLevelInfo && (
+        <LevelUpCelebration
+          show={activeCelebration === 'levelUp'}
+          newLevel={newLevelInfo.level}
+          levelName={newLevelInfo.name}
+          onDismiss={handleCelebrationDismiss}
+        />
+      )}
+      {streakMilestone && (
+        <StreakMilestoneCelebration
+          show={activeCelebration === 'streak'}
+          streakDays={streakMilestone}
+          onDismiss={handleCelebrationDismiss}
+        />
+      )}
+
+      <AnimatePresence>
+        {isOpen && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -273,6 +346,7 @@ export default function SessionRecapSheet({
           </div>
         </motion.div>
       )}
-    </AnimatePresence>
+      </AnimatePresence>
+    </>
   )
 }

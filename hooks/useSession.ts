@@ -20,6 +20,13 @@ interface SessionResult {
   newAchievements: any[]
   session?: Session | null
   beerLogs?: BeerLog[]
+  // Sprint 161 — The Vibe
+  xpBase?: number
+  xpTier?: 'normal' | 'lucky' | 'golden'
+  xpMultiplier?: number
+  leveledUp?: boolean
+  newLevelInfo?: { level: number; name: string } | null
+  streakMilestone?: number | null
 }
 
 export function useSession() {

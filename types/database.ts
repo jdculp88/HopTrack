@@ -618,6 +618,7 @@ export interface Session {
   share_to_feed: boolean
   note: string | null
   xp_awarded: number
+  xp_tier: 'normal' | 'lucky' | 'golden'
   session_latitude: number | null
   session_longitude: number | null
   created_at: string

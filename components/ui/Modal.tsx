@@ -92,22 +92,37 @@ export function Modal({ open, onClose, title, children, size = "md", className }
               }
             }}
             className={cn(
-              "relative w-full bg-[var(--surface)] border border-[var(--border)]",
+              "relative w-full border backdrop-blur-2xl",
               "rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden",
               "max-h-[90vh] sm:max-h-[85vh] flex flex-col",
               SIZES[size],
               className
             )}
+            style={{
+              background: "color-mix(in srgb, var(--surface) 78%, transparent)",
+              borderColor: "color-mix(in srgb, var(--accent-gold) 18%, var(--border))",
+              boxShadow:
+                "0 0 0 1px color-mix(in srgb, var(--accent-gold) 15%, transparent) inset, 0 20px 50px rgba(0,0,0,0.55)",
+            }}
             role="dialog"
             aria-modal="true"
             aria-labelledby={title ? "modal-title" : undefined}
           >
+            {/* Liquid Glass gloss overlay (Sprint 161 — The Vibe) */}
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                background:
+                  "linear-gradient(135deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.03) 40%, rgba(255,255,255,0.00) 65%, rgba(255,255,255,0.06) 100%)",
+              }}
+            />
             {/* Drag handle — mobile bottom sheet indicator */}
-            <div className="sm:hidden flex justify-center pt-3 pb-1 flex-shrink-0">
+            <div className="sm:hidden flex justify-center pt-3 pb-1 flex-shrink-0 relative z-[1]">
               <div className="w-10 h-1 rounded-full bg-[var(--border)]" />
             </div>
             {title && (
-              <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border)] flex-shrink-0">
+              <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border)] flex-shrink-0 relative z-[1]">
                 <h2 id="modal-title" className="font-display text-lg font-semibold text-[var(--text-primary)]">{title}</h2>
                 <button
                   onClick={onClose}
@@ -118,7 +133,7 @@ export function Modal({ open, onClose, title, children, size = "md", className }
                 </button>
               </div>
             )}
-            <div className="flex-1 overflow-y-auto overscroll-contain">{children}</div>
+            <div className="flex-1 overflow-y-auto overscroll-contain relative z-[1]">{children}</div>
           </motion.div>
         </div>
       )}

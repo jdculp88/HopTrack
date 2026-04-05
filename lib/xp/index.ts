@@ -69,3 +69,34 @@ export function getLevelProgress(xp: number): {
   return { current, next, progress, xpToNext };
 }
 
+// Variable XP rewards (Sprint 161 — The Vibe)
+// Applied once per session to the total XP to create a WOW moment.
+// Distribution: 94% normal (±20% variance), 5% lucky (2×), 1% golden (5×).
+export type XpTier = "normal" | "lucky" | "golden";
+
+export function rollXpMultiplier(): { multiplier: number; tier: XpTier } {
+  const roll = Math.random();
+
+  // 1% golden
+  if (roll < 0.01) {
+    return { multiplier: 5.0, tier: "golden" };
+  }
+  // 5% lucky (0.01 → 0.06)
+  if (roll < 0.06) {
+    return { multiplier: 2.0, tier: "lucky" };
+  }
+  // 94% normal: 0.8 to 1.2 (±20% variance)
+  const variance = 0.8 + Math.random() * 0.4;
+  return { multiplier: variance, tier: "normal" };
+}
+
+export function applyXpMultiplier(baseXp: number): {
+  finalXp: number;
+  tier: XpTier;
+  multiplier: number;
+} {
+  const { multiplier, tier } = rollXpMultiplier();
+  const finalXp = Math.round(baseXp * multiplier);
+  return { finalXp, tier, multiplier };
+}
+

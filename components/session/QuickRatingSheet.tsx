@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence } from 'motion/react'
 import { Star, X, Edit3 } from 'lucide-react'
 import { BeerLog } from '@/types/database'
 import { RatingDisclosure } from '@/components/ui/RatingDisclosure'
@@ -84,8 +84,11 @@ export default function QuickRatingSheet({
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-              className="fixed bottom-0 left-0 right-0 z-50 rounded-t-3xl pb-safe"
-              style={{ background: 'var(--surface)' }}
+              className="fixed bottom-0 left-0 right-0 z-50 rounded-t-3xl pb-safe backdrop-blur-2xl"
+              style={{
+                background: 'color-mix(in srgb, var(--surface) 80%, transparent)',
+                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.14), inset 0 0 0 1px color-mix(in srgb, var(--accent-gold) 18%, transparent), 0 -20px 60px rgba(0,0,0,0.5)',
+              }}
             >
               <div className="px-5 pt-5 pb-8">
                 <div className="w-10 h-1 rounded-full mx-auto mb-5" style={{ background: 'var(--border)' }} />
@@ -171,8 +174,11 @@ export default function QuickRatingSheet({
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-            className="fixed bottom-0 left-0 right-0 z-50 rounded-t-3xl pb-safe"
-            style={{ background: 'var(--surface)' }}
+            className="fixed bottom-0 left-0 right-0 z-50 rounded-t-3xl pb-safe backdrop-blur-2xl"
+            style={{
+              background: 'color-mix(in srgb, var(--surface) 80%, transparent)',
+              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.14), inset 0 0 0 1px color-mix(in srgb, var(--accent-gold) 18%, transparent), 0 -20px 60px rgba(0,0,0,0.5)',
+            }}
           >
             <div className="px-5 pt-5 pb-8">
               {/* Handle */}

@@ -275,7 +275,7 @@ BEGIN
   -- ═══════════════════════════════════════════════════════════════════════════
 
   -- u03: added friend within 7 days of signup (150d ago, friend added 148d ago)
-  INSERT INTO friendships (user_id, friend_id, status, created_at)
+  INSERT INTO friendships (requester_id, addressee_id, status, created_at)
   VALUES
     (u03, u04, 'accepted', now()-interval '148 days'),
     (u07, u08, 'accepted', now()-interval '117 days'),
