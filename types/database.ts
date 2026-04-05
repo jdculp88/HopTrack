@@ -94,6 +94,31 @@ export interface Database {
         Insert: BeerListItemInsert;
         Update: Partial<BeerListItem>;
       };
+      user_pinned_beers: {
+        Row: UserPinnedBeer;
+        Insert: UserPinnedBeerInsert;
+        Update: Partial<UserPinnedBeer>;
+      };
+      user_stats_snapshots: {
+        Row: UserStatsSnapshot;
+        Insert: Partial<UserStatsSnapshot> & { user_id: string };
+        Update: Partial<UserStatsSnapshot>;
+      };
+      style_percentile_buckets: {
+        Row: StylePercentileBucket;
+        Insert: StylePercentileBucket;
+        Update: Partial<StylePercentileBucket>;
+      };
+      brewery_percentile_buckets: {
+        Row: BreweryPercentileBucket;
+        Insert: BreweryPercentileBucket;
+        Update: Partial<BreweryPercentileBucket>;
+      };
+      overall_percentile_buckets: {
+        Row: OverallPercentileBucket;
+        Insert: OverallPercentileBucket;
+        Update: Partial<OverallPercentileBucket>;
+      };
       brewery_follows: {
         Row: BreweryFollow;
         Insert: BreweryFollowInsert;
@@ -806,6 +831,66 @@ export interface BeerListItem {
   beer?: { id: string; name: string; style: string | null; abv: number | null; avg_rating: number | null };
 }
 export type BeerListItemInsert = Omit<BeerListItem, "id" | "created_at" | "beer"> & { id?: string };
+
+// ─── User Pinned Beers (Four Favorites) — Sprint 162 ─────────────────────────
+export interface UserPinnedBeer {
+  id: string;
+  user_id: string;
+  beer_id: string;
+  position: number;      // 0-3
+  pinned_at: string;
+  // joined fields
+  beer?: {
+    id: string;
+    name: string;
+    style: string | null;
+    item_type: string | null;
+    abv: number | null;
+    avg_rating: number | null;
+    brewery?: { id: string; name: string } | null;
+  };
+}
+export type UserPinnedBeerInsert = Omit<UserPinnedBeer, "id" | "pinned_at" | "beer"> & { id?: string };
+
+// ─── Stats Snapshots & Percentile Buckets — Sprint 162 ───────────────────────
+export interface UserStatsSnapshot {
+  user_id: string;
+  total_beers: number;
+  total_beers_percentile: number | null;
+  unique_beers: number;
+  unique_beers_percentile: number | null;
+  unique_styles: number;
+  unique_styles_percentile: number | null;
+  top_style: string | null;
+  top_style_count: number;
+  top_style_percentile: number | null;
+  top_brewery_id: string | null;
+  top_brewery_visits: number;
+  top_brewery_percentile: number | null;
+  style_breakdown: Array<{ style: string; count: number; percentile: number }>;
+  computed_at: string;
+}
+
+export interface StylePercentileBucket {
+  style: string;
+  thresholds: number[];   // 101 values
+  sample_size: number;
+  computed_at: string;
+}
+
+export interface BreweryPercentileBucket {
+  brewery_id: string;
+  thresholds: number[];
+  sample_size: number;
+  computed_at: string;
+}
+
+export interface OverallPercentileBucket {
+  metric: string;         // "beers" | "sessions" | "breweries" | "styles"
+  thresholds: number[];
+  sample_size: number;
+  computed_at: string;
+}
 
 // ─── Referrals ────────────────────────────────────────────────────────────────
 export interface ReferralCode {

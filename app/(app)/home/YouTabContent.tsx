@@ -151,7 +151,37 @@ export function YouTabContent({
         </div>
       </div>
 
-      {/* Wrapped CTA */}
+      {/* Your Round CTA — weekly (Sprint 162) */}
+      {profile.total_checkins > 0 && (
+        <Link href="/your-round" className="block">
+          <motion.div
+            className="rounded-2xl p-5 relative overflow-hidden"
+            style={{
+              background: "linear-gradient(135deg, rgba(232,132,26,0.10) 0%, rgba(232,132,26,0.03) 100%)",
+              border: "1px solid rgba(232,132,26,0.20)",
+            }}
+            whileHover={{ scale: 1.01 }}
+            whileTap={{ scale: 0.99 }}
+          >
+            <div className="flex items-center gap-3.5 relative z-10">
+              <div className="p-2.5 rounded-xl" style={{ background: "rgba(232,132,26,0.12)" }}>
+                <Gift size={18} style={{ color: "var(--accent-amber)" }} />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
+                  Your Round, this week
+                </p>
+                <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+                  Last 7 days of pours, highlights, and top styles
+                </p>
+              </div>
+              <span className="text-xs font-mono" style={{ color: "var(--accent-amber)" }}>View</span>
+            </div>
+          </motion.div>
+        </Link>
+      )}
+
+      {/* Wrapped CTA — year-in-review */}
       {profile.total_checkins > 0 && (
         <Link href="/wrapped" className="block">
           <motion.div

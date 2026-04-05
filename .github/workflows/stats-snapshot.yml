@@ -1,0 +1,30 @@
+name: Stats Snapshot
+
+on:
+  schedule:
+    # Daily at 4am PT = 11:00 UTC (PST) / 12:00 UTC (PDT)
+    # Sprint 162 — The Identity: pre-computes percentile buckets + user snapshots
+    - cron: "37 11 * * *"
+  workflow_dispatch: # Manual trigger from GitHub UI
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Refresh percentile buckets and user snapshots
+        run: |
+          response=$(curl -s -w "\n%{http_code}" -X POST \
+            "${{ secrets.STATS_SNAPSHOT_ENDPOINT_URL }}" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            -H "Content-Type: application/json")
+
+          http_code=$(echo "$response" | tail -1)
+          body=$(echo "$response" | head -n -1)
+
+          echo "HTTP $http_code"
+          echo "$body"
+
+          if [ "$http_code" -ge 400 ]; then
+            echo "::error::Stats snapshot request failed with HTTP $http_code"
+            exit 1
+          fi

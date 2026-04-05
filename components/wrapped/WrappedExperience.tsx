@@ -17,6 +17,11 @@ interface WrappedExperienceProps {
   stats: WrappedStats;
   username: string;
   onClose?: () => void;
+  // Sprint 162 — The Identity: allow Your Round (weekly variant) to reuse this component
+  variant?: "week" | "year" | "alltime";
+  shareTitle?: string;
+  shareUrl?: string;
+  customShareText?: string;
 }
 
 const slideVariants = {
@@ -40,7 +45,17 @@ const springTransition = {
   damping: 35,
 };
 
-export function WrappedExperience({ stats, username, onClose }: WrappedExperienceProps) {
+export function WrappedExperience({
+  stats,
+  username,
+  onClose,
+  variant = "year",
+  shareTitle,
+  shareUrl,
+  customShareText,
+}: WrappedExperienceProps) {
+  // variant reserved for future per-slide customization; suppress unused warning
+  void variant;
   const [currentSlide, setCurrentSlide] = useState(0);
   const [direction, setDirection] = useState(0);
   const [copied, setCopied] = useState(false);
@@ -80,13 +95,15 @@ export function WrappedExperience({ stats, username, onClose }: WrappedExperienc
   }, [currentSlide]);
 
   async function handleShare() {
-    const shareText = getShareText(stats, username);
+    const resolvedShareText = customShareText ?? getShareText(stats, username);
+    const resolvedTitle = shareTitle ?? "My HopTrack Wrapped";
+    const resolvedUrl = shareUrl ?? "https://hoptrack.beer/wrapped";
     if (navigator.share) {
       try {
         await navigator.share({
-          title: "My HopTrack Wrapped",
-          text: shareText,
-          url: "https://hoptrack.beer/wrapped",
+          title: resolvedTitle,
+          text: resolvedShareText,
+          url: resolvedUrl,
         });
       } catch (_) {
         // cancelled
@@ -94,7 +111,7 @@ export function WrappedExperience({ stats, username, onClose }: WrappedExperienc
       return;
     }
     try {
-      await navigator.clipboard.writeText(shareText);
+      await navigator.clipboard.writeText(resolvedShareText);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (_) {

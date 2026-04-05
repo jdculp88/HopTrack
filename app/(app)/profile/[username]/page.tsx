@@ -10,6 +10,10 @@ import { generateGradientFromString } from "@/lib/utils";
 import { PageEnterWrapper } from "@/components/ui/PageEnterWrapper";
 import { calculateDrinkerKPIs } from "@/lib/kpi";
 import { ProfileTabs } from "./ProfileTabs";
+import { FourFavorites, type PinnedBeerItem } from "@/components/profile/FourFavorites";
+import { PersonalityBadge } from "@/components/profile/PersonalityBadge";
+import { computePersonality } from "@/lib/personality";
+import { computeTemporalProfile } from "@/lib/temporal";
 
 export async function generateMetadata({ params }: { params: Promise<{ username: string }> }) {
   const { username } = await params;
@@ -188,6 +192,52 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
       .slice(0, 6);
   })();
 
+  // ── Sprint 162 (The Identity) — pinned beers, snapshot, personality, temporal ──
+  const { data: pinnedBeersRaw } = await supabase
+    .from("user_pinned_beers")
+    .select("beer_id, position, beer:beers(id, name, style, item_type, abv, avg_rating, cover_image_url, brewery:breweries(id, name))")
+    .eq("user_id", profile.id)
+    .order("position", { ascending: true }) as any;
+
+  const pinnedBeers: PinnedBeerItem[] = ((pinnedBeersRaw as any[]) ?? []).map((row) => ({
+    beer_id: row.beer_id,
+    position: row.position,
+    beer: row.beer ?? null,
+  }));
+
+  const { data: snapshotRow } = await supabase
+    .from("user_stats_snapshots")
+    .select("total_beers_percentile, unique_styles_percentile, top_style, top_style_percentile")
+    .eq("user_id", profile.id)
+    .maybeSingle() as any;
+
+  const raritySnapshot = snapshotRow
+    ? {
+        total_beers_percentile: snapshotRow.total_beers_percentile,
+        unique_styles_percentile: snapshotRow.unique_styles_percentile,
+        top_style: snapshotRow.top_style,
+        top_style_percentile: snapshotRow.top_style_percentile,
+      }
+    : null;
+
+  // Compute personality from yearBeerLogs (needs beer.style + beer.item_type)
+  const personality = computePersonality(
+    ((yearBeerLogs as any[]) ?? []).map((r: any) => ({
+      beer_id: r.beer_id,
+      rating: r.rating,
+      beer: r.beer
+        ? { id: r.beer.id, style: r.beer.style, item_type: r.beer.item_type }
+        : null,
+    })),
+  );
+
+  // Temporal profile (day-of-week + hour breakdown)
+  const temporalProfile = computeTemporalProfile(
+    ((yearBeerLogs as any[]) ?? [])
+      .filter((r: any) => r.logged_at)
+      .map((r: any) => ({ logged_at: r.logged_at })),
+  );
+
   // Heatmap — aggregate pours by date (with dominant style per day)
   const heatmapData = (() => {
     if (!yearBeerLogs || yearBeerLogs.length === 0) return [];
@@ -264,6 +314,18 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
             </p>
           )}
 
+          {/* Sprint 162 (The Identity) — Personality + Four Favorites hero row */}
+          <PersonalityBadge
+            personality={personality}
+            userId={profile.id}
+            isOwnProfile={isOwnProfile}
+          />
+          <FourFavorites
+            userId={profile.id}
+            isOwnProfile={isOwnProfile}
+            initialPins={pinnedBeers}
+          />
+
           {/* Tabs */}
           <ProfileTabs
             activityData={{
@@ -275,6 +337,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
             }}
             statsData={{
               username,
+              userId: profile.id,
               isOwnProfile,
               profileStats: {
                 total_checkins: profile.total_checkins ?? 0,
@@ -289,6 +352,8 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
               drinkerKPIs,
               styleDNA,
               heatmapData,
+              raritySnapshot,
+              temporalProfile,
             }}
             listsData={{
               isOwnProfile,

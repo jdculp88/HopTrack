@@ -7,6 +7,7 @@ import { UserAvatar } from "@/components/ui/UserAvatar";
 import { ReportButton } from "@/components/ui/ReportButton";
 import { formatRelativeTime } from "@/lib/utils";
 import { RatingDisclosure } from "@/components/ui/RatingDisclosure";
+import { StarRating } from "@/components/ui/StarRating";
 
 interface BreweryReviewProps {
   breweryId: string;
@@ -38,7 +39,6 @@ export function BreweryReview({ breweryId, currentUserId, isBreweryAdmin, isAuth
   const [avgRating, setAvgRating] = useState<number | null>(null);
   const [totalReviews, setTotalReviews] = useState(0);
   const [rating, setRating] = useState(0);
-  const [hoverRating, setHoverRating] = useState(0);
   const [comment, setComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [showForm, setShowForm] = useState(false);
@@ -117,8 +117,6 @@ export function BreweryReview({ breweryId, currentUserId, isBreweryAdmin, isAuth
     }
   }
 
-  const displayRating = hoverRating || rating;
-
   return (
     <div>
       {/* Header */}
@@ -176,28 +174,12 @@ export function BreweryReview({ breweryId, currentUserId, isBreweryAdmin, isAuth
               className="rounded-2xl border p-4 mb-4 space-y-3"
               style={{ background: "var(--surface)", borderColor: "var(--border)" }}
             >
-              {/* Star picker */}
-              <div className="flex items-center gap-1">
-                {[1, 2, 3, 4, 5].map((n) => (
-                  <button
-                    key={n}
-                    onClick={() => setRating(n)}
-                    onMouseEnter={() => setHoverRating(n)}
-                    onMouseLeave={() => setHoverRating(0)}
-                    className="p-1 transition-transform hover:scale-110"
-                  >
-                    <Star
-                      size={28}
-                      style={{
-                        color: n <= displayRating ? "var(--accent-gold)" : "var(--border)",
-                        fill: n <= displayRating ? "var(--accent-gold)" : "transparent",
-                      }}
-                    />
-                  </button>
-                ))}
-                {displayRating > 0 && (
-                  <span className="ml-2 text-sm font-mono" style={{ color: "var(--text-muted)" }}>
-                    {displayRating}/5
+              {/* Star picker (half-star support — Sprint 162) */}
+              <div className="flex items-center gap-2">
+                <StarRating value={rating} onChange={setRating} size="lg" />
+                {rating > 0 && (
+                  <span className="text-sm font-mono" style={{ color: "var(--text-muted)" }}>
+                    {rating.toFixed(1)}/5
                   </span>
                 )}
               </div>
@@ -294,18 +276,12 @@ export function BreweryReview({ breweryId, currentUserId, isBreweryAdmin, isAuth
                     <span className="font-sans font-semibold text-sm" style={{ color: "var(--text-primary)" }}>
                       {review.profile.display_name ?? review.profile.username}
                     </span>
-                    <div className="flex items-center gap-0.5">
-                      {[1, 2, 3, 4, 5].map((n) => (
-                        <Star
-                          key={n}
-                          size={11}
-                          style={{
-                            color: n <= review.rating ? "var(--accent-gold)" : "var(--border)",
-                            fill: n <= review.rating ? "var(--accent-gold)" : "transparent",
-                          }}
-                        />
-                      ))}
-                    </div>
+                    <StarRating value={review.rating} readonly size="sm" />
+                    {review.rating % 1 !== 0 && (
+                      <span className="text-[10px] font-mono" style={{ color: "var(--accent-gold)" }}>
+                        {review.rating.toFixed(1)}
+                      </span>
+                    )}
                     <span className="text-xs" style={{ color: "var(--text-muted)" }}>
                       {formatRelativeTime(review.created_at)}
                     </span>

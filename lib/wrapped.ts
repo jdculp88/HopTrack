@@ -98,28 +98,17 @@ export function getAdventurerScore(uniqueStyles: number): number {
 }
 
 /**
- * Fetch and aggregate Wrapped stats from Supabase.
- * Used by both the API route and the server component page.
+ * Fetch and aggregate Wrapped-shape stats from Supabase for an arbitrary date range.
+ * Sprint 162 — extracted so Your Round (7-day window) can reuse the same aggregation.
  */
-export async function fetchWrappedStats(
+export async function fetchWrappedStatsForRange(
   supabase: any,
   userId: string,
-  year?: number | null,
+  range: { start: string; end: string; label: string },
 ): Promise<WrappedStats> {
-  const now = new Date();
-  let periodStart: string;
-  let periodEnd: string;
-  let periodLabel: string;
-
-  if (year) {
-    periodStart = `${year}-01-01T00:00:00.000Z`;
-    periodEnd = `${year}-12-31T23:59:59.999Z`;
-    periodLabel = `${year}`;
-  } else {
-    periodStart = "2020-01-01T00:00:00.000Z";
-    periodEnd = now.toISOString();
-    periodLabel = "All Time";
-  }
+  const periodStart = range.start;
+  const periodEnd = range.end;
+  const periodLabel = range.label;
 
   const [
     { data: sessions },
@@ -245,6 +234,30 @@ export async function fetchWrappedStats(
     brewerySessions,
     legendarySession,
   };
+}
+
+/**
+ * Fetch and aggregate Wrapped stats from Supabase.
+ * Used by both the API route and the server component page.
+ */
+export async function fetchWrappedStats(
+  supabase: any,
+  userId: string,
+  year?: number | null,
+): Promise<WrappedStats> {
+  const now = new Date();
+  if (year) {
+    return fetchWrappedStatsForRange(supabase, userId, {
+      start: `${year}-01-01T00:00:00.000Z`,
+      end: `${year}-12-31T23:59:59.999Z`,
+      label: `${year}`,
+    });
+  }
+  return fetchWrappedStatsForRange(supabase, userId, {
+    start: "2020-01-01T00:00:00.000Z",
+    end: now.toISOString(),
+    label: "All Time",
+  });
 }
 
 export function getShareText(stats: WrappedStats, _username: string): string {

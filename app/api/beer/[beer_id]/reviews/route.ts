@@ -49,9 +49,11 @@ export async function POST(
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { rating, comment } = await req.json();
-  if (!rating || rating < 1 || rating > 5) {
-    return NextResponse.json({ error: "Rating must be between 1 and 5" }, { status: 400 });
+  const { rating: rawRating, comment } = await req.json();
+  // Half-star support (Sprint 162): snap to nearest 0.5, require 0.5-5.0.
+  const rating = typeof rawRating === "number" ? Math.round(rawRating * 2) / 2 : 0;
+  if (!rating || rating < 0.5 || rating > 5.0) {
+    return NextResponse.json({ error: "Rating must be between 0.5 and 5.0" }, { status: 400 });
   }
 
   const { data, error } = await supabase

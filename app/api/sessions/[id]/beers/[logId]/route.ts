@@ -12,10 +12,15 @@ export async function PATCH(
 
   const { id: sessionId, logId } = await params
   const body = await request.json()
-  const { rating, comment } = body
+  const { rating: rawRating, comment } = body
 
-  if (rating != null && (rating < 1 || rating > 5)) {
-    return NextResponse.json({ error: 'Rating must be between 1 and 5' }, { status: 400 })
+  // Half-star support (Sprint 162): snap to nearest 0.5, require 0.5-5.0 when provided.
+  let rating: number | null | undefined = rawRating
+  if (typeof rawRating === "number") {
+    rating = Math.round(rawRating * 2) / 2
+    if (rating < 0.5 || rating > 5.0) {
+      return NextResponse.json({ error: 'Rating must be between 0.5 and 5.0' }, { status: 400 })
+    }
   }
 
   // Verify ownership

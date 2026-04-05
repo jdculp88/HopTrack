@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
-import { Star, X, Edit3 } from 'lucide-react'
+import { X, Edit3 } from 'lucide-react'
 import { BeerLog } from '@/types/database'
 import { RatingDisclosure } from '@/components/ui/RatingDisclosure'
+import { StarRating } from '@/components/ui/StarRating'
 
 interface QuickRatingSheetProps {
   beerLog: BeerLog
@@ -26,7 +27,6 @@ export default function QuickRatingSheet({
   previousComment,
 }: QuickRatingSheetProps) {
   const [rating, setRating] = useState(0)
-  const [hovered, setHovered] = useState(0)
   const [comment, setComment] = useState('')
   const [saving, setSaving] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
@@ -45,17 +45,26 @@ export default function QuickRatingSheet({
         setComment(newComment)
         setIsEditing(newIsEditing)
         setSaving(false)
-        setHovered(0)
       })
     }
   }, [isOpen, previousRating, previousComment, hasPreviousRating])
 
-  const ratingLabels: Record<number, string> = {
-    1: 'Disappointing',
-    2: 'Not great',
-    3: 'Pretty good',
-    4: 'Really good!',
-    5: 'Outstanding!',
+  // Half-star rating labels (Sprint 162) — snap to nearest 0.5
+  const ratingLabels: Record<string, string> = {
+    '0.5': 'Drain pour',
+    '1': 'Disappointing',
+    '1.5': 'Rough',
+    '2': 'Not great',
+    '2.5': 'Mediocre',
+    '3': 'Pretty good',
+    '3.5': 'Good',
+    '4': 'Really good!',
+    '4.5': 'Excellent',
+    '5': 'Outstanding!',
+  }
+  function getRatingLabel(r: number): string {
+    const key = (Math.round(r * 2) / 2).toString()
+    return ratingLabels[key] ?? ''
   }
 
   async function handleSave() {
@@ -107,22 +116,13 @@ export default function QuickRatingSheet({
                   </button>
                 </div>
 
-                {/* Previous rating display */}
-                <div className="flex items-center justify-center gap-2 mb-3">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <Star
-                      key={star}
-                      size={32}
-                      style={{
-                        color: star <= (previousRating ?? 0) ? 'var(--accent-gold)' : 'var(--border)',
-                        fill: star <= (previousRating ?? 0) ? 'var(--accent-gold)' : 'transparent',
-                      }}
-                    />
-                  ))}
+                {/* Previous rating display (half-star support) */}
+                <div className="flex items-center justify-center mb-3">
+                  <StarRating value={previousRating ?? 0} readonly size="lg" />
                 </div>
 
                 <p className="text-center text-sm mb-2" style={{ color: 'var(--text-secondary)' }}>
-                  {ratingLabels[previousRating ?? 0]}
+                  {getRatingLabel(previousRating ?? 0)}
                 </p>
 
                 {previousComment && (
@@ -206,48 +206,25 @@ export default function QuickRatingSheet({
               {/* FTC disclosure */}
               <RatingDisclosure />
 
-              {/* Stars */}
-              <div className="flex items-center justify-center gap-3 mb-3 mt-3">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <button
-                    key={star}
-                    onClick={() => setRating(star)}
-                    onMouseEnter={() => setHovered(star)}
-                    onMouseLeave={() => setHovered(0)}
-                    className="p-1"
-                  >
-                    <motion.div
-                      whileTap={{ scale: 1.3 }}
-                      transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-                    >
-                      <Star
-                        size={36}
-                        className="transition-colors"
-                        style={{
-                          color: star <= (hovered || rating) ? 'var(--accent-gold)' : 'var(--border)',
-                          fill: star <= (hovered || rating) ? 'var(--accent-gold)' : 'transparent',
-                        }}
-                      />
-                    </motion.div>
-                  </button>
-                ))}
+              {/* Stars (half-star support — Sprint 162) */}
+              <div className="flex items-center justify-center mb-3 mt-3">
+                <StarRating value={rating} onChange={setRating} size="xl" />
               </div>
 
               {/* Rating label */}
               <AnimatePresence mode="wait">
-                {(rating > 0 || hovered > 0) && (
+                {rating > 0 ? (
                   <motion.p
-                    key={hovered || rating}
+                    key={rating}
                     initial={{ opacity: 0, y: 4 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -4 }}
                     className="text-center text-sm mb-5"
                     style={{ color: 'var(--text-secondary)' }}
                   >
-                    {ratingLabels[hovered || rating]}
+                    {getRatingLabel(rating)}
                   </motion.p>
-                )}
-                {rating === 0 && hovered === 0 && (
+                ) : (
                   <div key="empty" className="mb-5 h-5" />
                 )}
               </AnimatePresence>

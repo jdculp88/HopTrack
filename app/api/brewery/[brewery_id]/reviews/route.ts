@@ -53,9 +53,11 @@ export async function POST(
   const user = await requireAuth(supabase);
   if (!user) return apiUnauthorized();
 
-  const { rating, comment } = await req.json();
-  if (!rating || rating < 1 || rating > 5) {
-    return apiBadRequest("Rating must be between 1 and 5");
+  const { rating: rawRating, comment } = await req.json();
+  // Half-star support (Sprint 162): snap to nearest 0.5, require 0.5-5.0.
+  const rating = typeof rawRating === "number" ? Math.round(rawRating * 2) / 2 : 0;
+  if (!rating || rating < 0.5 || rating > 5.0) {
+    return apiBadRequest("Rating must be between 0.5 and 5.0");
   }
 
   // Upsert — one review per user per brewery

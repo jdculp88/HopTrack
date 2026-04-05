@@ -19,7 +19,20 @@ export async function PATCH(
 
   // Only allow updating these fields
   const allowedUpdates: any = {}
-  if (body.rating !== undefined) allowedUpdates.rating = body.rating
+  if (body.rating !== undefined) {
+    // Half-star support (Sprint 162): snap to 0.5, allow null to clear, require 0.5-5.0 otherwise.
+    if (body.rating === null) {
+      allowedUpdates.rating = null
+    } else if (typeof body.rating === "number") {
+      const snapped = Math.round(body.rating * 2) / 2
+      if (snapped < 0.5 || snapped > 5.0) {
+        return NextResponse.json({ error: 'Rating must be between 0.5 and 5.0' }, { status: 400 })
+      }
+      allowedUpdates.rating = snapped
+    } else {
+      return NextResponse.json({ error: 'Rating must be a number or null' }, { status: 400 })
+    }
+  }
   if (body.comment !== undefined) allowedUpdates.comment = body.comment
   if (body.flavor_tags !== undefined) allowedUpdates.flavor_tags = body.flavor_tags
   if (body.serving_style !== undefined) allowedUpdates.serving_style = body.serving_style
