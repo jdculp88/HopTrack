@@ -318,8 +318,9 @@ export function weeklyDigestEmail(params: {
     loyaltyRedemptions: number;
     newFollowers: number;
   };
+  recommendations?: Array<{ title: string; description: string; ctaText: string; ctaUrl: string }>;
 }) {
-  const { breweryName, ownerName, breweryId, stats } = params;
+  const { breweryName, ownerName, breweryId, stats, recommendations } = params;
   const firstName = ownerName.split(" ")[0] || "there";
   const trendIcon = stats.visitsTrend >= 0 ? "&#9650;" : "&#9660;";
   const trendColor = stats.visitsTrend >= 0 ? "#4CAF50" : "#EF5350";
@@ -360,6 +361,25 @@ export function weeklyDigestEmail(params: {
 
     ${stats.topBeer ? `<p style="margin:0 0 8px;font-size:14px;color:${BRAND.text};">Top beer this week: <strong style="color:${BRAND.gold};">${stats.topBeer}</strong></p>` : ""}
     ${stats.newFollowers > 0 ? `<p style="margin:0 0 16px;font-size:14px;color:${BRAND.text};">+${stats.newFollowers} new follower${stats.newFollowers > 1 ? "s" : ""}</p>` : ""}
+
+    ${recommendations && recommendations.length > 0 ? `
+    <!-- Recommended Actions (Sprint 159) -->
+    <h2 style="margin:24px 0 12px;font-family:'Playfair Display',Georgia,serif;font-size:18px;color:${BRAND.gold};">
+      Recommended Actions
+    </h2>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;">
+      ${recommendations.map((rec, i) => `
+      <tr>
+        <td style="padding:12px 16px;background:#252320;border-radius:12px;${i < recommendations.length - 1 ? "margin-bottom:8px;" : ""}">
+          <p style="margin:0 0 4px;font-size:14px;font-weight:700;color:${BRAND.text};">${rec.title}</p>
+          <p style="margin:0 0 8px;font-size:13px;color:${BRAND.muted};">${rec.description}</p>
+          <a href="https://app.hoptrack.beer${rec.ctaUrl}" style="font-size:12px;font-weight:600;color:${BRAND.gold};text-decoration:none;">${rec.ctaText} &rarr;</a>
+        </td>
+      </tr>
+      ${i < recommendations.length - 1 ? "<tr><td style=\"height:8px;\"></td></tr>" : ""}
+      `).join("")}
+    </table>
+    ` : ""}
 
     ${button("View Full Analytics", `https://app.hoptrack.beer/brewery-admin/${breweryId}/analytics`)}
   `,

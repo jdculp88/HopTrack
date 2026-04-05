@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { AnalyticsClient } from "./AnalyticsClient";
+import { calculatePeerBenchmarks } from "@/lib/brewery-benchmarks";
 
 export const metadata = { title: "Analytics" };
 
@@ -81,6 +82,14 @@ export default async function AnalyticsPage({ params }: { params: Promise<{ brew
     profileLookup[p.id] = { display_name: p.display_name, username: p.username };
   });
 
+  // Sprint 159: Peer Benchmarking
+  const peerBenchmarks = await calculatePeerBenchmarks(brewery_id);
+
+  // Get subscription tier for feature gating
+  const { data: breweryData } = await supabase
+    .from("breweries").select("subscription_tier").eq("id", brewery_id).single() as any;
+  const subscriptionTier = breweryData?.subscription_tier ?? "free";
+
   return (
     <AnalyticsClient
       breweryId={brewery_id}
@@ -92,6 +101,8 @@ export default async function AnalyticsPage({ params }: { params: Promise<{ brew
       followers={(followers as any[]) ?? []}
       profiles={profileLookup}
       userSessionCounts={userSessionCounts}
+      peerBenchmarks={peerBenchmarks}
+      subscriptionTier={subscriptionTier}
     />
   );
 }

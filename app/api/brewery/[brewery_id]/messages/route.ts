@@ -21,10 +21,11 @@ export async function POST(
   const account = await requireBreweryAdmin(supabase, user.id, brewery_id);
   if (!account) return apiForbidden();
 
-  const { tier, subject, body: messageBody } = await request.json() as {
+  const { tier, subject, body: messageBody, userId: targetUserId } = await request.json() as {
     tier: Tier;
     subject: string;
     body: string;
+    userId?: string; // Sprint 159: targeted single-user win-back messaging
   };
 
   if (!subject?.trim() || !messageBody?.trim()) {
@@ -52,33 +53,42 @@ export async function POST(
     .from("breweries").select("name").eq("id", brewery_id).single() as any;
   const breweryName = brewery?.name ?? "A brewery";
 
-  // Fetch all completed sessions for this brewery
-  const { data: sessions } = await supabase
-    .from("sessions")
-    .select("user_id")
-    .eq("brewery_id", brewery_id)
-    .eq("is_active", false) as any;
-
-  // Aggregate visit counts per user
-  const visitCounts = new Map<string, number>();
-  for (const s of (sessions ?? []) as any[]) {
-    if (!s.user_id) continue;
-    visitCounts.set(s.user_id, (visitCounts.get(s.user_id) ?? 0) + 1);
-  }
-
-  // Filter by segment (using unified CRM logic)
-  const targetUsers: string[] = [];
-  for (const [userId, visits] of visitCounts) {
-    // Don't message yourself
-    if (userId === user.id) continue;
-
-    if (tier === "all" || computeSegment(visits) === tier) {
-      targetUsers.push(userId);
+  // Sprint 159: targeted single-user messaging (win-back)
+  let targetUsers: string[];
+  if (targetUserId) {
+    if (targetUserId === user.id) {
+      return apiBadRequest("Cannot send message to yourself");
     }
-  }
+    targetUsers = [targetUserId];
+  } else {
+    // Fetch all completed sessions for this brewery
+    const { data: sessions } = await supabase
+      .from("sessions")
+      .select("user_id")
+      .eq("brewery_id", brewery_id)
+      .eq("is_active", false) as any;
 
-  if (targetUsers.length === 0) {
-    return apiBadRequest("No customers in this segment");
+    // Aggregate visit counts per user
+    const visitCounts = new Map<string, number>();
+    for (const s of (sessions ?? []) as any[]) {
+      if (!s.user_id) continue;
+      visitCounts.set(s.user_id, (visitCounts.get(s.user_id) ?? 0) + 1);
+    }
+
+    // Filter by segment (using unified CRM logic)
+    targetUsers = [];
+    for (const [userId, visits] of visitCounts) {
+      // Don't message yourself
+      if (userId === user.id) continue;
+
+      if (tier === "all" || computeSegment(visits) === tier) {
+        targetUsers.push(userId);
+      }
+    }
+
+    if (targetUsers.length === 0) {
+      return apiBadRequest("No customers in this segment");
+    }
   }
 
   // Create notifications in batch

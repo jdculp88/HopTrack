@@ -5,6 +5,7 @@ import { weeklyDigestEmail } from "@/lib/email-templates";
 import { calculateDigestStats } from "@/app/api/brewery/[brewery_id]/digest/route";
 import { onBrandWeeklyDigest } from "@/lib/email-triggers";
 import { rateLimitResponse } from "@/lib/rate-limit";
+import { generateDigestRecommendations } from "@/lib/digest-recommendations";
 
 // POST /api/cron/weekly-digest — send weekly digest emails to all eligible breweries
 // Secured by CRON_SECRET header. Called by GitHub Actions on a weekly schedule.
@@ -58,7 +59,7 @@ export async function POST(req: Request) {
   // Filter to verified (claimed) breweries only
   const { data: breweries } = await supabase
     .from("breweries")
-    .select("id, name")
+    .select("id, name, subscription_tier")
     .eq("verified", true)
     .in("id", activeBreweryIds) as any;
 
@@ -168,12 +169,61 @@ export async function POST(req: Request) {
       // Calculate stats
       const { stats } = await calculateDigestStats(brewery.id);
 
+      // Sprint 159: Generate recommendations for paid tiers
+      const tier = brewery.subscription_tier ?? "free";
+      const isPaid = tier === "tap" || tier === "cask" || tier === "barrel";
+      let recommendations;
+      if (isPaid) {
+        try {
+          // Quick count of VIPs who haven't visited in 14+ days
+          const twoWeeksAgo = new Date(Date.now() - 14 * 86400000).toISOString();
+          const { data: allBrewerySessions } = await supabase
+            .from("sessions")
+            .select("user_id, started_at")
+            .eq("brewery_id", brewery.id)
+            .eq("is_active", false)
+            .limit(50000) as any;
+
+          let vipsNotVisiting = 0;
+          if (allBrewerySessions) {
+            const userVisits = new Map<string, { count: number; last: string }>();
+            for (const s of allBrewerySessions as any[]) {
+              const existing = userVisits.get(s.user_id);
+              if (!existing) {
+                userVisits.set(s.user_id, { count: 1, last: s.started_at });
+              } else {
+                existing.count++;
+                if (s.started_at > existing.last) existing.last = s.started_at;
+              }
+            }
+            for (const [, data] of userVisits) {
+              if (data.count >= 10 && data.last < twoWeeksAgo) vipsNotVisiting++;
+            }
+          }
+
+          recommendations = generateDigestRecommendations({
+            breweryId: brewery.id,
+            topBeer: stats.topBeer,
+            visits: stats.visits,
+            visitsTrend: stats.visitsTrend,
+            followerGrowth: stats.newFollowers,
+            loyaltyRedemptions: stats.loyaltyRedemptions,
+            kpis: null, // Keep it lightweight — full KPI calc is expensive per-brewery in a cron loop
+            vipsNotVisiting,
+          });
+        } catch {
+          // Don't fail the digest over recommendations
+          recommendations = undefined;
+        }
+      }
+
       // Build and send email
       const template = weeklyDigestEmail({
         breweryName: brewery.name,
         ownerName: profile.display_name || "Brewmaster",
         breweryId: brewery.id,
         stats,
+        recommendations,
       });
 
       const result = await sendEmail({

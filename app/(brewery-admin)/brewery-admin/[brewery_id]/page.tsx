@@ -16,6 +16,8 @@ import { OnboardingChecklist } from "@/components/brewery-admin/OnboardingCheckl
 import { PosDashboardCard } from "@/components/brewery-admin/PosDashboardCard";
 import { PosSyncAlertBanner } from "@/components/brewery-admin/PosSyncAlertBanner";
 import { AISuggestionsCard } from "@/components/brewery-admin/AISuggestionsCard";
+import { BreweryHealthCard } from "@/components/brewery-admin/BreweryHealthCard";
+import { calculateMyBreweryHealth } from "@/lib/brewery-health";
 import { Sparkline, ActiveSessionsCounter, RecentActivityFeed } from "./DashboardClient";
 import type { ActivityItem } from "./DashboardClient";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
@@ -336,6 +338,9 @@ async function fetchCachedBreweryDashboardData(breweryId: string) {
 
   const subscriptionTier = (brewery as any)?.subscription_tier ?? "free";
 
+  // ── Brewery Health Score (Sprint 159) ────────────────────────────────────
+  const breweryHealth = await calculateMyBreweryHealth(breweryId);
+
   // ── Build activity feed ────────────────────────────────────────────────────
   const activityItems: ActivityItem[] = [];
 
@@ -409,6 +414,7 @@ async function fetchCachedBreweryDashboardData(breweryId: string) {
     subscriptionTier,
     activityFeed,
     latestAISuggestion,
+    breweryHealth,
   };
 }
 
@@ -451,7 +457,7 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
     kpis, sparklines,
     hasBeers, hasLoyalty, hasLogo,
     loyaltyVisitsThisMonth, loyaltyVisitsByWeek, subscriptionTier,
-    activityFeed, latestAISuggestion,
+    activityFeed, latestAISuggestion, breweryHealth,
   } = cached;
 
   // ── Quick actions ──────────────────────────────────────────────────────────
@@ -567,6 +573,13 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
       {(brewery as any)?.pos_connected && (
         <PosSyncAlertBanner breweryId={brewery_id} />
       )}
+
+      {/* ── Brewery Health Score (Sprint 159) ────────────────────── */}
+      <div className="mb-6">
+        <ErrorBoundary inline context="BreweryHealthCard">
+          <BreweryHealthCard health={breweryHealth} tier={subscriptionTier} breweryId={brewery_id} />
+        </ErrorBoundary>
+      </div>
 
       {/* ── KPI Cards ────────────────────────────────────────────────── */}
       <ErrorBoundary inline context="DashboardKPICards">

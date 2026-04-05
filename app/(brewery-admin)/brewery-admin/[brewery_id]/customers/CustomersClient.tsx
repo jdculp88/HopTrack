@@ -7,6 +7,8 @@ import { Search, ArrowUpDown, Users, Crown, Download, ChevronRight } from "lucid
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import { formatRelativeTime } from "@/lib/dates";
 import { computeSegment, getSegmentConfig, SEGMENTS, type CustomerSegment } from "@/lib/crm";
+import { WinBackCard } from "@/components/brewery-admin/WinBackCard";
+import type { WinBackCandidate } from "@/lib/win-back";
 
 interface CustomerRow {
   user_id: string;
@@ -33,8 +35,16 @@ function SegmentBadge({ visits }: { visits: number }) {
   );
 }
 
-export function CustomersClient({ customers }: { customers: CustomerRow[] }) {
+interface CustomersClientProps {
+  customers: CustomerRow[];
+  winBackCandidates?: WinBackCandidate[];
+  subscriptionTier?: string;
+  breweryId?: string;
+}
+
+export function CustomersClient({ customers, winBackCandidates = [], subscriptionTier = "free", breweryId }: CustomersClientProps) {
   const { brewery_id } = useParams<{ brewery_id: string }>();
+  const effectiveBreweryId = breweryId ?? brewery_id;
   const [search, setSearch] = useState("");
   const [sortKey, setSortKey] = useState<SortKey>("visits");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
@@ -122,6 +132,15 @@ export function CustomersClient({ customers }: { customers: CustomerRow[] }) {
           </a>
         )}
       </div>
+
+      {/* Win-Back Opportunities (Sprint 159) */}
+      {winBackCandidates.length > 0 && (
+        <WinBackCard
+          candidates={winBackCandidates}
+          tier={subscriptionTier}
+          breweryId={effectiveBreweryId}
+        />
+      )}
 
       {/* Segment filter pills */}
       <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">

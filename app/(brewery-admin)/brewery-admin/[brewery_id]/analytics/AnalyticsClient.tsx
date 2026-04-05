@@ -8,6 +8,8 @@ import { formatDateShort } from "@/lib/dates";
 import { calculateBreweryKPIs, formatDuration, formatTrend } from "@/lib/kpi";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { HelpIcon } from "@/components/ui/HelpIcon";
+import { PeerBenchmarkCard } from "@/components/brewery-admin/PeerBenchmarkCard";
+import type { PeerBenchmarks } from "@/lib/brewery-benchmarks";
 
 interface AnalyticsClientProps {
   breweryId: string;
@@ -19,6 +21,8 @@ interface AnalyticsClientProps {
   followers?: any[];
   profiles?: Record<string, { display_name?: string; username?: string }>;
   userSessionCounts?: Record<string, number>;
+  peerBenchmarks?: PeerBenchmarks;
+  subscriptionTier?: string;
 }
 
 type TimeRange = "7d" | "30d" | "90d" | "all";
@@ -761,7 +765,7 @@ function AnalyticsInner({ breweryId, sessions: allSessions, beerLogs: allBeerLog
   );
 }
 
-export function AnalyticsClient({ breweryId, sessions, beerLogs, breweryVisits, loyaltyCards, loyaltyRedemptions, followers, profiles, userSessionCounts }: AnalyticsClientProps) {
+export function AnalyticsClient({ breweryId, sessions, beerLogs, breweryVisits, loyaltyCards, loyaltyRedemptions, followers, profiles, userSessionCounts, peerBenchmarks, subscriptionTier = "free" }: AnalyticsClientProps) {
   return (
     <Suspense fallback={
       <div className="p-6 lg:p-8 max-w-5xl mx-auto pt-16 lg:pt-8">
@@ -782,6 +786,12 @@ export function AnalyticsClient({ breweryId, sessions, beerLogs, breweryVisits, 
         profiles={profiles}
         userSessionCounts={userSessionCounts}
       />
+      {/* Sprint 159: Peer Benchmarking */}
+      {peerBenchmarks && (
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 pb-8">
+          <PeerBenchmarkCard benchmarks={peerBenchmarks} tier={subscriptionTier} breweryId={breweryId} />
+        </div>
+      )}
     </Suspense>
   );
 }

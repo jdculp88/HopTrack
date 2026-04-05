@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { CustomersClient } from "./CustomersClient";
+import { identifyWinBackCandidates } from "@/lib/win-back";
 
 export const metadata = { title: "Customer Insights" };
 
@@ -108,5 +109,20 @@ export default async function CustomersPage({ params }: { params: Promise<{ brew
     };
   });
 
-  return <CustomersClient customers={customers} />;
+  // Win-Back Intelligence (Sprint 159)
+  const winBackCandidates = await identifyWinBackCandidates(brewery_id);
+
+  // Get subscription tier for feature gating
+  const { data: breweryData } = await supabase
+    .from("breweries").select("subscription_tier").eq("id", brewery_id).single() as any;
+  const subscriptionTier = breweryData?.subscription_tier ?? "free";
+
+  return (
+    <CustomersClient
+      customers={customers}
+      winBackCandidates={winBackCandidates}
+      subscriptionTier={subscriptionTier}
+      breweryId={brewery_id}
+    />
+  );
 }
