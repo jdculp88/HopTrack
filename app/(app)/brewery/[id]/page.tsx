@@ -20,6 +20,7 @@ import { BreweryReviewsSection } from "./BreweryReviewsSection";
 import { AuthGate } from "@/components/ui/AuthGate";
 import { StorefrontGate } from "@/components/ui/StorefrontGate";
 import { DrinkingNowStrip } from "@/components/brewery/DrinkingNowStrip";
+import { getCachedBreweryDetailMetadata, getCachedBreweryPublicData } from "@/lib/cached-data";
 
 // ─── Supabase join shapes ────────────────────────────────────────────────────
 
@@ -62,14 +63,7 @@ interface TopVisitor extends BreweryVisit {
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from("breweries")
-    .select(
-      "name, city, state, street, postal_code, country, phone, website_url, description, latitude, longitude, brewery_type",
-    )
-    .eq("id", id)
-    .single();
+  const data = await getCachedBreweryDetailMetadata(id);
   if (!data) return { title: "Brewery" };
   const title = `${data.name} · ${data.city}, ${data.state}`;
   const cityParam = [data.city, data.state].filter(Boolean).join(", ");
@@ -100,8 +94,6 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-export const revalidate = 60;
-
 export default async function BreweryPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
 
@@ -113,18 +105,10 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
   const isAuthenticated = !!user;
   const returnPath = `/brewery/${id}`;
 
-  // ── Core brewery data (public) ──
-  const { data: breweryRaw } = await supabase.from("breweries").select("*").eq("id", id).single();
+  // ── Core brewery + beers data (cached — Sprint 158) ──
+  const { brewery: breweryRaw, beers } = await getCachedBreweryPublicData(id);
   if (!breweryRaw) notFound();
   const brewery = breweryRaw as Brewery;
-
-  // ── Beers (public) ──
-  const { data: beers } = await supabase
-    .from("beers")
-    .select("*, brewery:breweries(id, name)")
-    .eq("brewery_id", id)
-    .eq("is_active", true)
-    .order("total_ratings", { ascending: false });
 
   // ── User's visit (auth only) ──
   let userVisit: BreweryVisit | null = null;

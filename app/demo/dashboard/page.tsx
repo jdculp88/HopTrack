@@ -1,3 +1,4 @@
+import { cacheLife, cacheTag } from "next/cache";
 import { createServiceClient } from "@/lib/supabase/service";
 import { DEMO_BREWERY_ID, DEMO_BREWERY_NAME } from "@/lib/constants/demo";
 import { calculateBreweryKPIs, calculateBreweryKPISparklines } from "@/lib/kpi";
@@ -6,9 +7,11 @@ import { formatRelativeTime } from "@/lib/dates";
 import type { ActivityItem } from "@/app/(brewery-admin)/brewery-admin/[brewery_id]/DashboardClient";
 import DemoDashboardClient from "./DemoDashboardClient";
 
-export const revalidate = 60;
+async function fetchDemoDashboardData() {
+  "use cache";
+  cacheLife("hop-standard");
+  cacheTag("demo");
 
-export default async function DemoDashboardPage() {
   const supabase = createServiceClient();
   const breweryId = DEMO_BREWERY_ID;
 
@@ -278,32 +281,35 @@ export default async function DemoDashboardPage() {
     };
   });
 
-  return (
-    <DemoDashboardClient
-      breweryName={(brewery as any)?.name ?? DEMO_BREWERY_NAME}
-      city={(brewery as any)?.city}
-      state={(brewery as any)?.state}
-      breweryType={(brewery as any)?.brewery_type}
-      todayVisitCount={todayVisitCount}
-      todayBeersCount={todayBeersCount}
-      todayNewFollowers={todayNewFollowers ?? 0}
-      activeSessionCount={activeSessionCount}
-      totalVisits={totalVisits}
-      totalBeersLogged={totalBeersLogged}
-      uniqueVisitors={uniqueVisitors}
-      thisWeekTotal={thisWeekTotal}
-      weekTrend={weekTrend}
-      weeklyData={weeklyData}
-      totalFollowerCount={totalFollowerCount ?? 0}
-      onTapCount={onTapCount}
-      totalBeerCount={totalBeerCount}
-      kpis={kpis}
-      sparklines={sparklines}
-      roi={roi}
-      topBeersList={topBeersList}
-      activityFeed={activityItems.slice(0, 5)}
-      recentVisits={recentVisits}
-      hasLoyalty={!!loyaltyProgram}
-    />
-  );
+  return {
+    breweryName: (brewery as any)?.name ?? DEMO_BREWERY_NAME,
+    city: (brewery as any)?.city,
+    state: (brewery as any)?.state,
+    breweryType: (brewery as any)?.brewery_type,
+    todayVisitCount,
+    todayBeersCount,
+    todayNewFollowers: todayNewFollowers ?? 0,
+    activeSessionCount,
+    totalVisits,
+    totalBeersLogged,
+    uniqueVisitors,
+    thisWeekTotal,
+    weekTrend,
+    weeklyData,
+    totalFollowerCount: totalFollowerCount ?? 0,
+    onTapCount,
+    totalBeerCount,
+    kpis,
+    sparklines,
+    roi,
+    topBeersList,
+    activityFeed: activityItems.slice(0, 5),
+    recentVisits,
+    hasLoyalty: !!loyaltyProgram,
+  };
+}
+
+export default async function DemoDashboardPage() {
+  const props = await fetchDemoDashboardData();
+  return <DemoDashboardClient {...props} />;
 }

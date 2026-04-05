@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 import type { NextRequest } from "next/server";
 
-export const runtime = "edge";
+// runtime: "edge" removed — incompatible with cacheComponents (Sprint 158)
 
 // 1200×630 — standard OG image size
 const W = 1200;

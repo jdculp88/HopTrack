@@ -1,10 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { cacheLife, cacheTag } from "next/cache";
+import { createServiceClient } from "@/lib/supabase/service";
 import { verifyBrandAccessWithScope } from "@/lib/brand-auth";
 import { buildBrandCustomerList, findRegularsAtOtherLocations } from "@/lib/brand-crm";
 import { BrandCustomersClient } from "./BrandCustomersClient";
-
-export const revalidate = 30;
 
 export async function generateMetadata({ params }: { params: Promise<{ brand_id: string }> }) {
   const { brand_id } = await params;
@@ -17,42 +17,23 @@ export async function generateMetadata({ params }: { params: Promise<{ brand_id:
   return { title: `${data?.name ?? "Brand"} Customers — HopTrack` };
 }
 
-export default async function BrandCustomersPage({ params }: { params: Promise<{ brand_id: string }> }) {
-  const { brand_id } = await params;
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+async function fetchCachedCustomersData(brandId: string, locationIds: string[]) {
+  "use cache";
+  cacheLife("hop-realtime");
+  cacheTag(`brand-${brandId}`);
 
-  const access = await verifyBrandAccessWithScope(supabase, brand_id, user.id);
-  if (!access || !["owner", "brand_manager", "regional_manager"].includes(access.role)) redirect("/brewery-admin");
+  const service = createServiceClient();
 
   // Fetch brand + locations
   const [{ data: brand }, { data: locations }] = await Promise.all([
-    supabase.from("brewery_brands").select("id, name").eq("id", brand_id).single() as any,
-    supabase.from("breweries").select("id, name").eq("brand_id", brand_id).order("name") as any,
+    service.from("brewery_brands").select("id, name").eq("id", brandId).single() as any,
+    service.from("breweries").select("id, name").eq("brand_id", brandId).order("name") as any,
   ]);
 
-  if (!brand) redirect("/brewery-admin");
-
-  let locationIds = (locations ?? []).map((l: any) => l.id);
-
-  // Apply location_scope for regional managers
-  if (access.locationScope) {
-    const scopeSet = new Set(access.locationScope);
-    locationIds = locationIds.filter((id: string) => scopeSet.has(id));
-  }
+  if (!brand) return { brand: null, locations: [], customers: [], crossLocationCount: 0, regularsAtOtherLocations: [] };
 
   if (locationIds.length === 0) {
-    return (
-      <BrandCustomersClient
-        brandId={brand_id}
-        brandName={brand.name}
-        customers={[]}
-        locations={[]}
-        crossLocationCount={0}
-        regularsAtOtherLocations={[]}
-      />
-    );
+    return { brand, locations: locations ?? [], customers: [], crossLocationCount: 0, regularsAtOtherLocations: [] };
   }
 
   const locationMap = new Map((locations ?? []).map((l: any) => [l.id, l.name])) as Map<string, string>;
@@ -62,22 +43,22 @@ export default async function BrandCustomersPage({ params }: { params: Promise<{
     { data: breweryVisits },
     { data: brandLoyaltyCards },
   ] = await Promise.all([
-    supabase
+    service
       .from("brewery_visits")
       .select("user_id, brewery_id, total_visits, unique_beers_tried, first_visit_at, last_visit_at")
       .in("brewery_id", locationIds)
       .limit(50000) as any,
-    supabase
+    service
       .from("brand_loyalty_cards")
       .select("user_id, stamps")
-      .eq("brand_id", brand_id)
+      .eq("brand_id", brandId)
       .limit(50000) as any,
   ]);
 
   // Get profiles for all unique users
   const userIds = [...new Set((breweryVisits ?? []).map((v: any) => v.user_id).filter(Boolean))];
   const { data: profiles } = userIds.length > 0
-    ? await (supabase.from("profiles").select("id, display_name, username, avatar_url").in("id", userIds).limit(50000) as any)
+    ? await (service.from("profiles").select("id, display_name, username, avatar_url").in("id", userIds).limit(50000) as any)
     : { data: [] };
 
   const customers = buildBrandCustomerList(
@@ -96,14 +77,54 @@ export default async function BrandCustomersPage({ params }: { params: Promise<{
 
   const crossLocationCount = customers.filter((c) => c.isCrossLocation).length;
 
+  return { brand, locations: locations ?? [], customers, crossLocationCount, regularsAtOtherLocations };
+}
+
+export default async function BrandCustomersPage({ params }: { params: Promise<{ brand_id: string }> }) {
+  const { brand_id } = await params;
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const access = await verifyBrandAccessWithScope(supabase, brand_id, user.id);
+  if (!access || !["owner", "brand_manager", "regional_manager"].includes(access.role)) redirect("/brewery-admin");
+
+  // Resolve location scope for regional managers
+  let scopedLocationIds: string[] = [];
+  if (access.locationScope) {
+    scopedLocationIds = access.locationScope;
+  } else {
+    // Fetch all location IDs for the brand
+    const service = createServiceClient();
+    const { data: locs } = await (service.from("breweries").select("id").eq("brand_id", brand_id).order("name") as any);
+    scopedLocationIds = (locs ?? []).map((l: any) => l.id);
+  }
+
+  const cached = await fetchCachedCustomersData(brand_id, scopedLocationIds);
+
+  if (!cached.brand) redirect("/brewery-admin");
+
+  if (scopedLocationIds.length === 0) {
+    return (
+      <BrandCustomersClient
+        brandId={brand_id}
+        brandName={cached.brand.name}
+        customers={[]}
+        locations={[]}
+        crossLocationCount={0}
+        regularsAtOtherLocations={[]}
+      />
+    );
+  }
+
   return (
     <BrandCustomersClient
       brandId={brand_id}
-      brandName={brand.name}
-      customers={customers}
-      locations={(locations ?? []).filter((l: any) => locationIds.includes(l.id)).map((l: any) => ({ id: l.id, name: l.name }))}
-      crossLocationCount={crossLocationCount}
-      regularsAtOtherLocations={regularsAtOtherLocations}
+      brandName={cached.brand.name}
+      customers={cached.customers}
+      locations={cached.locations.filter((l: any) => scopedLocationIds.includes(l.id)).map((l: any) => ({ id: l.id, name: l.name }))}
+      crossLocationCount={cached.crossLocationCount}
+      regularsAtOtherLocations={cached.regularsAtOtherLocations}
     />
   );
 }

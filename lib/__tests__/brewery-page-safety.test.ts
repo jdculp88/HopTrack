@@ -13,15 +13,16 @@ import { join } from 'path'
  */
 
 const BREWERY_PAGE_PATH = join(process.cwd(), 'app/(app)/brewery/[id]/page.tsx')
+const CACHED_DATA_PATH = join(process.cwd(), 'lib/cached-data.ts')
 
 describe('Brewery Detail Page — Data Safety', () => {
   const source = readFileSync(BREWERY_PAGE_PATH, 'utf-8')
 
   it('beer query uses narrow brewery select (not wildcard)', () => {
-    // The beers query should NOT use brewery:breweries(*)
-    // It should use specific fields like brewery:breweries(id, name)
+    // Sprint 158: beers query moved to lib/cached-data.ts (getCachedBreweryPublicData)
+    const cachedSource = readFileSync(CACHED_DATA_PATH, 'utf-8')
     const beerQueryPattern = /\.from\("beers"\)[\s\S]{0,100}\.select\(([^)]+)\)/
-    const match = source.match(beerQueryPattern)
+    const match = cachedSource.match(beerQueryPattern)
     expect(match).not.toBeNull()
 
     const selectArg = match![1]

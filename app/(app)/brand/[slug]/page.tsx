@@ -1,21 +1,14 @@
-import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Image from "next/image";
 import { MapPin, Globe, Building2 } from "lucide-react";
 import { BrandLocationsClient } from "./BrandLocationsClient";
 import { BrandLoyaltyStampCard } from "@/components/loyalty/BrandLoyaltyStampCard";
-
-export const revalidate = 60;
+import { getCachedBrandPublicData, getCachedBrandMetadata } from "@/lib/cached-data";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const supabase = await createClient();
-  const { data: brand } = await (supabase
-    .from("brewery_brands")
-    .select("name, description")
-    .eq("slug", slug)
-    .single() as any);
+  const brand = await getCachedBrandMetadata(slug);
 
   if (!brand) return { title: "Brand Not Found | HopTrack" };
 
@@ -31,34 +24,11 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function BrandPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const supabase = await createClient();
-
-  // Fetch brand
-  const { data: brand } = await (supabase
-    .from("brewery_brands")
-    .select("*")
-    .eq("slug", slug)
-    .single() as any);
+  const { brand, locations, hasBrandLoyalty } = await getCachedBrandPublicData(slug);
 
   if (!brand) notFound();
 
-  // Fetch locations with basic stats
-  const { data: locations } = await (supabase
-    .from("breweries")
-    .select("id, name, city, state, logo_url, cover_image_url, latitude, longitude, description")
-    .eq("brand_id", brand.id)
-    .order("name") as any);
-
-  const locationCount = locations?.length ?? 0;
-
-  // Check for active brand loyalty program
-  const { data: brandLoyaltyPrograms } = await (supabase
-    .from("brand_loyalty_programs")
-    .select("id")
-    .eq("brand_id", brand.id)
-    .eq("is_active", true)
-    .limit(1) as any);
-  const hasBrandLoyalty = (brandLoyaltyPrograms?.length ?? 0) > 0;
+  const locationCount = locations.length;
 
   return (
     <div className="min-h-screen pb-24" style={{ background: "var(--bg)" }}>

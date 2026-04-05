@@ -4,8 +4,7 @@ import { createServiceClient } from "@/lib/supabase/service";
 import { getStripe } from "@/lib/stripe";
 import { propagateBrandTier, revertBrandTier } from "@/lib/brand-billing";
 
-// Required for Stripe webhook signature verification
-export const dynamic = "force-dynamic";
+// force-dynamic removed — all routes are dynamic by default with cacheComponents (Sprint 158)
 
 export async function POST(req: NextRequest) {
   const body = await req.text();

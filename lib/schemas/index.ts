@@ -66,3 +66,9 @@ export function parseSearchParams<T>(
 
   return { data: result.data, error: null };
 }
+
+// ─── Re-exports ──────────────────────────────────────────────────────────────
+
+export { beerSearchSchema, type BeerSearch } from "./beers";
+export { brewerySearchSchema, type BrewerySearch } from "./breweries";
+export { searchQuerySchema, type SearchQuery } from "./search";

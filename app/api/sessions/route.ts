@@ -6,6 +6,7 @@ import { rateLimitResponse } from '@/lib/rate-limit'
 import { apiUnauthorized, apiServerError } from '@/lib/api-response'
 import { parseRequestBody } from '@/lib/schemas'
 import { sessionCreateSchema } from '@/lib/schemas/sessions'
+import { invalidateBrewery, invalidateCommandCenter } from '@/lib/cache-invalidation'
 
 // POST /api/sessions — start a new session (check-in at brewery or home)
 export async function POST(request: NextRequest) {
@@ -64,6 +65,10 @@ export async function POST(request: NextRequest) {
   if (share_to_feed) {
     notifyFriendsSessionStarted(supabase, user.id, session.id, brewery_id ?? null).catch(() => {})
   }
+
+  // Invalidate cached data for this brewery (Sprint 158)
+  if (brewery_id) invalidateBrewery(brewery_id);
+  invalidateCommandCenter();
 
   return NextResponse.json({ session }, { status: 201 })
 }

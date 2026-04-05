@@ -5,8 +5,7 @@ import Link from "next/link";
 import { Building2, ArrowLeft, List, Settings } from "lucide-react";
 import { BrandCatalogClient } from "./BrandCatalogClient";
 import { verifyBrandAccess } from "@/lib/brand-auth";
-
-export const revalidate = 30;
+import { getCachedBrandRecord } from "@/lib/cached-data";
 
 export async function generateMetadata({ params }: { params: Promise<{ brand_id: string }> }) {
   const { brand_id } = await params;
@@ -29,11 +28,8 @@ export default async function BrandCatalogPage({ params }: { params: Promise<{ b
   const brandRole = await verifyBrandAccess(supabase, brand_id, user.id);
   if (!brandRole) redirect("/brewery-admin");
 
-  const { data: brand } = await (supabase
-    .from("brewery_brands")
-    .select("*")
-    .eq("id", brand_id)
-    .single() as any);
+  // Fetch brand (cached — auth verified above)
+  const brand = await getCachedBrandRecord(brand_id);
 
   if (!brand) notFound();
 

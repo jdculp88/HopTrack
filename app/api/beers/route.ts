@@ -1,17 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { rateLimitResponse } from "@/lib/rate-limit";
+import { parseSearchParams } from "@/lib/schemas";
+import { beerSearchSchema } from "@/lib/schemas/beers";
 
 export async function GET(request: Request) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { searchParams } = new URL(request.url);
-  const breweryId = searchParams.get("brewery_id");
-  const q = searchParams.get("q");
-  const style = searchParams.get("style");
-  const limit = parseInt(searchParams.get("limit") ?? "50");
+  const parsed = parseSearchParams(request, beerSearchSchema);
+  if (parsed.error) return parsed.error;
+
+  const { q, brewery_id, style, limit } = parsed.data;
 
   let query = supabase
     .from("beers")
@@ -19,7 +20,7 @@ export async function GET(request: Request) {
     .eq("is_active", true)
     .limit(limit);
 
-  if (breweryId) query = query.eq("brewery_id", breweryId);
+  if (brewery_id) query = query.eq("brewery_id", brewery_id);
   if (q) query = query.ilike("name", `%${q}%`);
   if (style) query = query.eq("style", style);
 

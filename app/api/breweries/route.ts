@@ -6,20 +6,20 @@ import {
   mapOpenBreweryToDb,
 } from "@/lib/openbrewerydb";
 import { rateLimitResponse } from "@/lib/rate-limit";
+import { parseSearchParams } from "@/lib/schemas";
+import { brewerySearchSchema } from "@/lib/schemas/breweries";
 
 export async function GET(request: Request) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { searchParams } = new URL(request.url);
+  const parsed = parseSearchParams(request, brewerySearchSchema);
+  if (parsed.error) return parsed.error;
 
-  const q = searchParams.get("q");
-  const lat = searchParams.get("lat");
-  const lng = searchParams.get("lng");
-  const limit = parseInt(searchParams.get("limit") ?? "10");
+  const { q, lat, lng, limit } = parsed.data;
 
-  if (lat && lng) {
+  if (lat !== undefined && lng !== undefined) {
     // Nearby breweries: first check DB, then Open Brewery DB
     const { data: dbBreweries } = await supabase
       .from("breweries")
@@ -28,8 +28,8 @@ export async function GET(request: Request) {
       .limit(500);
 
     // Simple distance filter (rough)
-    const latN = parseFloat(lat);
-    const lngN = parseFloat(lng);
+    const latN = lat;
+    const lngN = lng;
     const nearby = (dbBreweries ?? []).filter((b) => {
       if (!b.latitude || !b.longitude) return false;
       const dLat = Math.abs(b.latitude - latN);

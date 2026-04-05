@@ -4,6 +4,8 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { rateLimitResponse } from "@/lib/rate-limit";
+import { parseSearchParams } from "@/lib/schemas";
+import { searchQuerySchema } from "@/lib/schemas/search";
 
 export async function GET(req: Request) {
   const rl = rateLimitResponse(req, "search-typeahead", { limit: 60, windowMs: 60_000 });
@@ -15,11 +17,12 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const url = new URL(req.url);
-  const q = url.searchParams.get("q")?.trim() ?? "";
-  const limit = Math.min(20, Math.max(1, parseInt(url.searchParams.get("limit") ?? "8")));
+  const parsed = parseSearchParams(req, searchQuerySchema);
+  if (parsed.error) return parsed.error;
 
-  if (q.length < 2) {
+  const { q, limit } = parsed.data;
+
+  if (q.trim().length < 2) {
     return NextResponse.json(
       { error: "Query must be at least 2 characters" },
       { status: 400 }

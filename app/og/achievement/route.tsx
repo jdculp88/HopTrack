@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 
-export const runtime = "edge";
+// runtime: "edge" removed — incompatible with cacheComponents (Sprint 158)
 
 const W = 1200;
 const H = 630;

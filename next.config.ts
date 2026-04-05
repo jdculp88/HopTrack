@@ -11,6 +11,14 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   // Explicitly disable source maps in production client bundles (Sprint 137 — The Shield)
   productionBrowserSourceMaps: false,
+  // Sprint 158 — "use cache" directive enabled, replaces ISR `export const revalidate`
+  cacheComponents: true,
+  // Custom cache profiles for HopTrack page types (Sprint 158)
+  cacheLife: {
+    "hop-realtime": { stale: 15, revalidate: 30, expire: 60 },
+    "hop-standard": { stale: 30, revalidate: 60, expire: 300 },
+    "hop-static": { stale: 120, revalidate: 300, expire: 900 },
+  },
   experimental: {
     // Brief client-side Router Cache — keeps layout RSC payloads for 30s so
     // tab switches don't re-fetch auth + profile every click. Mutations call

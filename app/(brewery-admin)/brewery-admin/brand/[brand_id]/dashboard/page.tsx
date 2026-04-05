@@ -8,54 +8,39 @@ import { formatRelativeTime } from "@/lib/dates";
 import { verifyBrandAccessWithScope } from "@/lib/brand-auth";
 import { calculateBreweryKPIs, type BreweryKPIs } from "@/lib/kpi";
 import { BrandOnboardingWizard } from "@/components/brewery-admin/brand/onboarding/BrandOnboardingWizard";
+import { cacheLife, cacheTag } from "next/cache";
+import { createServiceClient } from "@/lib/supabase/service";
 
 
-export const revalidate = 30;
+async function fetchCachedBrandDashboardData(brandId: string) {
+  "use cache";
+  cacheLife("hop-realtime");
+  cacheTag(`brand-${brandId}`);
 
-export async function generateMetadata({ params }: { params: Promise<{ brand_id: string }> }) {
-  const { brand_id } = await params;
-  const supabase = await createClient();
-  const { data } = await (supabase
-    .from("brewery_brands")
-    .select("name")
-    .eq("id", brand_id)
-    .single() as any);
-  return { title: `${data?.name ?? "Brand"} Dashboard — HopTrack` };
-}
-
-export default async function BrandDashboardPage({ params }: { params: Promise<{ brand_id: string }> }) {
-  const { brand_id } = await params;
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
-
-  // Verify brand membership (shared utility — handles RLS fallback)
-  const brandAccess = await verifyBrandAccessWithScope(supabase, brand_id, user.id);
-  if (!brandAccess) redirect("/brewery-admin");
-  const { role: brandRole, locationScope } = brandAccess;
+  const service = createServiceClient();
 
   // Fetch brand
-  const { data: brand } = await (supabase
+  const { data: brand } = await (service
     .from("brewery_brands")
     .select("*")
-    .eq("id", brand_id)
+    .eq("id", brandId)
     .single() as any);
 
-  if (!brand) notFound();
+  if (!brand) return null;
 
   // Fetch locations
-  const { data: locations } = await (supabase
+  const { data: locations } = await (service
     .from("breweries")
     .select("id, name, city, state, cover_image_url, latitude, longitude")
-    .eq("brand_id", brand_id)
+    .eq("brand_id", brandId)
     .order("name") as any);
 
   const locationIds = (locations ?? []).map((l: any) => l.id);
 
   // Onboarding data — parallel queries for card
   const [{ data: brandLoyalty }, { count: teamCount }] = await Promise.all([
-    supabase.from("brand_loyalty_programs").select("id").eq("brand_id", brand_id).eq("is_active", true).limit(1) as any,
-    supabase.from("brand_accounts").select("id", { count: "exact", head: true }).eq("brand_id", brand_id) as any,
+    service.from("brand_loyalty_programs").select("id").eq("brand_id", brandId).eq("is_active", true).limit(1) as any,
+    service.from("brand_accounts").select("id", { count: "exact", head: true }).eq("brand_id", brandId) as any,
   ]);
 
   // Fetch analytics data server-side for initial render
@@ -89,17 +74,17 @@ export default async function BrandDashboardPage({ params }: { params: Promise<{
       { count: thisWeekSessionCount },
       { count: lastWeekSessionCount },
     ] = await Promise.all([
-      supabase.from("sessions").select("id, user_id, brewery_id, started_at").in("brewery_id", locationIds).eq("is_active", false).limit(50000) as any,
-      supabase.from("beer_logs").select("id, beer_id, rating, quantity, logged_at, brewery_id, beer:beers(name, style)").in("brewery_id", locationIds).limit(50000) as any,
-      supabase.from("sessions").select("id", { count: "exact", head: true }).in("brewery_id", locationIds).eq("is_active", false).gte("started_at", todayStart).lt("started_at", tomorrowStart) as any,
-      supabase.from("beer_logs").select("id", { count: "exact", head: true }).in("brewery_id", locationIds).gte("logged_at", todayStart).lt("logged_at", tomorrowStart) as any,
-      supabase.from("sessions").select("id, brewery_id, started_at, profile:profiles(display_name, username), beer_logs(id, beer_id, beer:beers(name))").in("brewery_id", locationIds).eq("is_active", false).order("started_at", { ascending: false }).limit(15) as any,
-      supabase.from("brewery_followers").select("id", { count: "exact", head: true }).in("brewery_id", locationIds) as any,
+      service.from("sessions").select("id, user_id, brewery_id, started_at").in("brewery_id", locationIds).eq("is_active", false).limit(50000) as any,
+      service.from("beer_logs").select("id, beer_id, rating, quantity, logged_at, brewery_id, beer:beers(name, style)").in("brewery_id", locationIds).limit(50000) as any,
+      service.from("sessions").select("id", { count: "exact", head: true }).in("brewery_id", locationIds).eq("is_active", false).gte("started_at", todayStart).lt("started_at", tomorrowStart) as any,
+      service.from("beer_logs").select("id", { count: "exact", head: true }).in("brewery_id", locationIds).gte("logged_at", todayStart).lt("logged_at", tomorrowStart) as any,
+      service.from("sessions").select("id, brewery_id, started_at, profile:profiles(display_name, username), beer_logs(id, beer_id, beer:beers(name))").in("brewery_id", locationIds).eq("is_active", false).order("started_at", { ascending: false }).limit(15) as any,
+      service.from("brewery_followers").select("id", { count: "exact", head: true }).in("brewery_id", locationIds) as any,
       // Accurate counts (bypass PostgREST max-rows cap — S155 P0 fix)
-      supabase.from("sessions").select("id", { count: "exact", head: true }).in("brewery_id", locationIds).eq("is_active", false) as any,
-      supabase.from("beer_logs").select("id", { count: "exact", head: true }).in("brewery_id", locationIds) as any,
-      supabase.from("sessions").select("id", { count: "exact", head: true }).in("brewery_id", locationIds).eq("is_active", false).gte("started_at", weekAgo).lt("started_at", tomorrowStart) as any,
-      supabase.from("sessions").select("id", { count: "exact", head: true }).in("brewery_id", locationIds).eq("is_active", false).gte("started_at", twoWeeksAgo).lt("started_at", weekAgo) as any,
+      service.from("sessions").select("id", { count: "exact", head: true }).in("brewery_id", locationIds).eq("is_active", false) as any,
+      service.from("beer_logs").select("id", { count: "exact", head: true }).in("brewery_id", locationIds) as any,
+      service.from("sessions").select("id", { count: "exact", head: true }).in("brewery_id", locationIds).eq("is_active", false).gte("started_at", weekAgo).lt("started_at", tomorrowStart) as any,
+      service.from("sessions").select("id", { count: "exact", head: true }).in("brewery_id", locationIds).eq("is_active", false).gte("started_at", twoWeeksAgo).lt("started_at", weekAgo) as any,
     ]);
 
     const sessions = allSessions ?? [];
@@ -197,12 +182,12 @@ export default async function BrandDashboardPage({ params }: { params: Promise<{
       { data: brandRedemptions },
       { data: brandFollowers },
     ] = await Promise.all([
-      supabase.from("sessions").select("id, user_id, started_at, ended_at, is_active").in("brewery_id", locationIds).eq("is_active", false).limit(50000) as any,
-      supabase.from("beer_logs").select("id, beer_id, rating, quantity, logged_at").in("brewery_id", locationIds).limit(50000) as any,
-      supabase.from("brewery_visits").select("user_id, total_visits").in("brewery_id", locationIds).limit(50000) as any,
-      supabase.from("loyalty_cards").select("user_id").in("brewery_id", locationIds).limit(50000) as any,
-      supabase.from("loyalty_redemptions").select("id, redeemed_at").in("brewery_id", locationIds).limit(50000) as any,
-      supabase.from("brewery_follows").select("id, created_at").in("brewery_id", locationIds).limit(50000) as any,
+      service.from("sessions").select("id, user_id, started_at, ended_at, is_active").in("brewery_id", locationIds).eq("is_active", false).limit(50000) as any,
+      service.from("beer_logs").select("id, beer_id, rating, quantity, logged_at").in("brewery_id", locationIds).limit(50000) as any,
+      service.from("brewery_visits").select("user_id, total_visits").in("brewery_id", locationIds).limit(50000) as any,
+      service.from("loyalty_cards").select("user_id").in("brewery_id", locationIds).limit(50000) as any,
+      service.from("loyalty_redemptions").select("id, redeemed_at").in("brewery_id", locationIds).limit(50000) as any,
+      service.from("brewery_follows").select("id, created_at").in("brewery_id", locationIds).limit(50000) as any,
     ]);
 
     brandKPIs = calculateBreweryKPIs({
@@ -219,7 +204,7 @@ export default async function BrandDashboardPage({ params }: { params: Promise<{
   // ── Tap stats (lightweight query for dashboard overview card) ──
   let tapStats: { totalOnTap: number; totalOff: number; uniqueBeers: number; sharedBeers: number } | undefined;
   if (locationIds.length > 0) {
-    const { data: allBeers } = await (supabase
+    const { data: allBeers } = await (service
       .from("beers")
       .select("name, brewery_id, is_on_tap")
       .in("brewery_id", locationIds)
@@ -239,6 +224,50 @@ export default async function BrandDashboardPage({ params }: { params: Promise<{
       tapStats = { totalOnTap, totalOff, uniqueBeers, sharedBeers };
     }
   }
+
+  return {
+    brand,
+    locations: locations ?? [],
+    locationIds,
+    brandLoyalty,
+    teamCount: teamCount ?? 0,
+    stats,
+    locationBreakdown,
+    topBeers,
+    recentActivity,
+    weeklyTrend,
+    brandKPIs,
+    tapStats,
+  };
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ brand_id: string }> }) {
+  const { brand_id } = await params;
+  const supabase = await createClient();
+  const { data } = await (supabase
+    .from("brewery_brands")
+    .select("name")
+    .eq("id", brand_id)
+    .single() as any);
+  return { title: `${data?.name ?? "Brand"} Dashboard — HopTrack` };
+}
+
+export default async function BrandDashboardPage({ params }: { params: Promise<{ brand_id: string }> }) {
+  const { brand_id } = await params;
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  // Verify brand membership (shared utility — handles RLS fallback)
+  const brandAccess = await verifyBrandAccessWithScope(supabase, brand_id, user.id);
+  if (!brandAccess) redirect("/brewery-admin");
+  const { role: brandRole, locationScope } = brandAccess;
+
+  // Fetch cached data (auth verified above)
+  const cached = await fetchCachedBrandDashboardData(brand_id);
+  if (!cached) notFound();
+
+  const { brand, locations, locationIds, brandLoyalty, teamCount, stats, locationBreakdown, topBeers, recentActivity, weeklyTrend, brandKPIs, tapStats } = cached;
 
   return (
     <div className="min-h-screen" style={{ background: "var(--bg)" }}>
@@ -261,7 +290,7 @@ export default async function BrandDashboardPage({ params }: { params: Promise<{
             </h1>
             <div className="flex items-center gap-3 mt-0.5">
               <span className="text-xs flex items-center gap-1" style={{ color: "var(--text-muted)" }}>
-                <MapPin size={11} /> {(locations ?? []).length} location{(locations ?? []).length !== 1 ? "s" : ""}
+                <MapPin size={11} /> {locations.length} location{locations.length !== 1 ? "s" : ""}
               </span>
               <Link
                 href={`/brand/${brand.slug}`}
@@ -298,7 +327,7 @@ export default async function BrandDashboardPage({ params }: { params: Promise<{
         brandId={brand_id}
         brandName={brand.name}
         brandSlug={brand.slug}
-        locationCount={(locations ?? []).length}
+        locationCount={locations.length}
       />
 
       {/* Dashboard Content */}
@@ -306,7 +335,7 @@ export default async function BrandDashboardPage({ params }: { params: Promise<{
         brandId={brand_id}
         initialData={{
           brand: { id: brand.id, name: brand.name, slug: brand.slug, logo_url: brand.logo_url, description: brand.description },
-          locations: locations ?? [],
+          locations,
           stats,
           locationBreakdown,
           topBeers,

@@ -5,8 +5,7 @@ import Link from "next/link";
 import { Building2, ArrowLeft, Settings, Package } from "lucide-react";
 import { BrandTapListClient } from "./BrandTapListClient";
 import { verifyBrandAccess } from "@/lib/brand-auth";
-
-export const revalidate = 30;
+import { getCachedBrandRecord } from "@/lib/cached-data";
 
 export async function generateMetadata({ params }: { params: Promise<{ brand_id: string }> }) {
   const { brand_id } = await params;
@@ -29,12 +28,8 @@ export default async function BrandTapListPage({ params }: { params: Promise<{ b
   const brandRole = await verifyBrandAccess(supabase, brand_id, user.id);
   if (!brandRole) redirect("/brewery-admin");
 
-  // Fetch brand
-  const { data: brand } = await (supabase
-    .from("brewery_brands")
-    .select("*")
-    .eq("id", brand_id)
-    .single() as any);
+  // Fetch brand (cached — auth verified above)
+  const brand = await getCachedBrandRecord(brand_id);
 
   if (!brand) notFound();
 

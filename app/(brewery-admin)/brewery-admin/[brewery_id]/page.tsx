@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { cacheLife, cacheTag } from "next/cache";
 
 import Link from "next/link";
 import {
@@ -26,36 +27,12 @@ export async function generateMetadata({ params }: { params: Promise<{ brewery_i
   return { title: `${(data as any)?.name ?? "Brewery"} Dashboard — HopTrack` };
 }
 
-export const revalidate = 30;
+async function fetchCachedBreweryDashboardData(breweryId: string) {
+  "use cache";
+  cacheLife("hop-realtime");
+  cacheTag(`brewery-${breweryId}`);
 
-export default async function BreweryDashboardPage({ params }: { params: Promise<{ brewery_id: string }> }) {
-  const { brewery_id } = await params;
-
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
-
-  // ── Impersonation detection ─────────────────────────────────────────
-  const cookieStore = await cookies();
-  const isImpersonating = !!cookieStore.get("ht-impersonate")?.value;
-
-  // Use service client during impersonation (superadmin not in brewery_accounts)
-  const queryClient = isImpersonating ? createServiceClient() : supabase;
-
-  // Verify access — skip for impersonation (layout already verified superadmin)
-  let account: any = null;
-  if (isImpersonating) {
-    account = { role: "owner", verified: true };
-  } else {
-    const { data: acc } = await supabase
-      .from("brewery_accounts")
-      .select("role, verified, verified_at")
-      .eq("user_id", user.id)
-      .eq("brewery_id", brewery_id)
-      .maybeSingle() as any;
-    account = acc;
-    if (!account) redirect("/brewery-admin/claim");
-  }
+  const service = createServiceClient();
 
   // ── Fetch all data in parallel ─────────────────────────────────────────────
   const now = new Date();
@@ -78,85 +55,85 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
     { data: recentFollowers },
     { data: _loyaltyProgramsForROI },
   ] = await Promise.all([
-    queryClient.from("breweries").select("*").eq("id", brewery_id).single() as any,
-    queryClient.from("beers").select("*").eq("brewery_id", brewery_id) as any,
+    service.from("breweries").select("*").eq("id", breweryId).single() as any,
+    service.from("beers").select("*").eq("brewery_id", breweryId) as any,
 
     // Recent 10 sessions with beer logs for feed display
-    queryClient
+    service
       .from("sessions")
       .select("*, profile:profiles(display_name, username, avatar_url), beer_logs(id, beer_id, rating, quantity, beer:beers(name, style))")
-      .eq("brewery_id", brewery_id)
+      .eq("brewery_id", breweryId)
       .eq("is_active", false)
       .order("started_at", { ascending: false })
       .limit(10) as any,
 
-    queryClient
+    service
       .from("loyalty_programs")
       .select("*, loyalty_cards(count)")
-      .eq("brewery_id", brewery_id)
+      .eq("brewery_id", breweryId)
       .eq("is_active", true)
       .single() as any,
 
     // All sessions for aggregate stats
-    queryClient
+    service
       .from("sessions")
       .select("id, user_id, started_at, ended_at, is_active")
-      .eq("brewery_id", brewery_id)
+      .eq("brewery_id", breweryId)
       .eq("is_active", false)
       .limit(50000) as any,
 
     // All beer logs for rating + top beer stats
-    queryClient
+    service
       .from("beer_logs")
       .select("id, beer_id, rating, quantity, logged_at, beer:beers(name, style)")
-      .eq("brewery_id", brewery_id)
+      .eq("brewery_id", breweryId)
       .limit(50000) as any,
 
     // Today's sessions (count only — bypasses PostgREST max-rows cap)
-    queryClient
+    service
       .from("sessions")
       .select("id", { count: "exact", head: true })
-      .eq("brewery_id", brewery_id)
+      .eq("brewery_id", breweryId)
       .eq("is_active", false)
       .gte("started_at", todayStart)
       .lt("started_at", tomorrowStart) as any,
 
     // Today's beer logs (count only)
-    queryClient
+    service
       .from("beer_logs")
       .select("id", { count: "exact", head: true })
-      .eq("brewery_id", brewery_id)
+      .eq("brewery_id", breweryId)
       .gte("logged_at", todayStart)
       .lt("logged_at", tomorrowStart) as any,
 
     // Active sessions right now (count only)
-    queryClient
+    service
       .from("sessions")
       .select("id", { count: "exact", head: true })
-      .eq("brewery_id", brewery_id)
+      .eq("brewery_id", breweryId)
       .eq("is_active", true) as any,
 
     // Recent reviews for activity feed
-    queryClient
+    service
       .from("brewery_reviews")
       .select("id, rating, comment, created_at, profile:profiles!user_id(display_name, username)")
-      .eq("brewery_id", brewery_id)
+      .eq("brewery_id", breweryId)
       .order("created_at", { ascending: false })
       .limit(5),
 
     // Recent followers for activity feed
-    queryClient
+    service
       .from("brewery_follows")
       .select("id, created_at, profile:profiles!user_id(display_name, username)")
-      .eq("brewery_id", brewery_id)
+      .eq("brewery_id", breweryId)
       .order("created_at", { ascending: false })
       .limit(5),
 
     // Loyalty redemptions this month (for ROI card)
-    queryClient
+    service
       .from("loyalty_programs")
       .select("id")
-      .eq("brewery_id", brewery_id)
+      .eq("brewery_id", breweryId)
       .eq("is_active", true) as any,
   ]);
 
@@ -172,55 +149,55 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
     { count: thisWeekCountRaw },
     { count: lastWeekCountRaw },
   ] = await Promise.all([
-    queryClient
+    service
       .from("brewery_visits")
       .select("user_id, total_visits")
-      .eq("brewery_id", brewery_id)
+      .eq("brewery_id", breweryId)
       .limit(50000) as any,
-    queryClient
+    service
       .from("loyalty_cards")
       .select("user_id")
-      .eq("brewery_id", brewery_id)
+      .eq("brewery_id", breweryId)
       .limit(50000) as any,
-    queryClient
+    service
       .from("loyalty_redemptions")
       .select("id, redeemed_at")
-      .eq("brewery_id", brewery_id)
+      .eq("brewery_id", breweryId)
       .limit(50000) as any,
-    queryClient
+    service
       .from("brewery_follows")
       .select("id, created_at")
-      .eq("brewery_id", brewery_id)
+      .eq("brewery_id", breweryId)
       .limit(50000) as any,
-    queryClient
+    service
       .from("ai_suggestions")
       .select("id, suggestions, generated_at, status")
-      .eq("brewery_id", brewery_id)
+      .eq("brewery_id", breweryId)
       .order("generated_at", { ascending: false })
       .limit(1)
       .maybeSingle() as any,
 
     // Accurate counts — bypasses PostgREST max-rows cap (S155 P0 fix)
-    queryClient
+    service
       .from("sessions")
       .select("id", { count: "exact", head: true })
-      .eq("brewery_id", brewery_id)
+      .eq("brewery_id", breweryId)
       .eq("is_active", false) as any,
-    queryClient
+    service
       .from("beer_logs")
       .select("id", { count: "exact", head: true })
-      .eq("brewery_id", brewery_id) as any,
-    queryClient
+      .eq("brewery_id", breweryId) as any,
+    service
       .from("sessions")
       .select("id", { count: "exact", head: true })
-      .eq("brewery_id", brewery_id)
+      .eq("brewery_id", breweryId)
       .eq("is_active", false)
       .gte("started_at", weekAgoStart)
       .lt("started_at", tomorrowStart) as any,
-    queryClient
+    service
       .from("sessions")
       .select("id", { count: "exact", head: true })
-      .eq("brewery_id", brewery_id)
+      .eq("brewery_id", breweryId)
       .eq("is_active", false)
       .gte("started_at", twoWeeksAgoStart)
       .lt("started_at", weekAgoStart) as any,
@@ -235,7 +212,7 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
   ).sort((a, b) => (b[1] as number) - (a[1] as number)).slice(0, 3).map(([id]) => id);
 
   const { data: topProfiles } = topSessionUserIds.length > 0
-    ? await queryClient
+    ? await service
         .from("profiles")
         .select("id, display_name, username")
         .in("id", topSessionUserIds) as any
@@ -247,15 +224,15 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
   });
 
   // Follower counts (separate queries for count)
-  const { count: totalFollowerCount } = await supabase
+  const { count: totalFollowerCount } = await service
     .from("brewery_follows")
     .select("id", { count: "exact", head: true })
-    .eq("brewery_id", brewery_id);
+    .eq("brewery_id", breweryId);
 
-  const { count: todayNewFollowers } = await supabase
+  const { count: todayNewFollowers } = await service
     .from("brewery_follows")
     .select("id", { count: "exact", head: true })
-    .eq("brewery_id", brewery_id)
+    .eq("brewery_id", breweryId)
     .gte("created_at", todayStart)
     .lt("created_at", tomorrowStart);
 
@@ -270,8 +247,9 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
   const totalBeersLogged = totalBeerCountRaw ?? 0;
   const uniqueVisitors = new Set(sessions.map((s: any) => s.user_id)).size;
   const ratings = beerLogs.filter((l: any) => l.rating > 0).map((l: any) => l.rating);
-  const avgRating = ratings.length > 0
-    ? (ratings.reduce((a: number, b: number) => a + b, 0) / ratings.length).toFixed(1)
+  const ratingsCount = ratings.length;
+  const avgRating = ratingsCount > 0
+    ? (ratings.reduce((a: number, b: number) => a + b, 0) / ratingsCount).toFixed(1)
     : null;
 
   // Today stats (from count queries — accurate regardless of row limits)
@@ -398,6 +376,83 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
   });
 
   const activityFeed = activityItems.slice(0, 5);
+
+  return {
+    brewery,
+    beers,
+    recentSessions,
+    loyaltyProgram,
+    totalVisits,
+    totalBeersLogged,
+    uniqueVisitors,
+    avgRating,
+    ratingsCount,
+    todayVisitCount,
+    todayBeersCount,
+    activeSessionCount,
+    weeklyData,
+    thisWeekTotal,
+    lastWeekTotal,
+    weekTrend,
+    totalFollowerCount,
+    todayNewFollowers,
+    topBeersList,
+    onTapCount,
+    totalBeerCount,
+    kpis,
+    sparklines,
+    hasBeers,
+    hasLoyalty,
+    hasLogo,
+    loyaltyVisitsThisMonth,
+    loyaltyVisitsByWeek,
+    subscriptionTier,
+    activityFeed,
+    latestAISuggestion,
+  };
+}
+
+export default async function BreweryDashboardPage({ params }: { params: Promise<{ brewery_id: string }> }) {
+  const { brewery_id } = await params;
+
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  // ── Impersonation detection ─────────────────────────────────────────
+  const cookieStore = await cookies();
+  const isImpersonating = !!cookieStore.get("ht-impersonate")?.value;
+
+  // Verify access — skip for impersonation (layout already verified superadmin)
+  let account: any = null;
+  if (isImpersonating) {
+    account = { role: "owner", verified: true };
+  } else {
+    const { data: acc } = await supabase
+      .from("brewery_accounts")
+      .select("role, verified, verified_at")
+      .eq("user_id", user.id)
+      .eq("brewery_id", brewery_id)
+      .maybeSingle() as any;
+    account = acc;
+    if (!account) redirect("/brewery-admin/claim");
+  }
+
+  // Fetch cached data (auth verified above)
+  const cached = await fetchCachedBreweryDashboardData(brewery_id);
+
+  const {
+    brewery, beers, recentSessions, loyaltyProgram,
+    totalVisits, totalBeersLogged, uniqueVisitors, avgRating, ratingsCount,
+    todayVisitCount, todayBeersCount, activeSessionCount,
+    weeklyData, thisWeekTotal, lastWeekTotal, weekTrend,
+    totalFollowerCount, todayNewFollowers,
+    topBeersList, onTapCount, totalBeerCount,
+    kpis, sparklines,
+    hasBeers, hasLoyalty, hasLogo,
+    loyaltyVisitsThisMonth, loyaltyVisitsByWeek, subscriptionTier,
+    activityFeed, latestAISuggestion,
+  } = cached;
 
   // ── Quick actions ──────────────────────────────────────────────────────────
   const quickActions = [
@@ -875,7 +930,7 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
                 { label: "Beers logged", value: totalBeersLogged.toLocaleString() },
                 { label: "Unique visitors", value: uniqueVisitors.toLocaleString() },
                 { label: "Avg rating", value: avgRating ? `${avgRating} / 5` : "No ratings" },
-                { label: "Reviews", value: `${ratings.length}` },
+                { label: "Reviews", value: `${ratingsCount}` },
               ].map(({ label, value }) => (
                 <div key={label} className="flex items-center justify-between">
                   <span className="text-xs" style={{ color: "var(--text-muted)" }}>{label}</span>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
+import { IntelligenceLayer } from "./IntelligenceSections";
 import {
   Monitor,
   RefreshCw,
@@ -1142,6 +1143,9 @@ export default function CommandCenterClient({ initialData }: CommandCenterClient
 
         {/* Recent Activity */}
         <RecentActivityFeed items={data.recentActivity} />
+
+        {/* ── Intelligence Layer — Sprint 158 ────────────────── */}
+        <IntelligenceLayer />
       </div>
     </div>
   );

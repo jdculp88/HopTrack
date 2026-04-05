@@ -5,8 +5,8 @@ import Link from "next/link";
 import { Building2, MapPin, ArrowLeft } from "lucide-react";
 import { BrandReportsClient } from "./BrandReportsClient";
 import { verifyBrandAccessWithScope } from "@/lib/brand-auth";
-
-export const revalidate = 30;
+import { cacheLife, cacheTag } from "next/cache";
+import { createServiceClient } from "@/lib/supabase/service";
 
 export async function generateMetadata({ params }: { params: Promise<{ brand_id: string }> }) {
   const { brand_id } = await params;
@@ -19,30 +19,26 @@ export async function generateMetadata({ params }: { params: Promise<{ brand_id:
   return { title: `${data?.name ?? "Brand"} Reports — HopTrack` };
 }
 
-export default async function BrandReportsPage({ params }: { params: Promise<{ brand_id: string }> }) {
-  const { brand_id } = await params;
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+async function fetchCachedReportsData(brandId: string) {
+  "use cache";
+  cacheLife("hop-realtime");
+  cacheTag(`brand-${brandId}`);
 
-  // Verify brand membership (shared utility — handles RLS fallback)
-  const brandAccess = await verifyBrandAccessWithScope(supabase, brand_id, user.id);
-  if (!brandAccess) redirect("/brewery-admin");
-  const { locationScope } = brandAccess;
+  const service = createServiceClient();
 
   // Fetch brand + locations
-  const { data: brand } = await (supabase
+  const { data: brand } = await (service
     .from("brewery_brands")
     .select("*")
-    .eq("id", brand_id)
+    .eq("id", brandId)
     .single() as any);
 
-  if (!brand) notFound();
+  if (!brand) return { brand: null, locations: [], initialData: null };
 
-  const { data: locations } = await (supabase
+  const { data: locations } = await (service
     .from("breweries")
     .select("id, name, city, state")
-    .eq("brand_id", brand_id)
+    .eq("brand_id", brandId)
     .order("name") as any);
 
   // Fetch initial comparison data (30d default)
@@ -62,11 +58,11 @@ export default async function BrandReportsPage({ params }: { params: Promise<{ b
       { data: followers },
       { data: loyaltyPrograms },
     ] = await Promise.all([
-      supabase.from("sessions").select("id, user_id, brewery_id, started_at").in("brewery_id", locationIds).eq("is_active", false).gte("started_at", rangeStart).lt("started_at", nowISO).limit(50000) as any,
-      supabase.from("sessions").select("id, user_id, brewery_id").in("brewery_id", locationIds).eq("is_active", false).gte("started_at", prevRangeStart).lt("started_at", rangeStart).limit(50000) as any,
-      supabase.from("beer_logs").select("id, beer_id, rating, quantity, brewery_id, beer:beers(name, style)").in("brewery_id", locationIds).gte("logged_at", rangeStart).lt("logged_at", nowISO).limit(50000) as any,
-      supabase.from("brewery_followers").select("id, brewery_id").in("brewery_id", locationIds).limit(50000) as any,
-      supabase.from("loyalty_programs").select("id, brewery_id").in("brewery_id", locationIds).eq("is_active", true) as any,
+      service.from("sessions").select("id, user_id, brewery_id, started_at").in("brewery_id", locationIds).eq("is_active", false).gte("started_at", rangeStart).lt("started_at", nowISO).limit(50000) as any,
+      service.from("sessions").select("id, user_id, brewery_id").in("brewery_id", locationIds).eq("is_active", false).gte("started_at", prevRangeStart).lt("started_at", rangeStart).limit(50000) as any,
+      service.from("beer_logs").select("id, beer_id, rating, quantity, brewery_id, beer:beers(name, style)").in("brewery_id", locationIds).gte("logged_at", rangeStart).lt("logged_at", nowISO).limit(50000) as any,
+      service.from("brewery_followers").select("id, brewery_id").in("brewery_id", locationIds).limit(50000) as any,
+      service.from("loyalty_programs").select("id, brewery_id").in("brewery_id", locationIds).eq("is_active", true) as any,
     ]);
 
     const sessions = currentSessions ?? [];
@@ -79,7 +75,7 @@ export default async function BrandReportsPage({ params }: { params: Promise<{ b
     (loyaltyPrograms ?? []).forEach((p: any) => { programToBrewery[p.id] = p.brewery_id; });
     const redemptionsByBrewery: Record<string, number> = {};
     if (programIds.length > 0) {
-      const { data: redemptions } = await (supabase.from("loyalty_redemptions").select("id, program_id").in("program_id", programIds).gte("redeemed_at", rangeStart).lt("redeemed_at", nowISO).limit(50000) as any);
+      const { data: redemptions } = await (service.from("loyalty_redemptions").select("id, program_id").in("program_id", programIds).gte("redeemed_at", rangeStart).lt("redeemed_at", nowISO).limit(50000) as any);
       (redemptions ?? []).forEach((r: any) => {
         const bid = programToBrewery[r.program_id];
         if (bid) redemptionsByBrewery[bid] = (redemptionsByBrewery[bid] ?? 0) + 1;
@@ -180,6 +176,25 @@ export default async function BrandReportsPage({ params }: { params: Promise<{ b
     };
   }
 
+  return { brand, locations: locations ?? [], initialData };
+}
+
+export default async function BrandReportsPage({ params }: { params: Promise<{ brand_id: string }> }) {
+  const { brand_id } = await params;
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  // Verify brand membership (shared utility — handles RLS fallback)
+  const brandAccess = await verifyBrandAccessWithScope(supabase, brand_id, user.id);
+  if (!brandAccess) redirect("/brewery-admin");
+  const { locationScope } = brandAccess;
+
+  // Fetch cached data (auth verified above)
+  const { brand, locations, initialData } = await fetchCachedReportsData(brand_id);
+
+  if (!brand) notFound();
+
   return (
     <div className="min-h-screen" style={{ background: "var(--bg)" }}>
       {/* Brand Header */}
@@ -201,7 +216,7 @@ export default async function BrandReportsPage({ params }: { params: Promise<{ b
             </h1>
             <div className="flex items-center gap-3 mt-0.5">
               <span className="text-xs flex items-center gap-1" style={{ color: "var(--text-muted)" }}>
-                <MapPin size={11} /> {(locations ?? []).length} location{(locations ?? []).length !== 1 ? "s" : ""}
+                <MapPin size={11} /> {locations.length} location{locations.length !== 1 ? "s" : ""}
               </span>
             </div>
           </div>
@@ -221,8 +236,8 @@ export default async function BrandReportsPage({ params }: { params: Promise<{ b
         brandId={brand_id}
         brandSlug={brand.slug}
         initialData={initialData}
-        locationCount={(locations ?? []).length}
-        locations={(locations ?? []).map((l: any) => ({ id: l.id, name: l.name, city: l.city, state: l.state }))}
+        locationCount={locations.length}
+        locations={locations.map((l: any) => ({ id: l.id, name: l.name, city: l.city, state: l.state }))}
         locationScope={locationScope}
       />
     </div>
