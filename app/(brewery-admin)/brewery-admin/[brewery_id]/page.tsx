@@ -20,6 +20,7 @@ import { BreweryHealthCard } from "@/components/brewery-admin/BreweryHealthCard"
 import { calculateMyBreweryHealth } from "@/lib/brewery-health";
 import { Sparkline, ActiveSessionsCounter, RecentActivityFeed } from "./DashboardClient";
 import type { ActivityItem } from "./DashboardClient";
+import { Card } from "@/components/ui/Card";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 
 export async function generateMetadata({ params }: { params: Promise<{ brewery_id: string }> }) {
@@ -493,12 +494,9 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
       {(account as any)?.role === "staff" && (
         <Link
           href={`/brewery-admin/${brewery_id}/punch`}
-          className="block rounded-2xl border p-6 mb-6 transition-all hover:border-[var(--accent-gold)] group"
-          style={{
-            background: "color-mix(in srgb, var(--accent-gold) 8%, var(--surface))",
-            borderColor: "var(--border)",
-          }}
+          className="block mb-6 group"
         >
+        <Card hoverable padding="spacious" style={{ background: "color-mix(in srgb, var(--accent-gold) 8%, var(--surface))" }}>
           <div className="flex items-center gap-4">
             <div
               className="flex h-14 w-14 items-center justify-center rounded-2xl flex-shrink-0"
@@ -516,6 +514,7 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
             </div>
             <ArrowUpRight size={20} className="ml-auto flex-shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" style={{ color: "var(--accent-gold)" }} />
           </div>
+        </Card>
         </Link>
       )}
 
@@ -531,10 +530,7 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
       </div>
 
       {/* ── Today's Snapshot ─────────────────────────────────────────── */}
-      <div
-        className="rounded-2xl border p-4 mb-6"
-        style={{ background: "var(--surface)", borderColor: "var(--border)" }}
-      >
+      <Card padding="default" className="mb-6">
         <div className="flex items-center gap-2 mb-3">
           <Zap size={14} style={{ color: "var(--accent-gold)" }} />
           <h2 className="text-xs font-mono uppercase tracking-wider font-bold" style={{ color: "var(--accent-gold)" }}>
@@ -567,7 +563,7 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
             </span>
           )}
         </div>
-      </div>
+      </Card>
 
       {/* ── POS Sync Alert Banner ──────────────────────────────────── */}
       {(brewery as any)?.pos_connected && (
@@ -585,7 +581,7 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
       <ErrorBoundary inline context="DashboardKPICards">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {/* Today's Visits */}
-        <div className="rounded-2xl p-5 border" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
+        <Card padding="spacious">
           <div className="flex items-center justify-between mb-3">
             <p className="text-[10px] font-mono uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Today Visits</p>
             <Users size={14} style={{ color: "var(--accent-gold)" }} />
@@ -597,10 +593,10 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
           <p className="text-[10px] mt-2 truncate" style={{ color: "var(--text-muted)" }}>
             {totalVisits.toLocaleString()} all-time
           </p>
-        </div>
+        </Card>
 
         {/* Weekly Trend */}
-        <div className="rounded-2xl p-5 border" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
+        <Card padding="spacious">
           <div className="flex items-center justify-between mb-3">
             <p className="text-[10px] font-mono uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>This Week</p>
             <TrendingUp size={14} style={{ color: "var(--accent-gold)" }} />
@@ -623,10 +619,10 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
               </span>
             )}
           </div>
-        </div>
+        </Card>
 
         {/* Active Sessions */}
-        <div className="rounded-2xl p-5 border" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
+        <Card padding="spacious">
           <div className="flex items-center justify-between mb-3">
             <p className="text-[10px] font-mono uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Active Now</p>
             <Beer size={14} style={{ color: "var(--accent-gold)" }} />
@@ -635,10 +631,10 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
           <p className="text-[10px] mt-2 truncate" style={{ color: "var(--text-muted)" }}>
             {onTapCount}/{totalBeerCount} on tap
           </p>
-        </div>
+        </Card>
 
         {/* Followers */}
-        <div className="rounded-2xl p-5 border" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
+        <Card padding="spacious">
           <div className="flex items-center justify-between mb-3">
             <p className="text-[10px] font-mono uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Followers</p>
             <Heart size={14} style={{ color: "var(--accent-gold)" }} />
@@ -647,14 +643,14 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
           <p className="text-[10px] mt-2 truncate" style={{ color: (todayNewFollowers ?? 0) > 0 ? "#22c55e" : "var(--text-muted)" }}>
             {(todayNewFollowers ?? 0) > 0 ? `+${todayNewFollowers} today` : "No new followers today"}
           </p>
-        </div>
+        </Card>
       </div>
 
       {/* ── KPI Cards Row 2 — The Pulse (Sprint 124) ──────────────── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
 
         {/* Avg Session Duration */}
-        <div className="rounded-2xl p-5 border" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
+        <Card padding="spacious">
           <div className="flex items-center justify-between mb-3">
             <p className="text-[10px] font-mono uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Avg Duration</p>
             <Clock size={14} style={{ color: "var(--accent-gold)" }} />
@@ -676,10 +672,10 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
               <p className="text-[10px] mt-2" style={{ color: "var(--text-muted)" }}>Last 30 days</p>
             );
           })()}
-        </div>
+        </Card>
 
         {/* Beers Per Visit */}
-        <div className="rounded-2xl p-5 border" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
+        <Card padding="spacious">
           <div className="flex items-center justify-between mb-3">
             <p className="text-[10px] font-mono uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Beers / Visit</p>
             <Beer size={14} style={{ color: "var(--accent-gold)" }} />
@@ -701,10 +697,10 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
               <p className="text-[10px] mt-2" style={{ color: "var(--text-muted)" }}>Avg pours per session</p>
             );
           })()}
-        </div>
+        </Card>
 
         {/* New vs Returning */}
-        <div className="rounded-2xl p-5 border" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
+        <Card padding="spacious">
           <div className="flex items-center justify-between mb-3">
             <p className="text-[10px] font-mono uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Returning</p>
             <RefreshCw size={14} style={{ color: "var(--accent-gold)" }} />
@@ -722,10 +718,10 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
           ) : (
             <p className="text-[10px] mt-2" style={{ color: "var(--text-muted)" }}>Visitor breakdown</p>
           )}
-        </div>
+        </Card>
 
         {/* Customer Retention */}
-        <div className="rounded-2xl p-5 border" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
+        <Card padding="spacious">
           <div className="flex items-center justify-between mb-3">
             <p className="text-[10px] font-mono uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Retention</p>
             <Award size={14} style={{ color: "var(--accent-gold)" }} />
@@ -747,7 +743,7 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
               <p className="text-[10px] mt-2" style={{ color: "var(--text-muted)" }}>30-day return rate</p>
             );
           })()}
-        </div>
+        </Card>
       </div>
       </ErrorBoundary>
 
@@ -797,8 +793,7 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
                   const barWidth = Math.max(12, (beer.count / maxCount) * 100);
 
                   return (
-                    <div key={beer.name} className="flex items-center gap-4 p-4 rounded-2xl border"
-                      style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
+                    <Card key={beer.name} flat className="flex items-center gap-4">
                       <span className="font-display text-2xl font-bold w-8 flex-shrink-0"
                         style={{ color: i === 0 ? "var(--accent-gold)" : "var(--text-muted)" }}>
                         {i + 1}
@@ -824,7 +819,7 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
                           </p>
                         )}
                       </div>
-                    </div>
+                    </Card>
                   );
                 })}
               </div>
@@ -843,11 +838,11 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
             </div>
             <div className="space-y-2">
               {((recentSessions as any[]) ?? []).length === 0 ? (
-                <div className="rounded-2xl p-8 text-center border" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
+                <Card padding="spacious" className="text-center !py-8">
                   <p className="text-3xl mb-2">🍺</p>
                   <p className="font-display" style={{ color: "var(--text-primary)" }}>No sessions yet</p>
                   <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>Share your HopTrack brewery page to get the first pour tracked.</p>
-                </div>
+                </Card>
               ) : (
                 ((recentSessions as any[]) ?? []).slice(0, 6).map((s: any) => {
                   const sessionBeerLogs = (s.beer_logs as any[]) ?? [];
@@ -861,8 +856,7 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
                     : null;
 
                   return (
-                    <div key={s.id} className="flex items-center gap-3 p-3 rounded-xl border"
-                      style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
+                    <Card key={s.id} flat padding="compact" className="flex items-center gap-3 !rounded-xl">
                       <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
                         style={{ background: "var(--surface-2)", color: "var(--text-secondary)" }}>
                         {(s.profile?.display_name ?? s.user_id?.slice(0, 1) ?? "?")[0].toUpperCase()}
@@ -886,7 +880,7 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
                           {formatRelativeTime(s.started_at)}
                         </p>
                       </div>
-                    </div>
+                    </Card>
                   );
                 })
               )}
@@ -916,26 +910,23 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
             <h3 className="font-display font-bold mb-3" style={{ color: "var(--text-primary)" }}>Quick Actions</h3>
             <div className="grid grid-cols-2 gap-2">
               {quickActions.map(({ href, label, icon: Icon, desc }) => (
-                <Link
-                  key={href}
-                  href={href}
-                  className="rounded-xl border p-3 transition-all hover:border-[var(--accent-gold)] group"
-                  style={{ background: "var(--surface)", borderColor: "var(--border)" }}
-                >
-                  <Icon
-                    size={16}
-                    className="mb-1.5 transition-colors"
-                    style={{ color: "var(--text-muted)" }}
-                  />
-                  <p className="text-xs font-semibold truncate" style={{ color: "var(--text-primary)" }}>{label}</p>
-                  <p className="text-[10px] truncate" style={{ color: "var(--text-muted)" }}>{desc}</p>
+                <Link key={href} href={href} className="group">
+                  <Card hoverable flat padding="compact" className="!rounded-xl">
+                    <Icon
+                      size={16}
+                      className="mb-1.5 transition-colors"
+                      style={{ color: "var(--text-muted)" }}
+                    />
+                    <p className="text-xs font-semibold truncate" style={{ color: "var(--text-primary)" }}>{label}</p>
+                    <p className="text-[10px] truncate" style={{ color: "var(--text-muted)" }}>{desc}</p>
+                  </Card>
                 </Link>
               ))}
             </div>
           </div>
 
           {/* All-Time Stats */}
-          <div className="rounded-2xl border p-5" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
+          <Card padding="spacious">
             <h3 className="font-display font-bold mb-3" style={{ color: "var(--text-primary)" }}>All-Time Stats</h3>
             <div className="space-y-3">
               {[
@@ -951,10 +942,10 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
                 </div>
               ))}
             </div>
-          </div>
+          </Card>
 
           {/* Loyalty */}
-          <div className="rounded-2xl p-5 border" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
+          <Card padding="spacious">
             <div className="flex items-center justify-between mb-3">
               <h3 className="font-display font-bold" style={{ color: "var(--text-primary)" }}>Loyalty Program</h3>
               <Award size={14} style={{ color: "var(--accent-gold)" }} />
@@ -979,7 +970,7 @@ export default async function BreweryDashboardPage({ params }: { params: Promise
                 </Link>
               </>
             )}
-          </div>
+          </Card>
 
         </div>
         </ErrorBoundary>

@@ -6,6 +6,7 @@ import { Trophy, Lock } from "lucide-react";
 import { AchievementBadge } from "@/components/achievements/AchievementBadge";
 import { Modal } from "@/components/ui/Modal";
 import { formatDate } from "@/lib/utils";
+import { Card } from "@/components/ui/Card";
 import type { AchievementCategory, AchievementTier } from "@/types/database";
 
 const CATEGORIES: { key: AchievementCategory | "all"; label: string; emoji: string }[] = [
@@ -66,7 +67,7 @@ export function AchievementsClient({ achievements, totalEarned, total }: Achieve
       </div>
 
       {/* Progress bar */}
-      <div className="card-bg-stats rounded-2xl p-5 space-y-3" style={{ border: "1px solid var(--border)" }}>
+      <Card bgClass="card-bg-stats" padding="spacious" className="space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Trophy size={18} className="text-[var(--accent-gold)]" />
@@ -100,7 +101,7 @@ export function AchievementsClient({ achievements, totalEarned, total }: Achieve
             );
           })}
         </div>
-      </div>
+      </Card>
 
       {/* Category filter */}
       <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">

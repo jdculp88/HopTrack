@@ -17,6 +17,7 @@ import {
 import { useToast } from "@/components/ui/Toast";
 import { StarRating } from "@/components/ui/StarRating";
 import Link from "next/link";
+import { Card } from "@/components/ui/Card";
 import type { BeerList } from "@/types/database";
 
 interface BeerListsClientProps {
@@ -155,10 +156,7 @@ export function BeerListsClient({ userId: _userId, initialLists }: BeerListsClie
             exit={{ opacity: 0, height: 0 }}
             className="overflow-hidden mb-4"
           >
-            <div
-              className="rounded-2xl border p-4 space-y-3"
-              style={{ background: "var(--surface)", borderColor: "var(--accent-gold)" }}
-            >
+            <Card className="space-y-3" style={{ borderColor: "var(--accent-gold)" }}>
               <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--accent-gold)" }}>
                 New List
               </p>
@@ -206,17 +204,14 @@ export function BeerListsClient({ userId: _userId, initialLists }: BeerListsClie
                   </button>
                 </div>
               </div>
-            </div>
+            </Card>
           </motion.div>
         )}
       </AnimatePresence>
 
       {/* Empty state */}
       {lists.length === 0 && (
-        <div
-          className="rounded-2xl border p-10 text-center"
-          style={{ background: "var(--surface)", borderColor: "var(--border)" }}
-        >
+        <Card flat padding="spacious" className="text-center !py-10">
           <Beer size={36} className="mx-auto mb-3" style={{ color: "var(--text-muted)" }} />
           <p className="font-display font-semibold text-lg" style={{ color: "var(--text-primary)" }}>
             No lists yet — start curating!
@@ -224,7 +219,7 @@ export function BeerListsClient({ userId: _userId, initialLists }: BeerListsClie
           <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
             Build lists like &quot;Asheville Must-Tries&quot; or &quot;Best IPAs of 2026&quot;
           </p>
-        </div>
+        </Card>
       )}
 
       {/* List cards */}
@@ -235,10 +230,11 @@ export function BeerListsClient({ userId: _userId, initialLists }: BeerListsClie
           const isEditing = editingId === list.id;
 
           return (
-            <div
+            <Card
               key={list.id}
-              className="card-bg-collection rounded-2xl border overflow-hidden transition-all"
-              style={{ borderColor: "var(--border)" }}
+              bgClass="card-bg-collection"
+              flat
+              className="overflow-hidden !p-0"
             >
               {/* Card header */}
               <div className="flex items-center px-4 py-3 gap-2">
@@ -470,7 +466,7 @@ export function BeerListsClient({ userId: _userId, initialLists }: BeerListsClie
                   </motion.div>
                 )}
               </AnimatePresence>
-            </div>
+            </Card>
           );
         })}
       </div>

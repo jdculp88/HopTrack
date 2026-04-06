@@ -1,5 +1,6 @@
 import { TrendingUp, DollarSign, Info } from "lucide-react";
 import { calculateROI, formatROIMessage, type ROIData } from "@/lib/roi";
+import { Card } from "@/components/ui/Card";
 
 // ── Mini Sparkline (inline SVG, no client JS needed) ─────────────
 function MiniSparkline({
@@ -69,13 +70,7 @@ export default function ROIDashboardCard({
   // ── No loyalty program ──
   if (!hasLoyaltyProgram) {
     return (
-      <div
-        className="card-bg-stats rounded-2xl p-6"
-        style={{
-          border: "1px solid var(--border)",
-          background: "var(--surface)",
-        }}
-      >
+      <Card bgClass="card-bg-stats" padding="spacious">
         <div className="flex items-center gap-2 mb-3">
           <div
             className="flex items-center justify-center w-8 h-8 rounded-lg"
@@ -100,7 +95,7 @@ export default function ROIDashboardCard({
           Set up a loyalty program to start tracking your return on investment.
           Repeat visits driven by your stamp card show up here.
         </p>
-      </div>
+      </Card>
     );
   }
 
@@ -139,13 +134,7 @@ export default function ROIDashboardCard({
     weekData.length >= 2 && weekData[weekData.length - 1] >= weekData[weekData.length - 2];
 
   return (
-    <div
-      className="card-bg-stats rounded-2xl p-6"
-      style={{
-        border: "1px solid var(--border)",
-        background: "var(--surface)",
-      }}
-    >
+    <Card bgClass="card-bg-stats" padding="spacious">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
@@ -266,6 +255,6 @@ export default function ROIDashboardCard({
           )}
         </p>
       </div>
-    </div>
+    </Card>
   );
 }

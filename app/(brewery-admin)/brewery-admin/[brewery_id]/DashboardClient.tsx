@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { motion } from "motion/react";
 import { Activity } from "lucide-react";
 import { Sparkline } from "@/components/ui/Sparkline";
+import { Card } from "@/components/ui/Card";
 
 export { Sparkline };
 
@@ -65,10 +66,10 @@ interface RecentActivityProps {
 export function RecentActivityFeed({ items }: RecentActivityProps) {
   if (items.length === 0) {
     return (
-      <div className="rounded-2xl border p-6 text-center" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
+      <Card padding="spacious" className="text-center">
         <Activity size={20} className="mx-auto mb-2" style={{ color: "var(--text-muted)" }} />
         <p className="text-sm" style={{ color: "var(--text-muted)" }}>No recent activity yet</p>
-      </div>
+      </Card>
     );
   }
 

@@ -5,6 +5,7 @@ import { Plug, RefreshCw, Loader2, ArrowUpRight, AlertTriangle } from "lucide-re
 import { AnimatePresence, motion } from "motion/react";
 import { useToast } from "@/components/ui/Toast";
 import Link from "next/link";
+import { Card } from "@/components/ui/Card";
 
 interface PosConnection {
   id: string;
@@ -93,7 +94,7 @@ export function PosDashboardCard({ breweryId }: PosDashboardCardProps) {
 
   if (loading) {
     return (
-      <div className="rounded-2xl border p-5" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
+      <Card padding="spacious">
         <div className="flex items-center gap-2 mb-3">
           <Plug size={14} style={{ color: "var(--accent-gold)" }} />
           <h3 className="font-display font-bold" style={{ color: "var(--text-primary)" }}>POS Sync</h3>
@@ -101,14 +102,14 @@ export function PosDashboardCard({ breweryId }: PosDashboardCardProps) {
         <div className="flex items-center justify-center py-4">
           <Loader2 size={16} className="animate-spin" style={{ color: "var(--text-muted)" }} />
         </div>
-      </div>
+      </Card>
     );
   }
 
   // No connections — show CTA
   if (activeConnections.length === 0) {
     return (
-      <div className="rounded-2xl border p-5" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
+      <Card padding="spacious">
         <div className="flex items-center gap-2 mb-3">
           <Plug size={14} style={{ color: "var(--accent-gold)" }} />
           <h3 className="font-display font-bold" style={{ color: "var(--text-primary)" }}>POS Sync</h3>
@@ -123,12 +124,12 @@ export function PosDashboardCard({ breweryId }: PosDashboardCardProps) {
         >
           Connect POS <ArrowUpRight size={12} />
         </Link>
-      </div>
+      </Card>
     );
   }
 
   return (
-    <div className="rounded-2xl border p-5" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
+    <Card padding="spacious">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <Plug size={14} style={{ color: "var(--accent-gold)" }} />
@@ -207,7 +208,7 @@ export function PosDashboardCard({ breweryId }: PosDashboardCardProps) {
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </Card>
   );
 }
 

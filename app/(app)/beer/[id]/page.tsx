@@ -12,6 +12,7 @@ import { beerTransitionName } from "@/lib/view-transitions";
 import { BeerReviewSection } from "@/components/beer/BeerReviewSection";
 import { getSimilarBeers } from "@/lib/recommendations";
 import { getStyleFamily } from "@/lib/beerStyleColors";
+import { Card } from "@/components/ui/Card";
 import type { Beer } from "@/types/database";
 
 // Supabase join shapes for tables not in generated types
@@ -106,12 +107,12 @@ export default async function BeerPage({ params }: { params: Promise<{ id: strin
       </Link>
 
       {/* Header */}
-      <div className="bg-[var(--surface)] border border-[var(--border)] rounded-3xl overflow-hidden">
+      <Card elevated className="!rounded-3xl overflow-hidden !p-0">
         <div className="h-40 relative" style={!beer.cover_image_url ? { background: gradient } : undefined}>
           {beer.cover_image_url && (
             <Image src={beer.cover_image_url} alt={beer.name} fill className="object-cover" />
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-[#1C1A16] to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg)] to-transparent" />
         </div>
         <div className="p-6 -mt-8 relative">
           <div className="flex items-start justify-between gap-4 mb-3">
@@ -144,7 +145,7 @@ export default async function BeerPage({ params }: { params: Promise<{ id: strin
             <p className="text-[var(--text-secondary)] text-sm leading-relaxed mt-4">{beer.description}</p>
           )}
         </div>
-      </div>
+      </Card>
 
       {/* Flavor Tag Cloud */}
       {sortedTags.length > 0 && (
@@ -171,7 +172,7 @@ export default async function BeerPage({ params }: { params: Promise<{ id: strin
           <div className="grid grid-cols-2 gap-3">
             {similarBeers.map((similar) => (
               <Link key={similar.id} href={`/beer/${similar.id}`}>
-                <div className="card-bg-reco p-3 rounded-xl border border-[var(--border)] hover:border-[var(--accent-gold)]/30 transition-all" data-style={getStyleFamily(similar.style)}>
+                <Card bgClass="card-bg-reco" padding="compact" hoverable flat className="!rounded-xl" data-style={getStyleFamily(similar.style)}>
                   <p className="font-display font-bold text-sm truncate text-[var(--text-primary)]">{similar.name}</p>
                   {similar.brewery && (
                     <p className="text-[10px] truncate text-[var(--text-muted)] mt-0.5">{similar.brewery.name}</p>
@@ -182,7 +183,7 @@ export default async function BeerPage({ params }: { params: Promise<{ id: strin
                       <span className="text-xs font-mono text-[var(--accent-gold)]">★ {similar.avg_rating!.toFixed(1)}</span>
                     )}
                   </div>
-                </div>
+                </Card>
               </Link>
             ))}
           </div>
@@ -200,7 +201,7 @@ export default async function BeerPage({ params }: { params: Promise<{ id: strin
         {beerLogs && beerLogs.length > 0 ? (
           <div className="space-y-3">
             {beerLogs.map((log) => (
-              <div key={log.id} className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-4">
+              <Card key={log.id}>
                 <div className="flex items-center gap-3 mb-2">
                   <UserAvatar profile={log.profile ?? { display_name: null, avatar_url: null }} size="sm" />
                   <div className="flex-1 min-w-0">
@@ -227,14 +228,14 @@ export default async function BeerPage({ params }: { params: Promise<{ id: strin
                     ))}
                   </div>
                 )}
-              </div>
+              </Card>
             ))}
           </div>
         ) : (
-          <div className="text-center py-12 bg-[var(--surface)] rounded-2xl border border-[var(--border)]">
+          <Card flat className="text-center py-12">
             <p className="text-3xl mb-2">👋</p>
             <p className="text-[var(--text-secondary)]">Be the first to review this beer!</p>
-          </div>
+          </Card>
         )}
       </div>
     </div>
