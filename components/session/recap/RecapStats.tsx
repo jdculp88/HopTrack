@@ -1,7 +1,8 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { C, stagger, getOrdinalSuffix, BreweryStats } from './recapUtils'
+import RecapSectionTitle from './RecapSectionTitle'
 import { getLevelProgress } from '@/lib/xp'
 import { Session } from '@/types/database'
 
@@ -50,10 +51,10 @@ export default function RecapStats({
 
   return (
     <>
-      {/* Stats row */}
+      {/* Stats grid — 2x2 on mobile */}
       <motion.div
         {...stagger(0.2)}
-        className="flex overflow-hidden"
+        className="grid grid-cols-2 overflow-hidden"
         style={{
           margin: '20px 20px 0',
           background: C.card,
@@ -65,15 +66,22 @@ export default function RecapStats({
         {statCells.map((stat, i) => (
           <div
             key={stat.label}
-            className="flex-1 text-center"
-            style={{ padding: '16px 8px', borderRight: i < 3 ? `1px solid ${C.divider}` : 'none' }}
+            className="text-center"
+            style={{
+              padding: '18px 12px',
+              borderRight: i % 2 === 0 ? `1px solid ${C.divider}` : 'none',
+              borderBottom: i < 2 ? `1px solid ${C.divider}` : 'none',
+            }}
           >
             <motion.p
               initial={{ opacity: 0, scale: 0.5, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               transition={{ delay: 0.35 + i * 0.07, type: 'spring', stiffness: 400, damping: 24 }}
               className="font-display font-bold"
-              style={{ fontSize: 24, color: C.text1 }}
+              style={{
+                fontSize: stat.label === 'Beers' ? 32 : 24,
+                color: stat.label === 'Beers' ? C.gold : C.text1,
+              }}
             >
               {stat.value}
             </motion.p>
@@ -129,7 +137,7 @@ export default function RecapStats({
       {/* XP breakdown */}
       {xpGained > 0 && (
         <motion.div {...stagger(0.6)}>
-          <SectionTitle>XP Earned</SectionTitle>
+          <RecapSectionTitle>XP Earned</RecapSectionTitle>
           <div
             style={{
               margin: '0 20px',
@@ -215,19 +223,3 @@ export default function RecapStats({
   )
 }
 
-function SectionTitle({ children }: { children: React.ReactNode }) {
-  return (
-    <p
-      className="uppercase font-semibold"
-      style={{
-        fontSize: 10,
-        letterSpacing: 1.5,
-        color: C.accent,
-        margin: '24px 20px 12px',
-        paddingLeft: 2,
-      }}
-    >
-      {children}
-    </p>
-  )
-}

@@ -1,10 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { getGlass, getGlassSvgContent } from '@/lib/glassware'
 import { BeerLog } from '@/types/database'
 import { C, stagger, getOrdinalSuffix } from './recapUtils'
+import RecapSectionTitle from './RecapSectionTitle'
 
 // ── Glass icon ───────────────────────────────────────────────────────────────
 function GlassIcon({
@@ -61,23 +62,6 @@ function BeerStar({
   )
 }
 
-function SectionTitle({ children }: { children: React.ReactNode }) {
-  return (
-    <p
-      className="uppercase font-semibold"
-      style={{
-        fontSize: 10,
-        letterSpacing: 1.5,
-        color: C.accent,
-        margin: '24px 20px 12px',
-        paddingLeft: 2,
-      }}
-    >
-      {children}
-    </p>
-  )
-}
-
 // ── Props ────────────────────────────────────────────────────────────────────
 interface RecapBeerLogsProps {
   logs: BeerLog[]
@@ -102,7 +86,7 @@ export default function RecapBeerLogs({
 
   return (
     <motion.div {...stagger(0.4)}>
-      <SectionTitle>Your Beers This Session</SectionTitle>
+      <RecapSectionTitle>Your Beers This Session</RecapSectionTitle>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {logs.map((log, i) => {
           const rating = getRating(log)
@@ -118,12 +102,15 @@ export default function RecapBeerLogs({
           const beerId = log.beer_id ?? log.beer?.id
           const history = beerId ? beerHistory[beerId] : null
 
+          const isFirstTime = history ? history.timesTried <= 1 : true
+          const isEven = i % 2 === 0
+
           return (
             <motion.div
               key={log.id}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.45 + i * 0.06 }}
+              initial={{ opacity: 0, x: isEven ? -12 : 12 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.45 + i * 0.06, type: 'spring', stiffness: 400, damping: 28 }}
               style={{
                 margin: '0 20px',
                 padding: '16px 18px',
@@ -134,8 +121,8 @@ export default function RecapBeerLogs({
                 boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
               }}
             >
-              {/* Beer top row */}
-              <div className="flex items-start gap-3.5">
+              {/* Beer top row — glass alternates sides */}
+              <div className={`flex items-start gap-3.5 ${isEven ? '' : 'flex-row-reverse'}`}>
                 <div
                   className="flex items-center justify-center flex-shrink-0"
                   style={{
@@ -151,14 +138,32 @@ export default function RecapBeerLogs({
                     size={22}
                   />
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p
-                    className="font-display font-semibold truncate"
-                    style={{ fontSize: 16, color: C.text1 }}
-                  >
-                    {beerName}
-                  </p>
-                  <div className="flex items-center gap-2 flex-wrap" style={{ marginTop: 3 }}>
+                <div className={`flex-1 min-w-0 ${isEven ? '' : 'text-right'}`}>
+                  <div className={`flex items-center gap-2 ${isEven ? '' : 'justify-end'}`}>
+                    <p
+                      className="font-display font-semibold truncate"
+                      style={{ fontSize: 16, color: C.text1 }}
+                    >
+                      {beerName}
+                    </p>
+                    {isFirstTime && (
+                      <span
+                        style={{
+                          fontSize: 9,
+                          fontWeight: 700,
+                          letterSpacing: 0.5,
+                          color: C.bg,
+                          background: C.gold,
+                          padding: '1px 6px',
+                          borderRadius: 6,
+                          flexShrink: 0,
+                        }}
+                      >
+                        NEW
+                      </span>
+                    )}
+                  </div>
+                  <div className={`flex items-center gap-2 flex-wrap ${isEven ? '' : 'justify-end'}`} style={{ marginTop: 3 }}>
                     {beerStyle && (
                       <span
                         style={{

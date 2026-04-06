@@ -1,6 +1,6 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { C, stagger } from './recapUtils'
 
 interface RecapShareActionsProps {
@@ -29,7 +29,7 @@ export default function RecapShareActions({ onClose, onShare }: RecapShareAction
             fontSize: 15,
             fontWeight: 600,
             letterSpacing: 0.3,
-            boxShadow: '0 4px 16px rgba(183,82,47,0.25)',
+            boxShadow: '0 4px 16px rgba(200,148,58,0.35), 0 0 24px rgba(200,148,58,0.15)',
             cursor: 'pointer',
           }}
         >

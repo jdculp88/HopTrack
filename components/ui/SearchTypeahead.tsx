@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Search, Loader2, Beer as BeerIcon, MapPin, X, Clock } from "lucide-react";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+import { generateGradientFromString } from "@/lib/utils";
 
 const RECENT_SEARCHES_KEY = "ht-recent-searches";
 const MAX_RECENT = 5;
@@ -491,89 +492,115 @@ export function SearchTypeahead({
                 </div>
               )}
 
-              {/* Beer results */}
-              {results && results.beers.length > 0 && (
-                <div>
-                  <div
-                    className="px-3 py-2 text-xs font-semibold uppercase tracking-wider"
-                    style={{ color: "var(--text-muted)" }}
-                  >
-                    Beers
-                  </div>
-                  {results.beers.map((beer) => {
-                    const idx = flatItems.findIndex(
-                      (f) => f.type === "beer" && f.item.id === beer.id
-                    );
-                    const isActive = idx === activeIndex;
-                    return (
-                      <button
-                        key={`beer-${beer.id}`}
-                        id={`typeahead-item-${idx}`}
-                        data-typeahead-item
-                        type="button"
-                        role="option"
-                        aria-selected={isActive}
-                        className="w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors cursor-pointer"
-                        style={{
-                          backgroundColor: isActive
-                            ? "var(--surface-2)"
-                            : "transparent",
-                        }}
-                        onMouseEnter={() => setActiveIndex(idx)}
-                        onClick={() => handleSelect(flatItems[idx])}
-                      >
-                        <div
-                          className="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center"
-                          style={{
-                            backgroundColor: "var(--surface-2)",
-                          }}
-                        >
-                          <BeerIcon
-                            className="w-4 h-4"
-                            style={{ color: "var(--accent-gold)" }}
-                          />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <span
-                              className="text-sm font-medium truncate"
-                              style={{ color: "var(--text-primary)" }}
+              {/* Beer results — grouped by brewery when 2+ share a brewery */}
+              {results && results.beers.length > 0 && (() => {
+                // Group beers by brewery for visual sub-headers
+                const breweryGroups: { breweryId: string | null; breweryName: string | null; beers: BeerResult[] }[] = [];
+                const breweryMap = new Map<string, typeof breweryGroups[number]>();
+                for (const beer of results.beers) {
+                  const bid = beer.brewery?.id ?? null;
+                  if (bid && breweryMap.has(bid)) {
+                    breweryMap.get(bid)!.beers.push(beer);
+                  } else if (bid) {
+                    const group = { breweryId: bid, breweryName: beer.brewery?.name ?? null, beers: [beer] };
+                    breweryMap.set(bid, group);
+                    breweryGroups.push(group);
+                  } else {
+                    breweryGroups.push({ breweryId: null, breweryName: null, beers: [beer] });
+                  }
+                }
+
+                return (
+                  <div>
+                    <div
+                      className="px-3 py-2 text-xs font-semibold uppercase tracking-wider flex items-center gap-2"
+                      style={{ color: "var(--text-muted)" }}
+                    >
+                      Beers
+                      <span className="text-[10px] font-normal">({results.beers.length})</span>
+                    </div>
+                    {breweryGroups.map((group) => (
+                      <div key={group.breweryId ?? 'unknown'}>
+                        {group.beers.length >= 2 && group.breweryName && (
+                          <div className="px-3 py-1" style={{ color: "var(--text-muted)" }}>
+                            <span className="font-display text-[11px] font-medium">{group.breweryName}</span>
+                          </div>
+                        )}
+                        {group.beers.map((beer) => {
+                          const idx = flatItems.findIndex(
+                            (f) => f.type === "beer" && f.item.id === beer.id
+                          );
+                          const isActive = idx === activeIndex;
+                          const gradient = generateGradientFromString(beer.name + (beer.brewery?.id ?? ''));
+                          return (
+                            <button
+                              key={`beer-${beer.id}`}
+                              id={`typeahead-item-${idx}`}
+                              data-typeahead-item
+                              type="button"
+                              role="option"
+                              aria-selected={isActive}
+                              className="w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors duration-150 cursor-pointer"
+                              style={{
+                                backgroundColor: isActive
+                                  ? "var(--surface-2)"
+                                  : "transparent",
+                              }}
+                              onMouseEnter={() => setActiveIndex(idx)}
+                              onClick={() => handleSelect(flatItems[idx])}
                             >
-                              {beer.name}
-                            </span>
-                            {beer.style && (
-                              <span
-                                className="flex-shrink-0 text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded-md"
-                                style={{
-                                  backgroundColor: "var(--surface-2)",
-                                  color: "var(--text-secondary)",
-                                }}
+                              <div
+                                className="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center"
+                                style={{ background: gradient }}
                               >
-                                {beer.style}
-                              </span>
-                            )}
-                          </div>
-                          <div
-                            className="flex items-center gap-2 text-xs mt-0.5"
-                            style={{ color: "var(--text-muted)" }}
-                          >
-                            {beer.brewery && (
-                              <span className="truncate">
-                                {beer.brewery.name}
-                              </span>
-                            )}
-                            {beer.abv != null && (
-                              <span className="flex-shrink-0">
-                                {beer.abv}% ABV
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
+                                <span className="font-display text-white text-sm font-bold drop-shadow-sm">
+                                  {beer.name.charAt(0).toUpperCase()}
+                                </span>
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2">
+                                  <span
+                                    className="text-sm font-medium truncate"
+                                    style={{ color: "var(--text-primary)" }}
+                                  >
+                                    {beer.name}
+                                  </span>
+                                  {beer.style && (
+                                    <span
+                                      className="flex-shrink-0 text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded-md"
+                                      style={{
+                                        backgroundColor: "var(--surface-2)",
+                                        color: "var(--text-secondary)",
+                                      }}
+                                    >
+                                      {beer.style}
+                                    </span>
+                                  )}
+                                </div>
+                                <div
+                                  className="flex items-center gap-2 text-xs mt-0.5"
+                                  style={{ color: "var(--text-muted)" }}
+                                >
+                                  {beer.brewery && group.beers.length < 2 && (
+                                    <span className="truncate">
+                                      {beer.brewery.name}
+                                    </span>
+                                  )}
+                                  {beer.abv != null && (
+                                    <span className="flex-shrink-0">
+                                      {beer.abv}% ABV
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
 
               {/* Brewery results */}
               {results && results.breweries.length > 0 && (
@@ -585,10 +612,11 @@ export function SearchTypeahead({
                     />
                   )}
                   <div
-                    className="px-3 py-2 text-xs font-semibold uppercase tracking-wider"
+                    className="px-3 py-2 text-xs font-semibold uppercase tracking-wider flex items-center gap-2"
                     style={{ color: "var(--text-muted)" }}
                   >
                     Breweries
+                    <span className="text-[10px] font-normal">({results.breweries.length})</span>
                   </div>
                   {results.breweries.map((brewery) => {
                     const idx = flatItems.findIndex(
@@ -604,7 +632,7 @@ export function SearchTypeahead({
                         type="button"
                         role="option"
                         aria-selected={isActive}
-                        className="w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors cursor-pointer"
+                        className="w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors duration-150 cursor-pointer"
                         style={{
                           backgroundColor: isActive
                             ? "var(--surface-2)"
@@ -614,14 +642,14 @@ export function SearchTypeahead({
                         onClick={() => handleSelect(flatItems[idx])}
                       >
                         <div
-                          className="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center"
+                          className="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center"
                           style={{
                             backgroundColor: "var(--surface-2)",
                           }}
                         >
                           <MapPin
-                            className="w-4 h-4"
-                            style={{ color: "var(--accent-gold)" }}
+                            className="w-5 h-5"
+                            style={{ color: "var(--text-secondary)" }}
                           />
                         </div>
                         <div className="flex-1 min-w-0">

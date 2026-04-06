@@ -108,13 +108,14 @@ export default async function BeerPage({ params }: { params: Promise<{ id: strin
 
       {/* Header */}
       <Card elevated className="!rounded-3xl overflow-hidden !p-0">
-        <div className="h-40 relative" style={!beer.cover_image_url ? { background: gradient } : undefined}>
+        <div className="h-56 relative" style={!beer.cover_image_url ? { background: gradient } : undefined}>
           {beer.cover_image_url && (
             <Image src={beer.cover_image_url} alt={beer.name} fill className="object-cover" />
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg)] to-transparent" />
+          {/* Two-layer gradient: bottom fade + subtle top vignette */}
+          <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg)] via-transparent to-[var(--bg)]/20" />
         </div>
-        <div className="p-6 -mt-8 relative">
+        <div className="p-6 -mt-12 relative">
           <div className="flex items-start justify-between gap-4 mb-3">
             <div>
               <h1 className="font-display text-3xl font-bold text-[var(--text-primary)] leading-tight" style={beerTransitionName(id)}>{beer.name}</h1>
@@ -125,24 +126,30 @@ export default async function BeerPage({ params }: { params: Promise<{ id: strin
             <WishlistButton beerId={id} initialWishlisted={!!wishlistItem} />
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
+          {/* Metadata stat pills */}
+          <div className="inline-flex flex-wrap items-center gap-2 bg-[var(--surface-2)] rounded-xl px-3 py-2">
             <BeerStyleBadge style={beer.style} size="md" />
             {beer.abv && (
               <span className="font-mono text-sm text-[var(--text-secondary)]">{formatABV(beer.abv)}</span>
             )}
             {beer.ibu && (
-              <span className="font-mono text-sm text-[var(--text-muted)]">{beer.ibu} IBU</span>
+              <>
+                <span className="text-[var(--border)]">·</span>
+                <span className="font-mono text-sm text-[var(--text-muted)]">{beer.ibu} IBU</span>
+              </>
             )}
           </div>
 
           {beer.avg_rating && (
-            <div className="mt-4">
+            <div className="mt-4" style={(beer.avg_rating ?? 0) >= 4.5 ? { filter: "drop-shadow(0 0 6px var(--accent-gold))" } : undefined}>
               <RatingDisplay rating={beer.avg_rating} count={beer.total_ratings} size="md" />
             </div>
           )}
 
           {beer.description && (
-            <p className="text-[var(--text-secondary)] text-sm leading-relaxed mt-4">{beer.description}</p>
+            <div className="mt-4 rounded-xl p-3 bg-[var(--surface-2)]/50">
+              <p className="text-[var(--text-secondary)] text-sm leading-relaxed">{beer.description}</p>
+            </div>
           )}
         </div>
       </Card>

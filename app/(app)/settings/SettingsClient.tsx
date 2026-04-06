@@ -8,6 +8,7 @@ import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { createClient } from "@/lib/supabase/client";
 import { useToast } from "@/components/ui/Toast";
 import { UserAvatar } from "@/components/ui/UserAvatar";
+import { Card } from "@/components/ui/Card";
 import type { Profile } from "@/types/database";
 
 type UsernameStatus = "idle" | "debouncing" | "checking" | "available" | "taken" | "same";
@@ -210,8 +211,11 @@ export function SettingsClient({ profile, userEmail }: SettingsClientProps) {
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-6 space-y-8">
+    <div className="max-w-2xl mx-auto px-4 py-6">
       <h1 className="font-sans text-3xl font-bold text-[var(--text-primary)]">Settings</h1>
+
+      {/* ── Personal ──────────────────────────────────────────── */}
+      <GroupLabel>Personal</GroupLabel>
 
       {/* Profile section */}
       <Section title="Profile" icon={<User size={16} />} description="Your public identity on HopTrack">
@@ -393,9 +397,13 @@ export function SettingsClient({ profile, userEmail }: SettingsClientProps) {
       </Section>
 
       {/* Appearance section */}
+      <div className="mt-3" />
       <Section title="Appearance" icon={<Palette size={16} />} description="Customize how HopTrack looks">
         <ThemeToggle variant="full" />
       </Section>
+
+      {/* ── Preferences ────────────────────────────────────────── */}
+      <GroupLabel>Preferences</GroupLabel>
 
       {/* Privacy section */}
       <Section title="Privacy" icon={<Lock size={16} />} description="Control who sees your activity">
@@ -416,6 +424,7 @@ export function SettingsClient({ profile, userEmail }: SettingsClientProps) {
       </Section>
 
       {/* Notifications section */}
+      <div className="mt-3" />
       <Section title="Notifications" icon={<Bell size={16} />} description="Choose what you want to hear about">
         <div className="space-y-1">
           <ToggleRow
@@ -463,6 +472,9 @@ export function SettingsClient({ profile, userEmail }: SettingsClientProps) {
         </div>
       </Section>
 
+      {/* ── Social ─────────────────────────────────────────────── */}
+      <GroupLabel>Social</GroupLabel>
+
       {/* Invite Friends section */}
       <div id="invite-friends" />
       <Section title="Invite Friends" icon={<Gift size={16} />} description="Earn 250 XP for every friend who joins">
@@ -506,6 +518,9 @@ export function SettingsClient({ profile, userEmail }: SettingsClientProps) {
         </div>
       </Section>
 
+      {/* ── Account ────────────────────────────────────────────── */}
+      <GroupLabel>Account</GroupLabel>
+
       {/* Account section */}
       <Section title="Account" icon={<User size={16} />} description="Your login and account details">
         <div className="space-y-1">
@@ -519,6 +534,7 @@ export function SettingsClient({ profile, userEmail }: SettingsClientProps) {
       </Section>
 
       {/* Danger Zone */}
+      <div className="mt-3" />
       <Section title="Danger Zone" icon={<Trash2 size={16} />} description="Destructive actions — proceed with care" variant="danger">
         <div className="space-y-2">
           <button
@@ -612,24 +628,36 @@ export function SettingsClient({ profile, userEmail }: SettingsClientProps) {
   );
 }
 
+function GroupLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="text-xs uppercase tracking-widest text-[var(--text-muted)] font-mono mt-8 mb-3">{children}</p>
+  );
+}
+
 function Section({ title, icon, description, children, variant = "default" }: { title: string; icon: React.ReactNode; description?: string; children: React.ReactNode; variant?: "default" | "danger" }) {
   return (
-    <div className={`rounded-2xl overflow-hidden ${
-      variant === "danger"
-        ? "bg-[color-mix(in_srgb,var(--danger)_5%,var(--surface))] border border-[color-mix(in_srgb,var(--danger)_20%,var(--border))]"
-        : "bg-[var(--surface)] border border-[var(--border)]"
-    }`}>
+    <Card
+      className={`!p-0 overflow-hidden ${
+        variant === "danger"
+          ? "!bg-[color-mix(in_srgb,var(--danger)_5%,var(--surface))] !border-[color-mix(in_srgb,var(--danger)_20%,var(--border))]"
+          : ""
+      }`}
+    >
       <div className="px-5 py-4 border-b border-[var(--border)]">
         <div className="flex items-center gap-2.5">
-          <span className={variant === "danger" ? "text-[var(--danger)]" : "text-[var(--accent-gold)]"}>{icon}</span>
+          <span className={`p-2 rounded-xl ${
+            variant === "danger"
+              ? "bg-[color-mix(in_srgb,var(--danger)_10%,var(--surface))] text-[var(--danger)]"
+              : "bg-[var(--surface-2)] text-[var(--accent-gold)]"
+          }`}>{icon}</span>
           <h2 className="font-display text-lg font-bold text-[var(--text-primary)]">{title}</h2>
         </div>
         {description && (
-          <p className="text-xs text-[var(--text-muted)] mt-1 ml-[30px]">{description}</p>
+          <p className="text-xs text-[var(--text-muted)] mt-1 ml-[42px]">{description}</p>
         )}
       </div>
       <div className="p-5">{children}</div>
-    </div>
+    </Card>
   );
 }
 

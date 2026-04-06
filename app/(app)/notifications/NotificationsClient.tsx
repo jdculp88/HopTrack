@@ -2,10 +2,12 @@
 
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Bell, Trophy, Users, Beer, Heart, TrendingUp, MessageCircle, Check, X, ExternalLink, ChevronDown, Gift } from "lucide-react";
+import { Bell, Trophy, Users, Beer, Heart, TrendingUp, MessageCircle, Check, CheckCheck, X, ExternalLink, ChevronDown, Gift } from "lucide-react";
 import Link from "next/link";
 import { formatRelativeTime } from "@/lib/utils";
 import { useToast } from "@/components/ui/Toast";
+import { PillTabs, type PillTab } from "@/components/ui/PillTabs";
+import { EmptyState } from "@/components/ui/EmptyState";
 import type { Notification, NotificationType } from "@/types/database";
 
 const ICONS: Record<NotificationType, { icon: React.ReactNode; color: string }> = {
@@ -151,6 +153,69 @@ function formatGroupNames(names: string[], total: number): string {
   return `${names[0]}, ${names[1]}, and ${othersCount} ${othersCount === 1 ? "other" : "others"}`;
 }
 
+// ── Category filter system ────────────────────────────────────────────────
+type NotifCategory = "all" | "social" | "achievements" | "rewards" | "system";
+
+const CATEGORY_MAP: Record<NotificationType, NotifCategory> = {
+  friend_request: "social",
+  friend_checkin: "social",
+  tagged_checkin: "social",
+  reaction: "social",
+  session_cheers: "social",
+  session_comment: "social",
+  group_invite: "social",
+  achievement_unlocked: "achievements",
+  reward_redeemed: "rewards",
+  brewery_follow: "rewards",
+  new_tap: "rewards",
+  new_event: "rewards",
+  weekly_stats: "system",
+  nudge: "system",
+  first_referral: "system",
+};
+
+const CATEGORY_LABELS: Record<NotifCategory, string> = {
+  all: "All",
+  social: "Social",
+  achievements: "Achievements",
+  rewards: "Rewards",
+  system: "System",
+};
+
+const CATEGORY_EMPTY: Record<NotifCategory, { title: string; description: string }> = {
+  all: { title: "The taps are quiet", description: "No notifications yet" },
+  social: { title: "No social notifications", description: "Cheers, comments, and friend requests will appear here" },
+  achievements: { title: "No achievements yet", description: "Unlock achievements by checking in and exploring" },
+  rewards: { title: "No reward notifications", description: "Follow breweries to get notified about new taps and events" },
+  system: { title: "No system notifications", description: "Weekly stats and updates will show up here" },
+};
+
+// ── Time section grouping ────────────────────────────────────────────────
+type TimeSection = "Today" | "Yesterday" | "This Week" | "Older";
+
+function getTimeSection(dateStr: string): TimeSection {
+  const now = new Date();
+  const date = new Date(dateStr);
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const yesterday = new Date(today.getTime() - 86400000);
+  const weekAgo = new Date(today.getTime() - 6 * 86400000);
+
+  if (date >= today) return "Today";
+  if (date >= yesterday) return "Yesterday";
+  if (date >= weekAgo) return "This Week";
+  return "Older";
+}
+
+function getEntryDate(entry: FeedEntry): string {
+  if (entry.kind === "single") return entry.notification.created_at;
+  return entry.latestAt;
+}
+
+function getEntryType(entry: FeedEntry): NotificationType {
+  if (entry.kind === "single") return entry.notification.type;
+  return entry.type;
+}
+
 interface NotificationsClientProps {
   notifications: Notification[];
 }
@@ -163,6 +228,7 @@ export function NotificationsClient({ notifications: initial }: NotificationsCli
   const { success, error: showError } = useToast();
 
   const [dismissedIds, setDismissedIds] = useState<Set<string>>(new Set());
+  const [activeCategory, setActiveCategory] = useState<NotifCategory>("all");
 
   const visibleNotifications = useMemo(
     () => notifications.filter(n => !dismissedIds.has(n.id)),
@@ -178,6 +244,48 @@ export function NotificationsClient({ notifications: initial }: NotificationsCli
       return entry.hasUnread;
     }).length;
   }, [feedEntries]);
+
+  // Unread counts per category (for badge dots)
+  const categoryUnreads = useMemo(() => {
+    const counts: Record<NotifCategory, number> = { all: 0, social: 0, achievements: 0, rewards: 0, system: 0 };
+    for (const entry of feedEntries) {
+      const isUnread = entry.kind === "single" ? !entry.notification.read : entry.hasUnread;
+      if (!isUnread) continue;
+      counts.all++;
+      const cat = CATEGORY_MAP[getEntryType(entry)];
+      if (cat) counts[cat]++;
+    }
+    return counts;
+  }, [feedEntries]);
+
+  // Filter by active category
+  const filteredEntries = useMemo(() => {
+    if (activeCategory === "all") return feedEntries;
+    return feedEntries.filter(entry => CATEGORY_MAP[getEntryType(entry)] === activeCategory);
+  }, [feedEntries, activeCategory]);
+
+  // Group filtered entries by time section
+  const timeSections = useMemo(() => {
+    const sections: { label: TimeSection; entries: FeedEntry[] }[] = [];
+    let currentSection: TimeSection | null = null;
+    for (const entry of filteredEntries) {
+      const section = getTimeSection(getEntryDate(entry));
+      if (section !== currentSection) {
+        currentSection = section;
+        sections.push({ label: section, entries: [] });
+      }
+      sections[sections.length - 1].entries.push(entry);
+    }
+    return sections;
+  }, [filteredEntries]);
+
+  const categoryTabs: PillTab<NotifCategory>[] = (
+    ["all", "social", "achievements", "rewards", "system"] as const
+  ).map(key => ({
+    key,
+    label: CATEGORY_LABELS[key],
+    count: categoryUnreads[key] > 0 ? categoryUnreads[key] : undefined,
+  }));
 
   function toggleGroup(groupKey: string) {
     setExpandedGroups(prev => {
@@ -291,56 +399,85 @@ export function NotificationsClient({ notifications: initial }: NotificationsCli
     >
     <div className="max-w-2xl mx-auto px-4 py-6 space-y-4">
       <div className="flex items-center justify-between">
-        <div>
+        <div className="flex items-center gap-3">
           <h1 className="font-sans text-3xl font-bold text-[var(--text-primary)]">Notifications</h1>
           {unread > 0 && (
-            <p className="text-xs text-[var(--text-muted)] mt-1">{unread} unread</p>
+            <button
+              onClick={markAllRead}
+              disabled={markingRead}
+              className="w-8 h-8 rounded-xl flex items-center justify-center bg-[var(--surface)] border border-[var(--border)] text-[var(--accent-gold)] hover:bg-[var(--surface-2)] transition-colors disabled:opacity-50"
+              aria-label="Mark all as read"
+              title="Mark all as read"
+            >
+              <CheckCheck size={14} />
+            </button>
           )}
         </div>
         {unread > 0 && (
-          <button
-            onClick={markAllRead}
-            disabled={markingRead}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium bg-[var(--surface)] border border-[var(--border)] text-[var(--accent-gold)] hover:bg-[var(--surface-2)] transition-colors disabled:opacity-50"
-          >
-            <motion.span className="flex items-center gap-1.5" whileTap={{ scale: 0.97 }} transition={{ type: "spring", stiffness: 400, damping: 30 }}>
-              <Check size={14} />
-              {markingRead ? "Marking..." : "Mark all read"}
-            </motion.span>
-          </button>
+          <span className="text-xs text-[var(--text-muted)]">{unread} unread</span>
         )}
       </div>
 
-      <div className="space-y-2">
-        <AnimatePresence initial={false}>
-          {feedEntries.map((entry, i) => {
-            if (entry.kind === "group") {
-              return (
-                <GroupedNotification
-                  key={`group-${entry.type}-${entry.sessionId}-${entry.latestAt}`}
-                  group={entry}
-                  index={i}
-                  expanded={expandedGroups.has(`${entry.type}-${entry.sessionId}-${entry.latestAt}`)}
-                  onToggle={() => toggleGroup(`${entry.type}-${entry.sessionId}-${entry.latestAt}`)}
-                />
-              );
-            }
+      {/* Category filter */}
+      <PillTabs
+        tabs={categoryTabs}
+        value={activeCategory}
+        onChange={setActiveCategory}
+        ariaLabel="Notification categories"
+        variant="pill"
+        size="sm"
+      />
 
-            const n = entry.notification;
-            return (
-              <SingleNotification
-                key={n.id}
-                notification={n}
-                index={i}
-                friendActions={friendActions}
-                onAccept={handleFriendAccept}
-                onDecline={handleFriendDecline}
-                onDismiss={() => dismissNotification(n.id, !n.read)}
-              />
-            );
-          })}
-        </AnimatePresence>
-      </div>
+      {/* Filtered + time-grouped feed */}
+      {filteredEntries.length === 0 ? (
+        <EmptyState
+          icon={<Bell size={24} />}
+          title={CATEGORY_EMPTY[activeCategory].title}
+          description={CATEGORY_EMPTY[activeCategory].description}
+        />
+      ) : (
+        <div className="space-y-1">
+          {timeSections.map(section => (
+            <div key={section.label}>
+              <div className="sticky top-0 z-10 bg-[var(--bg)]/80 backdrop-blur-sm py-2">
+                <p className="text-[10px] uppercase tracking-wide text-[var(--text-muted)] font-mono border-b border-[var(--border)]/50 pb-1.5">
+                  {section.label}
+                </p>
+              </div>
+              <div className="space-y-2 mt-1">
+                <AnimatePresence initial={false}>
+                  {section.entries.map((entry, i) => {
+                    if (entry.kind === "group") {
+                      return (
+                        <GroupedNotification
+                          key={`group-${entry.type}-${entry.sessionId}-${entry.latestAt}`}
+                          group={entry}
+                          index={i}
+                          expanded={expandedGroups.has(`${entry.type}-${entry.sessionId}-${entry.latestAt}`)}
+                          onToggle={() => toggleGroup(`${entry.type}-${entry.sessionId}-${entry.latestAt}`)}
+                        />
+                      );
+                    }
+
+                    const n = entry.notification;
+                    return (
+                      <SingleNotification
+                        key={n.id}
+                        notification={n}
+                        index={i}
+                        friendActions={friendActions}
+                        onAccept={handleFriendAccept}
+                        onDecline={handleFriendDecline}
+                        onDismiss={() => dismissNotification(n.id, !n.read)}
+                      />
+                    );
+                  })}
+                </AnimatePresence>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
     </motion.div>
   );

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence } from 'motion/react'
 import { ChevronLeft, ChevronRight, Camera } from 'lucide-react'
 import Image from 'next/image'
 import { C, stagger } from './recapUtils'

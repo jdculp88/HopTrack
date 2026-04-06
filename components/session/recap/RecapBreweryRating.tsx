@@ -1,7 +1,8 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { C, stagger, HINTS, getOrdinalSuffix, BreweryStats } from './recapUtils'
+import RecapSectionTitle from './RecapSectionTitle'
 
 interface RecapBreweryRatingProps {
   breweryName: string
@@ -14,23 +15,6 @@ interface RecapBreweryRatingProps {
   onHoverEnter: (v: number) => void
   onHoverLeave: () => void
   onStarClick: (v: number) => void
-}
-
-function SectionTitle({ children }: { children: React.ReactNode }) {
-  return (
-    <p
-      className="uppercase font-semibold"
-      style={{
-        fontSize: 10,
-        letterSpacing: 1.5,
-        color: C.accent,
-        margin: '24px 20px 12px',
-        paddingLeft: 2,
-      }}
-    >
-      {children}
-    </p>
-  )
 }
 
 export default function RecapBreweryRating({
@@ -46,13 +30,18 @@ export default function RecapBreweryRating({
   onStarClick,
 }: RecapBreweryRatingProps) {
   return (
-    <motion.div {...stagger(0.35)}>
-      <SectionTitle>Rate the Brewery</SectionTitle>
+    <motion.div
+      {...stagger(0.35)}
+      initial={{ opacity: 0, filter: 'blur(4px)' }}
+      animate={{ opacity: 1, filter: 'blur(0px)' }}
+      transition={{ delay: 0.35, duration: 0.5 }}
+    >
+      <RecapSectionTitle>Rate the Brewery</RecapSectionTitle>
       <div
         style={{
           margin: '0 20px',
           padding: 20,
-          background: C.card,
+          background: `radial-gradient(ellipse at 50% 0%, rgba(200,148,58,0.05) 0%, ${C.card} 70%)`,
           backdropFilter: 'blur(16px)',
           borderRadius: 16,
           border: `1px solid ${C.cardBorder}`,
