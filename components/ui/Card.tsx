@@ -12,6 +12,10 @@ interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   hoverable?: boolean;
   /** Sprint 161 — The Vibe: apply mesh gradient hero treatment */
   mesh?: boolean;
+  /** Sprint 163 — The Depth: higher elevation shadow (modals, popovers, featured) */
+  elevated?: boolean;
+  /** Sprint 163 — The Depth: disable shadow (for inline/nested cards) */
+  flat?: boolean;
   children: React.ReactNode;
 }
 
@@ -22,7 +26,7 @@ const paddingClasses = {
 };
 
 export const Card = forwardRef<HTMLDivElement, CardProps>(
-  ({ bgClass, padding = "default", hoverable = false, mesh = false, className, children, ...props }, ref) => {
+  ({ bgClass, padding = "default", hoverable = false, mesh = false, elevated = false, flat = false, className, children, ...props }, ref) => {
     const resolvedBgClass = mesh ? "card-bg-hero" : bgClass;
     return (
       <div
@@ -35,6 +39,11 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
             ? "border-[var(--border)] hover:border-[var(--accent-gold)]/30 transition-colors"
             : "border-[var(--border)]",
           !resolvedBgClass && "bg-[var(--surface)]",
+          // Sprint 163 — Shadow & Elevation System
+          !flat && (elevated
+            ? "shadow-[var(--shadow-elevated)]"
+            : "shadow-[var(--shadow-card)]"),
+          hoverable && !flat && "hover:shadow-[var(--shadow-card-hover)]",
           className
         )}
         {...props}
