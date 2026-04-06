@@ -53,9 +53,11 @@ export interface BreweryStats {
 // ─── Settings ─────────────────────────────────────────────────────────────────
 
 export type FontSize = "medium" | "large" | "xl";
+export type BoardDisplayFormat = "classic" | "grid" | "compact" | "poster" | "slideshow";
 
 export interface BoardSettings {
   fontSize: FontSize;
+  displayFormat: BoardDisplayFormat;
   showABV: boolean;
   showDesc: boolean;
   showPrice: boolean;
@@ -67,6 +69,7 @@ export interface BoardSettings {
 
 export const DEFAULT_SETTINGS: BoardSettings = {
   fontSize: "large",
+  displayFormat: "classic",
   showABV: true,
   showDesc: false,
   showPrice: true,
@@ -74,6 +77,38 @@ export const DEFAULT_SETTINGS: BoardSettings = {
   showStyle: true,
   showStats: true,
   showGlass: true,
+};
+
+/** Recommended defaults when switching to a format */
+export const FORMAT_DEFAULTS: Record<BoardDisplayFormat, Partial<BoardSettings>> = {
+  classic:   {},
+  grid:      { showGlass: true, showStyle: true },
+  compact:   { showGlass: false, showDesc: false, showRating: false, showStats: false, showStyle: false, showABV: false },
+  poster:    { showGlass: true, showStyle: true },
+  slideshow: { showGlass: true, showStyle: true, showDesc: true },
+};
+
+/** Settings that a format FORCES regardless of user toggle */
+export const FORMAT_FORCED: Record<BoardDisplayFormat, Partial<BoardSettings>> = {
+  classic:   {},
+  grid:      {},
+  compact:   { showGlass: false, showDesc: false, showRating: false, showStats: false },
+  poster:    {},
+  slideshow: {},
+};
+
+/** Apply forced overrides for the active format */
+export function getEffectiveSettings(settings: BoardSettings): BoardSettings {
+  const forced = FORMAT_FORCED[settings.displayFormat] ?? {};
+  return { ...settings, ...forced };
+}
+
+export const FORMAT_LABELS: Record<BoardDisplayFormat, string> = {
+  classic:   "Classic",
+  grid:      "Grid",
+  compact:   "Compact",
+  poster:    "Poster",
+  slideshow: "Slideshow",
 };
 
 // ─── Design constants (cream board palette) ───────────────────────────────────

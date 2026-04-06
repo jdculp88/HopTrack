@@ -6,11 +6,16 @@ import type { PourSize } from "@/lib/glassware";
 
 import {
   C, loadSettings, saveSettings, getInitials,
-  DEFAULT_SETTINGS,
-  type BoardBeer, type BoardEvent, type BeerStats, type BreweryStats, type BoardSettings,
+  DEFAULT_SETTINGS, FORMAT_DEFAULTS, getEffectiveSettings,
+  type BoardBeer, type BoardEvent, type BeerStats, type BreweryStats,
+  type BoardSettings, type BoardDisplayFormat,
 } from "./board-types";
 import { BoardHeader } from "./BoardHeader";
-import { BoardTapList } from "./BoardTapList";
+import { BoardClassic } from "./BoardClassic";
+import { BoardGrid } from "./BoardGrid";
+import { BoardCompact } from "./BoardCompact";
+import { BoardPoster } from "./BoardPoster";
+import { BoardSlideshow } from "./BoardSlideshow";
 import { BoardEvents } from "./BoardEvents";
 import { BoardStats } from "./BoardStats";
 
@@ -24,6 +29,16 @@ interface BoardClientProps {
   breweryStats?: BreweryStats;
   beerStats?: Record<string, BeerStats>;
   pourSizesMap?: Record<string, PourSize[]>;
+}
+
+// ─── Shared format props ──────────────────────────────────────────────────────
+
+export interface FormatProps {
+  beers: BoardBeer[];
+  settings: BoardSettings;
+  pourSizesMap: Record<string, PourSize[]>;
+  beerStats: Record<string, BeerStats>;
+  listRef: React.RefObject<HTMLDivElement | null>;
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -45,7 +60,7 @@ export function BoardClient({
   const listRef = useRef<HTMLDivElement | null>(null);
 
   // While settings panel is open the board previews draft; otherwise uses saved.
-  const activeSettings = settingsOpen ? draftSettings : settings;
+  const activeSettings = getEffectiveSettings(settingsOpen ? draftSettings : settings);
 
   // Persist saved settings to localStorage whenever they change
   useEffect(() => { saveSettings(breweryId, settings); }, [breweryId, settings]);
@@ -56,6 +71,11 @@ export function BoardClient({
   function cancelSettings() { setDraftSettings(settings); setSettingsOpen(false); }
   const setDraft = <K extends keyof BoardSettings>(k: K, v: BoardSettings[K]) =>
     setDraftSettings(p => ({ ...p, [k]: v }));
+
+  function onFormatChange(format: BoardDisplayFormat) {
+    const recommended = FORMAT_DEFAULTS[format];
+    setDraftSettings(prev => ({ ...prev, displayFormat: format, ...recommended }));
+  }
 
   // ── Realtime: refetch beers + pour sizes ───────────────────────────────────
   const refetchBeers = useCallback(async () => {
@@ -96,28 +116,21 @@ export function BoardClient({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [breweryId]);
 
-  // ── Auto-scroll (5s pause at top) ─────────────────────────────────────────
-  useEffect(() => {
-    const el = listRef.current;
-    if (!el) return;
-    let id: number, pos = 0, pause = 300;
-    const tick = () => {
-      if (!el || el.scrollHeight <= el.clientHeight) { id = requestAnimationFrame(tick); return; }
-      if (pause > 0) { pause--; id = requestAnimationFrame(tick); return; }
-      pos += 0.12;
-      if (pos >= el.scrollHeight - el.clientHeight) { pos = 0; pause = 300; }
-      el.scrollTop = pos;
-      id = requestAnimationFrame(tick);
-    };
-    id = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(id);
-  }, [beers, activeSettings.fontSize]);
-
-  // ── Derived values needed by sub-components ────────────────────────────────
+  // ── Derived values ─────────────────────────────────────────────────────────
   const activeTapBeers   = beers.filter(b => !b.is_featured && !b.is_86d);
   const featuredBeer     = beers.find(b => b.is_featured && !b.is_86d);
   const activeBeerCount  = (featuredBeer ? 1 : 0) + activeTapBeers.length;
   const hasMultipleTypes = new Set(activeTapBeers.map(b => b.item_type ?? "beer")).size > 1;
+
+  const formatProps: FormatProps = {
+    beers,
+    settings: activeSettings,
+    pourSizesMap: localPourSizes,
+    beerStats,
+    listRef,
+  };
+
+  const isSlideshow = activeSettings.displayFormat === "slideshow";
 
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
@@ -125,41 +138,164 @@ export function BoardClient({
       className="font-sans"
       style={{
         position: "fixed", inset: 0, overflow: "hidden",
-        background: `radial-gradient(ellipse at 50% 0%, rgba(212,168,67,0.07) 0%, transparent 55%), ${C.cream}`,
+        background: isSlideshow ? C.cream : `radial-gradient(ellipse at 50% 0%, rgba(212,168,67,0.07) 0%, transparent 55%), ${C.cream}`,
         color: C.text, display: "flex", flexDirection: "column",
       }}
     >
-      <BoardHeader
-        breweryName={breweryName}
-        initials={getInitials(breweryName)}
-        activeBeerCount={activeBeerCount}
-        hasMultipleTypes={hasMultipleTypes}
-        settingsOpen={settingsOpen}
-        draftSettings={draftSettings}
-        onOpenSettings={openSettings}
-        onCancelSettings={cancelSettings}
-        onApplySettings={applySettings}
-        onDraftChange={setDraft}
-      />
+      {/* Header hidden in slideshow mode */}
+      {!isSlideshow && (
+        <BoardHeader
+          breweryName={breweryName}
+          initials={getInitials(breweryName)}
+          activeBeerCount={activeBeerCount}
+          hasMultipleTypes={hasMultipleTypes}
+          settingsOpen={settingsOpen}
+          draftSettings={draftSettings}
+          onOpenSettings={openSettings}
+          onCancelSettings={cancelSettings}
+          onApplySettings={applySettings}
+          onDraftChange={setDraft}
+          onFormatChange={onFormatChange}
+        />
+      )}
 
-      <BoardTapList
-        beers={beers}
-        settings={activeSettings}
-        pourSizesMap={localPourSizes}
-        beerStats={beerStats}
-        listRef={listRef}
-      />
+      {/* Slideshow has its own minimal settings gear */}
+      {isSlideshow && (
+        <SlideshowSettingsButton
+          settingsOpen={settingsOpen}
+          draftSettings={draftSettings}
+          onOpenSettings={openSettings}
+          onCancelSettings={cancelSettings}
+          onApplySettings={applySettings}
+          onDraftChange={setDraft}
+          onFormatChange={onFormatChange}
+        />
+      )}
 
-      {/* ── Footer ──────────────────────────────────────────────── */}
-      <div style={{
-        flexShrink: 0,
-        borderTop: "1px solid rgba(26,23,20,0.1)",
-        padding: "16px 40px",
-        display: "flex", alignItems: "center", justifyContent: "space-between", gap: 24,
-      }}>
-        <BoardEvents events={events} />
-        <BoardStats breweryStats={breweryStats} showStats={activeSettings.showStats} />
-      </div>
+      {/* Format renderer */}
+      <FormatRenderer format={activeSettings.displayFormat} {...formatProps} breweryName={breweryName} />
+
+      {/* Footer hidden in slideshow mode */}
+      {!isSlideshow && (
+        <div style={{
+          flexShrink: 0,
+          borderTop: "1px solid rgba(26,23,20,0.1)",
+          padding: "16px 40px",
+          display: "flex", alignItems: "center", justifyContent: "space-between", gap: 24,
+        }}>
+          <BoardEvents events={events} />
+          <BoardStats breweryStats={breweryStats} showStats={activeSettings.showStats} />
+        </div>
+      )}
     </div>
+  );
+}
+
+// ─── Format renderer ─────────────────────────────────────────────────────────
+
+function FormatRenderer({ format, breweryName, ...props }: FormatProps & { format: BoardDisplayFormat; breweryName: string }) {
+  switch (format) {
+    case "classic":   return <BoardClassic {...props} />;
+    case "grid":      return <BoardGrid {...props} />;
+    case "compact":   return <BoardCompact {...props} />;
+    case "poster":    return <BoardPoster {...props} />;
+    case "slideshow": return <BoardSlideshow {...props} breweryName={breweryName} />;
+  }
+}
+
+// ─── Slideshow mini settings button (top-right gear) ──────────────────────────
+
+import { Settings } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
+import { FORMAT_LABELS, type FontSize } from "./board-types";
+
+function SlideshowSettingsButton({
+  settingsOpen, draftSettings,
+  onOpenSettings, onCancelSettings, onApplySettings, onDraftChange, onFormatChange,
+}: {
+  settingsOpen: boolean;
+  draftSettings: BoardSettings;
+  onOpenSettings: () => void;
+  onCancelSettings: () => void;
+  onApplySettings: () => void;
+  onDraftChange: <K extends keyof BoardSettings>(key: K, value: BoardSettings[K]) => void;
+  onFormatChange: (format: BoardDisplayFormat) => void;
+}) {
+  const formats: BoardDisplayFormat[] = ["classic", "grid", "compact", "poster", "slideshow"];
+
+  return (
+    <>
+      <button
+        onClick={settingsOpen ? onCancelSettings : onOpenSettings}
+        style={{
+          position: "absolute", top: 16, right: 16,
+          padding: 8, borderRadius: 10, border: "none",
+          background: "rgba(251,247,240,0.6)", backdropFilter: "blur(8px)",
+          cursor: "pointer", color: C.textSubtle, zIndex: 20,
+        }}
+      >
+        <Settings size={18} />
+      </button>
+
+      <AnimatePresence>
+        {settingsOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ type: "spring", stiffness: 400, damping: 30 }}
+            style={{
+              position: "absolute", top: 52, right: 16, zIndex: 20,
+              borderRadius: 12, border: `1px solid ${C.border}`,
+              background: "rgba(251,247,240,0.97)", backdropFilter: "blur(12px)",
+              padding: "12px 16px", minWidth: 240,
+            }}
+          >
+            {/* Format selector */}
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 10 }}>
+              {formats.map(f => (
+                <button
+                  key={f}
+                  onClick={() => onFormatChange(f)}
+                  style={{
+                    padding: "4px 10px", borderRadius: 99, border: "none", cursor: "pointer",
+                    fontSize: 11, fontFamily: "var(--font-mono), 'JetBrains Mono', monospace",
+                    background: draftSettings.displayFormat === f ? "#0F0E0C" : C.border,
+                    color: draftSettings.displayFormat === f ? "#F5F0E8" : C.textMuted,
+                    fontWeight: 600,
+                  }}
+                >
+                  {FORMAT_LABELS[f]}
+                </button>
+              ))}
+            </div>
+
+            {/* Apply / Cancel */}
+            <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", paddingTop: 8, borderTop: `1px solid ${C.border}` }}>
+              <button
+                onClick={onCancelSettings}
+                style={{
+                  padding: "4px 12px", borderRadius: 8, border: `1px solid ${C.border}`,
+                  fontSize: 11, cursor: "pointer", background: "transparent", color: C.textMuted,
+                  fontFamily: "var(--font-mono), 'JetBrains Mono', monospace",
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={onApplySettings}
+                style={{
+                  padding: "4px 12px", borderRadius: 8, border: "none",
+                  fontSize: 11, cursor: "pointer", background: "#0F0E0C", color: C.gold,
+                  fontWeight: 700, fontFamily: "var(--font-mono), 'JetBrains Mono', monospace",
+                }}
+              >
+                Apply
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 }

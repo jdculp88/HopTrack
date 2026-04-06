@@ -2,7 +2,10 @@
 
 import { Settings } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
-import { C, type BoardSettings, type FontSize } from "./board-types";
+import {
+  C, FORMAT_LABELS, FORMAT_FORCED,
+  type BoardSettings, type FontSize, type BoardDisplayFormat,
+} from "./board-types";
 
 interface BoardHeaderProps {
   breweryName: string;
@@ -15,7 +18,10 @@ interface BoardHeaderProps {
   onCancelSettings: () => void;
   onApplySettings: () => void;
   onDraftChange: <K extends keyof BoardSettings>(key: K, value: BoardSettings[K]) => void;
+  onFormatChange: (format: BoardDisplayFormat) => void;
 }
+
+const FORMATS: BoardDisplayFormat[] = ["classic", "grid", "compact", "poster", "slideshow"];
 
 export function BoardHeader({
   breweryName,
@@ -28,10 +34,14 @@ export function BoardHeader({
   onCancelSettings,
   onApplySettings,
   onDraftChange,
+  onFormatChange,
 }: BoardHeaderProps) {
+  const forcedKeys = new Set(Object.keys(FORMAT_FORCED[draftSettings.displayFormat] ?? {}));
+  const hideFontSize = draftSettings.displayFormat === "slideshow";
+
   return (
     <>
-      {/* ── Header bar ────────────────────────────────────────────────── */}
+      {/* Header bar */}
       <header style={{ padding: "28px 40px 20px", flexShrink: 0, position: "relative" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 16, flex: 1, minWidth: 0 }}>
@@ -69,7 +79,7 @@ export function BoardHeader({
           </div>
         </div>
 
-        {/* Settings gear button */}
+        {/* Settings gear */}
         <button
           onClick={settingsOpen ? onCancelSettings : onOpenSettings}
           style={{
@@ -84,11 +94,10 @@ export function BoardHeader({
           <Settings size={20} />
         </button>
 
-        {/* Divider */}
         <div style={{ marginTop: 20, height: 1, background: "rgba(26,23,20,0.12)" }} />
       </header>
 
-      {/* ── Settings panel ────────────────────────────────────────────── */}
+      {/* Settings panel */}
       <AnimatePresence>
         {settingsOpen && (
           <motion.div
@@ -105,28 +114,52 @@ export function BoardHeader({
               padding: "12px 20px",
               background: "rgba(251,247,240,0.97)", backdropFilter: "blur(12px)",
             }}>
+              {/* Format selector */}
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+                <span className="font-mono" style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: "0.1em", color: C.textSubtle }}>
+                  Format
+                </span>
+                {FORMATS.map(f => (
+                  <button
+                    key={f}
+                    onClick={() => onFormatChange(f)}
+                    style={{
+                      padding: "4px 12px", borderRadius: 99, border: "none", cursor: "pointer",
+                      fontSize: 11, fontFamily: "var(--font-mono), 'JetBrains Mono', monospace",
+                      background: draftSettings.displayFormat === f ? "#0F0E0C" : C.border,
+                      color: draftSettings.displayFormat === f ? "#F5F0E8" : C.textMuted,
+                      fontWeight: 600,
+                    }}
+                  >
+                    {FORMAT_LABELS[f]}
+                  </button>
+                ))}
+              </div>
+
               <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 18, marginBottom: 10 }}>
                 {/* Font size pills */}
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <span className="font-mono" style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: "0.1em", color: C.textSubtle }}>
-                    Size
-                  </span>
-                  {(["medium", "large", "xl"] as FontSize[]).map(s => (
-                    <button
-                      key={s}
-                      onClick={() => onDraftChange("fontSize", s)}
-                      style={{
-                        padding: "4px 12px", borderRadius: 99, border: "none", cursor: "pointer",
-                        fontSize: 11, fontFamily: "var(--font-mono), 'JetBrains Mono', monospace",
-                        background: draftSettings.fontSize === s ? "#0F0E0C" : C.border,
-                        color: draftSettings.fontSize === s ? "#F5F0E8" : C.textMuted,
-                        fontWeight: 600,
-                      }}
-                    >
-                      {s.toUpperCase()}
-                    </button>
-                  ))}
-                </div>
+                {!hideFontSize && (
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <span className="font-mono" style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: "0.1em", color: C.textSubtle }}>
+                      Size
+                    </span>
+                    {(["medium", "large", "xl"] as FontSize[]).map(s => (
+                      <button
+                        key={s}
+                        onClick={() => onDraftChange("fontSize", s)}
+                        style={{
+                          padding: "4px 12px", borderRadius: 99, border: "none", cursor: "pointer",
+                          fontSize: 11, fontFamily: "var(--font-mono), 'JetBrains Mono', monospace",
+                          background: draftSettings.fontSize === s ? "#0F0E0C" : C.border,
+                          color: draftSettings.fontSize === s ? "#F5F0E8" : C.textMuted,
+                          fontWeight: 600,
+                        }}
+                      >
+                        {s.toUpperCase()}
+                      </button>
+                    ))}
+                  </div>
+                )}
 
                 {/* Toggle checkboxes */}
                 {([
@@ -137,17 +170,25 @@ export function BoardHeader({
                   { label: "Price",  key: "showPrice"  as const, val: draftSettings.showPrice },
                   { label: "Rating", key: "showRating" as const, val: draftSettings.showRating },
                   { label: "Stats",  key: "showStats"  as const, val: draftSettings.showStats },
-                ]).map(({ label, key, val }) => (
-                  <label key={label} style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer" }}>
-                    <input
-                      type="checkbox"
-                      checked={val}
-                      onChange={e => onDraftChange(key, e.target.checked)}
-                      style={{ accentColor: C.gold }}
-                    />
-                    <span className="font-mono" style={{ fontSize: 12, color: C.textMuted }}>{label}</span>
-                  </label>
-                ))}
+                ]).map(({ label, key, val }) => {
+                  const isForced = forcedKeys.has(key);
+                  return (
+                    <label key={label} style={{
+                      display: "flex", alignItems: "center", gap: 6,
+                      cursor: isForced ? "not-allowed" : "pointer",
+                      opacity: isForced ? 0.4 : 1,
+                    }}>
+                      <input
+                        type="checkbox"
+                        checked={isForced ? false : val}
+                        disabled={isForced}
+                        onChange={e => onDraftChange(key, e.target.checked)}
+                        style={{ accentColor: C.gold }}
+                      />
+                      <span className="font-mono" style={{ fontSize: 12, color: C.textMuted }}>{label}</span>
+                    </label>
+                  );
+                })}
               </div>
 
               {/* Preview label + apply / cancel */}
