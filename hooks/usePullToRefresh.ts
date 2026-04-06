@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 
 interface UsePullToRefreshOptions {
   threshold?: number; // px to pull before triggering, default 60
@@ -19,6 +19,7 @@ export function usePullToRefresh({
 }: UsePullToRefreshOptions = {}) {
   const containerRef = useRef<HTMLDivElement>(null);
   const startY = useRef<number | null>(null);
+  const thresholdHapticFired = useRef(false);
   const [pullDistance, setPullDistance] = useState(0);
   const [isPulling, setIsPulling] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -31,6 +32,7 @@ export function usePullToRefresh({
       // Only activate when scrolled to top
       if (window.scrollY > 0) return;
       startY.current = e.touches[0].clientY;
+      thresholdHapticFired.current = false;
     }
 
     function onTouchMove(e: TouchEvent) {
@@ -41,7 +43,16 @@ export function usePullToRefresh({
       if (window.scrollY === 0 && dy > 0) e.preventDefault();
       const capped = Math.min(dy, threshold * 1.5);
       setPullDistance(capped);
-      setIsPulling(capped >= threshold);
+      const pastThreshold = capped >= threshold;
+      setIsPulling(pastThreshold);
+      // Haptic feedback when crossing threshold (Sprint 169)
+      if (pastThreshold && !thresholdHapticFired.current) {
+        thresholdHapticFired.current = true;
+        if (typeof navigator !== "undefined" && navigator.vibrate) {
+          const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+          if (!mq.matches) navigator.vibrate(5);
+        }
+      }
     }
 
     function onTouchEnd() {

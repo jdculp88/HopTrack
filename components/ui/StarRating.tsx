@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
+import { useHaptic } from "@/hooks/useHaptic";
 
 interface StarRatingProps {
   value: number;
@@ -29,6 +30,7 @@ export function StarRating({
   const [hovered, setHovered] = useState<number | null>(null);
   const displayValue = hovered ?? value;
   const isInteractive = !readonly && !!onChange;
+  const { haptic } = useHaptic();
 
   function handleMouseMove(e: React.MouseEvent<HTMLButtonElement>, starIndex: number) {
     if (!isInteractive) return;
@@ -45,7 +47,7 @@ export function StarRating({
     const isHalf = x < rect.width / 2;
     const newValue = starIndex + (isHalf ? 0.5 : 1);
     onChange?.(newValue);
-    if (navigator.vibrate) navigator.vibrate(30);
+    haptic("selection");
   }
 
   function handleKeyDown(e: React.KeyboardEvent) {

@@ -35,6 +35,8 @@ interface Achievement {
   category: AchievementCategory;
   earned: boolean;
   earned_at: string | null;
+  unlockCount?: number;
+  rarityPercent?: number;
 }
 
 interface AchievementsClientProps {
@@ -159,6 +161,7 @@ export function AchievementsClient({ achievements, totalEarned, total }: Achieve
                   earnedAt={achievement.earned_at ?? undefined}
                   size="md"
                   onClick={() => setSelected(achievement)}
+                  rarityPercent={achievement.rarityPercent}
                 />
               </motion.div>
             ))}
@@ -199,8 +202,31 @@ export function AchievementsClient({ achievements, totalEarned, total }: Achieve
                 <p className="text-[var(--text-secondary)] text-sm mt-2 leading-relaxed">{selected.description}</p>
               </div>
 
-              <div className="flex items-center gap-2 bg-[var(--accent-gold)]/10 border border-[var(--accent-gold)]/20 px-4 py-2 rounded-full">
-                <span className="text-[var(--accent-gold)] font-mono font-bold">+{selected.xp_reward} XP</span>
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 bg-[var(--accent-gold)]/10 border border-[var(--accent-gold)]/20 px-4 py-2 rounded-full">
+                  <span className="text-[var(--accent-gold)] font-mono font-bold">+{selected.xp_reward} XP</span>
+                </div>
+                {selected.rarityPercent !== undefined && (
+                  <div
+                    className="px-3 py-2 rounded-full text-xs font-mono font-medium border"
+                    style={{
+                      color: selected.rarityPercent <= 5 ? "#D4A843"
+                        : selected.rarityPercent <= 20 ? "#8BAABF"
+                        : selected.rarityPercent <= 50 ? "#3D7A52"
+                        : "var(--text-muted)",
+                      borderColor: selected.rarityPercent <= 5 ? "rgba(212,168,67,0.3)"
+                        : selected.rarityPercent <= 20 ? "rgba(139,170,191,0.3)"
+                        : selected.rarityPercent <= 50 ? "rgba(61,122,82,0.3)"
+                        : "var(--border)",
+                      background: selected.rarityPercent <= 5 ? "rgba(212,168,67,0.08)"
+                        : selected.rarityPercent <= 20 ? "rgba(139,170,191,0.08)"
+                        : selected.rarityPercent <= 50 ? "rgba(61,122,82,0.08)"
+                        : "var(--surface-2)",
+                    }}
+                  >
+                    {selected.rarityPercent}% unlocked
+                  </div>
+                )}
               </div>
 
               {selected.earned ? (

@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useHaptic } from "@/hooks/useHaptic";
 
 const FOCUSABLE = 'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
 
@@ -27,6 +28,8 @@ const SIZES = {
 export function Modal({ open, onClose, title, children, size = "md", className }: ModalProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
+  const { haptic } = useHaptic();
+  const handleClose = () => { haptic("tap"); onClose(); };
 
   useEffect(() => {
     if (open) {
@@ -73,7 +76,7 @@ export function Modal({ open, onClose, title, children, size = "md", className }
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="absolute inset-0 bg-black/70 backdrop-blur-sm"
-            onClick={onClose}
+            onClick={handleClose}
           />
 
           {/* Panel */}
@@ -88,7 +91,7 @@ export function Modal({ open, onClose, title, children, size = "md", className }
             dragElastic={{ top: 0, bottom: 0.4 }}
             onDragEnd={(_, info) => {
               if (info.velocity.y > 300 || info.offset.y > 100) {
-                onClose();
+                handleClose();
               }
             }}
             className={cn(
@@ -125,7 +128,7 @@ export function Modal({ open, onClose, title, children, size = "md", className }
               <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border)] flex-shrink-0 relative z-[1]">
                 <h2 id="modal-title" className="font-display text-lg font-semibold text-[var(--text-primary)]">{title}</h2>
                 <button
-                  onClick={onClose}
+                  onClick={handleClose}
                   aria-label="Close dialog"
                   className="p-2 rounded-xl hover:bg-[var(--surface-2)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
                 >

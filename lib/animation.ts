@@ -57,3 +57,15 @@ export const cardHover = {
   featured: { y: -4 },
   compact: { y: -2, scale: 1.01 },
 } as const;
+
+// Micro-interaction presets — Sprint 169 (The Details)
+export const microInteraction = {
+  /** Button press feedback */
+  press: { scale: 0.97 },
+  /** Icon tap feedback */
+  tap: { scale: 0.95 },
+  /** Toggle/switch animation */
+  toggle: { scale: 0.92 },
+  /** Subtle feedback for selection changes */
+  select: { scale: 0.98 },
+} as const;

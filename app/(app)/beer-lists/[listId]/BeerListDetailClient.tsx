@@ -36,7 +36,9 @@ import { CSS } from "@dnd-kit/utilities";
 import { useToast } from "@/components/ui/Toast";
 import { StarRating } from "@/components/ui/StarRating";
 import { UserAvatar } from "@/components/ui/UserAvatar";
+import { PillTabs } from "@/components/ui/PillTabs";
 import Link from "next/link";
+import { generateGradientFromString } from "@/lib/utils";
 
 interface BeerItem {
   id: string;
@@ -49,8 +51,13 @@ interface BeerItem {
     style?: string | null;
     abv?: number | null;
     avg_rating?: number | null;
+    cover_image_url?: string | null;
+    item_type?: string | null;
+    brewery?: { id: string; name: string } | null;
   } | null;
 }
+
+type ViewMode = "list" | "mosaic";
 
 interface BeerListDetailClientProps {
   list: any;
@@ -124,6 +131,19 @@ function SortableItem({
             {item.position + 1}
           </span>
 
+          {/* Beer thumbnail (Sprint 169) */}
+          <div
+            className="w-10 h-10 rounded-lg flex-shrink-0 flex items-center justify-center text-xs font-bold"
+            style={{
+              background: beer?.cover_image_url
+                ? `url(${beer.cover_image_url}) center/cover`
+                : generateGradientFromString(beer?.name ?? "beer"),
+              color: "rgba(255,255,255,0.8)",
+            }}
+          >
+            {!beer?.cover_image_url && (beer?.name?.[0]?.toUpperCase() ?? "?")}
+          </div>
+
           {/* Beer info */}
           <div className="flex-1 min-w-0">
             <Link
@@ -135,9 +155,14 @@ function SortableItem({
             </Link>
 
             <div className="flex flex-wrap items-center gap-1.5 mt-0.5">
+              {beer?.brewery?.name && (
+                <span className="text-xs" style={{ color: "var(--text-secondary)" }}>
+                  {beer.brewery.name}
+                </span>
+              )}
               {beer?.style && (
                 <span className="text-xs" style={{ color: "var(--text-muted)" }}>
-                  {beer.style}
+                  {beer?.brewery?.name ? "· " : ""}{beer.style}
                 </span>
               )}
               {beer?.abv != null && (
@@ -269,6 +294,7 @@ export function BeerListDetailClient({
   );
   const [confirmRemoveId, setConfirmRemoveId] = useState<string | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<ViewMode>("list");
 
   // Duplicate list state
   const [showDuplicateConfirm, setShowDuplicateConfirm] = useState(false);
@@ -559,8 +585,44 @@ export function BeerListDetailClient({
         </AnimatePresence>
       </div>
 
-      {/* Drag hint — owner with items */}
-      {isOwner && items.length > 1 && (
+      {/* Stats panel + view toggle (Sprint 169) */}
+      {items.length > 0 && (
+        <div className="flex items-center justify-between mb-4">
+          {/* Stats summary */}
+          <div className="flex items-center gap-3 text-xs font-mono" style={{ color: "var(--text-muted)" }}>
+            {(() => {
+              const styles = new Set(items.map(i => (i.beer as any)?.style).filter(Boolean));
+              const breweries = new Set(items.map(i => (i.beer as any)?.brewery?.name).filter(Boolean));
+              const ratings = items.map(i => (i.beer as any)?.avg_rating).filter((r: any) => r != null) as number[];
+              const avg = ratings.length > 0 ? (ratings.reduce((a, b) => a + b, 0) / ratings.length).toFixed(1) : null;
+              return (
+                <>
+                  <span>{items.length} beers</span>
+                  {styles.size > 0 && <span>· {styles.size} styles</span>}
+                  {breweries.size > 0 && <span>· {breweries.size} breweries</span>}
+                  {avg && <span>· {avg} avg</span>}
+                </>
+              );
+            })()}
+          </div>
+
+          {/* View toggle */}
+          <PillTabs
+            ariaLabel="View mode"
+            variant="segmented"
+            size="sm"
+            tabs={[
+              { key: "list", label: "List" },
+              { key: "mosaic", label: "Mosaic" },
+            ]}
+            value={viewMode}
+            onChange={(key) => setViewMode(key as ViewMode)}
+          />
+        </div>
+      )}
+
+      {/* Drag hint — owner with items (list mode only) */}
+      {isOwner && items.length > 1 && viewMode === "list" && (
         <p className="text-xs mb-3 flex items-center gap-1" style={{ color: "var(--text-muted)" }}>
           <GripVertical size={12} />
           Drag to reorder
@@ -583,6 +645,74 @@ export function BeerListDetailClient({
             </p>
           )}
         </div>
+      ) : viewMode === "mosaic" ? (
+        /* Mosaic grid view (Sprint 169) */
+        <motion.div
+          className="grid grid-cols-2 sm:grid-cols-3 gap-3"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.2 }}
+        >
+          {items.map((item, i) => {
+            const beer = item.beer as any;
+            return (
+              <motion.div
+                key={item.id}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: i * 0.03, type: "spring", stiffness: 350, damping: 28 }}
+              >
+                <Link href={`/beer/${beer?.id ?? ""}`} className="block group">
+                  <div
+                    className="aspect-square rounded-2xl overflow-hidden relative"
+                    style={{
+                      background: beer?.cover_image_url
+                        ? `url(${beer.cover_image_url}) center/cover`
+                        : generateGradientFromString(beer?.name ?? "beer"),
+                    }}
+                  >
+                    {/* Position badge */}
+                    <div
+                      className="absolute top-2 left-2 w-6 h-6 rounded-lg flex items-center justify-center text-xs font-mono font-bold"
+                      style={{ background: "rgba(0,0,0,0.6)", color: "var(--accent-gold)" }}
+                    >
+                      {item.position + 1}
+                    </div>
+
+                    {/* Initial overlay when no image */}
+                    {!beer?.cover_image_url && (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <span className="text-4xl font-bold" style={{ color: "rgba(255,255,255,0.25)" }}>
+                          {beer?.name?.[0]?.toUpperCase() ?? "?"}
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Bottom info overlay */}
+                    <div
+                      className="absolute inset-x-0 bottom-0 p-2.5 pt-8"
+                      style={{ background: "linear-gradient(transparent, rgba(0,0,0,0.75))" }}
+                    >
+                      <p className="text-xs font-semibold text-white truncate group-hover:text-[var(--accent-gold)] transition-colors">
+                        {beer?.name ?? "Unknown"}
+                      </p>
+                      <div className="flex items-center gap-1.5 mt-0.5">
+                        {beer?.style && (
+                          <span className="text-[10px] text-white/60 truncate">{beer.style}</span>
+                        )}
+                        {beer?.avg_rating != null && (
+                          <span className="text-[10px] text-[var(--accent-gold)] font-mono">
+                            ★ {beer.avg_rating.toFixed(1)}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              </motion.div>
+            );
+          })}
+        </motion.div>
       ) : (
         <DndContext
           sensors={sensors}

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion } from "motion/react";
 import { Bookmark, BookmarkCheck } from "lucide-react";
 import { useToast } from "@/components/ui/Toast";
+import { useHaptic } from "@/hooks/useHaptic";
 
 interface WishlistButtonProps {
   beerId: string;
@@ -14,9 +15,11 @@ export function WishlistButton({ beerId, initialWishlisted }: WishlistButtonProp
   const [wishlisted, setWishlisted] = useState(initialWishlisted);
   const [loading, setLoading] = useState(false);
   const { success, error } = useToast();
+  const { haptic } = useHaptic();
 
   async function toggle() {
     if (loading) return;
+    haptic(wishlisted ? "tap" : "success");
     const prev = wishlisted;
     setWishlisted(!prev);
     setLoading(true);

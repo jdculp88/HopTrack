@@ -3,6 +3,7 @@
 import { forwardRef } from "react";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
+import { useHaptic } from "@/hooks/useHaptic";
 
 interface IconButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   /** aria-label is REQUIRED for icon buttons — no visible text means screen readers need it */
@@ -26,9 +27,11 @@ const VARIANTS = {
 };
 
 export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
-  ({ size = "md", variant = "ghost", className, children, ...props }, ref) => {
+  ({ size = "md", variant = "ghost", className, children, onClick, ...props }, ref) => {
+    const { haptic } = useHaptic();
     return (
       <button
+        onClick={(e) => { haptic("tap"); onClick?.(e); }}
         ref={ref}
         className={cn(
           "inline-flex items-center justify-center flex-shrink-0 transition-colors",

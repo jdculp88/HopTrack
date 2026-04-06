@@ -18,6 +18,7 @@ import { useToast } from "@/components/ui/Toast";
 import { StarRating } from "@/components/ui/StarRating";
 import Link from "next/link";
 import { Card } from "@/components/ui/Card";
+import { generateGradientFromString } from "@/lib/utils";
 import type { BeerList } from "@/types/database";
 
 interface BeerListsClientProps {
@@ -245,6 +246,31 @@ export function BeerListsClient({ userId: _userId, initialLists }: BeerListsClie
                   <motion.div animate={{ rotate: isExpanded ? 180 : 0 }} transition={{ duration: 0.2 }}>
                     <ChevronDown size={15} style={{ color: "var(--text-muted)" }} />
                   </motion.div>
+
+                  {/* Preview mosaic — first 4 beer thumbnails (Sprint 169) */}
+                  {items.length > 0 && (
+                    <div className="grid grid-cols-2 gap-0.5 w-10 h-10 rounded-lg overflow-hidden flex-shrink-0">
+                      {items.slice(0, 4).map((item) => {
+                        const beer = item.beer as any;
+                        return (
+                          <div
+                            key={item.id}
+                            className="w-full h-full"
+                            style={{
+                              background: beer?.cover_image_url
+                                ? `url(${beer.cover_image_url}) center/cover`
+                                : generateGradientFromString(beer?.name ?? "beer"),
+                            }}
+                          />
+                        );
+                      })}
+                      {/* Fill empty slots */}
+                      {items.length < 4 && Array.from({ length: 4 - Math.min(items.length, 4) }).map((_, i) => (
+                        <div key={`empty-${i}`} className="w-full h-full" style={{ background: "var(--surface-2)" }} />
+                      ))}
+                    </div>
+                  )}
+
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
                       <span
@@ -259,9 +285,15 @@ export function BeerListsClient({ userId: _userId, initialLists }: BeerListsClie
                         <Globe size={10} style={{ color: "var(--text-muted)" }} />
                       )}
                     </div>
+                    {/* Stats line (Sprint 169) */}
                     <span className="text-xs" style={{ color: "var(--text-muted)" }}>
                       {items.length} beer{items.length !== 1 ? "s" : ""}
-                      {list.description ? ` · ${list.description}` : ""}
+                      {(() => {
+                        const styles = new Set(items.map((i: any) => i.beer?.style).filter(Boolean));
+                        const ratings = items.map((i: any) => i.beer?.avg_rating).filter((r: any) => r != null);
+                        const avg = ratings.length > 0 ? (ratings.reduce((a: number, b: number) => a + b, 0) / ratings.length).toFixed(1) : null;
+                        return `${styles.size > 0 ? ` · ${styles.size} style${styles.size !== 1 ? "s" : ""}` : ""}${avg ? ` · ${avg} avg` : ""}`;
+                      })()}
                     </span>
                   </div>
                 </button>
@@ -403,6 +435,18 @@ export function BeerListsClient({ userId: _userId, initialLists }: BeerListsClie
                                 >
                                   {item.position + 1}
                                 </span>
+                                {/* Beer thumbnail (Sprint 169) */}
+                                <div
+                                  className="w-10 h-10 rounded-lg flex-shrink-0 flex items-center justify-center text-xs font-bold"
+                                  style={{
+                                    background: beer?.cover_image_url
+                                      ? `url(${beer.cover_image_url}) center/cover`
+                                      : generateGradientFromString(beer?.name ?? "beer"),
+                                    color: "rgba(255,255,255,0.8)",
+                                  }}
+                                >
+                                  {!beer?.cover_image_url && (beer?.name?.[0]?.toUpperCase() ?? "?")}
+                                </div>
                                 <div className="flex-1 min-w-0">
                                   <div className="flex items-center gap-2">
                                     <Link
@@ -417,9 +461,14 @@ export function BeerListsClient({ userId: _userId, initialLists }: BeerListsClie
                                     )}
                                   </div>
                                   <div className="flex items-center gap-1.5 mt-0.5">
+                                    {beer?.brewery?.name && (
+                                      <span className="text-[11px]" style={{ color: "var(--text-secondary)" }}>
+                                        {beer.brewery.name}
+                                      </span>
+                                    )}
                                     {beer?.style && (
                                       <span className="text-[11px]" style={{ color: "var(--text-muted)" }}>
-                                        {beer.style}
+                                        {beer?.brewery?.name ? "· " : ""}{beer.style}
                                       </span>
                                     )}
                                     {beer?.abv != null && (
@@ -430,7 +479,7 @@ export function BeerListsClient({ userId: _userId, initialLists }: BeerListsClie
                                   </div>
                                   {item.note && (
                                     <p className="text-[11px] italic mt-0.5" style={{ color: "var(--text-secondary)" }}>
-                                      "{item.note}"
+                                      &quot;{item.note}&quot;
                                     </p>
                                   )}
                                 </div>

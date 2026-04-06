@@ -22,6 +22,8 @@ interface WrappedExperienceProps {
   shareTitle?: string;
   shareUrl?: string;
   customShareText?: string;
+  // Sprint 169 — The Details: week-over-week comparison
+  previousStats?: WrappedStats;
 }
 
 const slideVariants = {
@@ -53,6 +55,7 @@ export function WrappedExperience({
   shareTitle,
   shareUrl,
   customShareText,
+  previousStats,
 }: WrappedExperienceProps) {
   // variant reserved for future per-slide customization; suppress unused warning
   void variant;
@@ -65,7 +68,7 @@ export function WrappedExperience({
   // Build slide list based on available data
   const slides: Array<{ key: string; component: React.ReactNode }> = [];
   slides.push({ key: "intro", component: <WrappedIntro stats={stats} /> });
-  slides.push({ key: "numbers", component: <WrappedNumbers stats={stats} /> });
+  slides.push({ key: "numbers", component: <WrappedNumbers stats={stats} previousStats={previousStats} /> });
   if (stats.topStyle) {
     slides.push({ key: "taste", component: <WrappedTaste stats={stats} /> });
   }

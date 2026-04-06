@@ -15,7 +15,7 @@ export default async function BeerListsPage() {
   const { data: lists } = await supabase
     .from("beer_lists")
     .select(
-      "id, title, description, is_public, created_at, items:beer_list_items(id, beer_id, position, note, beer:beers(id, name, style, abv, avg_rating))"
+      "id, title, description, is_public, created_at, items:beer_list_items(id, beer_id, position, note, beer:beers(id, name, style, abv, avg_rating, cover_image_url, item_type, brewery:breweries(id, name)))"
     )
     .eq("user_id", user.id)
     .order("created_at", { ascending: false });

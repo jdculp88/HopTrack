@@ -3,6 +3,7 @@
 import { forwardRef } from "react";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
+import { useHaptic } from "@/hooks/useHaptic";
 
 type ButtonVariant = "primary" | "secondary" | "ghost" | "danger" | "gold";
 type ButtonSize = "xs" | "sm" | "md" | "lg";
@@ -48,13 +49,19 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       children,
       className,
       disabled,
+      onClick,
       ...props
     },
     ref
   ) => {
+    const { haptic } = useHaptic();
     return (
       <button
         ref={ref}
+        onClick={(e) => {
+          haptic("press");
+          onClick?.(e);
+        }}
         className={cn(
           "inline-flex items-center justify-center font-sans transition-all duration-150",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-gold)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)]",

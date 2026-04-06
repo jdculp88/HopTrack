@@ -15,9 +15,10 @@ interface YourRoundClientProps {
   userId: string;
   username: string;
   initialStats: WrappedStats;
+  previousStats?: WrappedStats;
 }
 
-export function YourRoundClient({ userId, username, initialStats }: YourRoundClientProps) {
+export function YourRoundClient({ userId, username, initialStats, previousStats }: YourRoundClientProps) {
   // Empty state — no beers this week
   if (!initialStats || initialStats.totalBeers === 0) {
     return (
@@ -66,6 +67,7 @@ export function YourRoundClient({ userId, username, initialStats }: YourRoundCli
     >
       <WrappedExperience
         stats={initialStats}
+        previousStats={previousStats}
         username={username}
         variant="week"
         shareTitle="My HopTrack Round"

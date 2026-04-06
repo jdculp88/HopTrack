@@ -4,6 +4,7 @@ import { Sun, Moon } from "lucide-react";
 import { motion } from "motion/react";
 import { useTheme } from "./ThemeProvider";
 import { cn } from "@/lib/utils";
+import { useHaptic } from "@/hooks/useHaptic";
 
 interface ThemeToggleProps {
   className?: string;
@@ -14,11 +15,13 @@ interface ThemeToggleProps {
 export function ThemeToggle({ className, variant = "compact" }: ThemeToggleProps) {
   const { theme, toggle } = useTheme();
   const isDark = theme === "dark";
+  const { haptic } = useHaptic();
+  const handleToggle = () => { haptic("selection"); toggle(); };
 
   if (variant === "full") {
     return (
       <button
-        onClick={toggle}
+        onClick={handleToggle}
         className={cn(
           "flex items-center justify-between w-full p-3 rounded-xl transition-colors",
           "hover:bg-[var(--surface-2)]",

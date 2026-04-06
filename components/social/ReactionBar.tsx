@@ -4,6 +4,7 @@ import { useState, useCallback, useRef } from "react";
 import { motion } from "motion/react";
 import { MessageCircle, Share2 } from "lucide-react";
 import { useToast } from "@/components/ui/Toast";
+import { useHaptic } from "@/hooks/useHaptic";
 
 interface ReactionBarProps {
   sessionId?: string;
@@ -33,6 +34,7 @@ export function ReactionBar({
   const [particles, setParticles] = useState<Array<{ id: number; angle: number }>>([]);
   const particleIdRef = useRef(0);
   const { error: showError } = useToast();
+  const { haptic } = useHaptic();
 
   const beerCount = counts.beer ?? 0;
   const hasReacted = myReactions.includes("beer");
@@ -55,9 +57,7 @@ export function ReactionBar({
 
     // Cheers animation: gold particles + haptic
     if (!wasActive) {
-      if (typeof navigator !== "undefined" && "vibrate" in navigator) {
-        navigator.vibrate(30);
-      }
+      haptic("success");
       const newParticles = Array.from({ length: 6 }, (_, i) => ({
         id: particleIdRef.current++,
         angle: (i / 6) * 360 + Math.random() * 30,

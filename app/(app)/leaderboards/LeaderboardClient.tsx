@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Skeleton } from "@/components/ui/SkeletonLoader";
 import { LeaderboardRow } from "@/components/social/LeaderboardRow";
+import { LeaderboardPodium } from "@/components/social/LeaderboardPodium";
 import { LEADERBOARD_CATEGORIES } from "@/lib/schemas/leaderboard";
 import { PILL_ACTIVE, PILL_INACTIVE } from "@/lib/constants/ui";
 import { stagger, spring } from "@/lib/animation";
@@ -66,6 +67,48 @@ const VALUE_LABELS: Record<Category, string> = {
 /** XP and streak are always all-time (no time range filter) */
 const ALL_TIME_CATEGORIES = new Set<Category>(["xp", "streak"]);
 
+// ─── Rank Change Tracking (localStorage) ────────────────────────────────────
+
+function getRankStorageKey(cat: Category, sc: Scope, tr: TimeRange): string {
+  return `ht-lb-ranks-${cat}-${sc}-${tr}`;
+}
+
+function loadPreviousRanks(cat: Category, sc: Scope, tr: TimeRange): Record<string, number> {
+  try {
+    const key = getRankStorageKey(cat, sc, tr);
+    const stored = localStorage.getItem(key);
+    return stored ? JSON.parse(stored) : {};
+  } catch {
+    return {};
+  }
+}
+
+function saveCurrentRanks(cat: Category, sc: Scope, tr: TimeRange, entries: LeaderboardEntry[]) {
+  try {
+    const key = getRankStorageKey(cat, sc, tr);
+    const snapshot: Record<string, number> = {};
+    for (const e of entries) {
+      snapshot[e.profile.id] = e.rank;
+    }
+    localStorage.setItem(key, JSON.stringify(snapshot));
+  } catch {
+    // localStorage quota or disabled — silent fail
+  }
+}
+
+function computeRankChanges(
+  entries: LeaderboardEntry[],
+  previousRanks: Record<string, number>,
+): LeaderboardEntry[] {
+  if (Object.keys(previousRanks).length === 0) return entries;
+  return entries.map((entry) => {
+    const prev = previousRanks[entry.profile.id];
+    if (prev === undefined) return entry;
+    const change = prev - entry.rank; // positive = moved up
+    return { ...entry, change };
+  });
+}
+
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export default function LeaderboardClient({ currentUser }: LeaderboardClientProps) {
@@ -120,7 +163,13 @@ export default function LeaderboardClient({ currentUser }: LeaderboardClientProp
         change: e.change,
       }));
 
-      setEntries(mapped);
+      // Compute rank changes from localStorage snapshot
+      const resolvedTimeRange = ALL_TIME_CATEGORIES.has(category) ? "all" as TimeRange : timeRange;
+      const previousRanks = loadPreviousRanks(category, scope, resolvedTimeRange);
+      const withChanges = computeRankChanges(mapped, previousRanks);
+      saveCurrentRanks(category, scope, resolvedTimeRange, mapped);
+
+      setEntries(withChanges);
       setUserRank(json.meta?.userRank ?? -1);
       setUserValue(json.meta?.userValue ?? 0);
     } catch {
@@ -240,27 +289,39 @@ export default function LeaderboardClient({ currentUser }: LeaderboardClientProp
           }
         />
       ) : (
-        <motion.div
-          className="space-y-2"
-          variants={stagger.container(0.04)}
-          initial="initial"
-          animate="animate"
-        >
-          {entries.map((entry, i) => (
-            <motion.div
-              key={entry.profile.id}
-              variants={stagger.item}
-              transition={spring.default}
-            >
-              <LeaderboardRow
-                entry={entry}
-                label={VALUE_LABELS[category]}
-                currentUserId={currentUser.id}
-                index={i}
-              />
-            </motion.div>
-          ))}
-        </motion.div>
+        <>
+          {/* Podium — top 3 with height hierarchy */}
+          {entries.length >= 3 && (
+            <LeaderboardPodium
+              entries={entries}
+              label={VALUE_LABELS[category]}
+              currentUserId={currentUser.id}
+            />
+          )}
+
+          {/* Remaining entries (4+), or all if < 3 */}
+          <motion.div
+            className="space-y-2"
+            variants={stagger.container(0.04)}
+            initial="initial"
+            animate="animate"
+          >
+            {(entries.length >= 3 ? entries.slice(3) : entries).map((entry, i) => (
+              <motion.div
+                key={entry.profile.id}
+                variants={stagger.item}
+                transition={spring.default}
+              >
+                <LeaderboardRow
+                  entry={entry}
+                  label={VALUE_LABELS[category]}
+                  currentUserId={currentUser.id}
+                  index={i}
+                />
+              </motion.div>
+            ))}
+          </motion.div>
+        </>
       )}
 
       {/* Sticky user rank card */}

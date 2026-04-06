@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { Heart } from "lucide-react";
 import { useToast } from "@/components/ui/Toast";
+import { useHaptic } from "@/hooks/useHaptic";
 
 interface FollowBreweryButtonProps {
   breweryId: string;
@@ -15,6 +16,7 @@ export function FollowBreweryButton({ breweryId, variant = "default" }: FollowBr
   const [count, setCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const { success, error } = useToast();
+  const { haptic } = useHaptic();
 
   useEffect(() => {
     fetch(`/api/brewery/${breweryId}/follow`)
@@ -29,6 +31,7 @@ export function FollowBreweryButton({ breweryId, variant = "default" }: FollowBr
 
   async function toggle() {
     if (loading) return;
+    haptic(isFollowing ? "tap" : "success");
     const prev = isFollowing;
     const prevCount = count;
     setIsFollowing(!prev);

@@ -12,6 +12,10 @@ interface AchievementBadgeProps {
   size?: "sm" | "md" | "lg";
   onClick?: () => void;
   className?: string;
+  /** 0-100 progress toward unlock (Sprint 169) */
+  progress?: number;
+  /** Rarity label (Sprint 169) */
+  rarityPercent?: number;
 }
 
 const SIZES = {
@@ -20,6 +24,13 @@ const SIZES = {
   lg: { container: "w-20 h-20", icon: "text-3xl", ring: "ring-2" },
 };
 
+function getRarityLabel(percent: number): { label: string; color: string } {
+  if (percent <= 5) return { label: "Legendary", color: "#D4A843" };
+  if (percent <= 20) return { label: "Rare", color: "#8BAABF" };
+  if (percent <= 50) return { label: "Uncommon", color: "#3D7A52" };
+  return { label: "Common", color: "var(--text-muted)" };
+}
+
 export function AchievementBadge({
   achievement,
   earned = false,
@@ -27,6 +38,8 @@ export function AchievementBadge({
   size = "md",
   onClick,
   className,
+  progress,
+  rarityPercent,
 }: AchievementBadgeProps) {
   const tier = TIER_STYLES[achievement.tier];
   const s = SIZES[size];
@@ -42,22 +55,48 @@ export function AchievementBadge({
         whileTap={onClick ? { scale: 0.95 } : undefined}
         className="h-full flex flex-col items-center gap-2"
       >
-        <div
-          className={cn(
-            s.container,
-            "rounded-2xl flex items-center justify-center flex-shrink-0 ring-2",
-            earned ? tier.glow : "",
-            earned ? "" : "opacity-40 grayscale"
+        <div className="relative">
+          {/* SVG progress ring for locked achievements (Sprint 169) */}
+          {!earned && progress !== undefined && progress > 0 && progress < 100 && (
+            <svg
+              className="absolute inset-0 -m-1"
+              style={{ width: "calc(100% + 8px)", height: "calc(100% + 8px)" }}
+              viewBox="0 0 44 44"
+            >
+              {/* Track */}
+              <circle cx="22" cy="22" r="20" fill="none" stroke="var(--border)" strokeWidth="2" opacity="0.4" />
+              {/* Progress arc */}
+              <motion.circle
+                cx="22" cy="22" r="20"
+                fill="none"
+                stroke={tier.color}
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeDasharray={`${2 * Math.PI * 20}`}
+                initial={{ strokeDashoffset: 2 * Math.PI * 20 }}
+                animate={{ strokeDashoffset: 2 * Math.PI * 20 * (1 - progress / 100) }}
+                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                style={{ transform: "rotate(-90deg)", transformOrigin: "center" }}
+              />
+            </svg>
           )}
-          style={earned
-            ? {
-                background: `color-mix(in srgb, ${tier.color} 12%, transparent)`,
-                outline: `2px solid color-mix(in srgb, ${tier.color} 35%, transparent)`,
-                outlineOffset: "2px",
-              }
-            : { background: "var(--surface)", outline: "2px solid var(--border)", outlineOffset: "2px" }}
-        >
-          <span className={cn(s.icon, earned ? "" : "opacity-50")}>{achievement.icon}</span>
+          <div
+            className={cn(
+              s.container,
+              "rounded-2xl flex items-center justify-center flex-shrink-0 ring-2",
+              earned ? tier.glow : "",
+              earned ? "" : "opacity-40 grayscale"
+            )}
+            style={earned
+              ? {
+                  background: `color-mix(in srgb, ${tier.color} 12%, transparent)`,
+                  outline: `2px solid color-mix(in srgb, ${tier.color} 35%, transparent)`,
+                  outlineOffset: "2px",
+                }
+              : { background: "var(--surface)", outline: "2px solid var(--border)", outlineOffset: "2px" }}
+          >
+            <span className={cn(s.icon, earned ? "" : "opacity-50")}>{achievement.icon}</span>
+          </div>
         </div>
         {size !== "sm" && (
           <div className="text-center flex-1 flex flex-col justify-between">
@@ -67,6 +106,18 @@ export function AchievementBadge({
             <p className="text-[10px] mt-1" style={{ color: earned ? achievement.badge_color : "var(--text-muted)" }}>
               {tier.label}
             </p>
+            {/* Rarity label (Sprint 169) */}
+            {rarityPercent !== undefined && earned && (
+              <p className="text-[9px] font-mono mt-0.5" style={{ color: getRarityLabel(rarityPercent).color }}>
+                {getRarityLabel(rarityPercent).label} · {rarityPercent}%
+              </p>
+            )}
+            {/* Progress text for locked (Sprint 169) */}
+            {!earned && progress !== undefined && progress > 0 && (
+              <p className="text-[9px] font-mono mt-0.5 text-[var(--text-muted)]">
+                {progress}%
+              </p>
+            )}
           </div>
         )}
       </motion.div>
