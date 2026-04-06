@@ -280,6 +280,19 @@ export function computePersonality(
   };
 }
 
+// ─── Axis labels for human-readable display ───────────────────────────────
+
+export const AXIS_LABELS: Record<string, { label: string; description: string }> = {
+  E: { label: "Explorer", description: "You seek variety across styles" },
+  L: { label: "Loyalist", description: "You know what you like and stick with it" },
+  B: { label: "Bold", description: "You lean toward hop-forward, intense flavors" },
+  S: { label: "Smooth", description: "You prefer clean, balanced, malt-forward beers" },
+  H: { label: "Hunter", description: "Always trying something new at the tap" },
+  R: { label: "Regular", description: "You have go-to pours you return to" },
+  J: { label: "Judge", description: "You rate critically — high standards" },
+  O: { label: "Optimist", description: "Most beers get the benefit of the doubt" },
+};
+
 /** Get archetype entry by 4-letter code. Returns default if code invalid. */
 export function getArchetypeByCode(code: string): ArchetypeEntry {
   return ARCHETYPES[code] ?? DEFAULT_ARCHETYPE;

@@ -8,6 +8,7 @@ import { Star, Award, UtensilsCrossed, FileText, ExternalLink } from "lucide-rea
 import { ITEM_TYPE_LABELS, ITEM_TYPE_EMOJI } from "@/types/database";
 import { BeerCard } from "@/components/beer/BeerCard";
 import { BeerStyleBadge } from "@/components/ui/BeerStyleBadge";
+import { PillTabs, type PillTab } from "@/components/ui/PillTabs";
 import type { RealtimePostgresChangesPayload } from "@supabase/supabase-js";
 
 type TapBeer = {
@@ -105,6 +106,42 @@ export function RealtimeTapList({
         .filter((g) => g.items.length > 0)
     : [{ type: "beer", items: allItems }];
 
+  // ── Sort controls ──
+  type SortKey = "new" | "name" | "rating" | "abv";
+  const [sortBy, setSortBy] = useState<SortKey>("new");
+
+  const sortTabs: PillTab<SortKey>[] = [
+    { key: "new", label: "New" },
+    { key: "name", label: "Name" },
+    { key: "rating", label: "Rating" },
+    { key: "abv", label: "ABV" },
+  ];
+
+  const sortItems = useCallback((items: TapBeer[]): TapBeer[] => {
+    return [...items].sort((a, b) => {
+      switch (sortBy) {
+        case "name":
+          return (a.name ?? "").localeCompare(b.name ?? "");
+        case "rating": {
+          const ra = typeof a.avg_rating === "number" ? a.avg_rating : -1;
+          const rb = typeof b.avg_rating === "number" ? b.avg_rating : -1;
+          return rb - ra;
+        }
+        case "abv": {
+          const aa = typeof a.abv === "number" ? a.abv : -1;
+          const ab = typeof b.abv === "number" ? b.abv : -1;
+          return ab - aa;
+        }
+        case "new":
+        default: {
+          const ta = a.tapped_at ? new Date(a.tapped_at).getTime() : 0;
+          const tb = b.tapped_at ? new Date(b.tapped_at).getTime() : 0;
+          return tb - ta;
+        }
+      }
+    });
+  }, [sortBy]);
+
   // Featured beer (Beer of the Week)
   const featuredBeer = allItems.find((b) => b.is_featured) ?? null;
 
@@ -167,11 +204,24 @@ export function RealtimeTapList({
 
         {allItems.length > 0 ? (
           <div className="space-y-6">
+            {/* Sort controls */}
+            {allItems.length > 1 && (
+              <PillTabs
+                tabs={sortTabs}
+                value={sortBy}
+                onChange={setSortBy}
+                ariaLabel="Sort tap list"
+                variant="pill"
+                size="sm"
+                fullWidth={false}
+              />
+            )}
             {grouped.map((group) => {
               const section =
                 ITEM_TYPE_LABELS[group.type as keyof typeof ITEM_TYPE_LABELS] ?? group.type;
               const emoji =
                 ITEM_TYPE_EMOJI[group.type as keyof typeof ITEM_TYPE_EMOJI] ?? "";
+              const sorted = sortItems(group.items);
               return (
                 <div key={group.type}>
                   {hasNonBeer && (
@@ -186,7 +236,7 @@ export function RealtimeTapList({
                     </div>
                   )}
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                    {group.items.map((beer) => (
+                    {sorted.map((beer) => (
                       <div key={beer.id} className="relative">
                         <BeerCard beer={beer as any} variant="grid" />
                         <div className="absolute top-2 right-2">

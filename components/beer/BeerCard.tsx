@@ -14,10 +14,11 @@ import type { BeerWithBrewery } from "@/types/database";
 import { IncompleteBeerBadge } from "@/components/beer/IncompleteBeerBadge";
 import { useLongPress } from "@/hooks/useLongPress";
 import { ContextMenu, type ContextMenuItem } from "@/components/ui/ContextMenu";
+import { Card } from "@/components/ui/Card";
 
 interface BeerCardProps {
   beer: BeerWithBrewery;
-  variant?: "default" | "compact" | "grid";
+  variant?: "default" | "compact" | "grid" | "list";
   className?: string;
 }
 
@@ -65,9 +66,141 @@ export function BeerCard({ beer, variant = "default", className }: BeerCardProps
     );
   }
 
+  if (variant === "list") {
+    return (
+      <ListBeerCard beer={beer} gradient={gradient} className={className} />
+    );
+  }
+
   // Grid card (with long-press context menu — Sprint 161)
   return (
     <GridBeerCard beer={beer} gradient={gradient} className={className} />
+  );
+}
+
+function ListBeerCard({
+  beer,
+  gradient,
+  className,
+}: {
+  beer: BeerWithBrewery;
+  gradient: string;
+  className?: string;
+}) {
+  const router = useRouter();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [menuAnchor, setMenuAnchor] = useState<{ x: number; y: number } | null>(null);
+
+  const longPress = useLongPress({
+    onLongPress: (coords) => {
+      setMenuAnchor(coords);
+      setMenuOpen(true);
+    },
+  });
+
+  const beerUrl = typeof window !== "undefined" ? `${window.location.origin}/beer/${beer.id}` : `/beer/${beer.id}`;
+
+  const menuItems: ContextMenuItem[] = [
+    {
+      label: "View Details",
+      icon: <Eye size={16} />,
+      onSelect: () => router.push(`/beer/${beer.id}`),
+    },
+    {
+      label: "Share",
+      icon: <Share2 size={16} />,
+      onSelect: async () => {
+        if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
+          try {
+            await navigator.share({ title: beer.name, url: beerUrl });
+            return;
+          } catch {
+            // Fall through to clipboard
+          }
+        }
+        if (typeof navigator !== "undefined" && navigator.clipboard) {
+          navigator.clipboard.writeText(beerUrl).catch(() => {});
+        }
+      },
+    },
+    {
+      label: "Copy Link",
+      icon: <Copy size={16} />,
+      onSelect: () => {
+        if (typeof navigator !== "undefined" && navigator.clipboard) {
+          navigator.clipboard.writeText(beerUrl).catch(() => {});
+        }
+      },
+    },
+  ];
+
+  return (
+    <>
+      <Card
+        padding="compact"
+        flat
+        hoverable
+        className={cn("group", className)}
+      >
+        <div
+          onPointerDown={longPress.onPointerDown}
+          onPointerMove={longPress.onPointerMove}
+          onPointerUp={longPress.onPointerUp}
+          onPointerLeave={longPress.onPointerLeave}
+          onPointerCancel={longPress.onPointerCancel}
+          onContextMenu={longPress.onContextMenu}
+        >
+          <Link
+            href={`/beer/${beer.id}`}
+            onClickCapture={(e) => {
+              if (longPress.didFire()) {
+                e.preventDefault();
+                e.stopPropagation();
+                longPress.reset();
+              }
+            }}
+            className="flex items-center gap-3"
+          >
+            <div
+              className="w-10 h-10 rounded-xl flex-shrink-0 overflow-hidden relative"
+              style={!beer.cover_image_url ? { background: gradient } : undefined}
+            >
+              {beer.cover_image_url && (
+                <Image src={beer.cover_image_url} alt={beer.name} fill className="object-cover" sizes="40px" />
+              )}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p
+                className="font-display font-medium text-[var(--text-primary)] truncate text-sm group-hover:text-[var(--accent-gold)] transition-colors"
+                style={beerTransitionName(beer.id)}
+              >
+                {beer.name}
+              </p>
+              <p className="text-xs text-[var(--text-muted)] truncate">
+                {(beer as any).brewery?.name ?? "—"}
+              </p>
+            </div>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <BeerStyleBadge style={beer.style} itemType={beer.item_type} size="xs" />
+              <span className="text-xs font-mono text-[var(--text-muted)]">{formatABV(beer.abv)}</span>
+            </div>
+            {beer.avg_rating && (
+              <div className="flex-shrink-0 flex items-center gap-1">
+                <span className="text-sm font-mono text-[var(--accent-gold)]">★</span>
+                <span className="text-sm font-mono text-[var(--accent-gold)]">{beer.avg_rating.toFixed(1)}</span>
+              </div>
+            )}
+          </Link>
+        </div>
+      </Card>
+
+      <ContextMenu
+        open={menuOpen}
+        anchor={menuAnchor}
+        items={menuItems}
+        onClose={() => setMenuOpen(false)}
+      />
+    </>
   );
 }
 

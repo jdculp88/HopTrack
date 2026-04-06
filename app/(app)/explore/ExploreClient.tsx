@@ -5,11 +5,12 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "motion/react";
 import {
-  Search, Map, List, Loader2, SlidersHorizontal, X, Sparkles,
+  Search, Map, List, LayoutGrid, Loader2, SlidersHorizontal, X, Sparkles,
   Navigation, ChevronDown, ChevronUp, MapPin, Users, Calendar, Clock, Bookmark,
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { cn } from "@/lib/utils";
 import { BreweryCard, getBreweryPlaceholder } from "@/components/brewery/BreweryCard";
 import { SearchTypeahead } from "@/components/ui/SearchTypeahead";
 import { SkeletonCard } from "@/components/ui/SkeletonLoader";
@@ -43,7 +44,7 @@ interface ExploreClientProps {
   totalBreweryCount?: number;
 }
 
-type ViewMode = "list" | "map";
+type ViewMode = "grid" | "list" | "map";
 type VisitFilter = "all" | "visited" | "unvisited";
 
 const BREWERY_TYPE_OPTIONS: { value: BreweryType; label: string }[] = [
@@ -71,7 +72,7 @@ export function ExploreClient({
   const { info } = useToast();
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  const [view, setView] = useState<ViewMode>((searchParams.get("view") as ViewMode) ?? "list");
+  const [view, setView] = useState<ViewMode>((searchParams.get("view") as ViewMode) ?? "grid");
   const [query, setQuery] = useState(searchParams.get("q") ?? "");
   const [visitFilter, setVisitFilter] = useState<VisitFilter>((searchParams.get("visit") as VisitFilter) ?? "all");
   const [typeFilter, setTypeFilter] = useState<BreweryType | "all">((searchParams.get("type") as BreweryType) ?? "all");
@@ -142,7 +143,7 @@ export function ExploreClient({
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   }, [searchParams, router, pathname]);
 
-  function setViewAndSync(v: ViewMode) { setView(v); pushParams({ view: v === "list" ? "" : v }); }
+  function setViewAndSync(v: ViewMode) { setView(v); pushParams({ view: v === "grid" ? "" : v }); }
   function setVisitFilterAndSync(f: VisitFilter) { setVisitFilter(f); pushParams({ visit: f === "all" ? "" : f }); }
   function setTypeFilterAndSync(t: BreweryType | "all") { setTypeFilter(t); pushParams({ type: t === "all" ? "" : t }); }
   function setBotwFilterAndSync(v: boolean) { setBotwFilter(v); pushParams({ botw: v ? "1" : "" }); }
@@ -239,27 +240,25 @@ export function ExploreClient({
           <h1 className="font-sans text-3xl font-bold text-[var(--text-primary)]">Explore</h1>
           <div className="flex items-center gap-2">
             {/* View toggle */}
-            <div className="flex items-center gap-2 bg-[var(--surface)] border border-[var(--border)] rounded-xl p-1">
-              <button
-                onClick={() => setViewAndSync("list")}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-all"
-                style={view === "list"
-                  ? { background: "color-mix(in srgb, var(--accent-gold) 10%, transparent)", color: "var(--accent-gold)" }
-                  : { color: "var(--text-muted)" }
-                }
-              >
-                <List size={14} /> List
-              </button>
-              <button
-                onClick={() => setViewAndSync("map")}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-all"
-                style={view === "map"
-                  ? { background: "color-mix(in srgb, var(--accent-gold) 10%, transparent)", color: "var(--accent-gold)" }
-                  : { color: "var(--text-muted)" }
-                }
-              >
-                <Map size={14} /> Map
-              </button>
+            <div className="flex items-center bg-[var(--surface)] border border-[var(--border)] rounded-xl p-1">
+              {([
+                { key: "grid" as ViewMode, icon: <LayoutGrid size={14} />, label: "Grid" },
+                { key: "list" as ViewMode, icon: <List size={14} />, label: "List" },
+                { key: "map" as ViewMode, icon: <Map size={14} />, label: "Map" },
+              ]).map((opt) => (
+                <button
+                  key={opt.key}
+                  onClick={() => setViewAndSync(opt.key)}
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm transition-all"
+                  style={view === opt.key
+                    ? { background: "color-mix(in srgb, var(--accent-gold) 10%, transparent)", color: "var(--accent-gold)" }
+                    : { color: "var(--text-muted)" }
+                  }
+                  aria-pressed={view === opt.key}
+                >
+                  {opt.icon} <span className="hidden sm:inline">{opt.label}</span>
+                </button>
+              ))}
             </div>
           </div>
         </div>
@@ -296,7 +295,7 @@ export function ExploreClient({
           </button>
 
           {/* Visit filter pills — inline, only when not searching */}
-          {!isSearching && view === "list" && (
+          {!isSearching && view !== "map" && (
             <>
               {(["all", "visited", "unvisited"] as VisitFilter[]).map((f) => {
                 const labels = {
@@ -399,10 +398,10 @@ export function ExploreClient({
       {view === "map" ? (
         <BreweryMap breweries={filteredBreweries} className="h-[480px]" />
       ) : isSearching ? (
-        /* Search results */
+        /* Search results — grid or list depending on view mode */
         <div className="space-y-4">
           {searching ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className={view === "list" ? "space-y-1.5 max-w-2xl" : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"}>
               {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
             </div>
           ) : filteredBreweries.length === 0 ? (
@@ -410,24 +409,24 @@ export function ExploreClient({
           ) : (
             <>
               <p className="text-sm text-[var(--text-muted)]">
-                {filteredBreweries.length} result{filteredBreweries.length !== 1 ? "s" : ""} for "{query}"
+                {filteredBreweries.length} result{filteredBreweries.length !== 1 ? "s" : ""} for &ldquo;{query}&rdquo;
               </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className={view === "list" ? "space-y-1.5 max-w-2xl" : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"}>
                 {filteredBreweries.map((b: any, i: number) => {
                   const isExternal = !UUID_REGEX.test(b.id);
                   return (
                     <motion.div
                       key={b.id}
-                      initial={{ opacity: 0, y: 20 }}
+                      initial={{ opacity: 0, y: view === "list" ? 8 : 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: i * 0.04 }}
                     >
                       {isExternal ? (
                         <div
-                          onClick={(e) => { e.preventDefault(); e.stopPropagation(); info("This brewery isn't on HopTrack yet -- check back soon!"); }}
+                          onClick={(e) => { e.preventDefault(); e.stopPropagation(); info("This brewery isn&apos;t on HopTrack yet -- check back soon!"); }}
                           className="cursor-pointer [&_a]:pointer-events-none relative h-full"
                         >
-                          <BreweryCard brewery={b} />
+                          <BreweryCard brewery={b} variant={view === "list" ? "list" : undefined} />
                           <span
                             className="absolute top-3 left-3 z-10 text-[10px] font-mono px-2 py-0.5 rounded-full"
                             style={{
@@ -445,6 +444,7 @@ export function ExploreClient({
                           followerCount={followerCounts[b.id]}
                           hasEvent={hasUpcomingEvents.includes(b.id)}
                           distance={b.id in distanceMap ? formatDistance(distanceMap[b.id]!) : undefined}
+                          variant={view === "list" ? "list" : undefined}
                         />
                       )}
                     </motion.div>
@@ -457,7 +457,7 @@ export function ExploreClient({
       ) : (
         /* Discovery view — sections */
         <div className="space-y-8">
-          {/* Near Me section */}
+          {/* Near Me section — horizontal scroll in both grid + list modes */}
           {nearMeBreweries.length > 0 && (
             <section>
               <div className="flex items-center gap-2 mb-3">
@@ -479,7 +479,7 @@ export function ExploreClient({
             </section>
           )}
 
-          {/* Recently Visited */}
+          {/* Recently Visited — horizontal scroll in both modes */}
           {recentBreweries.length > 0 && (
             <section>
               <div className="flex items-center gap-2 mb-3">
@@ -508,7 +508,7 @@ export function ExploreClient({
             </p>
           )}
 
-          {/* All Breweries grid */}
+          {/* All Breweries — grid or list based on view mode */}
           <section>
             <div className="flex items-center gap-2 mb-4">
               <h2 className="font-sans text-xl font-bold text-[var(--text-primary)]">
@@ -516,19 +516,19 @@ export function ExploreClient({
               </h2>
               <span className="text-sm text-[var(--text-muted)]">({filteredBreweries.length})</span>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className={view === "list" ? "space-y-1.5 max-w-2xl" : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"}>
               {searching
                 ? Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)
                 : filteredBreweries.length === 0
                 ? (
-                  <p className="col-span-full text-center text-[var(--text-muted)] py-12">
+                  <p className={cn(view !== "list" && "col-span-full", "text-center text-[var(--text-muted)] py-12")}>
                     No breweries match your filters. Try adjusting them.
                   </p>
                 )
                 : filteredBreweries.map((b: any, i: number) => (
                     <motion.div
                       key={b.id}
-                      initial={{ opacity: 0, y: 20 }}
+                      initial={{ opacity: 0, y: view === "list" ? 8 : 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: Math.min(i, 20) * 0.04 }}
                     >
@@ -537,6 +537,7 @@ export function ExploreClient({
                         followerCount={followerCounts[b.id]}
                         hasEvent={hasUpcomingEvents.includes(b.id)}
                         distance={b.id in distanceMap ? formatDistance(distanceMap[b.id]!) : undefined}
+                        variant={view === "list" ? "list" : undefined}
                       />
                     </motion.div>
                   ))
@@ -587,16 +588,29 @@ function EnrichedBreweryCard({
   followerCount,
   hasEvent,
   distance,
+  variant,
 }: {
   brewery: BreweryWithStats;
   followerCount?: number;
   hasEvent?: boolean;
   distance?: string;
+  variant?: "list";
 }) {
   // Ensure the event flag is set on the brewery object so BreweryCard renders the badge in the image area
   const enrichedBrewery = hasEvent
     ? { ...brewery, has_upcoming_events: true }
     : brewery;
+
+  // List variant — distance is shown inline by BreweryCard list, no stats strip needed
+  if (variant === "list") {
+    return (
+      <BreweryCard
+        brewery={enrichedBrewery as BreweryWithStats}
+        variant="list"
+        distance={distance}
+      />
+    );
+  }
 
   const hasStats = (followerCount && followerCount > 0) || distance;
 

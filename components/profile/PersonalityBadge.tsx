@@ -5,8 +5,8 @@
 // Renders in the profile hero area between bio/location and tabs.
 
 import { useState } from "react";
-import { motion } from "motion/react";
-import { Share2, Copy, Check } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
+import { Share2, Copy, Check, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/Card";
 import {
@@ -14,6 +14,7 @@ import {
   getPersonalityShareText,
   shareOrCopy,
 } from "@/lib/share";
+import { AXIS_LABELS } from "@/lib/personality";
 import type { PersonalityResult } from "@/lib/personality";
 
 interface PersonalityBadgeProps {
@@ -99,6 +100,9 @@ export function PersonalityBadge({
       </>
     );
 
+  const [expanded, setExpanded] = useState(false);
+  const axisLetters = personality.code.split("");
+
   return (
     <Card padding="spacious" className="mb-4 relative overflow-hidden">
       {/* Gold shimmer accent */}
@@ -167,6 +171,69 @@ export function PersonalityBadge({
           </button>
         )}
       </div>
+
+      {/* Axis breakdown — human-readable labels */}
+      <button
+        type="button"
+        onClick={() => setExpanded((v) => !v)}
+        className="mt-3 w-full flex items-center justify-between gap-2 py-1.5 group"
+        aria-expanded={expanded}
+        aria-label="Show personality axis details"
+      >
+        <div className="flex items-center gap-1.5 flex-wrap text-xs text-[var(--text-secondary)]">
+          {axisLetters.map((letter, i) => {
+            const info = AXIS_LABELS[letter];
+            if (!info) return null;
+            return (
+              <span key={letter} className="flex items-center gap-1">
+                {i > 0 && <span className="text-[var(--text-muted)]">·</span>}
+                <span className="font-medium">{info.label}</span>
+              </span>
+            );
+          })}
+        </div>
+        <motion.span
+          animate={{ rotate: expanded ? 180 : 0 }}
+          transition={{ type: "spring", stiffness: 400, damping: 30 }}
+          className="text-[var(--text-muted)] group-hover:text-[var(--text-secondary)] transition-colors flex-shrink-0"
+        >
+          <ChevronDown size={14} />
+        </motion.span>
+      </button>
+
+      <AnimatePresence>
+        {expanded && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 400, damping: 30 }}
+            className="overflow-hidden"
+          >
+            <div className="pt-2 space-y-2 border-t border-[var(--border)]">
+              {axisLetters.map((letter) => {
+                const info = AXIS_LABELS[letter];
+                if (!info) return null;
+                return (
+                  <div key={letter} className="flex items-start gap-2">
+                    <span className="text-[10px] font-mono font-bold text-[var(--accent-gold)] w-4 flex-shrink-0 mt-0.5">
+                      {letter}
+                    </span>
+                    <div>
+                      <p className="text-xs font-medium text-[var(--text-primary)]">
+                        {info.label}
+                      </p>
+                      <p className="text-xs text-[var(--text-muted)]">
+                        {info.description}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </Card>
   );
 }

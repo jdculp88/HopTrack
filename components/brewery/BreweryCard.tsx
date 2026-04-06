@@ -11,6 +11,7 @@ import { breweryTransitionName } from "@/lib/view-transitions";
 import type { BreweryWithStats } from "@/types/database";
 import { useLongPress } from "@/hooks/useLongPress";
 import { ContextMenu, type ContextMenuItem } from "@/components/ui/ContextMenu";
+import { Card } from "@/components/ui/Card";
 
 const BREWERY_PLACEHOLDER_IMAGES = [
   "https://picsum.photos/seed/brewery1/400/200",
@@ -49,7 +50,7 @@ const BREWERY_TYPE_LABELS: Record<string, string> = {
 interface BreweryCardProps {
   brewery: BreweryWithStats;
   distance?: string;
-  variant?: "default" | "featured" | "compact";
+  variant?: "default" | "featured" | "compact" | "list";
   className?: string;
 }
 
@@ -57,6 +58,18 @@ export function BreweryCard({ brewery, distance, variant = "default", className 
   const placeholderSrc = getBreweryPlaceholder(brewery.name);
   const coverSrc = brewery.cover_image_url || placeholderSrc;
   const typeLabel = brewery.brewery_type ? BREWERY_TYPE_LABELS[brewery.brewery_type] ?? brewery.brewery_type : null;
+
+  if (variant === "list") {
+    return (
+      <ListBreweryCard
+        brewery={brewery}
+        coverSrc={coverSrc}
+        typeLabel={typeLabel}
+        distance={distance}
+        className={className}
+      />
+    );
+  }
 
   if (variant === "compact") {
     return (
@@ -158,6 +171,146 @@ export function BreweryCard({ brewery, distance, variant = "default", className 
       typeLabel={typeLabel}
       className={className}
     />
+  );
+}
+
+function ListBreweryCard({
+  brewery,
+  coverSrc,
+  typeLabel,
+  distance,
+  className,
+}: {
+  brewery: BreweryWithStats;
+  coverSrc: string;
+  typeLabel: string | null;
+  distance?: string;
+  className?: string;
+}) {
+  const router = useRouter();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [menuAnchor, setMenuAnchor] = useState<{ x: number; y: number } | null>(null);
+
+  const longPress = useLongPress({
+    onLongPress: (coords) => {
+      setMenuAnchor(coords);
+      setMenuOpen(true);
+    },
+  });
+
+  const breweryUrl =
+    typeof window !== "undefined"
+      ? `${window.location.origin}/brewery/${brewery.id}`
+      : `/brewery/${brewery.id}`;
+
+  const menuItems: ContextMenuItem[] = [
+    {
+      label: "View Details",
+      icon: <Eye size={16} />,
+      onSelect: () => router.push(`/brewery/${brewery.id}`),
+    },
+    {
+      label: "Find on Map",
+      icon: <Compass size={16} />,
+      onSelect: () => router.push(`/explore?b=${brewery.id}`),
+    },
+    {
+      label: "Share",
+      icon: <Share2 size={16} />,
+      onSelect: async () => {
+        if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
+          try {
+            await navigator.share({ title: brewery.name, url: breweryUrl });
+            return;
+          } catch {
+            // User cancelled or share failed — fall through to clipboard
+          }
+        }
+        if (typeof navigator !== "undefined" && navigator.clipboard) {
+          navigator.clipboard.writeText(breweryUrl).catch(() => {});
+        }
+      },
+    },
+    {
+      label: "Copy Link",
+      icon: <Copy size={16} />,
+      onSelect: () => {
+        if (typeof navigator !== "undefined" && navigator.clipboard) {
+          navigator.clipboard.writeText(breweryUrl).catch(() => {});
+        }
+      },
+    },
+  ];
+
+  return (
+    <>
+      <Card
+        padding="compact"
+        flat
+        hoverable
+        className={cn("group", className)}
+      >
+        <div
+          onPointerDown={longPress.onPointerDown}
+          onPointerMove={longPress.onPointerMove}
+          onPointerUp={longPress.onPointerUp}
+          onPointerLeave={longPress.onPointerLeave}
+          onPointerCancel={longPress.onPointerCancel}
+          onContextMenu={longPress.onContextMenu}
+        >
+          <Link
+            href={`/brewery/${brewery.id}`}
+            aria-label={brewery.name}
+            onClickCapture={(e) => {
+              if (longPress.didFire()) {
+                e.preventDefault();
+                e.stopPropagation();
+                longPress.reset();
+              }
+            }}
+            className="flex items-center gap-3"
+          >
+            <div className="w-12 h-12 rounded-xl flex-shrink-0 overflow-hidden relative">
+              <Image src={coverSrc} alt={brewery.name} fill className="object-cover" sizes="48px" />
+              {brewery.user_visit && (
+                <div className="absolute bottom-0.5 right-0.5 w-2.5 h-2.5 rounded-full bg-[#3D7A52] border border-[var(--surface)]" />
+              )}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p
+                className="font-display font-semibold text-[var(--text-primary)] truncate text-sm group-hover:text-[var(--accent-gold)] transition-colors"
+                style={breweryTransitionName(brewery.id)}
+              >
+                {brewery.name}
+              </p>
+              <p className="text-xs text-[var(--text-muted)] truncate">
+                {brewery.city}{brewery.state ? `, ${brewery.state}` : ""}
+                {distance && ` · ${distance}`}
+              </p>
+            </div>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              {brewery.beer_count !== undefined && brewery.beer_count > 0 && (
+                <span className="text-xs font-mono text-[var(--text-muted)]">
+                  {brewery.beer_count} on tap
+                </span>
+              )}
+              {typeLabel && (
+                <span className="text-xs text-[var(--text-secondary)] bg-[var(--surface-2)] px-2 py-0.5 rounded-full">
+                  {typeLabel}
+                </span>
+              )}
+            </div>
+          </Link>
+        </div>
+      </Card>
+
+      <ContextMenu
+        open={menuOpen}
+        anchor={menuAnchor}
+        items={menuItems}
+        onClose={() => setMenuOpen(false)}
+      />
+    </>
   );
 }
 

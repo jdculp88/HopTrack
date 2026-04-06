@@ -43,6 +43,8 @@ interface FourFavoritesProps {
   userId: string;
   isOwnProfile: boolean;
   initialPins: PinnedBeerItem[];
+  /** Compact mode: inline 48x48 thumbnails, no edit/share, for dense layouts */
+  compact?: boolean;
 }
 
 // ─── Main Component ────────────────────────────────────────────────────────
@@ -51,6 +53,7 @@ export function FourFavorites({
   userId,
   isOwnProfile,
   initialPins,
+  compact = false,
 }: FourFavoritesProps) {
   const [pins, setPins] = useState<PinnedBeerItem[]>(initialPins);
   const [isEditing, setIsEditing] = useState(false);
@@ -70,6 +73,54 @@ export function FourFavorites({
 
   // Hide entirely for other profiles with no pins.
   if (!isOwnProfile && pinCount === 0) return null;
+
+  // Compact mode — inline 48x48 thumbnails, no edit/share controls
+  if (compact) {
+    return (
+      <div className="flex items-center gap-2">
+        {slots.map((slot, i) => {
+          if (!slot || !slot.beer) {
+            if (!isOwnProfile) return null;
+            return (
+              <div
+                key={i}
+                className="w-12 h-12 rounded-lg border-2 border-dashed border-[var(--border)] flex-shrink-0"
+                aria-hidden="true"
+              />
+            );
+          }
+          const { beer } = slot;
+          const gradient = generateGradientFromString(beer.name + (beer.brewery?.id ?? ""));
+          const styleVars = getStyleVars(beer.style, beer.item_type);
+          return (
+            <Link key={beer.id} href={`/beer/${beer.id}`} className="flex-shrink-0 group">
+              <div
+                className="w-12 h-12 rounded-lg overflow-hidden relative border border-[var(--border)] group-hover:border-[var(--accent-gold)]/40 transition-colors"
+                style={
+                  beer.cover_image_url
+                    ? undefined
+                    : { background: `linear-gradient(135deg, ${styleVars.primary} 0%, ${styleVars.soft} 100%), ${gradient}` }
+                }
+              >
+                {beer.cover_image_url && (
+                  <Image
+                    src={beer.cover_image_url}
+                    alt={beer.name}
+                    fill
+                    className="object-cover"
+                    sizes="48px"
+                  />
+                )}
+              </div>
+              <p className="text-[10px] text-[var(--text-muted)] truncate w-12 mt-0.5 text-center">
+                {beer.name}
+              </p>
+            </Link>
+          );
+        })}
+      </div>
+    );
+  }
 
   const save = useCallback(
     async (nextPins: PinnedBeerItem[]) => {
