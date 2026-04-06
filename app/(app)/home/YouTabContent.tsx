@@ -63,10 +63,9 @@ export function YouTabContent({
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ type: "spring", stiffness: 400, damping: 30 }}
-        className="rounded-2xl p-5 relative overflow-hidden"
+        className="rounded-2xl p-5 relative overflow-hidden shadow-[var(--shadow-elevated)] border border-[var(--border)]"
         style={{
           background: "var(--surface-2)",
-          border: "1px solid var(--surface-warm-border)",
         }}
       >
         {/* Pour fill — rises from bottom, represents XP progress */}
@@ -125,8 +124,7 @@ export function YouTabContent({
 
       {/* Stats card — grid lines treatment */}
       <div
-        className="card-bg-stats rounded-2xl p-4"
-        style={{ border: "1px solid var(--surface-warm-border)" }}
+        className="card-bg-stats rounded-2xl p-4 shadow-[var(--shadow-card)] border border-[var(--border)]"
       >
         <p className="text-[10px] font-mono uppercase tracking-widest mb-3 relative z-10" style={{ color: "var(--text-muted)" }}>
           Your Numbers
@@ -155,7 +153,7 @@ export function YouTabContent({
       {profile.total_checkins > 0 && (
         <Link href="/your-round" className="block">
           <motion.div
-            className="rounded-2xl p-5 relative overflow-hidden"
+            className="rounded-2xl p-5 relative overflow-hidden shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-shadow"
             style={{
               background: "linear-gradient(135deg, rgba(232,132,26,0.10) 0%, rgba(232,132,26,0.03) 100%)",
               border: "1px solid rgba(232,132,26,0.20)",
@@ -185,7 +183,7 @@ export function YouTabContent({
       {profile.total_checkins > 0 && (
         <Link href="/wrapped" className="block">
           <motion.div
-            className="rounded-2xl p-5 relative overflow-hidden"
+            className="rounded-2xl p-5 relative overflow-hidden shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-shadow"
             style={{
               background: "linear-gradient(135deg, rgba(212,168,67,0.10) 0%, rgba(212,168,67,0.03) 100%)",
               border: "1px solid rgba(212,168,67,0.20)",
@@ -239,8 +237,7 @@ export function YouTabContent({
       {/* Activity Heatmap */}
       {activityHeatmap && activityHeatmap.length > 0 && (
         <div
-          className="card-bg-stats rounded-2xl p-4"
-          style={{ border: "1px solid var(--surface-warm-border)" }}
+          className="card-bg-stats rounded-2xl p-4 shadow-[var(--shadow-card)] border border-[var(--border)]"
         >
           <p className="text-[10px] font-mono uppercase tracking-widest mb-3" style={{ color: "var(--text-muted)" }}>
             Activity
@@ -257,8 +254,7 @@ export function YouTabContent({
       {/* Recent achievements — radiating arcs treatment */}
       {userAchievements && userAchievements.length > 0 && (
         <div
-          className="card-bg-achievement rounded-2xl p-4 space-y-3"
-          style={{ border: "1px solid var(--surface-warm-border)" }}
+          className="card-bg-achievement rounded-2xl p-4 space-y-3 shadow-[var(--shadow-card)] border border-[var(--border)]"
         >
           <div className="flex items-center justify-between relative z-10">
             <p className="text-[10px] font-mono uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
@@ -305,7 +301,7 @@ export function YouTabContent({
               item.beer ? (
                 <Link key={item.id} href={`/beer/${item.beer.id}`}>
                   <div
-                    className="card-bg-reco flex items-center gap-3 p-3 rounded-xl transition-colors"
+                    className="card-bg-reco flex items-center gap-3 p-3 rounded-xl transition-[colors,shadow] shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)]"
                     data-style={getStyleFamily(item.beer.style)}
                     style={{ border: "1px solid var(--border)" }}
                   >
@@ -352,7 +348,7 @@ export function YouTabContent({
             {visitedBreweries.slice(0, 6).map((b) => (
               <Link key={b.id} href={`/brewery/${b.id}`}>
                 <div
-                  className="card-bg-hoproute p-3 rounded-xl transition-colors"
+                  className="card-bg-hoproute p-3 rounded-xl transition-[colors,shadow] shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)]"
                   style={{ border: "1px solid color-mix(in srgb, var(--accent-amber) 20%, var(--border))" }}
                 >
                   <div className="flex items-center gap-2 mb-1">
@@ -398,7 +394,7 @@ export function YouTabContent({
                 <motion.div
                   whileHover={{ x: 2 }}
                   transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                  className="card-bg-hoproute flex items-center gap-3 p-3 rounded-xl transition-colors"
+                  className="card-bg-hoproute flex items-center gap-3 p-3 rounded-xl transition-[colors,shadow] shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)]"
                   style={{ border: "1px solid color-mix(in srgb, var(--accent-amber) 20%, var(--border))" }}
                 >
                   <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "color-mix(in srgb, var(--accent-gold) 12%, transparent)", color: "var(--accent-gold)" }}>
@@ -425,7 +421,7 @@ export function YouTabContent({
       {/* Plan HopRoute CTA if no past routes */}
       {(!pastRoutes || pastRoutes.length === 0) && (
         <Link href="/hop-route/new">
-          <div className="card-bg-hoproute flex items-center gap-3 p-4 rounded-2xl border transition-colors" style={{ borderColor: "color-mix(in srgb, var(--accent-amber) 35%, var(--border))" }}>
+          <div className="card-bg-hoproute flex items-center gap-3 p-4 rounded-2xl border transition-[colors,shadow] shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)]" style={{ borderColor: "color-mix(in srgb, var(--accent-amber) 35%, var(--border))" }}>
             <span className="text-2xl">🗺️</span>
             <div>
               <p className="text-sm font-semibold text-[var(--text-primary)]">Plan a HopRoute</p>
@@ -438,11 +434,11 @@ export function YouTabContent({
       {/* Your activity */}
       <div className="space-y-3 !mt-10">
         <div className="flex items-center gap-3">
-          <div className="flex-1 h-px" style={{ background: "var(--border)" }} />
+          <div className="flex-1 border-t border-[var(--border)] opacity-60" />
           <span className="text-[10px] font-mono uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
             Your Activity
           </span>
-          <div className="flex-1 h-px" style={{ background: "var(--border)" }} />
+          <div className="flex-1 border-t border-[var(--border)] opacity-60" />
         </div>
 
         {sessions.length > 0 ? (

@@ -262,7 +262,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
     <PageEnterWrapper>
       <div className="max-w-3xl mx-auto">
         {/* Hero Banner */}
-        <div className="relative h-48 sm:h-64 mx-4 mt-4 rounded-2xl overflow-hidden">
+        <div className="relative h-48 sm:h-64 mx-4 mt-4 rounded-2xl overflow-hidden shadow-[var(--shadow-elevated)]">
           <ProfileBanner
             username={username}
             displayName={profile.display_name}

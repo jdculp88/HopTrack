@@ -8,7 +8,9 @@ import {
   isStreakSeen,
   markStreakSeen,
 } from "@/components/social/StreakFeedCard";
-import { FeedTabBar, type FeedTab } from "@/components/social/FeedTabBar";
+import { PillTabs } from "@/components/ui/PillTabs";
+
+export type FeedTab = "friends" | "discover" | "you";
 import { useSession } from "@/hooks/useSession";
 import { useFeedPagination } from "@/hooks/useFeedPagination";
 import type { FriendRating } from "@/components/social/RatingCard";
@@ -460,7 +462,18 @@ export function HomeFeed({
       <WishlistOnTapAlert count={wishlistOnTapCount} />
 
       {/* Feed Tab Bar */}
-      <FeedTabBar activeTab={activeTab} onChange={handleTabChange} />
+      <PillTabs
+        tabs={[
+          { key: "friends" as FeedTab, label: "Friends" },
+          { key: "discover" as FeedTab, label: "Discover" },
+          { key: "you" as FeedTab, label: "You" },
+        ]}
+        value={activeTab}
+        onChange={handleTabChange}
+        ariaLabel="Feed tabs"
+        variant="underline"
+        fullWidth
+      />
 
       {/* Tab Content — Sprint 161 swipe wrapper */}
       <motion.div

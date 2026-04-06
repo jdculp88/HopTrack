@@ -240,7 +240,7 @@ export function ExploreClient({
           <h1 className="font-sans text-3xl font-bold text-[var(--text-primary)]">Explore</h1>
           <div className="flex items-center gap-2">
             {/* View toggle */}
-            <div className="flex items-center bg-[var(--surface)] border border-[var(--border)] rounded-xl p-1">
+            <div className="flex items-center bg-[var(--surface)] border border-[var(--border)] rounded-xl p-1 shadow-[var(--shadow-card)]">
               {([
                 { key: "grid" as ViewMode, icon: <LayoutGrid size={14} />, label: "Grid" },
                 { key: "list" as ViewMode, icon: <List size={14} />, label: "List" },
@@ -340,7 +340,7 @@ export function ExploreClient({
               transition={{ type: "spring", stiffness: 400, damping: 30 }}
               className="overflow-hidden"
             >
-              <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-4 space-y-4">
+              <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-4 space-y-4 shadow-[var(--shadow-card)]">
                 {/* Brewery type */}
                 <div>
                   <p className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wide mb-2">Brewery Type</p>
@@ -464,7 +464,7 @@ export function ExploreClient({
                 <Navigation size={16} style={{ color: "var(--accent-gold)" }} />
                 <h2 className="font-sans text-xl font-bold text-[var(--text-primary)]">Near Me</h2>
               </div>
-              <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide snap-x">
+              <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide snap-x" style={{ maskImage: "linear-gradient(to right, transparent 0%, black 16px, black calc(100% - 16px), transparent 100%)" }}>
                 {nearMeBreweries.map((b, i) => (
                   <NearMeCard
                     key={b.id}
@@ -486,7 +486,7 @@ export function ExploreClient({
                 <Clock size={16} style={{ color: "var(--accent-gold)" }} />
                 <h2 className="font-sans text-xl font-bold text-[var(--text-primary)]">Recently Visited</h2>
               </div>
-              <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide snap-x">
+              <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide snap-x" style={{ maskImage: "linear-gradient(to right, transparent 0%, black 16px, black calc(100% - 16px), transparent 100%)" }}>
                 {recentBreweries.map((b, i) => (
                   <NearMeCard
                     key={b.id}
@@ -678,7 +678,7 @@ function NearMeCard({
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay: index * 0.05 }}
-        className="flex-shrink-0 w-56 bg-[var(--surface)] border border-[var(--border)] rounded-2xl overflow-hidden hover:border-[color-mix(in_srgb,var(--accent-gold)_30%,transparent)] transition-colors group"
+        className="flex-shrink-0 w-56 bg-[var(--surface)] border border-[var(--border)] rounded-2xl overflow-hidden hover:border-[color-mix(in_srgb,var(--accent-gold)_30%,transparent)] transition-[colors,shadow] shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] group"
       >
         {/* Mini cover */}
         <div className="h-24 w-full relative overflow-hidden">

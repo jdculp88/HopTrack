@@ -54,6 +54,7 @@ export function ProfileTabs({ activityData, statsData, listsData, breweriesData 
         variant="underline"
         fullWidth
         sticky={{ top: 0 }}
+        className="shadow-[var(--shadow-card)]"
       />
 
       <div className="mt-6">

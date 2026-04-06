@@ -6,6 +6,7 @@ import { Users, Trophy, Search, UserPlus, Loader2, UserX, Clock, X, Beer } from 
 import { motion, AnimatePresence } from "motion/react";
 import { LeaderboardRow } from "@/components/social/LeaderboardRow";
 import { UserAvatar } from "@/components/ui/UserAvatar";
+import { PillTabs } from "@/components/ui/PillTabs";
 import { useToast } from "@/components/ui/Toast";
 import Link from "next/link";
 import type { LeaderboardEntry } from "@/types/database";
@@ -218,70 +219,34 @@ export function FriendsClient({
       <h1 className="font-sans text-3xl font-bold" style={{ color: "var(--text-primary)" }}>Friends</h1>
 
       {/* Tab bar */}
-      <div
-        className="flex gap-1 rounded-2xl p-1"
-        style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
-      >
-        {([
-          { key: "friends" as Tab, label: "My Friends", icon: Users, count: friends.length },
-          { key: "leaderboard" as Tab, label: "Leaderboards", icon: Trophy, count: null },
-        ] as const).map(({ key, label, icon: Icon, count }) => (
-          <button
-            key={key}
-            onClick={() => setTab(key)}
-            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium transition-all"
-            style={
-              tab === key
-                ? { background: "color-mix(in srgb, var(--accent-gold) 10%, transparent)", color: "var(--accent-gold)" }
-                : { color: "var(--text-muted)" }
-            }
-          >
-            <Icon size={14} />
-            {label}
-            {count !== null && count > 0 && (
-              <span
-                className="text-[10px] font-mono px-1.5 py-0.5 rounded-md"
-                style={{
-                  background: tab === key
-                    ? "color-mix(in srgb, var(--accent-gold) 15%, transparent)"
-                    : "var(--surface-2)",
-                  color: tab === key ? "var(--accent-gold)" : "var(--text-muted)",
-                }}
-              >
-                {count}
-              </span>
-            )}
-          </button>
-        ))}
-      </div>
+      <PillTabs
+        tabs={[
+          { key: "friends" as Tab, label: "My Friends", icon: <Users size={14} />, count: friends.length > 0 ? friends.length : undefined },
+          { key: "leaderboard" as Tab, label: "Leaderboards", icon: <Trophy size={14} /> },
+        ]}
+        value={tab}
+        onChange={setTab}
+        ariaLabel="Friends navigation"
+        variant="segmented"
+        fullWidth
+      />
 
       {tab === "leaderboard" && (
         <>
           {/* Leaderboard sub-tabs */}
-          <div className="flex gap-2 overflow-x-auto no-scrollbar">
-            {(["sessions", "beers", "breweries"] as LeaderboardType[]).map((t) => (
-              <button
-                key={t}
-                onClick={() => setLeaderboardType(t)}
-                className="px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all flex-shrink-0"
-                style={
-                  leaderboardType === t
-                    ? {
-                        background: "color-mix(in srgb, var(--accent-gold) 15%, transparent)",
-                        color: "var(--accent-gold)",
-                        border: "1px solid color-mix(in srgb, var(--accent-gold) 30%, transparent)",
-                      }
-                    : {
-                        background: "var(--surface)",
-                        color: "var(--text-secondary)",
-                        border: "1px solid var(--border)",
-                      }
-                }
-              >
-                {t === "sessions" ? "Sessions" : t === "beers" ? "Unique Beers" : "Breweries"}
-              </button>
-            ))}
-          </div>
+          <PillTabs
+            tabs={[
+              { key: "sessions" as LeaderboardType, label: "Sessions" },
+              { key: "beers" as LeaderboardType, label: "Unique Beers" },
+              { key: "breweries" as LeaderboardType, label: "Breweries" },
+            ]}
+            value={leaderboardType}
+            onChange={setLeaderboardType}
+            ariaLabel="Leaderboard category"
+            variant="pill"
+            size="sm"
+            snapScroll
+          />
 
           <div className="space-y-1">
             {leaderboards[leaderboardType].data.map((entry, i) => (
@@ -306,7 +271,7 @@ export function FriendsClient({
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
               placeholder="Search friends or find new ones..."
-              className="w-full rounded-2xl pl-11 pr-4 py-3.5 text-sm transition-colors focus:outline-none"
+              className="w-full rounded-2xl pl-11 pr-4 py-3.5 text-sm transition-[colors,shadow] focus:outline-none shadow-[var(--shadow-card)] focus:shadow-[var(--shadow-card-hover)]"
               style={{
                 background: "var(--surface)",
                 border: "1px solid var(--border)",
@@ -338,7 +303,7 @@ export function FriendsClient({
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -8 }}
                     transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                    className="flex items-center gap-3 p-3 rounded-2xl"
+                    className="flex items-center gap-3 p-3 rounded-2xl shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-shadow"
                     style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
                   >
                     <UserAvatar profile={user} size="sm" />
@@ -380,7 +345,7 @@ export function FriendsClient({
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
-                className="card-bg-notification rounded-2xl p-4 space-y-3"
+                className="card-bg-notification rounded-2xl p-4 space-y-3 shadow-[var(--shadow-card)] border border-[var(--border)]"
               >
                 <div className="flex items-center gap-2">
                   <div
@@ -447,7 +412,7 @@ export function FriendsClient({
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
-                className="rounded-2xl p-4 space-y-3"
+                className="rounded-2xl p-4 space-y-3 shadow-[var(--shadow-card)]"
                 style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
               >
                 <p className="text-xs font-medium uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
@@ -535,14 +500,14 @@ export function FriendsClient({
 
           {/* Friends list */}
           {filteredFriends.length === 0 && searchQuery.length < 2 && pendingRequests.length === 0 && sentRequests.length === 0 ? (
-            <div className="text-center py-16 space-y-4">
+            <div className="card-bg-featured text-center py-16 space-y-4 rounded-2xl shadow-[var(--shadow-card)] border border-[var(--border)]">
               <div
-                className="w-20 h-20 rounded-full flex items-center justify-center mx-auto"
+                className="w-20 h-20 rounded-full flex items-center justify-center mx-auto relative z-10"
                 style={{ background: "color-mix(in srgb, var(--accent-gold) 8%, transparent)" }}
               >
                 <Beer size={32} style={{ color: "var(--accent-gold)" }} />
               </div>
-              <div>
+              <div className="relative z-10">
                 <p className="font-display text-xl font-bold" style={{ color: "var(--text-primary)" }}>Drinking solo?</p>
                 <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>Find your crew! Search by username above to add friends and share the round.</p>
               </div>
@@ -551,7 +516,7 @@ export function FriendsClient({
                   const input = document.querySelector<HTMLInputElement>('input[placeholder*="Search friends"]');
                   input?.focus();
                 }}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-colors"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-colors relative z-10"
                 style={{
                   background: "color-mix(in srgb, var(--accent-gold) 10%, transparent)",
                   color: "var(--accent-gold)",
@@ -573,7 +538,7 @@ export function FriendsClient({
                   initial={{ opacity: 0, y: 6 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.03, type: "spring", stiffness: 400, damping: 30 }}
-                  className="overflow-hidden rounded-2xl"
+                  className="overflow-hidden rounded-2xl shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-shadow"
                   style={{ border: "1px solid var(--border)" }}
                 >
                   <div
