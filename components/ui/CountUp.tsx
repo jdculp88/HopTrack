@@ -48,6 +48,7 @@ export function CountUp({
 
   useEffect(() => {
     if (reducedMotion) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- reduced motion: set final value immediately
       setDisplay(value);
       return;
     }

@@ -11,9 +11,8 @@ import { SessionProvider, useSessionContext } from "@/contexts/SessionContext";
 import dynamic from "next/dynamic";
 const ActiveSessionBanner = dynamic(() => import("@/components/session/ActiveSessionBanner"), { ssr: false });
 const CheckinEntryDrawer = dynamic(() => import("@/components/session/CheckinEntryDrawer"), { ssr: false });
-const TapWallSheet = dynamic(() => import("@/components/session/TapWallSheet"), { ssr: false });
+const DetentSheet = dynamic(() => import("@/components/session/DetentSheet"), { ssr: false });
 const SessionRecapSheet = dynamic(() => import("@/components/session/SessionRecapSheet"), { ssr: false });
-const MinimizedSessionBar = dynamic(() => import("@/components/session/MinimizedSessionBar"), { ssr: false });
 import { SessionShareCard } from "@/components/session/SessionShareCard";
 import { PushOptIn } from "@/components/push/PushOptIn";
 import { WelcomeFlow, isOnboardingComplete } from "@/components/onboarding/WelcomeFlow";
@@ -141,7 +140,7 @@ function AppShellInner({ children, username, unreadNotifications: initialUnread 
   // Open tap wall
   useEffect(() => {
     function handleOpenTapWall() {
-      if (activeSession) setTapWallMode('open');
+      if (activeSession) setTapWallMode('full');
     }
     window.addEventListener('hoptrack:open-tapwall', handleOpenTapWall);
     return () => window.removeEventListener('hoptrack:open-tapwall', handleOpenTapWall);
@@ -164,7 +163,7 @@ function AppShellInner({ children, username, unreadNotifications: initialUnread 
     setActiveSession(session, breweryName);
     setCheckinOpen(false);
     setPreselectedBrewery(null);
-    setTapWallMode('open');
+    setTapWallMode('full');
     window.dispatchEvent(new CustomEvent('hoptrack:session-changed', {
       detail: { session, breweryName },
     }));
@@ -174,7 +173,7 @@ function AppShellInner({ children, username, unreadNotifications: initialUnread 
     setActiveSession(session, 'At Home');
     setCheckinOpen(false);
     setPreselectedBrewery(null);
-    setTapWallMode('open');
+    setTapWallMode('full');
     window.dispatchEvent(new CustomEvent('hoptrack:session-changed', {
       detail: { session, breweryName: 'At Home' },
     }));
@@ -205,21 +204,12 @@ function AppShellInner({ children, username, unreadNotifications: initialUnread 
     window.dispatchEvent(new CustomEvent('hoptrack:session-changed', { detail: null }));
   }, [clearSession]);
 
-  const handleTapWallClose = useCallback(() => {
-    // Minimize instead of fully closing — beer logs persist in context
-    if (activeSession) {
-      setTapWallMode('minimized');
-    } else {
-      setTapWallMode('closed');
-    }
-  }, [activeSession, setTapWallMode]);
-
-  const handleMinimizedTap = useCallback(() => {
-    setTapWallMode('open');
+  const handleDetentChange = useCallback((detent: 'peek' | 'half' | 'full') => {
+    setTapWallMode(detent);
   }, [setTapWallMode]);
 
   const handleBannerTap = useCallback(() => {
-    setTapWallMode('open');
+    setTapWallMode('full');
   }, [setTapWallMode]);
 
   return (
@@ -246,7 +236,7 @@ function AppShellInner({ children, username, unreadNotifications: initialUnread 
           {children}
         </main>
 
-        {/* Active session banner — shows when session active and tap wall is closed */}
+        {/* Active session banner — shows when session active and tap wall is closed (desktop) */}
         <AnimatePresence>
           {activeSession && tapWallMode === 'closed' && (
             <ActiveSessionBanner
@@ -268,32 +258,19 @@ function AppShellInner({ children, username, unreadNotifications: initialUnread 
         preselectedBrewery={preselectedBrewery}
       />
 
-      {activeSession && (
-        <TapWallSheet
-          isOpen={tapWallMode === 'open'}
-          onClose={handleTapWallClose}
-          onMinimize={() => setTapWallMode('minimized')}
+      {/* ── Detent Sheet — 3-state session sheet (peek/half/full) ──────────── */}
+      {activeSession && tapWallMode !== 'closed' && (
+        <DetentSheet
           session={activeSession}
           breweryName={sessionBreweryName}
           breweryId={activeSession.brewery_id}
           homeMode={activeSession.context === 'home'}
+          initialDetent={tapWallMode as 'peek' | 'half' | 'full'}
+          onDetentChange={handleDetentChange}
           onSessionEnd={handleSessionEnd}
           onSessionCancelled={handleSessionCancelled}
         />
       )}
-
-      {/* Minimized session bar */}
-      <AnimatePresence>
-        {activeSession && tapWallMode === 'minimized' && (
-          <MinimizedSessionBar
-            breweryName={sessionBreweryName}
-            beerCount={beerLogs.reduce((sum, l) => sum + (l.quantity ?? 1), 0)}
-            startedAt={activeSession.started_at}
-            beerLogs={beerLogs}
-            onTap={handleMinimizedTap}
-          />
-        )}
-      </AnimatePresence>
 
       <SessionRecapSheet
         isOpen={recapOpen}

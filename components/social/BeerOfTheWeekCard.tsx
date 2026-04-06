@@ -1,7 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
+import { variants, transition } from '@/lib/animation'
 import { Star } from 'lucide-react'
 import { getGlass, getGlassSvgContent } from '@/lib/glassware'
 
@@ -21,9 +22,9 @@ export function BeerOfTheWeekCard({ beer, index = 0 }: { beer: FeaturedBeer; ind
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.05, duration: 0.3 }}
+      initial={variants.slideUpSmall.initial}
+      animate={variants.slideUpSmall.animate}
+      transition={{ delay: index * 0.05, ...transition.normal }}
     >
       <Link href={`/beer/${beer.id}`}>
         <div

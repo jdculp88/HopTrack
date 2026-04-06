@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
+import { transition } from "@/lib/animation";
 
 const REACTIONS = [
   { emoji: "🍺", label: "Cheers" },
@@ -86,7 +87,7 @@ export function EmojiPulse({ itemKey }: EmojiPulseProps) {
                   initial={{ opacity: 0, y: -4 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 4 }}
-                  transition={{ duration: 0.15 }}
+                  transition={transition.fast}
                   className="font-mono text-[10px]"
                 >
                   {count}

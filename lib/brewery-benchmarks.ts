@@ -82,6 +82,8 @@ export async function calculatePeerBenchmarks(breweryId: string): Promise<PeerBe
     .neq("id", breweryId)
     .limit(200);
 
+  let peerIds: string[] | undefined;
+
   if (brewery.city) {
     const { data: cityPeers } = await (service as any)
       .from("breweries")
@@ -93,7 +95,7 @@ export async function calculatePeerBenchmarks(breweryId: string): Promise<PeerBe
 
     if (cityPeers && cityPeers.length >= 5) {
       peerQuery = null; // skip state query
-      var peerIds = cityPeers.map((p: any) => p.id);
+      peerIds = cityPeers.map((p: any) => p.id);
     } else {
       peerScope = "state";
       peerLocation = brewery.state;
@@ -103,14 +105,16 @@ export async function calculatePeerBenchmarks(breweryId: string): Promise<PeerBe
     peerLocation = brewery.state;
   }
 
-  if (!peerIds!) {
+  if (!peerIds) {
     const { data: statePeers } = await peerQuery;
     if (!statePeers || statePeers.length < 5) return { ...emptyResult, peerLocation };
     peerIds = statePeers.map((p: any) => p.id);
   }
 
-  const peerCount = peerIds.length;
-  const allIds = [breweryId, ...peerIds];
+  // At this point peerIds is guaranteed defined (assigned above or in city branch)
+  const resolvedPeerIds = peerIds as string[];
+  const peerCount = resolvedPeerIds.length;
+  const allIds = [breweryId, ...resolvedPeerIds];
 
   // Fetch data for all breweries (self + peers) in parallel
   const [
@@ -172,7 +176,7 @@ export async function calculatePeerBenchmarks(breweryId: string): Promise<PeerBe
   const mine = computeMetrics(breweryId);
 
   // Compute averages across peers
-  const peerMetrics = peerIds.map((pid: string) => computeMetrics(pid));
+  const peerMetrics = resolvedPeerIds.map((pid: string) => computeMetrics(pid));
 
   function peerAverage(getter: (m: ReturnType<typeof computeMetrics>) => number | null): number | null {
     const values = peerMetrics.map(getter).filter((v: number | null): v is number => v !== null);

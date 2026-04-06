@@ -7,6 +7,7 @@ import { useEffect } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { TrendingUp } from "lucide-react";
 import { useHaptic } from "@/hooks/useHaptic";
+import { transition, variants } from "@/lib/animation";
 
 interface LevelUpCelebrationProps {
   show: boolean;
@@ -63,10 +64,8 @@ export function LevelUpCelebration({
       {show && (
         <motion.div
           key="level-up-celebration"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
+          {...variants.fadeIn}
+          transition={transition.fast}
           className="fixed inset-0 z-[200] flex items-center justify-center"
           style={{
             background: "rgba(15, 14, 12, 0.85)",
@@ -78,7 +77,7 @@ export function LevelUpCelebration({
             initial={{ scale: 0.5, opacity: 0, y: 40 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.8, opacity: 0 }}
-            transition={{ type: "spring", stiffness: 400, damping: 22 }}
+            transition={{ type: "spring", stiffness: 400, damping: 22 }} // intentional: celebration-specific timing (lower damping = more bounce than spring.default)
             className="flex flex-col items-center gap-4 px-10 py-10 rounded-3xl max-w-sm w-full mx-4 relative overflow-hidden"
             style={{
               background: "var(--surface)",
@@ -105,7 +104,7 @@ export function LevelUpCelebration({
             <motion.div
               initial={{ scale: 0.6, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: 0.15, type: "spring", stiffness: 400, damping: 20 }}
+              transition={{ delay: 0.15, type: "spring", stiffness: 400, damping: 20 }} // intentional: celebration-specific timing (extra bounce for medallion reveal)
               className="relative"
             >
               <div
@@ -135,9 +134,8 @@ export function LevelUpCelebration({
             </motion.div>
 
             <motion.p
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4, duration: 0.3 }}
+              {...variants.slideUpSmall}
+              transition={{ delay: 0.4, ...transition.normal }}
               className="font-display text-2xl font-bold text-center"
               style={{ color: "var(--text-primary)" }}
             >

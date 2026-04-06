@@ -1,83 +1,109 @@
 "use client";
 
-import { Sun, Moon } from "lucide-react";
+import { Sun, Moon, Smartphone } from "lucide-react";
 import { motion } from "motion/react";
-import { useTheme } from "./ThemeProvider";
+import { useTheme, type Theme } from "./ThemeProvider";
 import { cn } from "@/lib/utils";
 import { useHaptic } from "@/hooks/useHaptic";
+import { spring, transition, microInteraction } from "@/lib/animation";
+
+const THEME_OPTIONS: { value: Theme; label: string; icon: typeof Sun }[] = [
+  { value: "light", label: "Light", icon: Sun },
+  { value: "dark", label: "Dark", icon: Moon },
+  { value: "oled", label: "OLED", icon: Smartphone },
+];
 
 interface ThemeToggleProps {
   className?: string;
-  /** compact = icon-only button; full = pill with label */
+  /** compact = icon-only button; full = 3-segment selector */
   variant?: "compact" | "full";
 }
 
 export function ThemeToggle({ className, variant = "compact" }: ThemeToggleProps) {
-  const { theme, toggle } = useTheme();
-  const isDark = theme === "dark";
+  const { theme, toggle, setTheme } = useTheme();
   const { haptic } = useHaptic();
-  const handleToggle = () => { haptic("selection"); toggle(); };
 
   if (variant === "full") {
     return (
-      <button
-        onClick={handleToggle}
+      <div
         className={cn(
-          "flex items-center justify-between w-full p-3 rounded-xl transition-colors",
-          "hover:bg-[var(--surface-2)]",
+          "flex items-center justify-between w-full p-3 rounded-xl",
           className
         )}
       >
-        <div className="flex items-center gap-3">
-          {isDark ? (
-            <Moon size={16} className="text-[var(--accent-gold)]" />
-          ) : (
-            <Sun size={16} className="text-[var(--accent-gold)]" />
-          )}
-          <span className="text-sm font-sans text-[var(--text-primary)]">
-            {isDark ? "Dark Mode" : "Light Mode"}
-          </span>
-        </div>
+        <span className="text-sm font-sans text-[var(--text-primary)]">
+          Theme
+        </span>
 
-        {/* Toggle pill */}
+        {/* 3-segment selector */}
         <div
-          className={cn(
-            "w-12 h-6 rounded-full relative transition-colors duration-200 flex-shrink-0",
-            isDark ? "bg-[var(--accent-gold)]" : "bg-[var(--border)]"
-          )}
+          className="relative flex rounded-xl p-0.5 flex-shrink-0"
+          style={{ background: "var(--surface)" }}
+          role="radiogroup"
+          aria-label="Theme selection"
         >
+          {THEME_OPTIONS.map((opt) => {
+            const Icon = opt.icon;
+            const isActive = theme === opt.value;
+            return (
+              <button
+                key={opt.value}
+                onClick={() => { haptic("selection"); setTheme(opt.value); }}
+                className={cn(
+                  "relative z-10 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors",
+                  isActive
+                    ? "text-[var(--bg)]"
+                    : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
+                )}
+                role="radio"
+                aria-checked={isActive}
+                aria-label={opt.label}
+              >
+                <Icon size={13} />
+                <span className="hidden sm:inline">{opt.label}</span>
+              </button>
+            );
+          })}
+          {/* Sliding active indicator */}
           <motion.div
             layout
-            transition={{ type: "spring", stiffness: 500, damping: 35 }}
-            className={cn(
-              "absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-sm",
-              isDark ? "left-6" : "left-0.5"
-            )}
+            layoutId="theme-indicator"
+            transition={spring.snappy}
+            className="absolute top-0.5 bottom-0.5 rounded-lg"
+            style={{
+              background: "var(--accent-gold)",
+              width: `calc(${100 / THEME_OPTIONS.length}% - 2px)`,
+              left: `calc(${THEME_OPTIONS.findIndex(o => o.value === theme) * (100 / THEME_OPTIONS.length)}% + 1px)`,
+            }}
           />
         </div>
-      </button>
+      </div>
     );
   }
 
-  // Compact icon button
+  // Compact icon button — cycles through themes
+  const currentIcon = THEME_OPTIONS.find(o => o.value === theme)!;
+  const nextTheme = THEME_OPTIONS[(THEME_OPTIONS.findIndex(o => o.value === theme) + 1) % THEME_OPTIONS.length];
+  const Icon = currentIcon.value === "dark" ? Sun : currentIcon.value === "light" ? Smartphone : Moon;
+
   return (
     <button
-      onClick={toggle}
+      onClick={() => { haptic("selection"); toggle(); }}
       className={cn(
         "p-2 rounded-xl transition-colors",
         "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-2)]",
         className
       )}
-      aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+      aria-label={`Switch to ${nextTheme.label} mode`}
     >
       <motion.div
         key={theme}
         initial={{ rotate: -30, opacity: 0 }}
-        animate={{ rotate: 0,   opacity: 1 }}
-        whileTap={{ scale: 0.9 }}
-        transition={{ duration: 0.2 }}
+        animate={{ rotate: 0, opacity: 1 }}
+        whileTap={microInteraction.toggle}
+        transition={transition.fast}
       >
-        {isDark ? <Sun size={18} /> : <Moon size={18} />}
+        <Icon size={18} />
       </motion.div>
     </button>
   );

@@ -5,7 +5,7 @@ import type { Session, BeerLog } from '@/types/database'
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 
-export type TapWallMode = 'closed' | 'open' | 'minimized'
+export type TapWallMode = 'closed' | 'peek' | 'half' | 'full'
 
 interface SessionContextValue {
   // State

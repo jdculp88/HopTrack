@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "motion/react";
+import { variants, transition } from "@/lib/animation";
 import { Map, Route } from "lucide-react";
 import { getFirstName } from "@/lib/first-name";
 
@@ -17,9 +18,9 @@ export interface FriendActiveRoute {
 export function HopRouteCTACard({ route, index = 0 }: { route: FriendActiveRoute; index?: number }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.03, duration: 0.25 }}
+      initial={variants.slideUpSmall.initial}
+      animate={variants.slideUpSmall.animate}
+      transition={{ delay: index * 0.03, ...transition.normal }}
       className="card-bg-hoproute rounded-2xl p-4 relative overflow-hidden"
       style={{
         border: "1px solid color-mix(in srgb, var(--accent-gold) 20%, var(--border))",

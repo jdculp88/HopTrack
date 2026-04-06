@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion } from "motion/react";
 import { Share2, Check } from "lucide-react";
 import { getStyleVars } from "@/lib/beerStyleColors";
+import { spring } from "@/lib/animation";
 
 // Match HomeFeed's StyleDNAEntry shape (avgRating can be null)
 interface StyleDNAEntry {
@@ -89,7 +90,7 @@ export function BeerDNACard({ styleDNA, username }: BeerDNACardProps) {
     <motion.div
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ type: "spring", stiffness: 400, damping: 30 }}
+      transition={spring.default}
       className="card-bg-taste-dna rounded-2xl p-5 relative overflow-hidden"
       style={{
         border: "1px solid var(--border)",

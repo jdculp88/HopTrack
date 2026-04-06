@@ -108,7 +108,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    let friendNameMap = new Map<string, string>();
+    const friendNameMap = new Map<string, string>();
     if (allFriendIdsUsed.size > 0) {
       const { data: profilesRaw } = await (supabase
         .from("profiles")

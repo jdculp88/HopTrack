@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef } from "react";
 import { motion } from "motion/react";
+import { spring, microInteraction } from "@/lib/animation";
 import { MessageCircle, Share2 } from "lucide-react";
 import { useToast } from "@/components/ui/Toast";
 import { useHaptic } from "@/hooks/useHaptic";
@@ -119,8 +120,8 @@ export function ReactionBar({
         >
           <motion.span
             className="flex items-center gap-1.5"
-            whileTap={{ scale: 0.97 }}
-            transition={{ type: "spring", stiffness: 400, damping: 30 }}
+            whileTap={microInteraction.press}
+            transition={spring.default}
           >
             <span
               style={{
@@ -179,8 +180,8 @@ export function ReactionBar({
         >
           <motion.span
             className="flex items-center"
-            whileTap={{ scale: 0.97 }}
-            transition={{ type: "spring", stiffness: 400, damping: 30 }}
+            whileTap={microInteraction.press}
+            transition={spring.default}
           >
             <Share2 size={14} />
           </motion.span>

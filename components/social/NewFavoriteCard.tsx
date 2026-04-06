@@ -1,7 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
+import { variants, transition } from '@/lib/animation'
 import { Heart } from 'lucide-react'
 import { formatRelativeTime } from '@/lib/dates'
 import { EmojiPulse } from '@/components/social/EmojiPulse'
@@ -32,9 +33,9 @@ export function NewFavoriteCard({
 }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.03, duration: 0.25 }}
+      initial={variants.slideUpSmall.initial}
+      animate={variants.slideUpSmall.animate}
+      transition={{ delay: index * 0.03, ...transition.normal }}
       className="card-bg-featured rounded-2xl p-4 relative overflow-hidden"
     >
       {/* Header row: Heart icon + "{firstName} found a new favorite" + timestamp */}

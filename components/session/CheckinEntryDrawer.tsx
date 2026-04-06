@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence } from 'motion/react'
 import { X, Search, MapPin, Loader2, ChevronRight, Home, Clock } from 'lucide-react'
 import { FullScreenDrawer } from '@/components/ui/Modal'
 import { generateGradientFromString } from '@/lib/utils'

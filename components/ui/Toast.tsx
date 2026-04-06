@@ -3,6 +3,7 @@
 import { createContext, useContext, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { CheckCircle, AlertCircle, Info, X } from "lucide-react";
+import { spring } from "@/lib/animation";
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 
@@ -117,10 +118,11 @@ function ToastItem({ toast: t, onDismiss }: { toast: ToastItem; onDismiss: (id: 
   return (
     <motion.div
       layout
+      // intentional: multi-property animation (opacity + x + scale) for toast slide-in
       initial={{ opacity: 0, x: 60, scale: 0.92 }}
       animate={{ opacity: 1, x: 0, scale: 1 }}
       exit={{ opacity: 0, x: 60, scale: 0.92 }}
-      transition={{ type: "spring", stiffness: 420, damping: 32 }}
+      transition={spring.default}
       className="pointer-events-auto flex items-start gap-3 px-4 py-3.5 rounded-2xl backdrop-blur-md"
       style={{
         background: "color-mix(in srgb, var(--surface) 82%, transparent)",

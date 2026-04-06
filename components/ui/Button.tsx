@@ -4,6 +4,7 @@ import { forwardRef } from "react";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 import { useHaptic } from "@/hooks/useHaptic";
+import { spring, microInteraction } from "@/lib/animation";
 
 type ButtonVariant = "primary" | "secondary" | "ghost" | "danger" | "gold";
 type ButtonSize = "xs" | "sm" | "md" | "lg";
@@ -77,8 +78,8 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         <motion.span
           className="inline-flex items-center justify-center gap-inherit w-full"
           whileHover={variant === "primary" ? { scale: 1.01 } : undefined}
-          whileTap={{ scale: 0.97 }}
-          transition={{ type: "spring", stiffness: 400, damping: 30 }}
+          whileTap={microInteraction.press}
+          transition={spring.default}
           style={{ gap: "inherit" }}
         >
           {loading ? (

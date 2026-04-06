@@ -14,6 +14,7 @@ export function JustTappedBadge({ tappedAt }: JustTappedBadgeProps) {
   if (!tappedAt) return null;
 
   const tappedTime = new Date(tappedAt).getTime();
+  // eslint-disable-next-line react-hooks/purity -- Date.now() intentional for freshness check on each render
   const twoHoursAgo = Date.now() - 2 * 60 * 60 * 1000;
 
   if (tappedTime < twoHoursAgo) return null;

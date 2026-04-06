@@ -1,6 +1,7 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
+import { variants, transition } from '@/lib/animation'
 import { StarRating } from '@/components/ui/StarRating'
 import { UserAvatar } from '@/components/ui/UserAvatar'
 import { formatRelativeTime } from '@/lib/dates'
@@ -20,9 +21,9 @@ export function RatingCard({ rating: review, index = 0 }: { rating: FriendRating
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.03, duration: 0.25 }}
+      initial={variants.slideUpSmall.initial}
+      animate={variants.slideUpSmall.animate}
+      transition={{ delay: index * 0.03, ...transition.normal }}
       className="flex items-center gap-3 px-4 py-3 rounded-xl relative overflow-hidden"
       style={{ background: 'var(--surface-warm)', border: '1px solid var(--surface-warm-border)' }}
     >

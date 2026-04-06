@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { Beer, ChevronRight } from 'lucide-react'
 import { Session, BeerLog } from '@/types/database'
 import { InviteFriendsButton } from '@/components/session/InviteFriendsButton'

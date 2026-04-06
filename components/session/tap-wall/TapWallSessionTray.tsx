@@ -1,6 +1,6 @@
 'use client'
 
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence } from 'motion/react'
 import { Loader2, Users, AlertTriangle, Plus } from 'lucide-react'
 import { getStyleFamily } from '@/lib/beerStyleColors'
 import { getStyleHex } from '@/lib/session-colors'

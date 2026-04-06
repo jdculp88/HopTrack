@@ -191,6 +191,89 @@
   --badge-gold:             #b07828;
 }
 
+/* ── OLED Black theme (true black for OLED displays — opt-in only) ────────── */
+[data-theme="oled"] {
+  --bg:              #000000;
+  --surface:         #0A0A0A;
+  --surface-2:       #141414;
+  --surface-3:       #1E1E1E;
+  --surface-glass:   rgba(10, 10, 10, 0.85);
+  --border:          #2A2A2A;
+  --text-primary:    #F5F0E8;
+  --text-secondary:  #C4B89E;
+  --text-muted:      #8B7D6E;
+  --accent-gold:     #D4A843;
+  --accent-amber:    #E8841A;
+  --accent-green:    #2D5A3D;
+  --danger:          #C44B3A;
+  --success:         #3D7A52;
+  --skeleton-base:   #0A0A0A;
+  --skeleton-shine:  #141414;
+  --scrollbar-track: #0A0A0A;
+  --scrollbar-thumb: #2A2A2A;
+
+  /* Elevation via subtle border-glow — box-shadow invisible on true black */
+  --shadow-card:       0 0 0 1px rgba(255,255,255,0.06);
+  --shadow-card-hover: 0 0 0 1px rgba(255,255,255,0.1), 0 0 8px rgba(212,168,67,0.08);
+  --shadow-elevated:   0 0 0 1px rgba(255,255,255,0.1), 0 0 16px rgba(212,168,67,0.06);
+  --glow-gold:         0 0 24px rgba(212,168,67,0.2);
+  --surface-warm:      linear-gradient(135deg, color-mix(in srgb, var(--accent-gold) 5%, #0A0A0A), #0A0A0A);
+  --surface-warm-border: color-mix(in srgb, var(--accent-gold) 14%, #2A2A2A);
+
+  /* Beer style colors — same as dark mode (designed for dark backgrounds) */
+  --ipa-green:              #5a8a4a;
+  --ipa-green-light:        #0C1A08;
+  --ipa-green-soft:         #7aaa6a;
+
+  --stout-espresso:         #3d2b1f;
+  --stout-espresso-light:   #0E0804;
+  --stout-espresso-mid:     #6b5445;
+
+  --sour-berry:             #a8456a;
+  --sour-berry-light:       #18060E;
+  --sour-berry-soft:        #c87090;
+
+  --porter-plum:            #5c3d5e;
+  --porter-plum-light:      #0E0610;
+  --porter-plum-soft:       #8a6a8c;
+
+  --lager-sky:              #4a7a8a;
+  --lager-sky-light:        #061216;
+  --lager-sky-soft:         #6a9aaa;
+
+  --saison-peach:           #d48a50;
+  --saison-peach-light:     #160C02;
+
+  --cider-rose:             #B85C4A;
+  --cider-rose-light:       #140804;
+  --cider-rose-soft:        #D08878;
+
+  --wine-burgundy:          #722F37;
+  --wine-burgundy-light:    #0C0406;
+  --wine-burgundy-soft:     #9E5B64;
+
+  --cocktail-teal:          #1A8E80;
+  --cocktail-teal-light:    #02100E;
+  --cocktail-teal-soft:     #4DB8AC;
+
+  --na-lemon:               #BFA032;
+  --na-lemon-light:         #141002;
+  --na-lemon-soft:          #D4B958;
+
+  --streak-flame:           #e07830;
+  --xp-emerald:             #4a8a5c;
+  --live-green:             #48a058;
+
+  --badge-bronze:           #a07850;
+  --badge-silver:           #8a9098;
+  --badge-gold:             #c8943a;
+}
+
+/* OLED card noise — lower opacity for true black */
+[data-theme="oled"] {
+  --card-noise: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+}
+
 /* ── View Transitions — Sprint 156 ────────────────────────────────────────── */
 ::view-transition-old(root) {
   animation: vt-fade-out 200ms ease-out;

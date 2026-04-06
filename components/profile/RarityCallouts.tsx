@@ -7,6 +7,7 @@ import { useState } from "react";
 import { motion } from "motion/react";
 import { Share2, Check, Copy } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { spring } from "@/lib/animation";
 import { Card, CardTitle } from "@/components/ui/Card";
 import { formatTopPercent, getRarityTier } from "@/lib/percentiles";
 import { getStyleVars } from "@/lib/beerStyleColors";
@@ -153,9 +154,9 @@ function RarityRow({
         <p className="text-sm text-[var(--text-secondary)]">{label}</p>
         <div className="flex items-baseline gap-2 mt-0.5">
           <motion.p
-            initial={{ opacity: 0, x: -4 }}
+            initial={{ opacity: 0, x: -4 }} // intentional: subtle left-to-right slide for percentile reveal
             animate={{ opacity: 1, x: 0 }}
-            transition={{ type: "spring", stiffness: 400, damping: 25 }}
+            transition={spring.default}
             className="font-display text-xl font-bold text-[var(--accent-gold)]"
           >
             {formatTopPercent(percentile)}

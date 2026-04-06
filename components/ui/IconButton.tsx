@@ -4,6 +4,7 @@ import { forwardRef } from "react";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 import { useHaptic } from "@/hooks/useHaptic";
+import { spring } from "@/lib/animation";
 
 interface IconButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   /** aria-label is REQUIRED for icon buttons — no visible text means screen readers need it */
@@ -45,8 +46,8 @@ export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
       >
         <motion.span
           className="inline-flex items-center justify-center"
-          whileTap={{ scale: 0.88 }}
-          transition={{ type: "spring", stiffness: 500, damping: 30 }}
+          whileTap={{ scale: 0.88 }} // intentional: aggressive tap scale for compact icon buttons
+          transition={spring.snappy}
         >
           {children}
         </motion.span>

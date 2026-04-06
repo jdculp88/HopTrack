@@ -1,7 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
+import { variants, transition, spring, microInteraction } from '@/lib/animation'
 import { TrendingUp, Calendar } from 'lucide-react'
 import { StarRating } from '@/components/ui/StarRating'
 import { UserAvatar } from '@/components/ui/UserAvatar'
@@ -61,9 +62,9 @@ export function TrendingCard({ reviews, index = 0 }: { reviews: TrendingReview[]
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.04, duration: 0.3 }}
+      initial={variants.slideUpSmall.initial}
+      animate={variants.slideUpSmall.animate}
+      transition={{ delay: index * 0.04, ...transition.normal }}
     >
       <div className="flex items-center gap-2 mb-3">
         <TrendingUp size={14} style={{ color: 'var(--accent-gold)' }} />
@@ -75,9 +76,9 @@ export function TrendingCard({ reviews, index = 0 }: { reviews: TrendingReview[]
         {reviews.map((review, i) => (
           <motion.div
             key={review.id}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 + i * 0.05, duration: 0.25 }}
+            initial={variants.slideUpSmall.initial}
+            animate={variants.slideUpSmall.animate}
+            transition={{ delay: 0.1 + i * 0.05, ...transition.normal }}
             className="card-bg-reco rounded-xl p-3.5 flex-shrink-0 snap-start"
             data-style={getStyleFamily(review.beer?.style)}
             style={{
@@ -127,9 +128,9 @@ export function BreweryReviewCard({ review, index = 0 }: { review: BreweryReview
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.04, duration: 0.25 }}
+      initial={variants.slideUpSmall.initial}
+      animate={variants.slideUpSmall.animate}
+      transition={{ delay: index * 0.04, ...transition.normal }}
     >
       <Link href={`/brewery/${review.brewery.id}`}>
         <div
@@ -170,9 +171,9 @@ export function EventCard({ event, index = 0 }: { event: EventItem; index?: numb
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.04, duration: 0.25 }}
+      initial={variants.slideUpSmall.initial}
+      animate={variants.slideUpSmall.animate}
+      transition={{ delay: index * 0.04, ...transition.normal }}
     >
       <Link href={`/brewery/${event.brewery.id}`}>
         <div
@@ -214,9 +215,9 @@ export function SeasonalBeersScroll({ beers }: { beers: SeasonalBeer[] }) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
+      initial={variants.slideUpSmall.initial}
+      animate={variants.slideUpSmall.animate}
+      transition={transition.normal}
     >
       <p className="text-[10px] font-mono uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)' }}>
         New & Noteworthy
@@ -225,9 +226,9 @@ export function SeasonalBeersScroll({ beers }: { beers: SeasonalBeer[] }) {
         {beers.map((beer, i) => (
           <motion.div
             key={beer.id}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.05, duration: 0.25 }}
+            initial={variants.slideUpSmall.initial}
+            animate={variants.slideUpSmall.animate}
+            transition={{ delay: i * 0.05, ...transition.normal }}
             className="card-bg-seasonal rounded-xl p-3.5 flex-shrink-0"
             style={{
               border: '1px solid var(--surface-warm-border)',
@@ -328,9 +329,9 @@ export function CuratedCollectionsList({ collections }: { collections: CuratedCo
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
+      initial={variants.slideUpSmall.initial}
+      animate={variants.slideUpSmall.animate}
+      transition={transition.normal}
     >
       <p
         className="text-[10px] font-mono uppercase tracking-widest mb-3"
@@ -344,9 +345,9 @@ export function CuratedCollectionsList({ collections }: { collections: CuratedCo
           return (
             <motion.div
               key={col.id}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.04, duration: 0.25 }}
+              initial={variants.slideUpSmall.initial}
+              animate={variants.slideUpSmall.animate}
+              transition={{ delay: i * 0.04, ...transition.normal }}
             >
               <button
                 type="button"
@@ -354,8 +355,8 @@ export function CuratedCollectionsList({ collections }: { collections: CuratedCo
                 className="w-full text-left"
               >
                 <motion.div
-                  whileTap={{ scale: 0.98 }}
-                  transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                  whileTap={microInteraction.select}
+                  transition={spring.default}
                   className="card-bg-collection rounded-xl py-3.5 pr-4 flex items-center gap-3.5 relative overflow-hidden"
                   style={{
                     background: tagStyles.bg,

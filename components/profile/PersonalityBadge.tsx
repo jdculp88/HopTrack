@@ -8,6 +8,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Share2, Copy, Check, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { spring } from "@/lib/animation";
 import { Card } from "@/components/ui/Card";
 import {
   generateOGImageUrl,
@@ -31,6 +32,7 @@ export function PersonalityBadge({
   const [shareState, setShareState] = useState<
     "idle" | "sharing" | "copied" | "shared" | "failed"
   >("idle");
+  const [expanded, setExpanded] = useState(false);
 
   // Hide for other profiles with insufficient data.
   if (!personality.hasEnoughData && !isOwnProfile) return null;
@@ -100,7 +102,6 @@ export function PersonalityBadge({
       </>
     );
 
-  const [expanded, setExpanded] = useState(false);
   const axisLetters = personality.code.split("");
 
   return (
@@ -118,6 +119,7 @@ export function PersonalityBadge({
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-3 mb-1">
             <motion.span
+              // intentional: multi-property animation (scale + rotate) with low damping for playful bounce
               initial={{ scale: 0.5, rotate: -10 }}
               animate={{ scale: 1, rotate: 0 }}
               transition={{ type: "spring", stiffness: 400, damping: 20 }}
@@ -194,7 +196,7 @@ export function PersonalityBadge({
         </div>
         <motion.span
           animate={{ rotate: expanded ? 180 : 0 }}
-          transition={{ type: "spring", stiffness: 400, damping: 30 }}
+          transition={spring.default}
           className="text-[var(--text-muted)] group-hover:text-[var(--text-secondary)] transition-colors flex-shrink-0"
         >
           <ChevronDown size={14} />
@@ -207,7 +209,7 @@ export function PersonalityBadge({
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ type: "spring", stiffness: 400, damping: 30 }}
+            transition={spring.default}
             className="overflow-hidden"
           >
             <div className="pt-2 space-y-2 border-t border-[var(--border)]">

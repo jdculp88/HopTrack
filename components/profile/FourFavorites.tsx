@@ -10,6 +10,7 @@ import Image from "next/image";
 import { motion, AnimatePresence } from "motion/react";
 import { Pencil, X, Plus, Search, Check, Share2 } from "lucide-react";
 import { cn, generateGradientFromString } from "@/lib/utils";
+import { spring, variants } from "@/lib/animation";
 import { BeerStyleBadge } from "@/components/ui/BeerStyleBadge";
 import { Modal } from "@/components/ui/Modal";
 import { Card, CardTitle } from "@/components/ui/Card";
@@ -71,6 +72,44 @@ export function FourFavorites({
 
   const pinCount = pins.length;
 
+  const save = useCallback(
+    async (nextPins: PinnedBeerItem[]) => {
+      setSaving(true);
+      setError(null);
+      try {
+        const beerIds = nextPins
+          .sort((a, b) => a.position - b.position)
+          .map((p) => p.beer_id);
+        const res = await fetch("/api/profile/pinned-beers", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ beer_ids: beerIds }),
+        });
+        const payload = await res.json();
+        if (!res.ok || payload.error) {
+          setError(payload.error?.message ?? "Failed to save pins");
+          return false;
+        }
+        // Use server response as authoritative
+        const fresh: PinnedBeerItem[] = (payload.data ?? []).map(
+          (row: { beer_id: string; position: number; beer: FourFavoritesBeer | null }) => ({
+            beer_id: row.beer_id,
+            position: row.position,
+            beer: row.beer,
+          }),
+        );
+        setPins(fresh);
+        return true;
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Network error");
+        return false;
+      } finally {
+        setSaving(false);
+      }
+    },
+    [],
+  );
+
   // Hide entirely for other profiles with no pins.
   if (!isOwnProfile && pinCount === 0) return null;
 
@@ -121,44 +160,6 @@ export function FourFavorites({
       </div>
     );
   }
-
-  const save = useCallback(
-    async (nextPins: PinnedBeerItem[]) => {
-      setSaving(true);
-      setError(null);
-      try {
-        const beerIds = nextPins
-          .sort((a, b) => a.position - b.position)
-          .map((p) => p.beer_id);
-        const res = await fetch("/api/profile/pinned-beers", {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ beer_ids: beerIds }),
-        });
-        const payload = await res.json();
-        if (!res.ok || payload.error) {
-          setError(payload.error?.message ?? "Failed to save pins");
-          return false;
-        }
-        // Use server response as authoritative
-        const fresh: PinnedBeerItem[] = (payload.data ?? []).map(
-          (row: { beer_id: string; position: number; beer: FourFavoritesBeer | null }) => ({
-            beer_id: row.beer_id,
-            position: row.position,
-            beer: row.beer,
-          }),
-        );
-        setPins(fresh);
-        return true;
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Network error");
-        return false;
-      } finally {
-        setSaving(false);
-      }
-    },
-    [],
-  );
 
   const handleRemove = async (position: number) => {
     const next = pins
@@ -340,9 +341,8 @@ function SlotCard({ slot, isEditing, isOwnProfile, saving, onRemove, onAdd }: Sl
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ type: "spring", stiffness: 400, damping: 30 }}
+      {...variants.scaleIn}
+      transition={spring.default}
       className="relative group"
     >
       <Link

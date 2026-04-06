@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "motion/react";
+import { spring, variants } from "@/lib/animation";
 import { MapPin, Beer, Star, Home, Users } from "lucide-react";
 import { cn, formatRelativeTime } from "@/lib/utils";
 import { UserAvatar } from "@/components/ui/UserAvatar";
@@ -142,10 +143,10 @@ export function SessionCard({ session, currentUserId, className, reactionCounts,
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      whileInView={{ opacity: 1, y: 0 }}
+      initial={variants.slideUpSmall.initial}
+      whileInView={variants.slideUpSmall.animate}
       viewport={{ once: true, margin: "-50px" }}
-      transition={{ type: "spring", stiffness: 400, damping: 30 }}
+      transition={spring.default}
       role="article"
       aria-label={cardLabel}
       className={cn(

@@ -7,6 +7,7 @@
 import { motion } from "motion/react";
 import { Crown } from "lucide-react";
 import Link from "next/link";
+import { spring } from "@/lib/animation";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import { RANK_STYLES } from "@/lib/constants/tiers";
 import { cn, formatCount } from "@/lib/utils";
@@ -58,16 +59,18 @@ export function LeaderboardPodium({ entries, label, currentUserId }: Leaderboard
           <motion.div
             key={entry.profile.id}
             className={cn("flex flex-col items-center flex-1 max-w-[140px]", HEIGHTS[rank])}
+            // intentional: multi-property animation (opacity + y + scale) with staggered ceremony delay
             initial={{ opacity: 0, y: 30, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ type: "spring", stiffness: 350, damping: 28, delay: animDelay }}
+            transition={{ ...spring.default, delay: animDelay }}
           >
             {/* Crown on 1st place */}
             {rank === 0 && (
               <motion.div
+                // intentional: multi-property animation (opacity + y + rotate) with bouncy spring for crown celebration
                 initial={{ opacity: 0, y: -10, rotate: -15 }}
                 animate={{ opacity: 1, y: 0, rotate: 0 }}
-                transition={{ type: "spring", stiffness: 400, damping: 20, delay: animDelay + 0.2 }}
+                transition={{ ...spring.bouncy, delay: animDelay + 0.2 }}
                 className="mb-1"
               >
                 <Crown size={20} style={{ color: "#D4A843" }} fill="#D4A843" />

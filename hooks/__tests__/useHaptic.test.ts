@@ -6,13 +6,13 @@ import { useHaptic } from "../useHaptic";
 describe("useHaptic", () => {
   const mockVibrate = vi.fn();
   let matchMediaMock: ReturnType<typeof vi.fn>;
-  let listeners: Record<string, Function>;
+  let listeners: Record<string, (...args: unknown[]) => void>;
 
   beforeEach(() => {
     listeners = {};
     matchMediaMock = vi.fn().mockReturnValue({
       matches: false,
-      addEventListener: (event: string, cb: Function) => { listeners[event] = cb; },
+      addEventListener: (event: string, cb: (...args: unknown[]) => void) => { listeners[event] = cb; },
       removeEventListener: vi.fn(),
     });
     Object.defineProperty(window, "matchMedia", { value: matchMediaMock, writable: true });

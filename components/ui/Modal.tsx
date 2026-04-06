@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useHaptic } from "@/hooks/useHaptic";
+import { spring, variants } from "@/lib/animation";
 
 const FOCUSABLE = 'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
 
@@ -72,9 +73,7 @@ export function Modal({ open, onClose, title, children, size = "md", className }
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
           {/* Backdrop */}
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            {...variants.fadeIn}
             className="absolute inset-0 bg-black/70 backdrop-blur-sm"
             onClick={handleClose}
           />
@@ -85,7 +84,7 @@ export function Modal({ open, onClose, title, children, size = "md", className }
             initial={{ opacity: 0, y: 40, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.97 }}
-            transition={{ type: "spring", stiffness: 350, damping: 30 }}
+            transition={spring.default}
             drag="y"
             dragConstraints={{ top: 0, bottom: 0 }}
             dragElastic={{ top: 0, bottom: 0.4 }}
@@ -196,9 +195,7 @@ export function FullScreenDrawer({ open, onClose, children, className, "aria-lab
     <AnimatePresence>
       {open && (
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
+          {...variants.fadeIn}
           className="fixed inset-0 z-50 bg-[var(--bg)]"
         >
           <motion.div
@@ -206,7 +203,7 @@ export function FullScreenDrawer({ open, onClose, children, className, "aria-lab
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
-            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            transition={spring.gentle}
             className={cn("h-full flex flex-col", className)}
             role="dialog"
             aria-modal="true"

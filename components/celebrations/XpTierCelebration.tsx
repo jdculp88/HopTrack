@@ -7,6 +7,7 @@ import { useEffect } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { Sparkles, Zap } from "lucide-react";
 import { useHaptic } from "@/hooks/useHaptic";
+import { transition, variants } from "@/lib/animation";
 
 interface XpTierCelebrationProps {
   show: boolean;
@@ -74,10 +75,8 @@ export function XpTierCelebration({
       {show && (
         <motion.div
           key={`xp-tier-${tier}`}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
+          {...variants.fadeIn}
+          transition={transition.fast}
           className="fixed inset-0 z-[200] flex items-center justify-center"
           style={{
             background: "rgba(15, 14, 12, 0.85)",
@@ -102,7 +101,7 @@ export function XpTierCelebration({
             initial={{ scale: 0.5, opacity: 0, y: 40, rotateX: -30 }}
             animate={{ scale: 1, opacity: 1, y: 0, rotateX: 0 }}
             exit={{ scale: 0.8, opacity: 0 }}
-            transition={{ type: "spring", stiffness: 380, damping: 22 }}
+            transition={{ type: "spring", stiffness: 380, damping: 22 }} // intentional: celebration-specific timing (380 stiffness + low damping for dramatic card entrance)
             className="flex flex-col items-center gap-5 px-10 py-12 rounded-3xl max-w-sm w-full mx-4 relative overflow-hidden"
             style={{
               background: "var(--surface)",
@@ -147,7 +146,7 @@ export function XpTierCelebration({
               <motion.div
                 initial={{ scale: 0.6, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: 0.15, type: "spring", stiffness: 400, damping: 20 }}
+                transition={{ delay: 0.15, type: "spring", stiffness: 400, damping: 20 }} // intentional: celebration-specific timing (extra bounce for multiplier reveal)
                 className="font-display font-bold text-center leading-none"
                 style={{
                   fontSize: "88px",
@@ -160,9 +159,8 @@ export function XpTierCelebration({
               </motion.div>
 
               <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4, duration: 0.3 }}
+                {...variants.slideUpSmall}
+                transition={{ delay: 0.4, ...transition.normal }}
                 className="flex flex-col items-center gap-1.5"
               >
                 <p
