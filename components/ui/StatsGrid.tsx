@@ -43,7 +43,7 @@ export function StatsGrid({ stats, columns = 3, className }: StatsGridProps) {
         <div
           key={label}
           className="rounded-2xl p-5 border text-center"
-          style={{ background: "var(--surface)", borderColor: "var(--border)" }}
+          style={{ background: "var(--card-bg)", borderColor: "var(--border)" }}
         >
           {icon && (
             <div className="mb-2 flex justify-center" style={{ color: "var(--text-muted)" }}>

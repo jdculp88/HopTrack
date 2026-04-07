@@ -340,7 +340,7 @@ export function BeerListsClient({ userId: _userId, initialLists }: BeerListsClie
                         value={editTitle}
                         onChange={(e) => setEditTitle(e.target.value)}
                         className="w-full px-3 py-2 rounded-xl text-sm border outline-none"
-                        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--text-primary)" }}
+                        style={{ background: "var(--card-bg)", borderColor: "var(--border)", color: "var(--text-primary)" }}
                       />
                       <input
                         type="text"
@@ -348,7 +348,7 @@ export function BeerListsClient({ userId: _userId, initialLists }: BeerListsClie
                         onChange={(e) => setEditDesc(e.target.value)}
                         placeholder="Description (optional)"
                         className="w-full px-3 py-2 rounded-xl text-sm border outline-none"
-                        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--text-primary)" }}
+                        style={{ background: "var(--card-bg)", borderColor: "var(--border)", color: "var(--text-primary)" }}
                       />
                       <div className="flex items-center justify-between">
                         <button

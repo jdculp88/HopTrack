@@ -278,7 +278,7 @@ export function YouTabContent({
       {/* Activity Heatmap */}
       {activityHeatmap && activityHeatmap.length > 0 && (
         <div
-          className="card-bg-stats rounded-2xl p-4 shadow-[var(--shadow-card)] border border-[var(--border)]"
+          className="card-bg-stats rounded-2xl p-4 shadow-[var(--shadow-card)] border border-[var(--card-border)]"
         >
           <p className="text-[10px] font-mono uppercase tracking-widest mb-3" style={{ color: "var(--text-muted)" }}>
             Activity
@@ -295,7 +295,7 @@ export function YouTabContent({
       {/* Recent achievements — radiating arcs treatment */}
       {userAchievements && userAchievements.length > 0 && (
         <div
-          className="card-bg-achievement rounded-2xl p-4 space-y-3 shadow-[var(--shadow-card)] border border-[var(--border)]"
+          className="card-bg-achievement rounded-2xl p-4 space-y-3 shadow-[var(--shadow-card)] border border-[var(--card-border)]"
         >
           <div className="flex items-center justify-between relative z-10">
             <p className="text-[10px] font-mono uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
@@ -342,26 +342,41 @@ export function YouTabContent({
               item.beer ? (
                 <Link key={item.id} href={`/beer/${item.beer.id}`}>
                   <div
-                    className="card-bg-reco flex items-center gap-3 p-3 rounded-xl transition-[colors,shadow] shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)]"
+                    className="card-bg-reco flex items-center gap-3 p-3.5 rounded-xl transition-all shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] hover:scale-[1.01]"
                     data-style={getStyleFamily(item.beer.style)}
-                    style={{ border: "1px solid var(--border)" }}
+                    style={{
+                      border: "1px solid var(--card-border)",
+                      borderLeft: `3px solid ${getStyleVars(item.beer.style).primary}`,
+                    }}
                   >
                     <div
-                      className="w-8 h-8 rounded-lg flex items-center justify-center text-lg flex-shrink-0"
+                      className="w-10 h-10 rounded-xl flex items-center justify-center text-lg flex-shrink-0"
                       style={{ background: `linear-gradient(135deg, ${getStyleVars(item.beer.style).light}, ${getStyleVars(item.beer.style).soft ?? getStyleVars(item.beer.style).light})` }}
                     >
                       🍺
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate" style={{ color: "var(--text-primary)" }}>
+                      <p className="font-display text-sm font-semibold truncate" style={{ color: "var(--text-primary)" }}>
                         {item.beer.name}
                       </p>
-                      <p className="text-xs truncate" style={{ color: "var(--text-muted)" }}>
-                        {item.beer.brewery?.name}
-                        {item.beer.style ? ` · ${item.beer.style}` : ""}
-                      </p>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span className="text-xs truncate" style={{ color: "var(--text-muted)" }}>
+                          {item.beer.brewery?.name}
+                        </span>
+                        {item.beer.style && (
+                          <span
+                            className="text-[10px] font-mono px-1.5 py-0.5 rounded-full"
+                            style={{
+                              background: `color-mix(in srgb, ${getStyleVars(item.beer.style).primary} 15%, transparent)`,
+                              color: getStyleVars(item.beer.style).primary,
+                            }}
+                          >
+                            {item.beer.style}
+                          </span>
+                        )}
+                      </div>
                     </div>
-                    {item.beer.abv && (
+                    {item.beer.abv != null && (
                       <span className="text-xs font-mono flex-shrink-0" style={{ color: "var(--text-muted)" }}>
                         {item.beer.abv}%
                       </span>

@@ -192,7 +192,7 @@ function NoFriendsEmptyState() {
           href="/explore"
           className="inline-flex items-center justify-center gap-2 font-medium text-sm px-5 py-3 rounded-xl transition-all"
           style={{
-            background: "var(--surface)",
+            background: "var(--card-bg)",
             color: "var(--text-primary)",
             border: "1px solid var(--border)",
           }}

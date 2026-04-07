@@ -42,7 +42,7 @@ export function OnboardingCard({ onDismiss }: { onDismiss: () => void }) {
           }
           className="flex items-center gap-3 w-full text-left p-3 rounded-xl transition-colors"
           style={{
-            background: "var(--surface)",
+            background: "var(--card-bg)",
             border: "1px solid var(--border)",
           }}
         >
@@ -71,7 +71,7 @@ export function OnboardingCard({ onDismiss }: { onDismiss: () => void }) {
           href="/explore"
           className="flex items-center gap-3 w-full text-left p-3 rounded-xl transition-colors"
           style={{
-            background: "var(--surface)",
+            background: "var(--card-bg)",
             border: "1px solid var(--border)",
           }}
         >
@@ -100,7 +100,7 @@ export function OnboardingCard({ onDismiss }: { onDismiss: () => void }) {
           href="/friends"
           className="flex items-center gap-3 w-full text-left p-3 rounded-xl transition-colors"
           style={{
-            background: "var(--surface)",
+            background: "var(--card-bg)",
             border: "1px solid var(--border)",
           }}
         >

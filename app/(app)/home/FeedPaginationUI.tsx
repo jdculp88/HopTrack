@@ -38,7 +38,7 @@ export function FeedCardSkeleton() {
     <div
       className="rounded-2xl p-4 space-y-3"
       style={{
-        background: "var(--surface)",
+        background: "var(--card-bg)",
         border: "1px solid var(--border)",
       }}
     >

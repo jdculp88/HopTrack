@@ -70,8 +70,12 @@ export function ActivityTab({
         {favBeer ? (
           <Link href={`/beer/${favBeer.beer.id}`}>
             <div
-              className="card-bg-reco flex items-center gap-4 p-4 border border-[var(--border)] hover:border-[var(--accent-gold)]/40 rounded-2xl transition-all group"
+              className="card-bg-reco flex items-center gap-4 p-4 rounded-2xl transition-all group hover:scale-[1.01]"
               data-style={getStyleFamily(favBeer.beer.style)}
+              style={{
+                border: "1px solid var(--card-border)",
+                borderLeft: `3px solid ${getStyleVars(favBeer.beer.style).primary}`,
+              }}
             >
               <div
                 className="w-14 h-14 rounded-2xl flex-shrink-0 flex items-center justify-center text-2xl"
@@ -106,7 +110,7 @@ export function ActivityTab({
             </div>
           </Link>
         ) : (
-          <div className="text-center py-10 bg-[var(--surface)] rounded-2xl border border-[var(--border)]">
+          <div className="text-center py-10 bg-[var(--card-bg)] rounded-2xl border border-[var(--card-border)]">
             <p className="text-3xl mb-2">🍺</p>
             <p className="font-display text-base text-[var(--text-primary)]">Still exploring the menu</p>
             <p className="text-sm text-[var(--text-secondary)] mt-1">
@@ -124,8 +128,12 @@ export function ActivityTab({
             {recentLogs.map((log) => (
               <Link key={log.id} href={`/beer/${log.beer?.id ?? ""}`}>
                 <div
-                  className="card-bg-reco flex items-center gap-3 p-3 border border-[var(--border)] hover:border-[var(--accent-gold)]/30 rounded-2xl transition-colors"
+                  className="card-bg-reco flex items-center gap-3 p-3.5 rounded-2xl transition-all hover:scale-[1.01]"
                   data-style={getStyleFamily(log.beer?.style ?? null)}
+                  style={{
+                    border: "1px solid var(--card-border)",
+                    borderLeft: `3px solid ${getStyleVars(log.beer?.style ?? null).primary}`,
+                  }}
                 >
                   <div
                     className="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center text-lg"
@@ -162,7 +170,7 @@ export function ActivityTab({
             ))}
           </div>
         ) : (
-          <div className="text-center py-10 bg-[var(--surface)] rounded-2xl border border-[var(--border)]">
+          <div className="text-center py-10 bg-[var(--card-bg)] rounded-2xl border border-[var(--card-border)]">
             <p className="text-3xl mb-2">📓</p>
             <p className="font-display text-base text-[var(--text-primary)]">The journal is empty</p>
             <p className="text-sm text-[var(--text-secondary)] mt-1">Start a session to begin tracking your pours.</p>

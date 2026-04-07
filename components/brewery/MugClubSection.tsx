@@ -258,7 +258,7 @@ function PerkRow({
                   <span
                     key={i}
                     className="w-6 h-7 rounded flex items-center justify-center font-mono text-sm font-bold"
-                    style={{ background: "var(--surface)", border: "1px solid var(--accent-gold)", color: "var(--accent-gold)" }}
+                    style={{ background: "var(--card-bg)", border: "1px solid var(--accent-gold)", color: "var(--accent-gold)" }}
                   >
                     {char}
                   </span>

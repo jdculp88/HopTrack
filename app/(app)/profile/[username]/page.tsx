@@ -325,6 +325,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
             userId={profile.id}
             isOwnProfile={isOwnProfile}
             initialPins={pinnedBeers}
+            compact
           />
 
           {/* Tabs */}

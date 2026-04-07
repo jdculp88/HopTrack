@@ -266,7 +266,7 @@ function GridBeerCard({
         whileHover={{ y: -3, scale: 1.01 }}
         transition={{ type: "spring", stiffness: 300, damping: 20 }}
         className={cn(
-          "bg-[var(--surface)] rounded-2xl overflow-hidden",
+          "bg-[var(--card-bg)] rounded-2xl overflow-hidden",
           "border border-[var(--border)] hover:border-[var(--accent-gold)]/30",
           "transition-colors duration-150 group",
           className

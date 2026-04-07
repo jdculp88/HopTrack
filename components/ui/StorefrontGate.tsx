@@ -29,7 +29,7 @@ export function StorefrontGate({ children, isUnlocked, sectionName, breweryId }:
         <div
           className="rounded-2xl border p-5 text-center space-y-2.5 max-w-sm w-full mx-4"
           style={{
-            background: "var(--surface)",
+            background: "var(--card-bg)",
             borderColor: "var(--border)",
             boxShadow: "0 4px 24px rgba(0,0,0,0.2)",
           }}

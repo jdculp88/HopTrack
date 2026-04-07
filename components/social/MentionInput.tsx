@@ -131,7 +131,7 @@ export function MentionInput({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 4 }}
             className="absolute left-0 right-0 bottom-full mb-1 rounded-xl border shadow-lg overflow-hidden z-50"
-            style={{ background: "var(--surface)", borderColor: "var(--border)" }}
+            style={{ background: "var(--card-bg)", borderColor: "var(--border)" }}
           >
             {suggestions.map((user) => (
               <button

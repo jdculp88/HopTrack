@@ -385,7 +385,7 @@ export function NotificationsClient({ notifications: initial }: NotificationsCli
         <div className="max-w-2xl mx-auto px-4 py-6">
           <h1 className="font-sans text-3xl font-bold text-[var(--text-primary)] mb-8">Notifications</h1>
           <div className="text-center py-20 space-y-4">
-            <div className="w-16 h-16 rounded-2xl bg-[var(--surface)] border border-[var(--border)] flex items-center justify-center mx-auto">
+            <div className="w-16 h-16 rounded-2xl bg-[var(--card-bg)] border border-[var(--card-border)] flex items-center justify-center mx-auto">
               <Bell size={24} className="text-[var(--text-muted)]" />
             </div>
             <p className="font-display text-xl text-[var(--text-primary)]">The taps are quiet</p>
@@ -418,7 +418,7 @@ export function NotificationsClient({ notifications: initial }: NotificationsCli
             <button
               onClick={markAllRead}
               disabled={markingRead}
-              className="w-8 h-8 rounded-xl flex items-center justify-center bg-[var(--surface)] border border-[var(--border)] text-[var(--accent-gold)] hover:bg-[var(--surface-2)] transition-colors disabled:opacity-50"
+              className="w-8 h-8 rounded-xl flex items-center justify-center bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--accent-gold)] hover:bg-[var(--surface-2)] transition-colors disabled:opacity-50"
               aria-label="Mark all as read"
               title="Mark all as read"
             >
@@ -453,7 +453,7 @@ export function NotificationsClient({ notifications: initial }: NotificationsCli
           {timeSections.map(section => (
             <div key={section.label}>
               <div className="sticky top-0 z-10 bg-[var(--bg)]/80 backdrop-blur-sm py-2">
-                <p className="text-[10px] uppercase tracking-wide text-[var(--text-muted)] font-mono border-b border-[var(--border)]/50 pb-1.5">
+                <p className="text-[10px] uppercase tracking-wide text-[var(--text-muted)] font-mono border-b border-[var(--card-border)]/50 pb-1.5">
                   {section.label}
                 </p>
               </div>
@@ -579,7 +579,7 @@ function GroupedNotification({
         className={`w-full flex items-start gap-4 p-4 rounded-2xl border transition-colors text-left ${
           group.hasUnread
             ? "card-bg-notification border-[var(--accent-gold)]/20"
-            : "bg-[var(--surface)]/50 border-[var(--border)]"
+            : "bg-[var(--card-bg)]/50 border-[var(--card-border)]"
         }`}
       >
         <AvatarStack notifications={group.notifications} />
@@ -634,7 +634,7 @@ function GroupedNotification({
             transition={{ type: "spring", stiffness: 400, damping: 30 }}
             className="overflow-hidden"
           >
-            <div className="ml-6 mt-1 space-y-1 border-l-2 border-[var(--border)] pl-4">
+            <div className="ml-6 mt-1 space-y-1 border-l-2 border-[var(--card-border)] pl-4">
               {group.notifications.map((n) => {
                 const data = (n.data as Record<string, string> | null) ?? {};
                 return (
@@ -645,7 +645,7 @@ function GroupedNotification({
                     exit={{ opacity: 0, x: -6 }}
                     className={`flex items-center gap-3 p-2.5 rounded-xl text-sm ${
                       !n.read
-                        ? "bg-[var(--surface)] border border-[var(--accent-gold)]/10"
+                        ? "bg-[var(--card-bg)] border border-[var(--accent-gold)]/10"
                         : "bg-transparent"
                     }`}
                   >

@@ -49,8 +49,12 @@ export function ListsTab({ isOwnProfile, wishlist, beerLists, achievements }: Li
               {wishlist.map((item) => (
                 <Link key={item.id} href={`/beer/${item.beer?.id ?? ""}`}>
                   <div
-                    className="card-bg-reco flex items-center gap-3 p-3 border border-[var(--border)] hover:border-[var(--accent-gold)]/30 rounded-2xl transition-colors"
+                    className="card-bg-reco flex items-center gap-3 p-3.5 rounded-2xl transition-colors hover:scale-[1.01]"
                     data-style={getStyleFamily(item.beer?.style ?? null)}
+                    style={{
+                      border: "1px solid var(--card-border)",
+                      borderLeft: `3px solid ${getStyleVars(item.beer?.style ?? null).primary}`,
+                    }}
                   >
                     <div
                       className="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center text-lg"
@@ -75,7 +79,7 @@ export function ListsTab({ isOwnProfile, wishlist, beerLists, achievements }: Li
             </div>
           ) : (
             <Link href="/explore">
-              <div className="flex items-center gap-4 p-4 bg-[var(--surface)] border border-dashed border-[var(--border)] hover:border-[var(--accent-gold)]/30 rounded-2xl transition-colors">
+              <div className="flex items-center gap-4 p-4 bg-[var(--card-bg)] border border-dashed border-[var(--card-border)] hover:border-[var(--accent-gold)]/30 rounded-2xl transition-colors">
                 <div className="w-10 h-10 rounded-xl bg-[var(--surface-2)] flex items-center justify-center text-lg opacity-40">
                   🍺
                 </div>
@@ -103,7 +107,7 @@ export function ListsTab({ isOwnProfile, wishlist, beerLists, achievements }: Li
               const itemCount = list.items?.length ?? 0;
               return (
                 <Link key={list.id} href={`/beer-lists/${list.id}`}>
-                  <div className="card-bg-reco p-4 border border-[var(--border)] hover:border-[var(--accent-gold)]/30 rounded-2xl transition-colors">
+                  <div className="card-bg-reco p-4 border border-[var(--card-border)] hover:border-[var(--accent-gold)]/30 rounded-2xl transition-colors">
                     <p className="font-display font-semibold text-[var(--text-primary)] truncate">{list.title}</p>
                     {list.description && (
                       <p className="text-xs text-[var(--text-muted)] mt-1 line-clamp-2">{list.description}</p>
@@ -119,7 +123,7 @@ export function ListsTab({ isOwnProfile, wishlist, beerLists, achievements }: Li
           </div>
         ) : isOwnProfile ? (
           <Link href="/beer-lists">
-            <div className="flex items-center gap-4 p-4 bg-[var(--surface)] border border-dashed border-[var(--border)] hover:border-[var(--accent-gold)]/30 rounded-2xl transition-colors">
+            <div className="flex items-center gap-4 p-4 bg-[var(--card-bg)] border border-dashed border-[var(--card-border)] hover:border-[var(--accent-gold)]/30 rounded-2xl transition-colors">
               <div className="w-10 h-10 rounded-xl bg-[var(--surface-2)] flex items-center justify-center text-lg opacity-40">
                 📋
               </div>
@@ -132,7 +136,7 @@ export function ListsTab({ isOwnProfile, wishlist, beerLists, achievements }: Li
             </div>
           </Link>
         ) : (
-          <div className="text-center py-6 bg-[var(--surface)] rounded-2xl border border-[var(--border)]">
+          <div className="text-center py-6 bg-[var(--card-bg)] rounded-2xl border border-[var(--card-border)]">
             <p className="text-sm text-[var(--text-muted)]">No public lists yet</p>
           </div>
         )}
@@ -146,7 +150,7 @@ export function ListsTab({ isOwnProfile, wishlist, beerLists, achievements }: Li
           <div>
             <h2 className="font-display text-2xl font-bold text-[var(--text-primary)] mb-4">Achievements</h2>
             <Link href="/achievements">
-              <div className="text-center py-10 bg-[var(--surface)] rounded-2xl border border-[var(--border)] hover:border-[var(--accent-gold)]/30 transition-colors">
+              <div className="text-center py-10 bg-[var(--card-bg)] rounded-2xl border border-[var(--card-border)] hover:border-[var(--accent-gold)]/30 transition-colors">
                 <p className="text-3xl mb-2">🏆</p>
                 <p className="font-display text-base text-[var(--text-primary)]">No badges yet</p>
                 <p className="text-sm text-[var(--text-secondary)] mt-1">

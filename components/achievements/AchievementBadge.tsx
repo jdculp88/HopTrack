@@ -93,7 +93,7 @@ export function AchievementBadge({
                   outline: `2px solid color-mix(in srgb, ${tier.color} 35%, transparent)`,
                   outlineOffset: "2px",
                 }
-              : { background: "var(--surface)", outline: "2px solid var(--border)", outlineOffset: "2px" }}
+              : { background: "var(--card-bg)", outline: "2px solid var(--border)", outlineOffset: "2px" }}
           >
             <span className={cn(s.icon, earned ? "" : "opacity-50")}>{achievement.icon}</span>
           </div>

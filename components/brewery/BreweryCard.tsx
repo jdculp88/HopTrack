@@ -79,7 +79,7 @@ export function BreweryCard({ brewery, distance, variant = "default", className 
           transition={{ type: "spring", stiffness: 400, damping: 30 }}
           className={cn(
             "flex items-center gap-3 p-3 rounded-2xl",
-            "bg-[var(--surface)] border border-[var(--border)] hover:border-[var(--accent-gold)]/30",
+            "bg-[var(--card-bg)] border border-[var(--border)] hover:border-[var(--accent-gold)]/30",
             "transition-colors duration-150 group",
             className
           )}
@@ -386,7 +386,7 @@ function DefaultBreweryCard({
         whileHover={{ y: -3, scale: 1.01 }}
         transition={{ type: "spring", stiffness: 400, damping: 30 }}
         className={cn(
-          "bg-[var(--surface)] rounded-2xl overflow-hidden h-full flex flex-col",
+          "bg-[var(--card-bg)] rounded-2xl overflow-hidden h-full flex flex-col",
           "border border-[var(--border)] hover:border-[var(--accent-gold)]/30",
           "transition-colors duration-150 group",
           className

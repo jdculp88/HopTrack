@@ -36,7 +36,7 @@ export function AuthGate({ children, isAuthenticated, featureName, returnPath }:
           <div
             className="rounded-2xl border p-6 text-center space-y-3 max-w-xs w-full mx-4 shadow-xl"
             style={{
-              background: "var(--surface)",
+              background: "var(--card-bg)",
               borderColor: "var(--border)",
               boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
             }}

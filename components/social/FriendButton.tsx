@@ -76,7 +76,7 @@ export function FriendButton({ profileId, currentUserId }: FriendButtonProps) {
 
   if (status === "pending_sent") {
     return (
-      <div className="flex items-center gap-1.5 px-4 py-2 bg-[var(--surface)] border border-[var(--border)] text-[var(--text-muted)] rounded-xl text-sm font-medium">
+      <div className="flex items-center gap-1.5 px-4 py-2 bg-[var(--card-bg)] border border-[var(--border)] text-[var(--text-muted)] rounded-xl text-sm font-medium">
         <Clock size={14} />
         Pending
       </div>

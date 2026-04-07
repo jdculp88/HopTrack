@@ -129,7 +129,7 @@ export function BeerReviewSection({ beerId, currentUserId }: BeerReviewSectionPr
           >
             <div
               className="rounded-2xl border p-4 mb-4 space-y-3"
-              style={{ background: "var(--surface)", borderColor: "var(--border)" }}
+              style={{ background: "var(--card-bg)", borderColor: "var(--border)" }}
             >
               <div className="flex items-center gap-3">
                 <span className="text-sm" style={{ color: "var(--text-secondary)" }}>Tap to rate:</span>
@@ -231,7 +231,7 @@ export function BeerReviewSection({ beerId, currentUserId }: BeerReviewSectionPr
             <div
               key={review.id}
               className="rounded-2xl border p-4"
-              style={{ background: "var(--surface)", borderColor: "var(--border)" }}
+              style={{ background: "var(--card-bg)", borderColor: "var(--border)" }}
             >
               <div className="flex items-start gap-3">
                 <UserAvatar profile={review.profile ?? { display_name: null, avatar_url: null }} size="sm" />
@@ -262,7 +262,7 @@ export function BeerReviewSection({ beerId, currentUserId }: BeerReviewSectionPr
         !showForm && (
           <div
             className="text-center py-10 rounded-2xl border"
-            style={{ background: "var(--surface)", borderColor: "var(--border)" }}
+            style={{ background: "var(--card-bg)", borderColor: "var(--border)" }}
           >
             <MessageSquare size={24} className="mx-auto mb-2" style={{ color: "var(--text-muted)" }} />
             <p style={{ color: "var(--text-secondary)" }}>No reviews yet</p>

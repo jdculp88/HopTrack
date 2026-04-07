@@ -156,7 +156,7 @@ export function AddToListButton({ beerId, userId }: AddToListButtonProps) {
             exit={{ opacity: 0, y: -4, scale: 0.97 }}
             transition={{ duration: 0.15 }}
             className="absolute right-0 top-full mt-2 w-60 rounded-xl border shadow-xl overflow-hidden z-50"
-            style={{ background: "var(--surface)", borderColor: "var(--border)" }}
+            style={{ background: "var(--card-bg)", borderColor: "var(--border)" }}
           >
             {loading ? (
               <div className="p-4 text-center">

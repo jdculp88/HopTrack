@@ -71,7 +71,7 @@ export function DrinkingNowStrip({ breweryId, initialCount }: DrinkingNowStripPr
       transition={spring.default}
       className="rounded-2xl border overflow-hidden"
       style={{
-        background: "var(--surface)",
+        background: "var(--card-bg)",
         borderColor: "var(--border)",
       }}
     >

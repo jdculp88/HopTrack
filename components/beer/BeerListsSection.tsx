@@ -89,7 +89,7 @@ export function BeerListsSection({ lists: initialLists, isOwnProfile }: BeerList
           >
             <div
               className="rounded-2xl border p-4 space-y-3"
-              style={{ background: "var(--surface)", borderColor: "var(--border)" }}
+              style={{ background: "var(--card-bg)", borderColor: "var(--border)" }}
             >
               <input
                 type="text"
@@ -134,7 +134,7 @@ export function BeerListsSection({ lists: initialLists, isOwnProfile }: BeerList
       {lists.length === 0 && isOwnProfile ? (
         <div
           className="rounded-2xl border p-6 text-center"
-          style={{ background: "var(--surface)", borderColor: "var(--border)" }}
+          style={{ background: "var(--card-bg)", borderColor: "var(--border)" }}
         >
           <Beer size={24} style={{ color: "var(--text-muted)", margin: "0 auto 8px" }} />
           <p className="font-display text-sm" style={{ color: "var(--text-primary)" }}>No beer lists yet</p>
@@ -151,7 +151,7 @@ export function BeerListsSection({ lists: initialLists, isOwnProfile }: BeerList
               <div
                 key={list.id}
                 className="rounded-2xl border overflow-hidden"
-                style={{ background: "var(--surface)", borderColor: "var(--border)" }}
+                style={{ background: "var(--card-bg)", borderColor: "var(--border)" }}
               >
                 <button
                   onClick={() => setExpandedId(isExpanded ? null : list.id)}

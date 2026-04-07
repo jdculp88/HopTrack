@@ -193,7 +193,7 @@ export function TrendingSection({ defaultCity }: TrendingSectionProps) {
             <div
               key={i}
               className="flex-shrink-0 w-[180px] rounded-2xl border p-3 space-y-2"
-              style={{ background: "var(--surface)", borderColor: "var(--border)" }}
+              style={{ background: "var(--card-bg)", borderColor: "var(--border)" }}
             >
               <Skeleton className="h-5 w-8 rounded" />
               <Skeleton className="h-4 w-full" />

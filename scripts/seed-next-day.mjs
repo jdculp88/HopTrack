@@ -316,6 +316,7 @@ async function main() {
   const beerReviewRows = [];
   const breweryReviewRows = [];
   const reactionRows = [];
+  const commentRows = []; // Sprint 171: session comments for feed diversity
 
   // Track which users already left a brewery review today (avoid duplicates per run)
   const breweryReviewedUsers = new Set();
@@ -400,6 +401,34 @@ async function main() {
             type: randChoice(reactionTypes),
           });
         }
+      }
+    }
+
+    // Sprint 171: Session comments (~15% of sessions get a comment from a friend)
+    if (rng() < 0.15) {
+      const commentPool = ALL_PARTICIPANTS.filter(id => id !== slot.userId);
+      if (commentPool.length > 0) {
+        const SESSION_COMMENTS = [
+          'Great picks! That IPA is next on my list',
+          'Jealous! Save me a seat next time',
+          'How was the Nitro Stout?',
+          'We need to do a session together soon!',
+          'That brewery is amazing, glad you went!',
+          'You always find the best pours',
+          'Try the Saison next time — trust me',
+          'Been meaning to check this place out',
+          'Cheers! 🍻',
+          'Love seeing your check-ins!',
+          'Heading there this weekend actually',
+          'The barleywine there is a MUST',
+        ];
+        commentRows.push({
+          id: crypto.randomUUID(),
+          user_id: randChoice(commentPool),
+          session_id: sessionId,
+          body: randChoice(SESSION_COMMENTS),
+          created_at: iso(new Date(endTime.getTime() + randInt(5, 120) * 60 * 1000)),
+        });
       }
     }
 
@@ -492,10 +521,22 @@ async function main() {
     }
   }
 
+  // Session comments (Sprint 171: feed diversity)
+  if (commentRows.length > 0) {
+    const BATCH = 50;
+    for (let i = 0; i < commentRows.length; i += BATCH) {
+      const chunk = commentRows.slice(i, i + BATCH);
+      const { error } = await supabase.from('session_comments').insert(chunk);
+      if (error) {
+        console.warn('Warning inserting session_comments:', error.message);
+      }
+    }
+  }
+
   // 7. Summary
   console.log('\n────────────────────────────────────────────────────────');
   console.log(
-    `Day: ${dayName} ${dateStr} | Visitors: ${sessionRows.length} | Beer logs: ${beerLogRows.length} | Ratings: ${beerReviewRows.length} | Reviews: ${breweryReviewRows.length} | Reactions: ${reactionRows.length}`,
+    `Day: ${dayName} ${dateStr} | Visitors: ${sessionRows.length} | Beer logs: ${beerLogRows.length} | Ratings: ${beerReviewRows.length} | Reviews: ${breweryReviewRows.length} | Reactions: ${reactionRows.length} | Comments: ${commentRows.length}`,
   );
   console.log('────────────────────────────────────────────────────────');
   console.log('Done. Beers poured, data seeded.');

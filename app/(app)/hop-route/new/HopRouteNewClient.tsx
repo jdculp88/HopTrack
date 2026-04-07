@@ -319,7 +319,7 @@ export function HopRouteNewClient({ tasteDna }: HopRouteNewClientProps) {
                   onFocus={() => { setLocationMode("city"); if (suggestions.length > 0) setShowSuggestions(true); }}
                   onChange={(e) => { setLocationMode("city"); handleCityChange(e.target.value); }}
                   onKeyDown={handleCityKeyDown}
-                  className="w-full pl-10 pr-4 py-3 rounded-xl bg-[var(--surface)] border border-[var(--border)] text-[var(--text-primary)] text-sm placeholder:text-[var(--text-muted)] focus:border-[var(--accent-gold)] outline-none"
+                  className="w-full pl-10 pr-4 py-3 rounded-xl bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--text-primary)] text-sm placeholder:text-[var(--text-muted)] focus:border-[var(--accent-gold)] outline-none"
                   autoComplete="off"
                 />
                 {/* Autocomplete dropdown */}
@@ -331,7 +331,7 @@ export function HopRouteNewClient({ tasteDna }: HopRouteNewClientProps) {
                       exit={{ opacity: 0, y: -4 }}
                       transition={{ duration: 0.15 }}
                       className="absolute z-50 left-0 right-0 mt-1 rounded-xl border overflow-hidden shadow-lg"
-                      style={{ background: "var(--surface)", borderColor: "var(--border)" }}
+                      style={{ background: "var(--card-bg)", borderColor: "var(--border)" }}
                     >
                       {suggestionsLoading && suggestions.length === 0 ? (
                         <div className="flex items-center gap-2 px-4 py-3 text-sm" style={{ color: "var(--text-muted)" }}>
@@ -377,7 +377,7 @@ export function HopRouteNewClient({ tasteDna }: HopRouteNewClientProps) {
                     type="datetime-local"
                     value={timeStart}
                     onChange={(e) => setTimeStart(e.target.value)}
-                    className="w-full px-3 py-2.5 rounded-xl bg-[var(--surface)] border border-[var(--border)] text-[var(--text-primary)] text-sm focus:border-[var(--accent-gold)] outline-none"
+                    className="w-full px-3 py-2.5 rounded-xl bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--text-primary)] text-sm focus:border-[var(--accent-gold)] outline-none"
                   />
                 </div>
                 <div>
@@ -386,7 +386,7 @@ export function HopRouteNewClient({ tasteDna }: HopRouteNewClientProps) {
                     type="datetime-local"
                     value={timeEnd}
                     onChange={(e) => setTimeEnd(e.target.value)}
-                    className="w-full px-3 py-2.5 rounded-xl bg-[var(--surface)] border border-[var(--border)] text-[var(--text-primary)] text-sm focus:border-[var(--accent-gold)] outline-none"
+                    className="w-full px-3 py-2.5 rounded-xl bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--text-primary)] text-sm focus:border-[var(--accent-gold)] outline-none"
                   />
                 </div>
               </div>
@@ -448,7 +448,7 @@ export function HopRouteNewClient({ tasteDna }: HopRouteNewClientProps) {
                     style={
                       groupSize === opt.value
                         ? { background: "color-mix(in srgb, var(--accent-gold) 15%, transparent)", borderColor: "color-mix(in srgb, var(--accent-gold) 30%, transparent)", color: "var(--accent-gold)" }
-                        : { background: "var(--surface)", borderColor: "var(--border)", color: "var(--text-secondary)" }
+                        : { background: "var(--card-bg)", borderColor: "var(--border)", color: "var(--text-secondary)" }
                     }
                   >
                     <span>{opt.emoji}</span> {opt.label}
@@ -469,7 +469,7 @@ export function HopRouteNewClient({ tasteDna }: HopRouteNewClientProps) {
                     style={
                       transport === opt.value
                         ? { background: "color-mix(in srgb, var(--accent-gold) 15%, transparent)", borderColor: "color-mix(in srgb, var(--accent-gold) 30%, transparent)", color: "var(--accent-gold)" }
-                        : { background: "var(--surface)", borderColor: "var(--border)", color: "var(--text-secondary)" }
+                        : { background: "var(--card-bg)", borderColor: "var(--border)", color: "var(--text-secondary)" }
                     }
                   >
                     <span>{opt.emoji}</span>
@@ -491,7 +491,7 @@ export function HopRouteNewClient({ tasteDna }: HopRouteNewClientProps) {
                     style={
                       vibes.includes(v)
                         ? { background: "color-mix(in srgb, var(--accent-gold) 15%, transparent)", borderColor: "color-mix(in srgb, var(--accent-gold) 30%, transparent)", color: "var(--accent-gold)" }
-                        : { background: "var(--surface)", borderColor: "var(--border)", color: "var(--text-muted)" }
+                        : { background: "var(--card-bg)", borderColor: "var(--border)", color: "var(--text-muted)" }
                     }
                   >
                     {v}
@@ -504,7 +504,7 @@ export function HopRouteNewClient({ tasteDna }: HopRouteNewClientProps) {
               <button
                 onClick={() => setStep(1)}
                 className="px-4 py-3 rounded-xl text-sm border transition-colors"
-                style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--text-muted)" }}
+                style={{ background: "var(--card-bg)", borderColor: "var(--border)", color: "var(--text-muted)" }}
               >
                 Back
               </button>
@@ -571,7 +571,7 @@ export function HopRouteNewClient({ tasteDna }: HopRouteNewClientProps) {
                 onClick={() => setStep(2)}
                 disabled={generating}
                 className="px-4 py-3 rounded-xl text-sm border transition-colors disabled:opacity-40"
-                style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--text-muted)" }}
+                style={{ background: "var(--card-bg)", borderColor: "var(--border)", color: "var(--text-muted)" }}
               >
                 Back
               </button>

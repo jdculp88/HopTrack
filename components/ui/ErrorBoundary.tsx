@@ -70,7 +70,7 @@ function InlineError({ onRetry }: { onRetry: () => void }) {
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       className="flex flex-col items-center justify-center gap-3 p-6 rounded-2xl"
-      style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
+      style={{ background: "var(--card-bg)", border: "1px solid var(--border)" }}
     >
       <AlertTriangle size={24} style={{ color: "var(--danger)" }} />
       <p className="text-sm text-center" style={{ color: "var(--text-secondary)" }}>

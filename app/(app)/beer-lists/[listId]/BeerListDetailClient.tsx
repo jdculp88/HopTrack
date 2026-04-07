@@ -104,7 +104,7 @@ function SortableItem({
     >
       <div
         style={{
-          background: "var(--surface)",
+          background: "var(--card-bg)",
           border: `1px solid ${activeId && !isDragging ? "var(--border)" : "var(--border)"}`,
         }}
         className="rounded-2xl overflow-hidden"
@@ -252,7 +252,7 @@ function DragGhost({ item }: { item: BeerItem }) {
     <div
       className="rounded-2xl px-4 py-3 flex items-start gap-3"
       style={{
-        background: "var(--surface)",
+        background: "var(--card-bg)",
         border: "1.5px solid var(--accent-gold)",
         boxShadow: "0 8px 24px rgba(0,0,0,0.35)",
         transform: "scale(1.02)",
@@ -442,7 +442,7 @@ export function BeerListDetailClient({
       {/* Header card */}
       <div
         className="rounded-2xl p-5 mb-5"
-        style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
+        style={{ background: "var(--card-bg)", border: "1px solid var(--border)" }}
       >
         <div className="flex items-start gap-3">
           {profile && (
@@ -633,7 +633,7 @@ export function BeerListDetailClient({
       {items.length === 0 ? (
         <div
           className="rounded-2xl p-10 text-center"
-          style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
+          style={{ background: "var(--card-bg)", border: "1px solid var(--border)" }}
         >
           <Beer size={32} className="mx-auto mb-3" style={{ color: "var(--text-muted)" }} />
           <p className="font-medium" style={{ color: "var(--text-secondary)" }}>

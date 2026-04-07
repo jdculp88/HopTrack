@@ -60,7 +60,7 @@ export function BreweryAdFeedCard({ ad }: { ad: AdData }) {
       ref={cardRef}
       {...cardHover}
       className="rounded-2xl overflow-hidden border"
-      style={{ background: "var(--surface)", borderColor: "var(--border)" }}
+      style={{ background: "var(--card-bg)", borderColor: "var(--border)" }}
     >
       {/* Sponsored badge */}
       <div className="px-4 pt-3 pb-2 flex items-center justify-between">

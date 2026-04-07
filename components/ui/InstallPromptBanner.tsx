@@ -49,7 +49,7 @@ export function InstallPromptBanner() {
           <div
             className="rounded-2xl border p-4 shadow-lg backdrop-blur-md"
             style={{
-              background: "var(--surface)",
+              background: "var(--card-bg)",
               borderColor: "var(--border)",
             }}
           >

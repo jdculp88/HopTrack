@@ -390,7 +390,7 @@ function RedemptionCodeSection({
               key={i}
               className="w-10 h-12 rounded-lg flex items-center justify-center font-mono text-2xl font-bold"
               style={{
-                background: "var(--surface)",
+                background: "var(--card-bg)",
                 border: "1.5px solid var(--accent-gold)",
                 color: "var(--accent-gold)",
               }}

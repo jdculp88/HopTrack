@@ -273,7 +273,7 @@ export function FriendsClient({
               placeholder="Search friends or find new ones..."
               className="w-full rounded-2xl pl-11 pr-4 py-3.5 text-sm transition-[colors,shadow] focus:outline-none shadow-[var(--shadow-card)] focus:shadow-[var(--shadow-card-hover)]"
               style={{
-                background: "var(--surface)",
+                background: "var(--card-bg)",
                 border: "1px solid var(--border)",
                 color: "var(--text-primary)",
               }}
@@ -304,7 +304,7 @@ export function FriendsClient({
                     exit={{ opacity: 0, y: -8 }}
                     transition={{ type: "spring", stiffness: 400, damping: 30 }}
                     className="flex items-center gap-3 p-3 rounded-2xl shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-shadow"
-                    style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
+                    style={{ background: "var(--card-bg)", border: "1px solid var(--border)" }}
                   >
                     <UserAvatar profile={user} size="sm" />
                     <div className="flex-1 min-w-0">
@@ -345,7 +345,7 @@ export function FriendsClient({
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
-                className="card-bg-notification rounded-2xl p-4 space-y-3 shadow-[var(--shadow-card)] border border-[var(--border)]"
+                className="card-bg-notification rounded-2xl p-4 space-y-3 shadow-[var(--shadow-card)] border border-[var(--card-border)]"
               >
                 <div className="flex items-center gap-2">
                   <div
@@ -413,7 +413,7 @@ export function FriendsClient({
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 className="rounded-2xl p-4 space-y-3 shadow-[var(--shadow-card)]"
-                style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
+                style={{ background: "var(--card-bg)", border: "1px solid var(--border)" }}
               >
                 <p className="text-xs font-medium uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
                   Sent ({sentRequests.length})
@@ -427,7 +427,7 @@ export function FriendsClient({
                     className="overflow-hidden rounded-2xl"
                     style={{ border: "1px solid var(--border)" }}
                   >
-                    <div className="flex items-center gap-3 p-3" style={{ background: "var(--surface)" }}>
+                    <div className="flex items-center gap-3 p-3" style={{ background: "var(--card-bg)" }}>
                       <Link href={`/profile/${req.addressee.username}`}>
                         <UserAvatar profile={req.addressee} size="sm" />
                       </Link>
@@ -500,7 +500,7 @@ export function FriendsClient({
 
           {/* Friends list */}
           {filteredFriends.length === 0 && searchQuery.length < 2 && pendingRequests.length === 0 && sentRequests.length === 0 ? (
-            <div className="card-bg-featured text-center py-16 space-y-4 rounded-2xl shadow-[var(--shadow-card)] border border-[var(--border)]">
+            <div className="card-bg-featured text-center py-16 space-y-4 rounded-2xl shadow-[var(--shadow-card)] border border-[var(--card-border)]">
               <div
                 className="w-20 h-20 rounded-full flex items-center justify-center mx-auto relative z-10"
                 style={{ background: "color-mix(in srgb, var(--accent-gold) 8%, transparent)" }}
@@ -543,7 +543,7 @@ export function FriendsClient({
                 >
                   <div
                     className="flex items-center gap-3 p-3 group"
-                    style={{ background: "var(--surface)" }}
+                    style={{ background: "var(--card-bg)" }}
                   >
                     <Link href={`/profile/${friend.username}`} className="flex items-center gap-3 flex-1 min-w-0">
                       <UserAvatar profile={friend} size="sm" showLevel />

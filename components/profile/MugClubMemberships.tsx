@@ -50,7 +50,7 @@ export function MugClubMemberships({ memberships }: MugClubMembershipsProps) {
               <div
                 className="rounded-2xl px-4 py-3 border transition-colors hover:border-[var(--accent-gold)]/30"
                 style={{
-                  background: "var(--surface)",
+                  background: "var(--card-bg)",
                   borderColor: "var(--border)",
                 }}
               >

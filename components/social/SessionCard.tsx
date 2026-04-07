@@ -150,7 +150,7 @@ export function SessionCard({ session, currentUserId, className, reactionCounts,
       role="article"
       aria-label={cardLabel}
       className={cn(
-        "bg-[var(--surface)] rounded-2xl border border-[var(--border)] overflow-hidden",
+        "bg-[var(--card-bg)] rounded-2xl border border-[var(--border)] overflow-hidden",
         className
       )}
     >

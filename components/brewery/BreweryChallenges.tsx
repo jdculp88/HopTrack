@@ -190,7 +190,7 @@ export function BreweryChallenges({ challenges, myParticipations, isAuthenticate
               exit={{ y: "100%" }}
               transition={{ type: "spring", stiffness: 400, damping: 35 }}
               className="fixed bottom-0 left-0 right-0 z-50 rounded-t-3xl p-6 space-y-5 max-w-lg mx-auto"
-              style={{ background: "var(--surface)" }}
+              style={{ background: "var(--card-bg)" }}
             >
               {/* Handle */}
               <div className="w-10 h-1 rounded-full mx-auto" style={{ background: "var(--border)" }} />

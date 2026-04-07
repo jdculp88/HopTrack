@@ -250,7 +250,7 @@ export function RealtimeTapList({
             })}
           </div>
         ) : (
-          <div className="text-center py-12 bg-[var(--surface)] rounded-2xl border border-[var(--border)]">
+          <div className="text-center py-12 bg-[var(--card-bg)] rounded-2xl border border-[var(--border)]">
             <p className="text-4xl mb-3">{"🍺"}</p>
             <p className="font-display text-lg text-[var(--text-primary)]">Taps are quiet</p>
             <p className="text-sm text-[var(--text-secondary)] mt-1">
@@ -278,7 +278,7 @@ export function RealtimeTapList({
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-4 p-6 rounded-2xl border border-[var(--border)] hover:border-[var(--accent-gold)]/40 transition-colors group"
-                  style={{ background: "var(--surface)" }}
+                  style={{ background: "var(--card-bg)" }}
                 >
                   <div
                     className="p-3 rounded-xl"
@@ -309,11 +309,11 @@ export function RealtimeTapList({
                       style={{
                         maxHeight: 600,
                         objectFit: "contain",
-                        background: "var(--surface)",
+                        background: "var(--card-bg)",
                       }}
                     />
                   </a>
-                  <div className="px-4 py-2 text-center" style={{ background: "var(--surface)" }}>
+                  <div className="px-4 py-2 text-center" style={{ background: "var(--card-bg)" }}>
                     <a
                       href={menuImageUrl}
                       target="_blank"

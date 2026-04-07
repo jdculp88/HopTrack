@@ -50,7 +50,7 @@ export function LeaderboardClient({ allTime, monthly, currentUserId }: Leaderboa
             style={
               period === p
                 ? { background: "color-mix(in srgb, var(--accent-gold) 15%, transparent)", color: "var(--accent-gold)", borderColor: "color-mix(in srgb, var(--accent-gold) 30%, transparent)" }
-                : { background: "var(--surface)", color: "var(--text-muted)", borderColor: "var(--border)" }
+                : { background: "var(--card-bg)", color: "var(--text-muted)", borderColor: "var(--border)" }
             }
           >
             {p === "monthly" ? "This Month" : "All Time"}

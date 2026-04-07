@@ -206,7 +206,7 @@ export function PillTabs<K extends string = string>({
                   layoutId={`${layoutPrefix}-segmented-knob`}
                   className="absolute inset-0 rounded-lg"
                   style={{
-                    background: "var(--surface)",
+                    background: "var(--card-bg)",
                     boxShadow: "0 1px 2px rgba(0,0,0,0.15)",
                     zIndex: 0,
                   }}

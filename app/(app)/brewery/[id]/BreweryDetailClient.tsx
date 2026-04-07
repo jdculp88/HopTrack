@@ -407,7 +407,7 @@ export function BreweryDetailClient(props: BreweryDetailClientProps) {
                             key={s.id}
                             href={`/profile/${s.profile?.username}`}
                             className="flex flex-col items-center gap-2 p-3 rounded-2xl border flex-shrink-0 w-[100px] hover:border-[var(--accent-gold)]/40 transition-colors"
-                            style={{ background: "var(--surface)", borderColor: "var(--border)" }}
+                            style={{ background: "var(--card-bg)", borderColor: "var(--border)" }}
                           >
                             <div className="relative">
                               <div

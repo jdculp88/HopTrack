@@ -27,7 +27,7 @@ const BreweryMap = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="bg-[var(--surface)] border border-[var(--border)] rounded-3xl h-[480px] flex items-center justify-center gap-2 text-[var(--text-muted)]">
+      <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-3xl h-[480px] flex items-center justify-center gap-2 text-[var(--text-muted)]">
         <Loader2 size={18} className="animate-spin" />
         <span className="text-sm">Loading map...</span>
       </div>
@@ -240,7 +240,7 @@ export function ExploreClient({
           <h1 className="font-sans text-3xl font-bold text-[var(--text-primary)]">Explore</h1>
           <div className="flex items-center gap-2">
             {/* View toggle */}
-            <div className="flex items-center bg-[var(--surface)] border border-[var(--border)] rounded-xl p-1 shadow-[var(--shadow-card)]">
+            <div className="flex items-center bg-[var(--card-bg)] border border-[var(--card-border)] rounded-xl p-1 shadow-[var(--shadow-card)]">
               {([
                 { key: "grid" as ViewMode, icon: <LayoutGrid size={14} />, label: "Grid" },
                 { key: "list" as ViewMode, icon: <List size={14} />, label: "List" },
@@ -281,7 +281,7 @@ export function ExploreClient({
             style={
               showFilters || activeFilterCount > 0
                 ? { background: "color-mix(in srgb, var(--accent-gold) 10%, transparent)", color: "var(--accent-gold)", borderColor: "color-mix(in srgb, var(--accent-gold) 30%, transparent)" }
-                : { background: "var(--surface)", color: "var(--text-muted)", borderColor: "var(--border)" }
+                : { background: "var(--card-bg)", color: "var(--text-muted)", borderColor: "var(--border)" }
             }
           >
             <SlidersHorizontal size={14} />
@@ -311,7 +311,7 @@ export function ExploreClient({
                     style={
                       visitFilter === f
                         ? { background: "color-mix(in srgb, var(--accent-gold) 10%, transparent)", color: "var(--accent-gold)", borderColor: "color-mix(in srgb, var(--accent-gold) 30%, transparent)" }
-                        : { background: "var(--surface)", color: "var(--text-muted)", borderColor: "var(--border)" }
+                        : { background: "var(--card-bg)", color: "var(--text-muted)", borderColor: "var(--border)" }
                     }
                   >
                     {labels[f]}
@@ -340,7 +340,7 @@ export function ExploreClient({
               transition={{ type: "spring", stiffness: 400, damping: 30 }}
               className="overflow-hidden"
             >
-              <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-4 space-y-4 shadow-[var(--shadow-card)]">
+              <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-2xl p-4 space-y-4 shadow-[var(--shadow-card)]">
                 {/* Brewery type */}
                 <div>
                   <p className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wide mb-2">Brewery Type</p>
@@ -622,7 +622,7 @@ function EnrichedBreweryCard({
       />
       {/* Stats row — sits below the card, never overlaps content */}
       {hasStats && (
-        <div className="flex items-center gap-2 px-4 py-2 border border-[var(--border)] rounded-b-2xl bg-[var(--surface)]">
+        <div className="flex items-center gap-2 px-4 py-2 border border-[var(--card-border)] rounded-b-2xl bg-[var(--card-bg)]">
           {followerCount && followerCount > 0 && (
             <span
               className="flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded-full"
@@ -678,7 +678,7 @@ function NearMeCard({
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay: index * 0.05 }}
-        className="flex-shrink-0 w-56 bg-[var(--surface)] border border-[var(--border)] rounded-2xl overflow-hidden hover:border-[color-mix(in_srgb,var(--accent-gold)_30%,transparent)] transition-[colors,shadow] shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] group"
+        className="flex-shrink-0 w-56 bg-[var(--card-bg)] border border-[var(--card-border)] rounded-2xl overflow-hidden hover:border-[color-mix(in_srgb,var(--accent-gold)_30%,transparent)] transition-[colors,shadow] shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] group"
       >
         {/* Mini cover */}
         <div className="h-24 w-full relative overflow-hidden">

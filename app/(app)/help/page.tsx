@@ -62,7 +62,7 @@ function FaqItem({ question, answer }: { question: string; answer: string }) {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="border-b border-[var(--border)] last:border-0">
+    <div className="border-b border-[var(--card-border)] last:border-0">
       <button
         onClick={() => setOpen(!open)}
         className="w-full flex items-center justify-between gap-4 py-4 text-left"
@@ -106,13 +106,13 @@ export default function HelpPage() {
         Quick answers to common questions about HopTrack.
       </p>
 
-      <div className="rounded-2xl bg-[var(--surface)] border border-[var(--border)] px-5 divide-y divide-[var(--border)]">
+      <div className="rounded-2xl bg-[var(--card-bg)] border border-[var(--card-border)] px-5 divide-y divide-[var(--border)]">
         {faqs.map((faq) => (
           <FaqItem key={faq.question} question={faq.question} answer={faq.answer} />
         ))}
       </div>
 
-      <div className="mt-8 rounded-2xl bg-[var(--surface)] border border-[var(--border)] p-5 text-sm text-[var(--text-secondary)]">
+      <div className="mt-8 rounded-2xl bg-[var(--card-bg)] border border-[var(--card-border)] p-5 text-sm text-[var(--text-secondary)]">
         <p className="font-medium text-[var(--text-primary)] mb-1">Still need help?</p>
         <p>
           Email us at{" "}

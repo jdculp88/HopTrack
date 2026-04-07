@@ -138,14 +138,14 @@ export function HopRouteShareCard({ route, stops, onClose, onCopied }: HopRouteS
           <button
             onClick={handleCopyLink}
             className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-medium"
-            style={{ background: "var(--surface)", border: "1px solid var(--border)", color: "var(--text-secondary)" }}
+            style={{ background: "var(--card-bg)", border: "1px solid var(--border)", color: "var(--text-secondary)" }}
           >
             <Link size={14} /> Copy Link
           </button>
           <button
             onClick={onClose}
             className="w-12 flex items-center justify-center rounded-xl"
-            style={{ background: "var(--surface)", border: "1px solid var(--border)", color: "var(--text-muted)" }}
+            style={{ background: "var(--card-bg)", border: "1px solid var(--border)", color: "var(--text-muted)" }}
           >
             <X size={16} />
           </button>

@@ -217,7 +217,7 @@ export function DiscoverTabContent({
                   <div
                     className="p-3 rounded-xl h-full"
                     style={{
-                      background: "var(--surface)",
+                      background: "var(--card-bg)",
                       border: "1px solid var(--border)",
                     }}
                   >

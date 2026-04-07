@@ -55,7 +55,13 @@ export function BreweriesTab({ topBreweries, mugClubMemberships }: BreweriesTabP
               const lastVisit = formatRelativeDate(visit.last_visited);
               return (
                 <Link key={visit.id} href={`/brewery/${visit.brewery_id}`}>
-                  <div className="flex items-center gap-4 p-4 bg-[var(--card-bg)] border border-[var(--card-border)] hover:border-[var(--accent-gold)]/30 rounded-2xl transition-all shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)]">
+                  <div
+                    className="flex items-center gap-4 p-4 bg-[var(--card-bg)] rounded-2xl transition-all shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] hover:scale-[1.01]"
+                    style={{
+                      border: "1px solid var(--card-border)",
+                      borderLeft: `3px solid ${visit.total_visits >= 5 ? "var(--accent-gold)" : visit.total_visits >= 3 ? "var(--accent-amber)" : "var(--accent-blue)"}`,
+                    }}
+                  >
                     {/* Brewery icon */}
                     <div
                       className="w-14 h-14 rounded-xl flex-shrink-0"

@@ -114,7 +114,7 @@ export function AchievementsClient({ achievements, totalEarned, total }: Achieve
             className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap flex-shrink-0 transition-all border ${
               category === key
                 ? "bg-[var(--accent-gold)]/15 text-[var(--accent-gold)] border-[var(--accent-gold)]/30"
-                : "bg-[var(--surface)] text-[var(--text-secondary)] border-[var(--border)] hover:border-[#6B6456]"
+                : "bg-[var(--card-bg)] text-[var(--text-secondary)] border-[var(--card-border)] hover:border-[#6B6456]"
             }`}
           >
             <span>{emoji}</span>
@@ -237,7 +237,7 @@ export function AchievementsClient({ achievements, totalEarned, total }: Achieve
                   )}
                 </div>
               ) : (
-                <div className="w-full bg-[var(--surface-2)] border border-[var(--border)] rounded-2xl px-4 py-3 text-center flex items-center justify-center gap-2">
+                <div className="w-full bg-[var(--surface-2)] border border-[var(--card-border)] rounded-2xl px-4 py-3 text-center flex items-center justify-center gap-2">
                   <Lock size={14} className="text-[var(--text-muted)]" />
                   <p className="text-sm text-[var(--text-muted)]">Not yet unlocked</p>
                 </div>

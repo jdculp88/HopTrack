@@ -121,7 +121,7 @@ export function BrandLocationsClient({ locations, brandId }: BrandLocationsClien
         </h2>
 
         {locations.length === 0 ? (
-          <div className="rounded-2xl border p-8 text-center" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
+          <div className="rounded-2xl border p-8 text-center" style={{ background: "var(--card-bg)", borderColor: "var(--border)" }}>
             <MapPin size={24} className="mx-auto mb-2" style={{ color: "var(--text-muted)" }} />
             <p className="text-sm" style={{ color: "var(--text-muted)" }}>No locations yet.</p>
           </div>
@@ -132,7 +132,7 @@ export function BrandLocationsClient({ locations, brandId }: BrandLocationsClien
                 key={loc.id}
                 href={`/brewery/${loc.id}`}
                 className="group rounded-2xl border overflow-hidden transition-all"
-                style={{ background: "var(--surface)", borderColor: "var(--border)" }}
+                style={{ background: "var(--card-bg)", borderColor: "var(--border)" }}
               >
                 {/* Cover */}
                 <div className="h-32 relative overflow-hidden">

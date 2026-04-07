@@ -265,7 +265,7 @@ export default function LeaderboardClient({ currentUser }: LeaderboardClientProp
       {loading ? (
         <div className="space-y-2">
           {Array.from({ length: 10 }).map((_, i) => (
-            <div key={i} className="flex items-center gap-4 px-4 py-3 rounded-2xl border border-[var(--border)]">
+            <div key={i} className="flex items-center gap-4 px-4 py-3 rounded-2xl border border-[var(--card-border)]">
               <Skeleton className="w-8 h-6 rounded" />
               <Skeleton className="w-10 h-10 rounded-full" />
               <div className="flex-1 space-y-1.5">

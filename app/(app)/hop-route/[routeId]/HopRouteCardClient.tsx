@@ -147,7 +147,7 @@ export function HopRouteCardClient({ route: initialRoute }: HopRouteCardClientPr
           <button
             onClick={() => setShowShare(true)}
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-mono border transition-colors flex-shrink-0"
-            style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--text-muted)" }}
+            style={{ background: "var(--card-bg)", borderColor: "var(--border)", color: "var(--text-muted)" }}
           >
             <Share2 size={12} /> Share
           </button>
@@ -228,7 +228,7 @@ export function HopRouteCardClient({ route: initialRoute }: HopRouteCardClientPr
                 className={`rounded-2xl border overflow-hidden transition-all ${
                   stop.checked_in
                     ? "border-[var(--accent-gold)]/30 bg-[color-mix(in_srgb,var(--accent-gold)_3%,transparent)]"
-                    : "border-[var(--border)] bg-[var(--surface)]"
+                    : "border-[var(--card-border)] bg-[var(--card-bg)]"
                 }`}
               >
                 {/* Stop header — always visible */}
@@ -306,7 +306,7 @@ export function HopRouteCardClient({ route: initialRoute }: HopRouteCardClientPr
                       transition={{ type: "spring", stiffness: 400, damping: 30 }}
                       className="overflow-hidden"
                     >
-                      <div className="px-4 pb-4 space-y-3 border-t border-[var(--border)]">
+                      <div className="px-4 pb-4 space-y-3 border-t border-[var(--card-border)]">
                         {/* Sponsored offer */}
                         {stop.is_sponsored && brewery?.hop_route_offer && (
                           <div className="mt-3 p-3 rounded-xl flex items-start gap-2" style={{ background: "color-mix(in srgb, var(--accent-amber) 10%, transparent)" }}>
@@ -397,14 +397,14 @@ export function HopRouteCardClient({ route: initialRoute }: HopRouteCardClientPr
         <Link
           href="/hop-route/new"
           className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium border transition-colors"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--text-secondary)" }}
+          style={{ background: "var(--card-bg)", borderColor: "var(--border)", color: "var(--text-secondary)" }}
         >
           Plan Another Route
         </Link>
         <button
           onClick={() => setShowShare(true)}
           className="px-4 py-2.5 rounded-xl text-sm font-medium border transition-colors"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--text-muted)" }}
+          style={{ background: "var(--card-bg)", borderColor: "var(--border)", color: "var(--text-muted)" }}
         >
           <Share2 size={16} />
         </button>
