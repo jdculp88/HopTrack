@@ -35,6 +35,8 @@ const BreweryMap = dynamic(
   }
 );
 
+import type { ExploreMode } from "./ExploreShell";
+
 interface ExploreClientProps {
   breweries: BreweryWithStats[];
   hasBeerOfTheWeek?: string[];
@@ -42,6 +44,11 @@ interface ExploreClientProps {
   followerCounts?: Record<string, number>;
   recentBreweryIds?: string[];
   totalBreweryCount?: number;
+  /** Sprint 171: Mode selection moved into filter panel */
+  currentMode?: ExploreMode;
+  onModeChange?: (mode: ExploreMode) => void;
+  /** Sprint 171: Non-Near-Me modes render their own content below the search/filter bar */
+  modeContent?: React.ReactNode;
 }
 
 type ViewMode = "grid" | "list" | "map";
@@ -58,6 +65,13 @@ const BREWERY_TYPE_OPTIONS: { value: BreweryType; label: string }[] = [
   { value: "contract", label: "Contract" },
 ];
 
+const MODE_LABELS: Record<ExploreMode, { emoji: string; label: string }> = {
+  near: { emoji: "📍", label: "Near Me" },
+  trending: { emoji: "🔥", label: "Trending" },
+  following: { emoji: "👥", label: "Following" },
+  styles: { emoji: "🎨", label: "Styles" },
+};
+
 export function ExploreClient({
   breweries: initialBreweries,
   hasBeerOfTheWeek = [],
@@ -65,6 +79,9 @@ export function ExploreClient({
   followerCounts = {},
   recentBreweryIds = [],
   totalBreweryCount = 0,
+  currentMode = "near",
+  onModeChange,
+  modeContent,
 }: ExploreClientProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -340,6 +357,23 @@ export function ExploreClient({
               className="overflow-hidden"
             >
               <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-2xl p-4 space-y-4 shadow-[var(--shadow-card)]">
+                {/* Sprint 171: Browse Mode — moved from top pills */}
+                {onModeChange && (
+                  <div>
+                    <p className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wide mb-2">Browse Mode</p>
+                    <div className="flex flex-wrap gap-2">
+                      {(["near", "trending", "following", "styles"] as ExploreMode[]).map((m) => (
+                        <FilterChip
+                          key={m}
+                          label={`${MODE_LABELS[m].emoji} ${MODE_LABELS[m].label}`}
+                          active={currentMode === m}
+                          onClick={() => onModeChange(m)}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {/* Brewery type */}
                 <div>
                   <p className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wide mb-2">Brewery Type</p>
@@ -394,7 +428,8 @@ export function ExploreClient({
         </AnimatePresence>
       </div>
 
-      {view === "map" ? (
+      {/* Sprint 171: Non-Near-Me modes render their own content */}
+      {modeContent ? modeContent : view === "map" ? (
         <BreweryMap breweries={filteredBreweries} className="h-[480px]" />
       ) : isSearching ? (
         /* Search results — grid or list depending on view mode */

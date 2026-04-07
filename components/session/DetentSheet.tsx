@@ -320,10 +320,12 @@ export default function DetentSheet({
     <>
       <motion.div
         {...dragProps}
-        className="fixed bottom-0 left-0 right-0 z-40 flex flex-col rounded-t-2xl overflow-hidden"
+        className="fixed left-0 right-0 z-50 flex flex-col rounded-t-2xl overflow-hidden"
+        data-detent-sheet
         style={{
           ...dragProps.style,
           height: sheetHeight,
+          bottom: isFull ? 0 : 72, // Sprint 171: peek/half sit above mobile nav (72px), full covers all
           background: 'var(--bg)',
           boxShadow: 'var(--shadow-elevated)',
           touchAction: isFull ? 'pan-y' : 'none',
