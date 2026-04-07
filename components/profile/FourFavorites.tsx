@@ -348,13 +348,14 @@ function SlotCard({ slot, isEditing, isOwnProfile, saving, onRemove, onAdd }: Sl
       <Link
         href={`/beer/${beer.id}`}
         className={cn(
-          "block aspect-[4/3] rounded-xl overflow-hidden",
-          "border border-[var(--border)] hover:border-[var(--accent-gold)]/40",
+          "block aspect-[4/3] rounded-xl overflow-hidden relative",
+          "border border-[var(--card-border)] hover:border-[var(--accent-gold)]/40",
           "transition-all",
         )}
       >
+        {/* Full-bleed image/gradient background */}
         <div
-          className="relative w-full aspect-square"
+          className="absolute inset-0"
           style={
             beer.cover_image_url
               ? undefined
@@ -373,14 +374,15 @@ function SlotCard({ slot, isEditing, isOwnProfile, saving, onRemove, onAdd }: Sl
             />
           )}
         </div>
-        <div className="p-2.5">
-          <p className="font-display font-medium text-[var(--text-primary)] text-sm line-clamp-1">
+        {/* Text overlay at bottom with gradient fade */}
+        <div className="absolute inset-x-0 bottom-0 p-2.5 bg-gradient-to-t from-black/70 via-black/30 to-transparent">
+          <p className="font-display font-medium text-white text-sm line-clamp-1 drop-shadow-sm">
             {beer.name}
           </p>
-          <p className="text-xs text-[var(--text-muted)] line-clamp-1 mt-0.5">
+          <p className="text-xs text-white/70 line-clamp-1 mt-0.5 drop-shadow-sm">
             {beer.brewery?.name ?? "—"}
           </p>
-          <div className="mt-2">
+          <div className="mt-1.5">
             <BeerStyleBadge style={beer.style} itemType={beer.item_type} size="xs" />
           </div>
         </div>
