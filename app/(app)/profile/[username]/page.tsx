@@ -290,7 +290,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
           {/* Avatar + name — positioned INSIDE the hero, over the gradient */}
           <div className="relative z-10 px-5 pb-4 -mt-10">
             <div className="flex items-end gap-3.5">
-              <div className="ring-[3px] ring-[var(--card-bg)] rounded-full shadow-[var(--shadow-elevated)] flex-shrink-0">
+              <div className="rounded-full shadow-[var(--shadow-elevated)] flex-shrink-0">
                 <UserAvatar profile={profile} size="lg" />
               </div>
               <div className="pb-0.5 flex-1 min-w-0">
