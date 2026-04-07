@@ -337,7 +337,7 @@ export function YouTabContent({
               {wishlist.length} saved
             </span>
           </div>
-          <div className="space-y-5">
+          <div className="flex flex-col gap-4">
             {wishlist.slice(0, 5).map((item) => (
               item.beer ? (
                 <Link key={item.id} href={`/beer/${item.beer.id}`}>
@@ -400,9 +400,9 @@ export function YouTabContent({
               {visitedBreweries.length} visited
             </span>
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-4">
             {visitedBreweries.slice(0, 6).map((b) => (
-              <Link key={b.id} href={`/brewery/${b.id}`}>
+              <Link key={b.id} href={`/brewery/${b.id}`} className="block">
                 <div
                   className="card-bg-hoproute p-3 rounded-xl transition-[colors,shadow] shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)]"
                   style={{ border: "1px solid color-mix(in srgb, var(--accent-amber) 20%, var(--border))" }}
@@ -444,9 +444,9 @@ export function YouTabContent({
               Plan new →
             </Link>
           </div>
-          <div className="space-y-2">
+          <div className="flex flex-col gap-4">
             {pastRoutes.slice(0, 3).map((route) => (
-              <Link key={route.id} href={`/hop-route/${route.id}`}>
+              <Link key={route.id} href={`/hop-route/${route.id}`} className="block">
                 <motion.div
                   whileHover={{ x: 2 }}
                   transition={{ type: "spring", stiffness: 400, damping: 30 }}

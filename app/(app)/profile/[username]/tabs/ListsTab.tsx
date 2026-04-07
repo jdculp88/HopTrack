@@ -45,11 +45,11 @@ export function ListsTab({ isOwnProfile, wishlist, beerLists, achievements }: Li
             <h2 className="font-display text-2xl font-bold text-[var(--text-primary)]">Want to Try</h2>
           </div>
           {wishlist.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               {wishlist.map((item) => (
                 <Link key={item.id} href={`/beer/${item.beer?.id ?? ""}`}>
                   <div
-                    className="card-bg-reco flex items-center gap-4 p-3.5 rounded-2xl transition-colors hover:scale-[1.01]"
+                    className="card-bg-reco flex items-center gap-5 p-3.5 rounded-2xl transition-colors hover:scale-[1.01]"
                     data-style={getStyleFamily(item.beer?.style ?? null)}
                     style={{
                       border: "1px solid var(--card-border)",
@@ -79,7 +79,7 @@ export function ListsTab({ isOwnProfile, wishlist, beerLists, achievements }: Li
             </div>
           ) : (
             <Link href="/explore">
-              <div className="flex items-center gap-4 p-4 bg-[var(--card-bg)] border border-dashed border-[var(--card-border)] hover:border-[var(--accent-gold)]/30 rounded-2xl transition-colors">
+              <div className="flex items-center gap-5 p-4 bg-[var(--card-bg)] border border-dashed border-[var(--card-border)] hover:border-[var(--accent-gold)]/30 rounded-2xl transition-colors">
                 <div className="w-10 h-10 rounded-xl bg-[var(--surface-2)] flex items-center justify-center text-lg opacity-40">
                   🍺
                 </div>
@@ -102,7 +102,7 @@ export function ListsTab({ isOwnProfile, wishlist, beerLists, achievements }: Li
           <h2 className="font-display text-2xl font-bold text-[var(--text-primary)]">Beer Lists</h2>
         </div>
         {beerLists.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             {beerLists.map((list) => {
               const itemCount = list.items?.length ?? 0;
               return (
@@ -123,7 +123,7 @@ export function ListsTab({ isOwnProfile, wishlist, beerLists, achievements }: Li
           </div>
         ) : isOwnProfile ? (
           <Link href="/beer-lists">
-            <div className="flex items-center gap-4 p-4 bg-[var(--card-bg)] border border-dashed border-[var(--card-border)] hover:border-[var(--accent-gold)]/30 rounded-2xl transition-colors">
+            <div className="flex items-center gap-5 p-4 bg-[var(--card-bg)] border border-dashed border-[var(--card-border)] hover:border-[var(--accent-gold)]/30 rounded-2xl transition-colors">
               <div className="w-10 h-10 rounded-xl bg-[var(--surface-2)] flex items-center justify-center text-lg opacity-40">
                 📋
               </div>

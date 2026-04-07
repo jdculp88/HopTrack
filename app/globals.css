@@ -116,9 +116,9 @@
 
 /* ── Light / Cream theme (user toggle + forced on marketing pages) ─────────── */
 [data-theme="light"] {
-  --bg:              #FBF7F0;
+  --bg:              #FFFFFF;  /* Sprint 171: white background per founder request */
   --surface:         #FFFFFF;
-  --card-bg:         #FFFFFF;  /* Sprint 171: pure white cards on cream bg */
+  --card-bg:         #F8F6F2;  /* Sprint 171: warm tint cards on white bg for contrast */
   --surface-2:       #F3EDE3;
   --surface-3:       #EDE5D8;
   --surface-glass:   rgba(255, 255, 255, 0.75);
