@@ -213,7 +213,7 @@ function LoyaltyCardRow({ card }: { card: LoyaltyCard }) {
                 : "var(--surface-2)",
             }}
           >
-            <Star size={18} style={{ color: isFull ? "var(--bg)" : "var(--accent-gold)" }} />
+            <Star size={16} style={{ color: isFull ? "var(--bg)" : "var(--accent-gold)" }} />
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-[var(--text-primary)] truncate">

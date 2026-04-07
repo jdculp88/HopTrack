@@ -334,7 +334,7 @@ export function PintRewindCards({ initialData }: { initialData?: RewindData | nu
       <div className="fixed inset-0 flex items-center justify-center" style={{ background: "var(--bg)" }}>
         <div className="text-center px-8">
           <p className="text-5xl mb-4">🍺</p>
-          <h2 className="font-display text-2xl font-bold mb-2" style={{ color: "var(--accent-gold)" }}>Your rewind is empty</h2>
+          <h2 className="font-display text-[22px] font-bold tracking-[-0.01em] mb-2" style={{ color: "var(--accent-gold)" }}>Your rewind is empty</h2>
           <p className="text-sm mb-6" style={{ color: "rgba(255,255,255,0.6)" }}>Start a session at a brewery to unlock your Pint Rewind — your personal beer highlight reel.</p>
           <Link href="/explore" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm" style={{ background: "var(--accent-gold)", color: "var(--bg)" }}>
             <Home size={16} /> Find a brewery

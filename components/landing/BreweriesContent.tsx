@@ -241,7 +241,7 @@ function FaqItem({ q, a }: { q: string; a: string }) {
           className="flex-shrink-0"
           style={{ color: C.gold }}
         >
-          <ChevronDown size={18} />
+          <ChevronDown size={16} />
         </motion.span>
       </button>
       <AnimatePresence initial={false}>
@@ -358,7 +358,7 @@ export default function BreweriesContent() {
                   {FEATURES.slice(0, 2).map(({ icon: Icon, title, body }) => (
                     <div key={title} className="rounded-2xl p-8 space-y-4" style={{ background: C.darkSurface, border: `1px solid ${C.darkBorder}` }}>
                       <div className="w-10 h-10 rounded-2xl flex items-center justify-center" style={{ background: "rgba(212,168,67,0.1)", border: "1px solid rgba(212,168,67,0.2)" }}>
-                        <Icon size={18} style={{ color: C.gold }} />
+                        <Icon size={16} style={{ color: C.gold }} />
                       </div>
                       <h3 className="font-display text-xl font-bold" style={{ color: C.creamText }}>{title}</h3>
                       <p className="text-sm leading-relaxed font-sans" style={{ color: C.creamSubtle }}>{body}</p>
@@ -375,7 +375,7 @@ export default function BreweriesContent() {
                   <div className="grid lg:grid-cols-2 gap-8 items-center">
                     <div>
                       <div className="w-10 h-10 rounded-2xl flex items-center justify-center mb-5" style={{ background: "rgba(212,168,67,0.1)", border: "1px solid rgba(212,168,67,0.2)" }}>
-                        <BarChart2 size={18} style={{ color: C.gold }} />
+                        <BarChart2 size={16} style={{ color: C.gold }} />
                       </div>
                       <h3 className="font-display text-2xl font-bold mb-3" style={{ color: C.creamText }}>Analytics that tell a story.</h3>
                       <p className="text-sm leading-relaxed font-sans" style={{ color: C.creamSubtle }}>

@@ -89,7 +89,7 @@ export function BrandLocationsClient({ locations, brandId }: BrandLocationsClien
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ type: "spring", stiffness: 400, damping: 30 }}
-              className="mb-4 rounded-2xl border p-4 flex items-center gap-3"
+              className="mb-4 rounded-[14px] border p-4 flex items-center gap-3"
               style={{
                 background: "color-mix(in srgb, var(--accent-gold) 8%, var(--surface))",
                 borderColor: "color-mix(in srgb, var(--accent-gold) 25%, var(--border))",
@@ -99,7 +99,7 @@ export function BrandLocationsClient({ locations, brandId }: BrandLocationsClien
                 className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
                 style={{ background: "color-mix(in srgb, var(--accent-gold) 15%, transparent)" }}
               >
-                <Navigation size={18} style={{ color: "var(--accent-gold)" }} />
+                <Navigation size={16} style={{ color: "var(--accent-gold)" }} />
               </div>
               <div className="min-w-0">
                 <p className="text-xs font-semibold" style={{ color: "var(--accent-gold)" }}>
@@ -121,7 +121,7 @@ export function BrandLocationsClient({ locations, brandId }: BrandLocationsClien
         </h2>
 
         {locations.length === 0 ? (
-          <div className="rounded-2xl border p-8 text-center" style={{ background: "var(--card-bg)", borderColor: "var(--border)" }}>
+          <div className="rounded-[14px] border p-8 text-center" style={{ background: "var(--card-bg)", borderColor: "var(--border)" }}>
             <MapPin size={24} className="mx-auto mb-2" style={{ color: "var(--text-muted)" }} />
             <p className="text-sm" style={{ color: "var(--text-muted)" }}>No locations yet.</p>
           </div>
@@ -131,7 +131,7 @@ export function BrandLocationsClient({ locations, brandId }: BrandLocationsClien
               <Link
                 key={loc.id}
                 href={`/brewery/${loc.id}`}
-                className="group rounded-2xl border overflow-hidden transition-all"
+                className="group rounded-[14px] border overflow-hidden transition-all"
                 style={{ background: "var(--card-bg)", borderColor: "var(--border)" }}
               >
                 {/* Cover */}

@@ -119,7 +119,7 @@ export function PillTabs<K extends string = string>({
       ? { top: typeof sticky.top === "number" ? `${sticky.top}px` : sticky.top }
       : {}),
     ...(sticky ? { background: "color-mix(in srgb, var(--bg) 85%, transparent)" } : {}),
-    ...(variant === "segmented" ? { background: "var(--surface-2)" } : {}),
+    ...(variant === "segmented" ? { background: "var(--warm-bg, var(--surface-2))" } : {}),
   };
 
   // ─── Tab list styling ───────────────────────────────────────────────────
@@ -207,7 +207,7 @@ export function PillTabs<K extends string = string>({
                   className="absolute inset-0 rounded-lg"
                   style={{
                     background: "var(--card-bg)",
-                    boxShadow: "0 1px 2px rgba(0,0,0,0.15)",
+                    boxShadow: "var(--shadow-xs, 0 1px 2px rgba(0,0,0,0.03))",
                     zIndex: 0,
                   }}
                   transition={reducedMotion ? { duration: 0 } : spring.default}

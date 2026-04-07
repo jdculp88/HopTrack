@@ -66,7 +66,7 @@ export function LoyaltyQRModal({ open, onClose, breweryId, programName, stampsRe
               {/* Header */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <QrCode size={18} style={{ color: "var(--accent-gold)" }} />
+                  <QrCode size={16} style={{ color: "var(--accent-gold)" }} />
                   <h2 className="font-display font-bold" style={{ color: "var(--text-primary)" }}>
                     Loyalty QR Code
                   </h2>

@@ -291,11 +291,11 @@ export function HopRouteNewClient({ tasteDna }: HopRouteNewClientProps) {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
             transition={{ type: "spring", stiffness: 400, damping: 30 }}
-            className="card-bg-hoproute rounded-2xl p-5 space-y-5"
+            className="card-bg-hoproute rounded-[14px] p-5 space-y-5"
             style={{ border: "1px solid color-mix(in srgb, var(--accent-amber) 25%, var(--border))" }}
           >
             <h2 className="font-display text-xl font-bold text-[var(--text-primary)] flex items-center gap-2">
-              <MapPin size={18} className="text-[var(--accent-gold)]" /> Where & When
+              <MapPin size={16} className="text-[var(--accent-gold)]" /> Where & When
             </h2>
 
             {/* Location */}
@@ -411,11 +411,11 @@ export function HopRouteNewClient({ tasteDna }: HopRouteNewClientProps) {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
             transition={{ type: "spring", stiffness: 400, damping: 30 }}
-            className="card-bg-hoproute rounded-2xl p-5 space-y-5"
+            className="card-bg-hoproute rounded-[14px] p-5 space-y-5"
             style={{ border: "1px solid color-mix(in srgb, var(--accent-amber) 25%, var(--border))" }}
           >
             <h2 className="font-display text-xl font-bold text-[var(--text-primary)] flex items-center gap-2">
-              <Zap size={18} className="text-[var(--accent-gold)]" /> Your Preferences
+              <Zap size={16} className="text-[var(--accent-gold)]" /> Your Preferences
             </h2>
 
             {/* Stop count */}
@@ -527,11 +527,11 @@ export function HopRouteNewClient({ tasteDna }: HopRouteNewClientProps) {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
             transition={{ type: "spring", stiffness: 400, damping: 30 }}
-            className="card-bg-hoproute rounded-2xl p-5 space-y-5"
+            className="card-bg-hoproute rounded-[14px] p-5 space-y-5"
             style={{ border: "1px solid color-mix(in srgb, var(--accent-amber) 25%, var(--border))" }}
           >
             <h2 className="font-display text-xl font-bold text-[var(--text-primary)] flex items-center gap-2">
-              <Beer size={18} className="text-[var(--accent-gold)]" /> Your Taste DNA
+              <Beer size={16} className="text-[var(--accent-gold)]" /> Your Taste DNA
             </h2>
 
             {dna.length > 0 ? (
@@ -551,14 +551,14 @@ export function HopRouteNewClient({ tasteDna }: HopRouteNewClientProps) {
                 ))}
               </div>
             ) : (
-              <div className="card-bg-hoproute p-4 rounded-2xl border text-center" style={{ borderColor: "var(--border)" }}>
+              <div className="card-bg-hoproute p-4 rounded-[14px] border text-center" style={{ borderColor: "var(--border)" }}>
                 <p className="text-sm text-[var(--text-secondary)]">No taste history yet.</p>
                 <p className="text-xs text-[var(--text-muted)] mt-1">We'll suggest crowd-pleasers for your first HopRoute.</p>
               </div>
             )}
 
             {/* Summary */}
-            <div className="card-bg-hoproute p-4 rounded-2xl border space-y-1.5" style={{ borderColor: "color-mix(in srgb, var(--accent-amber) 25%, var(--border))" }}>
+            <div className="card-bg-hoproute p-4 rounded-[14px] border space-y-1.5" style={{ borderColor: "color-mix(in srgb, var(--accent-amber) 25%, var(--border))" }}>
               <p className="text-xs font-mono text-[var(--text-muted)] uppercase tracking-wide">Your Route</p>
               <p className="text-sm text-[var(--text-primary)]">📍 {city}</p>
               <p className="text-sm text-[var(--text-primary)]">🍺 {stopCount} stops · {GROUP_OPTIONS.find(g => g.value === groupSize)?.label}</p>

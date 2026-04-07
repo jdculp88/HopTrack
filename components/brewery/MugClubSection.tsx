@@ -33,7 +33,7 @@ export function MugClubSection({ clubs, myMemberships, breweryId, isAuthenticate
     <div>
       <div className="flex items-center gap-2 mb-4">
         <Crown size={20} style={{ color: "var(--accent-gold)" }} />
-        <h2 className="font-display text-2xl font-bold text-[var(--text-primary)]">
+        <h2 className="font-display text-[22px] font-bold tracking-[-0.01em] text-[var(--text-primary)]">
           Mug Clubs
         </h2>
       </div>
@@ -51,9 +51,18 @@ export function MugClubSection({ clubs, myMemberships, breweryId, isAuthenticate
           return (
             <div
               key={club.id}
-              className="card-bg-stats border rounded-2xl p-5 space-y-3"
-              style={{ borderColor: membership ? "var(--accent-gold)" : "var(--border)" }}
+              className="border rounded-[14px] p-5 space-y-3 relative overflow-hidden"
+              style={{
+                background: "repeating-linear-gradient(135deg, var(--card-bg, #FFFFFF), var(--card-bg, #FFFFFF) 6px, var(--warm-bg, var(--surface-2)) 6px, var(--warm-bg, var(--surface-2)) 7px)",
+                borderColor: membership ? "var(--amber, var(--accent-gold))" : "var(--border)",
+                borderWidth: membership ? "1.5px" : "1px",
+              }}
             >
+              {/* Premium golden top bar — Card Type 13 */}
+              <div
+                className="absolute top-0 left-0 right-0 h-[3px]"
+                style={{ background: "linear-gradient(90deg, #D4A830, var(--amber, var(--accent-gold)), #D4A830)" }}
+              />
               {/* Header */}
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">

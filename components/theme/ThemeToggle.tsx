@@ -103,7 +103,7 @@ export function ThemeToggle({ className, variant = "compact" }: ThemeToggleProps
         whileTap={microInteraction.toggle}
         transition={transition.fast}
       >
-        <Icon size={18} />
+        <Icon size={20} />
       </motion.div>
     </button>
   );

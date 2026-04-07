@@ -35,7 +35,7 @@ const PEDESTAL_HEIGHTS: Record<number, string> = {
 };
 
 const MEDAL_COLORS: Record<number, { bg: string; border: string; text: string }> = {
-  0: { bg: "rgba(212, 168, 67, 0.15)", border: "rgba(212, 168, 67, 0.40)", text: "#D4A843" },
+  0: { bg: "color-mix(in srgb, var(--amber, #C4883E) 15%, transparent)", border: "color-mix(in srgb, var(--amber, #C4883E) 40%, transparent)", text: "var(--amber, #C4883E)" },
   1: { bg: "rgba(192, 192, 192, 0.12)", border: "rgba(192, 192, 192, 0.35)", text: "#C0C0C0" },
   2: { bg: "rgba(184, 134, 82, 0.12)", border: "rgba(184, 134, 82, 0.35)", text: "#B88652" },
 };
@@ -73,7 +73,7 @@ export function LeaderboardPodium({ entries, label, currentUserId }: Leaderboard
                 transition={{ ...spring.bouncy, delay: animDelay + 0.2 }}
                 className="mb-1"
               >
-                <Crown size={20} style={{ color: "#D4A843" }} fill="#D4A843" />
+                <Crown size={20} style={{ color: "var(--amber, #C4883E)" }} fill="currentColor" />
               </motion.div>
             )}
 

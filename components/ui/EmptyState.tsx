@@ -54,14 +54,27 @@ export function EmptyState({
       animate={{ opacity: 1, y: 0 }}
       transition={{ type: "spring", stiffness: 300, damping: 28 }}
       className={cn(
-        "flex flex-col items-center justify-center text-center",
+        "flex flex-col items-center justify-center text-center rounded-[14px]",
         s.container,
         className
       )}
+      style={{
+        background: "var(--surface, var(--bg))",
+        border: "1.5px dashed var(--border)",
+      }}
     >
       {(icon || emoji) && (
         <div className={cn("mb-4", emoji && s.emoji)}>
-          {emoji ? <span>{emoji}</span> : icon}
+          {emoji ? (
+            <span>{emoji}</span>
+          ) : (
+            <div
+              className="w-12 h-12 rounded-[14px] flex items-center justify-center"
+              style={{ background: "var(--warm-bg, var(--surface-2))", color: "var(--text-muted)" }}
+            >
+              {icon}
+            </div>
+          )}
         </div>
       )}
 

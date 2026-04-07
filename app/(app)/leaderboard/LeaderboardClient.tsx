@@ -60,7 +60,7 @@ export function LeaderboardClient({ allTime, monthly, currentUserId }: Leaderboa
 
       {entries.length === 0 ? (
         <div className="text-center py-20 space-y-3">
-          <div className="w-16 h-16 rounded-2xl bg-[var(--surface)] border border-[var(--border)] flex items-center justify-center mx-auto">
+          <div className="w-16 h-16 rounded-[14px] bg-[var(--surface)] border border-[var(--border)] flex items-center justify-center mx-auto">
             <Trophy size={24} className="text-[var(--text-muted)]" />
           </div>
           <p className="font-display text-xl text-[var(--text-primary)]">No sessions yet this month</p>
@@ -82,7 +82,7 @@ export function LeaderboardClient({ allTime, monthly, currentUserId }: Leaderboa
               >
                 <Link
                   href={`/profile/${entry.profile.username}`}
-                  className={`flex items-center gap-4 p-4 rounded-2xl border transition-colors ${
+                  className={`flex items-center gap-4 p-4 rounded-[14px] border transition-colors ${
                     isMe
                       ? "border-[var(--accent-gold)]/30 bg-[color-mix(in_srgb,var(--accent-gold)_5%,transparent)]"
                       : "border-[var(--border)] bg-[var(--surface)] hover:border-[var(--accent-gold)]/20"

@@ -36,7 +36,7 @@ export function FeedEndMessage() {
 export function FeedCardSkeleton() {
   return (
     <div
-      className="rounded-2xl p-4 space-y-3"
+      className="rounded-[14px] p-4 space-y-3"
       style={{
         background: "var(--card-bg)",
         border: "1px solid var(--border)",

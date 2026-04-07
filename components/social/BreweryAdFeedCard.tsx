@@ -59,7 +59,7 @@ export function BreweryAdFeedCard({ ad }: { ad: AdData }) {
     <motion.div
       ref={cardRef}
       {...cardHover}
-      className="rounded-2xl overflow-hidden border"
+      className="rounded-[14px] overflow-hidden border"
       style={{ background: "var(--card-bg)", borderColor: "var(--border)" }}
     >
       {/* Sponsored badge */}

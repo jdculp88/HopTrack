@@ -423,7 +423,7 @@ export function BillingClient({ brewery, brandBilling }: { brewery: Brewery; bra
           className="rounded-2xl border p-5"
           style={{ borderColor: "var(--accent-gold)", background: "color-mix(in srgb, var(--accent-gold) 8%, transparent)" }}>
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center font-bold text-lg tabular-nums"
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center font-mono font-bold text-lg tabular-nums"
               style={{ background: "var(--accent-gold)", color: "var(--bg)" }}>{daysRemaining}</div>
             <div>
               <p className="font-semibold text-sm" style={{ color: "var(--text-primary)" }}>
@@ -519,7 +519,7 @@ export function BillingClient({ brewery, brandBilling }: { brewery: Brewery; bra
 
               {/* Price */}
               <div className="mb-4">
-                <span className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>{priceDisplay.price}</span>
+                <span className="text-2xl font-mono font-bold" style={{ color: "var(--text-primary)" }}>{priceDisplay.price}</span>
                 {priceDisplay.period && (
                   <span className="text-sm" style={{ color: "var(--text-muted)" }}>{priceDisplay.period}</span>
                 )}

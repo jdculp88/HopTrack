@@ -22,7 +22,7 @@ interface TapWallBeerListProps {
 function BeerSkeletonRow() {
   return (
     <div
-      className="flex items-center gap-3 p-4 rounded-2xl"
+      className="flex items-center gap-3 p-4 rounded-[14px]"
       style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
     >
       <Skeleton className="w-10 h-10 rounded-xl flex-shrink-0" />

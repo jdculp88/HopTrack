@@ -67,7 +67,7 @@ export function BreweryRatingHeader({
 
   return (
     <div
-      className="rounded-2xl border p-4"
+      className="rounded-[14px] border p-4"
       style={{ background: "var(--card-bg)", borderColor: "var(--border)" }}
     >
       <div className="flex items-center justify-between">

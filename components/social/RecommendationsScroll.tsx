@@ -101,29 +101,30 @@ export function RecommendationsScroll({ beers, aiBeers }: RecommendationsScrollP
           >
             <Link href={`/beer/${beer.id}`}>
               <div
-                className="card-bg-reco w-[180px] p-3.5 rounded-xl h-full transition-all hover:scale-[1.02]"
+                className="card-bg-reco w-[200px] min-h-[160px] p-4 rounded-[14px] h-full transition-all hover:scale-[1.02] flex flex-col"
                 data-style={getStyleFamily(beer.style)}
                 style={{
                   border: "1px solid var(--card-border)",
                   borderLeft: `3px solid var(--${getStyleFamily(beer.style) === "default" ? "accent-gold" : getStyleCssVar(getStyleFamily(beer.style))})`,
                 }}
               >
+                {/* Beer name — 16px/600 per audit #3 */}
                 <p
-                  className="font-display font-bold text-sm leading-tight mb-1"
-                  style={{ color: "var(--text-primary)" }}
+                  className="font-display font-semibold leading-tight mb-1"
+                  style={{ color: "var(--text-primary)", fontSize: "16px", letterSpacing: "-0.01em" }}
                 >
                   {beer.name}
                 </p>
                 {beer.brewery && (
                   <p
-                    className="text-[10px] truncate mb-2"
-                    style={{ color: "var(--text-muted)" }}
+                    className="text-xs truncate mb-2"
+                    style={{ color: "var(--text-secondary)" }}
                   >
                     {beer.brewery.name}{beer.brewery.city ? ` · ${beer.brewery.city}` : ""}
                   </p>
                 )}
                 <div className="flex items-center gap-2 mb-2">
-                  {beer.style && <BeerStyleBadge style={beer.style} size="xs" />}
+                  {beer.style && <BeerStyleBadge style={beer.style} size="sm" />}
                   {beer.abv != null && (
                     <span className="text-[10px] font-mono" style={{ color: "var(--text-muted)" }}>
                       {beer.abv}%
@@ -133,12 +134,12 @@ export function RecommendationsScroll({ beers, aiBeers }: RecommendationsScrollP
                 {beer.avg_rating != null && beer.avg_rating > 0 && (
                   <div className="flex items-center gap-1 mb-2">
                     <Star
-                      size={11}
+                      size={12}
                       className="fill-[var(--accent-gold)] text-[var(--accent-gold)]"
                     />
                     <span
-                      className="text-xs font-mono font-bold"
-                      style={{ color: "var(--accent-gold)" }}
+                      className="text-sm font-mono font-bold"
+                      style={{ color: "var(--amber, var(--accent-gold))" }}
                     >
                       {beer.avg_rating.toFixed(1)}
                     </span>
@@ -149,11 +150,11 @@ export function RecommendationsScroll({ beers, aiBeers }: RecommendationsScrollP
                     )}
                   </div>
                 )}
-                {/* AI reason — the information density from Brewed for You */}
+                {/* Reason line — style's primary color per audit #3 */}
                 {beer.reason && (
                   <p
-                    className="text-[10px] leading-relaxed line-clamp-2"
-                    style={{ color: "var(--text-secondary)" }}
+                    className="text-[11px] leading-relaxed line-clamp-2 mt-auto"
+                    style={{ color: `var(--${getStyleCssVar(getStyleFamily(beer.style))}, var(--text-secondary))` }}
                   >
                     {beer.reason}
                   </p>

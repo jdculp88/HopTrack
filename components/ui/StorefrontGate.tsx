@@ -38,7 +38,7 @@ export function StorefrontGate({ children, isUnlocked, sectionName, breweryId }:
             className="w-10 h-10 rounded-xl flex items-center justify-center mx-auto"
             style={{ background: "color-mix(in srgb, var(--accent-gold) 15%, transparent)" }}
           >
-            <Lock size={18} style={{ color: "var(--accent-gold)" }} />
+            <Lock size={16} style={{ color: "var(--accent-gold)" }} />
           </div>
           <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
             {sectionName}

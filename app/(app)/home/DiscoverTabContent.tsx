@@ -77,7 +77,7 @@ export function DiscoverTabContent({
         <span className="text-6xl block">🍶</span>
         <div className="space-y-2">
           <h3
-            className="font-display text-2xl font-bold"
+            className="font-display text-[22px] font-bold tracking-[-0.01em]"
             style={{ color: "var(--text-primary)" }}
           >
             The cellar is being restocked.
@@ -109,7 +109,7 @@ export function DiscoverTabContent({
           whileHover={{ scale: 1.01 }}
           whileTap={{ scale: 0.99 }}
           transition={{ type: "spring", stiffness: 400, damping: 30 }}
-          className="card-bg-hoproute rounded-2xl p-5 border"
+          className="card-bg-hoproute rounded-[14px] p-5 border"
           style={{ borderColor: "color-mix(in srgb, var(--accent-gold) 30%, transparent)" }}
         >
           <div className="flex items-center justify-between gap-4">
@@ -132,7 +132,7 @@ export function DiscoverTabContent({
               </p>
             </div>
             <div
-              className="flex-shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center text-2xl"
+              className="flex-shrink-0 w-12 h-12 rounded-[14px] flex items-center justify-center text-2xl"
               style={{
                 background: "color-mix(in srgb, var(--accent-gold) 15%, transparent)",
               }}

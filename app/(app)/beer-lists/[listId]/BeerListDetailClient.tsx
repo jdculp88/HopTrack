@@ -99,7 +99,7 @@ function SortableItem({
     <div
       ref={setNodeRef}
       style={style}
-      className="rounded-2xl overflow-hidden"
+      className="rounded-[14px] overflow-hidden"
       {...attributes}
     >
       <div
@@ -107,7 +107,7 @@ function SortableItem({
           background: "var(--card-bg)",
           border: `1px solid ${activeId && !isDragging ? "var(--border)" : "var(--border)"}`,
         }}
-        className="rounded-2xl overflow-hidden"
+        className="rounded-[14px] overflow-hidden"
       >
         <div className="flex items-start gap-3 px-4 py-3">
           {/* Drag handle — owner only */}
@@ -250,7 +250,7 @@ function DragGhost({ item }: { item: BeerItem }) {
   const beer = item.beer;
   return (
     <div
-      className="rounded-2xl px-4 py-3 flex items-start gap-3"
+      className="rounded-[14px] px-4 py-3 flex items-start gap-3"
       style={{
         background: "var(--card-bg)",
         border: "1.5px solid var(--accent-gold)",
@@ -441,7 +441,7 @@ export function BeerListDetailClient({
 
       {/* Header card */}
       <div
-        className="rounded-2xl p-5 mb-5"
+        className="rounded-[14px] p-5 mb-5"
         style={{ background: "var(--card-bg)", border: "1px solid var(--border)" }}
       >
         <div className="flex items-start gap-3">
@@ -632,7 +632,7 @@ export function BeerListDetailClient({
       {/* Beer items */}
       {items.length === 0 ? (
         <div
-          className="rounded-2xl p-10 text-center"
+          className="rounded-[14px] p-10 text-center"
           style={{ background: "var(--card-bg)", border: "1px solid var(--border)" }}
         >
           <Beer size={32} className="mx-auto mb-3" style={{ color: "var(--text-muted)" }} />
@@ -664,7 +664,7 @@ export function BeerListDetailClient({
               >
                 <Link href={`/beer/${beer?.id ?? ""}`} className="block group">
                   <div
-                    className="aspect-square rounded-2xl overflow-hidden relative"
+                    className="aspect-square rounded-[14px] overflow-hidden relative"
                     style={{
                       background: beer?.cover_image_url
                         ? `url(${beer.cover_image_url}) center/cover`

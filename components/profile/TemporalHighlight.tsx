@@ -39,7 +39,10 @@ export function TemporalHighlight({ profile }: TemporalHighlightProps) {
               >
                 {shortLabel}
               </span>
-              <div className="flex-1 h-5 bg-[var(--surface-2)] rounded-md overflow-hidden">
+              <div
+                className="flex-1 overflow-hidden rounded-md"
+                style={{ height: isFavorite ? "28px" : "20px", background: "var(--warm-bg, var(--surface-2))" }}
+              >
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${width}%` }}
@@ -49,17 +52,22 @@ export function TemporalHighlight({ profile }: TemporalHighlightProps) {
                     damping: 25,
                     delay: i * 0.04,
                   }}
-                  className="h-full rounded-md"
+                  className="h-full rounded-md relative"
                   style={{
                     background: isFavorite
-                      ? "linear-gradient(to right, var(--accent-gold), var(--accent-amber))"
+                      ? "linear-gradient(to right, var(--amber, var(--accent-gold)), var(--accent-amber))"
                       : "var(--border)",
+                    boxShadow: isFavorite ? "0 0 12px rgba(196,136,62,0.2)" : "none",
                   }}
                 />
               </div>
               <span
-                className="text-[10px] font-mono tabular-nums w-6 text-right flex-shrink-0"
-                style={{ color: isFavorite ? "var(--accent-gold)" : "var(--text-muted)" }}
+                className="font-mono tabular-nums w-6 text-right flex-shrink-0"
+                style={{
+                  fontSize: isFavorite ? "13px" : "10px",
+                  fontWeight: isFavorite ? 700 : 500,
+                  color: isFavorite ? "var(--amber, var(--accent-gold))" : "var(--text-muted)",
+                }}
               >
                 {day.count}
               </span>

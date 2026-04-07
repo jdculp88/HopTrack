@@ -48,7 +48,7 @@ export function BreweriesTab({ topBreweries, mugClubMemberships }: BreweriesTabP
     <div className="space-y-8">
       {/* Brewery Passport */}
       <div>
-        <h2 className="font-display text-2xl font-bold text-[var(--text-primary)] mb-4">Brewery Passport</h2>
+        <h2 className="font-display text-[22px] font-bold tracking-[-0.01em] text-[var(--text-primary)] mb-4">Brewery Passport</h2>
         {topBreweries.length > 0 ? (
           <div className="flex flex-col gap-5">
             {topBreweries.map((visit) => {
@@ -56,7 +56,7 @@ export function BreweriesTab({ topBreweries, mugClubMemberships }: BreweriesTabP
               return (
                 <Link key={visit.id} href={`/brewery/${visit.brewery_id}`}>
                   <div
-                    className="flex items-center gap-4 p-4 bg-[var(--card-bg)] rounded-2xl transition-all shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] hover:scale-[1.01]"
+                    className="flex items-center gap-4 p-4 bg-[var(--card-bg)] rounded-[14px] transition-all shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] hover:scale-[1.01]"
                     style={{
                       border: "1px solid var(--card-border)",
                       borderLeft: `3px solid ${visit.total_visits >= 5 ? "var(--accent-gold)" : visit.total_visits >= 3 ? "var(--accent-amber)" : "var(--accent-blue)"}`,
@@ -110,8 +110,11 @@ export function BreweriesTab({ topBreweries, mugClubMemberships }: BreweriesTabP
           </div>
         ) : (
           <Link href="/explore">
-            <div className="text-center py-10 bg-[var(--card-bg)] rounded-2xl border border-[var(--card-border)] hover:border-[var(--accent-gold)]/30 transition-colors">
-              <p className="text-3xl mb-2">🏠</p>
+            <div className="text-center py-10 bg-[var(--card-bg)] rounded-[14px] border border-[var(--card-border)] hover:border-[var(--accent-gold)]/30 transition-colors">
+              <div className="w-12 h-12 rounded-[14px] flex items-center justify-center mx-auto mb-3"
+                   style={{ background: "var(--warm-bg, var(--surface-2))" }}>
+                <MapPin size={24} style={{ color: "var(--text-muted)" }} />
+              </div>
               <p className="font-display text-base text-[var(--text-primary)]">No regular haunts yet</p>
               <p className="text-sm text-[var(--text-secondary)] mt-1">
                 Visit a few taprooms and your favorites will show up here.

@@ -117,7 +117,7 @@ export function LoyaltyStampCard({ program, card, breweryName, breweryId }: Loya
     >
       {/* Card body */}
       <div
-        className="relative overflow-visible rounded-2xl px-6 py-5"
+        className="relative overflow-visible rounded-[14px] px-6 py-5"
         style={{
           background: "var(--surface-2)",
           border: "1.5px solid var(--accent-gold)",
@@ -127,7 +127,7 @@ export function LoyaltyStampCard({ program, card, breweryName, breweryId }: Loya
       >
         {/* Subtle paper grain texture */}
         <div
-          className="pointer-events-none absolute inset-0 rounded-2xl opacity-[0.035]"
+          className="pointer-events-none absolute inset-0 rounded-[14px] opacity-[0.035]"
           style={{
             backgroundImage:
               "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
@@ -221,13 +221,13 @@ export function LoyaltyStampCard({ program, card, breweryName, breweryId }: Loya
                     className="absolute inset-0 rounded-full"
                     style={{
                       border: filled
-                        ? "1.5px solid var(--accent-gold)"
-                        : "1.5px solid color-mix(in srgb, var(--border) 80%, transparent)",
+                        ? "2px solid var(--amber, var(--accent-gold))"
+                        : "1.5px dashed color-mix(in srgb, var(--border) 70%, transparent)",
                       background: filled
-                        ? "color-mix(in srgb, var(--accent-gold) 15%, transparent)"
-                        : "color-mix(in srgb, var(--surface) 50%, transparent)",
+                        ? "color-mix(in srgb, var(--amber, var(--accent-gold)) 15%, transparent)"
+                        : "transparent",
                       boxShadow: filled
-                        ? "0 0 8px color-mix(in srgb, var(--accent-gold) 35%, transparent), inset 0 1px 0 color-mix(in srgb, var(--text-primary) 10%, transparent)"
+                        ? "0 0 10px color-mix(in srgb, var(--amber, var(--accent-gold)) 30%, transparent)"
                         : "none",
                     }}
                   />
@@ -414,14 +414,15 @@ function RedemptionCodeSection({
       variants={rewardBannerVariants}
       initial="hidden"
       animate="visible"
-      className="rounded-xl px-4 py-3 text-center"
+      className="rounded-[14px] px-4 py-4 text-center"
       style={{
-        background: "color-mix(in srgb, var(--accent-gold) 12%, transparent)",
-        border: "1px solid color-mix(in srgb, var(--accent-gold) 50%, transparent)",
+        background: "linear-gradient(135deg, color-mix(in srgb, var(--amber, var(--accent-gold)) 15%, var(--card-bg, #FFFFFF)), color-mix(in srgb, var(--amber, var(--accent-gold)) 8%, var(--card-bg, #FFFFFF)))",
+        border: "1.5px solid var(--amber, var(--accent-gold))",
+        boxShadow: "0 0 20px color-mix(in srgb, var(--amber, var(--accent-gold)) 15%, transparent)",
       }}
     >
-      <p className="font-display font-bold text-base" style={{ color: "var(--accent-gold)" }}>
-        Reward Ready!
+      <p className="font-display font-bold text-lg" style={{ color: "var(--amber, var(--accent-gold))" }}>
+        🎉 Reward Ready!
       </p>
       {error && (
         <p className="text-xs mt-1" style={{ color: "var(--danger)" }}>{error}</p>

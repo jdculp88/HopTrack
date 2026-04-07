@@ -159,7 +159,7 @@ export function BarcodeScanner({ onBeerFound, onClose }: BarcodeScannerProps) {
           className="w-8 h-8 flex items-center justify-center rounded-full"
           style={{ background: "rgba(255,255,255,0.15)" }}
         >
-          <X size={18} className="text-white" />
+          <X size={16} className="text-white" />
         </button>
       </div>
 

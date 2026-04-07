@@ -25,7 +25,7 @@ const SIZES = {
 };
 
 function getRarityLabel(percent: number): { label: string; color: string } {
-  if (percent <= 5) return { label: "Legendary", color: "#D4A843" };
+  if (percent <= 5) return { label: "Legendary", color: "var(--amber, #C4883E)" };
   if (percent <= 20) return { label: "Rare", color: "#8BAABF" };
   if (percent <= 50) return { label: "Uncommon", color: "#3D7A52" };
   return { label: "Common", color: "var(--text-muted)" };
@@ -83,17 +83,20 @@ export function AchievementBadge({
           <div
             className={cn(
               s.container,
-              "rounded-2xl flex items-center justify-center flex-shrink-0 ring-2",
+              "rounded-[14px] flex items-center justify-center flex-shrink-0 ring-2",
               earned ? tier.glow : "",
               earned ? "" : "opacity-40 grayscale"
             )}
             style={earned
               ? {
                   background: `color-mix(in srgb, ${tier.color} 12%, transparent)`,
-                  outline: `2px solid color-mix(in srgb, ${tier.color} 35%, transparent)`,
-                  outlineOffset: "2px",
+                  border: `2px solid ${tier.color}`,
+                  boxShadow: `0 0 12px color-mix(in srgb, ${tier.color} 20%, transparent)`,
                 }
-              : { background: "var(--card-bg)", outline: "2px solid var(--border)", outlineOffset: "2px" }}
+              : {
+                  background: "var(--card-bg)",
+                  border: "2px dashed var(--border)",
+                }}
           >
             <span className={cn(s.icon, earned ? "" : "opacity-50")}>{achievement.icon}</span>
           </div>
@@ -138,10 +141,10 @@ export function AchievementUnlock({ achievement, xpGained }: AchievementUnlockPr
       initial={{ opacity: 0, y: 60, scale: 0.9 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ type: "spring", stiffness: 300, damping: 25, delay: 0.1 }}
-      className="flex items-center gap-4 bg-[var(--surface-2)] border border-[var(--accent-gold)]/30 rounded-2xl p-4"
+      className="flex items-center gap-4 bg-[var(--surface-2)] border border-[var(--accent-gold)]/30 rounded-[14px] p-4"
     >
       <div
-        className="w-14 h-14 rounded-2xl flex items-center justify-center ring-2 flex-shrink-0"
+        className="w-14 h-14 rounded-[14px] flex items-center justify-center ring-2 flex-shrink-0"
         style={{ background: `${achievement.badge_color}20`, boxShadow: `0 0 16px ${achievement.badge_color}40` }}
       >
         <span className={cn("text-3xl", tier.ring)}>{achievement.icon}</span>

@@ -70,7 +70,7 @@ export function BreweryChallenges({ challenges, myParticipations, isAuthenticate
     <>
       <div>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-display text-2xl font-bold" style={{ color: "var(--text-primary)" }}>
+          <h2 className="font-display text-[22px] font-bold tracking-[-0.01em]" style={{ color: "var(--text-primary)" }}>
             Challenges
           </h2>
           <span className="text-xs font-mono" style={{ color: "var(--accent-gold)" }}>
@@ -90,20 +90,29 @@ export function BreweryChallenges({ challenges, myParticipations, isAuthenticate
               <button
                 key={challenge.id}
                 onClick={() => !isExpired && setSelected(challenge)}
-                className="w-full text-left rounded-2xl border p-4 transition-all"
+                className="w-full text-left rounded-[14px] border p-4 transition-all"
                 style={{
                   background: isCompleted
-                    ? "color-mix(in srgb, var(--accent-gold) 6%, var(--surface))"
-                    : "var(--surface)",
+                    ? "color-mix(in srgb, var(--amber, var(--accent-gold)) 6%, var(--card-bg, var(--surface)))"
+                    : "linear-gradient(135deg, rgba(45,143,78,0.06), rgba(232,168,56,0.06))",
                   borderColor: isCompleted
-                    ? "var(--accent-gold)"
-                    : "var(--border)",
+                    ? "var(--amber, var(--accent-gold))"
+                    : "rgba(45,143,78,0.15)",
                   opacity: isExpired ? 0.6 : 1,
                   cursor: isExpired ? "default" : "pointer",
                 }}
               >
                 <div className="flex items-center gap-3">
-                  <span className="text-2xl flex-shrink-0">{challenge.icon}</span>
+                  {/* 44x44 badge icon — Card Type 10 */}
+                  <div
+                    className="w-11 h-11 rounded-xl flex items-center justify-center text-[22px] flex-shrink-0"
+                    style={{
+                      background: "linear-gradient(135deg, rgba(45,143,78,0.1), rgba(232,168,56,0.1))",
+                      border: "1px solid rgba(45,143,78,0.15)",
+                    }}
+                  >
+                    {challenge.icon}
+                  </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <p className="font-display font-semibold truncate" style={{ color: "var(--text-primary)" }}>
@@ -128,21 +137,21 @@ export function BreweryChallenges({ challenges, myParticipations, isAuthenticate
                       </p>
                     )}
 
-                    {/* Progress bar — only if joined */}
+                    {/* Progress bar — Card Type 10: 6px, success→warning gradient */}
                     {participation && (
-                      <div className="mt-2.5">
-                        <div className="flex items-center justify-between text-xs mb-1" style={{ color: "var(--text-muted)" }}>
-                          <span>{progress} / {challenge.target_value}</span>
-                          <span>{pct}%</span>
-                        </div>
-                        <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "var(--surface-2)" }}>
+                      <div className="mt-3">
+                        <div className="h-1.5 rounded-[3px] overflow-hidden" style={{ background: "var(--warm-bg, var(--surface-2))" }}>
                           <motion.div
-                            className="h-full rounded-full"
-                            style={{ background: isCompleted ? "var(--accent-gold)" : "var(--accent-gold)", opacity: isCompleted ? 1 : 0.7 }}
+                            className="h-full rounded-[3px]"
+                            style={{ background: isCompleted ? "var(--amber, var(--accent-gold))" : "linear-gradient(90deg, var(--success), var(--func-warning, var(--accent-amber)))" }}
                             initial={{ width: 0 }}
                             animate={{ width: `${pct}%` }}
                             transition={{ type: "spring", stiffness: 200, damping: 25 }}
                           />
+                        </div>
+                        <div className="flex items-center justify-between font-mono text-[10px] mt-1" style={{ color: "var(--text-muted)" }}>
+                          <span>{progress} / {challenge.target_value}</span>
+                          <span>{pct}%</span>
                         </div>
                       </div>
                     )}
@@ -207,7 +216,7 @@ export function BreweryChallenges({ challenges, myParticipations, isAuthenticate
               {/* Icon + title */}
               <div className="text-center space-y-2">
                 <span className="text-5xl block">{selected.icon}</span>
-                <h3 className="font-display text-2xl font-bold" style={{ color: "var(--text-primary)" }}>
+                <h3 className="font-display text-[22px] font-bold tracking-[-0.01em]" style={{ color: "var(--text-primary)" }}>
                   {selected.name}
                 </h3>
                 {selected.description && (
@@ -218,7 +227,7 @@ export function BreweryChallenges({ challenges, myParticipations, isAuthenticate
               </div>
 
               {/* Goal */}
-              <div className="rounded-2xl p-4 space-y-1" style={{ background: "var(--surface-2)" }}>
+              <div className="rounded-[14px] p-4 space-y-1" style={{ background: "var(--surface-2)" }}>
                 <p className="text-xs font-mono uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Goal</p>
                 <p className="font-medium" style={{ color: "var(--text-primary)" }}>
                   {selected.challenge_type === "beer_count" && `Try ${selected.target_value} different beers`}
@@ -230,7 +239,7 @@ export function BreweryChallenges({ challenges, myParticipations, isAuthenticate
 
               {/* Reward */}
               {(selected.reward_description || selected.reward_xp > 0) && (
-                <div className="rounded-2xl p-4 space-y-1"
+                <div className="rounded-[14px] p-4 space-y-1"
                   style={{ background: "color-mix(in srgb, var(--accent-gold) 8%, transparent)" }}>
                   <p className="text-xs font-mono uppercase tracking-wider" style={{ color: "var(--accent-gold)" }}>Reward</p>
                   <p className="font-medium" style={{ color: "var(--text-primary)" }}>
@@ -252,7 +261,7 @@ export function BreweryChallenges({ challenges, myParticipations, isAuthenticate
               {!isAuthenticated ? (
                 <a
                   href={`/signup?next=${encodeURIComponent(returnPath ?? "/")}`}
-                  className="w-full py-3.5 rounded-2xl font-semibold text-sm flex items-center justify-center gap-2 transition-opacity hover:opacity-90"
+                  className="w-full py-3.5 rounded-[14px] font-semibold text-sm flex items-center justify-center gap-2 transition-opacity hover:opacity-90"
                   style={{ background: "var(--accent-gold)", color: "var(--bg)" }}
                 >
                   <Trophy size={16} /> Sign Up to Accept Challenge
@@ -261,7 +270,7 @@ export function BreweryChallenges({ challenges, myParticipations, isAuthenticate
                 <button
                   onClick={() => handleJoin(selected)}
                   disabled={joining}
-                  className="w-full py-3.5 rounded-2xl font-semibold text-sm flex items-center justify-center gap-2 transition-opacity hover:opacity-90 disabled:opacity-60"
+                  className="w-full py-3.5 rounded-[14px] font-semibold text-sm flex items-center justify-center gap-2 transition-opacity hover:opacity-90 disabled:opacity-60"
                   style={{ background: "var(--accent-gold)", color: "var(--bg)" }}
                 >
                   {joining ? (

@@ -74,7 +74,7 @@ function FaqItem({ question, answer }: { question: string; answer: string }) {
           transition={{ duration: 0.2 }}
           className="shrink-0 text-[var(--text-muted)]"
         >
-          <ChevronDown size={18} />
+          <ChevronDown size={16} />
         </motion.div>
       </button>
       <AnimatePresence initial={false}>
@@ -106,13 +106,13 @@ export default function HelpPage() {
         Quick answers to common questions about HopTrack.
       </p>
 
-      <div className="rounded-2xl bg-[var(--card-bg)] border border-[var(--card-border)] px-5 divide-y divide-[var(--border)]">
+      <div className="rounded-[14px] bg-[var(--card-bg)] border border-[var(--card-border)] px-5 divide-y divide-[var(--border)]">
         {faqs.map((faq) => (
           <FaqItem key={faq.question} question={faq.question} answer={faq.answer} />
         ))}
       </div>
 
-      <div className="mt-8 rounded-2xl bg-[var(--card-bg)] border border-[var(--card-border)] p-5 text-sm text-[var(--text-secondary)]">
+      <div className="mt-8 rounded-[14px] bg-[var(--card-bg)] border border-[var(--card-border)] p-5 text-sm text-[var(--text-secondary)]">
         <p className="font-medium text-[var(--text-primary)] mb-1">Still need help?</p>
         <p>
           Email us at{" "}

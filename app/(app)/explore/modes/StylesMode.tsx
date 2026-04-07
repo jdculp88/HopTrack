@@ -92,7 +92,7 @@ export function StylesMode() {
               key={family.key}
               type="button"
               onClick={() => handleSelectFamily(family.key)}
-              className="relative rounded-2xl overflow-hidden p-4 border transition-all text-left"
+              className="relative rounded-[14px] overflow-hidden p-4 border transition-all text-left"
               style={{
                 background: `linear-gradient(135deg, ${vars.light}, ${vars.soft})`,
                 borderColor: isActive ? vars.primary : "var(--border)",
@@ -204,7 +204,7 @@ export function StylesMode() {
                           transition={{ delay: i * 0.03, ...spring.default }}
                         >
                           <Link href={`/beer/${beer.id}`}>
-                            <div className="flex items-center gap-3 p-3 border border-[var(--card-border)] hover:border-[var(--accent-gold)]/30 rounded-2xl bg-[var(--card-bg)] transition-colors">
+                            <div className="flex items-center gap-3 p-3 border border-[var(--card-border)] hover:border-[var(--accent-gold)]/30 rounded-[14px] bg-[var(--card-bg)] transition-colors">
                               <div className="flex-1 min-w-0">
                                 <p
                                   className="font-display font-semibold text-sm truncate"
@@ -250,13 +250,13 @@ export function StylesMode() {
                 )}
 
                 {data.beers.length === 0 && data.breweries.length === 0 && (
-                  <div className="text-center py-10 bg-[var(--card-bg)] rounded-2xl border border-[var(--card-border)]">
+                  <div className="text-center py-10 bg-[var(--card-bg)] rounded-[14px] border border-[var(--card-border)]">
                     <p className="text-sm text-[var(--text-muted)]">No breweries listing this style yet</p>
                   </div>
                 )}
               </>
             ) : (
-              <div className="text-center py-10 bg-[var(--card-bg)] rounded-2xl border border-[var(--card-border)]">
+              <div className="text-center py-10 bg-[var(--card-bg)] rounded-[14px] border border-[var(--card-border)]">
                 <p className="text-sm text-[var(--text-muted)]">Couldn&apos;t load results</p>
               </div>
             )}

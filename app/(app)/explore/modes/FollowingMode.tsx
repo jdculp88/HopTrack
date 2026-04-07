@@ -72,7 +72,7 @@ export function FollowingMode() {
             {[0, 1, 2].map((i) => (
               <div
                 key={i}
-                className="flex-shrink-0 w-[180px] rounded-2xl border p-3 space-y-2"
+                className="flex-shrink-0 w-[180px] rounded-[14px] border p-3 space-y-2"
                 style={{ background: "var(--card-bg)", borderColor: "var(--border)" }}
               >
                 <Skeleton className="h-4 w-full" />
@@ -182,7 +182,7 @@ export function FollowingMode() {
                 transition={{ delay: i * 0.03, ...spring.default }}
               >
                 <Link href={`/beer/${beer.beer_id}`}>
-                  <div className="card-bg-reco flex items-center gap-3 p-3 border border-[var(--card-border)] hover:border-[var(--accent-gold)]/30 rounded-2xl transition-colors">
+                  <div className="card-bg-reco flex items-center gap-3 p-3 border border-[var(--card-border)] hover:border-[var(--accent-gold)]/30 rounded-[14px] transition-colors">
                     <div
                       className="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center text-lg"
                       style={{ background: "var(--surface-2)" }}
@@ -220,7 +220,7 @@ export function FollowingMode() {
 
       {/* Partial empty states */}
       {friendCheckins.length === 0 && followedCount > 0 && (
-        <div className="text-center py-6 bg-[var(--card-bg)] rounded-2xl border border-[var(--card-border)]">
+        <div className="text-center py-6 bg-[var(--card-bg)] rounded-[14px] border border-[var(--card-border)]">
           <p className="text-sm text-[var(--text-muted)]">
             {friendCount === 0
               ? "Add friends to see what they're drinking"
@@ -230,7 +230,7 @@ export function FollowingMode() {
       )}
 
       {newAtFollowed.length === 0 && friendCheckins.length > 0 && (
-        <div className="text-center py-6 bg-[var(--card-bg)] rounded-2xl border border-[var(--card-border)]">
+        <div className="text-center py-6 bg-[var(--card-bg)] rounded-[14px] border border-[var(--card-border)]">
           <p className="text-sm text-[var(--text-muted)]">
             {followedCount === 0
               ? "Follow breweries to see new tap arrivals"

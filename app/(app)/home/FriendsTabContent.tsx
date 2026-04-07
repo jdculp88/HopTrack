@@ -62,7 +62,7 @@ export function FriendsTabContent({
     <>
       {/* Sprint 171: Mini-stats strip — earn the space */}
       <div
-        className="rounded-2xl px-4 py-3 bg-[var(--card-bg)]"
+        className="rounded-[14px] px-4 py-3 bg-[var(--card-bg)]"
         style={{ border: "1px solid var(--card-border)" }}
       >
         <div className="flex items-center gap-4">
@@ -166,7 +166,7 @@ function NoFriendsEmptyState() {
       <span className="text-6xl block">🍺</span>
       <div className="space-y-2">
         <h3
-          className="font-display text-2xl font-bold"
+          className="font-display text-[22px] font-bold tracking-[-0.01em]"
           style={{ color: "var(--text-primary)", letterSpacing: "-0.02em" }}
         >
           Your round starts here.
@@ -215,7 +215,7 @@ function FriendsNoSessionsEmptyState() {
       <span className="text-6xl block">🪣</span>
       <div className="space-y-2">
         <h3
-          className="font-display text-2xl font-bold"
+          className="font-display text-[22px] font-bold tracking-[-0.01em]"
           style={{ color: "var(--text-primary)", letterSpacing: "-0.02em" }}
         >
           The taps are dry over here.

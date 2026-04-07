@@ -73,7 +73,7 @@ export function FeedItemCard({
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: index * 0.03, duration: 0.28 }}
-        className={item.isLive ? "card-bg-live rounded-2xl" : "rounded-2xl"}
+        className={item.isLive ? "card-bg-live rounded-[14px]" : "rounded-[14px]"}
       >
         <SessionCard
           session={item.data}

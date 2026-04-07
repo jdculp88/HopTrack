@@ -13,24 +13,48 @@ import { useLongPress } from "@/hooks/useLongPress";
 import { ContextMenu, type ContextMenuItem } from "@/components/ui/ContextMenu";
 import { Card } from "@/components/ui/Card";
 
-const BREWERY_PLACEHOLDER_IMAGES = [
-  "https://picsum.photos/seed/brewery1/400/200",
-  "https://picsum.photos/seed/brewery2/400/200",
-  "https://picsum.photos/seed/brewery3/400/200",
-  "https://picsum.photos/seed/brewery4/400/200",
-  "https://picsum.photos/seed/brewery5/400/200",
-  "https://picsum.photos/seed/brewery6/400/200",
-  "https://picsum.photos/seed/brewery7/400/200",
-  "https://picsum.photos/seed/brewery8/400/200",
-];
+/**
+ * Design System v2.0 — Brewery Monogram Fallback
+ * Two-letter initials on warm gradient. Never show solid color blocks or random stock photos.
+ */
+export function getBreweryMonogram(name: string): string {
+  const words = name.replace(/[^a-zA-Z\s]/g, "").trim().split(/\s+/);
+  if (words.length >= 2) return (words[0][0] + words[1][0]).toUpperCase();
+  return name.slice(0, 2).toUpperCase();
+}
 
-/** Pick a deterministic placeholder image from the brewery name */
-export function getBreweryPlaceholder(name: string): string {
+/** Deterministic warm gradient from brewery name */
+function getBreweryGradient(name: string): string {
   let hash = 0;
   for (let i = 0; i < name.length; i++) {
     hash = ((hash << 5) - hash + name.charCodeAt(i)) | 0;
   }
-  return BREWERY_PLACEHOLDER_IMAGES[Math.abs(hash) % BREWERY_PLACEHOLDER_IMAGES.length];
+  const gradients = [
+    "linear-gradient(135deg, var(--amber, #C4883E), color-mix(in srgb, var(--amber, #C4883E) 70%, #8B6914))",
+    "linear-gradient(135deg, var(--stout-espresso, #3D2B1F), var(--stout-espresso-mid, #6B5445))",
+    "linear-gradient(135deg, var(--porter-plum, #5B3A6B), var(--porter-plum-soft, #9B7AAB))",
+    "linear-gradient(135deg, var(--lager-sky, #2E6B8A), var(--lager-sky-soft, #6EABCA))",
+    "linear-gradient(135deg, var(--ipa-green, #4A7C2E), var(--ipa-green-soft, #8BBD6F))",
+    "linear-gradient(135deg, var(--sour-berry, #9B2D5E), var(--sour-berry-soft, #DB6D9E))",
+  ];
+  return gradients[Math.abs(hash) % gradients.length];
+}
+
+/** Brewery monogram placeholder — replaces random stock photos per Design System v2.0 */
+export function BreweryMonogram({ name, className, textSize = "text-2xl" }: { name: string; className?: string; textSize?: string }) {
+  return (
+    <div
+      className={cn("flex items-center justify-center", className)}
+      style={{ background: getBreweryGradient(name) }}
+    >
+      <span
+        className={cn("font-display font-bold text-white/90", textSize)}
+        style={{ textShadow: "0 2px 4px rgba(0,0,0,0.2)" }}
+      >
+        {getBreweryMonogram(name)}
+      </span>
+    </div>
+  );
 }
 
 const BREWERY_TYPE_LABELS: Record<string, string> = {
@@ -55,8 +79,8 @@ interface BreweryCardProps {
 }
 
 export function BreweryCard({ brewery, distance, variant = "default", className }: BreweryCardProps) {
-  const placeholderSrc = getBreweryPlaceholder(brewery.name);
-  const coverSrc = brewery.cover_image_url || placeholderSrc;
+  const hasCover = !!brewery.cover_image_url;
+  const coverSrc = brewery.cover_image_url ?? "";
   const typeLabel = brewery.brewery_type ? BREWERY_TYPE_LABELS[brewery.brewery_type] ?? brewery.brewery_type : null;
 
   if (variant === "list") {
@@ -64,6 +88,7 @@ export function BreweryCard({ brewery, distance, variant = "default", className 
       <ListBreweryCard
         brewery={brewery}
         coverSrc={coverSrc}
+        hasCover={hasCover}
         typeLabel={typeLabel}
         distance={distance}
         className={className}
@@ -78,14 +103,18 @@ export function BreweryCard({ brewery, distance, variant = "default", className 
           whileHover={{ y: -2, scale: 1.01 }}
           transition={{ type: "spring", stiffness: 400, damping: 30 }}
           className={cn(
-            "flex items-center gap-3 p-3 rounded-2xl",
+            "flex items-center gap-3 p-3 rounded-[14px]",
             "bg-[var(--card-bg)] border border-[var(--border)] hover:border-[var(--accent-gold)]/30",
             "transition-colors duration-150 group",
             className
           )}
         >
           <div className="w-12 h-12 rounded-xl flex-shrink-0 overflow-hidden relative">
-            <Image src={coverSrc} alt={brewery.name} fill className="object-cover" sizes="48px" />
+            {hasCover ? (
+              <Image src={coverSrc} alt={brewery.name} fill className="object-cover" sizes="48px" />
+            ) : (
+              <BreweryMonogram name={brewery.name} className="w-full h-full" textSize="text-base" />
+            )}
           </div>
           <div className="flex-1 min-w-0">
             <p className="font-display font-semibold text-[var(--text-primary)] truncate text-sm group-hover:text-[var(--accent-gold)] transition-colors">
@@ -120,13 +149,17 @@ export function BreweryCard({ brewery, distance, variant = "default", className 
         >
           {/* Background */}
           <div className="absolute inset-0">
-            <Image
-              src={coverSrc}
-              alt={brewery.name}
-              fill
-              className="object-cover group-hover:scale-105 transition-transform duration-500"
-              sizes="(max-width: 640px) 100vw, 50vw"
-            />
+            {hasCover ? (
+              <Image
+                src={coverSrc}
+                alt={brewery.name}
+                fill
+                className="object-cover group-hover:scale-105 transition-transform duration-500"
+                sizes="(max-width: 640px) 100vw, 50vw"
+              />
+            ) : (
+              <BreweryMonogram name={brewery.name} className="w-full h-full" textSize="text-4xl" />
+            )}
           </div>
           {/* Gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg)] via-[var(--bg)]/40 to-transparent" />
@@ -139,7 +172,7 @@ export function BreweryCard({ brewery, distance, variant = "default", className 
               </span>
             )}
             <h3
-              className="font-display text-2xl font-bold text-[var(--text-primary)] mb-1"
+              className="font-display text-[22px] font-bold tracking-[-0.01em] text-[var(--text-primary)] mb-1"
               style={breweryTransitionName(brewery.id)}
             >
               {brewery.name}
@@ -168,6 +201,7 @@ export function BreweryCard({ brewery, distance, variant = "default", className 
     <DefaultBreweryCard
       brewery={brewery}
       coverSrc={coverSrc}
+      hasCover={hasCover}
       typeLabel={typeLabel}
       className={className}
     />
@@ -177,12 +211,14 @@ export function BreweryCard({ brewery, distance, variant = "default", className 
 function ListBreweryCard({
   brewery,
   coverSrc,
+  hasCover,
   typeLabel,
   distance,
   className,
 }: {
   brewery: BreweryWithStats;
   coverSrc: string;
+  hasCover: boolean;
   typeLabel: string | null;
   distance?: string;
   className?: string;
@@ -271,9 +307,13 @@ function ListBreweryCard({
             className="flex items-center gap-3"
           >
             <div className="w-12 h-12 rounded-xl flex-shrink-0 overflow-hidden relative">
-              <Image src={coverSrc} alt={brewery.name} fill className="object-cover" sizes="48px" />
+              {hasCover ? (
+                <Image src={coverSrc} alt={brewery.name} fill className="object-cover" sizes="48px" />
+              ) : (
+                <BreweryMonogram name={brewery.name} className="w-full h-full" textSize="text-base" />
+              )}
               {brewery.user_visit && (
-                <div className="absolute bottom-0.5 right-0.5 w-2.5 h-2.5 rounded-full bg-[#3D7A52] border border-[var(--surface)]" />
+                <div className="absolute bottom-0.5 right-0.5 w-2.5 h-2.5 rounded-full bg-[var(--success)] border border-[var(--surface)]" />
               )}
             </div>
             <div className="flex-1 min-w-0">
@@ -317,11 +357,13 @@ function ListBreweryCard({
 function DefaultBreweryCard({
   brewery,
   coverSrc,
+  hasCover,
   typeLabel,
   className,
 }: {
   brewery: BreweryWithStats;
   coverSrc: string;
+  hasCover: boolean;
   typeLabel: string | null;
   className?: string;
 }) {
@@ -386,7 +428,7 @@ function DefaultBreweryCard({
         whileHover={{ y: -3, scale: 1.01 }}
         transition={{ type: "spring", stiffness: 400, damping: 30 }}
         className={cn(
-          "bg-[var(--card-bg)] rounded-2xl overflow-hidden h-full flex flex-col",
+          "bg-[var(--card-bg)] rounded-[14px] overflow-hidden h-full flex flex-col",
           "border border-[var(--border)] hover:border-[var(--accent-gold)]/30",
           "transition-colors duration-150 group",
           className
@@ -409,22 +451,27 @@ function DefaultBreweryCard({
             }
           }}
         >
-          {/* Cover */}
-          <div className="h-36 w-full relative overflow-hidden flex-shrink-0">
-            <Image
-              src={coverSrc}
-              alt={brewery.name}
-              fill
-              className="object-cover group-hover:scale-105 transition-transform duration-500"
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            />
+          {/* Cover — Design System v2.0: monogram fallback, never stock photos */}
+          <div className="h-[120px] w-full relative overflow-hidden flex-shrink-0">
+            {hasCover ? (
+              <Image
+                src={coverSrc}
+                alt={brewery.name}
+                fill
+                className="object-cover group-hover:scale-105 transition-transform duration-500"
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              />
+            ) : (
+              <BreweryMonogram name={brewery.name} className="w-full h-full" textSize="text-3xl" />
+            )}
+            <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/30 to-transparent" />
             {brewery.user_visit && (
-              <div className="absolute top-3 right-3 bg-[#3D7A52]/90 text-white text-xs font-mono px-2 py-0.5 rounded-full">
+              <div className="absolute top-3 right-3 bg-[var(--success)]/90 text-white text-xs font-mono px-2 py-0.5 rounded-full">
                 ✓ Visited
               </div>
             )}
             {brewery.has_upcoming_events && !brewery.user_visit && (
-              <div className="absolute top-3 right-3 flex items-center gap-1 bg-[#5B8DEF]/90 text-white text-xs font-mono px-2 py-0.5 rounded-full">
+              <div className="absolute top-3 right-3 flex items-center gap-1 bg-[var(--accent-blue)]/90 text-white text-xs font-mono px-2 py-0.5 rounded-full">
                 <Calendar size={10} /> Event
               </div>
             )}

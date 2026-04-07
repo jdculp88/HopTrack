@@ -1,5 +1,6 @@
 "use client";
 
+import { Trophy } from "lucide-react";
 import { BreweryReview } from "@/components/brewery/BreweryReview";
 import { LeaderboardRow } from "@/components/social/LeaderboardRow";
 import type { Profile, BreweryVisit } from "@/types/database";
@@ -25,20 +26,10 @@ export function BreweryReviewsSection({
 }: BreweryReviewsSectionProps) {
   return (
     <>
-      {/* Brewery Reviews */}
-      <div>
-        <BreweryReview
-          breweryId={breweryId}
-          currentUserId={currentUserId}
-          isAuthenticated={isAuthenticated}
-          returnPath={returnPath}
-        />
-      </div>
-
-      {/* Top Visitors Leaderboard — auth only */}
+      {/* Top Visitors Leaderboard — audit #20: moved ABOVE reviews for social proof */}
       {isAuthenticated && (
         <div>
-          <h2 className="font-display text-2xl font-bold text-[var(--text-primary)] mb-4">
+          <h2 className="font-display text-[22px] font-bold tracking-[-0.01em] text-[var(--text-primary)] mb-4">
             Top Visitors
           </h2>
           {topVisitors.length > 0 ? (
@@ -58,8 +49,11 @@ export function BreweryReviewsSection({
               ))}
             </div>
           ) : (
-            <div className="text-center py-10 bg-[var(--surface)] rounded-2xl border border-[var(--border)]">
-              <p className="text-3xl mb-2">🏆</p>
+            <div className="text-center py-10 bg-[var(--surface)] rounded-[14px] border border-[var(--border)]">
+              <div className="w-12 h-12 rounded-[14px] flex items-center justify-center mx-auto mb-3"
+                   style={{ background: "var(--warm-bg, var(--surface-2))" }}>
+                <Trophy size={24} style={{ color: "var(--text-muted)" }} />
+              </div>
               <p className="text-sm text-[var(--text-secondary)]">
                 No visitors yet — be the first to start a session here.
               </p>
@@ -67,6 +61,16 @@ export function BreweryReviewsSection({
           )}
         </div>
       )}
+
+      {/* Brewery Reviews — below leaderboard per audit #20 */}
+      <div>
+        <BreweryReview
+          breweryId={breweryId}
+          currentUserId={currentUserId}
+          isAuthenticated={isAuthenticated}
+          returnPath={returnPath}
+        />
+      </div>
     </>
   );
 }

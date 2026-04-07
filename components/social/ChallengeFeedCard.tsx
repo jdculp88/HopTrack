@@ -33,7 +33,7 @@ export function ChallengeFeedCard({
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.03, duration: 0.28 }}
-      className="card-bg-achievement rounded-2xl border border-[var(--border)] p-4"
+      className="card-bg-achievement rounded-[14px] border border-[var(--border)] p-4"
     >
       {/* Header */}
       <div className="flex items-start gap-3">

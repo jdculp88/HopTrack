@@ -76,7 +76,7 @@ export function BrandLoyaltyStampCard({ brandId, brandName, breweryId, breweryNa
 
   if (loading) {
     return (
-      <div className="h-48 rounded-2xl animate-pulse" style={{ background: "var(--surface-2)" }} />
+      <div className="h-48 rounded-[14px] animate-pulse" style={{ background: "var(--surface-2)" }} />
     );
   }
 
@@ -100,7 +100,7 @@ export function BrandLoyaltyStampCard({ brandId, brandName, breweryId, breweryNa
       style={{ isolation: "isolate" }}
     >
       <div
-        className="relative overflow-visible rounded-2xl px-6 py-5"
+        className="relative overflow-visible rounded-[14px] px-6 py-5"
         style={{
           background: "var(--surface-2)",
           border: "1.5px solid var(--accent-gold)",
@@ -110,7 +110,7 @@ export function BrandLoyaltyStampCard({ brandId, brandName, breweryId, breweryNa
       >
         {/* Paper grain */}
         <div
-          className="pointer-events-none absolute inset-0 rounded-2xl opacity-[0.035]"
+          className="pointer-events-none absolute inset-0 rounded-[14px] opacity-[0.035]"
           style={{
             backgroundImage:
               "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",

@@ -29,7 +29,7 @@ export function LeaderboardRow({ entry, label, currentUserId, index = 0, classNa
       <Link href={`/profile/${entry.profile.username}`}>
         <div
           className={cn(
-            "flex items-center gap-4 px-4 py-3 rounded-2xl transition-colors",
+            "flex items-center gap-4 px-4 py-3 rounded-[14px] transition-colors",
             "hover:bg-[var(--surface-2)] group",
             isCurrentUser && "bg-[var(--accent-gold)]/5 border border-[var(--accent-gold)]/20",
             className

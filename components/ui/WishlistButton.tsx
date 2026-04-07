@@ -59,9 +59,9 @@ export function WishlistButton({ beerId, initialWishlisted }: WishlistButtonProp
         transition={{ type: "spring", stiffness: 400, damping: 20 }}
       >
         {wishlisted ? (
-          <BookmarkCheck size={18} className="text-[var(--accent-gold)]" />
+          <BookmarkCheck size={16} className="text-[var(--accent-gold)]" />
         ) : (
-          <Bookmark size={18} />
+          <Bookmark size={16} />
         )}
       </motion.div>
     </button>

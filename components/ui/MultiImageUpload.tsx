@@ -108,10 +108,10 @@ export function MultiImageUpload({
             style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}
           >
             {uploading ? (
-              <Loader2 size={18} className="animate-spin" style={{ color: "var(--accent-gold)" }} />
+              <Loader2 size={16} className="animate-spin" style={{ color: "var(--accent-gold)" }} />
             ) : (
               <>
-                {currentUrls.length === 0 ? <Camera size={18} /> : <Plus size={18} />}
+                {currentUrls.length === 0 ? <Camera size={16} /> : <Plus size={16} />}
                 <span className="text-[10px]">
                   {currentUrls.length === 0 ? "Upload" : "Add"}
                 </span>

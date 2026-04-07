@@ -6,8 +6,9 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion } from "motion/react";
 import { Eye, Share2, Copy } from "lucide-react";
-import { cn, formatABV, generateGradientFromString } from "@/lib/utils";
+import { cn, formatABV } from "@/lib/utils";
 import { beerTransitionName } from "@/lib/view-transitions";
+import { getStyleVars } from "@/lib/beerStyleColors";
 import { BeerStyleBadge } from "@/components/ui/BeerStyleBadge";
 import { StarRating } from "@/components/ui/StarRating";
 import type { BeerWithBrewery } from "@/types/database";
@@ -23,7 +24,7 @@ interface BeerCardProps {
 }
 
 export function BeerCard({ beer, variant = "default", className }: BeerCardProps) {
-  const gradient = generateGradientFromString(beer.name + beer.brewery_id);
+  const styleVars = getStyleVars(beer.style, beer.item_type);
 
   if (variant === "compact") {
     return (
@@ -39,11 +40,16 @@ export function BeerCard({ beer, variant = "default", className }: BeerCardProps
           )}
         >
           <div
-            className="w-10 h-10 rounded-xl flex-shrink-0 overflow-hidden"
-            style={!beer.cover_image_url ? { background: gradient } : undefined}
+            className="w-10 h-10 rounded-xl flex-shrink-0 overflow-hidden relative flex items-center justify-center"
+            style={!beer.cover_image_url ? { background: `${styleVars.light}`, border: `1px solid color-mix(in srgb, ${styleVars.primary} 15%, transparent)` } : undefined}
           >
-            {beer.cover_image_url && (
+            {beer.cover_image_url ? (
               <Image src={beer.cover_image_url} alt={beer.name} fill className="object-cover" />
+            ) : (
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={`${styleVars.primary}`} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.5 }}>
+                <path d="M7 3h10l-1.5 15a2 2 0 0 1-2 1.8h-3a2 2 0 0 1-2-1.8L7 3z"/>
+                <path d="M8 3c0 0 .5 2 4 2s4-2 4-2"/>
+              </svg>
             )}
           </div>
           <div className="flex-1 min-w-0">
@@ -68,23 +74,23 @@ export function BeerCard({ beer, variant = "default", className }: BeerCardProps
 
   if (variant === "list") {
     return (
-      <ListBeerCard beer={beer} gradient={gradient} className={className} />
+      <ListBeerCard beer={beer} styleVars={styleVars} className={className} />
     );
   }
 
   // Grid card (with long-press context menu — Sprint 161)
   return (
-    <GridBeerCard beer={beer} gradient={gradient} className={className} />
+    <GridBeerCard beer={beer} styleVars={styleVars} className={className} />
   );
 }
 
 function ListBeerCard({
   beer,
-  gradient,
+  styleVars,
   className,
 }: {
   beer: BeerWithBrewery;
-  gradient: string;
+  styleVars: { primary: string; light: string; soft: string };
   className?: string;
 }) {
   const router = useRouter();
@@ -162,11 +168,16 @@ function ListBeerCard({
             className="flex items-center gap-3"
           >
             <div
-              className="w-10 h-10 rounded-xl flex-shrink-0 overflow-hidden relative"
-              style={!beer.cover_image_url ? { background: gradient } : undefined}
+              className="w-10 h-10 rounded-xl flex-shrink-0 overflow-hidden relative flex items-center justify-center"
+              style={!beer.cover_image_url ? { background: `${styleVars.light}`, border: `1px solid color-mix(in srgb, ${styleVars.primary} 15%, transparent)` } : undefined}
             >
-              {beer.cover_image_url && (
+              {beer.cover_image_url ? (
                 <Image src={beer.cover_image_url} alt={beer.name} fill className="object-cover" sizes="40px" />
+              ) : (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={`${styleVars.primary}`} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.5 }}>
+                  <path d="M7 3h10l-1.5 15a2 2 0 0 1-2 1.8h-3a2 2 0 0 1-2-1.8L7 3z"/>
+                  <path d="M8 3c0 0 .5 2 4 2s4-2 4-2"/>
+                </svg>
               )}
             </div>
             <div className="flex-1 min-w-0">
@@ -206,11 +217,11 @@ function ListBeerCard({
 
 function GridBeerCard({
   beer,
-  gradient,
+  styleVars,
   className,
 }: {
   beer: BeerWithBrewery;
-  gradient: string;
+  styleVars: { primary: string; light: string; soft: string };
   className?: string;
 }) {
   const router = useRouter();
@@ -266,7 +277,7 @@ function GridBeerCard({
         whileHover={{ y: -3, scale: 1.01 }}
         transition={{ type: "spring", stiffness: 300, damping: 20 }}
         className={cn(
-          "bg-[var(--card-bg)] rounded-2xl overflow-hidden",
+          "bg-[var(--card-bg)] rounded-[14px] overflow-hidden",
           "border border-[var(--border)] hover:border-[var(--accent-gold)]/30",
           "transition-colors duration-150 group",
           className
@@ -288,16 +299,31 @@ function GridBeerCard({
             }
           }}
         >
-          {/* Cover */}
+          {/* Cover — style-tinted placeholder per Design System v2.0 (no solid color blocks) */}
           <div
-            className="h-24 w-full relative overflow-hidden"
-            style={!beer.cover_image_url ? { background: gradient } : undefined}
+            className="h-[100px] w-full relative overflow-hidden flex items-center justify-center"
+            style={!beer.cover_image_url ? {
+              background: `linear-gradient(135deg, ${styleVars.light}, color-mix(in srgb, ${styleVars.light} 50%, var(--card-bg)))`,
+            } : undefined}
           >
-            {beer.cover_image_url && (
-              <Image src={beer.cover_image_url} alt={beer.name} fill className="object-cover" />
+            {beer.cover_image_url ? (
+              <>
+                <Image src={beer.cover_image_url} alt={beer.name} fill className="object-cover" />
+                <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-black/30 to-transparent" />
+              </>
+            ) : (
+              <div className="flex flex-col items-center gap-1.5">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={`${styleVars.primary}`} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.35 }}>
+                  <path d="M7 3h10l-1.5 15a2 2 0 0 1-2 1.8h-3a2 2 0 0 1-2-1.8L7 3z"/>
+                  <path d="M8 3c0 0 .5 2 4 2s4-2 4-2"/>
+                  <line x1="12" y1="19.8" x2="12" y2="22"/>
+                  <line x1="9" y1="22" x2="15" y2="22"/>
+                </svg>
+                <BeerStyleBadge style={beer.style} itemType={beer.item_type} size="xs" />
+              </div>
             )}
             {beer.seasonal && (
-              <div className="absolute top-2 left-2 bg-[var(--accent-amber)]/90 text-white text-[10px] font-mono px-1.5 py-0.5 rounded-full">
+              <div className="absolute top-2 left-2 bg-[var(--func-warning)]/90 text-white text-[8px] font-mono font-semibold tracking-wider uppercase px-1.5 py-0.5 rounded">
                 Seasonal
               </div>
             )}

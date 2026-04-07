@@ -101,7 +101,7 @@ function CheckinFAB({ onCheckin, haptic }: { onCheckin: () => void; haptic: (p: 
           transition={{ type: "spring", stiffness: 450, damping: 22 }}
           style={{ color: "var(--bg)" }}
         >
-          <PlusCircle size={22} />
+          <PlusCircle size={20} />
         </motion.div>
       </motion.div>
     </button>
@@ -192,10 +192,10 @@ export function AppNav({ username, unreadNotifications = 0, onCheckin }: AppNavP
           <button
             onClick={onCheckin}
             aria-expanded={false}
-            className="w-full flex items-center justify-center gap-2 font-semibold py-3 rounded-2xl transition-all duration-150 active:scale-95 hover:opacity-90"
+            className="w-full flex items-center justify-center gap-2 font-semibold py-3 rounded-xl transition-all duration-150 active:scale-95 hover:opacity-90"
             style={{ background: "var(--accent-gold)", color: "var(--bg)" }}
           >
-            <PlusCircle size={18} />
+            <PlusCircle size={16} />
             Start Session
           </button>
         </div>
@@ -209,21 +209,21 @@ export function AppNav({ username, unreadNotifications = 0, onCheckin }: AppNavP
           />
         </div>
 
-        {/* Nav links */}
-        <nav aria-label="Main navigation" className="flex-1 px-3 py-2 space-y-1 overflow-y-auto">
+        {/* Nav links — Design System v2.0: active = warm-bg + 3px amber left accent + 600 weight */}
+        <nav aria-label="Main navigation" className="flex-1 px-3 py-2 space-y-0.5 overflow-y-auto">
           {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
             const isActive = pathname.startsWith(href);
             return (
               <Link key={href} href={href} aria-current={isActive ? "page" : undefined}>
                 <div
-                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-150 group"
+                  className="relative flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group overflow-hidden"
                   style={{
-                    background: isActive ? "color-mix(in srgb, var(--accent-gold) 12%, transparent)" : "transparent",
-                    color: isActive ? "var(--accent-gold)" : "var(--text-secondary)",
+                    background: isActive ? "var(--warm-bg, var(--surface-2))" : "transparent",
+                    color: isActive ? "var(--text-primary)" : "var(--text-secondary)",
                   }}
                   onMouseEnter={e => {
                     if (!isActive) {
-                      (e.currentTarget as HTMLElement).style.background = "var(--surface-2)";
+                      (e.currentTarget as HTMLElement).style.background = "var(--warm-bg, var(--surface-2))";
                       (e.currentTarget as HTMLElement).style.color = "var(--text-primary)";
                     }
                   }}
@@ -234,22 +234,23 @@ export function AppNav({ username, unreadNotifications = 0, onCheckin }: AppNavP
                     }
                   }}
                 >
-                  <Icon size={18} />
-                  <span className="font-sans text-sm font-medium">{label}</span>
+                  {/* 3px amber left accent bar on active */}
                   {isActive && (
                     <div
-                      className="ml-auto w-1.5 h-1.5 rounded-full"
-                      style={{ background: "var(--accent-gold)" }}
+                      className="absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-r-full"
+                      style={{ background: "var(--amber, var(--accent-gold))" }}
                     />
                   )}
+                  <Icon size={20} />
+                  <span className={`font-sans text-sm ${isActive ? "font-semibold" : "font-medium"}`}>{label}</span>
                 </div>
               </Link>
             );
           })}
         </nav>
 
-        {/* Bottom links */}
-        <div className="px-3 py-4 border-t space-y-1" style={{ borderColor: "var(--border)" }}>
+        {/* Bottom links — Design System v2.0: same active treatment, secondary items quieter */}
+        <div className="px-3 py-4 border-t space-y-0.5" style={{ borderColor: "var(--border)" }}>
           {[
             {
               href: "/notifications",
@@ -257,61 +258,67 @@ export function AppNav({ username, unreadNotifications = 0, onCheckin }: AppNavP
               icon: Bell,
               exact: true,
               badge: unreadNotifications > 0 ? (unreadNotifications > 9 ? "9+" : String(unreadNotifications)) : null,
+              secondary: false,
             },
-            { href: "/rewards",             label: "Rewards",  icon: Gift,     exact: true,  badge: null },
-            { href: `/profile/${username}`, label: "Profile",  icon: User,     exact: false, badge: null },
-            { href: "/settings",            label: "Settings", icon: Settings, exact: true,  badge: null },
-          ].map(({ href, label, icon: Icon, exact, badge }) => {
+            { href: "/rewards",             label: "Rewards",  icon: Gift,     exact: true,  badge: null, secondary: false },
+            { href: `/profile/${username}`, label: "Profile",  icon: User,     exact: false, badge: null, secondary: false },
+            { href: "/settings",            label: "Settings", icon: Settings, exact: true,  badge: null, secondary: true },
+          ].map(({ href, label, icon: Icon, exact, badge, secondary }) => {
             const isActive = exact ? pathname === href : pathname.startsWith(href);
             const linkAriaLabel = badge ? `${label}, ${badge} unread` : label;
             return (
               <Link key={href} href={href} aria-label={linkAriaLabel} aria-current={isActive ? "page" : undefined}>
                 <div
-                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-150"
+                  className="relative flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 overflow-hidden"
                   style={{
-                    background: isActive ? "color-mix(in srgb, var(--accent-gold) 12%, transparent)" : "transparent",
-                    color: isActive ? "var(--accent-gold)" : "var(--text-secondary)",
+                    background: isActive ? "var(--warm-bg, var(--surface-2))" : "transparent",
+                    color: isActive ? "var(--text-primary)" : secondary ? "var(--text-muted)" : "var(--text-secondary)",
+                    fontSize: secondary ? "13px" : undefined,
                   }}
                   onMouseEnter={e => {
                     if (!isActive) {
-                      (e.currentTarget as HTMLElement).style.background = "var(--surface-2)";
+                      (e.currentTarget as HTMLElement).style.background = "var(--warm-bg, var(--surface-2))";
                       (e.currentTarget as HTMLElement).style.color = "var(--text-primary)";
                     }
                   }}
                   onMouseLeave={e => {
                     if (!isActive) {
                       (e.currentTarget as HTMLElement).style.background = "transparent";
-                      (e.currentTarget as HTMLElement).style.color = "var(--text-secondary)";
+                      (e.currentTarget as HTMLElement).style.color = secondary ? "var(--text-muted)" : "var(--text-secondary)";
                     }
                   }}
                 >
+                  {isActive && (
+                    <div
+                      className="absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-r-full"
+                      style={{ background: "var(--amber, var(--accent-gold))" }}
+                    />
+                  )}
                   <div className="relative">
-                    <Icon size={18} />
+                    <Icon size={20} />
                     {badge && (
                       <span
-                        className="absolute -top-1 -right-1 w-4 h-4 rounded-full text-white text-[9px] font-mono flex items-center justify-center"
+                        className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] rounded-full text-white text-[9px] font-mono font-bold flex items-center justify-center px-1"
                         style={{ background: "var(--danger)" }}
                       >
                         {badge}
                       </span>
                     )}
                   </div>
-                  <span className="font-sans text-sm font-medium">{label}</span>
+                  <span className={`font-sans text-sm ${isActive ? "font-semibold" : "font-medium"}`}>{label}</span>
                 </div>
               </Link>
             );
           })}
 
-          {/* Sprint 171: Theme toggle moved to Settings > Appearance only */}
-
-          {/* Logout */}
+          {/* Logout — tertiary color, smaller */}
           <button
             onClick={handleLogout}
             aria-label="Log out"
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-150 text-left"
-            style={{ color: "var(--text-muted)" }}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 text-left"
+            style={{ color: "var(--text-muted)", fontSize: "13px" }}
             onMouseEnter={e => {
-              (e.currentTarget as HTMLElement).style.background = "var(--surface-2)";
+              (e.currentTarget as HTMLElement).style.background = "var(--warm-bg, var(--surface-2))";
               (e.currentTarget as HTMLElement).style.color = "var(--danger)";
             }}
             onMouseLeave={e => {
@@ -319,7 +326,7 @@ export function AppNav({ username, unreadNotifications = 0, onCheckin }: AppNavP
               (e.currentTarget as HTMLElement).style.color = "var(--text-muted)";
             }}
           >
-            <LogOut size={18} />
+            <LogOut size={20} />
             <span className="font-sans text-sm font-medium">Log out</span>
           </button>
         </div>

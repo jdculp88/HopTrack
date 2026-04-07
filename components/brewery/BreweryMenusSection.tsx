@@ -56,11 +56,11 @@ export function BreweryMenusSection({ menus }: Props) {
 
   return (
     <div>
-      <h2 className="font-display text-2xl font-bold mb-4" style={{ color: "var(--text-primary)" }}>
+      <h2 className="font-display text-[22px] font-bold tracking-[-0.01em] mb-4" style={{ color: "var(--text-primary)" }}>
         Menus
       </h2>
 
-      <div className="card-bg-featured border rounded-2xl overflow-hidden" style={{ borderColor: "var(--border)" }}>
+      <div className="card-bg-featured border rounded-[14px] overflow-hidden" style={{ borderColor: "var(--border)" }}>
         {/* Category pills */}
         <div className="flex overflow-x-auto scrollbar-hide gap-2 px-4 pt-4 pb-2 snap-x">
           {activeMenus.map((menu) => {

@@ -383,9 +383,9 @@ export function NotificationsClient({ notifications: initial }: NotificationsCli
         transition={{ type: "spring", stiffness: 400, damping: 30 }}
       >
         <div className="max-w-2xl mx-auto px-4 py-6">
-          <h1 className="font-sans text-3xl font-bold text-[var(--text-primary)] mb-8">Notifications</h1>
+          <h1 className="font-display text-[28px] font-bold tracking-[-0.02em] text-[var(--text-primary)] mb-8">Notifications</h1>
           <div className="text-center py-20 space-y-4">
-            <div className="w-16 h-16 rounded-2xl bg-[var(--card-bg)] border border-[var(--card-border)] flex items-center justify-center mx-auto">
+            <div className="w-16 h-16 rounded-[14px] bg-[var(--card-bg)] border border-[var(--card-border)] flex items-center justify-center mx-auto">
               <Bell size={24} className="text-[var(--text-muted)]" />
             </div>
             <p className="font-display text-xl text-[var(--text-primary)]">The taps are quiet</p>
@@ -413,7 +413,7 @@ export function NotificationsClient({ notifications: initial }: NotificationsCli
     <div className="max-w-2xl mx-auto px-4 py-6 space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <h1 className="font-sans text-3xl font-bold text-[var(--text-primary)]">Notifications</h1>
+          <h1 className="font-display text-[28px] font-bold tracking-[-0.02em] text-[var(--text-primary)]">Notifications</h1>
           {unread > 0 && (
             <button
               onClick={markAllRead}
@@ -576,7 +576,7 @@ function GroupedNotification({
       {/* Group header — clickable */}
       <button
         onClick={onToggle}
-        className={`w-full flex items-start gap-4 p-4 rounded-2xl border transition-colors text-left ${
+        className={`w-full flex items-start gap-4 p-4 rounded-[14px] border transition-colors text-left ${
           group.hasUnread
             ? "card-bg-notification border-[var(--accent-gold)]/20"
             : "bg-[var(--card-bg)]/50 border-[var(--card-border)]"
@@ -716,7 +716,7 @@ function SingleNotification({
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, height: 0, marginBottom: 0, overflow: "hidden" }}
       transition={{ type: "spring", stiffness: 400, damping: 30 }}
-      className="relative group flex items-start gap-4 p-4 rounded-2xl border transition-colors"
+      className="relative group flex items-start gap-4 p-4 rounded-[14px] border transition-colors"
       style={{
         background: !n.read ? "var(--surface-2)" : "var(--card-bg)",
         borderColor: "var(--card-border)",

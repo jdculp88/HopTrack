@@ -93,7 +93,7 @@ export function TapWallBeerCard({
   return (
     <div
       onClick={!logged ? onLog : undefined}
-      className="relative rounded-2xl overflow-hidden transition-all"
+      className="relative rounded-[14px] overflow-hidden transition-all"
       style={{
         border: `1.5px solid ${logged ? hex.primary + '30' : 'var(--border)'}`,
         background: logged
@@ -170,7 +170,7 @@ export function TapWallBeerCard({
                 onDec={onDecrement}
                 incrementing={incrementing}
                 decrementing={decrementing}
-                primaryHex="#D4A843"
+                primaryHex={hex.primary}
               />
             ) : (
               <button
@@ -178,8 +178,9 @@ export function TapWallBeerCard({
                 disabled={loading}
                 className="px-3 py-1.5 rounded-xl text-xs font-semibold transition-all disabled:opacity-60 flex items-center gap-1"
                 style={{
-                  background: 'var(--accent-gold)',
-                  color: 'var(--bg)',
+                  background: hex.primary,
+                  color: '#fff',
+                  boxShadow: `0 2px 8px ${hex.primary}28`,
                 }}
               >
                 {loading ? <Loader2 size={12} className="animate-spin" /> : "I'm having this"}

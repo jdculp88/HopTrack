@@ -69,7 +69,7 @@ export function DrinkingNowStrip({ breweryId, initialCount }: DrinkingNowStripPr
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={spring.default}
-      className="rounded-2xl border overflow-hidden"
+      className="rounded-[14px] border overflow-hidden"
       style={{
         background: "var(--card-bg)",
         borderColor: "var(--border)",

@@ -24,7 +24,7 @@ export function ClosedBreweryBanner({ breweryName }: ClosedBreweryBannerProps) {
           className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5"
           style={{ background: "color-mix(in srgb, var(--text-muted) 15%, transparent)" }}
         >
-          <Clock size={18} style={{ color: "var(--text-muted)" }} />
+          <Clock size={16} style={{ color: "var(--text-muted)" }} />
         </div>
         <div>
           <p className="font-display font-bold text-sm" style={{ color: "var(--text-primary)" }}>

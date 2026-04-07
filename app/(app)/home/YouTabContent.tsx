@@ -78,7 +78,7 @@ export function YouTabContent({
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ type: "spring", stiffness: 400, damping: 30 }}
-        className="rounded-2xl p-5 relative overflow-hidden shadow-[var(--shadow-elevated)] border border-[var(--card-border)]"
+        className="rounded-[14px] p-5 relative overflow-hidden shadow-[var(--shadow-elevated)] border border-[var(--card-border)]"
         style={{
           background: "var(--card-bg)",
         }}
@@ -155,25 +155,25 @@ export function YouTabContent({
       {/* Stats card — grid lines treatment */}
       {/* Sprint 171: Color-differentiated stats */}
       <div
-        className="card-bg-stats rounded-2xl p-4 shadow-[var(--shadow-card)] border border-[var(--card-border)]"
+        className="card-bg-stats rounded-[14px] p-4 shadow-[var(--shadow-card)] border border-[var(--card-border)]"
       >
         <p className="text-[10px] font-mono uppercase tracking-widest mb-3 relative z-10" style={{ color: "var(--text-muted)" }}>
           Your Numbers
         </p>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 relative z-10">
-          <div className="text-center rounded-2xl py-3 px-1" style={{ background: "color-mix(in srgb, var(--accent-blue) 8%, var(--card-bg))" }}>
+          <div className="text-center rounded-[14px] py-3 px-1" style={{ background: "color-mix(in srgb, var(--accent-blue) 8%, var(--card-bg))" }}>
             <p className="font-mono font-bold text-xl leading-none" style={{ color: "var(--accent-blue)" }}>{profile.total_checkins}</p>
             <p className="text-[10px] text-[var(--text-muted)] mt-1 font-mono uppercase tracking-wide">Sessions</p>
           </div>
-          <div className="text-center rounded-2xl py-3 px-1" style={{ background: "color-mix(in srgb, var(--accent-amber) 8%, var(--card-bg))" }}>
+          <div className="text-center rounded-[14px] py-3 px-1" style={{ background: "color-mix(in srgb, var(--accent-amber) 8%, var(--card-bg))" }}>
             <p className="font-mono font-bold text-xl leading-none" style={{ color: "var(--accent-amber)" }}>{profile.unique_beers ?? 0}</p>
             <p className="text-[10px] text-[var(--text-muted)] mt-1 font-mono uppercase tracking-wide">Unique Beers</p>
           </div>
-          <div className="text-center rounded-2xl py-3 px-1" style={{ background: "color-mix(in srgb, var(--accent-green) 8%, var(--card-bg))" }}>
+          <div className="text-center rounded-[14px] py-3 px-1" style={{ background: "color-mix(in srgb, var(--accent-green) 8%, var(--card-bg))" }}>
             <p className="font-mono font-bold text-xl leading-none" style={{ color: "var(--success)" }}>{visitedBreweries.length || (profile.unique_breweries ?? 0)}</p>
             <p className="text-[10px] text-[var(--text-muted)] mt-1 font-mono uppercase tracking-wide">Breweries</p>
           </div>
-          <div className="text-center rounded-2xl py-3 px-1" style={{ background: `color-mix(in srgb, ${(profile.current_streak ?? 0) > 0 ? "var(--accent-amber)" : "var(--accent-gold)"} 8%, var(--card-bg))` }}>
+          <div className="text-center rounded-[14px] py-3 px-1" style={{ background: `color-mix(in srgb, ${(profile.current_streak ?? 0) > 0 ? "var(--accent-amber)" : "var(--accent-gold)"} 8%, var(--card-bg))` }}>
             <p className="font-mono font-bold text-xl leading-none" style={{ color: (profile.current_streak ?? 0) > 0 ? "var(--accent-amber)" : "var(--accent-gold)" }}>{profile.current_streak ?? 0}</p>
             <p className="text-[10px] text-[var(--text-muted)] mt-1 font-mono uppercase tracking-wide">Day Streak</p>
           </div>
@@ -185,7 +185,7 @@ export function YouTabContent({
         <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
           <Link href="/your-round" className="block">
             <motion.div
-              className="rounded-2xl p-5 relative overflow-hidden shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-shadow"
+              className="rounded-[14px] p-5 relative overflow-hidden shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-shadow"
               style={{
                 background: "linear-gradient(135deg, rgba(232,132,26,0.10) 0%, rgba(232,132,26,0.03) 100%)",
                 border: "1px solid rgba(232,132,26,0.20)",
@@ -195,7 +195,7 @@ export function YouTabContent({
             >
               <div className="flex items-center gap-3.5 relative z-10">
                 <div className="p-2.5 rounded-xl" style={{ background: "rgba(232,132,26,0.12)" }}>
-                  <Gift size={18} style={{ color: "var(--accent-amber)" }} />
+                  <Gift size={16} style={{ color: "var(--accent-amber)" }} />
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
@@ -220,7 +220,7 @@ export function YouTabContent({
         <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
           <Link href="/wrapped" className="block">
             <motion.div
-              className="rounded-2xl p-5 relative overflow-hidden shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-shadow"
+              className="rounded-[14px] p-5 relative overflow-hidden shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-shadow"
               style={{
                 background: "linear-gradient(135deg, rgba(212,168,67,0.10) 0%, rgba(212,168,67,0.03) 100%)",
                 border: "1px solid rgba(212,168,67,0.20)",
@@ -236,7 +236,7 @@ export function YouTabContent({
                   style={{
                     width: i % 2 === 0 ? 2.5 : 2,
                     height: i % 2 === 0 ? 2.5 : 2,
-                    background: "#D4A843",
+                    background: "var(--amber, var(--accent-gold))",
                     left: `${12 + i * 15}%`,
                     top: `${20 + (i * 11) % 60}%`,
                   }}
@@ -255,7 +255,7 @@ export function YouTabContent({
               ))}
               <div className="flex items-center gap-3.5 relative z-10">
                 <div className="p-2.5 rounded-xl" style={{ background: "rgba(212,168,67,0.12)" }}>
-                  <Gift size={18} style={{ color: "var(--accent-gold)" }} />
+                  <Gift size={16} style={{ color: "var(--accent-gold)" }} />
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
@@ -278,7 +278,7 @@ export function YouTabContent({
       {/* Activity Heatmap */}
       {activityHeatmap && activityHeatmap.length > 0 && (
         <div
-          className="card-bg-stats rounded-2xl p-4 shadow-[var(--shadow-card)] border border-[var(--card-border)]"
+          className="card-bg-stats rounded-[14px] p-4 shadow-[var(--shadow-card)] border border-[var(--card-border)]"
         >
           <p className="text-[10px] font-mono uppercase tracking-widest mb-3" style={{ color: "var(--text-muted)" }}>
             Activity
@@ -295,7 +295,7 @@ export function YouTabContent({
       {/* Recent achievements — radiating arcs treatment */}
       {userAchievements && userAchievements.length > 0 && (
         <div
-          className="card-bg-achievement rounded-2xl p-4 space-y-3 shadow-[var(--shadow-card)] border border-[var(--card-border)]"
+          className="card-bg-achievement rounded-[14px] p-4 space-y-3 shadow-[var(--shadow-card)] border border-[var(--card-border)]"
         >
           <div className="flex items-center justify-between relative z-10">
             <p className="text-[10px] font-mono uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
@@ -477,7 +477,7 @@ export function YouTabContent({
       {/* Plan HopRoute CTA if no past routes */}
       {(!pastRoutes || pastRoutes.length === 0) && (
         <Link href="/hop-route/new">
-          <div className="card-bg-hoproute flex items-center gap-3 p-4 rounded-2xl border transition-[colors,shadow] shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)]" style={{ borderColor: "color-mix(in srgb, var(--accent-amber) 35%, var(--border))" }}>
+          <div className="card-bg-hoproute flex items-center gap-3 p-4 rounded-[14px] border transition-[colors,shadow] shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)]" style={{ borderColor: "color-mix(in srgb, var(--accent-amber) 35%, var(--border))" }}>
             <span className="text-2xl">🗺️</span>
             <div>
               <p className="text-sm font-semibold text-[var(--text-primary)]">Plan a HopRoute</p>
@@ -527,7 +527,7 @@ export function YouTabContent({
           <div className="text-center py-10 space-y-4">
             <span className="text-5xl block">🍺</span>
             <div className="space-y-2">
-              <h3 className="font-display text-2xl font-bold" style={{ color: "var(--text-primary)" }}>
+              <h3 className="font-display text-[22px] font-bold tracking-[-0.01em]" style={{ color: "var(--text-primary)" }}>
                 Time to crack one open.
               </h3>
               <p className="text-sm max-w-xs mx-auto leading-relaxed" style={{ color: "var(--text-secondary)" }}>

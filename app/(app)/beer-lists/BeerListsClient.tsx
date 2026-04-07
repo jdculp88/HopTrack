@@ -136,7 +136,7 @@ export function BeerListsClient({ userId: _userId, initialLists }: BeerListsClie
     <div className="max-w-2xl mx-auto px-4 py-6">
       {/* Page header */}
       <div className="flex items-center justify-between mb-6">
-        <h1 className="font-display font-bold text-3xl" style={{ color: "var(--text-primary)" }}>
+        <h1 className="font-display font-bold text-[28px] tracking-[-0.02em]" style={{ color: "var(--text-primary)" }}>
           My Beer Lists
         </h1>
         <button

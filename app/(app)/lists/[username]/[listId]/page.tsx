@@ -59,7 +59,7 @@ export default async function BeerListPage({
 
       {/* Profile + list header */}
       <div
-        className="rounded-2xl p-5 mb-6 flex items-start gap-4"
+        className="rounded-[14px] p-5 mb-6 flex items-start gap-4"
         style={{ background: "var(--card-bg)", border: "1px solid var(--border)" }}
       >
         <Link href={`/profile/${username}`}>
@@ -132,7 +132,7 @@ export default async function BeerListPage({
       {/* Beer items */}
       {items.length === 0 ? (
         <div
-          className="rounded-2xl p-8 text-center"
+          className="rounded-[14px] p-8 text-center"
           style={{ background: "var(--card-bg)", border: "1px solid var(--border)" }}
         >
           <BookMarked size={32} className="mx-auto mb-3" style={{ color: "var(--text-muted)" }} />
@@ -153,7 +153,7 @@ export default async function BeerListPage({
             return (
               <div
                 key={item.id}
-                className="rounded-2xl p-4 flex items-start gap-3"
+                className="rounded-[14px] p-4 flex items-start gap-3"
                 style={{ background: "var(--card-bg)", border: "1px solid var(--border)" }}
               >
                 <span

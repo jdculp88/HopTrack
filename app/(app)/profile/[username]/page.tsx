@@ -262,7 +262,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
     <PageEnterWrapper>
       <div className="max-w-3xl mx-auto">
         {/* Sprint 171: Profile hero — seamless Instagram-style integration */}
-        <div className="relative mx-4 mt-4 rounded-2xl overflow-hidden shadow-[var(--shadow-elevated)]">
+        <div className="relative mx-4 mt-4 rounded-[14px] overflow-hidden shadow-[var(--shadow-elevated)]">
           {/* Banner image */}
           <div className="h-36 sm:h-44">
             <ProfileBanner

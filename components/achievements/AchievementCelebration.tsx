@@ -87,7 +87,7 @@ export function AchievementCelebration({
             >
               {icon}
             </motion.div>
-            <p className="font-display text-2xl font-bold text-center" style={{ color: "var(--text-primary)" }}>
+            <p className="font-display text-[22px] font-bold tracking-[-0.01em] text-center" style={{ color: "var(--text-primary)" }}>
               {name}
             </p>
             <div className="flex items-center gap-3">

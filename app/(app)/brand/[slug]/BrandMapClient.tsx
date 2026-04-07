@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 const BreweryMap = dynamic(
   () => import("@/components/map/BreweryMap").then((mod) => mod.BreweryMap),
   { ssr: false, loading: () => (
-    <div className="h-[300px] sm:h-[400px] rounded-2xl animate-pulse" style={{ background: "var(--surface-2)" }} />
+    <div className="h-[300px] sm:h-[400px] rounded-[14px] animate-pulse" style={{ background: "var(--surface-2)" }} />
   )}
 );
 

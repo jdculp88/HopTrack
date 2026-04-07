@@ -212,7 +212,7 @@ export function SettingsClient({ profile, userEmail }: SettingsClientProps) {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6">
-      <h1 className="font-sans text-3xl font-bold text-[var(--text-primary)]">Settings</h1>
+      <h1 className="font-display text-[28px] font-bold tracking-[-0.02em] text-[var(--text-primary)]">Settings</h1>
 
       {/* ── Personal ──────────────────────────────────────────── */}
       <GroupLabel>Personal</GroupLabel>
@@ -555,7 +555,7 @@ export function SettingsClient({ profile, userEmail }: SettingsClientProps) {
               </div>
               {referralUseCount > 0 && (
                 <p className="text-xs text-[var(--text-muted)]">
-                  🍺 {referralUseCount} {referralUseCount === 1 ? "person has" : "people have"} joined with your code
+                  🍺 <span className="font-mono font-bold">{referralUseCount}</span> {referralUseCount === 1 ? "person has" : "people have"} joined with your code
                 </p>
               )}
             </div>

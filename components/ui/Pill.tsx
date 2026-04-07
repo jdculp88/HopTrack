@@ -17,7 +17,7 @@ interface PillProps {
 
 const sizeClasses: Record<PillSize, string> = {
   xs: "text-[10px] px-1.5 py-0.5 gap-1",
-  sm: "text-xs px-2 py-0.5 gap-1",
+  sm: "text-[10.5px] px-2 py-0.5 gap-1",
   md: "text-xs px-3 py-1 gap-1.5",
 };
 
@@ -75,12 +75,19 @@ export function Pill({
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-full font-mono font-medium whitespace-nowrap",
+        "inline-flex items-center rounded-full font-mono font-semibold whitespace-nowrap",
         sizeClasses[size],
         className
       )}
       style={getVariantStyles(variant, styleColor)}
     >
+      {/* Design System v2.0: style variant gets a 6px color dot indicator */}
+      {variant === "style" && !icon && (
+        <span
+          className="w-[6px] h-[6px] rounded-full flex-shrink-0"
+          style={{ background: styleColor ?? "var(--accent-gold)" }}
+        />
+      )}
       {icon}
       {children}
     </span>

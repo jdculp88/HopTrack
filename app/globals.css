@@ -2,201 +2,307 @@
 @import "leaflet/dist/leaflet.css";
 
 /*
- * ─── HOPTRACK DESIGN SYSTEM — "Gold on Cream" ──────────────────────────────
+ * ─── HOPTRACK DESIGN SYSTEM v2.0 — "Warmth Over Sterility" ─────────────────
  *
- * Direction: WisprFlow-inspired warm cream canvas with dark floating sections
- * Identity: "Gold on cream, like a perfect pilsner"
+ * Direction: Warm cream canvas (light-default), rich taproom dark (opt-in)
+ * Identity: "Warm, inviting, lived-in — like your favorite bar"
  *
  * PALETTE PHILOSOPHY
- *   Cream canvas  = craft paper, brewery menu, warm and inviting
- *   Dark sections  = chalkboard specials, floating on cream with rounded corners
+ *   Cream canvas  = craft paper, brewery menu, warm and inviting (DEFAULT)
+ *   Dark sections  = dimly lit taproom, warm browns NOT grey
  *   Gold accent    = the pour, the brand, THE light source
  *
- * TYPOGRAPHY
- *   Display:  Playfair Display — editorial serif, italic contrast, 80-108px heroes
- *   Body:     DM Sans          — clean, modern, legible
- *   Mono:     JetBrains Mono   — labels, stats, data
+ * TYPOGRAPHY (3 fonts, 3 roles — no exceptions)
+ *   Display:  General Sans  — headers, titles, display text (600-700 only)
+ *   Body:     Satoshi       — all body text, buttons, cards, nav (400-700)
+ *   Mono:     JetBrains Mono — ALL numeric data, stats, badges, labels
  *
  * LAYOUT
+ *   App interior:    light by default, user-toggleable to dark/oled
  *   Marketing pages: cream canvas, dark floating sections with rounded-[2rem]
- *   App interior:    dark by default (brewery-friendly), user-toggleable to cream
- *   Section rhythm:  cream → dark card → cream → dark card (the "flow")
  * ────────────────────────────────────────────────────────────────────────────
  */
 
-/* ── Semantic color tokens — dark theme (default for app interior) ─────────── */
+/* ═══════════════════════════════════════════════════════════════════════════
+   FONTS — Self-hosted via Fontshare for zero CLS
+   General Sans = display/headers | Satoshi = body/UI | JetBrains Mono = data
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* General Sans — Display Font (headers, titles only) */
+@font-face {
+  font-family: 'General Sans';
+  src: url('https://cdn.fontshare.com/wf/MZGQYLDDOFSXU5BPMJQXIZLMNFUQ/V3BPYIDTNRHE2QJQC7SJDV5FMY3DGDOH/ADPXBYVHZVANMTCGGNHFMSN6WV6HPSEX.woff2') format('woff2');
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'General Sans';
+  src: url('https://cdn.fontshare.com/wf/MZGQYLDDOFSXU5BPMJQXIZLMNFUQ/AO3J5XILPZXXWHLZOJYKYNZ4VV5X6WKZ/AOI5J7FDHPUYPVQHHOPFFXZQVVZZYJQ4.woff2') format('woff2');
+  font-weight: 500;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'General Sans';
+  src: url('https://cdn.fontshare.com/wf/MZGQYLDDOFSXU5BPMJQXIZLMNFUQ/HKFGDTBV4HHJXFRMSSYLHVDVPDB3KMQW/V6NHTPSQXY5BLZHMZLSQKICRXQ2TGH65.woff2') format('woff2');
+  font-weight: 600;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'General Sans';
+  src: url('https://cdn.fontshare.com/wf/MZGQYLDDOFSXU5BPMJQXIZLMNFUQ/32LH5LGXBVV3QBT6FHKGY636WLGKYOYL/BTPPJD2JQR3NOOU2SXKAG6QZWOKFVNOS.woff2') format('woff2');
+  font-weight: 700;
+  font-display: swap;
+}
+
+/* Satoshi — UI Font (body, buttons, cards, navigation) */
+@font-face {
+  font-family: 'Satoshi';
+  src: url('https://cdn.fontshare.com/wf/YICUDSYR6BBMXJEMR3VNXLWL3OAAFNJV/DKB57YTOFAYZV4KBQKXBR6YME4GDC6P7/ACSRFQENGUQUU5ELGH5H6LRU5T5SMEAX.woff2') format('woff2');
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Satoshi';
+  src: url('https://cdn.fontshare.com/wf/YICUDSYR6BBMXJEMR3VNXLWL3OAAFNJV/PJAQN7B4O7RUQFCMNPYUOAQF7XT7GQ3Q/7SE6LLGJRM3CVJNFVKHTTOQOLMXXPEKN.woff2') format('woff2');
+  font-weight: 500;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Satoshi';
+  src: url('https://cdn.fontshare.com/wf/YICUDSYR6BBMXJEMR3VNXLWL3OAAFNJV/4IASUOY6KS7JRGBZMIJLGCAHLLIRR7FZ/STXB6FNPXR3S65SSMUUEXQR7N3OQFDBD.woff2') format('woff2');
+  font-weight: 600;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Satoshi';
+  src: url('https://cdn.fontshare.com/wf/YICUDSYR6BBMXJEMR3VNXLWL3OAAFNJV/4IASUOY6KS7JRGBZMIJLGCAHLLIRR7FZ/STXB6FNPXR3S65SSMUUEXQR7N3OQFDBD.woff2') format('woff2');
+  font-weight: 700;
+  font-display: swap;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LIGHT THEME (DEFAULT) — Design System v2.0
+   "Warmth Over Sterility" — Cream surfaces, amber accents, candlelight
+   ═══════════════════════════════════════════════════════════════════════════ */
 :root {
-  --bg:              #0F0E0C;
-  --surface:         #1C1A16;
-  --card-bg:         #1A1B1F;  /* Sprint 171: cool-neutral card surface — temperature contrast vs warm bg */
-  --surface-2:       #252219;
-  --surface-3:       #2E2A22;
-  --surface-glass:   rgba(28, 26, 22, 0.7);
-  --border:          #504A3A;
-  --card-border:     #3A3A42;  /* Sprint 171: cooler border for cards */
-  --text-primary:    #F5F0E8;
-  --text-secondary:  #C4B89E;
-  --text-muted:      #8B7D6E;
-  --accent-gold:     #D4A843;
+  /* ── Surface Palette ────────────────────────────────────────────────────── */
+  --bg:              #FDFAF5;  /* Warm Cream — page background */
+  --surface:         #FDFAF5;  /* Alias for bg */
+  --card-bg:         #FFFFFF;  /* White — card backgrounds */
+  --surface-2:       #F7F1E8;  /* Warm Mist — inputs, pills, subtle fills */
+  --surface-3:       #EDE3D4;  /* Parchment Deep — active tabs, pressed states */
+  --surface-glass:   rgba(255, 255, 255, 0.75);
+  --border:          #EDE5D8;  /* Parchment — borders, dividers */
+  --card-border:     #EDE5D8;  /* Same warm border for cards */
+  --warm-bg:         #F7F1E8;  /* Design System v2: explicit warm-bg token */
+  --warm-bg-deep:    #EDE3D4;  /* Design System v2: active tabs, pressed */
+
+  /* ── Text Colors ────────────────────────────────────────────────────────── */
+  --text-primary:    #2C1810;  /* Espresso — NOT pure black, warm dark brown */
+  --text-secondary:  #7A6B5A;  /* Bark — descriptions, supporting text */
+  --text-muted:      #A89880;  /* Sandstone — timestamps, labels, metadata */
+
+  /* ── Brand Accent ───────────────────────────────────────────────────────── */
+  --accent-gold:     #C4883E;  /* HopTrack Amber — primary brand accent, CTAs */
+  --amber:           #C4883E;  /* Alias for accent-gold (Design System v2) */
   --accent-amber:    #E8841A;
   --accent-green:    #2D5A3D;
-  --accent-blue:     #5B8DEF;  /* Sprint 171: social/friends accent */
-  --accent-purple:   #8B6CC1;  /* Sprint 171: achievements/milestones accent */
-  --danger:          #C44B3A;
-  --success:         #3D7A52;
-  --skeleton-base:   #1C1A16;
-  --skeleton-shine:  #252219;
-  --scrollbar-track: #1C1A16;
-  --scrollbar-thumb: #504A3A;
+  --accent-blue:     #4A7BE0;  /* Social/friends (darker for light bg) */
+  --accent-purple:   #7558B0;  /* Achievements/milestones (darker for light bg) */
 
-  /* ── Shadow & Elevation System — Sprint 163 (The Depth) ─────────────────── */
-  --shadow-card:       0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
-  --shadow-card-hover: 0 4px 12px rgba(0,0,0,0.4), 0 2px 4px rgba(0,0,0,0.2);
-  --shadow-elevated:   0 8px 24px rgba(0,0,0,0.5), 0 4px 8px rgba(0,0,0,0.3);
-  --glow-gold:         0 0 20px rgba(212,168,67,0.15);
+  /* ── Functional Colors (UI states + gamification ONLY) ──────────────────── */
+  --danger:          #C0392B;  /* func-error */
+  --success:         #2D8F4E;  /* func-success */
+  --func-warning:    #E8A838;  /* Streaks, challenges, attention */
+  --func-info:       #3498DB;  /* New badges, notifications */
 
-  /* Warm card gradient — BeerDNA-style treatment for data/stats cards */
-  --surface-warm:    linear-gradient(135deg, color-mix(in srgb, var(--accent-gold) 6%, var(--surface)), var(--surface));
-  --surface-warm-border: color-mix(in srgb, var(--accent-gold) 18%, var(--border));
+  /* ── Skeleton & Scrollbar ───────────────────────────────────────────────── */
+  --skeleton-base:   #F7F1E8;
+  --skeleton-shine:  #FDFAF5;
+  --scrollbar-track: #F7F1E8;
+  --scrollbar-thumb: #D4C4B0;
 
-  /* ── Beer Style Colors (dark mode) ──────────────────────────────────────── */
-  /* Primary: used for bars, dots, text accents                               */
-  /* Light:   darkened tint for dark-mode backgrounds                         */
-  /* Soft:    lighter/desaturated for dark-mode text/icons                    */
-  --ipa-green:              #5a8a4a;
-  --ipa-green-light:        #1a2c14;
-  --ipa-green-soft:         #7aaa6a;
+  /* ── Shadow & Elevation — Design System v2.0 (5-tier hierarchy) ─────────── */
+  --shadow-xs:         0 1px 2px rgba(0,0,0,0.03);
+  --shadow-sm:         0 2px 8px rgba(0,0,0,0.05);
+  --shadow-md:         0 4px 16px rgba(0,0,0,0.07);
+  --shadow-lg:         0 8px 28px rgba(0,0,0,0.10);
+  /* Legacy aliases — map to new 5-tier */
+  --shadow-card:       var(--shadow-xs);
+  --shadow-card-hover: var(--shadow-sm);
+  --shadow-elevated:   var(--shadow-md);
+  --glow-gold:         0 0 20px rgba(196,154,53,0.12);
 
-  --stout-espresso:         #3d2b1f;
-  --stout-espresso-light:   #1e1510;
-  --stout-espresso-mid:     #6b5445;
+  /* ── Warm Gradient Treatment ────────────────────────────────────────────── */
+  --surface-warm:        linear-gradient(135deg, #F7F1E8 0%, #FFFFFF 100%);
+  --surface-warm-border: #E8D9C0;
 
-  --sour-berry:             #a8456a;
-  --sour-berry-light:       #2a1020;
-  --sour-berry-soft:        #c87090;
+  /* ── Beer Style Colors (light mode — tint backgrounds, primary content) ── */
+  --ipa-green:              #4A7C2E;   /* Hop Green primary */
+  --ipa-green-light:        #F0F5EC;   /* Tint background */
+  --ipa-green-soft:         #8BBD6F;   /* Soft accent */
 
-  --porter-plum:            #5c3d5e;
-  --porter-plum-light:      #1e1220;
-  --porter-plum-soft:       #8a6a8c;
+  --stout-espresso:         #3D2B1F;   /* Espresso primary */
+  --stout-espresso-light:   #F5F0EC;   /* Tint background */
+  --stout-espresso-mid:     #8B6F5E;   /* Soft */
 
-  --lager-sky:              #4a7a8a;
-  --lager-sky-light:        #12262c;
-  --lager-sky-soft:         #6a9aaa;
+  --sour-berry:             #9B2D5E;   /* Wild Berry primary */
+  --sour-berry-light:       #F6EFF3;   /* Tint background */
+  --sour-berry-soft:        #DB6D9E;   /* Soft */
 
-  --saison-peach:           #d48a50;
-  --saison-peach-light:     #2a1a08;
+  --porter-plum:            #5B3A6B;   /* Barrel Plum primary */
+  --porter-plum-light:      #F4F0F6;   /* Tint background */
+  --porter-plum-soft:       #9B7AAB;   /* Soft */
 
-  /* ── Beverage Category Colors (dark mode) ───────────────────────────────── */
-  /* Content-layer only. One color per category. No sub-styles.              */
-  --cider-rose:             #B85C4A;
-  --cider-rose-light:       #2a1410;
+  --lager-sky:              #2E6B8A;   /* Crisp Sky primary */
+  --lager-sky-light:        #EDF4F7;   /* Tint background */
+  --lager-sky-soft:         #6EABCA;   /* Soft */
+
+  --saison-peach:           #C4853E;   /* Harvest Peach primary */
+  --saison-peach-light:     #F9F3EC;   /* Tint background */
+
+  /* ── Beverage Category Colors (light mode) ──────────────────────────────── */
+  --cider-rose:             #C4526C;   /* Orchard Rose */
+  --cider-rose-light:       #F6EFF2;
   --cider-rose-soft:        #D08878;
 
-  --wine-burgundy:          #722F37;
-  --wine-burgundy-light:    #1e0c10;
+  --wine-burgundy:          #6B1A3E;   /* Burgundy */
+  --wine-burgundy-light:    #F4ECF0;
   --wine-burgundy-soft:     #9E5B64;
 
-  --cocktail-teal:          #1A8E80;
-  --cocktail-teal-light:    #0a2420;
+  --cocktail-teal:          #2A8F89;   /* Tropical Teal */
+  --cocktail-teal-light:    #ECF6F5;
   --cocktail-teal-soft:     #4DB8AC;
 
-  --na-lemon:               #BFA032;
-  --na-lemon-light:         #2a2208;
+  --na-lemon:               #E4C34E;   /* Fresh Lemon */
+  --na-lemon-light:         #FAF6EA;
   --na-lemon-soft:          #D4B958;
 
   /* ── Functional System Colors ───────────────────────────────────────────── */
-  --streak-flame:           #e07830;
-  --xp-emerald:             #4a8a5c;
-  --live-green:             #48a058;
+  --streak-flame:           #E8A838;   /* Warning gold */
+  --xp-emerald:             #2D8F4E;
+  --live-green:             #2D8F4E;
 
-  --badge-bronze:           #a07850;
-  --badge-silver:           #8a9098;
-  --badge-gold:             #c8943a;
+  --badge-bronze:           #CD7F32;
+  --badge-silver:           #C0C0C0;
+  --badge-gold:             #FFD700;
+
+  /* ── Transition Speed Tokens — Design System v2.0 ───────────────────────── */
+  --transition-micro:    0.2s;   /* Hover, focus, input states */
+  --transition-layout:   0.3s;   /* Expand/collapse, reveal */
+  --transition-gradient:  0.6s;  /* Gradient shifts, session bubble color */
+  --ease-default:        cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+  /* ── Border Radius Tokens — Design System v2.0 ─────────────────────────── */
+  --radius-badge:    4px;    /* Small badges, dots */
+  --radius-tag:      8px;    /* Inner elements, tags, small pills */
+  --radius-button:  12px;    /* Buttons, inputs, search bars */
+  --radius-card:    14px;    /* Cards (THE standard card radius) */
+  --radius-large:   16px;    /* Large cards, modals */
+  --radius-sheet:   22px;    /* Session bubbles, drawer sheets */
+  --radius-pill:   100px;    /* Full-round pills, avatars */
+
+  /* ── Card Noise Texture (light mode — 4% opacity) ──────────────────────── */
+  --card-noise: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
 }
 
-/* ── Light / Cream theme (user toggle + forced on marketing pages) ─────────── */
-[data-theme="light"] {
-  --bg:              #FFFFFF;  /* Sprint 171: white background per founder request */
-  --surface:         #FFFFFF;
-  --card-bg:         #F8F6F2;  /* Sprint 171: warm tint cards on white bg for contrast */
-  --surface-2:       #F3EDE3;
-  --surface-3:       #EDE5D8;
-  --surface-glass:   rgba(255, 255, 255, 0.75);
-  --border:          #D8CFC0;
-  --card-border:     #E0D8CC;  /* Sprint 171: slightly warmer card border for light */
-  --text-primary:    #1A1714;
-  --text-secondary:  #5A4E3E;
-  --text-muted:      #9A8E7E;
-  --accent-gold:     #C49A35;
-  --accent-amber:    #D4730E;
+/* ═══════════════════════════════════════════════════════════════════════════
+   DARK THEME — "Dimly lit taproom, not code editor"
+   Warm browns, NOT grey or pure black. Beer style colors → light variants.
+   ═══════════════════════════════════════════════════════════════════════════ */
+[data-theme="dark"] {
+  --bg:              #1A0F08;  /* Deep Barrel */
+  --surface:         #1A0F08;
+  --card-bg:         #241810;  /* Charred Oak */
+  --surface-2:       #2E1F14;  /* Roasted */
+  --surface-3:       #3D2B1F;
+  --surface-glass:   rgba(26, 15, 8, 0.85);
+  --border:          #3D2B1F;  /* Leather */
+  --card-border:     #3D2B1F;
+  --warm-bg:         #2E1F14;  /* Dark Roasted */
+  --warm-bg-deep:    #3D2B1F;
+
+  --text-primary:    #FDFAF5;
+  --text-secondary:  #B5A898;
+  --text-muted:      #7A6B5A;
+
+  --accent-gold:     #C4883E;  /* Same amber — pops on dark */
+  --amber:           #C4883E;
+  --accent-amber:    #E8841A;
   --accent-green:    #2D5A3D;
-  --accent-blue:     #4A7BE0;  /* Sprint 171: social accent (darker for light bg) */
-  --accent-purple:   #7558B0;  /* Sprint 171: achievements accent (darker for light bg) */
-  --danger:          #B03A2B;
-  --success:         #2E6642;
-  --skeleton-base:   #EDE5D8;
-  --skeleton-shine:  #F5EEE4;
-  --scrollbar-track: #F3EDE3;
-  --scrollbar-thumb: #D4C4B0;
+  --accent-blue:     #5B8DEF;
+  --accent-purple:   #8B6CC1;
 
-  /* Shadow & Elevation — lighter for cream surfaces */
-  --shadow-card:       0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.05);
-  --shadow-card-hover: 0 4px 12px rgba(0,0,0,0.12), 0 2px 4px rgba(0,0,0,0.06);
-  --shadow-elevated:   0 8px 24px rgba(0,0,0,0.15), 0 4px 8px rgba(0,0,0,0.08);
-  --glow-gold:         0 0 20px rgba(196,154,53,0.12);
-  /* Warm card gradient — matches BeerDNA card in light mode */
-  --surface-warm:    linear-gradient(135deg, #faf6f0 0%, #f5eddc 100%);
-  --surface-warm-border: #E8D9C0;
+  --danger:          #C44B3A;
+  --success:         #3D7A52;
+  --func-warning:    #E8A838;
+  --func-info:       #3498DB;
 
-  /* ── Beer Style Colors (light mode) ─────────────────────────────────────── */
-  --ipa-green:              #5a8a4a;
-  --ipa-green-light:        #eaf2e6;
-  --ipa-green-soft:         #4a7a3a;
+  --skeleton-base:   #241810;
+  --skeleton-shine:  #2E1F14;
+  --scrollbar-track: #1A0F08;
+  --scrollbar-thumb: #3D2B1F;
 
-  --stout-espresso:         #3d2b1f;
-  --stout-espresso-light:   #ebe3dc;
-  --stout-espresso-mid:     #6b5445;
+  /* Shadows — more prominent on dark */
+  --shadow-xs:         0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
+  --shadow-sm:         0 2px 8px rgba(0,0,0,0.4), 0 2px 4px rgba(0,0,0,0.2);
+  --shadow-md:         0 4px 16px rgba(0,0,0,0.5), 0 4px 8px rgba(0,0,0,0.3);
+  --shadow-lg:         0 8px 28px rgba(0,0,0,0.6), 0 4px 8px rgba(0,0,0,0.3);
+  --shadow-card:       var(--shadow-xs);
+  --shadow-card-hover: var(--shadow-sm);
+  --shadow-elevated:   var(--shadow-md);
+  --glow-gold:         0 0 20px rgba(196,136,62,0.15);
 
-  --sour-berry:             #a8456a;
-  --sour-berry-light:       #f5e6ec;
-  --sour-berry-soft:        #8a2a52;
+  --surface-warm:        linear-gradient(135deg, color-mix(in srgb, var(--accent-gold) 6%, #1A0F08), #1A0F08);
+  --surface-warm-border: color-mix(in srgb, var(--accent-gold) 18%, #3D2B1F);
 
-  --porter-plum:            #5c3d5e;
-  --porter-plum-light:      #ece4ed;
-  --porter-plum-soft:       #4a2a4c;
+  /* Beer style colors — light variants (MORE vivid on dark) */
+  --ipa-green:              #6B9D4F;
+  --ipa-green-light:        #1E2A18;   /* Dark tint */
+  --ipa-green-soft:         #8BBD6F;
 
-  --lager-sky:              #4a7a8a;
-  --lager-sky-light:        #e4eef2;
-  --lager-sky-soft:         #3a6070;
+  --stout-espresso:         #5C4033;
+  --stout-espresso-light:   #2E2018;   /* Dark tint */
+  --stout-espresso-mid:     #8B6F5E;
 
-  --saison-peach:           #d48a50;
-  --saison-peach-light:     #f8eddf;
+  --sour-berry:             #BB4D7E;
+  --sour-berry-light:       #2E1A24;   /* Dark tint */
+  --sour-berry-soft:        #DB6D9E;
 
-  /* ── Beverage Category Colors (light mode) ──────────────────────────────── */
-  --cider-rose:             #B85C4A;
-  --cider-rose-light:       #F2DCD6;
-  --cider-rose-soft:        #9A4838;
+  --porter-plum:            #7B5A8B;
+  --porter-plum-light:      #2A1E2E;   /* Dark tint */
+  --porter-plum-soft:       #9B7AAB;
 
-  --wine-burgundy:          #722F37;
-  --wine-burgundy-light:    #EDCFD4;
-  --wine-burgundy-soft:     #5C222A;
+  --lager-sky:              #4E8BAA;
+  --lager-sky-light:        #1A2430;   /* Dark tint */
+  --lager-sky-soft:         #6EABCA;
 
-  --cocktail-teal:          #1A8E80;
-  --cocktail-teal-light:    #C8EFEA;
-  --cocktail-teal-soft:     #147268;
+  --saison-peach:           #D4A55E;
+  --saison-peach-light:     #2E2418;   /* Dark tint */
 
-  --na-lemon:               #BFA032;
-  --na-lemon-light:         #F5EDCE;
-  --na-lemon-soft:          #9A8228;
+  --cider-rose:             #D08878;
+  --cider-rose-light:       #2A1410;
+  --cider-rose-soft:        #E0A898;
 
-  /* ── Functional System Colors ───────────────────────────────────────────── */
-  --streak-flame:           #d06020;
-  --xp-emerald:             #3a7a4c;
-  --live-green:             #38904a;
+  --wine-burgundy:          #9E5B64;
+  --wine-burgundy-light:    #1E0C10;
+  --wine-burgundy-soft:     #BE7B84;
 
-  --badge-bronze:           #8a6838;
-  --badge-silver:           #6a7080;
-  --badge-gold:             #b07828;
+  --cocktail-teal:          #4DB8AC;
+  --cocktail-teal-light:    #0A2420;
+  --cocktail-teal-soft:     #6DD8CC;
+
+  --na-lemon:               #D4B958;
+  --na-lemon-light:         #2A2208;
+  --na-lemon-soft:          #E4D978;
+
+  --streak-flame:           #E8A838;
+  --xp-emerald:             #4A8A5C;
+  --live-green:             #48A058;
+
+  --badge-bronze:           #CD7F32;
+  --badge-silver:           #C0C0C0;
+  --badge-gold:             #FFD700;
 }
 
 /* ── OLED Black theme (true black for OLED displays — opt-in only) ────────── */
@@ -438,7 +544,7 @@ html { scroll-behavior: smooth; }
 body {
   background-color: var(--bg);
   color: var(--text-primary);
-  font-family: var(--font-instrument), system-ui, sans-serif;
+  font-family: 'Satoshi', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   transition: background-color 0.15s ease, color 0.15s ease;

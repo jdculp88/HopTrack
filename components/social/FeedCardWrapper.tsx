@@ -58,7 +58,7 @@ export function FeedCardWrapper({
       transition={spring.default}
       role="article"
       aria-label={ariaLabel}
-      className={`rounded-2xl overflow-hidden flex relative ${bgClass ?? ""} ${className ?? ""}`}
+      className={`rounded-[14px] overflow-hidden flex relative ${bgClass ?? ""} ${className ?? ""}`}
       style={backgroundStyle ?? defaultBg}
       data-tier={dataTier}
     >

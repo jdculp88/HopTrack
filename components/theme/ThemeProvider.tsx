@@ -10,10 +10,10 @@ interface ThemeContextValue {
   setTheme: (t: Theme) => void;
 }
 
-const THEME_CYCLE: Theme[] = ["dark", "light", "oled"];
+const THEME_CYCLE: Theme[] = ["light", "dark", "oled"];
 
 const ThemeContext = createContext<ThemeContextValue>({
-  theme: "dark",
+  theme: "light",
   toggle: () => {},
   setTheme: () => {},
 });
@@ -23,23 +23,24 @@ export function useTheme() {
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>("dark");
+  const [theme, setThemeState] = useState<Theme>("light");
 
   function apply(t: Theme) {
     document.documentElement.setAttribute("data-theme", t);
   }
 
-  // On mount: read saved preference or system preference
+  // On mount: read saved preference or respect prefers-color-scheme
   useEffect(() => {
     const saved = localStorage.getItem("hoptrack-theme") as Theme | null;
     if (saved === "light" || saved === "dark" || saved === "oled") {
       apply(saved);
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setThemeState(saved);
-    } else if (window.matchMedia("(prefers-color-scheme: light)").matches) {
-      apply("light");
-      setThemeState("light");
+    } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      apply("dark");
+      setThemeState("dark");
     }
+    // Light is default (:root) — no data-theme attribute needed
   }, []);
 
   function toggle() {

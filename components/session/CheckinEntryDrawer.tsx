@@ -308,7 +308,7 @@ export default function CheckinEntryDrawer({ isOpen, onClose, onSessionStarted, 
           <div className="space-y-4">
             {!autoDetected && !showSearch && (
               <div>
-                <h2 className="font-sans text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>
+                <h2 className="font-display text-[28px] font-bold tracking-[-0.02em]" style={{ color: 'var(--text-primary)' }}>
                   Where are you?
                 </h2>
                 <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>
@@ -480,9 +480,9 @@ function BreweryConfirmCard({
           }}
         >
           {isLoading ? (
-            <><Loader2 size={18} className="animate-spin" /> Starting...</>
+            <><Loader2 size={16} className="animate-spin" /> Starting...</>
           ) : (
-            <>Start your visit <ChevronRight size={18} /></>
+            <>Start your visit <ChevronRight size={16} /></>
           )}
         </button>
       </div>

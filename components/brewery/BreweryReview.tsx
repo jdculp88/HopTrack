@@ -122,7 +122,7 @@ export function BreweryReview({ breweryId, currentUserId, isBreweryAdmin, isAuth
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
-          <h2 className="font-display text-2xl font-bold" style={{ color: "var(--text-primary)" }}>
+          <h2 className="font-display text-[22px] font-bold tracking-[-0.01em]" style={{ color: "var(--text-primary)" }}>
             Reviews
           </h2>
           {avgRating != null && (
@@ -171,7 +171,7 @@ export function BreweryReview({ breweryId, currentUserId, isBreweryAdmin, isAuth
             className="overflow-hidden"
           >
             <div
-              className="rounded-2xl border p-4 mb-4 space-y-3"
+              className="rounded-[14px] border p-4 mb-4 space-y-3"
               style={{ background: "var(--card-bg)", borderColor: "var(--border)" }}
             >
               {/* Star picker (half-star support — Sprint 162) */}
@@ -260,14 +260,41 @@ export function BreweryReview({ breweryId, currentUserId, isBreweryAdmin, isAuth
         )}
       </AnimatePresence>
 
-      {/* Reviews list */}
+      {/* Reviews list — Design System v2.0: text reviews = full card, rating-only = compact row */}
       {reviews.length > 0 ? (
-        <div className="space-y-3">
-          {reviews.map((review) => (
+        <div className="space-y-2">
+          {reviews.map((review, i) => {
+            const hasText = !!review.comment;
+
+            // Rating-only: compact row, NO card wrapper (Card Type 5)
+            if (!hasText && !review.owner_response) {
+              return (
+                <div
+                  key={review.id}
+                  className="flex items-center gap-2.5 py-2 px-1"
+                  style={{ borderBottom: "1px solid var(--border)" }}
+                >
+                  <UserAvatar profile={review.profile ?? { display_name: null, avatar_url: null }} size="sm" />
+                  <span className="text-[13px] font-medium flex-1 min-w-0 truncate" style={{ color: "var(--text-secondary)" }}>
+                    {review.profile.display_name ?? review.profile.username}
+                  </span>
+                  <StarRating value={review.rating} readonly size="sm" />
+                  <span className="text-[10px] font-mono" style={{ color: "var(--text-muted)" }}>
+                    {formatRelativeTime(review.created_at)}
+                  </span>
+                </div>
+              );
+            }
+
+            // Text review: full card (featured treatment for first review = warm gradient)
+            return (
             <div
               key={review.id}
-              className="rounded-2xl border p-4"
-              style={{ background: "var(--card-bg)", borderColor: "var(--border)" }}
+              className="rounded-[14px] border p-4"
+              style={{
+                background: i === 0 ? "linear-gradient(180deg, var(--warm-bg, var(--surface-2)) 0%, var(--card-bg, #FFFFFF) 100%)" : "var(--card-bg)",
+                borderColor: "var(--border)",
+              }}
             >
               <div className="flex items-start gap-3">
                 <UserAvatar profile={review.profile ?? { display_name: null, avatar_url: null }} size="sm" />
@@ -278,7 +305,7 @@ export function BreweryReview({ breweryId, currentUserId, isBreweryAdmin, isAuth
                     </span>
                     <StarRating value={review.rating} readonly size="sm" />
                     {review.rating % 1 !== 0 && (
-                      <span className="text-[10px] font-mono" style={{ color: "var(--accent-gold)" }}>
+                      <span className="text-[10px] font-mono" style={{ color: "var(--amber, var(--accent-gold))" }}>
                         {review.rating.toFixed(1)}
                       </span>
                     )}
@@ -385,12 +412,13 @@ export function BreweryReview({ breweryId, currentUserId, isBreweryAdmin, isAuth
                 </div>
               </div>
             </div>
-          ))}
+          );
+          })}
         </div>
       ) : (
         !showForm && (
           <div
-            className="text-center py-10 rounded-2xl border"
+            className="text-center py-10 rounded-[14px] border"
             style={{ background: "var(--card-bg)", borderColor: "var(--border)" }}
           >
             <MessageSquare size={24} className="mx-auto mb-2" style={{ color: "var(--text-muted)" }} />

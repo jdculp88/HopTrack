@@ -32,8 +32,8 @@ const config: Config = {
         success: "#3D7A52",
       },
       fontFamily: {
-        display: ["var(--font-playfair)", "serif"],
-        sans: ["var(--font-dm-sans)", "system-ui", "sans-serif"],
+        display: ["'General Sans'", "system-ui", "sans-serif"],
+        sans: ["'Satoshi'", "system-ui", "sans-serif"],
         mono: ["var(--font-jetbrains)", "monospace"],
       },
       animation: {

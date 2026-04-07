@@ -33,7 +33,7 @@ export function YourRoundClient({ userId, username, initialStats, previousStats 
         >
           <Beer size={40} className="mx-auto mb-4" style={{ color: "var(--accent-gold)" }} />
           <h2
-            className="font-display text-2xl font-bold mb-2"
+            className="font-display text-[22px] font-bold tracking-[-0.01em] mb-2"
             style={{ color: "var(--text-primary)" }}
           >
             No pours this week

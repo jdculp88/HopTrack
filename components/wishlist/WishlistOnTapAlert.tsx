@@ -57,7 +57,7 @@ export function WishlistOnTapAlert({ count }: WishlistOnTapAlertProps) {
               className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
               style={{ background: "color-mix(in srgb, var(--accent-gold) 20%, transparent)" }}
             >
-              <Beer size={18} style={{ color: "var(--accent-gold)" }} />
+              <Beer size={16} style={{ color: "var(--accent-gold)" }} />
             </div>
 
             <div className="flex-1 min-w-0">

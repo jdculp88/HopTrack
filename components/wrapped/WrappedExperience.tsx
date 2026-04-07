@@ -198,7 +198,7 @@ export function WrappedExperience({
           style={{ background: "rgba(255,255,255,0.1)" }}
           aria-label="Close Wrapped"
         >
-          <X size={18} style={{ color: "#E8D5A3" }} />
+          <X size={16} style={{ color: "#E8D5A3" }} />
         </button>
       )}
 
@@ -248,7 +248,7 @@ export function WrappedExperience({
           style={{ background: "rgba(255,255,255,0.1)" }}
           aria-label="Previous slide"
         >
-          <ChevronLeft size={18} style={{ color: "#E8D5A3" }} />
+          <ChevronLeft size={16} style={{ color: "#E8D5A3" }} />
         </button>
 
         {/* Share button (visible on last slide or always) */}
@@ -269,7 +269,7 @@ export function WrappedExperience({
           style={{ background: "rgba(255,255,255,0.1)" }}
           aria-label="Next slide"
         >
-          <ChevronRight size={18} style={{ color: "#E8D5A3" }} />
+          <ChevronRight size={16} style={{ color: "#E8D5A3" }} />
         </button>
       </div>
 

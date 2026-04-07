@@ -85,13 +85,23 @@ export function StreakDisplay({
 
   return (
     <div
-      className="card-bg-streak rounded-2xl p-5 relative overflow-hidden"
+      className="card-bg-streak rounded-[14px] relative overflow-hidden"
       style={{
         backgroundColor: "var(--card-bg)",
-        border: "1px solid var(--card-border)",
-        borderLeft: `3px solid ${isAtRisk ? "var(--accent-amber)" : "var(--accent-gold)"}`,
+        border: "1px solid var(--border)",
+        padding: "18px 20px",
       }}
     >
+      {/* 3px top bar — Card Type 8: warning → gold gradient */}
+      <div
+        className="absolute top-0 left-0 right-0 h-[3px]"
+        style={{ background: `linear-gradient(90deg, ${isAtRisk ? "var(--accent-amber)" : "var(--func-warning, var(--streak-flame))"}, #F4D35E)` }}
+      />
+      {/* Radial amber glow */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{ background: "radial-gradient(ellipse at 10% 50%, rgba(232,168,56,0.06) 0%, transparent 60%)" }}
+      />
       {/* Floating sparkle particles */}
       {currentStreak > 0 && [0, 1, 2, 3, 4].map(i => (
         <motion.div
@@ -127,18 +137,15 @@ export function StreakDisplay({
           className="relative"
         >
           <div
-            className={`rounded-xl p-3 ${isAtRisk ? "streak-at-risk" : ""}`}
+            className={`w-12 h-12 rounded-[14px] flex items-center justify-center ${isAtRisk ? "streak-at-risk" : ""}`}
             style={{
-              backgroundColor: isAtRisk
-                ? "rgba(245, 158, 11, 0.1)"
-                : "rgba(212, 168, 67, 0.1)",
+              background: isAtRisk
+                ? "linear-gradient(135deg, rgba(245,158,11,0.12), rgba(232,168,56,0.08))"
+                : "linear-gradient(135deg, rgba(244,211,94,0.12), rgba(232,168,56,0.08))",
+              border: `1px solid ${isAtRisk ? "rgba(245,158,11,0.2)" : "rgba(232,168,56,0.12)"}`,
             }}
           >
-            <Flame
-              size={32}
-              className={isAtRisk ? "text-amber-500" : ""}
-              style={{ color: isAtRisk ? undefined : "var(--accent-gold)" }}
-            />
+            <span className="text-2xl">🔥</span>
           </div>
         </motion.div>
 
@@ -146,13 +153,13 @@ export function StreakDisplay({
         <div className="flex-1">
           <div className="flex items-baseline gap-2">
             <span
-              className="font-mono text-3xl font-bold tabular-nums"
-              style={{ color: isAtRisk ? "var(--text-muted)" : "var(--accent-gold)" }}
+              className="font-mono font-bold tabular-nums leading-none"
+              style={{ fontSize: "32px", color: isAtRisk ? "var(--text-muted)" : "var(--text-primary)" }}
             >
               {displayCount}
             </span>
             <span
-              className="text-sm font-medium uppercase tracking-wide"
+              className="font-mono text-[10px] ml-1"
               style={{ color: "var(--text-muted)" }}
             >
               day streak

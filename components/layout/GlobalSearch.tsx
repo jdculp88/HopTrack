@@ -52,7 +52,7 @@ export function GlobalSearch() {
         onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "var(--accent-gold)"; }}
         onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "var(--text-muted)"; }}
       >
-        <Search size={18} />
+        <Search size={20} />
       </button>
 
       {/* Full-screen overlay */}

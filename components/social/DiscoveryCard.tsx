@@ -169,6 +169,11 @@ export function BreweryReviewCard({ review, index = 0 }: { review: BreweryReview
 export function EventCard({ event, index = 0 }: { event: EventItem; index?: number }) {
   if (!event.brewery) return null
 
+  const d = new Date(event.event_date)
+  const month = d.toLocaleDateString('en-US', { month: 'short' }).toUpperCase()
+  const day = d.getDate()
+  const dow = d.toLocaleDateString('en-US', { weekday: 'short' })
+
   return (
     <motion.div
       initial={variants.slideUpSmall.initial}
@@ -177,22 +182,43 @@ export function EventCard({ event, index = 0 }: { event: EventItem; index?: numb
     >
       <Link href={`/brewery/${event.brewery.id}`}>
         <div
-          className="card-bg-notification rounded-xl px-4 py-3 flex items-center gap-3"
+          className="flex gap-3.5 p-3.5 rounded-[14px] border"
+          style={{
+            background: 'linear-gradient(135deg, color-mix(in srgb, var(--amber, var(--accent-gold)) 4%, var(--card-bg, #FFFFFF)), color-mix(in srgb, var(--amber, var(--accent-gold)) 2%, var(--card-bg, #FFFFFF)))',
+            borderColor: 'color-mix(in srgb, var(--amber, var(--accent-gold)) 20%, var(--border))',
+          }}
         >
+          {/* Date chip — Card Type 9 */}
           <div
-            className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-            style={{ background: 'color-mix(in srgb, var(--accent-gold) 12%, transparent)' }}
+            className="w-11 flex-shrink-0 text-center rounded-xl border py-1.5"
+            style={{
+              background: 'var(--card-bg, #FFFFFF)',
+              borderColor: 'var(--border)',
+            }}
           >
-            <Calendar size={18} style={{ color: 'var(--accent-gold)' }} />
+            <div className="font-mono text-[8px] font-semibold tracking-[0.1em] uppercase" style={{ color: 'var(--amber, var(--accent-gold))' }}>
+              {month}
+            </div>
+            <div className="font-mono text-lg font-bold leading-none" style={{ color: 'var(--text-primary)' }}>
+              {day}
+            </div>
+            <div className="font-mono text-[8px]" style={{ color: 'var(--text-muted)' }}>
+              {dow}
+            </div>
           </div>
+
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
+            <p className="text-[14px] font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
               {event.title}
             </p>
-            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-              {event.brewery.name} · {formatEventDate(event.event_date)}
-              {event.start_time ? ` · ${formatTime(event.start_time)}` : ''}
+            <p className="text-xs mt-0.5" style={{ color: 'var(--text-secondary)' }}>
+              {event.brewery.name}
             </p>
+            {event.start_time && (
+              <p className="font-mono text-[10px] mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                {formatTime(event.start_time)}
+              </p>
+            )}
           </div>
         </div>
       </Link>

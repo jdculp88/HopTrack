@@ -278,39 +278,39 @@ export function BreweryDetailClient(props: BreweryDetailClientProps) {
                   role="region"
                   aria-label="Brewery statistics"
                 >
-                  <div className="card-bg-stats border border-[var(--border)] rounded-2xl p-4 flex flex-col gap-1">
+                  <div className="card-bg-stats border border-[var(--border)] rounded-[14px] p-4 flex flex-col gap-1">
                     <div className="flex items-center gap-1.5 text-[var(--text-muted)]">
                       <CheckCheck size={13} />
                       <span className="text-xs font-mono uppercase tracking-wider">Visits</span>
                     </div>
-                    <p className="font-display text-2xl font-bold text-[var(--text-primary)] leading-none">
+                    <p className="font-mono font-display text-2xl font-bold text-[var(--text-primary)] leading-none">
                       {totalCheckins.toLocaleString()}
                     </p>
                   </div>
-                  <div className="card-bg-stats border border-[var(--border)] rounded-2xl p-4 flex flex-col gap-1">
+                  <div className="card-bg-stats border border-[var(--border)] rounded-[14px] p-4 flex flex-col gap-1">
                     <div className="flex items-center gap-1.5 text-[var(--text-muted)]">
                       <Users size={13} />
                       <span className="text-xs font-mono uppercase tracking-wider">Visitors</span>
                     </div>
-                    <p className="font-display text-2xl font-bold text-[var(--text-primary)] leading-none">
+                    <p className="font-mono font-display text-2xl font-bold text-[var(--text-primary)] leading-none">
                       {uniqueVisitors.toLocaleString()}
                     </p>
                   </div>
-                  <div className="card-bg-stats border border-[var(--border)] rounded-2xl p-4 flex flex-col gap-1">
+                  <div className="card-bg-stats border border-[var(--border)] rounded-[14px] p-4 flex flex-col gap-1">
                     <div className="flex items-center gap-1.5 text-[var(--text-muted)]">
                       <Star size={13} />
                       <span className="text-xs font-mono uppercase tracking-wider">Avg Rating</span>
                     </div>
                     {avgRating != null ? (
-                      <p className="font-display text-2xl font-bold text-[var(--accent-gold)] leading-none">
+                      <p className="font-mono font-display text-2xl font-bold text-[var(--accent-gold)] leading-none">
                         {avgRating.toFixed(1)}
                         <span className="text-sm font-sans font-normal text-[var(--text-muted)] ml-1">/5</span>
                       </p>
                     ) : (
-                      <p className="font-display text-2xl font-bold text-[var(--text-muted)] leading-none">—</p>
+                      <p className="font-mono font-display text-2xl font-bold text-[var(--text-muted)] leading-none">—</p>
                     )}
                   </div>
-                  <div className="card-bg-stats border border-[var(--border)] rounded-2xl p-4 flex flex-col gap-1 col-span-2 sm:col-span-1">
+                  <div className="card-bg-stats border border-[var(--border)] rounded-[14px] p-4 flex flex-col gap-1 col-span-2 sm:col-span-1">
                     <div className="flex items-center gap-1.5 text-[var(--text-muted)]">
                       <TrendingUp size={13} />
                       <span className="text-xs font-mono uppercase tracking-wider">Top Beer</span>
@@ -323,21 +323,53 @@ export function BreweryDetailClient(props: BreweryDetailClientProps) {
                       <p className="font-display text-sm font-bold text-[var(--text-muted)] leading-none">—</p>
                     )}
                   </div>
-                  <div className="card-bg-stats border border-[var(--border)] rounded-2xl p-4 flex flex-col gap-1">
+                  <div className="card-bg-stats border border-[var(--border)] rounded-[14px] p-4 flex flex-col gap-1">
                     <div className="flex items-center gap-1.5 text-[var(--text-muted)]">
                       <Beer size={13} />
                       <span className="text-xs font-mono uppercase tracking-wider">On Tap</span>
                     </div>
-                    <p className="font-display text-2xl font-bold text-[var(--text-primary)] leading-none">
+                    <p className="font-mono font-display text-2xl font-bold text-[var(--text-primary)] leading-none">
                       {beersOnTap}
                     </p>
                   </div>
                 </div>
 
+                {/* Explore prompt — audit #17: content below stats */}
+                {beersOnTap > 0 && (
+                  <div
+                    className="rounded-[14px] border p-4 flex items-center gap-4 cursor-pointer transition-colors hover:border-[var(--accent-gold)]/30"
+                    style={{ background: "var(--card-bg)", borderColor: "var(--border)" }}
+                    onClick={() => setActiveTab("taplist")}
+                    role="button"
+                    tabIndex={0}
+                  >
+                    <div
+                      className="w-12 h-12 rounded-[14px] flex items-center justify-center flex-shrink-0"
+                      style={{ background: "var(--warm-bg, var(--surface-2))" }}
+                    >
+                      <span className="text-xl">🍺</span>
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
+                        Explore {beersOnTap} beers on tap
+                      </p>
+                      <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
+                        Browse the full tap list, ratings, and styles →
+                      </p>
+                    </div>
+                  </div>
+                )}
+
                 {/* Claim CTA */}
                 {!hasAdmin && (
-                  <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-6 text-center space-y-3">
-                    <p className="text-2xl">🍺</p>
+                  <div
+                    className="border rounded-[14px] p-6 text-center space-y-3"
+                    style={{ background: "var(--surface, var(--bg))", border: "1.5px dashed var(--border)" }}
+                  >
+                    <div className="w-12 h-12 rounded-[14px] flex items-center justify-center mx-auto"
+                         style={{ background: "var(--warm-bg, var(--surface-2))" }}>
+                      <span className="text-xl">🏠</span>
+                    </div>
                     <h3 className="font-display text-lg font-bold text-[var(--text-primary)]">Own this brewery?</h3>
                     <p className="text-sm text-[var(--text-secondary)] max-w-sm mx-auto">
                       Claim your listing to manage your tap list, run loyalty programs, and see analytics.
@@ -389,7 +421,7 @@ export function BreweryDetailClient(props: BreweryDetailClientProps) {
               <div className="space-y-8">
                 {/* Friends Here Now */}
                 {isAuthenticated && friendsHere.length > 0 && (
-                  <div className="card-bg-live border border-[var(--accent-gold)]/20 rounded-2xl p-4">
+                  <div className="card-bg-live border border-[var(--accent-gold)]/20 rounded-[14px] p-4">
                     <div className="flex items-center gap-2 mb-3">
                       <span
                         className="w-2.5 h-2.5 rounded-full animate-pulse flex-shrink-0"
@@ -406,7 +438,7 @@ export function BreweryDetailClient(props: BreweryDetailClientProps) {
                           <Link
                             key={s.id}
                             href={`/profile/${s.profile?.username}`}
-                            className="flex flex-col items-center gap-2 p-3 rounded-2xl border flex-shrink-0 w-[100px] hover:border-[var(--accent-gold)]/40 transition-colors"
+                            className="flex flex-col items-center gap-2 p-3 rounded-[14px] border flex-shrink-0 w-[100px] hover:border-[var(--accent-gold)]/40 transition-colors"
                             style={{ background: "var(--card-bg)", borderColor: "var(--border)" }}
                           >
                             <div className="relative">
@@ -539,7 +571,7 @@ export function BreweryDetailClient(props: BreweryDetailClientProps) {
 
                 {hasBrandLoyalty && brewery.brand_id && brandName && (
                   <div>
-                    <h2 className="font-display text-2xl font-bold text-[var(--text-primary)] mb-3">
+                    <h2 className="font-display text-[22px] font-bold tracking-[-0.01em] text-[var(--text-primary)] mb-3">
                       {brandName} Passport
                     </h2>
                     {isAuthenticated ? (
@@ -577,7 +609,7 @@ export function BreweryDetailClient(props: BreweryDetailClientProps) {
 
                 {!hasBrandLoyalty && (loyaltyPrograms ?? []).length > 0 && (
                   <div>
-                    <h2 className="font-display text-2xl font-bold text-[var(--text-primary)] mb-3">
+                    <h2 className="font-display text-[22px] font-bold tracking-[-0.01em] text-[var(--text-primary)] mb-3">
                       Loyalty Program
                     </h2>
                     {isAuthenticated ? (

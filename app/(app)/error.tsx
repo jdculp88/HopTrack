@@ -17,7 +17,7 @@ export default function AppError({
   return (
     <div className="max-w-md mx-auto px-4 py-20 text-center space-y-4">
       <p className="text-5xl">🍺</p>
-      <h2 className="font-display text-2xl font-bold text-[var(--text-primary)]">Something went wrong</h2>
+      <h2 className="font-display text-[22px] font-bold tracking-[-0.01em] text-[var(--text-primary)]">Something went wrong</h2>
       <p className="text-sm text-[var(--text-secondary)]">
         We spilled a beer. Our team has been notified and is working on a fix.
       </p>

@@ -36,7 +36,7 @@ export function NewFavoriteCard({
       initial={variants.slideUpSmall.initial}
       animate={variants.slideUpSmall.animate}
       transition={{ delay: index * 0.03, ...transition.normal }}
-      className="card-bg-featured rounded-2xl p-4 relative overflow-hidden"
+      className="card-bg-featured rounded-[14px] p-4 relative overflow-hidden"
     >
       {/* Header row: Heart icon + "{firstName} found a new favorite" + timestamp */}
       <div className="flex items-center gap-1.5 mb-2.5 relative z-10">

@@ -21,7 +21,7 @@ export function HopRouteCTACard({ route, index = 0 }: { route: FriendActiveRoute
       initial={variants.slideUpSmall.initial}
       animate={variants.slideUpSmall.animate}
       transition={{ delay: index * 0.03, ...transition.normal }}
-      className="card-bg-hoproute rounded-2xl p-4 relative overflow-hidden"
+      className="card-bg-hoproute rounded-[14px] p-4 relative overflow-hidden"
       style={{
         border: "1px solid color-mix(in srgb, var(--accent-gold) 20%, var(--border))",
       }}

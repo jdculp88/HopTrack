@@ -32,11 +32,11 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
       <div
         ref={ref}
         className={cn(
-          "rounded-2xl border",
+          "rounded-[14px] border",
           paddingClasses[padding],
           resolvedBgClass,
           hoverable
-            ? "border-[var(--card-border)] hover:border-[var(--accent-gold)]/30 transition-colors"
+            ? "border-[var(--card-border)] hover:border-[var(--accent-gold)]/30 transition-all duration-200"
             : "border-[var(--card-border)]",
           !resolvedBgClass && "bg-[var(--card-bg)]",
           // Sprint 163 — Shadow & Elevation System
@@ -77,8 +77,8 @@ export function CardTitle({ as: Tag = "h3", className, children, ...props }: Car
   return (
     <Tag
       className={cn(
-        "font-display font-bold text-[var(--text-primary)]",
-        Tag === "h2" ? "text-2xl" : Tag === "h3" ? "text-lg" : "text-base",
+        "font-display font-bold text-[var(--text-primary)] tracking-[-0.01em]",
+        Tag === "h2" ? "text-[22px]" : Tag === "h3" ? "text-lg" : "text-base",
         className
       )}
       {...props}

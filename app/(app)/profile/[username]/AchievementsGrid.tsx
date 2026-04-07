@@ -85,7 +85,7 @@ export function AchievementsGrid({ achievements }: AchievementsGridProps) {
             <Trophy size={16} className="text-[var(--bg)]" />
           </div>
           <div>
-            <h2 className="font-sans text-3xl font-bold text-[var(--text-primary)] leading-tight">
+            <h2 className="font-display text-[28px] font-bold tracking-[-0.02em] text-[var(--text-primary)] leading-tight">
               Achievements
             </h2>
             <p className="font-mono text-sm text-[var(--text-muted)]">
@@ -193,7 +193,7 @@ export function AchievementsGrid({ achievements }: AchievementsGridProps) {
           ))}
         </div>
       ) : (
-        <div className="text-center py-8 bg-[var(--surface)] rounded-2xl border border-[var(--border)]">
+        <div className="text-center py-8 bg-[var(--surface)] rounded-[14px] border border-[var(--border)]">
           <p className="text-[var(--text-muted)] text-sm">No achievements match these filters.</p>
         </div>
       )}
@@ -208,7 +208,7 @@ export function AchievementsGrid({ achievements }: AchievementsGridProps) {
             {Array.from({ length: Math.min(TOTAL_ACHIEVEMENTS - earnedCount, 12) }).map((_, i) => (
               <div
                 key={`locked-${i}`}
-                className="w-16 h-16 rounded-2xl flex items-center justify-center opacity-25"
+                className="w-16 h-16 rounded-[14px] flex items-center justify-center opacity-25"
                 style={{ background: "var(--surface-2)" }}
               >
                 <span className="text-2xl grayscale">🏅</span>
@@ -216,7 +216,7 @@ export function AchievementsGrid({ achievements }: AchievementsGridProps) {
             ))}
             {TOTAL_ACHIEVEMENTS - earnedCount > 12 && (
               <div
-                className="w-16 h-16 rounded-2xl flex items-center justify-center opacity-25"
+                className="w-16 h-16 rounded-[14px] flex items-center justify-center opacity-25"
                 style={{ background: "var(--surface-2)" }}
               >
                 <span className="text-xs font-mono text-[var(--text-muted)]">

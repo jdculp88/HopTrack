@@ -216,7 +216,7 @@ export function FriendsClient({
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6 space-y-5">
-      <h1 className="font-sans text-3xl font-bold" style={{ color: "var(--text-primary)" }}>Friends</h1>
+      <h1 className="font-display text-[28px] font-bold tracking-[-0.02em]" style={{ color: "var(--text-primary)" }}>Friends</h1>
 
       {/* Tab bar */}
       <PillTabs
@@ -271,7 +271,7 @@ export function FriendsClient({
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
               placeholder="Search friends or find new ones..."
-              className="w-full rounded-2xl pl-11 pr-4 py-3.5 text-sm transition-[colors,shadow] focus:outline-none shadow-[var(--shadow-card)] focus:shadow-[var(--shadow-card-hover)]"
+              className="w-full rounded-[14px] pl-11 pr-4 py-3.5 text-sm transition-[colors,shadow] focus:outline-none shadow-[var(--shadow-card)] focus:shadow-[var(--shadow-card-hover)]"
               style={{
                 background: "var(--card-bg)",
                 border: "1px solid var(--border)",
@@ -303,7 +303,7 @@ export function FriendsClient({
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -8 }}
                     transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                    className="flex items-center gap-3 p-3 rounded-2xl shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-shadow"
+                    className="flex items-center gap-3 p-3 rounded-[14px] shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-shadow"
                     style={{ background: "var(--card-bg)", border: "1px solid var(--border)" }}
                   >
                     <UserAvatar profile={user} size="sm" />
@@ -345,11 +345,11 @@ export function FriendsClient({
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
-                className="card-bg-notification rounded-2xl p-4 space-y-3 shadow-[var(--shadow-card)] border border-[var(--card-border)]"
+                className="card-bg-notification rounded-[14px] p-4 space-y-3 shadow-[var(--shadow-card)] border border-[var(--card-border)]"
               >
                 <div className="flex items-center gap-2">
                   <div
-                    className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold"
+                    className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-mono font-bold"
                     style={{ background: "var(--accent-gold)", color: "var(--bg)" }}
                   >
                     {pendingRequests.length}
@@ -412,7 +412,7 @@ export function FriendsClient({
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
-                className="rounded-2xl p-4 space-y-3 shadow-[var(--shadow-card)]"
+                className="rounded-[14px] p-4 space-y-3 shadow-[var(--shadow-card)]"
                 style={{ background: "var(--card-bg)", border: "1px solid var(--border)" }}
               >
                 <p className="text-xs font-medium uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
@@ -424,7 +424,7 @@ export function FriendsClient({
                     layout
                     exit={{ opacity: 0, x: -100, height: 0 }}
                     transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                    className="overflow-hidden rounded-2xl"
+                    className="overflow-hidden rounded-[14px]"
                     style={{ border: "1px solid var(--border)" }}
                   >
                     <div className="flex items-center gap-3 p-3" style={{ background: "var(--card-bg)" }}>
@@ -500,7 +500,7 @@ export function FriendsClient({
 
           {/* Friends list */}
           {filteredFriends.length === 0 && searchQuery.length < 2 && pendingRequests.length === 0 && sentRequests.length === 0 ? (
-            <div className="card-bg-featured text-center py-16 space-y-4 rounded-2xl shadow-[var(--shadow-card)] border border-[var(--card-border)]">
+            <div className="card-bg-featured text-center py-16 space-y-4 rounded-[14px] shadow-[var(--shadow-card)] border border-[var(--card-border)]">
               <div
                 className="w-20 h-20 rounded-full flex items-center justify-center mx-auto relative z-10"
                 style={{ background: "color-mix(in srgb, var(--accent-gold) 8%, transparent)" }}
@@ -538,7 +538,7 @@ export function FriendsClient({
                   initial={{ opacity: 0, y: 6 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.03, type: "spring", stiffness: 400, damping: 30 }}
-                  className="overflow-hidden rounded-2xl shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-shadow"
+                  className="overflow-hidden rounded-[14px] shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-shadow"
                   style={{ border: "1px solid var(--border)" }}
                 >
                   <div

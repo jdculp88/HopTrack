@@ -55,7 +55,7 @@ export function DrinkerStatsCard({ kpis, username, isOwnProfile }: DrinkerStatsC
   if (kpis.totalPours === 0) return null;
 
   return (
-    <div className="card-bg-stats border border-[var(--border)] rounded-2xl overflow-hidden">
+    <div className="card-bg-stats border border-[var(--border)] rounded-[14px] overflow-hidden">
       <button
         onClick={() => setExpanded(!expanded)}
         className="w-full flex items-center justify-between p-4"

@@ -143,23 +143,23 @@ export default function DemoDashboardClient({
         </div>
         <div className="flex flex-wrap items-center gap-x-6 gap-y-1">
           <span className="text-sm" style={{ color: "var(--text-primary)" }}>
-            <strong className="font-display text-lg">{todayVisitCount}</strong>{" "}
+            <strong className="font-mono font-display text-lg">{todayVisitCount}</strong>{" "}
             <span style={{ color: "var(--text-muted)" }}>visit{todayVisitCount !== 1 ? "s" : ""}</span>
           </span>
           <span className="text-sm" style={{ color: "var(--text-primary)" }}>
-            <strong className="font-display text-lg">{todayBeersCount}</strong>{" "}
+            <strong className="font-mono font-display text-lg">{todayBeersCount}</strong>{" "}
             <span style={{ color: "var(--text-muted)" }}>beer{todayBeersCount !== 1 ? "s" : ""} poured</span>
           </span>
           {todayNewFollowers > 0 && (
             <span className="text-sm" style={{ color: "var(--text-primary)" }}>
-              <strong className="font-display text-lg">{todayNewFollowers}</strong>{" "}
+              <strong className="font-mono font-display text-lg">{todayNewFollowers}</strong>{" "}
               <span style={{ color: "var(--text-muted)" }}>new follower{todayNewFollowers !== 1 ? "s" : ""}</span>
             </span>
           )}
           {activeSessionCount > 0 && (
             <span className="flex items-center gap-1.5 text-sm">
               <span className="w-2 h-2 rounded-full inline-block animate-pulse" style={{ background: "#22c55e" }} />
-              <strong className="font-display text-lg" style={{ color: "var(--text-primary)" }}>{activeSessionCount}</strong>{" "}
+              <strong className="font-mono font-display text-lg" style={{ color: "var(--text-primary)" }}>{activeSessionCount}</strong>{" "}
               <span style={{ color: "var(--text-muted)" }}>drinking now</span>
             </span>
           )}
@@ -175,7 +175,7 @@ export default function DemoDashboardClient({
             <Users size={14} style={{ color: "var(--accent-gold)" }} />
           </div>
           <div className="flex items-end justify-between">
-            <p className="font-display text-2xl sm:text-3xl font-bold" style={{ color: "var(--text-primary)" }}>{todayVisitCount}</p>
+            <p className="font-mono font-display text-2xl sm:text-3xl font-bold" style={{ color: "var(--text-primary)" }}>{todayVisitCount}</p>
             <Sparkline data={weeklyData} />
           </div>
           <p className="text-[10px] mt-2 truncate" style={{ color: "var(--text-muted)" }}>
@@ -189,7 +189,7 @@ export default function DemoDashboardClient({
             <p className="text-[10px] font-mono uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>This Week</p>
             <TrendingUp size={14} style={{ color: "var(--accent-gold)" }} />
           </div>
-          <p className="font-display text-2xl sm:text-3xl font-bold" style={{ color: "var(--text-primary)" }}>{thisWeekTotal}</p>
+          <p className="font-mono font-display text-2xl sm:text-3xl font-bold" style={{ color: "var(--text-primary)" }}>{thisWeekTotal}</p>
           <div className="flex items-center gap-1 mt-2">
             {weekTrend !== null ? (
               <>
@@ -212,7 +212,7 @@ export default function DemoDashboardClient({
             <p className="text-[10px] font-mono uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>On Tap</p>
             <Beer size={14} style={{ color: "var(--accent-gold)" }} />
           </div>
-          <p className="font-display text-2xl sm:text-3xl font-bold" style={{ color: "var(--text-primary)" }}>
+          <p className="font-mono font-display text-2xl sm:text-3xl font-bold" style={{ color: "var(--text-primary)" }}>
             {onTapCount}
           </p>
           <p className="text-[10px] mt-2 truncate" style={{ color: "var(--text-muted)" }}>
@@ -226,7 +226,7 @@ export default function DemoDashboardClient({
             <p className="text-[10px] font-mono uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Followers</p>
             <Heart size={14} style={{ color: "var(--accent-gold)" }} />
           </div>
-          <p className="font-display text-2xl sm:text-3xl font-bold" style={{ color: "var(--text-primary)" }}>{totalFollowerCount}</p>
+          <p className="font-mono font-display text-2xl sm:text-3xl font-bold" style={{ color: "var(--text-primary)" }}>{totalFollowerCount}</p>
           <p className="text-[10px] mt-2 truncate" style={{ color: todayNewFollowers > 0 ? "#22c55e" : "var(--text-muted)" }}>
             {todayNewFollowers > 0 ? `+${todayNewFollowers} today` : "No new followers today"}
           </p>
@@ -242,7 +242,7 @@ export default function DemoDashboardClient({
             <Clock size={14} style={{ color: "var(--accent-gold)" }} />
           </div>
           <div className="flex items-end justify-between">
-            <p className="font-display text-2xl sm:text-3xl font-bold" style={{ color: "var(--text-primary)" }}>
+            <p className="font-mono font-display text-2xl sm:text-3xl font-bold" style={{ color: "var(--text-primary)" }}>
               {formatDuration(kpis.avgSessionDuration)}
             </p>
             <Sparkline data={sparklines.avgDuration} />
@@ -267,7 +267,7 @@ export default function DemoDashboardClient({
             <Beer size={14} style={{ color: "var(--accent-gold)" }} />
           </div>
           <div className="flex items-end justify-between">
-            <p className="font-display text-2xl sm:text-3xl font-bold" style={{ color: "var(--text-primary)" }}>
+            <p className="font-mono font-display text-2xl sm:text-3xl font-bold" style={{ color: "var(--text-primary)" }}>
               {kpis.beersPerVisit ?? "—"}
             </p>
             <Sparkline data={sparklines.beersPerVisit} />
@@ -292,7 +292,7 @@ export default function DemoDashboardClient({
             <RefreshCw size={14} style={{ color: "var(--accent-gold)" }} />
           </div>
           <div className="flex items-end justify-between">
-            <p className="font-display text-2xl sm:text-3xl font-bold" style={{ color: "var(--text-primary)" }}>
+            <p className="font-mono font-display text-2xl sm:text-3xl font-bold" style={{ color: "var(--text-primary)" }}>
               {kpis.returningVisitorPct !== null ? `${kpis.returningVisitorPct}%` : "—"}
             </p>
             <Sparkline data={sparklines.returningPct} />
@@ -313,7 +313,7 @@ export default function DemoDashboardClient({
             <Award size={14} style={{ color: "var(--accent-gold)" }} />
           </div>
           <div className="flex items-end justify-between">
-            <p className="font-display text-2xl sm:text-3xl font-bold" style={{ color: "var(--text-primary)" }}>
+            <p className="font-mono font-display text-2xl sm:text-3xl font-bold" style={{ color: "var(--text-primary)" }}>
               {kpis.retentionRate !== null ? `${kpis.retentionRate}%` : "—"}
             </p>
             <Sparkline data={sparklines.retention} />
@@ -459,11 +459,11 @@ export default function DemoDashboardClient({
                 </h3>
               </div>
               {roi.roiMultiple > 0 ? (
-                <p className="font-display text-4xl font-bold mb-2" style={{ color: "var(--text-primary)" }}>
+                <p className="font-mono font-display text-4xl font-bold mb-2" style={{ color: "var(--text-primary)" }}>
                   {roi.roiMultiple}x
                 </p>
               ) : (
-                <p className="font-display text-4xl font-bold mb-2" style={{ color: "var(--text-primary)" }}>
+                <p className="font-mono font-display text-4xl font-bold mb-2" style={{ color: "var(--text-primary)" }}>
                   ${roi.estimatedRevenue.toLocaleString()}
                 </p>
               )}
@@ -471,15 +471,15 @@ export default function DemoDashboardClient({
               <div className="grid grid-cols-3 gap-3 pt-3 border-t" style={{ borderColor: "var(--border)" }}>
                 <div>
                   <p className="text-[10px] font-mono" style={{ color: "var(--text-muted)" }}>Visits</p>
-                  <p className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>{roi.loyaltyDrivenVisits}</p>
+                  <p className="text-sm font-mono font-bold" style={{ color: "var(--text-primary)" }}>{roi.loyaltyDrivenVisits}</p>
                 </div>
                 <div>
                   <p className="text-[10px] font-mono" style={{ color: "var(--text-muted)" }}>Revenue</p>
-                  <p className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>${roi.estimatedRevenue.toLocaleString()}</p>
+                  <p className="text-sm font-mono font-bold" style={{ color: "var(--text-primary)" }}>${roi.estimatedRevenue.toLocaleString()}</p>
                 </div>
                 <div>
                   <p className="text-[10px] font-mono" style={{ color: "var(--text-muted)" }}>Cost</p>
-                  <p className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>${roi.subscriptionCost}/mo</p>
+                  <p className="text-sm font-mono font-bold" style={{ color: "var(--text-primary)" }}>${roi.subscriptionCost}/mo</p>
                 </div>
               </div>
             </div>

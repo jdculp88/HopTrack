@@ -13,7 +13,7 @@ interface ActivityHeatmapProps {
 const DAYS_OF_WEEK = ["Mon", "", "Wed", "", "Fri", "", ""];
 
 function getCellColor(count: number, style?: string): string {
-  if (count === 0) return "var(--surface-2)";
+  if (count === 0) return "var(--warm-bg, var(--surface-2))";
   const vars = getStyleVars(style ?? null);
   const primary = vars.primary;
   if (count <= 2) return `color-mix(in srgb, ${primary} 30%, var(--surface-2))`;

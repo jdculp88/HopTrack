@@ -11,7 +11,7 @@ export function OnboardingCard({ onDismiss }: { onDismiss: () => void }) {
       animate={{ opacity: 1, y: 0 }}
       role="region"
       aria-label="Getting started"
-      className="rounded-2xl p-5 relative"
+      className="rounded-[14px] p-5 relative"
       style={{
         background:
           "linear-gradient(135deg, color-mix(in srgb, var(--accent-gold) 8%, transparent), transparent)",

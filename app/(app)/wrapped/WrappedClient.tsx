@@ -17,7 +17,7 @@ export function WrappedClient({ username, initialStats }: { username: string; in
           animate={{ opacity: 1, y: 0 }}
         >
           <Beer size={40} className="mx-auto mb-4" style={{ color: "var(--accent-gold)" }} />
-          <h2 className="font-display text-2xl font-bold mb-2" style={{ color: "var(--text-primary)" }}>
+          <h2 className="font-display text-[22px] font-bold tracking-[-0.01em] mb-2" style={{ color: "var(--text-primary)" }}>
             Your story starts with a pour
           </h2>
           <p className="text-sm mb-6" style={{ color: "var(--text-muted)" }}>

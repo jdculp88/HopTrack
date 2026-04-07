@@ -11,7 +11,7 @@ import {
 import Link from "next/link";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import { BreweryCard, getBreweryPlaceholder } from "@/components/brewery/BreweryCard";
+import { BreweryCard, BreweryMonogram } from "@/components/brewery/BreweryCard";
 import { SearchTypeahead } from "@/components/ui/SearchTypeahead";
 import { SkeletonCard } from "@/components/ui/SkeletonLoader";
 import { useToast } from "@/components/ui/Toast";
@@ -28,7 +28,7 @@ const BreweryMap = dynamic(
     ssr: false,
     loading: () => (
       <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-3xl h-[480px] flex items-center justify-center gap-2 text-[var(--text-muted)]">
-        <Loader2 size={18} className="animate-spin" />
+        <Loader2 size={16} className="animate-spin" />
         <span className="text-sm">Loading map...</span>
       </div>
     ),
@@ -356,7 +356,7 @@ export function ExploreClient({
               transition={{ type: "spring", stiffness: 400, damping: 30 }}
               className="overflow-hidden"
             >
-              <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-2xl p-4 space-y-4 shadow-[var(--shadow-card)]">
+              <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-[14px] p-4 space-y-4 shadow-[var(--shadow-card)]">
                 {/* Sprint 171: Browse Mode — moved from top pills */}
                 {onModeChange && (
                   <div>
@@ -656,7 +656,7 @@ function EnrichedBreweryCard({
       />
       {/* Stats row — sits below the card, never overlaps content */}
       {hasStats && (
-        <div className="flex items-center gap-2 px-4 py-2 border border-[var(--card-border)] rounded-b-2xl bg-[var(--card-bg)]">
+        <div className="flex items-center gap-2 px-4 py-2 border border-[var(--card-border)] rounded-b-[14px] bg-[var(--card-bg)]">
           {followerCount && followerCount > 0 && (
             <span
               className="flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded-full"
@@ -704,7 +704,7 @@ function NearMeCard({
   hasEvent?: boolean;
   index: number;
 }) {
-  const coverSrc = brewery.cover_image_url || getBreweryPlaceholder(brewery.name);
+  const hasCover = !!brewery.cover_image_url;
 
   return (
     <Link href={`/brewery/${brewery.id}`}>
@@ -712,17 +712,21 @@ function NearMeCard({
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay: index * 0.05 }}
-        className="flex-shrink-0 w-56 bg-[var(--card-bg)] border border-[var(--card-border)] rounded-2xl overflow-hidden hover:border-[color-mix(in_srgb,var(--accent-gold)_30%,transparent)] transition-[colors,shadow] shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] group"
+        className="flex-shrink-0 w-56 bg-[var(--card-bg)] border border-[var(--card-border)] rounded-[14px] overflow-hidden hover:border-[color-mix(in_srgb,var(--accent-gold)_30%,transparent)] transition-[colors,shadow] shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] group"
       >
-        {/* Mini cover */}
+        {/* Mini cover — monogram fallback per Design System v2.0 */}
         <div className="h-24 w-full relative overflow-hidden">
-          <Image
-            src={coverSrc}
-            alt={brewery.name}
-            fill
-            className="object-cover group-hover:scale-105 transition-transform duration-500"
-            sizes="224px"
-          />
+          {hasCover ? (
+            <Image
+              src={brewery.cover_image_url!}
+              alt={brewery.name}
+              fill
+              className="object-cover group-hover:scale-105 transition-transform duration-500"
+              sizes="224px"
+            />
+          ) : (
+            <BreweryMonogram name={brewery.name} className="w-full h-full" textSize="text-2xl" />
+          )}
           {distance && (
             <span
               className="absolute top-2 right-2 text-[10px] font-mono px-2 py-0.5 rounded-full"
@@ -780,7 +784,7 @@ function SearchEmptyState({ query, onClear }: { query: string; onClear: () => vo
   return (
     <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
       <div
-        className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4"
+        className="w-16 h-16 rounded-[14px] flex items-center justify-center mb-4"
         style={{ background: "color-mix(in srgb, var(--accent-gold) 10%, transparent)" }}
       >
         <Search size={28} style={{ color: "var(--accent-gold)" }} />

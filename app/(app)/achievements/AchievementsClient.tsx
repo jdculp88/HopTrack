@@ -72,7 +72,7 @@ export function AchievementsClient({ achievements, totalEarned, total }: Achieve
       <Card bgClass="card-bg-stats" padding="spacious" className="space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Trophy size={18} className="text-[var(--accent-gold)]" />
+            <Trophy size={16} className="text-[var(--accent-gold)]" />
             <span className="font-sans font-semibold text-[var(--text-primary)] text-sm">Overall Progress</span>
           </div>
           <span className="font-mono text-[var(--accent-gold)] font-bold">{progress}%</span>
@@ -198,7 +198,7 @@ export function AchievementsClient({ achievements, totalEarned, total }: Achieve
                 >
                   {selected.tier} · {selected.category}
                 </p>
-                <h3 className="font-display text-2xl font-bold text-[var(--text-primary)]">{selected.name}</h3>
+                <h3 className="font-display text-[22px] font-bold tracking-[-0.01em] text-[var(--text-primary)]">{selected.name}</h3>
                 <p className="text-[var(--text-secondary)] text-sm mt-2 leading-relaxed">{selected.description}</p>
               </div>
 
@@ -210,7 +210,7 @@ export function AchievementsClient({ achievements, totalEarned, total }: Achieve
                   <div
                     className="px-3 py-2 rounded-full text-xs font-mono font-medium border"
                     style={{
-                      color: selected.rarityPercent <= 5 ? "#D4A843"
+                      color: selected.rarityPercent <= 5 ? "var(--amber, #C4883E)"
                         : selected.rarityPercent <= 20 ? "#8BAABF"
                         : selected.rarityPercent <= 50 ? "#3D7A52"
                         : "var(--text-muted)",
@@ -230,14 +230,14 @@ export function AchievementsClient({ achievements, totalEarned, total }: Achieve
               </div>
 
               {selected.earned ? (
-                <div className="w-full bg-[#3D7A52]/10 border border-[#3D7A52]/30 rounded-2xl px-4 py-3 text-center">
+                <div className="w-full bg-[#3D7A52]/10 border border-[#3D7A52]/30 rounded-[14px] px-4 py-3 text-center">
                   <p className="text-sm text-[#3D7A52] font-medium">✓ Unlocked!</p>
                   {selected.earned_at && (
                     <p className="text-xs text-[var(--text-muted)] mt-0.5">{formatDate(selected.earned_at)}</p>
                   )}
                 </div>
               ) : (
-                <div className="w-full bg-[var(--surface-2)] border border-[var(--card-border)] rounded-2xl px-4 py-3 text-center flex items-center justify-center gap-2">
+                <div className="w-full bg-[var(--surface-2)] border border-[var(--card-border)] rounded-[14px] px-4 py-3 text-center flex items-center justify-center gap-2">
                   <Lock size={14} className="text-[var(--text-muted)]" />
                   <p className="text-sm text-[var(--text-muted)]">Not yet unlocked</p>
                 </div>

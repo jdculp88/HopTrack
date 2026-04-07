@@ -125,7 +125,7 @@ export function HopRouteCardClient({ route: initialRoute }: HopRouteCardClientPr
   return (
     <div className="max-w-lg mx-auto px-4 py-6 space-y-4">
       {/* Header */}
-      <div className="card-bg-hoproute rounded-2xl p-4 border space-y-2" style={{ borderColor: "color-mix(in srgb, var(--accent-amber) 25%, var(--border))" }}>
+      <div className="card-bg-hoproute rounded-[14px] p-4 border space-y-2" style={{ borderColor: "color-mix(in srgb, var(--accent-amber) 25%, var(--border))" }}>
         <div className="flex items-start justify-between gap-3">
           <div>
             <h1 className="font-display text-3xl font-bold text-[var(--text-primary)]">{route.title}</h1>
@@ -225,7 +225,7 @@ export function HopRouteCardClient({ route: initialRoute }: HopRouteCardClientPr
 
               <motion.div
                 layout
-                className={`rounded-2xl border overflow-hidden transition-all ${
+                className={`rounded-[14px] border overflow-hidden transition-all ${
                   stop.checked_in
                     ? "border-[var(--accent-gold)]/30 bg-[color-mix(in_srgb,var(--accent-gold)_3%,transparent)]"
                     : "border-[var(--card-border)] bg-[var(--card-bg)]"
@@ -393,7 +393,7 @@ export function HopRouteCardClient({ route: initialRoute }: HopRouteCardClientPr
       </div>
 
       {/* Footer actions */}
-      <div className="card-bg-hoproute flex gap-2 p-3 rounded-2xl border" style={{ borderColor: "color-mix(in srgb, var(--accent-amber) 25%, var(--border))" }}>
+      <div className="card-bg-hoproute flex gap-2 p-3 rounded-[14px] border" style={{ borderColor: "color-mix(in srgb, var(--accent-amber) 25%, var(--border))" }}>
         <Link
           href="/hop-route/new"
           className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium border transition-colors"

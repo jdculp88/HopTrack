@@ -1,31 +1,17 @@
 import type { Metadata, Viewport } from "next";
-import { Playfair_Display, JetBrains_Mono, DM_Sans } from "next/font/google";
+import { JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import Script from "next/script";
 import dynamic from "next/dynamic";
 const CookieConsent = dynamic(() => import("@/components/ui/CookieConsent").then(m => ({ default: m.CookieConsent })));
 
-// Kept for The Board (editorial menu aesthetic)
-const playfair = Playfair_Display({
-  variable: "--font-playfair",
-  subsets: ["latin"],
-  weight: ["400", "700"],
-  style: ["normal", "italic"],
-  display: "swap",
-});
-
+// Design System v2.0: General Sans (display) + Satoshi (body) loaded via @font-face in globals.css
+// JetBrains Mono (data) stays as Google Font for reliable hosting
 const jetbrainsMono = JetBrains_Mono({
   variable: "--font-jetbrains",
   subsets: ["latin"],
-  weight: ["400"],
-  display: "swap",
-});
-
-const dmSans = DM_Sans({
-  variable: "--font-dm-sans",
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
+  weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
@@ -94,7 +80,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${playfair.variable} ${jetbrainsMono.variable} ${dmSans.variable}`}
+      className={`${jetbrainsMono.variable}`}
       data-scroll-behavior="smooth"
     >
       <head>
@@ -106,6 +92,7 @@ export default function RootLayout({
         )}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://cdn.fontshare.com" crossOrigin="anonymous" />
       </head>
       <body className="min-h-screen antialiased" suppressHydrationWarning>
         <ThemeProvider>

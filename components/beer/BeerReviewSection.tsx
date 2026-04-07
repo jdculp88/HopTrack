@@ -128,7 +128,7 @@ export function BeerReviewSection({ beerId, currentUserId }: BeerReviewSectionPr
             className="overflow-hidden"
           >
             <div
-              className="rounded-2xl border p-4 mb-4 space-y-3"
+              className="rounded-[14px] border p-4 mb-4 space-y-3"
               style={{ background: "var(--card-bg)", borderColor: "var(--border)" }}
             >
               <div className="flex items-center gap-3">
@@ -230,7 +230,7 @@ export function BeerReviewSection({ beerId, currentUserId }: BeerReviewSectionPr
           {reviews.map((review) => (
             <div
               key={review.id}
-              className="rounded-2xl border p-4"
+              className="rounded-[14px] border p-4"
               style={{ background: "var(--card-bg)", borderColor: "var(--border)" }}
             >
               <div className="flex items-start gap-3">
@@ -261,7 +261,7 @@ export function BeerReviewSection({ beerId, currentUserId }: BeerReviewSectionPr
       ) : (
         !showForm && (
           <div
-            className="text-center py-10 rounded-2xl border"
+            className="text-center py-10 rounded-[14px] border"
             style={{ background: "var(--card-bg)", borderColor: "var(--border)" }}
           >
             <MessageSquare size={24} className="mx-auto mb-2" style={{ color: "var(--text-muted)" }} />

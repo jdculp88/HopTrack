@@ -88,7 +88,7 @@ export function BeerListsSection({ lists: initialLists, isOwnProfile }: BeerList
             className="overflow-hidden"
           >
             <div
-              className="rounded-2xl border p-4 space-y-3"
+              className="rounded-[14px] border p-4 space-y-3"
               style={{ background: "var(--card-bg)", borderColor: "var(--border)" }}
             >
               <input
@@ -133,7 +133,7 @@ export function BeerListsSection({ lists: initialLists, isOwnProfile }: BeerList
       {/* List cards */}
       {lists.length === 0 && isOwnProfile ? (
         <div
-          className="rounded-2xl border p-6 text-center"
+          className="rounded-[14px] border p-6 text-center"
           style={{ background: "var(--card-bg)", borderColor: "var(--border)" }}
         >
           <Beer size={24} style={{ color: "var(--text-muted)", margin: "0 auto 8px" }} />
@@ -150,7 +150,7 @@ export function BeerListsSection({ lists: initialLists, isOwnProfile }: BeerList
             return (
               <div
                 key={list.id}
-                className="rounded-2xl border overflow-hidden"
+                className="rounded-[14px] border overflow-hidden"
                 style={{ background: "var(--card-bg)", borderColor: "var(--border)" }}
               >
                 <button

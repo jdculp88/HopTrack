@@ -56,7 +56,7 @@ export function TapWallHeader({
         </div>
         {/* Mesh gradient beer count badge */}
         <div
-          className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0 overflow-hidden"
+          className="w-11 h-11 rounded-[14px] flex items-center justify-center flex-shrink-0 overflow-hidden"
           style={{
             background: buildMeshGradient(beerLogs),
             transition: 'background 0.6s ease',

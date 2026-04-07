@@ -40,12 +40,12 @@ export default async function BrandPage({ params }: { params: Promise<{ slug: st
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
             {/* Logo */}
             {brand.logo_url ? (
-              <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden flex-shrink-0 relative border"
+              <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-[14px] overflow-hidden flex-shrink-0 relative border"
                 style={{ borderColor: "var(--border)" }}>
                 <Image src={brand.logo_url} alt={brand.name} fill className="object-cover" sizes="112px" />
               </div>
             ) : (
-              <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl flex items-center justify-center flex-shrink-0"
+              <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-[14px] flex items-center justify-center flex-shrink-0"
                 style={{ background: "color-mix(in srgb, var(--accent-gold) 15%, transparent)" }}>
                 <Building2 size={40} style={{ color: "var(--accent-gold)" }} />
               </div>

@@ -4,7 +4,7 @@ import { useState, useCallback } from "react";
 import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
 import { JustTappedBadge } from "./JustTappedBadge";
 import Link from "next/link";
-import { Star, Award, UtensilsCrossed, FileText, ExternalLink } from "lucide-react";
+import { Star, Award, UtensilsCrossed, FileText, ExternalLink, Beer } from "lucide-react";
 import { ITEM_TYPE_LABELS, ITEM_TYPE_EMOJI } from "@/types/database";
 import { BeerCard } from "@/components/beer/BeerCard";
 import { BeerStyleBadge } from "@/components/ui/BeerStyleBadge";
@@ -150,7 +150,7 @@ export function RealtimeTapList({
       {/* Beer of the Week */}
       {featuredBeer && (
         <Link href={`/beer/${featuredBeer.id}`}>
-          <div className="card-bg-featured flex items-center gap-4 p-4 border border-[var(--accent-gold)]/30 rounded-2xl transition-all hover:border-[var(--accent-gold)]/60 group">
+          <div className="card-bg-featured flex items-center gap-4 p-4 border border-[var(--accent-gold)]/30 rounded-[14px] transition-all hover:border-[var(--accent-gold)]/60 group">
             <div
               className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
               style={{
@@ -194,7 +194,7 @@ export function RealtimeTapList({
       {/* On Tap / Full Menu */}
       <div>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-display text-2xl font-bold text-[var(--text-primary)]">
+          <h2 className="font-display text-[22px] font-bold tracking-[-0.01em] text-[var(--text-primary)]">
             {hasNonBeer ? "Menu" : "On Tap"}
           </h2>
           <span className="text-sm font-mono text-[var(--text-muted)]">
@@ -211,7 +211,7 @@ export function RealtimeTapList({
                 value={sortBy}
                 onChange={setSortBy}
                 ariaLabel="Sort tap list"
-                variant="pill"
+                variant="segmented"
                 size="sm"
                 fullWidth={false}
               />
@@ -250,8 +250,11 @@ export function RealtimeTapList({
             })}
           </div>
         ) : (
-          <div className="text-center py-12 bg-[var(--card-bg)] rounded-2xl border border-[var(--border)]">
-            <p className="text-4xl mb-3">{"🍺"}</p>
+          <div className="text-center py-12 bg-[var(--card-bg)] rounded-[14px] border border-[var(--border)]">
+            <div className="w-12 h-12 rounded-[14px] flex items-center justify-center mx-auto mb-3"
+                 style={{ background: "var(--warm-bg, var(--surface-2))" }}>
+              <Beer size={24} style={{ color: "var(--text-muted)" }} />
+            </div>
             <p className="font-display text-lg text-[var(--text-primary)]">Taps are quiet</p>
             <p className="text-sm text-[var(--text-secondary)] mt-1">
               This brewery hasn&apos;t added anything yet — check back soon.
@@ -267,8 +270,8 @@ export function RealtimeTapList({
           return (
             <div>
               <div className="flex items-center gap-2 mb-3">
-                <UtensilsCrossed size={18} className="text-[var(--accent-gold)]" />
-                <h2 className="font-display text-2xl font-bold text-[var(--text-primary)]">
+                <UtensilsCrossed size={16} className="text-[var(--accent-gold)]" />
+                <h2 className="font-display text-[22px] font-bold tracking-[-0.01em] text-[var(--text-primary)]">
                   Food Menu
                 </h2>
               </div>
@@ -277,7 +280,7 @@ export function RealtimeTapList({
                   href={menuImageUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-4 p-6 rounded-2xl border border-[var(--border)] hover:border-[var(--accent-gold)]/40 transition-colors group"
+                  className="flex items-center gap-4 p-6 rounded-[14px] border border-[var(--border)] hover:border-[var(--accent-gold)]/40 transition-colors group"
                   style={{ background: "var(--card-bg)" }}
                 >
                   <div
@@ -295,12 +298,12 @@ export function RealtimeTapList({
                     <p className="text-sm text-[var(--text-muted)]">Opens as PDF in a new tab</p>
                   </div>
                   <ExternalLink
-                    size={18}
+                    size={16}
                     className="text-[var(--text-muted)] group-hover:text-[var(--accent-gold)] transition-colors"
                   />
                 </a>
               ) : (
-                <div className="rounded-2xl border border-[var(--border)] overflow-hidden">
+                <div className="rounded-[14px] border border-[var(--border)] overflow-hidden">
                   <a href={menuImageUrl} target="_blank" rel="noopener noreferrer">
                     <img
                       src={menuImageUrl}

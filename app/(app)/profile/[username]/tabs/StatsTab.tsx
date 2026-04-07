@@ -71,10 +71,10 @@ export function StatsTab({
   return (
     <div className="space-y-6">
       {/* Sprint 171: Quick Stats — color-differentiated KPIs */}
-      <div className="card-bg-stats border border-[var(--card-border)] rounded-2xl p-4">
+      <div className="card-bg-stats border border-[var(--card-border)] rounded-[14px] p-4">
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <div
-            className="text-center rounded-2xl py-3 px-1"
+            className="text-center rounded-[14px] py-3 px-1"
             style={{ background: "color-mix(in srgb, var(--accent-blue) 8%, var(--card-bg))" }}
           >
             <p className="font-mono font-bold text-xl leading-none" style={{ color: "var(--accent-blue)" }}>
@@ -83,7 +83,7 @@ export function StatsTab({
             <p className="text-[10px] text-[var(--text-muted)] mt-1 font-mono uppercase tracking-wide">Sessions</p>
           </div>
           <div
-            className="text-center rounded-2xl py-3 px-1"
+            className="text-center rounded-[14px] py-3 px-1"
             style={{ background: "color-mix(in srgb, var(--accent-amber) 8%, var(--card-bg))" }}
           >
             <p className="font-mono font-bold text-xl leading-none" style={{ color: "var(--accent-amber)" }}>
@@ -92,7 +92,7 @@ export function StatsTab({
             <p className="text-[10px] text-[var(--text-muted)] mt-1 font-mono uppercase tracking-wide">Unique Beers</p>
           </div>
           <div
-            className="text-center rounded-2xl py-3 px-1"
+            className="text-center rounded-[14px] py-3 px-1"
             style={{ background: "color-mix(in srgb, var(--accent-green) 8%, var(--card-bg))" }}
           >
             <p className="font-mono font-bold text-xl leading-none" style={{ color: "var(--success)" }}>
@@ -101,7 +101,7 @@ export function StatsTab({
             <p className="text-[10px] text-[var(--text-muted)] mt-1 font-mono uppercase tracking-wide">Breweries</p>
           </div>
           <div
-            className="text-center rounded-2xl py-3 px-1"
+            className="text-center rounded-[14px] py-3 px-1"
             style={{ background: `color-mix(in srgb, ${current_streak > 0 ? "var(--accent-amber)" : "var(--accent-gold)"} 8%, var(--card-bg))` }}
           >
             <p
@@ -115,28 +115,50 @@ export function StatsTab({
         </div>
       </div>
 
-      {/* Level + XP Progress */}
-      <div className="card-bg-stats border border-[var(--border)] rounded-2xl p-4 space-y-2">
+      {/* Level + XP Progress — audit #12: milestone dots, warm gradient bg, prominent XP */}
+      <div
+        className="border rounded-[14px] p-4 space-y-2"
+        style={{
+          background: "linear-gradient(180deg, var(--warm-bg, var(--surface-2)) 0%, var(--card-bg, #FFFFFF) 100%)",
+          borderColor: "var(--border)",
+        }}
+      >
         <div className="flex items-center justify-between">
           <div>
-            <span className="text-xs font-mono text-[var(--accent-gold)] uppercase tracking-wider">Level {level}</span>
-            <p className="font-display font-semibold text-[var(--text-primary)]">{levelInfo.current.name}</p>
+            <span className="font-mono text-[9px] font-semibold uppercase tracking-[0.12em]" style={{ color: "var(--amber, var(--accent-gold))" }}>
+              Level {level}
+            </span>
+            <p className="font-display text-lg font-bold text-[var(--text-primary)]">{levelInfo.current.name}</p>
           </div>
           {levelInfo.next && (
             <div className="text-right">
+              <p className="font-mono text-[13px] font-bold" style={{ color: "var(--amber, var(--accent-gold))" }}>
+                {levelInfo.xpToNext} XP to go
+              </p>
               <p className="text-xs text-[var(--text-muted)]">Next: {levelInfo.next.name}</p>
-              <p className="text-xs font-mono text-[var(--text-secondary)]">{levelInfo.xpToNext} XP to go</p>
             </div>
           )}
         </div>
-        <div className="h-2 bg-[var(--surface-2)] rounded-full overflow-hidden">
+        {/* Progress bar with amber gradient fill */}
+        <div className="relative h-2.5 rounded-full overflow-hidden" style={{ background: "var(--surface-2, var(--warm-bg))" }}>
           <div
             className="h-full rounded-full transition-all duration-1000"
             style={{
-              background: "linear-gradient(to right, var(--accent-gold), var(--accent-amber))",
+              background: "linear-gradient(to right, var(--amber, var(--accent-gold)), var(--accent-amber))",
               width: `${levelInfo.progress}%`,
             }}
           />
+          {/* Milestone dots at 25%, 50%, 75% */}
+          {[25, 50, 75].map((m) => (
+            <div
+              key={m}
+              className="absolute top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full"
+              style={{
+                left: `${m}%`,
+                background: levelInfo.progress >= m ? "rgba(255,255,255,0.6)" : "var(--border)",
+              }}
+            />
+          ))}
         </div>
         {(current_streak > 0 || longest_streak > 0) && (
           <div className="flex items-center gap-3 mt-3 pt-3 border-t border-[var(--border)]">
@@ -195,7 +217,7 @@ export function StatsTab({
 
       {/* Activity Heatmap — 52-week pour pattern */}
       {heatmapData.length > 0 && (
-        <div className="border border-[var(--border)] rounded-2xl p-4 bg-[var(--surface)]">
+        <div className="border border-[var(--border)] rounded-[14px] p-4 bg-[var(--surface)]">
           <h3 className="font-display text-lg font-semibold text-[var(--text-primary)] mb-3">Pour Pattern</h3>
           <ActivityHeatmap data={heatmapData} />
         </div>

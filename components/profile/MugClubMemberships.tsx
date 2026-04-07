@@ -35,7 +35,7 @@ export function MugClubMemberships({ memberships }: MugClubMembershipsProps) {
   return (
     <div>
       <h2 className="font-display text-lg font-bold text-[var(--text-primary)] mb-3 flex items-center gap-2">
-        <Crown size={18} style={{ color: "var(--accent-gold)" }} />
+        <Crown size={16} style={{ color: "var(--accent-gold)" }} />
         Mug Club Member
       </h2>
       <div className="space-y-2">
@@ -48,7 +48,7 @@ export function MugClubMemberships({ memberships }: MugClubMembershipsProps) {
           >
             <Link href={`/brewery/${membership.mug_club?.brewery_id}`}>
               <div
-                className="rounded-2xl px-4 py-3 border transition-colors hover:border-[var(--accent-gold)]/30"
+                className="rounded-[14px] px-4 py-3 border transition-colors hover:border-[var(--accent-gold)]/30"
                 style={{
                   background: "var(--card-bg)",
                   borderColor: "var(--border)",
@@ -61,7 +61,7 @@ export function MugClubMemberships({ memberships }: MugClubMembershipsProps) {
                       background: "color-mix(in srgb, var(--accent-gold) 15%, transparent)",
                     }}
                   >
-                    <Crown size={18} style={{ color: "var(--accent-gold)" }} />
+                    <Crown size={16} style={{ color: "var(--accent-gold)" }} />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-display font-bold text-sm text-[var(--text-primary)] truncate">

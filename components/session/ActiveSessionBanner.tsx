@@ -110,7 +110,7 @@ export default function ActiveSessionBanner({ session, breweryName, beerLogs = [
               </p>
             </div>
             <button onClick={onTap}>
-              <ChevronRight size={18} className="text-black/70" />
+              <ChevronRight size={16} className="text-black/70" />
             </button>
           </div>
         </div>
