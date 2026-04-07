@@ -85,13 +85,40 @@ export function StreakDisplay({
 
   return (
     <div
-      className="rounded-2xl p-5"
+      className="card-bg-streak rounded-2xl p-5 relative overflow-hidden"
       style={{
-        backgroundColor: "var(--surface)",
-        border: "1px solid var(--border)",
+        backgroundColor: "var(--card-bg)",
+        border: "1px solid var(--card-border)",
+        borderLeft: `3px solid ${isAtRisk ? "var(--accent-amber)" : "var(--accent-gold)"}`,
       }}
     >
-      <div className="flex items-center gap-4">
+      {/* Floating sparkle particles */}
+      {currentStreak > 0 && [0, 1, 2, 3, 4].map(i => (
+        <motion.div
+          key={i}
+          className="absolute rounded-full pointer-events-none"
+          style={{
+            width: i % 2 === 0 ? 3 : 2,
+            height: i % 2 === 0 ? 3 : 2,
+            background: isAtRisk ? "var(--accent-amber)" : "var(--accent-gold)",
+            right: `${10 + i * 16}%`,
+            top: `${15 + (i * 13) % 70}%`,
+          }}
+          animate={{
+            opacity: [0, 0.6, 0],
+            y: [0, -10, 0],
+            scale: [0.5, 1.2, 0.5],
+          }}
+          transition={{
+            duration: 2.5 + i * 0.4,
+            delay: i * 0.5,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+      ))}
+
+      <div className="flex items-center gap-4 relative z-10">
         {/* Flame icon */}
         <motion.div
           initial={{ scale: 0.3, opacity: 0 }}
