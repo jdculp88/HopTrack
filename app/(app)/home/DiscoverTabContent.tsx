@@ -21,7 +21,6 @@ import {
 } from "@/components/social/DiscoveryCard";
 import type { NewBrewery, RecommendedBeer } from "./HomeFeed";
 import { RecommendationsScroll } from "@/components/social/RecommendationsScroll";
-import { AIRecommendationFeedCard } from "@/components/social/AIRecommendationFeedCard";
 import type { AIRecommendedBeer } from "@/lib/recommendations";
 import { NearbyChallengesSection } from "@/components/social/NearbyChallengesSection";
 import { TrendingSection } from "@/components/social/TrendingSection";
@@ -165,16 +164,14 @@ export function DiscoverTabContent({
         <TrendingSection defaultCity={homeCity ?? undefined} />
       </ErrorBoundary>
 
-      {/* Brewed for You — AI Recommendations (Sprint 146) */}
-      <ErrorBoundary inline context="AIRecommendations">
-        {aiRecommendations && aiRecommendations.length > 0 && (
-          <AIRecommendationFeedCard recommendations={aiRecommendations} />
-        )}
-
-        {/* For You — Algorithmic Recommendations */}
-        {recommendations && recommendations.length > 0 && (
-          <RecommendationsScroll beers={recommendations} />
-        )}
+      {/* Sprint 171: Merged "Recommended for You" — AI + algorithmic in one section */}
+      <ErrorBoundary inline context="Recommendations">
+        {(recommendations?.length || aiRecommendations?.length) ? (
+          <RecommendationsScroll
+            beers={recommendations ?? []}
+            aiBeers={aiRecommendations}
+          />
+        ) : null}
       </ErrorBoundary>
 
       {/* Trending beer reviews */}

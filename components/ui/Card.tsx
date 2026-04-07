@@ -36,9 +36,9 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
           paddingClasses[padding],
           resolvedBgClass,
           hoverable
-            ? "border-[var(--border)] hover:border-[var(--accent-gold)]/30 transition-colors"
-            : "border-[var(--border)]",
-          !resolvedBgClass && "bg-[var(--surface)]",
+            ? "border-[var(--card-border)] hover:border-[var(--accent-gold)]/30 transition-colors"
+            : "border-[var(--card-border)]",
+          !resolvedBgClass && "bg-[var(--card-bg)]",
           // Sprint 163 — Shadow & Elevation System
           !flat && (elevated
             ? "shadow-[var(--shadow-elevated)]"

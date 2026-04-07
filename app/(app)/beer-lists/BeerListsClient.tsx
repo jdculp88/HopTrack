@@ -13,11 +13,14 @@ import {
   Beer,
   Check,
   ExternalLink,
+  Star,
 } from "lucide-react";
 import { useToast } from "@/components/ui/Toast";
 import { StarRating } from "@/components/ui/StarRating";
 import Link from "next/link";
 import { Card } from "@/components/ui/Card";
+import { BeerStyleBadge } from "@/components/ui/BeerStyleBadge";
+import { getStyleFamily, getStyleVars } from "@/lib/beerStyleColors";
 import { generateGradientFromString } from "@/lib/utils";
 import type { BeerList } from "@/types/database";
 
@@ -424,20 +427,24 @@ export function BeerListsClient({ userId: _userId, initialLists }: BeerListsClie
                           </p>
                         </div>
                       ) : (
-                        <div className="divide-y" style={{ borderColor: "var(--border)" }}>
+                        <div className="px-3 py-3 space-y-3">
                           {items.map((item) => {
                             const beer = item.beer as any; // supabase join shape
+                            const styleFamily = getStyleFamily(beer?.style ?? null);
+                            const styleVars = getStyleVars(beer?.style ?? null);
                             return (
-                              <div key={item.id} className="flex items-center gap-3 px-4 py-2.5">
-                                <span
-                                  className="text-xs font-mono w-5 text-right flex-shrink-0"
-                                  style={{ color: "var(--accent-gold)" }}
-                                >
-                                  {item.position + 1}
-                                </span>
-                                {/* Beer thumbnail (Sprint 169) */}
+                              <div
+                                key={item.id}
+                                className="card-bg-reco flex items-center gap-3 p-3 rounded-xl transition-colors"
+                                data-style={styleFamily}
+                                style={{
+                                  border: "1px solid var(--card-border)",
+                                  borderLeft: `3px solid ${styleVars.primary}`,
+                                }}
+                              >
+                                {/* Beer thumbnail */}
                                 <div
-                                  className="w-10 h-10 rounded-lg flex-shrink-0 flex items-center justify-center text-xs font-bold"
+                                  className="w-12 h-12 rounded-xl flex-shrink-0 flex items-center justify-center text-sm font-bold"
                                   style={{
                                     background: beer?.cover_image_url
                                       ? `url(${beer.cover_image_url}) center/cover`
@@ -448,37 +455,33 @@ export function BeerListsClient({ userId: _userId, initialLists }: BeerListsClie
                                   {!beer?.cover_image_url && (beer?.name?.[0]?.toUpperCase() ?? "?")}
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-2">
-                                    <Link
-                                      href={`/beer/${beer?.id ?? ""}`}
-                                      className="text-sm font-medium truncate hover:underline underline-offset-2"
-                                      style={{ color: "var(--text-primary)" }}
-                                    >
-                                      {beer?.name ?? "Unknown"}
-                                    </Link>
-                                    {beer?.avg_rating != null && (
-                                      <StarRating value={Math.round(beer.avg_rating)} readonly size="sm" />
-                                    )}
-                                  </div>
-                                  <div className="flex items-center gap-1.5 mt-0.5">
-                                    {beer?.brewery?.name && (
-                                      <span className="text-[11px]" style={{ color: "var(--text-secondary)" }}>
-                                        {beer.brewery.name}
-                                      </span>
-                                    )}
-                                    {beer?.style && (
-                                      <span className="text-[11px]" style={{ color: "var(--text-muted)" }}>
-                                        {beer?.brewery?.name ? "· " : ""}{beer.style}
-                                      </span>
-                                    )}
+                                  <Link
+                                    href={`/beer/${beer?.id ?? ""}`}
+                                    className="font-display text-sm font-semibold truncate block hover:text-[var(--accent-gold)] transition-colors"
+                                    style={{ color: "var(--text-primary)" }}
+                                  >
+                                    {beer?.name ?? "Unknown"}
+                                  </Link>
+                                  {beer?.brewery?.name && (
+                                    <p className="text-[11px] truncate" style={{ color: "var(--text-muted)" }}>
+                                      {beer.brewery.name}
+                                    </p>
+                                  )}
+                                  <div className="flex items-center gap-2 mt-1.5">
+                                    {beer?.style && <BeerStyleBadge style={beer.style} size="xs" />}
                                     {beer?.abv != null && (
-                                      <span className="text-[11px] font-mono" style={{ color: "var(--text-muted)" }}>
-                                        · {beer.abv}%
+                                      <span className="text-[10px] font-mono" style={{ color: "var(--text-muted)" }}>
+                                        {beer.abv}%
+                                      </span>
+                                    )}
+                                    {beer?.avg_rating != null && (
+                                      <span className="flex items-center gap-0.5 text-[10px]" style={{ color: "var(--accent-gold)" }}>
+                                        <Star size={9} fill="currentColor" /> {beer.avg_rating.toFixed(1)}
                                       </span>
                                     )}
                                   </div>
                                   {item.note && (
-                                    <p className="text-[11px] italic mt-0.5" style={{ color: "var(--text-secondary)" }}>
+                                    <p className="text-[10px] italic mt-1 leading-relaxed" style={{ color: "var(--text-secondary)" }}>
                                       &quot;{item.note}&quot;
                                     </p>
                                   )}

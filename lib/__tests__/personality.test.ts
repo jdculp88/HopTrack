@@ -285,7 +285,7 @@ describe("Known archetype codes", () => {
     const result = computePersonality(sample);
     expect(result.code).toBe("LSRO");
     expect(result.archetype).toBe("The Loyal Local");
-    expect(result.emoji).toBe("❤️");
+    expect(result.emoji).toBe("🏠"); // Sprint 171: on-brand icon
   });
 
   it("LBRO → The Daily Hop (loyalist + bold + regular + optimist)", () => {

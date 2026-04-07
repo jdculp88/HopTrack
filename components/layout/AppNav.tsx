@@ -8,7 +8,7 @@ import {
   PlusCircle, LogOut, Gift,
 } from "lucide-react";
 import { motion, useScroll, useMotionValueEvent, useReducedMotion } from "motion/react";
-import { ThemeToggle } from "@/components/theme/ThemeToggle";
+// Sprint 171: ThemeToggle removed from nav — lives in Settings > Appearance only
 import { createClient } from "@/lib/supabase/client";
 import { useHaptic } from "@/hooks/useHaptic";
 import { HopMark } from "@/components/ui/HopMark";
@@ -302,10 +302,7 @@ export function AppNav({ username, unreadNotifications = 0, onCheckin }: AppNavP
             );
           })}
 
-          {/* Theme toggle */}
-          <div className="px-3 pt-1">
-            <ThemeToggle variant="full" />
-          </div>
+          {/* Sprint 171: Theme toggle moved to Settings > Appearance only */}
 
           {/* Logout */}
           <button

@@ -284,20 +284,21 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
           )}
         </div>
 
-        <div className="px-4 sm:px-6 -mt-12 relative z-10">
+        {/* Sprint 171: Tighter hero-to-profile transition — avatar overlaps hero */}
+        <div className="px-4 sm:px-6 -mt-16 relative z-10">
           {/* Avatar + Info */}
-          <div className="flex items-end gap-4 mb-6">
-            <div className="ring-4 ring-[var(--bg)] rounded-full">
+          <div className="flex items-end gap-4 mb-4">
+            <div className="ring-4 ring-[var(--bg)] rounded-full shadow-[var(--shadow-elevated)]">
               <UserAvatar profile={profile} size="xl" />
             </div>
-            <div className="pb-1 flex-1 min-w-0">
-              <h1 className="font-display text-4xl sm:text-5xl font-bold text-[var(--text-primary)] leading-tight drop-shadow-lg">
+            <div className="pb-2 flex-1 min-w-0">
+              <h1 className="font-display text-3xl sm:text-4xl font-bold text-[var(--text-primary)] leading-tight drop-shadow-lg">
                 {profile.display_name}
               </h1>
               <p className="text-sm text-[var(--text-muted)]">@{profile.username}</p>
             </div>
             {!isOwnProfile && (
-              <div className="pb-1">
+              <div className="pb-2">
                 <FriendButton profileId={profile.id} currentUserId={user.id} />
               </div>
             )}

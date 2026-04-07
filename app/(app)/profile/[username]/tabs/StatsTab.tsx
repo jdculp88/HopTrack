@@ -70,39 +70,39 @@ export function StatsTab({
   const { total_checkins, unique_beers, unique_breweries, current_streak, longest_streak, level } = profileStats;
   return (
     <div className="space-y-6">
-      {/* Quick Stats — 4 KPIs */}
-      <div className="card-bg-stats border border-[var(--border)] rounded-2xl p-4">
-        <div className="grid grid-cols-4 gap-2">
+      {/* Sprint 171: Quick Stats — color-differentiated KPIs */}
+      <div className="card-bg-stats border border-[var(--card-border)] rounded-2xl p-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <div
             className="text-center rounded-2xl py-3 px-1"
-            style={{ background: "color-mix(in srgb, var(--surface-2) 55%, transparent)" }}
+            style={{ background: "color-mix(in srgb, var(--accent-blue) 8%, var(--card-bg))" }}
           >
-            <p className="font-mono font-bold text-xl leading-none text-[var(--accent-gold)]">
+            <p className="font-mono font-bold text-xl leading-none" style={{ color: "var(--accent-blue)" }}>
               <CountUp value={total_checkins} duration={1.0} />
             </p>
             <p className="text-[10px] text-[var(--text-muted)] mt-1 font-mono uppercase tracking-wide">Sessions</p>
           </div>
           <div
             className="text-center rounded-2xl py-3 px-1"
-            style={{ background: "color-mix(in srgb, var(--surface-2) 55%, transparent)" }}
+            style={{ background: "color-mix(in srgb, var(--accent-amber) 8%, var(--card-bg))" }}
           >
-            <p className="font-mono font-bold text-xl leading-none text-[var(--accent-gold)]">
+            <p className="font-mono font-bold text-xl leading-none" style={{ color: "var(--accent-amber)" }}>
               <CountUp value={unique_beers} duration={1.0} delay={0.1} />
             </p>
             <p className="text-[10px] text-[var(--text-muted)] mt-1 font-mono uppercase tracking-wide">Unique Beers</p>
           </div>
           <div
             className="text-center rounded-2xl py-3 px-1"
-            style={{ background: "color-mix(in srgb, var(--surface-2) 55%, transparent)" }}
+            style={{ background: "color-mix(in srgb, var(--accent-green) 8%, var(--card-bg))" }}
           >
-            <p className="font-mono font-bold text-xl leading-none text-[var(--accent-gold)]">
+            <p className="font-mono font-bold text-xl leading-none" style={{ color: "var(--success)" }}>
               <CountUp value={unique_breweries} duration={1.0} delay={0.2} />
             </p>
             <p className="text-[10px] text-[var(--text-muted)] mt-1 font-mono uppercase tracking-wide">Breweries</p>
           </div>
           <div
             className="text-center rounded-2xl py-3 px-1"
-            style={{ background: "color-mix(in srgb, var(--surface-2) 55%, transparent)" }}
+            style={{ background: `color-mix(in srgb, ${current_streak > 0 ? "var(--accent-amber)" : "var(--accent-gold)"} 8%, var(--card-bg))` }}
           >
             <p
               className="font-mono font-bold text-xl leading-none"

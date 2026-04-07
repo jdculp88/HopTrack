@@ -10,23 +10,36 @@ import { PillTabs, type PillTab } from "@/components/ui/PillTabs";
 import { EmptyState } from "@/components/ui/EmptyState";
 import type { Notification, NotificationType } from "@/types/database";
 
+// Sprint 171: Category-consistent icon colors
+// Social → blue, Achievements → purple, Rewards → gold, System → muted
 const ICONS: Record<NotificationType, { icon: React.ReactNode; color: string }> = {
-  friend_request:      { icon: <Users size={16} />,         color: "#4A7C59" },
-  friend_checkin:      { icon: <Beer size={16} />,          color: "var(--accent-gold)" },
-  tagged_checkin:      { icon: <Users size={16} />,         color: "var(--accent-gold)" },
-  achievement_unlocked:{ icon: <Trophy size={16} />,        color: "var(--accent-amber)" },
-  reaction:            { icon: <Heart size={16} />,         color: "#C44B3A" },
-  session_cheers:      { icon: <Beer size={16} />,          color: "var(--accent-gold)" },
-  session_comment:     { icon: <MessageCircle size={16} />, color: "#5B8DEF" },
-  weekly_stats:        { icon: <TrendingUp size={16} />,    color: "var(--text-secondary)" },
+  friend_request:      { icon: <Users size={16} />,         color: "var(--accent-blue)" },
+  friend_checkin:      { icon: <Beer size={16} />,          color: "var(--accent-blue)" },
+  tagged_checkin:      { icon: <Users size={16} />,         color: "var(--accent-blue)" },
+  achievement_unlocked:{ icon: <Trophy size={16} />,        color: "var(--accent-purple)" },
+  reaction:            { icon: <Heart size={16} />,         color: "var(--accent-blue)" },
+  session_cheers:      { icon: <Beer size={16} />,          color: "var(--accent-blue)" },
+  session_comment:     { icon: <MessageCircle size={16} />, color: "var(--accent-blue)" },
+  weekly_stats:        { icon: <TrendingUp size={16} />,    color: "var(--text-muted)" },
   nudge:               { icon: <Beer size={16} />,          color: "var(--text-muted)" },
   brewery_follow:      { icon: <Heart size={16} />,         color: "var(--accent-gold)" },
-  new_tap:             { icon: <Beer size={16} />,          color: "var(--accent-amber)" },
-  new_event:           { icon: <Bell size={16} />,          color: "#5B8DEF" },
-  first_referral:      { icon: <Users size={16} />,         color: "var(--accent-gold)" },
-  group_invite:        { icon: <Users size={16} />,         color: "#5B8DEF" },
+  new_tap:             { icon: <Beer size={16} />,          color: "var(--accent-gold)" },
+  new_event:           { icon: <Bell size={16} />,          color: "var(--accent-gold)" },
+  first_referral:      { icon: <Users size={16} />,         color: "var(--accent-blue)" },
+  group_invite:        { icon: <Users size={16} />,         color: "var(--accent-blue)" },
   reward_redeemed:     { icon: <Gift size={16} />,          color: "var(--accent-gold)" },
 };
+
+/** Sprint 171: Get category accent color for border/background */
+function getCategoryColor(type: NotificationType): string {
+  const cat = CATEGORY_MAP[type];
+  switch (cat) {
+    case "social": return "var(--accent-blue)";
+    case "achievements": return "var(--accent-purple)";
+    case "rewards": return "var(--accent-gold)";
+    default: return "var(--text-muted)";
+  }
+}
 
 // Types that can be grouped when targeting the same session within 1 hour
 const GROUPABLE_TYPES: NotificationType[] = ["reaction", "session_cheers", "session_comment"];
@@ -703,11 +716,12 @@ function SingleNotification({
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, height: 0, marginBottom: 0, overflow: "hidden" }}
       transition={{ type: "spring", stiffness: 400, damping: 30 }}
-      className={`relative group flex items-start gap-4 p-4 rounded-2xl border transition-colors ${
-        !n.read
-          ? "card-bg-notification border-[var(--accent-gold)]/20"
-          : "bg-[var(--surface)]/50 border-[var(--border)]"
-      }`}
+      className="relative group flex items-start gap-4 p-4 rounded-2xl border transition-colors"
+      style={{
+        background: !n.read ? "var(--surface-2)" : "var(--card-bg)",
+        borderColor: "var(--card-border)",
+        borderLeft: !n.read ? `3px solid ${getCategoryColor(n.type)}` : `3px solid transparent`,
+      }}
     >
       <div
         className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5"

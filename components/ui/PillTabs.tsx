@@ -154,6 +154,9 @@ export function PillTabs<K extends string = string>({
         color: active ? "var(--text-primary)" : "var(--text-muted)",
         fontWeight: active ? 600 : 400,
         letterSpacing: "0.3px",
+        // Sprint 171: Active tab gets subtle fill background for visibility
+        background: active ? "color-mix(in srgb, var(--accent-gold) 8%, transparent)" : "transparent",
+        borderRadius: active ? "8px 8px 0 0" : undefined,
       };
     }
     if (variant === "pill") {
@@ -224,10 +227,11 @@ export function PillTabs<K extends string = string>({
                 )}
               </span>
               {/* Underline — absolute-positioned with layoutId */}
+              {/* Sprint 171: h-0.5 → h-[3px] for visibility */}
               {variant === "underline" && active && (
                 <motion.span
                   layoutId={`${layoutPrefix}-underline`}
-                  className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full"
+                  className="absolute bottom-0 left-0 right-0 h-[3px] rounded-full"
                   style={{ background: "var(--accent-gold)" }}
                   transition={reducedMotion ? { duration: 0 } : spring.default}
                 />

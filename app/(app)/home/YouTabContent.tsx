@@ -13,6 +13,21 @@ import { getLevelProgress } from "@/lib/xp";
 import { FeedCardSkeletons, FeedEndMessage } from "./FeedPaginationUI";
 import type { Profile, Session } from "@/types/database";
 import type { StyleDNAEntry, WishlistItem, UserAchievement } from "./HomeFeed";
+
+/** Sprint 171: Your Round visible Sunday through Saturday of the reporting week */
+function isYourRoundVisible(): boolean {
+  const now = new Date();
+  const day = now.getDay(); // 0=Sun, 6=Sat
+  // Show all week — the content covers the previous 7 days and refreshes Sunday
+  return day >= 0; // Always visible when there's data — the key gate is total_checkins > 0
+  // NOTE: If Joshua wants it hidden mid-week, change to: return day === 0 || day === 1;
+}
+
+/** Sprint 171: Wrapped visible Dec 1 through Jan 31 only */
+function isWrappedVisible(): boolean {
+  const month = new Date().getMonth(); // 0=Jan, 11=Dec
+  return month === 11 || month === 0; // December or January
+}
 import { useReactions } from "./ReactionContext";
 
 export function YouTabContent({
@@ -63,9 +78,9 @@ export function YouTabContent({
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ type: "spring", stiffness: 400, damping: 30 }}
-        className="rounded-2xl p-5 relative overflow-hidden shadow-[var(--shadow-elevated)] border border-[var(--border)]"
+        className="rounded-2xl p-5 relative overflow-hidden shadow-[var(--shadow-elevated)] border border-[var(--card-border)]"
         style={{
-          background: "var(--surface-2)",
+          background: "var(--card-bg)",
         }}
       >
         {/* Pour fill — rises from bottom, represents XP progress */}
@@ -110,128 +125,154 @@ export function YouTabContent({
             </Link>
           </div>
           {levelInfo && levelInfo.next && (
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-mono" style={{ color: "var(--text-muted)" }}>
-                {profile.xp.toLocaleString()} XP
-              </span>
-              <span className="text-[11px] font-mono" style={{ color: "var(--text-muted)" }}>
-                {levelInfo.xpToNext} to Level {levelInfo.next.level}
-              </span>
-            </div>
+            <>
+              {/* Sprint 171: Thicker XP bar with glow */}
+              <div className="h-2 rounded-full overflow-hidden mb-2" style={{ background: "color-mix(in srgb, var(--surface-3) 60%, transparent)" }}>
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${Math.max(levelInfo.progress, 3)}%` }}
+                  transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.6 }}
+                  className="h-full rounded-full"
+                  style={{
+                    background: "linear-gradient(90deg, var(--accent-gold), var(--accent-amber))",
+                    boxShadow: "0 0 8px rgba(212,168,67,0.3)",
+                  }}
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-mono" style={{ color: "var(--text-muted)" }}>
+                  {profile.xp.toLocaleString()} XP
+                </span>
+                <span className="text-[11px] font-mono" style={{ color: "var(--text-muted)" }}>
+                  {levelInfo.xpToNext} to Level {(levelInfo.next as any).level}
+                </span>
+              </div>
+            </>
           )}
         </div>
       </motion.div>
 
       {/* Stats card — grid lines treatment */}
+      {/* Sprint 171: Color-differentiated stats */}
       <div
-        className="card-bg-stats rounded-2xl p-4 shadow-[var(--shadow-card)] border border-[var(--border)]"
+        className="card-bg-stats rounded-2xl p-4 shadow-[var(--shadow-card)] border border-[var(--card-border)]"
       >
         <p className="text-[10px] font-mono uppercase tracking-widest mb-3 relative z-10" style={{ color: "var(--text-muted)" }}>
           Your Numbers
         </p>
-        <div className="grid grid-cols-4 gap-2 relative z-10">
-          <div className="text-center rounded-2xl py-3 px-1" style={{ background: "color-mix(in srgb, var(--surface-2) 55%, transparent)" }}>
-            <p className="font-mono font-bold text-xl leading-none" style={{ color: "var(--accent-gold)" }}>{profile.total_checkins}</p>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 relative z-10">
+          <div className="text-center rounded-2xl py-3 px-1" style={{ background: "color-mix(in srgb, var(--accent-blue) 8%, var(--card-bg))" }}>
+            <p className="font-mono font-bold text-xl leading-none" style={{ color: "var(--accent-blue)" }}>{profile.total_checkins}</p>
             <p className="text-[10px] text-[var(--text-muted)] mt-1 font-mono uppercase tracking-wide">Sessions</p>
           </div>
-          <div className="text-center rounded-2xl py-3 px-1" style={{ background: "color-mix(in srgb, var(--surface-2) 55%, transparent)" }}>
-            <p className="font-mono font-bold text-xl leading-none" style={{ color: "var(--accent-gold)" }}>{profile.unique_beers ?? 0}</p>
+          <div className="text-center rounded-2xl py-3 px-1" style={{ background: "color-mix(in srgb, var(--accent-amber) 8%, var(--card-bg))" }}>
+            <p className="font-mono font-bold text-xl leading-none" style={{ color: "var(--accent-amber)" }}>{profile.unique_beers ?? 0}</p>
             <p className="text-[10px] text-[var(--text-muted)] mt-1 font-mono uppercase tracking-wide">Unique Beers</p>
           </div>
-          <div className="text-center rounded-2xl py-3 px-1" style={{ background: "color-mix(in srgb, var(--surface-2) 55%, transparent)" }}>
-            <p className="font-mono font-bold text-xl leading-none" style={{ color: "var(--accent-gold)" }}>{visitedBreweries.length || (profile.unique_breweries ?? 0)}</p>
+          <div className="text-center rounded-2xl py-3 px-1" style={{ background: "color-mix(in srgb, var(--accent-green) 8%, var(--card-bg))" }}>
+            <p className="font-mono font-bold text-xl leading-none" style={{ color: "var(--success)" }}>{visitedBreweries.length || (profile.unique_breweries ?? 0)}</p>
             <p className="text-[10px] text-[var(--text-muted)] mt-1 font-mono uppercase tracking-wide">Breweries</p>
           </div>
-          <div className="text-center rounded-2xl py-3 px-1" style={{ background: "color-mix(in srgb, var(--surface-2) 55%, transparent)" }}>
+          <div className="text-center rounded-2xl py-3 px-1" style={{ background: `color-mix(in srgb, ${(profile.current_streak ?? 0) > 0 ? "var(--accent-amber)" : "var(--accent-gold)"} 8%, var(--card-bg))` }}>
             <p className="font-mono font-bold text-xl leading-none" style={{ color: (profile.current_streak ?? 0) > 0 ? "var(--accent-amber)" : "var(--accent-gold)" }}>{profile.current_streak ?? 0}</p>
             <p className="text-[10px] text-[var(--text-muted)] mt-1 font-mono uppercase tracking-wide">Day Streak</p>
           </div>
         </div>
       </div>
 
-      {/* Your Round CTA — weekly (Sprint 162) */}
-      {profile.total_checkins > 0 && (
-        <Link href="/your-round" className="block">
-          <motion.div
-            className="rounded-2xl p-5 relative overflow-hidden shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-shadow"
-            style={{
-              background: "linear-gradient(135deg, rgba(232,132,26,0.10) 0%, rgba(232,132,26,0.03) 100%)",
-              border: "1px solid rgba(232,132,26,0.20)",
-            }}
-            whileHover={{ scale: 1.01 }}
-            whileTap={{ scale: 0.99 }}
-          >
-            <div className="flex items-center gap-3.5 relative z-10">
-              <div className="p-2.5 rounded-xl" style={{ background: "rgba(232,132,26,0.12)" }}>
-                <Gift size={18} style={{ color: "var(--accent-amber)" }} />
+      {/* Sprint 171: Your Round — only show on Sunday through Saturday of reporting week */}
+      {profile.total_checkins > 0 && isYourRoundVisible() && (
+        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
+          <Link href="/your-round" className="block">
+            <motion.div
+              className="rounded-2xl p-5 relative overflow-hidden shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-shadow"
+              style={{
+                background: "linear-gradient(135deg, rgba(232,132,26,0.10) 0%, rgba(232,132,26,0.03) 100%)",
+                border: "1px solid rgba(232,132,26,0.20)",
+              }}
+              whileHover={{ scale: 1.01 }}
+              whileTap={{ scale: 0.99 }}
+            >
+              <div className="flex items-center gap-3.5 relative z-10">
+                <div className="p-2.5 rounded-xl" style={{ background: "rgba(232,132,26,0.12)" }}>
+                  <Gift size={18} style={{ color: "var(--accent-amber)" }} />
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
+                      Your Round, this week
+                    </p>
+                    <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded-full" style={{ background: "rgba(232,132,26,0.15)", color: "var(--accent-amber)" }}>NEW</span>
+                  </div>
+                  <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+                    Last 7 days of pours, highlights, and top styles
+                  </p>
+                </div>
+                <span className="text-xs font-mono" style={{ color: "var(--accent-amber)" }}>View</span>
               </div>
-              <div className="flex-1">
-                <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
-                  Your Round, this week
-                </p>
-                <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-                  Last 7 days of pours, highlights, and top styles
-                </p>
-              </div>
-              <span className="text-xs font-mono" style={{ color: "var(--accent-amber)" }}>View</span>
-            </div>
-          </motion.div>
-        </Link>
+            </motion.div>
+          </Link>
+        </motion.div>
       )}
 
-      {/* Wrapped CTA — year-in-review */}
-      {profile.total_checkins > 0 && (
-        <Link href="/wrapped" className="block">
-          <motion.div
-            className="rounded-2xl p-5 relative overflow-hidden shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-shadow"
-            style={{
-              background: "linear-gradient(135deg, rgba(212,168,67,0.10) 0%, rgba(212,168,67,0.03) 100%)",
-              border: "1px solid rgba(212,168,67,0.20)",
-            }}
-            whileHover={{ scale: 1.01 }}
-            whileTap={{ scale: 0.99 }}
-          >
-            {/* Sparkle particles */}
-            {[0, 1, 2, 3, 4, 5].map(i => (
-              <motion.div
-                key={i}
-                className="absolute rounded-full"
-                style={{
-                  width: i % 2 === 0 ? 2.5 : 2,
-                  height: i % 2 === 0 ? 2.5 : 2,
-                  background: "#D4A843",
-                  left: `${12 + i * 15}%`,
-                  top: `${20 + (i * 11) % 60}%`,
-                }}
-                animate={{
-                  opacity: [0, 0.7, 0],
-                  scale: [0.5, 1.2, 0.5],
-                  y: [0, -8, 0],
-                }}
-                transition={{
-                  duration: 2 + (i % 3) * 0.6,
-                  delay: i * 0.4,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-              />
-            ))}
-            <div className="flex items-center gap-3.5 relative z-10">
-              <div className="p-2.5 rounded-xl" style={{ background: "rgba(212,168,67,0.12)" }}>
-                <Gift size={18} style={{ color: "var(--accent-gold)" }} />
+      {/* Sprint 171: Wrapped — only visible Dec 1 through Jan 31 */}
+      {profile.total_checkins > 0 && isWrappedVisible() && (
+        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
+          <Link href="/wrapped" className="block">
+            <motion.div
+              className="rounded-2xl p-5 relative overflow-hidden shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-shadow"
+              style={{
+                background: "linear-gradient(135deg, rgba(212,168,67,0.10) 0%, rgba(212,168,67,0.03) 100%)",
+                border: "1px solid rgba(212,168,67,0.20)",
+              }}
+              whileHover={{ scale: 1.01 }}
+              whileTap={{ scale: 0.99 }}
+            >
+              {/* Sparkle particles */}
+              {[0, 1, 2, 3, 4, 5].map(i => (
+                <motion.div
+                  key={i}
+                  className="absolute rounded-full"
+                  style={{
+                    width: i % 2 === 0 ? 2.5 : 2,
+                    height: i % 2 === 0 ? 2.5 : 2,
+                    background: "#D4A843",
+                    left: `${12 + i * 15}%`,
+                    top: `${20 + (i * 11) % 60}%`,
+                  }}
+                  animate={{
+                    opacity: [0, 0.7, 0],
+                    scale: [0.5, 1.2, 0.5],
+                    y: [0, -8, 0],
+                  }}
+                  transition={{
+                    duration: 2 + (i % 3) * 0.6,
+                    delay: i * 0.4,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
+                />
+              ))}
+              <div className="flex items-center gap-3.5 relative z-10">
+                <div className="p-2.5 rounded-xl" style={{ background: "rgba(212,168,67,0.12)" }}>
+                  <Gift size={18} style={{ color: "var(--accent-gold)" }} />
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
+                      Your Wrapped is ready
+                    </p>
+                    <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded-full" style={{ background: "rgba(212,168,67,0.15)", color: "var(--accent-gold)" }}>NEW</span>
+                  </div>
+                  <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+                    See your year in beer — stats, favorites, and personality
+                  </p>
+                </div>
+                <span className="text-xs font-mono" style={{ color: "var(--accent-gold)" }}>View</span>
               </div>
-              <div className="flex-1">
-                <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
-                  Your Wrapped is ready
-                </p>
-                <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-                  See your year in beer — stats, favorites, and personality
-                </p>
-              </div>
-              <span className="text-xs font-mono" style={{ color: "var(--accent-gold)" }}>View</span>
-            </div>
-          </motion.div>
-        </Link>
+            </motion.div>
+          </Link>
+        </motion.div>
       )}
 
       {/* Activity Heatmap */}

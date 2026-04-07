@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { User, MapPin, Lock, Palette, Trash2, ChevronRight, Bell, Camera, Loader2, Check, X, Gift, Copy, AlertCircle } from "lucide-react";
+import { User, MapPin, Lock, Palette, Trash2, ChevronRight, Bell, Camera, Loader2, Check, X, Gift, Copy, AlertCircle, ImageIcon } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { createClient } from "@/lib/supabase/client";
@@ -301,6 +301,56 @@ export function SettingsClient({ profile, userEmail }: SettingsClientProps) {
               </AnimatePresence>
             </div>
           )}
+
+          {/* Sprint 171: Banner Image Upload */}
+          <Field label="Banner Image">
+            <div className="space-y-2">
+              <p className="text-xs text-[var(--text-muted)]">
+                Upload a banner image for your profile hero. Recommended: 1200x400px.
+              </p>
+              <label
+                className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border cursor-pointer transition-colors hover:border-[var(--accent-gold)]/30"
+                style={{ background: "var(--surface-2)", borderColor: "var(--border)", color: "var(--text-secondary)" }}
+              >
+                <ImageIcon size={14} />
+                <span className="text-sm font-medium">Upload Banner</span>
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/gif,image/webp"
+                  className="hidden"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    if (file.size > 5 * 1024 * 1024) {
+                      toastError("Image must be under 5MB");
+                      return;
+                    }
+                    try {
+                      const sb = createClient();
+                      const { data: { user: authUser } } = await sb.auth.getUser();
+                      if (!authUser) { toastError("Not authenticated"); return; }
+                      const ext = file.name.split(".").pop() || "jpg";
+                      const path = `${authUser.id}/banner.${ext}`;
+                      const { error: uploadErr } = await sb.storage
+                        .from("avatars")
+                        .upload(path, file, { upsert: true });
+                      if (uploadErr) throw uploadErr;
+                      const { data: { publicUrl } } = sb.storage.from("avatars").getPublicUrl(path);
+                      const bannerUrl = `${publicUrl}?t=${Date.now()}`;
+                      await fetch("/api/profile", {
+                        method: "PATCH",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ banner_url: bannerUrl }),
+                      });
+                      toastSuccess("Banner updated!");
+                    } catch {
+                      toastError("Failed to upload banner");
+                    }
+                  }}
+                />
+              </label>
+            </div>
+          </Field>
 
           <Field label="Display Name">
             <input

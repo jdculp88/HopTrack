@@ -239,7 +239,7 @@ const ARCHETYPES: Record<string, ArchetypeEntry> = {
   },
   LSRO: {
     archetype: "The Loyal Local",
-    emoji: "❤️",
+    emoji: "🏠",  // Sprint 171: on-brand icon per personality mandate
     tagline: "Same bar. Same pour. Always a great night.",
   },
 };

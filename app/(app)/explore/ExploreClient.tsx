@@ -72,7 +72,7 @@ export function ExploreClient({
   const { info } = useToast();
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  const [view, setView] = useState<ViewMode>((searchParams.get("view") as ViewMode) ?? "grid");
+  const [view, setView] = useState<ViewMode>((searchParams.get("view") as ViewMode) ?? "list"); // Sprint 171: list default
   const [query, setQuery] = useState(searchParams.get("q") ?? "");
   const [visitFilter, setVisitFilter] = useState<VisitFilter>((searchParams.get("visit") as VisitFilter) ?? "all");
   const [typeFilter, setTypeFilter] = useState<BreweryType | "all">((searchParams.get("type") as BreweryType) ?? "all");
@@ -272,8 +272,8 @@ export function ExploreClient({
           className="w-full"
         />
 
-        {/* Filter bar — collapsible below search */}
-        <div className="flex items-center gap-2 flex-wrap">
+        {/* Filter bar — Sprint 171: sticky + proper spacing */}
+        <div className="flex items-center gap-3 flex-wrap sticky top-0 z-20 bg-[var(--bg)]/80 backdrop-blur-sm py-2 -mx-1 px-1">
           {/* Filter toggle */}
           <button
             onClick={() => setShowFilters((v) => !v)}

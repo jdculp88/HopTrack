@@ -229,12 +229,13 @@ export function SeasonalBeersScroll({ beers }: { beers: SeasonalBeer[] }) {
             initial={variants.slideUpSmall.initial}
             animate={variants.slideUpSmall.animate}
             transition={{ delay: i * 0.05, ...transition.normal }}
-            className="card-bg-seasonal rounded-xl p-3.5 flex-shrink-0"
+            className="card-bg-reco rounded-xl p-3.5 flex-shrink-0 relative"
+            data-style={getStyleFamily(beer.style)}
             style={{
-              border: '1px solid var(--surface-warm-border)',
-              minWidth: 140,
-              maxWidth: 160,
-              "--seasonal-color": getStyleVars(beer.style).primary,
+              border: '1px solid var(--card-border)',
+              borderLeft: `3px solid ${getStyleVars(beer.style).primary}`,
+              minWidth: 150,
+              maxWidth: 170,
             } as React.CSSProperties}
           >
             <span

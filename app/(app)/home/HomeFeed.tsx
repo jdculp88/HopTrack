@@ -507,6 +507,7 @@ export function HomeFeed({
                   currentUserId={currentUserId}
                   friendCount={friendCount}
                   activeFriendCount={activeFriendSessions.length}
+                  currentStreak={profile?.current_streak ?? 0}
                   loading={friendsPagination.loading}
                   hasMore={friendsPagination.hasMore}
                   sentinelRef={friendsPagination.sentinelRef}
