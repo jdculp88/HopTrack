@@ -104,15 +104,36 @@ export function PersonalityBadge({
 
   const axisLetters = personality.code.split("");
 
+  // Sprint 171: Personality-themed colors based on archetype axes
+  const axisColors = {
+    E: "var(--accent-blue)",    // Explorer = blue (adventure)
+    L: "var(--accent-amber)",   // Loyalist = amber (warmth)
+    B: "var(--ipa-green)",      // Bold = hop green
+    S: "var(--saison-peach)",   // Smooth = peach
+    H: "var(--accent-purple)",  // Hunter = purple (discovery)
+    R: "var(--accent-gold)",    // Regular = gold (reliability)
+    J: "var(--sour-berry)",     // Judge = berry (discerning)
+    O: "var(--lager-sky)",      // Optimist = sky blue (open)
+  };
+  const c1 = axisColors[personality.code[0] as keyof typeof axisColors] ?? "var(--accent-gold)";
+  const c2 = axisColors[personality.code[1] as keyof typeof axisColors] ?? "var(--accent-amber)";
+
   return (
     <Card padding="spacious" className="mb-4 relative overflow-hidden">
-      {/* Gold shimmer accent */}
+      {/* Sprint 171: Personality-colored gradient accent */}
       <div
         aria-hidden="true"
-        className="absolute inset-x-0 top-0 h-0.5"
+        className="absolute inset-x-0 top-0 h-1"
         style={{
-          background:
-            "linear-gradient(90deg, transparent 0%, var(--accent-gold) 50%, transparent 100%)",
+          background: `linear-gradient(90deg, ${c1} 0%, ${c2} 50%, var(--accent-gold) 100%)`,
+        }}
+      />
+      {/* Subtle background mesh from personality colors */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: `radial-gradient(ellipse at 0% 0%, color-mix(in srgb, ${c1} 8%, transparent) 0%, transparent 50%), radial-gradient(ellipse at 100% 100%, color-mix(in srgb, ${c2} 8%, transparent) 0%, transparent 50%)`,
         }}
       />
       <div className="flex items-center justify-between gap-3">
