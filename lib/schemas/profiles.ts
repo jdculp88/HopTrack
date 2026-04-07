@@ -19,6 +19,7 @@ export const profileUpdateSchema = z.object({
   bio: z.string().trim().max(500).optional(),
   home_city: z.string().trim().max(100).optional(),
   avatar_url: z.string().url().optional().or(z.literal("")),
+  banner_url: z.string().url().optional().or(z.literal("")).or(z.null()),
   is_public: z.boolean().optional(),
   notification_preferences: z.record(z.string(), z.boolean()).optional(),
 });

@@ -45,16 +45,15 @@ export function ExploreShell(props: ExploreShellProps) {
 
   return (
     <div>
-      {/* Mode pills */}
-      <div className="px-4 sm:px-6 mb-4">
+      {/* Sprint 171: Mode navigation — segmented, full-width, inside content area */}
+      <div className="px-4 sm:px-6 mb-6">
         <PillTabs
           tabs={modePills}
           value={mode}
           onChange={setMode}
           ariaLabel="Explore modes"
-          variant="pill"
-          snapScroll
-          fullWidth={false}
+          variant="segmented"
+          fullWidth
         />
       </div>
 

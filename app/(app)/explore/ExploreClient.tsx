@@ -236,8 +236,7 @@ export function ExploreClient({
     <div className="max-w-5xl mx-auto px-4 py-6 space-y-6">
       {/* Hero Search */}
       <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h1 className="font-sans text-3xl font-bold text-[var(--text-primary)]">Explore</h1>
+        <div className="flex items-center justify-end">
           <div className="flex items-center gap-2">
             {/* View toggle */}
             <div className="flex items-center bg-[var(--card-bg)] border border-[var(--card-border)] rounded-xl p-1 shadow-[var(--shadow-card)]">

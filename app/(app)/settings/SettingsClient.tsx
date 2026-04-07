@@ -337,7 +337,7 @@ export function SettingsClient({ profile, userEmail }: SettingsClientProps) {
                       if (uploadErr) throw uploadErr;
                       const { data: { publicUrl } } = sb.storage.from("avatars").getPublicUrl(path);
                       const bannerUrl = `${publicUrl}?t=${Date.now()}`;
-                      await fetch("/api/profile", {
+                      await fetch("/api/profiles", {
                         method: "PATCH",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ banner_url: bannerUrl }),
