@@ -35,7 +35,7 @@ export function PageHeader({ title, subtitle, icon: Icon, action, helpAction, cl
             </div>
           )}
           <div className="flex items-center gap-2">
-            <h1 className="font-display text-3xl font-bold" style={{ color: "var(--text-primary)" }}>
+            <h1 className="font-display text-3xl font-bold" style={{ color: "var(--text-primary)", letterSpacing: "-0.02em" }}>
               {title}
             </h1>
             {helpAction && <div className="flex-shrink-0">{helpAction}</div>}

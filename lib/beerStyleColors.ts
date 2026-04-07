@@ -1,8 +1,11 @@
 /**
- * Beer & Beverage Style Color System — Sprint 63 + Sprint 83
- * Maps any beer style string → one of 6 beer color families.
+ * Beer & Beverage Style Color System — Design System v2.0
+ * Maps any beer style string → one of 10 beer color families.
  * Maps non-beer item types → dedicated category colors (Sprint 83).
  * Each family maps to CSS variables defined in globals.css.
+ *
+ * 4 values per family: primary (saturated), light (mid), soft (lighter), tint (background wash).
+ * Legacy: `light` field = tint for backward compatibility. Use `tint` for new code.
  *
  * Rule: Style = Color, Always.
  * IPA is always hop green. Stout is always espresso. Cider is always orchard rose. No exceptions.
@@ -10,22 +13,33 @@
 
 export type BeerStyleFamily =
   | "ipa" | "stout" | "sour" | "porter" | "lager" | "saison"
+  | "pilsner" | "amber" | "dipa" | "pale_ale"
   | "cider" | "wine" | "cocktail" | "na"
   | "default";
 
-/** CSS variable names for each color family */
-export const STYLE_FAMILY_VARS: Record<BeerStyleFamily, { primary: string; light: string; soft: string }> = {
-  ipa:      { primary: "var(--ipa-green)",          light: "var(--ipa-green-light)",        soft: "var(--ipa-green-soft)" },
-  stout:    { primary: "var(--stout-espresso-mid)", light: "var(--stout-espresso-light)",   soft: "var(--stout-espresso-mid)" },
-  sour:     { primary: "var(--sour-berry)",         light: "var(--sour-berry-light)",       soft: "var(--sour-berry-soft)" },
-  porter:   { primary: "var(--porter-plum)",        light: "var(--porter-plum-light)",      soft: "var(--porter-plum-soft)" },
-  lager:    { primary: "var(--lager-sky)",          light: "var(--lager-sky-light)",        soft: "var(--lager-sky-soft)" },
-  saison:   { primary: "var(--saison-peach)",       light: "var(--saison-peach-light)",     soft: "var(--saison-peach)" },
-  cider:    { primary: "var(--cider-rose)",         light: "var(--cider-rose-light)",       soft: "var(--cider-rose-soft)" },
-  wine:     { primary: "var(--wine-burgundy)",      light: "var(--wine-burgundy-light)",    soft: "var(--wine-burgundy-soft)" },
-  cocktail: { primary: "var(--cocktail-teal)",      light: "var(--cocktail-teal-light)",    soft: "var(--cocktail-teal-soft)" },
-  na:       { primary: "var(--na-lemon)",           light: "var(--na-lemon-light)",         soft: "var(--na-lemon-soft)" },
-  default:  { primary: "var(--accent-gold)",        light: "var(--surface-2)",              soft: "var(--accent-amber)" },
+/** CSS variable names for each color family (4 values: primary/light/soft/tint) */
+export const STYLE_FAMILY_VARS: Record<BeerStyleFamily, {
+  primary: string;
+  light: string;   // Legacy: points to tint for backward compat
+  soft: string;
+  tint: string;    // DS v2: lightest background wash
+  lt: string;      // DS v2: mid-light shade
+}> = {
+  stout:    { primary: "var(--stout-espresso)",     light: "var(--stout-espresso-light)",   soft: "var(--stout-espresso-soft)",    tint: "var(--stout-espresso-tint)",    lt: "var(--stout-espresso-lt)" },
+  porter:   { primary: "var(--porter-plum)",        light: "var(--porter-plum-light)",      soft: "var(--porter-plum-soft)",       tint: "var(--porter-plum-tint)",       lt: "var(--porter-plum-lt)" },
+  ipa:      { primary: "var(--ipa-green)",          light: "var(--ipa-green-light)",        soft: "var(--ipa-green-soft)",         tint: "var(--ipa-green-tint)",         lt: "var(--ipa-green-lt)" },
+  sour:     { primary: "var(--sour-berry)",         light: "var(--sour-berry-light)",       soft: "var(--sour-berry-soft)",        tint: "var(--sour-berry-tint)",        lt: "var(--sour-berry-lt)" },
+  lager:    { primary: "var(--lager-sky)",          light: "var(--lager-sky-light)",        soft: "var(--lager-sky-soft)",         tint: "var(--lager-sky-tint)",         lt: "var(--lager-sky-lt)" },
+  saison:   { primary: "var(--saison-peach)",       light: "var(--saison-peach-light)",     soft: "var(--saison-peach-soft)",      tint: "var(--saison-peach-tint)",      lt: "var(--saison-peach-lt)" },
+  pilsner:  { primary: "var(--pilsner-grain)",      light: "var(--pilsner-grain-tint)",     soft: "var(--pilsner-grain-soft)",     tint: "var(--pilsner-grain-tint)",     lt: "var(--pilsner-grain-lt)" },
+  amber:    { primary: "var(--amber-fire)",         light: "var(--amber-fire-tint)",        soft: "var(--amber-fire-soft)",        tint: "var(--amber-fire-tint)",        lt: "var(--amber-fire-lt)" },
+  dipa:     { primary: "var(--dipa-hop)",           light: "var(--dipa-hop-tint)",          soft: "var(--dipa-hop-soft)",          tint: "var(--dipa-hop-tint)",          lt: "var(--dipa-hop-lt)" },
+  pale_ale: { primary: "var(--pale-meadow)",        light: "var(--pale-meadow-tint)",       soft: "var(--pale-meadow-soft)",       tint: "var(--pale-meadow-tint)",       lt: "var(--pale-meadow-lt)" },
+  cider:    { primary: "var(--cider-rose)",         light: "var(--cider-rose-light)",       soft: "var(--cider-rose-soft)",        tint: "var(--cider-rose-light)",       lt: "var(--cider-rose-soft)" },
+  wine:     { primary: "var(--wine-burgundy)",      light: "var(--wine-burgundy-light)",    soft: "var(--wine-burgundy-soft)",     tint: "var(--wine-burgundy-light)",    lt: "var(--wine-burgundy-soft)" },
+  cocktail: { primary: "var(--cocktail-teal)",      light: "var(--cocktail-teal-light)",    soft: "var(--cocktail-teal-soft)",     tint: "var(--cocktail-teal-light)",    lt: "var(--cocktail-teal-soft)" },
+  na:       { primary: "var(--na-lemon)",           light: "var(--na-lemon-light)",         soft: "var(--na-lemon-soft)",          tint: "var(--na-lemon-light)",         lt: "var(--na-lemon-soft)" },
+  default:  { primary: "var(--accent-gold)",        light: "var(--surface-2)",              soft: "var(--accent-amber)",           tint: "var(--surface-2)",              lt: "var(--accent-amber)" },
 };
 
 /** Maps item_type values → category color family (non-beer items) */
@@ -40,13 +54,20 @@ const ITEM_TYPE_TO_FAMILY: Record<string, BeerStyleFamily> = {
 const STYLE_TO_FAMILY: Record<string, BeerStyleFamily> = {
   // IPA family — hop green
   "IPA":               "ipa",
-  "Double IPA":        "ipa",
   "Hazy IPA":          "ipa",
   "Session IPA":       "ipa",
-  "Pale Ale":          "ipa",
   "New England IPA":   "ipa",
   "West Coast IPA":    "ipa",
-  "Imperial IPA":      "ipa",
+
+  // DIPA family — deep hop (DS v2: split from IPA)
+  "Double IPA":        "dipa",
+  "Imperial IPA":      "dipa",
+  "Triple IPA":        "dipa",
+
+  // Pale Ale family — meadow (DS v2: split from IPA)
+  "Pale Ale":          "pale_ale",
+  "American Pale Ale": "pale_ale",
+  "English Pale Ale":  "pale_ale",
 
   // Stout family — espresso
   "Stout":             "stout",
@@ -74,26 +95,33 @@ const STYLE_TO_FAMILY: Record<string, BeerStyleFamily> = {
 
   // Lager family — crisp sky
   "Lager":             "lager",
-  "Pilsner":           "lager",
   "Kolsch":            "lager",
   "Kölsch":            "lager",
   "Blonde Ale":        "lager",
   "Cream Ale":         "lager",
   "Helles":            "lager",
-  "Märzen":            "lager",
-  "Oktoberfest":       "lager",
 
-  // Saison family — harvest peach (closest to core brand gold)
+  // Pilsner family — golden grain (DS v2: split from lager)
+  "Pilsner":           "pilsner",
+  "Czech Pilsner":     "pilsner",
+  "German Pilsner":    "pilsner",
+
+  // Saison/Wheat family — harvest peach
   "Wheat":             "saison",
   "Hefeweizen":        "saison",
   "Belgian":           "saison",
   "Saison":            "saison",
-  "Amber":             "saison",
-  "Red Ale":           "saison",
   "Witbier":           "saison",
   "Dunkel":            "saison",
   "Belgian Tripel":    "saison",
   "Belgian Dubbel":    "saison",
+
+  // Amber family — copper fire (DS v2: split from saison)
+  "Amber":             "amber",
+  "Red Ale":           "amber",
+  "Irish Red":         "amber",
+  "Märzen":            "amber",
+  "Oktoberfest":       "amber",
 };
 
 /**

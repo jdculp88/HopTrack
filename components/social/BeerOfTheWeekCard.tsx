@@ -5,6 +5,7 @@ import { motion } from 'motion/react'
 import { variants, transition } from '@/lib/animation'
 import { Star } from 'lucide-react'
 import { getGlass, getGlassSvgContent } from '@/lib/glassware'
+import { BeerStyleBadge } from '@/components/ui/BeerStyleBadge'
 
 export interface FeaturedBeer {
   id: string
@@ -60,9 +61,7 @@ export function BeerOfTheWeekCard({ beer, index = 0 }: { beer: FeaturedBeer; ind
             {/* Style + ABV */}
             <div className="flex items-center gap-2 mt-0.5">
               {beer.style && (
-                <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                  {beer.style}
-                </span>
+                <BeerStyleBadge style={beer.style} size="xs" />
               )}
               {beer.abv && (
                 <span className="text-xs font-mono" style={{ color: 'var(--text-muted)' }}>

@@ -89,6 +89,7 @@
   --bg:              #FDFAF5;  /* Warm Cream — page background */
   --surface:         #FDFAF5;  /* Alias for bg */
   --card-bg:         #FFFFFF;  /* White — card backgrounds */
+  --card:            #FFFFFF;  /* Design System v2 alias */
   --surface-2:       #F7F1E8;  /* Warm Mist — inputs, pills, subtle fills */
   --surface-3:       #EDE3D4;  /* Parchment Deep — active tabs, pressed states */
   --surface-glass:   rgba(255, 255, 255, 0.75);
@@ -101,6 +102,7 @@
   --text-primary:    #2C1810;  /* Espresso — NOT pure black, warm dark brown */
   --text-secondary:  #7A6B5A;  /* Bark — descriptions, supporting text */
   --text-muted:      #A89880;  /* Sandstone — timestamps, labels, metadata */
+  --text-tertiary:   #A89880;  /* Design System v2 alias for --text-muted */
 
   /* ── Brand Accent ───────────────────────────────────────────────────────── */
   --accent-gold:     #C4883E;  /* HopTrack Amber — primary brand accent, CTAs */
@@ -113,6 +115,8 @@
   /* ── Functional Colors (UI states + gamification ONLY) ──────────────────── */
   --danger:          #C0392B;  /* func-error */
   --success:         #2D8F4E;  /* func-success */
+  --func-error:      #C0392B;  /* Design System v2 alias for --danger */
+  --func-success:    #2D8F4E;  /* Design System v2 alias for --success */
   --func-warning:    #E8A838;  /* Streaks, challenges, attention */
   --func-info:       #3498DB;  /* New badges, notifications */
 
@@ -132,34 +136,83 @@
   --shadow-card-hover: var(--shadow-sm);
   --shadow-elevated:   var(--shadow-md);
   --glow-gold:         0 0 20px rgba(196,154,53,0.12);
+  /* DS v2: beer-tinted shadow — set --shadow-color inline via style prop */
+  --shadow-color:      rgba(196,136,62,0.12);  /* default: amber */
+  --shadow-colored:    0 4px 16px var(--shadow-color);
 
   /* ── Warm Gradient Treatment ────────────────────────────────────────────── */
   --surface-warm:        linear-gradient(135deg, #F7F1E8 0%, #FFFFFF 100%);
   --surface-warm-border: #E8D9C0;
 
-  /* ── Beer Style Colors (light mode — tint backgrounds, primary content) ── */
-  --ipa-green:              #4A7C2E;   /* Hop Green primary */
-  --ipa-green-light:        #F0F5EC;   /* Tint background */
-  --ipa-green-soft:         #8BBD6F;   /* Soft accent */
+  /* ── Beer Style Colors — Content Layer (4 values: primary/light/soft/tint) ── */
+  /* These appear ONLY on beer/beverage content elements. Never on UI chrome. */
 
-  --stout-espresso:         #3D2B1F;   /* Espresso primary */
-  --stout-espresso-light:   #F5F0EC;   /* Tint background */
-  --stout-espresso-mid:     #8B6F5E;   /* Soft */
+  /* Stout → Espresso */
+  --stout-espresso:         #3D2B1F;   /* primary */
+  --stout-espresso-light:   #F5F0EC;   /* tint (legacy name) */
+  --stout-espresso-mid:     #8B6F5E;   /* soft (legacy name) */
+  --stout-espresso-lt:      #5C4033;   /* light (DS v2) */
+  --stout-espresso-soft:    #8B6F5E;   /* soft (DS v2 alias) */
+  --stout-espresso-tint:    #F5F0EC;   /* tint (DS v2 alias) */
 
-  --sour-berry:             #9B2D5E;   /* Wild Berry primary */
-  --sour-berry-light:       #F6EFF3;   /* Tint background */
-  --sour-berry-soft:        #DB6D9E;   /* Soft */
+  /* Porter → Barrel Plum */
+  --porter-plum:            #5B3A6B;   /* primary */
+  --porter-plum-light:      #F4F0F6;   /* tint (legacy name) */
+  --porter-plum-soft:       #9B7AAB;   /* soft */
+  --porter-plum-lt:         #7B5A8B;   /* light (DS v2) */
+  --porter-plum-tint:       #F4F0F6;   /* tint (DS v2 alias) */
 
-  --porter-plum:            #5B3A6B;   /* Barrel Plum primary */
-  --porter-plum-light:      #F4F0F6;   /* Tint background */
-  --porter-plum-soft:       #9B7AAB;   /* Soft */
+  /* IPA → Hop Green */
+  --ipa-green:              #4A7C2E;   /* primary */
+  --ipa-green-light:        #F0F5EC;   /* tint (legacy name) */
+  --ipa-green-soft:         #8BBD6F;   /* soft */
+  --ipa-green-lt:           #6B9D4F;   /* light (DS v2) */
+  --ipa-green-tint:         #F0F5EC;   /* tint (DS v2 alias) */
 
-  --lager-sky:              #2E6B8A;   /* Crisp Sky primary */
-  --lager-sky-light:        #EDF4F7;   /* Tint background */
-  --lager-sky-soft:         #6EABCA;   /* Soft */
+  /* Sour → Wild Berry */
+  --sour-berry:             #9B2D5E;   /* primary */
+  --sour-berry-light:       #F6EFF3;   /* tint (legacy name) */
+  --sour-berry-soft:        #DB6D9E;   /* soft */
+  --sour-berry-lt:          #BB4D7E;   /* light (DS v2) */
+  --sour-berry-tint:        #F6EFF3;   /* tint (DS v2 alias) */
 
-  --saison-peach:           #C4853E;   /* Harvest Peach primary */
-  --saison-peach-light:     #F9F3EC;   /* Tint background */
+  /* Lager → Crisp Sky */
+  --lager-sky:              #2E6B8A;   /* primary */
+  --lager-sky-light:        #EDF4F7;   /* tint (legacy name) */
+  --lager-sky-soft:         #6EABCA;   /* soft */
+  --lager-sky-lt:           #4E8BAA;   /* light (DS v2) */
+  --lager-sky-tint:         #EDF4F7;   /* tint (DS v2 alias) */
+
+  /* Wheat → Harvest Peach */
+  --saison-peach:           #C4853E;   /* primary */
+  --saison-peach-light:     #F9F3EC;   /* tint (legacy name) */
+  --saison-peach-soft:      #E4C57E;   /* soft (DS v2) */
+  --saison-peach-lt:        #D4A55E;   /* light (DS v2) */
+  --saison-peach-tint:      #F9F3EC;   /* tint (DS v2 alias) */
+
+  /* Pilsner → Golden Grain (NEW — DS v2) */
+  --pilsner-grain:          #D4A830;   /* primary */
+  --pilsner-grain-lt:       #E4C850;   /* light */
+  --pilsner-grain-soft:     #F4E870;   /* soft */
+  --pilsner-grain-tint:     #FAF6EA;   /* tint */
+
+  /* Amber → Copper Fire (NEW — DS v2) */
+  --amber-fire:             #B5651D;   /* primary */
+  --amber-fire-lt:          #D5852D;   /* light */
+  --amber-fire-soft:        #F5A53D;   /* soft */
+  --amber-fire-tint:        #F8F1E9;   /* tint */
+
+  /* DIPA → Deep Hop (NEW — DS v2) */
+  --dipa-hop:               #3A6B1E;   /* primary */
+  --dipa-hop-lt:            #5A8B3E;   /* light */
+  --dipa-hop-soft:          #7AAB5E;   /* soft */
+  --dipa-hop-tint:          #EFF5EB;   /* tint */
+
+  /* Pale Ale → Meadow (NEW — DS v2) */
+  --pale-meadow:            #7A9B3E;   /* primary */
+  --pale-meadow-lt:         #9ABB5E;   /* light */
+  --pale-meadow-soft:       #BAD87E;   /* soft */
+  --pale-meadow-tint:       #F3F6EE;   /* tint */
 
   /* ── Beverage Category Colors (light mode) ──────────────────────────────── */
   --cider-rose:             #C4526C;   /* Orchard Rose */
@@ -213,18 +266,24 @@
 [data-theme="dark"] {
   --bg:              #1A0F08;  /* Deep Barrel */
   --surface:         #1A0F08;
+  --surface-dark:    #1A0F08;  /* DS v2 alias: Deep Barrel */
   --card-bg:         #241810;  /* Charred Oak */
+  --card:            #241810;
+  --card-dark:       #241810;  /* DS v2 alias: Charred Oak */
   --surface-2:       #2E1F14;  /* Roasted */
   --surface-3:       #3D2B1F;
   --surface-glass:   rgba(26, 15, 8, 0.85);
   --border:          #3D2B1F;  /* Leather */
   --card-border:     #3D2B1F;
   --warm-bg:         #2E1F14;  /* Dark Roasted */
+  --warm-bg-dark:    #2E1F14;  /* DS v2 alias: Roasted */
   --warm-bg-deep:    #3D2B1F;
+  --border-dark:     #3D2B1F;  /* DS v2 alias: Leather */
 
   --text-primary:    #FDFAF5;
   --text-secondary:  #B5A898;
   --text-muted:      #7A6B5A;
+  --text-tertiary:   #7A6B5A;
 
   --accent-gold:     #C4883E;  /* Same amber — pops on dark */
   --amber:           #C4883E;
@@ -235,6 +294,8 @@
 
   --danger:          #C44B3A;
   --success:         #3D7A52;
+  --func-error:      #C44B3A;
+  --func-success:    #3D7A52;
   --func-warning:    #E8A838;
   --func-info:       #3498DB;
 
@@ -256,29 +317,64 @@
   --surface-warm:        linear-gradient(135deg, color-mix(in srgb, var(--accent-gold) 6%, #1A0F08), #1A0F08);
   --surface-warm-border: color-mix(in srgb, var(--accent-gold) 18%, #3D2B1F);
 
-  /* Beer style colors — light variants (MORE vivid on dark) */
-  --ipa-green:              #6B9D4F;
-  --ipa-green-light:        #1E2A18;   /* Dark tint */
-  --ipa-green-soft:         #8BBD6F;
-
+  /* Beer style colors — vivid on dark, dark tint backgrounds */
   --stout-espresso:         #5C4033;
-  --stout-espresso-light:   #2E2018;   /* Dark tint */
+  --stout-espresso-light:   #2E2018;
   --stout-espresso-mid:     #8B6F5E;
-
-  --sour-berry:             #BB4D7E;
-  --sour-berry-light:       #2E1A24;   /* Dark tint */
-  --sour-berry-soft:        #DB6D9E;
+  --stout-espresso-lt:      #8B6F5E;
+  --stout-espresso-soft:    #8B6F5E;
+  --stout-espresso-tint:    #2E2018;
 
   --porter-plum:            #7B5A8B;
-  --porter-plum-light:      #2A1E2E;   /* Dark tint */
+  --porter-plum-light:      #2A1E2E;
   --porter-plum-soft:       #9B7AAB;
+  --porter-plum-lt:         #9B7AAB;
+  --porter-plum-tint:       #2A1E2E;
+
+  --ipa-green:              #6B9D4F;
+  --ipa-green-light:        #1E2A18;
+  --ipa-green-soft:         #8BBD6F;
+  --ipa-green-lt:           #8BBD6F;
+  --ipa-green-tint:         #1E2A18;
+
+  --sour-berry:             #BB4D7E;
+  --sour-berry-light:       #2E1A24;
+  --sour-berry-soft:        #DB6D9E;
+  --sour-berry-lt:          #DB6D9E;
+  --sour-berry-tint:        #2E1A24;
 
   --lager-sky:              #4E8BAA;
-  --lager-sky-light:        #1A2430;   /* Dark tint */
+  --lager-sky-light:        #1A2430;
   --lager-sky-soft:         #6EABCA;
+  --lager-sky-lt:           #6EABCA;
+  --lager-sky-tint:         #1A2430;
 
   --saison-peach:           #D4A55E;
-  --saison-peach-light:     #2E2418;   /* Dark tint */
+  --saison-peach-light:     #2E2418;
+  --saison-peach-soft:      #E4C57E;
+  --saison-peach-lt:        #E4C57E;
+  --saison-peach-tint:      #2E2418;
+
+  /* New families (DS v2) — dark mode */
+  --pilsner-grain:          #E4C850;
+  --pilsner-grain-lt:       #F4E870;
+  --pilsner-grain-soft:     #F4E870;
+  --pilsner-grain-tint:     #2A2208;
+
+  --amber-fire:             #D5852D;
+  --amber-fire-lt:          #F5A53D;
+  --amber-fire-soft:        #F5A53D;
+  --amber-fire-tint:        #2E1E10;
+
+  --dipa-hop:               #5A8B3E;
+  --dipa-hop-lt:            #7AAB5E;
+  --dipa-hop-soft:          #7AAB5E;
+  --dipa-hop-tint:          #1A2A14;
+
+  --pale-meadow:            #9ABB5E;
+  --pale-meadow-lt:         #BAD87E;
+  --pale-meadow-soft:       #BAD87E;
+  --pale-meadow-tint:       #1E2A14;
 
   --cider-rose:             #D08878;
   --cider-rose-light:       #2A1410;
@@ -310,6 +406,7 @@
   --bg:              #000000;
   --surface:         #0A0A0A;
   --card-bg:         #111113;  /* Sprint 171: cool-neutral card surface for OLED */
+  --card:            #111113;
   --surface-2:       #141414;
   --surface-3:       #1E1E1E;
   --surface-glass:   rgba(10, 10, 10, 0.85);
@@ -318,6 +415,7 @@
   --text-primary:    #F5F0E8;
   --text-secondary:  #C4B89E;
   --text-muted:      #8B7D6E;
+  --text-tertiary:   #8B7D6E;
   --accent-gold:     #D4A843;
   --accent-amber:    #E8841A;
   --accent-green:    #2D5A3D;
@@ -325,6 +423,8 @@
   --accent-purple:   #8B6CC1;  /* Sprint 171 */
   --danger:          #C44B3A;
   --success:         #3D7A52;
+  --func-error:      #C44B3A;
+  --func-success:    #3D7A52;
   --skeleton-base:   #0A0A0A;
   --skeleton-shine:  #141414;
   --scrollbar-track: #0A0A0A;
@@ -338,29 +438,64 @@
   --surface-warm:      linear-gradient(135deg, color-mix(in srgb, var(--accent-gold) 5%, #0A0A0A), #0A0A0A);
   --surface-warm-border: color-mix(in srgb, var(--accent-gold) 14%, #2A2A2A);
 
-  /* Beer style colors — same as dark mode (designed for dark backgrounds) */
-  --ipa-green:              #5a8a4a;
-  --ipa-green-light:        #0C1A08;
-  --ipa-green-soft:         #7aaa6a;
-
+  /* Beer style colors — OLED (designed for true black backgrounds) */
   --stout-espresso:         #3d2b1f;
   --stout-espresso-light:   #0E0804;
   --stout-espresso-mid:     #6b5445;
-
-  --sour-berry:             #a8456a;
-  --sour-berry-light:       #18060E;
-  --sour-berry-soft:        #c87090;
+  --stout-espresso-lt:      #6b5445;
+  --stout-espresso-soft:    #6b5445;
+  --stout-espresso-tint:    #0E0804;
 
   --porter-plum:            #5c3d5e;
   --porter-plum-light:      #0E0610;
   --porter-plum-soft:       #8a6a8c;
+  --porter-plum-lt:         #8a6a8c;
+  --porter-plum-tint:       #0E0610;
+
+  --ipa-green:              #5a8a4a;
+  --ipa-green-light:        #0C1A08;
+  --ipa-green-soft:         #7aaa6a;
+  --ipa-green-lt:           #7aaa6a;
+  --ipa-green-tint:         #0C1A08;
+
+  --sour-berry:             #a8456a;
+  --sour-berry-light:       #18060E;
+  --sour-berry-soft:        #c87090;
+  --sour-berry-lt:          #c87090;
+  --sour-berry-tint:        #18060E;
 
   --lager-sky:              #4a7a8a;
   --lager-sky-light:        #061216;
   --lager-sky-soft:         #6a9aaa;
+  --lager-sky-lt:           #6a9aaa;
+  --lager-sky-tint:         #061216;
 
   --saison-peach:           #d48a50;
   --saison-peach-light:     #160C02;
+  --saison-peach-soft:      #E4C57E;
+  --saison-peach-lt:        #E4C57E;
+  --saison-peach-tint:      #160C02;
+
+  /* New families (DS v2) — OLED mode */
+  --pilsner-grain:          #C4A830;
+  --pilsner-grain-lt:       #E4C850;
+  --pilsner-grain-soft:     #E4C850;
+  --pilsner-grain-tint:     #141002;
+
+  --amber-fire:             #C5751D;
+  --amber-fire-lt:          #E5952D;
+  --amber-fire-soft:        #E5952D;
+  --amber-fire-tint:        #160A02;
+
+  --dipa-hop:               #4A7B2E;
+  --dipa-hop-lt:            #6A9B4E;
+  --dipa-hop-soft:          #6A9B4E;
+  --dipa-hop-tint:          #0C1606;
+
+  --pale-meadow:            #7A9B3E;
+  --pale-meadow-lt:         #9ABB5E;
+  --pale-meadow-soft:       #9ABB5E;
+  --pale-meadow-tint:       #0E1606;
 
   --cider-rose:             #B85C4A;
   --cider-rose-light:       #140804;
@@ -971,6 +1106,10 @@ body { overscroll-behavior-y: contain; }
 .card-bg-reco[data-style="wine"]     { background: var(--card-noise), linear-gradient(135deg, color-mix(in srgb, var(--wine-burgundy) 28%, var(--card-bg)) 0%, var(--card-bg) 60%); border-color: color-mix(in srgb, var(--wine-burgundy) 30%, var(--card-border)) !important; }
 .card-bg-reco[data-style="cocktail"] { background: var(--card-noise), linear-gradient(135deg, color-mix(in srgb, var(--cocktail-teal) 28%, var(--card-bg)) 0%, var(--card-bg) 60%); border-color: color-mix(in srgb, var(--cocktail-teal) 30%, var(--card-border)) !important; }
 .card-bg-reco[data-style="na"]       { background: var(--card-noise), linear-gradient(135deg, color-mix(in srgb, var(--na-lemon) 28%, var(--card-bg)) 0%, var(--card-bg) 60%); border-color: color-mix(in srgb, var(--na-lemon) 30%, var(--card-border)) !important; }
+.card-bg-reco[data-style="pilsner"]  { background: var(--card-noise), linear-gradient(135deg, color-mix(in srgb, var(--pilsner-grain) 28%, var(--card-bg)) 0%, var(--card-bg) 60%); border-color: color-mix(in srgb, var(--pilsner-grain) 30%, var(--card-border)) !important; }
+.card-bg-reco[data-style="amber"]    { background: var(--card-noise), linear-gradient(135deg, color-mix(in srgb, var(--amber-fire) 28%, var(--card-bg)) 0%, var(--card-bg) 60%); border-color: color-mix(in srgb, var(--amber-fire) 30%, var(--card-border)) !important; }
+.card-bg-reco[data-style="dipa"]     { background: var(--card-noise), linear-gradient(135deg, color-mix(in srgb, var(--dipa-hop) 28%, var(--card-bg)) 0%, var(--card-bg) 60%); border-color: color-mix(in srgb, var(--dipa-hop) 30%, var(--card-border)) !important; }
+.card-bg-reco[data-style="pale_ale"] { background: var(--card-noise), linear-gradient(135deg, color-mix(in srgb, var(--pale-meadow) 28%, var(--card-bg)) 0%, var(--card-bg) 60%); border-color: color-mix(in srgb, var(--pale-meadow) 30%, var(--card-border)) !important; }
 
 /* ── 10. SOCIAL — Intentionally bare ────────────────────────────────────── */
 /* No styles needed — restraint IS the design */
@@ -986,6 +1125,21 @@ body { overscroll-behavior-y: contain; }
     radial-gradient(ellipse at 50% 100%, color-mix(in srgb, var(--saison-peach) 20%, transparent) 0%, transparent 60%),
     linear-gradient(135deg, var(--surface) 0%, color-mix(in srgb, var(--accent-gold) 12%, var(--surface)) 100%);
   border-color: color-mix(in srgb, var(--accent-gold) 28%, var(--border)) !important;
+}
+
+/* ── 5. DARK FILL — Profile headers, session bubbles, brewery banners ──── */
+.card-bg-dark {
+  background: var(--card-noise), linear-gradient(135deg, color-mix(in srgb, var(--accent-gold) 8%, #1A0F08), #241810);
+  border-color: color-mix(in srgb, var(--accent-gold) 12%, #3D2B1F) !important;
+  color: #FDFAF5;
+}
+.card-bg-dark * { color: inherit; }
+
+/* ── 11. MUTED PANEL — Recessed panels, implementation notes, secondary ── */
+.card-bg-muted {
+  background: var(--warm-bg, var(--surface-2));
+  border-color: transparent !important;
+  box-shadow: none !important;
 }
 
 /* ── SEASONAL BLOB — Organic shape corner accent ────────────────────────── */

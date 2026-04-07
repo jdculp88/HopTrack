@@ -11,6 +11,8 @@ import { UserAvatar } from "@/components/ui/UserAvatar";
 import { SessionComments } from "@/components/social/SessionComments";
 import { ReactionBar } from "@/components/social/ReactionBar";
 import { ParticipantAvatars } from "@/components/session/ParticipantAvatars";
+import { BeerStyleBadge } from "@/components/ui/BeerStyleBadge";
+import { getStyleFamily, getStyleVars } from "@/lib/beerStyleColors";
 import type { Session, BeerLog, SessionParticipant } from "@/types/database";
 
 // ── Photo strip for feed cards ───────────────────────────────────────────────
@@ -135,6 +137,16 @@ export function SessionCard({ session, currentUserId, className, reactionCounts,
   // Session note
   const note = session.note;
 
+  // DS v2: Dominant beer style for card tinting
+  const dominantStyle = (() => {
+    const styles = (beer_logs ?? []).map(l => (l.beer as { style?: string | null } | undefined)?.style).filter(Boolean) as string[];
+    if (styles.length === 0) return null;
+    const counts: Record<string, number> = {};
+    for (const s of styles) { counts[s] = (counts[s] ?? 0) + 1; }
+    return Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
+  })();
+  const styleVars = dominantStyle ? getStyleVars(dominantStyle) : null;
+
   if (!profile) return null;
 
   const cardLabel = isAtHome
@@ -150,10 +162,22 @@ export function SessionCard({ session, currentUserId, className, reactionCounts,
       role="article"
       aria-label={cardLabel}
       className={cn(
-        "bg-[var(--card-bg)] rounded-[14px] border border-[var(--border)] overflow-hidden",
+        "rounded-[14px] border border-[var(--border)] overflow-hidden relative",
         className
       )}
+      style={{
+        background: styleVars
+          ? `linear-gradient(135deg, color-mix(in srgb, ${styleVars.primary} 8%, var(--card-bg)) 0%, var(--card-bg) 40%)`
+          : "var(--card-bg)",
+      }}
     >
+      {/* DS v2: Left accent bar in session's dominant beer style color */}
+      {styleVars && (
+        <div
+          className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-[14px]"
+          style={{ background: styleVars.primary }}
+        />
+      )}
       {/* Header — avatar, name, time, brewery */}
       <div className="p-4 pb-0">
         <div className="flex items-start gap-3">
@@ -246,12 +270,7 @@ export function SessionCard({ session, currentUserId, className, reactionCounts,
                     {beer?.name ?? "Unknown beer"}
                   </span>
                   {beer?.style && (
-                    <span
-                      className="text-[10px] font-mono uppercase tracking-wide flex-shrink-0 px-1.5 py-0.5 rounded"
-                      style={{ color: "var(--text-muted)", background: "var(--surface-2)" }}
-                    >
-                      {beer.style}
-                    </span>
+                    <BeerStyleBadge style={beer.style} size="xs" />
                   )}
                   {log.rating != null && (
                     <div className="flex items-center gap-0.5 flex-shrink-0">

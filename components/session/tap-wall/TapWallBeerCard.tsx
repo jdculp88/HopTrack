@@ -3,6 +3,7 @@
 import { Check, Beer, Loader2 } from 'lucide-react'
 import { getStyleFamily } from '@/lib/beerStyleColors'
 import { getStyleHex } from '@/lib/session-colors'
+import { BeerStyleBadge } from '@/components/ui/BeerStyleBadge'
 import { formatABV } from '@/lib/utils'
 
 export interface TapWallBeer {
@@ -136,17 +137,7 @@ export function TapWallBeerCard({
             </p>
             <div className="flex items-center gap-2 mt-0.5 flex-wrap">
               {beer.style && (
-                <span
-                  className="inline-flex items-center gap-1 text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded"
-                  style={{
-                    background: hex.primary + '14',
-                    border: `1px solid ${hex.primary}20`,
-                    color: hex.primary,
-                  }}
-                >
-                  <span className="w-1.5 h-1.5 rounded-full block" style={{ background: hex.primary }} />
-                  {beer.style}
-                </span>
+                <BeerStyleBadge style={beer.style} size="xs" />
               )}
               {beer.abv != null && (
                 <span className="text-[11px] font-mono" style={{ color: 'var(--text-muted)' }}>

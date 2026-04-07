@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { useHaptic } from "@/hooks/useHaptic";
 import { spring, microInteraction } from "@/lib/animation";
 
-type ButtonVariant = "primary" | "secondary" | "ghost" | "danger" | "gold";
+type ButtonVariant = "primary" | "secondary" | "ghost" | "danger" | "gold" | "style";
 type ButtonSize = "xs" | "sm" | "md" | "lg";
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -16,19 +16,23 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   icon?: React.ReactNode;
   iconRight?: React.ReactNode;
   fullWidth?: boolean;
+  /** CSS color string for variant="style" — uses beer's style primary color */
+  styleColor?: string;
 }
 
 const VARIANTS: Record<ButtonVariant, string> = {
   primary:
     "bg-[var(--accent-gold)] text-[var(--bg)] hover:bg-[var(--accent-amber)] border border-transparent font-semibold",
   secondary:
-    "bg-[var(--surface)] text-[var(--text-primary)] hover:bg-[var(--surface-2)] border border-[var(--border)] hover:border-[var(--accent-gold)]/40",
+    "bg-[var(--surface)] text-[var(--text-primary)] hover:bg-[var(--surface-2)] border border-[var(--border)] hover:border-[var(--text-muted)]",
   ghost:
     "bg-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface)] border border-transparent",
   danger:
     "bg-[var(--danger)]/10 text-[var(--danger)] hover:bg-[var(--danger)]/20 border border-[var(--danger)]/30",
   gold:
     "bg-transparent text-[var(--accent-gold)] hover:bg-[var(--accent-gold)]/10 border border-[var(--accent-gold)]/40 hover:border-[var(--accent-gold)]",
+  style:
+    "border border-transparent font-semibold",  /* color set via inline style */
 };
 
 const SIZES: Record<ButtonSize, string> = {
@@ -47,15 +51,30 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       icon,
       iconRight,
       fullWidth = false,
+      styleColor,
       children,
       className,
       disabled,
       onClick,
+      style,
       ...props
     },
     ref
   ) => {
     const { haptic } = useHaptic();
+
+    // DS v2: style variant uses beer's primary color for bg + colored shadow
+    const styleVariantProps = variant === "style" && styleColor
+      ? {
+          style: {
+            backgroundColor: styleColor,
+            color: "var(--bg)",
+            boxShadow: `0 4px 16px ${styleColor}20`,
+            ...style,
+          } as React.CSSProperties,
+        }
+      : { style };
+
     return (
       <button
         ref={ref}
@@ -73,6 +92,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           className
         )}
         disabled={disabled || loading}
+        {...styleVariantProps}
         {...props}
       >
         <motion.span

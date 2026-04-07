@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Sparkles, Star, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { FeedCardWrapper } from "./FeedCardWrapper";
-import { Pill } from "@/components/ui/Pill";
+import { BeerStyleBadge } from "@/components/ui/BeerStyleBadge";
 import type { AIRecommendedBeer } from "@/lib/recommendations";
 
 interface AIRecommendationFeedCardProps {
@@ -97,7 +97,7 @@ export function AIRecommendationFeedCard({ recommendations }: AIRecommendationFe
                   {/* Style + rating */}
                   <div className="flex items-center gap-2 mt-1.5">
                     {beer.style && (
-                      <Pill size="xs" variant="muted">{beer.style}</Pill>
+                      <BeerStyleBadge style={beer.style} size="xs" />
                     )}
                     {beer.avg_rating && (
                       <span className="flex items-center gap-0.5 text-[10px]" style={{ color: "var(--accent-gold)" }}>

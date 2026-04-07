@@ -108,7 +108,7 @@ export function PillTabs<K extends string = string>({
     "relative flex",
     snapScroll ? "overflow-x-auto scrollbar-hide snap-x snap-proximity" : "",
     sticky ? "sticky z-30 backdrop-blur-md" : "",
-    variant === "segmented" ? "rounded-xl p-1" : "",
+    variant === "segmented" ? "rounded-xl p-[3px]" : "",
     className,
   ]
     .filter(Boolean)
@@ -152,7 +152,7 @@ export function PillTabs<K extends string = string>({
     if (variant === "underline") {
       return {
         color: active ? "var(--text-primary)" : "var(--text-muted)",
-        fontWeight: active ? 600 : 400,
+        fontWeight: active ? 600 : 500,
         letterSpacing: "0.3px",
         // Sprint 171: Active tab gets subtle fill background for visibility
         background: active ? "color-mix(in srgb, var(--accent-gold) 8%, transparent)" : "transparent",

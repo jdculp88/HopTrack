@@ -35,18 +35,23 @@ interface EmbedBeerRowProps {
 
 // ─── Style color accents for embed ──────────────────────────────────────────
 
+// Design System v2.0 — primary colors per family (matches beerStyleColors.ts)
 const STYLE_ACCENTS: Record<string, string> = {
-  ipa: "#4A7C59",
-  stout: "#6B4C3B",
-  sour: "#8B3A6B",
-  porter: "#7B5B8D",
-  lager: "#4A7B9B",
-  saison: "#B8863B",
-  cider: "#B85C4A",
-  wine: "#722F37",
-  cocktail: "#1A8E80",
-  na: "#BFA032",
-  default: "#9E8E7A",
+  ipa: "#4A7C2E",
+  dipa: "#3A6B1E",
+  pale_ale: "#7A9B3E",
+  stout: "#3D2B1F",
+  sour: "#9B2D5E",
+  porter: "#5B3A6B",
+  lager: "#2E6B8A",
+  pilsner: "#D4A830",
+  saison: "#C4853E",
+  amber: "#B5651D",
+  cider: "#C4526C",
+  wine: "#6B1A3E",
+  cocktail: "#2A8F89",
+  na: "#E4C34E",
+  default: "#C4883E",
 };
 
 function getStyleAccent(style: string | null, itemType?: string | null): string {
@@ -80,13 +85,15 @@ export function EmbedBeerRow({
             </span>
             {showStyle && beer.style && (
               <span style={{
-                fontSize: 9, textTransform: "uppercase", letterSpacing: "0.08em",
+                display: "inline-flex", alignItems: "center", gap: 4,
+                fontSize: 9, textTransform: "uppercase" as const, letterSpacing: "0.08em",
                 color: styleAccent, fontWeight: 600,
                 background: `${styleAccent}15`,
                 border: `1px solid ${styleAccent}30`,
                 borderRadius: 99, padding: "1px 7px",
-                lineHeight: 1.4,
+                lineHeight: 1.4, fontFamily: "'JetBrains Mono', monospace",
               }}>
+                <span style={{ width: 5, height: 5, borderRadius: "50%", background: styleAccent, flexShrink: 0 }} />
                 {beer.style}
               </span>
             )}
@@ -226,13 +233,15 @@ export function EmbedBeerRow({
         }}>
           {showStyle && beer.style && (
             <span style={{
-              fontSize: 9, textTransform: "uppercase", letterSpacing: "0.08em",
+              display: "inline-flex", alignItems: "center", gap: 4,
+              fontSize: 9, textTransform: "uppercase" as const, letterSpacing: "0.08em",
               color: styleAccent, fontWeight: 600,
               background: `${styleAccent}15`,
               border: `1px solid ${styleAccent}30`,
               borderRadius: 99, padding: "2px 8px",
               lineHeight: 1.4,
             }}>
+              <span style={{ width: 5, height: 5, borderRadius: "50%", background: styleAccent, flexShrink: 0 }} />
               {beer.style}
             </span>
           )}

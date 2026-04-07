@@ -4,6 +4,7 @@ import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Plus, ChevronRight, Lock, Globe, Trash2, Beer, X } from "lucide-react";
 import { useToast } from "@/components/ui/Toast";
+import { BeerStyleBadge } from "@/components/ui/BeerStyleBadge";
 import type { BeerList } from "@/types/database";
 
 interface BeerListsSectionProps {
@@ -204,7 +205,7 @@ export function BeerListsSection({ lists: initialLists, isOwnProfile }: BeerList
                                     {item.beer?.name ?? "Unknown"}
                                   </p>
                                   {item.beer?.style && (
-                                    <p className="text-[11px]" style={{ color: "var(--text-muted)" }}>{item.beer.style}</p>
+                                    <BeerStyleBadge style={item.beer.style} size="xs" />
                                   )}
                                 </div>
                                 {item.beer?.avg_rating != null && (

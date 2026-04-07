@@ -33,12 +33,16 @@ const VALID_FAMILIES: readonly BeerStyleFamily[] = [
 // Canonical style strings for each family (used for .in() filter)
 // These are the keys from STYLE_TO_FAMILY in lib/beerStyleColors.ts
 const FAMILY_STYLES: Record<BeerStyleFamily, string[]> = {
-  ipa: ["IPA", "Double IPA", "Hazy IPA", "Session IPA", "Pale Ale", "New England IPA", "West Coast IPA", "Imperial IPA"],
+  ipa: ["IPA", "Hazy IPA", "Session IPA", "New England IPA", "West Coast IPA"],
+  dipa: ["Double IPA", "Imperial IPA", "Triple IPA"],
+  pale_ale: ["Pale Ale", "American Pale Ale", "English Pale Ale"],
   stout: ["Stout", "Imperial Stout", "Milk Stout", "Oatmeal Stout", "Dry Stout"],
   sour: ["Sour", "Gose", "Berliner Weisse", "Lambic", "Gueuze", "Flanders Red", "Wild Ale"],
   porter: ["Porter", "Brown Ale", "Barleywine", "English Barleywine", "Robust Porter", "Baltic Porter"],
-  lager: ["Lager", "Pilsner", "Kolsch", "Kölsch", "Blonde Ale", "Cream Ale", "Helles", "Märzen", "Oktoberfest"],
-  saison: ["Wheat", "Hefeweizen", "Belgian", "Saison", "Amber", "Red Ale", "Witbier", "Dunkel", "Belgian Tripel", "Belgian Dubbel"],
+  lager: ["Lager", "Kolsch", "Kölsch", "Blonde Ale", "Cream Ale", "Helles"],
+  pilsner: ["Pilsner", "Czech Pilsner", "German Pilsner"],
+  saison: ["Wheat", "Hefeweizen", "Belgian", "Saison", "Witbier", "Dunkel", "Belgian Tripel", "Belgian Dubbel"],
+  amber: ["Amber", "Red Ale", "Irish Red", "Märzen", "Oktoberfest"],
   cider: [],
   wine: [],
   cocktail: [],

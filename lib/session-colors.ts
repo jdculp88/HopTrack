@@ -11,11 +11,15 @@ import type { BeerLog } from '@/types/database'
 /** Raw hex values for gradient rendering — one per style family */
 const FAMILY_HEX: Record<BeerStyleFamily, { primary: string; light: string }> = {
   ipa:      { primary: '#4A7C2E', light: '#6B9D4F' },
+  dipa:     { primary: '#3A6B1E', light: '#5A8B3E' },
+  pale_ale: { primary: '#7A9B3E', light: '#9ABB5E' },
   stout:    { primary: '#3D2B1F', light: '#5C4033' },
   sour:     { primary: '#9B2D5E', light: '#BB4D7E' },
   porter:   { primary: '#5B3A6B', light: '#7B5A8B' },
   lager:    { primary: '#2E6B8A', light: '#4E8BAA' },
+  pilsner:  { primary: '#D4A830', light: '#E4C850' },
   saison:   { primary: '#C4853E', light: '#D4A55E' },
+  amber:    { primary: '#B5651D', light: '#D5852D' },
   cider:    { primary: '#A0522D', light: '#C47A5A' },
   wine:     { primary: '#722F37', light: '#9B4D57' },
   cocktail: { primary: '#2D7A7A', light: '#4D9A9A' },

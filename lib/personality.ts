@@ -84,7 +84,8 @@ function computeSignals(logs: PersonalityBeerLog[]): PersonalitySignals {
     const beerId = log.beer?.id ?? log.beer_id;
     if (beerId) beerSet.add(beerId);
 
-    if (getStyleFamily(style, log.beer?.item_type) === "ipa") {
+    const family = getStyleFamily(style, log.beer?.item_type);
+    if (family === "ipa" || family === "dipa" || family === "pale_ale") {
       hopForwardCount += 1;
     }
   }

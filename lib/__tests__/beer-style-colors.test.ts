@@ -1,4 +1,4 @@
-// Beer style color system tests — Avery + Reese, Sprint 104
+// Beer style color system tests — Avery + Reese, Sprint 104 + DS v2.0 update
 // Covers getStyleFamily, getStyleVars, getStyleDataAttr, STYLE_FAMILY_VARS
 import { describe, it, expect } from "vitest";
 import {
@@ -9,15 +9,16 @@ import {
   type BeerStyleFamily,
 } from "@/lib/beerStyleColors";
 
-// ── STYLE_FAMILY_VARS — all 6 beer families + 4 beverage categories + default ──
+// ── STYLE_FAMILY_VARS — all 10 beer families + 4 beverage categories + default ──
 
 describe("STYLE_FAMILY_VARS", () => {
   const expectedFamilies: BeerStyleFamily[] = [
     "ipa", "stout", "sour", "porter", "lager", "saison",
+    "pilsner", "amber", "dipa", "pale_ale",
     "cider", "wine", "cocktail", "na", "default",
   ];
 
-  it("contains entries for all 11 families", () => {
+  it("contains entries for all 15 families", () => {
     for (const family of expectedFamilies) {
       expect(STYLE_FAMILY_VARS).toHaveProperty(family);
     }
@@ -91,12 +92,32 @@ describe("STYLE_FAMILY_VARS", () => {
 
 describe("getStyleFamily IPA family", () => {
   const ipaStyles = [
-    "IPA", "Double IPA", "Hazy IPA", "Session IPA",
-    "Pale Ale", "New England IPA", "West Coast IPA", "Imperial IPA",
+    "IPA", "Hazy IPA", "Session IPA",
+    "New England IPA", "West Coast IPA",
   ];
 
   it.each(ipaStyles)("maps '%s' to 'ipa'", (style) => {
     expect(getStyleFamily(style)).toBe("ipa");
+  });
+});
+
+// ── getStyleFamily — DIPA family (DS v2: split from IPA) ──
+
+describe("getStyleFamily DIPA family", () => {
+  const dipaStyles = ["Double IPA", "Imperial IPA", "Triple IPA"];
+
+  it.each(dipaStyles)("maps '%s' to 'dipa'", (style) => {
+    expect(getStyleFamily(style)).toBe("dipa");
+  });
+});
+
+// ── getStyleFamily — Pale Ale family (DS v2: split from IPA) ──
+
+describe("getStyleFamily Pale Ale family", () => {
+  const paleAleStyles = ["Pale Ale", "American Pale Ale", "English Pale Ale"];
+
+  it.each(paleAleStyles)("maps '%s' to 'pale_ale'", (style) => {
+    expect(getStyleFamily(style)).toBe("pale_ale");
   });
 });
 
@@ -142,8 +163,8 @@ describe("getStyleFamily porter family", () => {
 
 describe("getStyleFamily lager family", () => {
   const lagerStyles = [
-    "Lager", "Pilsner", "Kolsch", "Kölsch",
-    "Blonde Ale", "Cream Ale", "Helles", "Märzen", "Oktoberfest",
+    "Lager", "Kolsch", "Kölsch",
+    "Blonde Ale", "Cream Ale", "Helles",
   ];
 
   it.each(lagerStyles)("maps '%s' to 'lager'", (style) => {
@@ -151,16 +172,36 @@ describe("getStyleFamily lager family", () => {
   });
 });
 
+// ── getStyleFamily — Pilsner family (DS v2: split from lager) ──
+
+describe("getStyleFamily Pilsner family", () => {
+  const pilsnerStyles = ["Pilsner", "Czech Pilsner", "German Pilsner"];
+
+  it.each(pilsnerStyles)("maps '%s' to 'pilsner'", (style) => {
+    expect(getStyleFamily(style)).toBe("pilsner");
+  });
+});
+
 // ── getStyleFamily — Saison family ──
 
 describe("getStyleFamily saison family", () => {
   const saisonStyles = [
-    "Wheat", "Hefeweizen", "Belgian", "Saison", "Amber",
-    "Red Ale", "Witbier", "Dunkel", "Belgian Tripel", "Belgian Dubbel",
+    "Wheat", "Hefeweizen", "Belgian", "Saison",
+    "Witbier", "Dunkel", "Belgian Tripel", "Belgian Dubbel",
   ];
 
   it.each(saisonStyles)("maps '%s' to 'saison'", (style) => {
     expect(getStyleFamily(style)).toBe("saison");
+  });
+});
+
+// ── getStyleFamily — Amber family (DS v2: split from saison) ──
+
+describe("getStyleFamily Amber family", () => {
+  const amberStyles = ["Amber", "Red Ale", "Irish Red", "Märzen", "Oktoberfest"];
+
+  it.each(amberStyles)("maps '%s' to 'amber'", (style) => {
+    expect(getStyleFamily(style)).toBe("amber");
   });
 });
 
@@ -299,8 +340,8 @@ describe("getStyleVars return shape", () => {
     expect(getStyleVars("Brown Ale")).toStrictEqual(STYLE_FAMILY_VARS.porter);
   });
 
-  it("returns lager vars for Pilsner style", () => {
-    expect(getStyleVars("Pilsner")).toStrictEqual(STYLE_FAMILY_VARS.lager);
+  it("returns pilsner vars for Pilsner style", () => {
+    expect(getStyleVars("Pilsner")).toStrictEqual(STYLE_FAMILY_VARS.pilsner);
   });
 
   it("returns saison vars for Wheat style", () => {
@@ -357,18 +398,21 @@ describe("getStyleDataAttr", () => {
   it("returns a BeerStyleFamily string (usable as data attribute value)", () => {
     const result = getStyleDataAttr("Double IPA");
     expect(typeof result).toBe("string");
-    expect(result.length).toBeGreaterThan(0);
+    expect(result).toBe("dipa");
   });
 });
 
-// ── Full coverage: all 26 documented beer styles return a non-default family ──
+// ── Full coverage: all documented beer styles return a non-default family ──
 
-describe("all 26 documented beer styles map to a non-default family", () => {
+describe("all documented beer styles map to a non-default family", () => {
   const allMappedStyles: [string, BeerStyleFamily][] = [
     // IPA
-    ["IPA", "ipa"], ["Double IPA", "ipa"], ["Hazy IPA", "ipa"],
-    ["Session IPA", "ipa"], ["Pale Ale", "ipa"], ["New England IPA", "ipa"],
-    ["West Coast IPA", "ipa"], ["Imperial IPA", "ipa"],
+    ["IPA", "ipa"], ["Hazy IPA", "ipa"], ["Session IPA", "ipa"],
+    ["New England IPA", "ipa"], ["West Coast IPA", "ipa"],
+    // DIPA (DS v2)
+    ["Double IPA", "dipa"], ["Imperial IPA", "dipa"], ["Triple IPA", "dipa"],
+    // Pale Ale (DS v2)
+    ["Pale Ale", "pale_ale"], ["American Pale Ale", "pale_ale"], ["English Pale Ale", "pale_ale"],
     // Stout
     ["Stout", "stout"], ["Imperial Stout", "stout"], ["Milk Stout", "stout"],
     ["Oatmeal Stout", "stout"], ["Dry Stout", "stout"],
@@ -379,18 +423,49 @@ describe("all 26 documented beer styles map to a non-default family", () => {
     ["Porter", "porter"], ["Brown Ale", "porter"], ["Barleywine", "porter"],
     ["English Barleywine", "porter"], ["Robust Porter", "porter"], ["Baltic Porter", "porter"],
     // Lager
-    ["Lager", "lager"], ["Pilsner", "lager"], ["Kolsch", "lager"], ["Kölsch", "lager"],
+    ["Lager", "lager"], ["Kolsch", "lager"], ["Kölsch", "lager"],
     ["Blonde Ale", "lager"], ["Cream Ale", "lager"], ["Helles", "lager"],
-    ["Märzen", "lager"], ["Oktoberfest", "lager"],
-    // Saison
+    // Pilsner (DS v2)
+    ["Pilsner", "pilsner"], ["Czech Pilsner", "pilsner"], ["German Pilsner", "pilsner"],
+    // Saison/Wheat
     ["Wheat", "saison"], ["Hefeweizen", "saison"], ["Belgian", "saison"],
-    ["Saison", "saison"], ["Amber", "saison"], ["Red Ale", "saison"],
-    ["Witbier", "saison"], ["Dunkel", "saison"],
+    ["Saison", "saison"], ["Witbier", "saison"], ["Dunkel", "saison"],
     ["Belgian Tripel", "saison"], ["Belgian Dubbel", "saison"],
+    // Amber (DS v2)
+    ["Amber", "amber"], ["Red Ale", "amber"], ["Irish Red", "amber"],
+    ["Märzen", "amber"], ["Oktoberfest", "amber"],
   ];
 
   it.each(allMappedStyles)("'%s' maps to '%s'", (style, expectedFamily) => {
     expect(getStyleFamily(style)).toBe(expectedFamily);
     expect(getStyleFamily(style)).not.toBe("default");
+  });
+});
+
+// ── DS v2: new families have correct CSS vars ──
+
+describe("DS v2 new family CSS variables", () => {
+  it("pilsner uses pilsner-grain variables", () => {
+    expect(STYLE_FAMILY_VARS.pilsner.primary).toContain("pilsner-grain");
+  });
+
+  it("amber uses amber-fire variables", () => {
+    expect(STYLE_FAMILY_VARS.amber.primary).toContain("amber-fire");
+  });
+
+  it("dipa uses dipa-hop variables", () => {
+    expect(STYLE_FAMILY_VARS.dipa.primary).toContain("dipa-hop");
+  });
+
+  it("pale_ale uses pale-meadow variables", () => {
+    expect(STYLE_FAMILY_VARS.pale_ale.primary).toContain("pale-meadow");
+  });
+
+  it("all families have tint and lt keys (DS v2)", () => {
+    for (const family of Object.keys(STYLE_FAMILY_VARS) as BeerStyleFamily[]) {
+      const vars = STYLE_FAMILY_VARS[family];
+      expect(vars).toHaveProperty("tint");
+      expect(vars).toHaveProperty("lt");
+    }
   });
 });

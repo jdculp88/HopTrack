@@ -8,6 +8,7 @@ import { StarRating } from '@/components/ui/StarRating'
 import { UserAvatar } from '@/components/ui/UserAvatar'
 import { useToast } from '@/components/ui/Toast'
 import { getStyleFamily, getStyleVars } from '@/lib/beerStyleColors'
+import { BeerStyleBadge } from '@/components/ui/BeerStyleBadge'
 import { getFirstName } from '@/lib/first-name'
 
 export interface BreweryReviewItem {
@@ -93,20 +94,11 @@ export function TrendingCard({ reviews, index = 0 }: { reviews: TrendingReview[]
             <p className="text-[11px] mt-1 truncate" style={{ color: 'var(--text-muted)' }}>
               {getFirstName(review.profile?.display_name, review.profile?.username)}
             </p>
-            {review.beer?.style && (() => {
-              const sv = getStyleVars(review.beer.style)
-              return (
-                <span
-                  className="inline-block mt-2 text-[10px] font-mono px-2 py-0.5 rounded-full"
-                  style={{
-                    background: `color-mix(in srgb, ${sv.primary} 12%, transparent)`,
-                    color: sv.primary,
-                  }}
-                >
-                  {review.beer.style}
-                </span>
-              )
-            })()}
+            {review.beer?.style && (
+              <div className="mt-2">
+                <BeerStyleBadge style={review.beer.style} size="xs" />
+              </div>
+            )}
             <div className="mt-2">
               <StarRating value={review.rating} readonly size="sm" />
             </div>
@@ -285,20 +277,11 @@ export function SeasonalBeersScroll({ beers }: { beers: SeasonalBeer[] }) {
             <p className="text-[11px] mt-1 truncate" style={{ color: 'var(--text-muted)' }}>
               {typeof beer.brewery === 'string' ? beer.brewery : (beer.brewery as any)?.name ?? ''}
             </p>
-            {(() => {
-              const sv = getStyleVars(beer.style)
-              return (
-                <span
-                  className="inline-block mt-2 text-[10px] font-mono px-2 py-0.5 rounded-full"
-                  style={{
-                    background: `color-mix(in srgb, ${sv.primary} 12%, transparent)`,
-                    color: sv.primary,
-                  }}
-                >
-                  {beer.style}
-                </span>
-              )
-            })()}
+            {beer.style && (
+              <div className="mt-2">
+                <BeerStyleBadge style={beer.style} size="xs" />
+              </div>
+            )}
           </motion.div>
         ))}
       </div>

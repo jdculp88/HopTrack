@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { Search, Loader2, Beer as BeerIcon, MapPin, X, Clock } from "lucide-react";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { generateGradientFromString } from "@/lib/utils";
+import { BeerStyleBadge } from "@/components/ui/BeerStyleBadge";
 
 const RECENT_SEARCHES_KEY = "ht-recent-searches";
 const MAX_RECENT = 5;
@@ -566,15 +567,7 @@ export function SearchTypeahead({
                                     {beer.name}
                                   </span>
                                   {beer.style && (
-                                    <span
-                                      className="flex-shrink-0 text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded-md"
-                                      style={{
-                                        backgroundColor: "var(--surface-2)",
-                                        color: "var(--text-secondary)",
-                                      }}
-                                    >
-                                      {beer.style}
-                                    </span>
+                                    <BeerStyleBadge style={beer.style} size="xs" />
                                   )}
                                 </div>
                                 <div
