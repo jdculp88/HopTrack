@@ -162,21 +162,24 @@ export function ActivityHeatmap({ data, compact = false }: ActivityHeatmapProps)
             ))}
           </div>
 
-          {/* Legend */}
-          <div className="flex items-center gap-1.5 mt-2 justify-end">
-            <span className="text-[9px] font-mono" style={{ color: "var(--text-muted)" }}>Color = style</span>
-            {(["IPA", "Stout", "Sour", "Porter", "Lager", "Saison"] as const).map((s) => (
+          {/* Legend — Less → More + color = style */}
+          <div className="flex items-center gap-1 mt-2">
+            <span className="text-[9px] font-mono mr-0.5" style={{ color: "var(--text-muted)" }}>Less</span>
+            {[0, 15, 30, 50, 80].map((pct, i) => (
               <div
-                key={s}
+                key={i}
                 className="rounded-[2px]"
-                title={s}
                 style={{
                   width: cellSize,
                   height: cellSize,
-                  background: getStyleVars(s).primary,
+                  background: pct === 0
+                    ? "var(--warm-bg, var(--surface-2))"
+                    : `color-mix(in srgb, var(--accent-gold) ${pct}%, var(--surface-2))`,
                 }}
               />
             ))}
+            <span className="text-[9px] font-mono mx-0.5" style={{ color: "var(--text-muted)" }}>More</span>
+            <span className="text-[9px] font-mono ml-2" style={{ color: "var(--text-muted)" }}>color = style</span>
           </div>
         </div>
       </div>

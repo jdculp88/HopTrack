@@ -3,7 +3,7 @@
 // StatsTab — Sprint 160 (The Flow) + Sprint 162 (The Identity)
 // Shows drinker stats: Quick Stats, Rarity, Temporal, Level+XP, DrinkerStatsCard, BeerDNA, ActivityHeatmap.
 
-import { Flame } from "lucide-react";
+import { Flame, GlassWater, Star, MapPin } from "lucide-react";
 import { BeerDNACard } from "@/components/profile/BeerDNACard";
 import { DrinkerStatsCard } from "@/components/profile/DrinkerStatsCard";
 import { ActivityHeatmap } from "@/components/profile/ActivityHeatmap";
@@ -70,123 +70,155 @@ export function StatsTab({
   const { total_checkins, unique_beers, unique_breweries, current_streak, longest_streak, level } = profileStats;
   return (
     <div className="space-y-6">
-      {/* Sprint 171: Quick Stats — color-differentiated KPIs */}
-      <div className="card-bg-stats border border-[var(--card-border)] rounded-[14px] p-4">
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      {/* Quick Stats — 3 cards with amber top accent bar + icons */}
+      <div className="grid grid-cols-3 gap-2">
+        {[
+          { value: total_checkins, label: "Sessions", icon: GlassWater, delay: 0 },
+          { value: unique_beers, label: "Unique Beers", icon: Star, delay: 0.1 },
+          { value: unique_breweries, label: "Breweries", icon: MapPin, delay: 0.2 },
+        ].map((stat, i) => (
           <div
-            className="text-center rounded-[14px] py-3 px-1"
-            style={{ background: "color-mix(in srgb, var(--accent-blue) 8%, var(--card-bg))" }}
+            key={stat.label}
+            className="rounded-[14px] border overflow-hidden"
+            style={{
+              background: "var(--card-bg)",
+              borderColor: "color-mix(in srgb, var(--accent-gold) 20%, var(--border))",
+            }}
           >
-            <p className="font-mono font-bold text-xl leading-none" style={{ color: "var(--accent-blue)" }}>
-              <CountUp value={total_checkins} duration={1.0} />
-            </p>
-            <p className="text-[10px] text-[var(--text-muted)] mt-1 font-mono uppercase tracking-wide">Sessions</p>
+            {/* Amber top accent bar */}
+            <div
+              className="h-[3px]"
+              style={{ background: "linear-gradient(to right, var(--accent-gold), var(--accent-amber))" }}
+            />
+            <div className="p-3.5">
+              <div
+                className="w-8 h-8 rounded-[10px] flex items-center justify-center mb-2"
+                style={{ background: "color-mix(in srgb, var(--accent-gold) 10%, var(--surface-2))" }}
+              >
+                <stat.icon size={16} style={{ color: "var(--accent-gold)" }} />
+              </div>
+              <p className="font-mono font-bold text-[28px] leading-none" style={{ color: "var(--text-primary)" }}>
+                <CountUp value={stat.value} duration={1.0} delay={stat.delay} />
+              </p>
+              <p className="text-[9px] text-[var(--text-muted)] mt-1.5 font-mono uppercase tracking-[0.12em]">{stat.label}</p>
+            </div>
           </div>
-          <div
-            className="text-center rounded-[14px] py-3 px-1"
-            style={{ background: "color-mix(in srgb, var(--accent-amber) 8%, var(--card-bg))" }}
-          >
-            <p className="font-mono font-bold text-xl leading-none" style={{ color: "var(--accent-amber)" }}>
-              <CountUp value={unique_beers} duration={1.0} delay={0.1} />
-            </p>
-            <p className="text-[10px] text-[var(--text-muted)] mt-1 font-mono uppercase tracking-wide">Unique Beers</p>
-          </div>
-          <div
-            className="text-center rounded-[14px] py-3 px-1"
-            style={{ background: "color-mix(in srgb, var(--accent-green) 8%, var(--card-bg))" }}
-          >
-            <p className="font-mono font-bold text-xl leading-none" style={{ color: "var(--success)" }}>
-              <CountUp value={unique_breweries} duration={1.0} delay={0.2} />
-            </p>
-            <p className="text-[10px] text-[var(--text-muted)] mt-1 font-mono uppercase tracking-wide">Breweries</p>
-          </div>
-          <div
-            className="text-center rounded-[14px] py-3 px-1"
-            style={{ background: `color-mix(in srgb, ${current_streak > 0 ? "var(--accent-amber)" : "var(--accent-gold)"} 8%, var(--card-bg))` }}
-          >
-            <p
-              className="font-mono font-bold text-xl leading-none"
-              style={{ color: current_streak > 0 ? "var(--accent-amber)" : "var(--accent-gold)" }}
-            >
-              <CountUp value={current_streak} duration={1.0} delay={0.3} />
-            </p>
-            <p className="text-[10px] text-[var(--text-muted)] mt-1 font-mono uppercase tracking-wide">Day Streak</p>
-          </div>
-        </div>
+        ))}
       </div>
 
-      {/* Level + XP Progress — audit #12: milestone dots, warm gradient bg, prominent XP */}
+      {/* Streak card — separate from stat grid */}
+      {(current_streak > 0 || longest_streak > 0) && (
+        <div
+          className="rounded-[14px] border overflow-hidden"
+          style={{
+            background: "var(--card-bg)",
+            borderColor: "color-mix(in srgb, var(--accent-gold) 20%, var(--border))",
+          }}
+        >
+          <div className="h-[3px]" style={{ background: "linear-gradient(to right, var(--accent-amber), var(--accent-gold))" }} />
+          <div className="p-4 flex items-center gap-3">
+            <div
+              className="w-12 h-12 rounded-[14px] flex items-center justify-center text-2xl"
+              style={{ background: "color-mix(in srgb, var(--accent-amber) 12%, var(--surface-2))" }}
+            >
+              🔥
+            </div>
+            <div>
+              <div className="flex items-baseline gap-2">
+                <span className="font-mono text-2xl font-bold" style={{ color: "var(--text-primary)" }}>
+                  <CountUp value={current_streak} duration={1.0} delay={0.3} />
+                </span>
+                <span className="text-sm" style={{ color: "var(--text-muted)" }}>day streak</span>
+              </div>
+              {longest_streak > 0 && (
+                <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
+                  Personal best: {longest_streak} days
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Level + XP Progress — warm gradient card with rank milestones */}
       <div
-        className="border rounded-[14px] p-4 space-y-2"
+        className="border rounded-[14px] p-4 space-y-3"
         style={{
-          background: "linear-gradient(180deg, var(--warm-bg, var(--surface-2)) 0%, var(--card-bg, #FFFFFF) 100%)",
-          borderColor: "var(--border)",
+          background: "linear-gradient(135deg, color-mix(in srgb, var(--accent-gold) 8%, var(--card-bg)) 0%, var(--card-bg) 60%)",
+          borderColor: "color-mix(in srgb, var(--accent-gold) 20%, var(--border))",
         }}
       >
-        <div className="flex items-center justify-between">
+        <div className="flex items-start justify-between">
           <div>
-            <span className="font-mono text-[9px] font-semibold uppercase tracking-[0.12em]" style={{ color: "var(--amber, var(--accent-gold))" }}>
+            <span className="font-mono text-[9px] font-bold uppercase tracking-[0.12em]" style={{ color: "var(--accent-gold)" }}>
               Level {level}
             </span>
-            <p className="font-display text-lg font-bold text-[var(--text-primary)]">{levelInfo.current.name}</p>
+            <p className="font-display text-xl font-bold text-[var(--text-primary)]">{levelInfo.current.name}</p>
           </div>
           {levelInfo.next && (
             <div className="text-right">
-              <p className="font-mono text-[13px] font-bold" style={{ color: "var(--amber, var(--accent-gold))" }}>
+              <span className="font-mono text-[9px] uppercase tracking-[0.12em] block" style={{ color: "var(--text-muted)" }}>
+                Next Rank
+              </span>
+              <p className="font-sans text-base font-bold text-[var(--text-primary)]">{levelInfo.next.name}</p>
+              <p className="font-mono text-[13px] font-bold" style={{ color: "var(--accent-gold)" }}>
                 {levelInfo.xpToNext} XP to go
               </p>
-              <p className="text-xs text-[var(--text-muted)]">Next: {levelInfo.next.name}</p>
             </div>
           )}
         </div>
-        {/* Progress bar with amber gradient fill */}
-        <div className="relative h-2.5 rounded-full overflow-hidden" style={{ background: "var(--surface-2, var(--warm-bg))" }}>
-          <div
-            className="h-full rounded-full transition-all duration-1000"
-            style={{
-              background: "linear-gradient(to right, var(--amber, var(--accent-gold)), var(--accent-amber))",
-              width: `${levelInfo.progress}%`,
-            }}
-          />
-          {/* Milestone dots at 25%, 50%, 75% */}
-          {[25, 50, 75].map((m) => (
+
+        {/* Progress bar with amber gradient + milestone dots */}
+        <div>
+          <div className="relative h-2.5 rounded-full overflow-hidden" style={{ background: "var(--surface-2)" }}>
             <div
-              key={m}
-              className="absolute top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full"
+              className="h-full rounded-full transition-all duration-1000"
               style={{
-                left: `${m}%`,
-                background: levelInfo.progress >= m ? "rgba(255,255,255,0.6)" : "var(--border)",
+                background: "linear-gradient(to right, var(--accent-gold), var(--accent-amber))",
+                width: `${levelInfo.progress}%`,
               }}
             />
-          ))}
+            {/* Milestone dots at rank transitions */}
+            {[20, 40, 60, 80].map((m) => (
+              <div
+                key={m}
+                className="absolute top-1/2 -translate-y-1/2 w-2 h-2 rounded-full border"
+                style={{
+                  left: `${m}%`,
+                  transform: "translate(-50%, -50%)",
+                  background: levelInfo.progress >= m ? "var(--accent-gold)" : "var(--surface-2)",
+                  borderColor: levelInfo.progress >= m ? "var(--accent-gold)" : "var(--border)",
+                }}
+              />
+            ))}
+          </div>
+          {/* Rank labels below the bar */}
+          <div className="flex justify-between mt-1.5">
+            {["Newbie", "Taster", "Brew Buddy", "Regular", "Legend"].map((rank) => (
+              <span
+                key={rank}
+                className="text-[8px] font-mono"
+                style={{ color: rank === levelInfo.current.name ? "var(--text-primary)" : "var(--text-muted)" }}
+              >
+                {rank}
+              </span>
+            ))}
+          </div>
         </div>
+
+        {/* Streak at bottom */}
         {(current_streak > 0 || longest_streak > 0) && (
-          <div className="flex items-center gap-3 mt-3 pt-3 border-t border-[var(--border)]">
+          <div className="flex items-center justify-between pt-2 border-t border-[var(--border)]">
             {current_streak > 0 && (
               <div className="flex items-center gap-1.5">
-                <Flame
-                  size={14}
-                  className={
-                    current_streak >= 30
-                      ? "text-[var(--accent-amber)]"
-                      : current_streak >= 7
-                        ? "text-[var(--accent-gold)]"
-                        : "text-[var(--text-muted)]"
-                  }
-                />
-                <span
-                  className="text-sm font-mono font-bold"
-                  style={{ color: current_streak >= 7 ? "var(--accent-gold)" : "var(--text-secondary)" }}
-                >
-                  {current_streak}
+                <span>🔥</span>
+                <span className="text-sm font-mono" style={{ color: "var(--text-secondary)" }}>
+                  {current_streak} day streak
                 </span>
-                <span className="text-xs text-[var(--text-muted)]">day streak</span>
               </div>
             )}
-            {longest_streak > current_streak && (
-              <div className="flex items-center gap-1 ml-auto">
-                <span className="text-xs text-[var(--text-muted)]">Best: {longest_streak}d</span>
-              </div>
+            {longest_streak > 0 && (
+              <span className="text-xs text-[var(--text-muted)]">Best: {longest_streak}d</span>
             )}
           </div>
         )}

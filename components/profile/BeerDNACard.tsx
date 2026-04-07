@@ -93,8 +93,8 @@ export function BeerDNACard({ styleDNA, username }: BeerDNACardProps) {
       transition={spring.default}
       className="card-bg-taste-dna rounded-[14px] p-5 relative overflow-hidden"
       style={{
-        background: "linear-gradient(180deg, var(--warm-bg, var(--surface-2)) 0%, var(--card-bg, #FFFFFF) 100%)",
-        border: "1px solid var(--border)",
+        background: `linear-gradient(135deg, color-mix(in srgb, ${dnaC1} 12%, var(--card-bg)) 0%, color-mix(in srgb, ${dnaC2} 8%, var(--card-bg)) 50%, var(--card-bg) 100%)`,
+        border: "1px solid color-mix(in srgb, var(--accent-gold) 25%, var(--border))",
         "--dna-c1": dnaC1,
         "--dna-c2": dnaC2,
         "--dna-c3": dnaC3,
@@ -113,7 +113,7 @@ export function BeerDNACard({ styleDNA, username }: BeerDNACardProps) {
           <div className="flex items-center gap-2">
             <span className="text-2xl">{personality.emoji}</span>
             <h3
-              className="font-display text-[22px] font-bold leading-tight tracking-[-0.01em]"
+              className="font-sans text-[20px] font-semibold leading-tight tracking-[-0.01em]"
               style={{ color: "var(--text-primary)" }}
             >
               {personality.label}
@@ -125,15 +125,15 @@ export function BeerDNACard({ styleDNA, username }: BeerDNACardProps) {
         </div>
         <button
           onClick={handleShare}
-          className="flex items-center gap-1.5 px-3.5 py-2 rounded-[10px] text-xs font-semibold transition-all flex-shrink-0"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all flex-shrink-0 hover:scale-105 active:scale-95"
           style={{
-            background: "var(--amber, var(--accent-gold))",
-            color: "#fff",
-            boxShadow: "0 2px 8px rgba(196,136,62,0.2)",
+            background: "var(--accent-gold)",
+            color: "var(--bg)",
+            boxShadow: "0 4px 12px rgba(196,136,62,0.3)",
           }}
           aria-label="Share your Beer DNA"
         >
-          {copied ? <Check size={12} /> : <Share2 size={12} />}
+          {copied ? <Check size={14} /> : <Share2 size={14} />}
           {copied ? "Copied!" : "Share"}
         </button>
       </div>
@@ -144,12 +144,18 @@ export function BeerDNACard({ styleDNA, username }: BeerDNACardProps) {
           const styleColor = getStyleVars(entry.style);
           return (
             <div key={entry.style} className="flex items-center gap-2.5">
-              <span
-                className="w-[70px] flex-shrink-0 text-xs font-semibold truncate"
-                style={{ color: styleColor.primary }}
-              >
-                {entry.style}
-              </span>
+              <div className="w-[80px] flex-shrink-0 flex items-center gap-1.5 min-w-0">
+                <span
+                  className="w-[6px] h-[6px] rounded-full flex-shrink-0"
+                  style={{ background: styleColor.primary }}
+                />
+                <span
+                  className="text-xs font-semibold truncate"
+                  style={{ color: styleColor.primary }}
+                >
+                  {entry.style}
+                </span>
+              </div>
               <div
                 className="flex-1 h-2 rounded overflow-hidden"
                 style={{ background: "var(--warm-bg, var(--surface-2))" }}

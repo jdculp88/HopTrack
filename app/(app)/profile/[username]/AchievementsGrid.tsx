@@ -171,9 +171,17 @@ export function AchievementsGrid({ achievements }: AchievementsGridProps) {
 
       {/* Grid */}
       {displayed.length > 0 ? (
-        <div className="grid grid-cols-4 sm:grid-cols-6 gap-3">
+        <div className="grid grid-cols-3 sm:grid-cols-5 gap-2.5">
           {displayed.map((ua: any) => (
-            <div key={ua.id} className="relative h-full">
+            <div
+              key={ua.id}
+              className="rounded-[14px] py-3 px-2 flex flex-col items-center"
+              style={{
+                background: "var(--card-bg)",
+                border: "1px solid var(--border)",
+                boxShadow: "0 1px 3px color-mix(in srgb, var(--accent-gold) 8%, transparent)",
+              }}
+            >
               <AchievementBadge
                 achievement={ua.achievement}
                 earned
@@ -181,14 +189,6 @@ export function AchievementsGrid({ achievements }: AchievementsGridProps) {
                 size="md"
                 className="h-full"
               />
-              {recentIds.has(ua.id) && (
-                <span
-                  className="absolute -top-1 -right-1 px-1.5 py-0.5 text-[9px] font-mono uppercase tracking-wider rounded-full"
-                  style={{ background: "var(--accent-gold)", color: "var(--bg)" }}
-                >
-                  New
-                </span>
-              )}
             </div>
           ))}
         </div>
@@ -204,24 +204,28 @@ export function AchievementsGrid({ achievements }: AchievementsGridProps) {
           <p className="text-xs font-mono uppercase tracking-wider text-[var(--text-muted)] mb-3">
             Locked — {TOTAL_ACHIEVEMENTS - earnedCount} remaining
           </p>
-          <div className="grid grid-cols-4 sm:grid-cols-6 gap-3">
-            {Array.from({ length: Math.min(TOTAL_ACHIEVEMENTS - earnedCount, 12) }).map((_, i) => (
+          <div className="grid grid-cols-3 sm:grid-cols-5 gap-2.5">
+            {Array.from({ length: Math.min(TOTAL_ACHIEVEMENTS - earnedCount, 10) }).map((_, i) => (
               <div
                 key={`locked-${i}`}
-                className="w-16 h-16 rounded-[14px] flex items-center justify-center opacity-25"
-                style={{ background: "var(--surface-2)" }}
+                className="rounded-[14px] py-3 px-2 flex flex-col items-center"
+                style={{ background: "var(--card-bg)", border: "1px dashed var(--border)" }}
               >
-                <span className="text-2xl grayscale">🏅</span>
+                <div className="w-16 h-16 rounded-full flex items-center justify-center opacity-30 grayscale" style={{ border: "2px dashed var(--border)" }}>
+                  <span className="text-2xl">🏅</span>
+                </div>
+                <p className="text-[10px] text-[var(--text-muted)] mt-2">Locked</p>
               </div>
             ))}
-            {TOTAL_ACHIEVEMENTS - earnedCount > 12 && (
+            {TOTAL_ACHIEVEMENTS - earnedCount > 10 && (
               <div
-                className="w-16 h-16 rounded-[14px] flex items-center justify-center opacity-25"
-                style={{ background: "var(--surface-2)" }}
+                className="rounded-[14px] py-3 px-2 flex flex-col items-center justify-center"
+                style={{ background: "var(--card-bg)", border: "1px dashed var(--border)" }}
               >
                 <span className="text-xs font-mono text-[var(--text-muted)]">
-                  +{TOTAL_ACHIEVEMENTS - earnedCount - 12}
+                  +{TOTAL_ACHIEVEMENTS - earnedCount - 10}
                 </span>
+                <p className="text-[10px] text-[var(--text-muted)] mt-1">more</p>
               </div>
             )}
           </div>

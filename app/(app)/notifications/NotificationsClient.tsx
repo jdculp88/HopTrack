@@ -13,21 +13,21 @@ import type { Notification, NotificationType } from "@/types/database";
 // Sprint 171: Category-consistent icon colors
 // Social → blue, Achievements → purple, Rewards → gold, System → muted
 const ICONS: Record<NotificationType, { icon: React.ReactNode; color: string }> = {
-  friend_request:      { icon: <Users size={16} />,         color: "var(--accent-blue)" },
-  friend_checkin:      { icon: <Beer size={16} />,          color: "var(--accent-blue)" },
-  tagged_checkin:      { icon: <Users size={16} />,         color: "var(--accent-blue)" },
-  achievement_unlocked:{ icon: <Trophy size={16} />,        color: "var(--accent-purple)" },
-  reaction:            { icon: <Heart size={16} />,         color: "var(--accent-blue)" },
-  session_cheers:      { icon: <Beer size={16} />,          color: "var(--accent-blue)" },
-  session_comment:     { icon: <MessageCircle size={16} />, color: "var(--accent-blue)" },
-  weekly_stats:        { icon: <TrendingUp size={16} />,    color: "var(--text-muted)" },
-  nudge:               { icon: <Beer size={16} />,          color: "var(--text-muted)" },
-  brewery_follow:      { icon: <Heart size={16} />,         color: "var(--accent-gold)" },
-  new_tap:             { icon: <Beer size={16} />,          color: "var(--accent-gold)" },
-  new_event:           { icon: <Bell size={16} />,          color: "var(--accent-gold)" },
-  first_referral:      { icon: <Users size={16} />,         color: "var(--accent-blue)" },
-  group_invite:        { icon: <Users size={16} />,         color: "var(--accent-blue)" },
-  reward_redeemed:     { icon: <Gift size={16} />,          color: "var(--accent-gold)" },
+  friend_request:      { icon: "👤",  color: "var(--accent-blue)" },
+  friend_checkin:      { icon: "🍻",  color: "var(--accent-blue)" },
+  tagged_checkin:      { icon: "🍻",  color: "var(--accent-blue)" },
+  achievement_unlocked:{ icon: "🏆",  color: "var(--accent-purple)" },
+  reaction:            { icon: "🍻",  color: "var(--accent-blue)" },
+  session_cheers:      { icon: "🍻",  color: "var(--accent-blue)" },
+  session_comment:     { icon: "💬",  color: "var(--accent-blue)" },
+  weekly_stats:        { icon: "📊",  color: "var(--text-muted)" },
+  nudge:               { icon: "🍺",  color: "var(--text-muted)" },
+  brewery_follow:      { icon: "❤️",  color: "var(--accent-gold)" },
+  new_tap:             { icon: "🍺",  color: "var(--accent-gold)" },
+  new_event:           { icon: "📅",  color: "var(--accent-gold)" },
+  first_referral:      { icon: "👤",  color: "var(--accent-blue)" },
+  group_invite:        { icon: "👥",  color: "var(--accent-blue)" },
+  reward_redeemed:     { icon: "🎁",  color: "var(--accent-gold)" },
 };
 
 /** Sprint 171: Get category accent color for border/background */
@@ -716,16 +716,25 @@ function SingleNotification({
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, height: 0, marginBottom: 0, overflow: "hidden" }}
       transition={{ type: "spring", stiffness: 400, damping: 30 }}
-      className="relative group flex items-start gap-4 p-4 rounded-[14px] border transition-colors"
+      className="relative group flex items-start gap-3 p-4 rounded-[14px] border transition-colors hover:bg-[var(--surface-2)]"
       style={{
         background: !n.read ? "var(--surface-2)" : "var(--card-bg)",
         borderColor: "var(--card-border)",
-        borderLeft: !n.read ? `3px solid ${getCategoryColor(n.type)}` : `3px solid transparent`,
       }}
     >
+      {/* Unread amber dot */}
+      {!n.read && (
+        <span
+          className="w-2 h-2 rounded-full flex-shrink-0 mt-4"
+          style={{ background: "var(--accent-gold)" }}
+        />
+      )}
+      {!n.read || (
+        <span className="w-2 flex-shrink-0" />
+      )}
       <div
-        className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5"
-        style={{ background: `${iconConfig.color}20`, color: iconConfig.color }}
+        className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5 text-lg"
+        style={{ background: `color-mix(in srgb, ${iconConfig.color} 15%, var(--surface-2))` }}
       >
         {iconConfig.icon}
       </div>

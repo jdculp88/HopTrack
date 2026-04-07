@@ -24,6 +24,7 @@ export interface FeaturedBeer {
   abv: number | null;
   glass_type: string | null;
   description: string | null;
+  avg_rating: number | null;
   brewery: { id: string; name: string } | null;
 }
 
@@ -276,7 +277,7 @@ export async function fetchCommunityContent(
       supabase
         .from("beers")
         .select(
-          "id, name, style, abv, glass_type, description, brewery:breweries(id, name)"
+          "id, name, style, abv, glass_type, description, avg_rating, brewery:breweries(id, name)"
         )
         .eq("is_featured", true)
         .eq("is_active", true)
@@ -303,7 +304,7 @@ export async function fetchCommunityContent(
         ? supabase
             .from("beer_reviews")
             .select(
-              "id, rating, comment, created_at, beer:beers(id, name, style), profile:profiles(id, username, display_name, avatar_url)"
+              "id, rating, comment, flavor_tags, created_at, beer:beers(id, name, style, brewery:breweries(id, name, city)), profile:profiles(id, username, display_name, avatar_url)"
             )
             .in("user_id", friendIds)
             .order("created_at", { ascending: false })
@@ -313,7 +314,7 @@ export async function fetchCommunityContent(
       supabase
         .from("brewery_events")
         .select(
-          "id, title, description, event_date, start_time, brewery:breweries(id, name)"
+          "id, title, description, event_date, start_time, brewery:breweries(id, name), event_rsvps(count)"
         )
         .gte("event_date", today)
         .eq("is_active", true)
@@ -333,7 +334,11 @@ export async function fetchCommunityContent(
       topReviews: (topReviewsRes.data ?? []) as any,
       breweryReviews: (breweryReviewsRes.data ?? []) as any,
       friendRatings: (friendRatingsRes.data ?? []) as any,
-      upcomingEvents: (upcomingEventsRes.data ?? []) as any,
+      upcomingEvents: ((upcomingEventsRes.data ?? []) as any[]).map((e: any) => ({
+        ...e,
+        going_count: Array.isArray(e.event_rsvps) ? (e.event_rsvps[0]?.count ?? 0) : 0,
+        event_rsvps: undefined,
+      })) as any,
       newBreweries: newBreweriesRes.data ?? [],
     };
   } catch {

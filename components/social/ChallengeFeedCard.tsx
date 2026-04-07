@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Trophy, MapPin } from "lucide-react";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import { formatRelativeTime } from "@/lib/utils";
+import { EmojiPulse } from "@/components/social/EmojiPulse";
 
 export interface FriendChallengeCompletion {
   id: string;
@@ -97,6 +98,7 @@ export function ChallengeFeedCard({
           </div>
         </div>
       </div>
+      <EmojiPulse itemKey={`challenge-${completion.id}`} />
     </motion.div>
   );
 }

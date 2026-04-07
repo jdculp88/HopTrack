@@ -499,12 +499,16 @@ function DefaultBreweryCard({
               </span>
             </div>
 
-            {/* Spacer pushes bottom content down for equal-height grid alignment */}
-            <div className="mt-auto">
+            {/* Stat row — ★ rating, N on tap, N visits */}
+            <div className="mt-auto flex items-center gap-3 text-xs font-mono" style={{ color: "var(--text-muted)" }}>
+              {(brewery as any).avg_rating > 0 && (
+                <span>★ {Number((brewery as any).avg_rating).toFixed(1)}</span>
+              )}
               {brewery.beer_count !== undefined && brewery.beer_count > 0 && (
-                <p className="text-xs text-[var(--text-muted)]">
-                  {brewery.beer_count} beer{brewery.beer_count !== 1 ? "s" : ""} on tap
-                </p>
+                <span>{brewery.beer_count} on tap</span>
+              )}
+              {(brewery as any).visit_count > 0 && (
+                <span>{(brewery as any).visit_count} visit{(brewery as any).visit_count !== 1 ? "s" : ""}</span>
               )}
             </div>
           </div>

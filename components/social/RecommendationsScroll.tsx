@@ -9,7 +9,8 @@ import Link from "next/link";
 import { motion } from "motion/react";
 import { Star, Sparkles, Loader2 } from "lucide-react";
 import { BeerStyleBadge } from "@/components/ui/BeerStyleBadge";
-import { getStyleFamily } from "@/lib/beerStyleColors";
+import { getStyleFamily, getStyleVars } from "@/lib/beerStyleColors";
+import { getGlass, getGlassSvgContent } from "@/lib/glassware";
 import type { AIRecommendedBeer } from "@/lib/recommendations";
 
 interface RecommendedBeer {
@@ -91,78 +92,119 @@ export function RecommendationsScroll({ beers, aiBeers }: RecommendationsScrollP
       </div>
 
       <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1 snap-x">
-        {merged.slice(0, 10).map((beer, i) => (
-          <motion.div
-            key={beer.id}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: i * 0.05 }}
-            className="flex-shrink-0 snap-start"
-          >
-            <Link href={`/beer/${beer.id}`}>
-              <div
-                className="card-bg-reco w-[200px] min-h-[160px] p-4 rounded-[14px] h-full transition-all hover:scale-[1.02] flex flex-col"
-                data-style={getStyleFamily(beer.style)}
-                style={{
-                  border: "1px solid var(--card-border)",
-                  borderLeft: `3px solid var(--${getStyleFamily(beer.style) === "default" ? "accent-gold" : getStyleCssVar(getStyleFamily(beer.style))})`,
-                }}
-              >
-                {/* Beer name — 16px/600 per audit #3 */}
-                <p
-                  className="font-display font-semibold leading-tight mb-1"
-                  style={{ color: "var(--text-primary)", fontSize: "16px", letterSpacing: "-0.01em" }}
+        {merged.slice(0, 10).map((beer, i) => {
+          const styleVars = getStyleVars(beer.style);
+          const glass = getGlass("shaker_pint");
+          const svgHtml = glass ? getGlassSvgContent(glass, `reco-${beer.id}`) : null;
+
+          return (
+            <motion.div
+              key={beer.id}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: i * 0.05 }}
+              className="flex-shrink-0 snap-start"
+            >
+              <Link href={`/beer/${beer.id}`}>
+                <div
+                  className="w-[220px] rounded-[14px] overflow-hidden transition-all hover:scale-[1.02] flex flex-col"
+                  style={{
+                    border: "1px solid var(--card-border)",
+                    background: "var(--card-bg)",
+                  }}
                 >
-                  {beer.name}
-                </p>
-                {beer.brewery && (
-                  <p
-                    className="text-xs truncate mb-2"
-                    style={{ color: "var(--text-secondary)" }}
+                  {/* Style-tinted hero area with glass watermark */}
+                  <div
+                    className="relative px-4 pt-10 pb-3"
+                    style={{
+                      background: `linear-gradient(180deg, color-mix(in srgb, ${styleVars.primary} 20%, var(--card-bg)) 0%, var(--card-bg) 100%)`,
+                    }}
                   >
-                    {beer.brewery.name}{beer.brewery.city ? ` · ${beer.brewery.city}` : ""}
-                  </p>
-                )}
-                <div className="flex items-center gap-2 mb-2">
-                  {beer.style && <BeerStyleBadge style={beer.style} size="sm" />}
-                  {beer.abv != null && (
-                    <span className="text-[10px] font-mono" style={{ color: "var(--text-muted)" }}>
-                      {beer.abv}%
-                    </span>
-                  )}
-                </div>
-                {beer.avg_rating != null && beer.avg_rating > 0 && (
-                  <div className="flex items-center gap-1 mb-2">
-                    <Star
-                      size={12}
-                      className="fill-[var(--accent-gold)] text-[var(--accent-gold)]"
-                    />
-                    <span
-                      className="text-sm font-mono font-bold"
-                      style={{ color: "var(--amber, var(--accent-gold))" }}
+                    {/* Glass watermark */}
+                    {svgHtml && (
+                      <div className="absolute top-2 right-3 opacity-15">
+                        <svg
+                          viewBox="0 0 80 120"
+                          width={36}
+                          height={54}
+                          dangerouslySetInnerHTML={{ __html: svgHtml }}
+                        />
+                      </div>
+                    )}
+
+                    {/* Beer name — large, bold */}
+                    <p
+                      className="font-display font-bold leading-tight"
+                      style={{ color: "var(--text-primary)", fontSize: "16px", letterSpacing: "-0.01em" }}
                     >
-                      {beer.avg_rating.toFixed(1)}
-                    </span>
-                    {beer.total_ratings > 0 && (
-                      <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>
-                        ({beer.total_ratings})
-                      </span>
+                      {beer.name}
+                    </p>
+                    {beer.brewery && (
+                      <p
+                        className="text-xs truncate mt-0.5"
+                        style={{ color: "var(--text-secondary)" }}
+                      >
+                        {beer.brewery.name}
+                      </p>
                     )}
                   </div>
-                )}
-                {/* Reason line — style's primary color per audit #3 */}
-                {beer.reason && (
-                  <p
-                    className="text-[11px] leading-relaxed line-clamp-2 mt-auto"
-                    style={{ color: `var(--${getStyleCssVar(getStyleFamily(beer.style))}, var(--text-secondary))` }}
-                  >
-                    {beer.reason}
-                  </p>
-                )}
-              </div>
-            </Link>
-          </motion.div>
-        ))}
+
+                  {/* Card body */}
+                  <div className="px-4 pb-4 flex flex-col gap-2 flex-1">
+                    {/* Style badge — full-width, prominent */}
+                    {beer.style && (
+                      <div>
+                        <BeerStyleBadge style={beer.style} size="sm" />
+                      </div>
+                    )}
+
+                    {/* Rating with 5 filled stars */}
+                    {beer.avg_rating != null && beer.avg_rating > 0 && (
+                      <div className="flex items-center gap-1.5">
+                        <div className="flex items-center gap-0.5">
+                          {Array.from({ length: 5 }).map((_, j) => (
+                            <Star
+                              key={j}
+                              size={11}
+                              style={{
+                                color: "var(--accent-gold)",
+                                fill:
+                                  j < Math.round(beer.avg_rating!)
+                                    ? "var(--accent-gold)"
+                                    : "transparent",
+                              }}
+                            />
+                          ))}
+                        </div>
+                        <span
+                          className="text-sm font-mono font-bold"
+                          style={{ color: "var(--accent-gold)" }}
+                        >
+                          {beer.avg_rating.toFixed(1)}
+                        </span>
+                        {beer.total_ratings > 0 && (
+                          <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>
+                            ({beer.total_ratings})
+                          </span>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Reason line — style's primary color */}
+                    {beer.reason && (
+                      <p
+                        className="text-[11px] leading-relaxed line-clamp-2 mt-auto"
+                        style={{ color: styleVars.primary }}
+                      >
+                        {beer.reason}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </Link>
+            </motion.div>
+          );
+        })}
       </div>
     </div>
   );

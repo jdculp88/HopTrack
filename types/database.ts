@@ -708,6 +708,7 @@ export interface BeerReview {
   beer_id: string;
   rating: number;
   comment: string | null;
+  flavor_tags: string[] | null;
   created_at: string;
   updated_at: string;
   // joined fields

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { type LucideIcon, Zap, Flame, Users, Map, Trophy, GlassWater, Star, Beer } from "lucide-react";
+import { Zap } from "lucide-react";
 import { formatRelativeTime } from "@/lib/dates";
 import { AchievementCelebration } from "@/components/achievements/AchievementCelebration";
 import { EmojiPulse } from "@/components/social/EmojiPulse";
@@ -33,21 +33,6 @@ export interface FriendAchievement {
   };
 }
 
-// One unique icon per achievement category — SVG line art, consistent with app icon system
-const CATEGORY_ICONS: Record<string, LucideIcon> = {
-  time:       Flame,       // streak / time-based
-  variety:    GlassWater,  // beer styles / variety
-  social:     Users,       // friends / social
-  hop_route:  Map,         // route / travel
-  milestone:  Trophy,      // major milestones
-  rating:     Star,        // rating-based
-  default:    Beer,        // fallback
-};
-
-function getCategoryIconElement(category: string): React.ReactElement {
-  const Icon = CATEGORY_ICONS[category] ?? CATEGORY_ICONS.default;
-  return <Icon size={22} strokeWidth={1.75} />;
-}
 
 export function AchievementFeedCard({
   achievement,
@@ -60,7 +45,7 @@ export function AchievementFeedCard({
   const tier = achievement.achievement.tier;
   const tierColor = TIER_COLORS[tier] ?? "var(--badge-gold)";
 
-  const categoryIcon = getCategoryIconElement(achievement.achievement.category);
+  const achievementIcon = achievement.achievement.icon;
   const [showCelebration, setShowCelebration] = useState(() =>
     isNewAchievement(achievement.earned_at)
   );
@@ -69,18 +54,20 @@ export function AchievementFeedCard({
   return (
     <FeedCardWrapper
       accentColor={tierColor}
-      icon={categoryIcon}
+      icon={
+        <span className="text-xl leading-none">{achievementIcon}</span>
+      }
       ariaLabel={`${achievement.profile.display_name || achievement.profile.username} earned ${achievement.achievement.name}`}
       bgClass="card-bg-achievement"
       backgroundStyle={{
-        background: `linear-gradient(135deg, color-mix(in srgb, ${tierColor} 8%, var(--surface)), var(--surface))`,
+        background: `linear-gradient(135deg, color-mix(in srgb, ${tierColor} 8%, var(--card-bg)), var(--card-bg))`,
         border: `1px solid color-mix(in srgb, ${tierColor} 20%, var(--border))`,
       }}
       dataTier={tier}
     >
       <AchievementCelebration
         show={showCelebration}
-        icon={achievement.achievement.icon}
+        icon={achievementIcon}
         name={achievement.achievement.name}
         tier={achievement.achievement.tier}
         xpReward={achievement.achievement.xp_reward}

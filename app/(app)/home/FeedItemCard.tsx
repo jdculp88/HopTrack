@@ -2,7 +2,9 @@
 
 import { motion } from "motion/react";
 import { SessionCard } from "@/components/social/SessionCard";
+import { CheckinCard } from "@/components/social/CheckinCard";
 import { RatingCard, type FriendRating } from "@/components/social/RatingCard";
+import { RatingOnlyRow } from "@/components/social/RatingOnlyRow";
 import {
   AchievementFeedCard,
   type FriendAchievement,
@@ -68,6 +70,11 @@ export function FeedItemCard({
 }) {
   const { reactionCounts, userReactions, commentCounts } = useReactions();
   if (item.type === "session") {
+    const beerCount = (item.data as any).beer_logs?.length ?? 0;
+    // 0 beers = minimal check-in row (Strava kudos style)
+    if (beerCount === 0 && !item.isLive) {
+      return <CheckinCard session={item.data} index={index} />;
+    }
     return (
       <motion.div
         initial={{ opacity: 0, y: 16 }}
@@ -87,6 +94,10 @@ export function FeedItemCard({
   }
 
   if (item.type === "rating") {
+    // No comment = compact row, with comment = full review card
+    if (!item.data.comment) {
+      return <RatingOnlyRow rating={item.data} index={index} />;
+    }
     return <RatingCard rating={item.data} index={index} />;
   }
 

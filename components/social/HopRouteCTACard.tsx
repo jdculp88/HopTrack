@@ -5,6 +5,7 @@ import { motion } from "motion/react";
 import { variants, transition } from "@/lib/animation";
 import { Map, Route } from "lucide-react";
 import { getFirstName } from "@/lib/first-name";
+import { EmojiPulse } from "@/components/social/EmojiPulse";
 
 export interface FriendActiveRoute {
   routeId: string;
@@ -77,6 +78,7 @@ export function HopRouteCTACard({ route, index = 0 }: { route: FriendActiveRoute
         <Route size={14} />
         Join {getFirstName(route.friendName, null)} on this route
       </Link>
+      <EmojiPulse itemKey={`hoproute-cta-${route.routeId}`} />
     </motion.div>
   );
 }

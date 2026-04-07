@@ -112,13 +112,25 @@ export function DiscoverTabContent({
           className="card-bg-hoproute rounded-[14px] p-5 border"
           style={{ borderColor: "color-mix(in srgb, var(--accent-gold) 30%, transparent)" }}
         >
-          <div className="flex items-center justify-between gap-4">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <Beer size={16} style={{ color: "var(--accent-gold)" }} />
+          <div className="flex items-center gap-4">
+            {/* Map thumbnail */}
+            <div
+              className="flex-shrink-0 w-16 h-16 rounded-[14px] flex items-center justify-center text-3xl"
+              style={{
+                background: "color-mix(in srgb, var(--accent-gold) 12%, var(--surface-2))",
+              }}
+            >
+              🗺️
+            </div>
+            <div className="space-y-1 flex-1 min-w-0">
+              <div className="flex items-center gap-1.5">
                 <span
-                  className="text-[10px] font-mono uppercase tracking-widest"
-                  style={{ color: "var(--accent-gold)" }}
+                  className="w-2 h-2 rounded-full flex-shrink-0"
+                  style={{ background: "#4CAF50" }}
+                />
+                <span
+                  className="text-[10px] font-mono uppercase tracking-widest font-bold"
+                  style={{ color: "#4CAF50" }}
                 >
                   New
                 </span>
@@ -130,14 +142,6 @@ export function DiscoverTabContent({
                 AI-powered brewery crawl planner. Tell us where and when — we
                 build your night.
               </p>
-            </div>
-            <div
-              className="flex-shrink-0 w-12 h-12 rounded-[14px] flex items-center justify-center text-2xl"
-              style={{
-                background: "color-mix(in srgb, var(--accent-gold) 15%, transparent)",
-              }}
-            >
-              🗺️
             </div>
           </div>
         </motion.div>

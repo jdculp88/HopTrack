@@ -8,6 +8,7 @@ import { getStyleFamily, getStyleVars } from "@/lib/beerStyleColors";
 import { ActivityHeatmap } from "@/components/profile/ActivityHeatmap";
 import { BeerDNACard } from "@/components/profile/BeerDNACard";
 import { SessionCard } from "@/components/social/SessionCard";
+import { CheckinCard } from "@/components/social/CheckinCard";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import { getLevelProgress } from "@/lib/xp";
 import { FeedCardSkeletons, FeedEndMessage } from "./FeedPaginationUI";
@@ -499,22 +500,29 @@ export function YouTabContent({
 
         {sessions.length > 0 ? (
           <div className="space-y-4">
-            {sessions.map((s, i) => (
-              <motion.div
-                key={s.id}
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.03, duration: 0.28 }}
-              >
-                <SessionCard
-                  session={s}
-                  currentUserId={currentUserId}
-                  reactionCounts={reactionCounts?.[s.id]}
-                  userReactions={userReactions?.[s.id]}
-                  commentCount={commentCounts?.[s.id]}
-                />
-              </motion.div>
-            ))}
+            {sessions.map((s, i) => {
+              const beerCount = (s as any).beer_logs?.length ?? 0;
+              // 0 beers = minimal check-in row
+              if (beerCount === 0) {
+                return <CheckinCard key={s.id} session={s} index={i} />;
+              }
+              return (
+                <motion.div
+                  key={s.id}
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.03, duration: 0.28 }}
+                >
+                  <SessionCard
+                    session={s}
+                    currentUserId={currentUserId}
+                    reactionCounts={reactionCounts?.[s.id]}
+                    userReactions={userReactions?.[s.id]}
+                    commentCount={commentCounts?.[s.id]}
+                  />
+                </motion.div>
+              );
+            })}
 
             {/* Pagination sentinel + status */}
             {loading && <FeedCardSkeletons count={3} />}

@@ -8,7 +8,7 @@ import Link from "next/link";
 import { MapPin, Beer, Clock } from "lucide-react";
 import { MugClubMemberships } from "@/components/profile/MugClubMemberships";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { generateGradientFromString } from "@/lib/utils";
+import { BreweryMonogram } from "@/components/brewery/BreweryCard";
 
 interface BreweryVisit {
   id: string;
@@ -62,10 +62,11 @@ export function BreweriesTab({ topBreweries, mugClubMemberships }: BreweriesTabP
                       borderLeft: `3px solid ${visit.total_visits >= 5 ? "var(--accent-gold)" : visit.total_visits >= 3 ? "var(--accent-amber)" : "var(--accent-blue)"}`,
                     }}
                   >
-                    {/* Brewery icon */}
-                    <div
+                    {/* Brewery monogram */}
+                    <BreweryMonogram
+                      name={visit.brewery?.name ?? "??"}
                       className="w-14 h-14 rounded-xl flex-shrink-0"
-                      style={{ background: generateGradientFromString(visit.brewery?.name ?? "") }}
+                      textSize="text-xl"
                     />
                     {/* Info */}
                     <div className="flex-1 min-w-0">
@@ -98,10 +99,10 @@ export function BreweriesTab({ topBreweries, mugClubMemberships }: BreweriesTabP
                         )}
                       </div>
                     </div>
-                    {/* Visit count */}
+                    {/* Visit count — large */}
                     <div className="text-right flex-shrink-0">
-                      <p className="font-mono font-bold text-lg" style={{ color: "var(--accent-gold)" }}>{visit.total_visits}</p>
-                      <p className="text-[10px] text-[var(--text-muted)] font-mono">visits</p>
+                      <p className="font-mono font-bold text-2xl leading-none" style={{ color: "var(--text-primary)" }}>{visit.total_visits}</p>
+                      <p className="text-[9px] text-[var(--text-muted)] font-mono uppercase tracking-[0.12em] mt-0.5">Visits</p>
                     </div>
                   </div>
                 </Link>

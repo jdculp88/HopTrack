@@ -80,14 +80,26 @@ export function DrinkerStatsCard({ kpis, username, isOwnProfile }: DrinkerStatsC
         </div>
       </button>
 
-      {/* Always-visible stats */}
-      <div className="px-4 pb-4 grid grid-cols-3 gap-3">
-        {stats.map(({ label, value }) => (
-          <div key={label} className="text-center rounded-xl py-2 px-1" style={{ background: "color-mix(in srgb, var(--surface-2) 55%, transparent)" }}>
-            <p className="font-mono font-bold text-sm leading-none text-[var(--accent-gold)]">{value}</p>
-            <p className="text-[9px] text-[var(--text-muted)] mt-1 font-mono uppercase tracking-wide">{label}</p>
-          </div>
-        ))}
+      {/* 3×2 grid with hairline dividers */}
+      <div className="px-4 pb-4">
+        <div
+          className="grid grid-cols-3"
+          style={{ border: "1px solid var(--border)", borderRadius: 10, overflow: "hidden" }}
+        >
+          {stats.map(({ label, value }, i) => (
+            <div
+              key={label}
+              className="text-center py-3.5 px-2"
+              style={{
+                borderRight: (i % 3 !== 2) ? "1px solid var(--border)" : "none",
+                borderBottom: i < 3 ? "1px solid var(--border)" : "none",
+              }}
+            >
+              <p className="font-mono font-bold text-lg leading-none text-[var(--text-primary)]">{value}</p>
+              <p className="text-[8px] text-[var(--text-muted)] mt-1.5 font-mono uppercase tracking-[0.12em]">{label}</p>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Expanded stats */}

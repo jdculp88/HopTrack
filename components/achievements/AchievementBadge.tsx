@@ -80,17 +80,25 @@ export function AchievementBadge({
               />
             </svg>
           )}
+          {/* "NEW" badge for recently earned (within 7 days) */}
+          {earned && _earnedAt && (Date.now() - new Date(_earnedAt).getTime() < 7 * 24 * 60 * 60 * 1000) && (
+            <span
+              className="absolute -top-1.5 -right-1.5 text-[8px] font-mono font-bold px-1.5 py-0.5 rounded-full uppercase z-10"
+              style={{ background: "#3498DB", color: "#fff" }}
+            >
+              NEW
+            </span>
+          )}
           <div
             className={cn(
               s.container,
-              "rounded-[14px] flex items-center justify-center flex-shrink-0 ring-2",
-              earned ? tier.glow : "",
+              "rounded-full flex items-center justify-center flex-shrink-0",
               earned ? "" : "opacity-40 grayscale"
             )}
             style={earned
               ? {
-                  background: `color-mix(in srgb, ${tier.color} 12%, transparent)`,
-                  border: `2px solid ${tier.color}`,
+                  background: `color-mix(in srgb, ${tier.color} 10%, transparent)`,
+                  border: `2.5px solid ${tier.color}`,
                   boxShadow: `0 0 12px color-mix(in srgb, ${tier.color} 20%, transparent)`,
                 }
               : {

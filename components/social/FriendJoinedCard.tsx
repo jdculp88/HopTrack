@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { UserPlus } from 'lucide-react'
 import { useToast } from '@/components/ui/Toast'
 import { FeedCardWrapper } from '@/components/social/FeedCardWrapper'
+import { EmojiPulse } from '@/components/social/EmojiPulse'
 import { getFirstName } from '@/lib/first-name'
 import { formatRelativeTime } from '@/lib/dates'
 
@@ -110,6 +111,7 @@ export function FriendJoinedCard({
           </button>
         </div>
       </div>
+      <EmojiPulse itemKey={`friend-joined-${friend.userId}`} />
     </FeedCardWrapper>
   )
 }

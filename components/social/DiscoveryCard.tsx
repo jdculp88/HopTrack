@@ -27,6 +27,7 @@ export interface EventItem {
   event_date: string
   start_time: string | null
   brewery: { id: string; name: string } | null
+  going_count?: number
 }
 
 export interface TrendingReview {
@@ -164,7 +165,19 @@ export function EventCard({ event, index = 0 }: { event: EventItem; index?: numb
   const d = new Date(event.event_date)
   const month = d.toLocaleDateString('en-US', { month: 'short' }).toUpperCase()
   const day = d.getDate()
-  const dow = d.toLocaleDateString('en-US', { weekday: 'short' })
+
+  // Relative day label
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const eventDay = new Date(d)
+  eventDay.setHours(0, 0, 0, 0)
+  const diffDays = Math.round((eventDay.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+  const relativeDay =
+    diffDays === 0 ? 'Today' :
+    diffDays === 1 ? 'Tomorrow' :
+    d.toLocaleDateString('en-US', { weekday: 'short' })
+
+  const goingCount = event.going_count ?? 0
 
   return (
     <motion.div
@@ -174,44 +187,74 @@ export function EventCard({ event, index = 0 }: { event: EventItem; index?: numb
     >
       <Link href={`/brewery/${event.brewery.id}`}>
         <div
-          className="flex gap-3.5 p-3.5 rounded-[14px] border"
+          className="flex items-center gap-3.5 p-3.5 rounded-[14px] border relative overflow-hidden"
           style={{
-            background: 'linear-gradient(135deg, color-mix(in srgb, var(--amber, var(--accent-gold)) 4%, var(--card-bg, #FFFFFF)), color-mix(in srgb, var(--amber, var(--accent-gold)) 2%, var(--card-bg, #FFFFFF)))',
-            borderColor: 'color-mix(in srgb, var(--amber, var(--accent-gold)) 20%, var(--border))',
+            background: 'linear-gradient(135deg, color-mix(in srgb, var(--accent-gold) 6%, var(--card-bg)) 0%, var(--card-bg) 60%)',
+            borderColor: 'color-mix(in srgb, var(--accent-gold) 25%, var(--border))',
           }}
         >
-          {/* Date chip — Card Type 9 */}
+          {/* Gold left accent bar */}
           <div
-            className="w-11 flex-shrink-0 text-center rounded-xl border py-1.5"
+            className="absolute left-0 top-0 bottom-0 w-[3px]"
+            style={{ background: 'var(--accent-gold)' }}
+          />
+
+          {/* Date chip */}
+          <div
+            className="w-14 h-14 flex-shrink-0 text-center rounded-xl flex flex-col items-center justify-center"
             style={{
-              background: 'var(--card-bg, #FFFFFF)',
-              borderColor: 'var(--border)',
+              background: 'color-mix(in srgb, var(--accent-gold) 10%, var(--surface-2))',
+              border: '1px solid color-mix(in srgb, var(--accent-gold) 20%, var(--border))',
             }}
           >
-            <div className="font-mono text-[8px] font-semibold tracking-[0.1em] uppercase" style={{ color: 'var(--amber, var(--accent-gold))' }}>
+            <div
+              className="font-mono text-[9px] font-bold tracking-[0.12em] uppercase leading-none"
+              style={{ color: 'var(--accent-gold)' }}
+            >
               {month}
             </div>
-            <div className="font-mono text-lg font-bold leading-none" style={{ color: 'var(--text-primary)' }}>
+            <div
+              className="font-mono text-xl font-bold leading-none mt-0.5"
+              style={{ color: 'var(--text-primary)' }}
+            >
               {day}
-            </div>
-            <div className="font-mono text-[8px]" style={{ color: 'var(--text-muted)' }}>
-              {dow}
             </div>
           </div>
 
+          {/* Event details */}
           <div className="flex-1 min-w-0">
-            <p className="text-[14px] font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
+            <p
+              className="font-sans font-bold text-[15px] truncate"
+              style={{ color: 'var(--text-primary)' }}
+            >
               {event.title}
             </p>
             <p className="text-xs mt-0.5" style={{ color: 'var(--text-secondary)' }}>
               {event.brewery.name}
             </p>
-            {event.start_time && (
-              <p className="font-mono text-[10px] mt-0.5" style={{ color: 'var(--text-muted)' }}>
-                {formatTime(event.start_time)}
-              </p>
-            )}
+            <p className="font-mono text-[10px] mt-0.5" style={{ color: 'var(--text-muted)' }}>
+              {relativeDay}
+              {event.start_time ? ` · ${formatTime(event.start_time)}` : ''}
+            </p>
           </div>
+
+          {/* Going count */}
+          {goingCount > 0 && (
+            <div className="flex flex-col items-end flex-shrink-0">
+              <span
+                className="font-mono text-xl font-bold leading-none"
+                style={{ color: 'var(--accent-gold)' }}
+              >
+                {goingCount}
+              </span>
+              <span
+                className="font-mono text-[10px] mt-0.5"
+                style={{ color: 'var(--text-muted)' }}
+              >
+                going
+              </span>
+            </div>
+          )}
         </div>
       </Link>
     </motion.div>
@@ -240,50 +283,72 @@ export function SeasonalBeersScroll({ beers }: { beers: SeasonalBeer[] }) {
       <p className="text-[10px] font-mono uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)' }}>
         New & Noteworthy
       </p>
-      <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide snap-x">
-        {beers.map((beer, i) => (
-          <motion.div
-            key={beer.id}
-            initial={variants.slideUpSmall.initial}
-            animate={variants.slideUpSmall.animate}
-            transition={{ delay: i * 0.05, ...transition.normal }}
-            className="card-bg-reco rounded-xl p-3.5 flex-shrink-0 relative"
-            data-style={getStyleFamily(beer.style)}
-            style={{
-              border: '1px solid var(--card-border)',
-              borderLeft: `3px solid ${getStyleVars(beer.style).primary}`,
-              minWidth: 150,
-              maxWidth: 170,
-            } as React.CSSProperties}
-          >
-            <span
-              className="absolute top-2 right-2 text-[9px] font-mono font-bold px-2 py-0.5 rounded-md"
-              style={{
-                color: beer.badge === 'Limited' ? 'var(--danger, #c0583a)' : 'var(--accent-gold)',
-                background: beer.badge === 'Limited'
-                  ? 'color-mix(in srgb, var(--danger, #c0583a) 10%, transparent)'
-                  : 'color-mix(in srgb, var(--accent-gold) 10%, transparent)',
-                letterSpacing: '0.5px',
-              }}
+      <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide snap-x -mx-1 px-1">
+        {beers.map((beer, i) => {
+          const styleVars = getStyleVars(beer.style)
+          const breweryName = typeof beer.brewery === 'string' ? beer.brewery : (beer.brewery as any)?.name ?? ''
+
+          // Badge color: "New" = info-blue, "Limited" = gold, "Seasonal" = gold
+          const badgeColor = beer.badge === 'New' ? '#3498DB' : 'var(--accent-gold)'
+
+          return (
+            <motion.div
+              key={beer.id}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: i * 0.05 }}
+              className="flex-shrink-0 snap-start"
             >
-              {beer.badge}
-            </span>
-            <p
-              className="font-display text-sm font-semibold leading-tight pr-12"
-              style={{ color: 'var(--text-primary)' }}
-            >
-              {beer.name}
-            </p>
-            <p className="text-[11px] mt-1 truncate" style={{ color: 'var(--text-muted)' }}>
-              {typeof beer.brewery === 'string' ? beer.brewery : (beer.brewery as any)?.name ?? ''}
-            </p>
-            {beer.style && (
-              <div className="mt-2">
-                <BeerStyleBadge style={beer.style} size="xs" />
+              <div
+                className="w-[200px] rounded-[14px] overflow-hidden transition-all hover:scale-[1.02] flex flex-col"
+                style={{ border: '1px solid var(--card-border)', background: 'var(--card-bg)' }}
+              >
+                {/* Style-tinted hero with glass watermark */}
+                <div
+                  className="relative h-28 flex items-center justify-center"
+                  style={{
+                    background: `linear-gradient(180deg, color-mix(in srgb, ${styleVars.primary} 22%, var(--card-bg)) 0%, color-mix(in srgb, ${styleVars.primary} 8%, var(--card-bg)) 100%)`,
+                  }}
+                >
+                  {/* Glass watermark */}
+                  <svg viewBox="0 0 80 120" width={40} height={60} opacity={0.12} aria-hidden="true">
+                    <rect x="15" y="10" width="50" height="90" rx="4" fill="none" stroke="currentColor" strokeWidth="2" />
+                    <rect x="15" y="10" width="50" height="15" rx="4" fill="currentColor" opacity="0.15" />
+                  </svg>
+
+                  {/* Badge */}
+                  <span
+                    className="absolute top-2.5 right-2.5 text-[10px] font-mono font-bold px-2.5 py-1 rounded-full uppercase tracking-wider"
+                    style={{
+                      color: '#fff',
+                      background: badgeColor,
+                    }}
+                  >
+                    {beer.badge}
+                  </span>
+                </div>
+
+                {/* Card body */}
+                <div className="px-3.5 pt-3 pb-3.5">
+                  <p
+                    className="font-display font-bold text-[15px] leading-tight"
+                    style={{ color: 'var(--text-primary)' }}
+                  >
+                    {beer.name}
+                  </p>
+                  <p className="text-xs mt-0.5 truncate" style={{ color: 'var(--text-muted)' }}>
+                    {breweryName}
+                  </p>
+                  {beer.style && (
+                    <div className="mt-2.5">
+                      <BeerStyleBadge style={beer.style} size="sm" />
+                    </div>
+                  )}
+                </div>
               </div>
-            )}
-          </motion.div>
-        ))}
+            </motion.div>
+          )
+        })}
       </div>
     </motion.div>
   )

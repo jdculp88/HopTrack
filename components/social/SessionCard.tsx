@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion } from "motion/react";
 import { spring, variants } from "@/lib/animation";
-import { MapPin, Beer, Star, Home, Users } from "lucide-react";
+import { MapPin, Beer, Star, Home, Users, Clock } from "lucide-react";
 import { cn, formatRelativeTime } from "@/lib/utils";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import { SessionComments } from "@/components/social/SessionComments";
@@ -93,15 +93,16 @@ interface SessionCardProps {
 
 export function SessionCard({ session, currentUserId, className, reactionCounts, userReactions, commentCount, participants }: SessionCardProps) {
   const { profile, brewery, beer_logs } = session;
-  const beerCount = beer_logs?.length ?? 0;
+  // Total pours (sum of quantity, not just log count)
+  const totalPours = (beer_logs ?? []).reduce((sum, l) => sum + ((l as any).quantity ?? 1), 0);
   const ratedLogs = (beer_logs ?? []).filter((l) => l.rating != null);
-  const _avgRating =
+  const avgRating =
     ratedLogs.length > 0
       ? ratedLogs.reduce((sum, l) => sum + (l.rating ?? 0), 0) / ratedLogs.length
       : null;
 
   // Session duration
-  const _duration = session.ended_at
+  const duration = session.ended_at
     ? (() => {
         const ms = new Date(session.ended_at).getTime() - new Date(session.started_at).getTime();
         const mins = Math.round(ms / 60000);
@@ -111,6 +112,34 @@ export function SessionCard({ session, currentUserId, className, reactionCounts,
         return rem > 0 ? `${hrs}h ${rem}m` : `${hrs}h`;
       })()
     : null;
+
+  // Group beer logs by beer name for pour counts
+  const groupedLogs = (() => {
+    const logs = beer_logs ?? [];
+    const groups: { beer: any; quantity: number; rating: number | null; style: string | null; logs: typeof logs }[] = [];
+    const seen = new Map<string, number>();
+    for (const log of logs) {
+      const key = log.beer?.name ?? log.id;
+      const idx = seen.get(key);
+      if (idx !== undefined) {
+        groups[idx].quantity += (log as any).quantity ?? 1;
+        // Keep highest rating
+        if (log.rating != null && (groups[idx].rating == null || log.rating > groups[idx].rating)) {
+          groups[idx].rating = log.rating;
+        }
+      } else {
+        seen.set(key, groups.length);
+        groups.push({
+          beer: log.beer,
+          quantity: (log as any).quantity ?? 1,
+          rating: log.rating ?? null,
+          style: (log.beer as any)?.style ?? null,
+          logs: [log],
+        });
+      }
+    }
+    return groups;
+  })();
 
   const isAtHome = session.context === "home" || !brewery;
 
@@ -126,10 +155,10 @@ export function SessionCard({ session, currentUserId, className, reactionCounts,
     return `${nameStr} ${location}`.trim();
   })();
 
-  // Show 4 beers, expand if more
+  // Show 4 grouped beers, expand if more
   const [expanded, setExpanded] = useState(false);
-  const visibleLogs = expanded ? (beer_logs ?? []) : (beer_logs ?? []).slice(0, 4);
-  const hiddenCount = beerCount - 4;
+  const visibleGroups = expanded ? groupedLogs : groupedLogs.slice(0, 4);
+  const hiddenCount = groupedLogs.length - 4;
 
   // Find first photo from beer logs
   const firstPhoto = (beer_logs ?? []).find((l) => l.photo_url)?.photo_url;
@@ -200,29 +229,40 @@ export function SessionCard({ session, currentUserId, className, reactionCounts,
               </span>
             </div>
 
-            {/* Brewery name — large, prominent */}
+            {/* Context line */}
             {isAtHome ? (
               <p className="text-sm mt-0.5 flex items-center gap-1" style={{ color: "var(--text-secondary)" }}>
                 <Home size={12} />
                 Drinking at home
               </p>
-            ) : (
-              <div className="mt-0.5">
-                <Link
-                  href={`/brewery/${brewery!.id}`}
-                  className="font-display font-bold text-base hover:underline underline-offset-2 transition-colors leading-tight"
-                  style={{ color: "var(--accent-gold)" }}
-                >
-                  {brewery!.name}
-                </Link>
-                <p className="text-xs flex items-center gap-1 mt-0.5" style={{ color: "var(--text-muted)" }}>
-                  <MapPin size={10} />
-                  {brewery!.city}{brewery!.state ? `, ${brewery!.state}` : ""}
-                </p>
-              </div>
+            ) : brewery && (
+              <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
+                {brewery.name}
+              </p>
             )}
           </div>
         </div>
+
+        {/* Brewery location sub-card */}
+        {!isAtHome && brewery && (
+          <Link
+            href={`/brewery/${brewery.id}`}
+            className="mt-3 flex items-center gap-3 rounded-xl px-3.5 py-2.5 transition-colors hover:opacity-80"
+            style={{ background: "var(--surface-2)" }}
+          >
+            <MapPin size={14} className="flex-shrink-0" style={{ color: "var(--text-muted)" }} />
+            <div className="min-w-0">
+              <span className="font-sans font-bold text-sm block" style={{ color: "var(--text-primary)" }}>
+                {brewery.name}
+              </span>
+              {(brewery.city || brewery.state) && (
+                <span className="text-xs" style={{ color: "var(--text-muted)" }}>
+                  {brewery.city}{brewery.state ? `, ${brewery.state}` : ""}
+                </span>
+              )}
+            </div>
+          </Link>
+        )}
 
         {/* Session note */}
         {note && (
@@ -231,7 +271,7 @@ export function SessionCard({ session, currentUserId, className, reactionCounts,
               className="text-sm italic pl-3 leading-relaxed"
               style={{ color: "var(--text-secondary)" }}
             >
-              "{note}"
+              &ldquo;{note}&rdquo;
             </p>
           </div>
         )}
@@ -250,44 +290,33 @@ export function SessionCard({ session, currentUserId, className, reactionCounts,
         </div>
       )}
 
-      {/* Beer list — readable rows, one per line */}
-      {beerCount > 0 && (
+      {/* Beer list — grouped with pour counts */}
+      {groupedLogs.length > 0 && (
         <div className="px-4 pt-3 pb-1">
           <div className="space-y-1">
-            {visibleLogs.map((log) => {
-              const beer = log.beer;
-              return (
-                <div
-                  key={log.id}
-                  className="flex items-center gap-2 py-1.5"
+            {visibleGroups.map((group, i) => (
+              <div key={group.beer?.name ?? i} className="flex items-center gap-2 py-1.5">
+                {/* Pour count badge */}
+                <span
+                  className="font-mono text-[11px] font-semibold flex-shrink-0 w-6 text-center rounded"
+                  style={{ color: "var(--text-muted)", background: "var(--surface-2)" }}
                 >
-                  <Beer size={12} className="flex-shrink-0" style={{ color: "var(--accent-gold)" }} />
-                  <span
-                    className="font-display text-sm font-semibold flex-1 min-w-0 truncate"
-                    style={{ color: "var(--text-primary)" }}
-                    title={beer?.name}
-                  >
-                    {beer?.name ?? "Unknown beer"}
-                  </span>
-                  {beer?.style && (
-                    <BeerStyleBadge style={beer.style} size="xs" />
-                  )}
-                  {log.rating != null && (
-                    <div className="flex items-center gap-0.5 flex-shrink-0">
-                      <Star size={11} style={{ color: "var(--accent-gold)", fill: "var(--accent-gold)" }} />
-                      <span className="text-xs font-mono" style={{ color: "var(--accent-gold)" }}>
-                        {Number(log.rating).toFixed(1)}
-                      </span>
-                    </div>
-                  )}
-                  {log.rating == null && (
-                    <span className="text-[10px] flex-shrink-0" style={{ color: "var(--text-muted)" }}>
-                      —
-                    </span>
-                  )}
-                </div>
-              );
-            })}
+                  &times;{group.quantity}
+                </span>
+                {/* Style badge */}
+                {group.style && (
+                  <BeerStyleBadge style={group.style} size="xs" />
+                )}
+                {/* Beer name */}
+                <span
+                  className="text-sm font-sans flex-1 min-w-0 truncate"
+                  style={{ color: "var(--text-primary)" }}
+                  title={group.beer?.name}
+                >
+                  {group.beer?.name ?? "Unknown beer"}
+                </span>
+              </div>
+            ))}
           </div>
           {hiddenCount > 0 && !expanded && (
             <button
@@ -298,6 +327,30 @@ export function SessionCard({ session, currentUserId, className, reactionCounts,
               Show {hiddenCount} more
             </button>
           )}
+
+          {/* Stats strip */}
+          <div
+            className="flex items-center gap-3 pt-2 mt-2 flex-wrap"
+            style={{ borderTop: "1px solid var(--border)" }}
+          >
+            <span className="flex items-center gap-1 text-xs" style={{ color: "var(--text-muted)" }}>
+              <span>🍺</span>
+              <span className="font-mono font-semibold">{totalPours}</span>
+              <span>beer{totalPours !== 1 ? "s" : ""}</span>
+            </span>
+            {duration && (
+              <span className="flex items-center gap-1 text-xs" style={{ color: "var(--text-muted)" }}>
+                <Clock size={11} />
+                <span className="font-mono font-semibold">{duration}</span>
+              </span>
+            )}
+            {avgRating != null && (
+              <span className="flex items-center gap-1 text-xs" style={{ color: "var(--text-muted)" }}>
+                <Star size={11} style={{ fill: "var(--text-muted)" }} />
+                <span className="font-mono font-semibold">avg {avgRating.toFixed(1)}</span>
+              </span>
+            )}
+          </div>
         </div>
       )}
 

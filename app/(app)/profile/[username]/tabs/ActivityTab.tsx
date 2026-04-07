@@ -64,48 +64,73 @@ export function ActivityTab({
         />
       )}
 
-      {/* Favorite Beer */}
+      {/* Favorite Beer — amber accent top bar, glass thumbnail, big rating */}
       <div>
-        <h2 className="font-display text-[22px] font-bold tracking-[-0.01em] text-[var(--text-primary)] mb-4">Favorite Beer</h2>
         {favBeer ? (
           <Link href={`/beer/${favBeer.beer.id}`}>
             <div
-              className="card-bg-reco flex items-center gap-4 p-4 rounded-[14px] transition-all group hover:scale-[1.01]"
-              data-style={getStyleFamily(favBeer.beer.style)}
+              className="rounded-[14px] overflow-hidden transition-all group hover:scale-[1.01]"
               style={{
-                border: "1px solid var(--card-border)",
-                borderLeft: `3px solid ${getStyleVars(favBeer.beer.style).primary}`,
+                background: "var(--card-bg)",
+                border: "1px solid color-mix(in srgb, var(--accent-gold) 25%, var(--border))",
               }}
             >
-              <div
-                className="w-14 h-14 rounded-[14px] flex-shrink-0 flex items-center justify-center text-2xl"
-                style={{
-                  background: `linear-gradient(135deg, ${getStyleVars(favBeer.beer.style).light}, ${getStyleVars(favBeer.beer.style).soft ?? getStyleVars(favBeer.beer.style).light})`,
-                }}
-              >
-                🍺
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-display font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-gold)] transition-colors truncate">
-                  {favBeer.beer.name}
-                </p>
-                <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                  {favBeer.beer.style && <BeerStyleBadge style={favBeer.beer.style} size="xs" />}
-                  {favBeer.beer.abv && (
-                    <span className="text-xs font-mono text-[var(--text-muted)]">{formatABV(favBeer.beer.abv)}</span>
-                  )}
+              {/* Amber top accent bar */}
+              <div className="h-[3px]" style={{ background: "linear-gradient(to right, var(--accent-gold), var(--accent-amber))" }} />
+              <div className="flex items-center gap-3.5 p-4">
+                {/* Glass thumbnail — style tinted */}
+                <div
+                  className="w-14 h-14 rounded-[14px] flex-shrink-0 flex items-center justify-center"
+                  style={{
+                    background: `color-mix(in srgb, ${getStyleVars(favBeer.beer.style).primary} 12%, var(--surface-2))`,
+                    border: `1px solid color-mix(in srgb, ${getStyleVars(favBeer.beer.style).primary} 18%, transparent)`,
+                  }}
+                >
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={getStyleVars(favBeer.beer.style).primary} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.6 }}>
+                    <path d="M7 3h10l-1.5 15a2 2 0 0 1-2 1.8h-3a2 2 0 0 1-2-1.8L7 3z"/>
+                    <path d="M8 3c0 0 .5 2 4 2s4-2 4-2"/>
+                  </svg>
                 </div>
-              </div>
-              <div className="text-right flex-shrink-0">
-                {favBeer.beer.avg_rating && (
-                  <div className="flex items-center gap-1 justify-end mb-0.5">
-                    <Star size={11} className="text-[var(--accent-gold)] fill-[var(--accent-gold)]" />
-                    <span className="text-sm font-mono font-bold text-[var(--accent-gold)]">
-                      {favBeer.beer.avg_rating.toFixed(1)}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5 mb-0.5">
+                    <Star size={10} style={{ color: "var(--accent-gold)", fill: "var(--accent-gold)" }} />
+                    <span className="text-[9px] font-mono uppercase tracking-[0.12em] font-bold" style={{ color: "var(--accent-gold)" }}>
+                      Favorite Beer
                     </span>
                   </div>
-                )}
-                <p className="text-xs text-[var(--text-muted)]">{favBeer.count}× poured</p>
+                  <p className="font-display font-bold text-base text-[var(--text-primary)] group-hover:text-[var(--accent-gold)] transition-colors truncate">
+                    {favBeer.beer.name}
+                  </p>
+                  <div className="flex items-center gap-1.5 mt-0.5">
+                    {favBeer.beer.style && <BeerStyleBadge style={favBeer.beer.style} size="xs" />}
+                    {favBeer.beer.abv && (
+                      <span className="text-xs font-mono text-[var(--text-muted)]">· {formatABV(favBeer.beer.abv)}</span>
+                    )}
+                  </div>
+                </div>
+                {/* Big rating + pour count */}
+                <div className="flex flex-col items-end flex-shrink-0">
+                  {favBeer.beer.avg_rating && (
+                    <span className="font-mono text-2xl font-bold leading-none" style={{ color: "var(--accent-gold)" }}>
+                      {favBeer.beer.avg_rating.toFixed(1)}
+                    </span>
+                  )}
+                  <div className="flex items-center gap-0.5 mt-1">
+                    {Array.from({ length: 5 }).map((_, j) => (
+                      <Star
+                        key={j}
+                        size={8}
+                        style={{
+                          color: "var(--accent-gold)",
+                          fill: favBeer.beer.avg_rating && j < Math.round(favBeer.beer.avg_rating) ? "var(--accent-gold)" : "transparent",
+                        }}
+                      />
+                    ))}
+                  </div>
+                  <span className="text-[10px] font-mono mt-0.5" style={{ color: "var(--text-muted)" }}>
+                    {favBeer.count}x poured
+                  </span>
+                </div>
               </div>
             </div>
           </Link>
@@ -136,53 +161,57 @@ export function ActivityTab({
               return (
                 <Link key={entry.key} href={`/beer/${entry.beerId}`}>
                   <div
-                    className="flex items-center gap-2.5 px-3.5 py-2.5 transition-colors hover:bg-[var(--warm-bg,var(--surface-2))]"
+                    className="flex items-center gap-3 px-3.5 py-3 transition-colors hover:bg-[var(--warm-bg,var(--surface-2))]"
                     style={{
                       borderBottom: i < groupJournalEntries(recentLogs).length - 1 ? "1px solid var(--border)" : "none",
-                      borderLeft: `3px solid ${styleVars.primary}`,
+                      borderLeft: `4px solid ${styleVars.primary}`,
                     }}
                   >
-                    {/* Glass icon thumbnail — 36x36, style tint bg */}
+                    {/* Glass icon thumbnail — style tint bg */}
                     <div
-                      className="w-9 h-9 rounded-[10px] flex-shrink-0 flex items-center justify-center"
+                      className="w-10 h-10 rounded-[10px] flex-shrink-0 flex items-center justify-center"
                       style={{
-                        background: styleVars.light,
-                        border: `1px solid color-mix(in srgb, ${styleVars.primary} 15%, transparent)`,
+                        background: `color-mix(in srgb, ${styleVars.primary} 12%, var(--surface-2))`,
+                        border: `1px solid color-mix(in srgb, ${styleVars.primary} 18%, transparent)`,
                       }}
                     >
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={styleVars.primary} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.5 }}>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={styleVars.primary} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.6 }}>
                         <path d="M7 3h10l-1.5 15a2 2 0 0 1-2 1.8h-3a2 2 0 0 1-2-1.8L7 3z"/>
                         <path d="M8 3c0 0 .5 2 4 2s4-2 4-2"/>
                       </svg>
                     </div>
                     {/* Beer info */}
                     <div className="flex-1 min-w-0">
-                      <p className="text-[13px] font-semibold text-[var(--text-primary)] truncate">
+                      <p className="text-[15px] font-bold text-[var(--text-primary)] truncate">
                         {entry.name}
                       </p>
                       <div className="flex items-center gap-1.5 mt-0.5">
                         {entry.style && <BeerStyleBadge style={entry.style} size="xs" />}
-                        <span className="text-[10px] font-mono text-[var(--text-muted)]">
+                        <span className="text-[11px] text-[var(--text-muted)]">
                           {entry.brewery}
                         </span>
                       </div>
                     </div>
-                    {/* Count badge OR rating */}
-                    {entry.count > 1 && (
+                    {/* Count badge OR rating — not both per the mockup */}
+                    {entry.rating != null && entry.rating > 0 ? (
                       <span
-                        className="font-mono text-[10px] font-semibold px-2 py-0.5 rounded-[5px] flex-shrink-0"
-                        style={{ background: "var(--warm-bg, var(--surface-2))", color: "var(--text-muted)" }}
+                        className="flex items-center gap-1 flex-shrink-0"
                       >
-                        ×{entry.count}
+                        <Star size={13} style={{ color: "var(--accent-gold)", fill: "var(--accent-gold)" }} />
+                        <span className="font-mono text-[15px] font-bold" style={{ color: "var(--accent-gold)" }}>
+                          {entry.rating.toFixed(1)}
+                        </span>
                       </span>
-                    )}
-                    {entry.rating != null && entry.rating > 0 && (
-                      <span className="font-mono text-[13px] font-bold flex-shrink-0" style={{ color: "var(--amber, var(--accent-gold))" }}>
-                        ★ {entry.rating.toFixed(1)}
+                    ) : entry.count > 1 ? (
+                      <span
+                        className="font-mono text-[11px] font-semibold px-2 py-0.5 rounded-[6px] flex-shrink-0"
+                        style={{ background: "var(--surface-2)", color: "var(--text-muted)" }}
+                      >
+                        &times;{entry.count}
                       </span>
-                    )}
+                    ) : null}
                     {/* Date */}
-                    <span className="font-mono text-[10px] text-[var(--text-muted)] flex-shrink-0">
+                    <span className="font-mono text-[11px] text-[var(--text-muted)] flex-shrink-0">
                       {entry.date}
                     </span>
                   </div>

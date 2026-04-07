@@ -6,6 +6,7 @@ import { Target, MapPin } from "lucide-react";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import { formatRelativeTime } from "@/lib/utils";
 import type { FriendChallengeMilestone } from "@/lib/queries/feed";
+import { EmojiPulse } from "@/components/social/EmojiPulse";
 
 export function ChallengeMilestoneFeedCard({
   milestone,
@@ -95,6 +96,7 @@ export function ChallengeMilestoneFeedCard({
           </div>
         </div>
       </div>
+      <EmojiPulse itemKey={`milestone-${milestone.id}`} />
     </motion.div>
   );
 }

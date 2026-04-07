@@ -54,8 +54,8 @@ export function MugClubSection({ clubs, myMemberships, breweryId, isAuthenticate
               className="border rounded-[14px] p-5 space-y-3 relative overflow-hidden"
               style={{
                 background: "repeating-linear-gradient(135deg, var(--card-bg, #FFFFFF), var(--card-bg, #FFFFFF) 6px, var(--warm-bg, var(--surface-2)) 6px, var(--warm-bg, var(--surface-2)) 7px)",
-                borderColor: membership ? "var(--amber, var(--accent-gold))" : "var(--border)",
-                borderWidth: membership ? "1.5px" : "1px",
+                borderColor: "var(--accent-gold)",
+                borderWidth: "2px",
               }}
             >
               {/* Premium golden top bar — Card Type 13 */}
@@ -67,7 +67,7 @@ export function MugClubSection({ clubs, myMemberships, breweryId, isAuthenticate
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
                   <h3 className="font-display text-lg font-bold text-[var(--text-primary)]">
-                    {club.name}
+                    👑 {club.name}
                   </h3>
                   {club.description && (
                     <p className="text-sm text-[var(--text-secondary)] mt-1 leading-relaxed">
@@ -76,7 +76,7 @@ export function MugClubSection({ clubs, myMemberships, breweryId, isAuthenticate
                   )}
                 </div>
                 <div className="text-right flex-shrink-0">
-                  <p className="font-display text-xl font-bold text-[var(--accent-gold)]">
+                  <p className="font-mono text-3xl font-bold" style={{ color: "var(--accent-gold)" }}>
                     ${club.annual_fee}
                   </p>
                   <p className="text-xs font-mono text-[var(--text-muted)]">/ year</p>
@@ -99,22 +99,17 @@ export function MugClubSection({ clubs, myMemberships, breweryId, isAuthenticate
                 </ul>
               )}
 
-              {/* Footer: member count + action */}
-              <div className="flex items-center justify-between pt-1">
-                <span className="flex items-center gap-1.5 text-xs font-mono text-[var(--text-muted)]">
-                  <Users size={12} />
-                  {count} member{count !== 1 ? "s" : ""}
-                </span>
-
+              {/* CTA + member count */}
+              <div className="space-y-2.5 pt-1">
                 {membership ? (
-                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold"
+                  <div className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl text-sm font-semibold"
                     style={{
                       background: "color-mix(in srgb, var(--accent-gold) 15%, transparent)",
                       color: "var(--accent-gold)",
                     }}
                   >
-                    <Crown size={12} />
-                    You're a member
+                    <Crown size={14} />
+                    You&apos;re a member
                     {membership.expires_at && (
                       <span className="font-mono font-normal text-[var(--text-muted)] ml-1">
                         exp {new Date(membership.expires_at).toLocaleDateString("en-US", {
@@ -132,18 +127,18 @@ export function MugClubSection({ clubs, myMemberships, breweryId, isAuthenticate
                         "Contact the brewery to join \u2014 membership payments coming soon!"
                       );
                     }}
-                    className="px-4 py-2 rounded-xl text-sm font-semibold transition-colors"
+                    className="w-full py-3 rounded-xl text-sm font-bold transition-colors text-center"
                     style={{
                       background: "var(--accent-gold)",
                       color: "var(--bg)",
                     }}
                   >
-                    Join Club
+                    Join {club.name}
                   </button>
                 ) : (
                   <a
                     href={`/signup?next=${encodeURIComponent(returnPath ?? "/")}`}
-                    className="px-4 py-2 rounded-xl text-sm font-semibold transition-colors"
+                    className="block w-full py-3 rounded-xl text-sm font-bold transition-colors text-center"
                     style={{
                       background: "var(--accent-gold)",
                       color: "var(--bg)",
@@ -152,6 +147,11 @@ export function MugClubSection({ clubs, myMemberships, breweryId, isAuthenticate
                     Sign Up to Join
                   </a>
                 )}
+
+                <p className="flex items-center justify-center gap-1.5 text-xs font-mono text-[var(--text-muted)]">
+                  <Users size={12} />
+                  {count} member{count !== 1 ? "s" : ""}
+                </p>
               </div>
             </div>
           );
@@ -223,12 +223,13 @@ function PerkRow({
 
   return (
     <li className="text-sm text-[var(--text-secondary)]">
-      <div className="flex items-start gap-2">
-        <Check
-          size={14}
-          className="flex-shrink-0 mt-0.5"
-          style={{ color: "var(--accent-gold)" }}
-        />
+      <div className="flex items-start gap-2.5">
+        <div
+          className="w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0 mt-0.5"
+          style={{ background: "color-mix(in srgb, var(--accent-gold) 18%, transparent)" }}
+        >
+          <Check size={12} style={{ color: "var(--accent-gold)" }} />
+        </div>
         <span className="flex-1">
           {typeof perk === "string" ? perk : perk.title}
           {typeof perk === "object" && perk.description && (

@@ -119,7 +119,7 @@ export function PersonalityBadge({
   const c2 = axisColors[personality.code[1] as keyof typeof axisColors] ?? "var(--accent-amber)";
 
   return (
-    <Card padding="spacious" className="mb-4 relative overflow-hidden">
+    <Card padding="spacious" className="mb-4 relative overflow-hidden" style={{ border: "1.5px solid color-mix(in srgb, var(--accent-gold) 35%, var(--border))" }}>
       {/* Sprint 171: Personality-colored gradient accent */}
       <div
         aria-hidden="true"
@@ -203,14 +203,21 @@ export function PersonalityBadge({
         aria-expanded={expanded}
         aria-label="Show personality axis details"
       >
-        <div className="flex items-center gap-1.5 flex-wrap text-xs text-[var(--text-secondary)]">
-          {axisLetters.map((letter, i) => {
+        <div className="flex items-center gap-2 flex-wrap">
+          {axisLetters.map((letter) => {
             const info = AXIS_LABELS[letter];
             if (!info) return null;
             return (
-              <span key={letter} className="flex items-center gap-1">
-                {i > 0 && <span className="text-[var(--text-muted)]">·</span>}
-                <span className="font-medium">{info.label}</span>
+              <span
+                key={letter}
+                className="text-xs font-medium px-3 py-1 rounded-full"
+                style={{
+                  color: "var(--text-secondary)",
+                  border: "1px solid var(--border)",
+                  background: "color-mix(in srgb, var(--accent-gold) 4%, transparent)",
+                }}
+              >
+                {info.label}
               </span>
             );
           })}

@@ -323,33 +323,31 @@ function GridBeerCard({
               </div>
             )}
             {beer.seasonal && (
-              <div className="absolute top-2 left-2 bg-[var(--func-warning)]/90 text-white text-[8px] font-mono font-semibold tracking-wider uppercase px-1.5 py-0.5 rounded">
+              <div className="absolute top-2 right-2 text-[9px] font-mono font-bold tracking-wider uppercase px-2 py-0.5 rounded-full" style={{ background: "#3498DB", color: "#fff" }}>
                 Seasonal
               </div>
             )}
           </div>
 
-          <div className="p-3 space-y-2">
+          <div className="p-3 space-y-1.5">
             <h3
-              className="font-display font-semibold text-[var(--text-primary)] text-sm leading-tight group-hover:text-[var(--accent-gold)] transition-colors line-clamp-2"
+              className="font-sans font-bold text-[var(--text-primary)] text-[15px] leading-tight group-hover:text-[var(--accent-gold)] transition-colors line-clamp-2"
               style={beerTransitionName(beer.id)}
             >
               {beer.name}
             </h3>
 
-            <div className="flex items-center gap-1.5 flex-wrap">
-              <BeerStyleBadge style={beer.style} itemType={beer.item_type} size="xs" />
-              <span className="text-xs font-mono text-[var(--text-muted)]">{formatABV(beer.abv)}</span>
+            <div className="flex items-center gap-1 flex-wrap text-xs" style={{ color: "var(--text-muted)" }}>
+              <span>{beer.style ?? "Beer"}</span>
+              <span>·</span>
+              <span className="font-mono">{formatABV(beer.abv)}</span>
+              <span>·</span>
+              {beer.avg_rating ? (
+                <span className="font-mono" style={{ color: "var(--accent-gold)" }}>★ {beer.avg_rating.toFixed(1)}</span>
+              ) : (
+                <span>No ratings</span>
+              )}
             </div>
-
-            {beer.avg_rating ? (
-              <div className="flex items-center gap-1">
-                <StarRating value={beer.avg_rating} readonly size="sm" />
-                <span className="text-xs font-mono text-[var(--accent-gold)]">{beer.avg_rating.toFixed(1)}</span>
-              </div>
-            ) : (
-              <p className="text-xs text-[var(--text-muted)]">No ratings yet</p>
-            )}
 
             <IncompleteBeerBadge beer={beer} compact />
           </div>

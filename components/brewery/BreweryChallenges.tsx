@@ -137,37 +137,47 @@ export function BreweryChallenges({ challenges, myParticipations, isAuthenticate
                       </p>
                     )}
 
-                    {/* Progress bar — Card Type 10: 6px, success→warning gradient */}
+                    {/* Progress bar */}
                     {participation && (
                       <div className="mt-3">
-                        <div className="h-1.5 rounded-[3px] overflow-hidden" style={{ background: "var(--warm-bg, var(--surface-2))" }}>
+                        <div className="h-2 rounded-full overflow-hidden" style={{ background: "var(--surface-2)" }}>
                           <motion.div
-                            className="h-full rounded-[3px]"
-                            style={{ background: isCompleted ? "var(--amber, var(--accent-gold))" : "linear-gradient(90deg, var(--success), var(--func-warning, var(--accent-amber)))" }}
+                            className="h-full rounded-full"
+                            style={{ background: isCompleted ? "var(--accent-gold)" : "linear-gradient(90deg, var(--success), var(--accent-amber))" }}
                             initial={{ width: 0 }}
                             animate={{ width: `${pct}%` }}
                             transition={{ type: "spring", stiffness: 200, damping: 25 }}
                           />
                         </div>
-                        <div className="flex items-center justify-between font-mono text-[10px] mt-1" style={{ color: "var(--text-muted)" }}>
-                          <span>{progress} / {challenge.target_value}</span>
-                          <span>{pct}%</span>
-                        </div>
                       </div>
                     )}
 
-                    {/* Reward pill + ends_at */}
-                    <div className="flex items-center gap-3 mt-2 text-xs" style={{ color: "var(--text-muted)" }}>
-                      {challenge.reward_description && (
-                        <span>🎁 {challenge.reward_description}</span>
-                      )}
-                      {!challenge.reward_description && challenge.reward_xp > 0 && (
-                        <span>⭐ {challenge.reward_xp} XP</span>
-                      )}
-                      {challenge.ends_at && (
-                        <span>Ends {new Date(challenge.ends_at).toLocaleDateString()}</span>
-                      )}
-                    </div>
+                    {/* Progress label + end date */}
+                    {participation && (
+                      <div className="flex items-center justify-between mt-1 text-xs font-mono" style={{ color: "var(--text-muted)" }}>
+                        <span>{progress} / {challenge.target_value} beers tried</span>
+                        {challenge.ends_at && (
+                          <span>Ends {new Date(challenge.ends_at).toLocaleDateString()}</span>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Reward section — subtle card */}
+                    {(challenge.reward_description || challenge.reward_xp > 0) && (
+                      <div
+                        className="mt-2.5 px-3 py-2 rounded-[10px] flex items-center gap-2 text-xs"
+                        style={{ background: "var(--surface-2)", color: "var(--text-secondary)" }}
+                      >
+                        <span>🎁</span>
+                        <span>{challenge.reward_description ?? `${challenge.reward_xp} XP`}</span>
+                      </div>
+                    )}
+                    {/* End date (when no participation yet) */}
+                    {!participation && challenge.ends_at && (
+                      <p className="text-xs font-mono mt-2" style={{ color: "var(--text-muted)" }}>
+                        Ends {new Date(challenge.ends_at).toLocaleDateString()}
+                      </p>
+                    )}
                   </div>
                   {!isCompleted && !isExpired && (
                     <ChevronRight size={16} className="flex-shrink-0" style={{ color: "var(--text-muted)" }} />

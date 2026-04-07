@@ -297,9 +297,9 @@ export function HomeFeed({
       });
     }
 
-    // Friend achievements
+    // Friend achievements — cap at 3 so sessions get visual space
     if (friendAchievements && friendAchievements.length > 0) {
-      friendAchievements.forEach((a) => {
+      friendAchievements.slice(0, 3).forEach((a) => {
         items.push({
           type: "achievement",
           data: a,

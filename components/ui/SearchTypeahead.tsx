@@ -2,10 +2,33 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Search, Loader2, Beer as BeerIcon, MapPin, X, Clock } from "lucide-react";
+import { Search, Loader2, MapPin, X, Clock, User } from "lucide-react";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
-import { generateGradientFromString } from "@/lib/utils";
 import { BeerStyleBadge } from "@/components/ui/BeerStyleBadge";
+import { getStyleVars } from "@/lib/beerStyleColors";
+
+/** Highlight query match in text with amber background */
+function HighlightMatch({ text, query }: { text: string; query: string }) {
+  if (!query || query.length < 2) return <>{text}</>;
+  const idx = text.toLowerCase().indexOf(query.toLowerCase());
+  if (idx === -1) return <>{text}</>;
+  return (
+    <>
+      {text.slice(0, idx)}
+      <mark
+        style={{
+          background: "color-mix(in srgb, var(--accent-gold) 25%, transparent)",
+          color: "inherit",
+          borderRadius: 2,
+          padding: "0 1px",
+        }}
+      >
+        {text.slice(idx, idx + query.length)}
+      </mark>
+      {text.slice(idx + query.length)}
+    </>
+  );
+}
 
 const RECENT_SEARCHES_KEY = "ht-recent-searches";
 const MAX_RECENT = 5;
@@ -426,10 +449,7 @@ export function SearchTypeahead({
                     style={{ backgroundColor: "var(--surface-2)" }}
                   >
                     {item.type === "beer" ? (
-                      <BeerIcon
-                        className="w-4 h-4"
-                        style={{ color: "var(--accent-gold)" }}
-                      />
+                      <span className="text-sm">🍺</span>
                     ) : (
                       <MapPin
                         className="w-4 h-4"
@@ -532,7 +552,7 @@ export function SearchTypeahead({
                             (f) => f.type === "beer" && f.item.id === beer.id
                           );
                           const isActive = idx === activeIndex;
-                          const gradient = generateGradientFromString(beer.name + (beer.brewery?.id ?? ''));
+                          const sv = beer.style ? getStyleVars(beer.style) : null;
                           return (
                             <button
                               key={`beer-${beer.id}`}
@@ -550,42 +570,49 @@ export function SearchTypeahead({
                               onMouseEnter={() => setActiveIndex(idx)}
                               onClick={() => handleSelect(flatItems[idx])}
                             >
+                              {/* Glass icon thumbnail */}
                               <div
                                 className="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center"
-                                style={{ background: gradient }}
+                                style={{
+                                  background: sv
+                                    ? `color-mix(in srgb, ${sv.primary} 12%, var(--surface-2))`
+                                    : "var(--surface-2)",
+                                  border: sv
+                                    ? `1px solid color-mix(in srgb, ${sv.primary} 15%, transparent)`
+                                    : "1px solid var(--border)",
+                                }}
                               >
-                                <span className="font-display text-white text-sm font-bold drop-shadow-sm">
-                                  {beer.name.charAt(0).toUpperCase()}
-                                </span>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={sv?.primary ?? "var(--text-muted)"} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.5 }}>
+                                  <path d="M7 3h10l-1.5 15a2 2 0 0 1-2 1.8h-3a2 2 0 0 1-2-1.8L7 3z"/>
+                                  <path d="M8 3c0 0 .5 2 4 2s4-2 4-2"/>
+                                </svg>
                               </div>
                               <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2">
-                                  <span
-                                    className="text-sm font-medium truncate"
-                                    style={{ color: "var(--text-primary)" }}
-                                  >
-                                    {beer.name}
-                                  </span>
-                                  {beer.style && (
-                                    <BeerStyleBadge style={beer.style} size="xs" />
-                                  )}
-                                </div>
+                                <span
+                                  className="text-sm font-bold truncate block"
+                                  style={{ color: "var(--text-primary)" }}
+                                >
+                                  <HighlightMatch text={beer.name} query={query} />
+                                </span>
                                 <div
-                                  className="flex items-center gap-2 text-xs mt-0.5"
+                                  className="flex items-center gap-1 text-xs mt-0.5"
                                   style={{ color: "var(--text-muted)" }}
                                 >
                                   {beer.brewery && group.beers.length < 2 && (
-                                    <span className="truncate">
-                                      {beer.brewery.name}
-                                    </span>
+                                    <span className="truncate">{beer.brewery.name}</span>
                                   )}
-                                  {beer.abv != null && (
-                                    <span className="flex-shrink-0">
-                                      {beer.abv}% ABV
-                                    </span>
-                                  )}
+                                  {beer.style && <><span>·</span><span>{beer.style}</span></>}
+                                  {beer.abv != null && <><span>·</span><span>{beer.abv}%</span></>}
+                                  {(beer as any).avg_rating > 0 && <><span>·</span><span style={{ color: "var(--accent-gold)" }}>★ {Number((beer as any).avg_rating).toFixed(1)}</span></>}
                                 </div>
                               </div>
+                              {/* Type badge */}
+                              <span
+                                className="text-[9px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-full flex-shrink-0"
+                                style={{ border: "1px solid var(--border)", color: "var(--text-muted)" }}
+                              >
+                                Beer
+                              </span>
                             </button>
                           );
                         })}
@@ -646,36 +673,25 @@ export function SearchTypeahead({
                           />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <span
-                              className="text-sm font-medium truncate"
-                              style={{ color: "var(--text-primary)" }}
-                            >
-                              {brewery.name}
-                            </span>
-                            {brewery.brewery_type && (
-                              <span
-                                className="flex-shrink-0 text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded-md"
-                                style={{
-                                  backgroundColor: "var(--surface-2)",
-                                  color: "var(--text-secondary)",
-                                }}
-                              >
-                                {brewery.brewery_type}
-                              </span>
+                          <span
+                            className="text-sm font-bold truncate block"
+                            style={{ color: "var(--text-primary)" }}
+                          >
+                            <HighlightMatch text={brewery.name} query={query} />
+                          </span>
+                          <div className="flex items-center gap-1 text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
+                            {(brewery.city || brewery.state) && (
+                              <span>{[brewery.city, brewery.state].filter(Boolean).join(", ")}</span>
                             )}
                           </div>
-                          {(brewery.city || brewery.state) && (
-                            <div
-                              className="text-xs mt-0.5"
-                              style={{ color: "var(--text-muted)" }}
-                            >
-                              {[brewery.city, brewery.state]
-                                .filter(Boolean)
-                                .join(", ")}
-                            </div>
-                          )}
                         </div>
+                        {/* Type badge */}
+                        <span
+                          className="text-[9px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-full flex-shrink-0"
+                          style={{ border: "1px solid var(--border)", color: "var(--text-muted)" }}
+                        >
+                          Brewery
+                        </span>
                       </button>
                     );
                   })}
