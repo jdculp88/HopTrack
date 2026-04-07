@@ -337,7 +337,7 @@ export function YouTabContent({
               {wishlist.length} saved
             </span>
           </div>
-          <div className="space-y-2">
+          <div className="space-y-3">
             {wishlist.slice(0, 5).map((item) => (
               item.beer ? (
                 <Link key={item.id} href={`/beer/${item.beer.id}`}>

@@ -318,7 +318,7 @@ function SlotCard({ slot, isEditing, isOwnProfile, saving, onRemove, onAdd }: Sl
           onClick={onAdd}
           disabled={saving}
           className={cn(
-            "aspect-[3/4] rounded-xl border-2 border-dashed border-[var(--border)]",
+            "aspect-[4/3] rounded-xl border-2 border-dashed border-[var(--border)]",
             "flex flex-col items-center justify-center gap-2",
             "text-[var(--text-muted)] hover:text-[var(--accent-gold)] hover:border-[var(--accent-gold)]/50",
             "transition-colors disabled:opacity-50 disabled:cursor-not-allowed",
@@ -348,7 +348,7 @@ function SlotCard({ slot, isEditing, isOwnProfile, saving, onRemove, onAdd }: Sl
       <Link
         href={`/beer/${beer.id}`}
         className={cn(
-          "block aspect-[3/4] rounded-xl overflow-hidden",
+          "block aspect-[4/3] rounded-xl overflow-hidden",
           "border border-[var(--border)] hover:border-[var(--accent-gold)]/40",
           "transition-all",
         )}

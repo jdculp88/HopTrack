@@ -124,7 +124,7 @@ export function ActivityTab({
       <div>
         <h2 className="font-display text-2xl font-bold text-[var(--text-primary)] mb-4">Beer Journal</h2>
         {recentLogs.length > 0 ? (
-          <div className="space-y-3">
+          <div className="space-y-4">
             {recentLogs.map((log) => (
               <Link key={log.id} href={`/beer/${log.beer?.id ?? ""}`}>
                 <div

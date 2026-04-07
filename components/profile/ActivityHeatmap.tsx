@@ -101,9 +101,9 @@ export function ActivityHeatmap({ data, compact = false }: ActivityHeatmapProps)
         </div>
       </div>
 
-      {/* Grid */}
-      <div className="overflow-x-auto pb-1 scrollbar-hide">
-        <div className="inline-block">
+      {/* Grid — Sprint 171: full-width, cells stretch to fill container */}
+      <div className="pb-1">
+        <div>
           {/* Month labels */}
           <div className="flex mb-1" style={{ paddingLeft: compact ? 0 : 28 }}>
             {months.map((m, i) => (
@@ -123,7 +123,7 @@ export function ActivityHeatmap({ data, compact = false }: ActivityHeatmapProps)
             ))}
           </div>
 
-          <div className="flex gap-0.5">
+          <div className="flex gap-[2px] w-full">
             {/* Day labels */}
             {!compact && (
               <div className="flex flex-col gap-0.5 mr-1">
@@ -145,14 +145,14 @@ export function ActivityHeatmap({ data, compact = false }: ActivityHeatmapProps)
 
             {/* Weeks */}
             {grid.map((week, wi) => (
-              <div key={wi} className="flex flex-col gap-0.5">
+              <div key={wi} className="flex flex-col gap-[2px] flex-1">
                 {week.map((day) => (
                   <div
                     key={day.date}
-                    className="rounded-[2px] transition-colors"
+                    className="rounded-[2px] transition-colors w-full aspect-square"
                     style={{
-                      width: cellSize,
-                      height: cellSize,
+                      minWidth: cellSize,
+                      minHeight: cellSize,
                       background: getCellColor(day.count, day.style),
                     }}
                     title={`${new Date(day.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })} — ${day.count} pour${day.count !== 1 ? "s" : ""}${day.style ? ` · ${day.style}` : ""}`}

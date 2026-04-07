@@ -261,48 +261,54 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
   return (
     <PageEnterWrapper>
       <div className="max-w-3xl mx-auto">
-        {/* Hero Banner */}
-        <div className="relative h-48 sm:h-64 mx-4 mt-4 rounded-2xl overflow-hidden shadow-[var(--shadow-elevated)]">
-          <ProfileBanner
-            username={username}
-            displayName={profile.display_name}
-            bannerUrl={profile.banner_url}
-          />
+        {/* Sprint 171: Profile hero — seamless Instagram-style integration */}
+        <div className="relative mx-4 mt-4 rounded-2xl overflow-hidden shadow-[var(--shadow-elevated)]">
+          {/* Banner image */}
+          <div className="h-36 sm:h-44">
+            <ProfileBanner
+              username={username}
+              displayName={profile.display_name}
+              bannerUrl={profile.banner_url}
+            />
+          </div>
+          {/* Gradient fade into content area */}
           <div
-            className="absolute inset-0"
+            className="absolute inset-0 pointer-events-none"
             style={{
-              background: "linear-gradient(to top, var(--bg), color-mix(in srgb, var(--bg) 30%, transparent), transparent)",
+              background: "linear-gradient(to top, var(--card-bg) 0%, color-mix(in srgb, var(--card-bg) 60%, transparent) 35%, transparent 60%)",
             }}
           />
           {isOwnProfile && (
             <Link
               href="/settings"
-              className="absolute top-4 right-4 p-2.5 rounded-xl bg-black/30 backdrop-blur-sm text-white/70 hover:text-white transition-colors"
+              className="absolute top-3 right-3 p-2 rounded-xl bg-black/30 backdrop-blur-sm text-white/70 hover:text-white transition-colors z-20"
             >
-              <Settings size={18} />
+              <Settings size={16} />
             </Link>
           )}
+
+          {/* Avatar + name — positioned INSIDE the hero, over the gradient */}
+          <div className="relative z-10 px-5 pb-4 -mt-10">
+            <div className="flex items-end gap-3.5">
+              <div className="ring-[3px] ring-[var(--card-bg)] rounded-full shadow-[var(--shadow-elevated)] flex-shrink-0">
+                <UserAvatar profile={profile} size="lg" />
+              </div>
+              <div className="pb-0.5 flex-1 min-w-0">
+                <h1 className="font-display text-2xl sm:text-3xl font-bold text-[var(--text-primary)] leading-tight">
+                  {profile.display_name}
+                </h1>
+                <p className="text-xs text-[var(--text-muted)]">@{profile.username}</p>
+              </div>
+              {!isOwnProfile && (
+                <div className="pb-1 flex-shrink-0">
+                  <FriendButton profileId={profile.id} currentUserId={user.id} />
+                </div>
+              )}
+            </div>
+          </div>
         </div>
 
-        {/* Sprint 171: Tighter hero-to-profile transition — avatar overlaps hero */}
-        <div className="px-4 sm:px-6 -mt-16 relative z-10">
-          {/* Avatar + Info */}
-          <div className="flex items-end gap-4 mb-4">
-            <div className="ring-4 ring-[var(--bg)] rounded-full shadow-[var(--shadow-elevated)]">
-              <UserAvatar profile={profile} size="xl" />
-            </div>
-            <div className="pb-2 flex-1 min-w-0">
-              <h1 className="font-display text-3xl sm:text-4xl font-bold text-[var(--text-primary)] leading-tight drop-shadow-lg">
-                {profile.display_name}
-              </h1>
-              <p className="text-sm text-[var(--text-muted)]">@{profile.username}</p>
-            </div>
-            {!isOwnProfile && (
-              <div className="pb-2">
-                <FriendButton profileId={profile.id} currentUserId={user.id} />
-              </div>
-            )}
-          </div>
+        <div className="px-4 sm:px-6 mt-4">
 
           {/* Bio + Location */}
           {profile.bio && (
@@ -325,7 +331,6 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
             userId={profile.id}
             isOwnProfile={isOwnProfile}
             initialPins={pinnedBeers}
-            compact
           />
 
           {/* Tabs */}
