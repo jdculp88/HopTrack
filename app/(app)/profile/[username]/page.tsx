@@ -321,17 +321,13 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
             </p>
           )}
 
-          {/* Sprint 162 (The Identity) — Personality + Four Favorites hero row */}
+          {/* Sprint 162 (The Identity) — Personality badge */}
           <PersonalityBadge
             personality={personality}
             userId={profile.id}
             isOwnProfile={isOwnProfile}
           />
-          <FourFavorites
-            userId={profile.id}
-            isOwnProfile={isOwnProfile}
-            initialPins={pinnedBeers}
-          />
+          {/* Sprint 171: Four Favorites removed — doesn't work without real beer cover images */}
 
           {/* Tabs */}
           <ProfileTabs
