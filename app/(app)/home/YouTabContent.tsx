@@ -337,7 +337,7 @@ export function YouTabContent({
               {wishlist.length} saved
             </span>
           </div>
-          <div className="space-y-3">
+          <div className="space-y-5">
             {wishlist.slice(0, 5).map((item) => (
               item.beer ? (
                 <Link key={item.id} href={`/beer/${item.beer.id}`}>
@@ -400,7 +400,7 @@ export function YouTabContent({
               {visitedBreweries.length} visited
             </span>
           </div>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-3">
             {visitedBreweries.slice(0, 6).map((b) => (
               <Link key={b.id} href={`/brewery/${b.id}`}>
                 <div

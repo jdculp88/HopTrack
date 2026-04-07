@@ -457,7 +457,7 @@ export function NotificationsClient({ notifications: initial }: NotificationsCli
                   {section.label}
                 </p>
               </div>
-              <div className="space-y-2 mt-1">
+              <div className="space-y-4 mt-1">
                 <AnimatePresence initial={false}>
                   {section.entries.map((entry, i) => {
                     if (entry.kind === "group") {

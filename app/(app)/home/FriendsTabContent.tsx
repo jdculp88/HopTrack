@@ -127,7 +127,7 @@ export function FriendsTabContent({
 
       {/* Feed */}
       {feedItems.length > 0 ? (
-        <div className="space-y-3">
+        <div className="space-y-4">
           {feedItems.map((item, i) => (
             <div key={getFeedItemKey(item, i)}>
               <FeedItemCard

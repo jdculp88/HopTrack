@@ -50,7 +50,7 @@ export function BreweriesTab({ topBreweries, mugClubMemberships }: BreweriesTabP
       <div>
         <h2 className="font-display text-2xl font-bold text-[var(--text-primary)] mb-4">Brewery Passport</h2>
         {topBreweries.length > 0 ? (
-          <div className="space-y-4">
+          <div className="space-y-5">
             {topBreweries.map((visit) => {
               const lastVisit = formatRelativeDate(visit.last_visited);
               return (
