@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import { motion } from "motion/react";
-import { Star, MessageCircle } from "lucide-react";
+import { Star, ThumbsUp, MessageCircle } from "lucide-react";
 import { spring, variants } from "@/lib/animation";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import { BeerStyleBadge } from "@/components/ui/BeerStyleBadge";
-import { EmojiPulse } from "@/components/social/EmojiPulse";
+import { FlavorTag } from "@/components/ui/FlavorTag";
 import { formatRelativeTime } from "@/lib/dates";
 import { getFirstName } from "@/lib/first-name";
 import { getStyleVars } from "@/lib/beerStyleColors";
@@ -87,7 +87,13 @@ export function RatingCard({
               </p>
             )}
           </div>
-          <div className="flex flex-col items-end flex-shrink-0">
+          <div
+            className="flex flex-col items-center flex-shrink-0 rounded-[10px]"
+            style={{
+              background: "var(--warm-bg)",
+              padding: "8px 12px",
+            }}
+          >
             <span
               className="font-mono text-2xl font-bold leading-none"
               style={{ color: "var(--accent-gold)" }}
@@ -132,7 +138,10 @@ export function RatingCard({
           >
             {firstName}
           </Link>
-          <span className="text-xs" style={{ color: "var(--text-muted)" }}>
+          <span
+            className="font-mono"
+            style={{ fontSize: "10.5px", color: "var(--text-muted)" }}
+          >
             {formatRelativeTime(review.created_at)}
           </span>
         </div>
@@ -154,33 +163,36 @@ export function RatingCard({
               <BeerStyleBadge style={review.beer.style} size="sm" />
             )}
             {(review.flavor_tags ?? []).map((tag) => (
-              <span
-                key={tag}
-                className="text-[11px] font-mono px-2.5 py-0.5 rounded-full"
-                style={{
-                  color: "var(--text-secondary)",
-                  border: "1px solid var(--border)",
-                }}
-              >
-                {tag}
-              </span>
+              <FlavorTag key={tag} tag={tag} />
             ))}
           </div>
         )}
 
-        {/* Social footer */}
+        {/* Social footer — inset separator, same visual as SessionCard */}
         <div
-          className="flex items-center gap-4 mt-3 pt-3"
-          style={{ borderTop: "1px solid var(--border)" }}
+          className="flex items-center mt-3 pt-3 border-t"
+          style={{ borderColor: "var(--border)", gap: "16px" }}
         >
-          <EmojiPulse itemKey={`review-${review.id}`} />
-          <span
-            className="flex items-center gap-1.5 text-xs"
-            style={{ color: "var(--text-muted)" }}
+          <button
+            className="flex items-center transition-colors"
+            style={{ gap: "6px", color: "var(--text-muted)" }}
+            aria-label="Cheers"
           >
-            <MessageCircle size={13} />
-            Reply
+            <ThumbsUp size={16} />
+          </button>
+          <span
+            className="flex items-center font-mono"
+            style={{ gap: "4px", fontSize: "12px", color: "var(--text-muted)" }}
+          >
+            🍻 Cheers 0
           </span>
+          <button
+            className="flex items-center font-mono transition-colors"
+            style={{ gap: "4px", fontSize: "12px", color: "var(--text-muted)" }}
+            aria-label="Reply"
+          >
+            <MessageCircle size={14} /> Reply
+          </button>
         </div>
       </div>
     </motion.div>

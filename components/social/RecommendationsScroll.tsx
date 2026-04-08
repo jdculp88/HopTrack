@@ -10,7 +10,6 @@ import { motion } from "motion/react";
 import { Star, Sparkles, Loader2 } from "lucide-react";
 import { BeerStyleBadge } from "@/components/ui/BeerStyleBadge";
 import { getStyleFamily, getStyleVars } from "@/lib/beerStyleColors";
-import { getGlass, getGlassSvgContent } from "@/lib/glassware";
 import type { AIRecommendedBeer } from "@/lib/recommendations";
 
 interface RecommendedBeer {
@@ -91,11 +90,9 @@ export function RecommendationsScroll({ beers, aiBeers }: RecommendationsScrollP
         )}
       </div>
 
-      <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1 snap-x">
+      <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1 snap-x items-stretch">
         {merged.slice(0, 10).map((beer, i) => {
           const styleVars = getStyleVars(beer.style);
-          const glass = getGlass("shaker_pint");
-          const svgHtml = glass ? getGlassSvgContent(glass, `reco-${beer.id}`) : null;
 
           return (
             <motion.div
@@ -103,69 +100,75 @@ export function RecommendationsScroll({ beers, aiBeers }: RecommendationsScrollP
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: i * 0.05 }}
-              className="flex-shrink-0 snap-start"
+              className="flex-shrink-0 snap-start flex"
             >
               <Link href={`/beer/${beer.id}`}>
                 <div
-                  className="w-[220px] rounded-[14px] overflow-hidden transition-all hover:scale-[1.02] flex flex-col"
+                  className="w-[180px] h-full rounded-[14px] overflow-hidden transition-all hover:scale-[1.02] flex flex-col"
                   style={{
                     border: "1px solid var(--card-border)",
                     background: "var(--card-bg)",
                   }}
                 >
-                  {/* Style-tinted hero area with glass watermark */}
+                  {/* Style-tinted hero — radial glow + linear tint per design spec */}
                   <div
-                    className="relative px-4 pt-10 pb-3"
+                    className="relative px-3 pt-3 pb-2 flex-shrink-0 overflow-hidden"
                     style={{
-                      background: `linear-gradient(180deg, color-mix(in srgb, ${styleVars.primary} 20%, var(--card-bg)) 0%, var(--card-bg) 100%)`,
+                      height: "64px",
+                      background: `radial-gradient(ellipse at 80% 20%, color-mix(in srgb, ${styleVars.primary} 8%, transparent) 0%, transparent 60%), linear-gradient(180deg, color-mix(in srgb, ${styleVars.primary} 6%, var(--card-bg)) 0%, var(--card-bg) 100%)`,
                     }}
                   >
-                    {/* Glass watermark */}
-                    {svgHtml && (
-                      <div className="absolute top-2 right-3 opacity-15">
-                        <svg
-                          viewBox="0 0 80 120"
-                          width={36}
-                          height={54}
-                          dangerouslySetInnerHTML={{ __html: svgHtml }}
-                        />
-                      </div>
-                    )}
+                    {/* Custom glass line-art SVG per design spec */}
+                    <svg
+                      className="absolute top-3 right-3"
+                      width={32}
+                      height={32}
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke={styleVars.primary}
+                      strokeWidth={1}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      style={{ opacity: 0.3 }}
+                    >
+                      <path d="M7 3h10l-1.5 15a2 2 0 0 1-2 1.8h-3a2 2 0 0 1-2-1.8L7 3z" />
+                    </svg>
 
-                    {/* Beer name — large, bold */}
+                    {/* Beer name */}
                     <p
-                      className="font-display font-bold leading-tight"
-                      style={{ color: "var(--text-primary)", fontSize: "16px", letterSpacing: "-0.01em" }}
+                      className="font-sans font-bold leading-tight pr-8 line-clamp-2"
+                      style={{ color: "var(--text-primary)", fontSize: "14px", letterSpacing: "-0.01em" }}
                     >
                       {beer.name}
                     </p>
                     {beer.brewery && (
                       <p
-                        className="text-xs truncate mt-0.5"
-                        style={{ color: "var(--text-secondary)" }}
+                        className="truncate mt-0.5"
+                        style={{ fontSize: "11px", color: "var(--text-secondary)" }}
                       >
                         {beer.brewery.name}
                       </p>
                     )}
                   </div>
 
-                  {/* Card body */}
-                  <div className="px-4 pb-4 flex flex-col gap-2 flex-1">
-                    {/* Style badge — full-width, prominent */}
+                  {/* Card body — badge, rating, reason aligned across cards */}
+                  <div className="px-3 pb-3 flex flex-col flex-1">
+                    <div className="flex flex-col">
+                    {/* Style badge — full-width, sm text */}
                     {beer.style && (
-                      <div>
-                        <BeerStyleBadge style={beer.style} size="sm" />
+                      <div style={{ marginTop: "6px" }}>
+                        <BeerStyleBadge style={beer.style} size="sm" fullWidth />
                       </div>
                     )}
 
-                    {/* Rating with 5 filled stars */}
+                    {/* Rating */}
                     {beer.avg_rating != null && beer.avg_rating > 0 && (
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex items-center gap-1.5" style={{ marginTop: "6px" }}>
                         <div className="flex items-center gap-0.5">
                           {Array.from({ length: 5 }).map((_, j) => (
                             <Star
                               key={j}
-                              size={11}
+                              size={10}
                               style={{
                                 color: "var(--accent-gold)",
                                 fill:
@@ -177,28 +180,29 @@ export function RecommendationsScroll({ beers, aiBeers }: RecommendationsScrollP
                           ))}
                         </div>
                         <span
-                          className="text-sm font-mono font-bold"
-                          style={{ color: "var(--accent-gold)" }}
+                          className="font-mono font-bold"
+                          style={{ fontSize: "13px", color: "var(--accent-gold)" }}
                         >
                           {beer.avg_rating.toFixed(1)}
                         </span>
                         {beer.total_ratings > 0 && (
-                          <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>
+                          <span style={{ fontSize: "10px", color: "var(--text-muted)" }}>
                             ({beer.total_ratings})
                           </span>
                         )}
                       </div>
                     )}
 
-                    {/* Reason line — style's primary color */}
+                    {/* Reason — anchored to bottom */}
                     {beer.reason && (
                       <p
-                        className="text-[11px] leading-relaxed line-clamp-2 mt-auto"
-                        style={{ color: styleVars.primary }}
+                        className="leading-relaxed line-clamp-2 mt-auto"
+                        style={{ fontSize: "11px", color: styleVars.primary, paddingTop: "6px" }}
                       >
                         {beer.reason}
                       </p>
                     )}
+                    </div>
                   </div>
                 </div>
               </Link>

@@ -109,36 +109,60 @@ export function DiscoverTabContent({
           whileHover={{ scale: 1.01 }}
           whileTap={{ scale: 0.99 }}
           transition={{ type: "spring", stiffness: 400, damping: 30 }}
-          className="card-bg-hoproute rounded-[14px] p-5 border"
-          style={{ borderColor: "color-mix(in srgb, var(--accent-gold) 30%, transparent)" }}
+          className="rounded-[16px] overflow-hidden"
+          style={{
+            background: "linear-gradient(135deg, var(--warm-bg), var(--card-bg))",
+            border: "1px solid var(--border)",
+            padding: "20px",
+          }}
         >
-          <div className="flex items-center gap-4">
-            {/* Map thumbnail */}
+          <div className="flex items-center" style={{ gap: "16px" }}>
+            {/* Icon container — 52×52, gold gradient bg + gold border */}
             <div
-              className="flex-shrink-0 w-16 h-16 rounded-[14px] flex items-center justify-center text-3xl"
+              className="flex-shrink-0 flex items-center justify-center rounded-[14px]"
               style={{
-                background: "color-mix(in srgb, var(--accent-gold) 12%, var(--surface-2))",
+                width: "52px",
+                height: "52px",
+                background: "linear-gradient(135deg, rgba(196,136,62,0.12), rgba(196,136,62,0.06))",
+                border: "1px solid rgba(196,136,62,0.15)",
+                fontSize: "24px",
               }}
             >
               🗺️
             </div>
-            <div className="space-y-1 flex-1 min-w-0">
-              <div className="flex items-center gap-1.5">
+            <div className="flex-1 min-w-0">
+              {/* NEW badge — green dot + mono text */}
+              <div className="flex items-center" style={{ gap: "5px", marginBottom: "2px" }}>
                 <span
-                  className="w-2 h-2 rounded-full flex-shrink-0"
-                  style={{ background: "#4CAF50" }}
+                  className="rounded-full flex-shrink-0"
+                  style={{ width: "5px", height: "5px", background: "var(--success, #4CAF50)" }}
                 />
                 <span
-                  className="text-[10px] font-mono uppercase tracking-widest font-bold"
-                  style={{ color: "#4CAF50" }}
+                  className="font-mono font-semibold uppercase"
+                  style={{
+                    fontSize: "9px",
+                    color: "var(--accent-gold)",
+                    letterSpacing: "0.12em",
+                  }}
                 >
                   New
                 </span>
               </div>
-              <p className="font-display text-lg font-bold text-[var(--text-primary)]">
+              {/* Title — sans 17px/600 */}
+              <p
+                className="font-sans font-semibold"
+                style={{ fontSize: "17px", color: "var(--text-primary)" }}
+              >
                 Plan a HopRoute
               </p>
-              <p className="text-sm text-[var(--text-secondary)]">
+              {/* Description — 13px, text-secondary, mt 2px */}
+              <p
+                style={{
+                  fontSize: "13px",
+                  color: "var(--text-secondary)",
+                  marginTop: "2px",
+                }}
+              >
                 AI-powered brewery crawl planner. Tell us where and when — we
                 build your night.
               </p>

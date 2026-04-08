@@ -133,7 +133,7 @@ const SESSION_SELECT = `
   profile:profiles!sessions_user_id_fkey(id, username, display_name, avatar_url, current_streak),
   brewery:breweries!brewery_id(id, name, city, state),
   beer_logs(id, beer_id, rating, flavor_tags, serving_style, comment, photo_url, logged_at, quantity, beer:beers(id, name, style, glass_type)),
-  session_photos(id, url, created_at)
+  session_photos(id, photo_url, created_at)
 `;
 
 const ONE_WEEK_AGO = () =>
@@ -286,7 +286,7 @@ export async function fetchCommunityContent(
       supabase
         .from("beer_reviews")
         .select(
-          "id, rating, comment, created_at, beer:beers(id, name, style, glass_type), profile:profiles(id, username, display_name, avatar_url)"
+          "id, rating, comment, created_at, beer:beers(id, name, style, glass_type), profile:profiles!beer_reviews_user_id_fkey(id, username, display_name, avatar_url)"
         )
         .gte("rating", 4)
         .order("created_at", { ascending: false })
@@ -295,7 +295,7 @@ export async function fetchCommunityContent(
       supabase
         .from("brewery_reviews")
         .select(
-          "id, rating, comment, created_at, brewery:breweries(id, name, city, state), profile:profiles(id, username, display_name, avatar_url)"
+          "id, rating, comment, created_at, brewery:breweries(id, name, city, state), profile:profiles!brewery_reviews_user_id_fkey(id, username, display_name, avatar_url)"
         )
         .order("created_at", { ascending: false })
         .limit(8),
@@ -304,7 +304,7 @@ export async function fetchCommunityContent(
         ? supabase
             .from("beer_reviews")
             .select(
-              "id, rating, comment, flavor_tags, created_at, beer:beers(id, name, style, brewery:breweries(id, name, city)), profile:profiles(id, username, display_name, avatar_url)"
+              "id, rating, comment, flavor_tags, created_at, beer:beers(id, name, style, brewery:breweries(id, name, city)), profile:profiles!beer_reviews_user_id_fkey(id, username, display_name, avatar_url)"
             )
             .in("user_id", friendIds)
             .order("created_at", { ascending: false })

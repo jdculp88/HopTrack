@@ -14,7 +14,9 @@ import { getStyleVars } from "@/lib/beerStyleColors";
 interface BeerStyleBadgeProps {
   style: BeerStyle | string | null;
   itemType?: string | null;
-  size?: "xs" | "sm" | "md";
+  size?: "xs" | "sm" | "md" | "lg";
+  /** Stretch badge to fill container width */
+  fullWidth?: boolean;
   className?: string;
 }
 
@@ -22,9 +24,10 @@ const sizeConfig = {
   xs: { badge: "px-1.5 py-0.5 gap-1 text-[9px]", dot: "w-1 h-1" },
   sm: { badge: "px-2 py-0.5 gap-1 text-[10.5px]", dot: "w-1.5 h-1.5" },
   md: { badge: "px-2.5 py-1 gap-1.5 text-xs", dot: "w-1.5 h-1.5" },
+  lg: { badge: "px-3.5 py-1 gap-1.5 text-xs", dot: "w-1.5 h-1.5" },
 };
 
-export function BeerStyleBadge({ style, itemType, size = "sm", className }: BeerStyleBadgeProps) {
+export function BeerStyleBadge({ style, itemType, size = "sm", fullWidth = false, className }: BeerStyleBadgeProps) {
   if (!style && !itemType) return null;
   const vars = getStyleVars(style, itemType);
   const s = sizeConfig[size];
@@ -32,14 +35,15 @@ export function BeerStyleBadge({ style, itemType, size = "sm", className }: Beer
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-[6px] font-mono font-semibold leading-none whitespace-nowrap",
+        fullWidth ? "flex w-full" : "inline-flex",
+        "items-center rounded-[6px] font-mono font-semibold leading-none whitespace-nowrap",
         s.badge,
         className
       )}
       style={{
-        backgroundColor: `color-mix(in srgb, ${vars.primary} 15%, transparent)`,
+        backgroundColor: `color-mix(in srgb, ${vars.primary} 12%, var(--card-bg))`,
         color: vars.primary,
-        border: `1px solid color-mix(in srgb, ${vars.primary} 15%, transparent)`,
+        border: `1px solid color-mix(in srgb, ${vars.primary} 12%, transparent)`,
       }}
     >
       {/* 6px color dot indicator — Design System v2.0 */}

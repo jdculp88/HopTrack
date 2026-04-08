@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { motion } from 'motion/react'
 import { variants, transition, spring, microInteraction } from '@/lib/animation'
-import { TrendingUp, Calendar } from 'lucide-react'
+import { TrendingUp, Calendar, Star } from 'lucide-react'
 import { StarRating } from '@/components/ui/StarRating'
 import { UserAvatar } from '@/components/ui/UserAvatar'
 import { useToast } from '@/components/ui/Toast'
@@ -58,60 +58,128 @@ function formatTime(time: string | null): string {
   return `${hr}:${m.toString().padStart(2, '0')} ${ampm}`
 }
 
-// ─── Trending Beer Reviews — Horizontal Scroll ──────────────────────────────
+// ─── Trending Beer Reviews — Horizontal Scroll (mirrored Reco layout) ───────
 export function TrendingCard({ reviews, index = 0 }: { reviews: TrendingReview[]; index?: number }) {
   if (reviews.length === 0) return null
 
   return (
-    <motion.div
-      initial={variants.slideUpSmall.initial}
-      animate={variants.slideUpSmall.animate}
-      transition={{ delay: index * 0.04, ...transition.normal }}
-    >
-      <div className="flex items-center gap-2 mb-3">
-        <TrendingUp size={14} style={{ color: 'var(--accent-gold)' }} />
-        <span className="text-[10px] font-mono uppercase tracking-widest" style={{ color: 'var(--accent-gold)' }}>
+    <div className="space-y-2">
+      <div className="flex items-center gap-2 px-1">
+        <TrendingUp size={13} style={{ color: 'var(--accent-gold)' }} />
+        <p
+          className="text-[10px] font-mono uppercase tracking-widest"
+          style={{ color: 'var(--accent-gold)' }}
+        >
           Trending Near You
-        </span>
+        </p>
       </div>
-      <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide snap-x">
-        {reviews.map((review, i) => (
-          <motion.div
-            key={review.id}
-            initial={variants.slideUpSmall.initial}
-            animate={variants.slideUpSmall.animate}
-            transition={{ delay: 0.1 + i * 0.05, ...transition.normal }}
-            className="card-bg-reco rounded-xl p-3.5 flex-shrink-0 snap-start"
-            data-style={getStyleFamily(review.beer?.style)}
-            style={{
-              border: '1px solid var(--surface-warm-border)',
-              minWidth: 150,
-              maxWidth: 170,
-            }}
-          >
-            <p className="font-display text-sm font-semibold leading-tight truncate" style={{ color: 'var(--text-primary)' }}>
-              {review.beer?.name || 'Unknown'}
-            </p>
-            <p className="text-[11px] mt-1 truncate" style={{ color: 'var(--text-muted)' }}>
-              {getFirstName(review.profile?.display_name, review.profile?.username)}
-            </p>
-            {review.beer?.style && (
-              <div className="mt-2">
-                <BeerStyleBadge style={review.beer.style} size="xs" />
-              </div>
-            )}
-            <div className="mt-2">
-              <StarRating value={review.rating} readonly size="sm" />
-            </div>
-            {review.comment && (
-              <p className="text-[10px] mt-1.5 line-clamp-2" style={{ color: 'var(--text-muted)' }}>
-                "{review.comment}"
-              </p>
-            )}
-          </motion.div>
-        ))}
+
+      <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1 snap-x items-stretch">
+        {reviews.map((review, i) => {
+          const styleVars = getStyleVars(review.beer?.style)
+
+          return (
+            <motion.div
+              key={review.id}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: i * 0.05 }}
+              className="flex-shrink-0 snap-start flex"
+            >
+              <Link href={`/beer/${review.beer?.id ?? ''}`}>
+                <div
+                  className="w-[180px] h-full rounded-[14px] overflow-hidden transition-all hover:scale-[1.02] flex flex-col"
+                  style={{
+                    border: '1px solid var(--card-border)',
+                    background: 'var(--card-bg)',
+                  }}
+                >
+                  {/* Hero — gradient mirrored to LEFT */}
+                  <div
+                    className="relative px-3 pt-3 pb-2 flex-shrink-0 overflow-hidden"
+                    style={{
+                      height: '64px',
+                      background: `radial-gradient(ellipse at 20% 20%, color-mix(in srgb, ${styleVars.primary} 8%, transparent) 0%, transparent 60%), linear-gradient(180deg, color-mix(in srgb, ${styleVars.primary} 6%, var(--card-bg)) 0%, var(--card-bg) 100%)`,
+                    }}
+                  >
+                    {/* Glass SVG — LEFT side */}
+                    <svg
+                      className="absolute top-3 left-3"
+                      width={32}
+                      height={32}
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke={styleVars.primary}
+                      strokeWidth={1}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      style={{ opacity: 0.3 }}
+                    >
+                      <path d="M7 3h10l-1.5 15a2 2 0 0 1-2 1.8h-3a2 2 0 0 1-2-1.8L7 3z" />
+                    </svg>
+
+                    {/* Beer name — padded left for icon */}
+                    <p
+                      className="font-sans font-bold leading-tight pl-8 line-clamp-2"
+                      style={{ color: 'var(--text-primary)', fontSize: '14px', letterSpacing: '-0.01em' }}
+                    >
+                      {review.beer?.name || 'Unknown'}
+                    </p>
+                    <p
+                      className="truncate mt-0.5 pl-8"
+                      style={{ fontSize: '11px', color: 'var(--text-secondary)' }}
+                    >
+                      {getFirstName(review.profile?.display_name, review.profile?.username)}
+                    </p>
+                  </div>
+
+                  {/* Body — badge, rating, comment */}
+                  <div className="px-3 pb-3 flex flex-col flex-1">
+                    <div className="flex flex-col">
+                      {review.beer?.style && (
+                        <div style={{ marginTop: '6px' }}>
+                          <BeerStyleBadge style={review.beer.style} size="sm" fullWidth />
+                        </div>
+                      )}
+
+                      <div className="flex items-center gap-1.5" style={{ marginTop: '6px' }}>
+                        <div className="flex items-center gap-0.5">
+                          {Array.from({ length: 5 }).map((_, j) => (
+                            <Star
+                              key={j}
+                              size={10}
+                              style={{
+                                color: 'var(--accent-gold)',
+                                fill: j < Math.round(review.rating) ? 'var(--accent-gold)' : 'transparent',
+                              }}
+                            />
+                          ))}
+                        </div>
+                        <span
+                          className="font-mono font-bold"
+                          style={{ fontSize: '13px', color: 'var(--accent-gold)' }}
+                        >
+                          {review.rating.toFixed(1)}
+                        </span>
+                      </div>
+
+                      {review.comment && (
+                        <p
+                          className="leading-relaxed line-clamp-2 mt-auto"
+                          style={{ fontSize: '11px', color: styleVars.primary, paddingTop: '6px' }}
+                        >
+                          &ldquo;{review.comment}&rdquo;
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            </motion.div>
+          )
+        })}
       </div>
-    </motion.div>
+    </div>
   )
 }
 
@@ -147,11 +215,34 @@ export function BreweryReviewCard({ review, index = 0 }: { review: BreweryReview
             </p>
             {review.comment && (
               <p className="text-xs mt-0.5 truncate" style={{ color: 'var(--text-muted)' }}>
-                "{review.comment}"
+                &ldquo;{review.comment}&rdquo;
               </p>
             )}
           </div>
-          <StarRating value={review.rating} readonly size="sm" />
+          {/* Rating — warm-bg container, same as SessionCard/RatingCard */}
+          <div
+            className="flex flex-col items-center flex-shrink-0 rounded-[10px]"
+            style={{ background: 'var(--warm-bg)', padding: '8px 12px' }}
+          >
+            <span
+              className="font-mono text-lg font-bold leading-none"
+              style={{ color: 'var(--accent-gold)' }}
+            >
+              {review.rating.toFixed(1)}
+            </span>
+            <div className="flex items-center gap-0.5 mt-1">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Star
+                  key={i}
+                  size={8}
+                  style={{
+                    color: 'var(--accent-gold)',
+                    fill: i < Math.round(review.rating) ? 'var(--accent-gold)' : 'transparent',
+                  }}
+                />
+              ))}
+            </div>
+          </div>
         </div>
       </Link>
     </motion.div>
@@ -283,13 +374,17 @@ export function SeasonalBeersScroll({ beers }: { beers: SeasonalBeer[] }) {
       <p className="text-[10px] font-mono uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)' }}>
         New & Noteworthy
       </p>
-      <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide snap-x -mx-1 px-1">
+      <div
+        className="flex overflow-x-auto pb-1 snap-x -mx-1 px-1"
+        style={{ gap: '10px', scrollbarWidth: 'none' }}
+      >
         {beers.map((beer, i) => {
           const styleVars = getStyleVars(beer.style)
           const breweryName = typeof beer.brewery === 'string' ? beer.brewery : (beer.brewery as any)?.name ?? ''
 
           // Badge color: "New" = info-blue, "Limited" = gold, "Seasonal" = gold
           const badgeColor = beer.badge === 'New' ? '#3498DB' : 'var(--accent-gold)'
+          const badgeShadow = beer.badge === 'New' ? '0 1px 4px rgba(52,152,219,0.3)' : '0 1px 4px rgba(196,136,62,0.3)'
 
           return (
             <motion.div
@@ -300,47 +395,87 @@ export function SeasonalBeersScroll({ beers }: { beers: SeasonalBeer[] }) {
               className="flex-shrink-0 snap-start"
             >
               <div
-                className="w-[200px] rounded-[14px] overflow-hidden transition-all hover:scale-[1.02] flex flex-col"
-                style={{ border: '1px solid var(--card-border)', background: 'var(--card-bg)' }}
+                className="rounded-[14px] overflow-hidden relative"
+                style={{
+                  minWidth: '145px',
+                  maxWidth: '145px',
+                  border: '1px solid var(--card-border)',
+                  background: 'var(--card-bg)',
+                  transition: 'all 0.2s',
+                }}
               >
-                {/* Style-tinted hero with glass watermark */}
-                <div
-                  className="relative h-28 flex items-center justify-center"
+                {/* NEW / Limited / Seasonal badge */}
+                <span
+                  className="absolute font-mono font-bold uppercase"
                   style={{
-                    background: `linear-gradient(180deg, color-mix(in srgb, ${styleVars.primary} 22%, var(--card-bg)) 0%, color-mix(in srgb, ${styleVars.primary} 8%, var(--card-bg)) 100%)`,
+                    top: '8px',
+                    right: '8px',
+                    fontSize: '8px',
+                    letterSpacing: '0.1em',
+                    padding: '2px 7px',
+                    borderRadius: '5px',
+                    color: '#fff',
+                    background: badgeColor,
+                    boxShadow: badgeShadow,
+                    zIndex: 2,
                   }}
                 >
-                  {/* Glass watermark */}
-                  <svg viewBox="0 0 80 120" width={40} height={60} opacity={0.12} aria-hidden="true">
-                    <rect x="15" y="10" width="50" height="90" rx="4" fill="none" stroke="currentColor" strokeWidth="2" />
-                    <rect x="15" y="10" width="50" height="15" rx="4" fill="currentColor" opacity="0.15" />
-                  </svg>
+                  {beer.badge}
+                </span>
 
-                  {/* Badge */}
-                  <span
-                    className="absolute top-2.5 right-2.5 text-[10px] font-mono font-bold px-2.5 py-1 rounded-full uppercase tracking-wider"
-                    style={{
-                      color: '#fff',
-                      background: badgeColor,
-                    }}
+                {/* Hero — style-tinted, 90px, centered glass */}
+                <div
+                  className="flex items-center justify-center relative"
+                  style={{
+                    height: '90px',
+                    background: `radial-gradient(ellipse at 50% 40%, color-mix(in srgb, ${styleVars.primary} 14%, transparent) 0%, transparent 70%), linear-gradient(180deg, color-mix(in srgb, ${styleVars.primary} 12%, var(--card-bg)) 0%, color-mix(in srgb, ${styleVars.primary} 4%, var(--card-bg)) 100%)`,
+                  }}
+                >
+                  {/* Glass line-art — centered, 0.15 opacity */}
+                  <svg
+                    width={32}
+                    height={32}
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke={styleVars.primary}
+                    strokeWidth={1}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    style={{ opacity: 0.15 }}
                   >
-                    {beer.badge}
-                  </span>
+                    <path d="M7 3h10l-1.5 15a2 2 0 0 1-2 1.8h-3a2 2 0 0 1-2-1.8L7 3z" />
+                  </svg>
                 </div>
 
-                {/* Card body */}
-                <div className="px-3.5 pt-3 pb-3.5">
+                {/* Info area — separated by border-top */}
+                <div
+                  style={{
+                    padding: '10px 12px 12px',
+                    background: 'var(--card-bg)',
+                    borderTop: '1px solid var(--border)',
+                  }}
+                >
                   <p
-                    className="font-display font-bold text-[15px] leading-tight"
-                    style={{ color: 'var(--text-primary)' }}
+                    className="font-sans font-semibold leading-[1.25]"
+                    style={{
+                      fontSize: '13px',
+                      color: 'var(--text-primary)',
+                      marginBottom: '2px',
+                    }}
                   >
                     {beer.name}
                   </p>
-                  <p className="text-xs mt-0.5 truncate" style={{ color: 'var(--text-muted)' }}>
+                  <p
+                    className="truncate"
+                    style={{
+                      fontSize: '10px',
+                      color: 'var(--text-muted)',
+                    }}
+                  >
                     {breweryName}
                   </p>
                   {beer.style && (
-                    <div className="mt-2.5">
+                    <div style={{ marginTop: '8px' }}>
                       <BeerStyleBadge style={beer.style} size="sm" />
                     </div>
                   )}

@@ -890,6 +890,17 @@ body { overscroll-behavior-y: contain; }
   background: color-mix(in srgb, var(--accent-gold) 6%, var(--card-bg));
 }
 
+/* Beer of the Week — exact design spec gradient (both ends warm) */
+.botw-card-bg {
+  background: linear-gradient(135deg, #FFF9F0 0%, #FFF4E6 100%);
+}
+[data-theme="dark"] .botw-card-bg {
+  background: linear-gradient(135deg, #2E2418 0%, #2A2014 100%);
+}
+[data-theme="oled"] .botw-card-bg {
+  background: linear-gradient(135deg, #1A1510 0%, #16120E 100%);
+}
+
 .card-bg-hoproute {
   background: color-mix(in srgb, var(--accent-amber) 6%, var(--card-bg));
 }

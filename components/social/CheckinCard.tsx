@@ -6,7 +6,6 @@ import { spring } from "@/lib/animation";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import { formatRelativeTime } from "@/lib/dates";
 import { getFirstName } from "@/lib/first-name";
-import { EmojiPulse } from "@/components/social/EmojiPulse";
 import type { Session } from "@/types/database";
 
 /**
@@ -88,7 +87,6 @@ export function CheckinCard({
         {formatRelativeTime(session.started_at)}
       </span>
 
-      <EmojiPulse itemKey={`checkin-${session.id}`} />
     </motion.div>
   );
 }
