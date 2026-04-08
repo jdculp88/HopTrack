@@ -1,9 +1,10 @@
 "use client";
 
+import { useMemo } from "react";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 import { TIER_STYLES } from "@/lib/constants/tiers";
-import type { Achievement, AchievementTier } from "@/types/database";
+import type { Achievement } from "@/types/database";
 
 interface AchievementBadgeProps {
   achievement: Achievement;
@@ -43,6 +44,10 @@ export function AchievementBadge({
 }: AchievementBadgeProps) {
   const tier = TIER_STYLES[achievement.tier];
   const s = SIZES[size];
+  const isRecent = useMemo(() => {
+    if (!earned || !_earnedAt) return false;
+    return Date.now() - new Date(_earnedAt).getTime() < 7 * 24 * 60 * 60 * 1000;
+  }, [earned, _earnedAt]);
 
   return (
     <button
@@ -81,7 +86,7 @@ export function AchievementBadge({
             </svg>
           )}
           {/* "NEW" badge for recently earned (within 7 days) */}
-          {earned && _earnedAt && (Date.now() - new Date(_earnedAt).getTime() < 7 * 24 * 60 * 60 * 1000) && (
+          {isRecent && (
             <span
               className="absolute -top-1.5 -right-1.5 text-[8px] font-mono font-bold px-1.5 py-0.5 rounded-full uppercase z-10"
               style={{ background: "#3498DB", color: "#fff" }}
