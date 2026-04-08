@@ -60,65 +60,7 @@ export function FriendsTabContent({
 
   return (
     <>
-      {/* Sprint 171: Mini-stats strip — earn the space */}
-      <div
-        className="rounded-[14px] px-4 py-3 bg-[var(--card-bg)]"
-        style={{ border: "1px solid var(--card-border)" }}
-      >
-        <div className="flex items-center gap-4">
-          {/* Avatar link */}
-          {profile && (
-            <Link href={`/profile/${profile.username}`} className="flex-shrink-0">
-              <UserAvatar profile={profile} size="sm" />
-            </Link>
-          )}
 
-          {/* Stats strip */}
-          <div className="flex items-center gap-4 flex-1 min-w-0">
-            {/* Streak */}
-            {(currentStreak ?? 0) > 0 && (
-              <div className="flex items-center gap-1.5">
-                <Flame size={14} style={{ color: "var(--accent-amber)" }} />
-                <span className="text-sm font-mono font-bold" style={{ color: "var(--accent-amber)" }}>
-                  {currentStreak}
-                </span>
-              </div>
-            )}
-
-            {/* Weekly beers */}
-            {(weeklyBeers ?? 0) > 0 && (
-              <div className="flex items-center gap-1.5">
-                <Beer size={14} style={{ color: "var(--accent-gold)" }} />
-                <span className="text-sm font-mono font-bold" style={{ color: "var(--accent-gold)" }}>
-                  {weeklyBeers}
-                </span>
-                <span className="text-[10px] text-[var(--text-muted)]">this week</span>
-              </div>
-            )}
-
-            {/* Friends count */}
-            <div className="flex items-center gap-1.5">
-              <Users size={14} style={{ color: "var(--accent-blue)" }} />
-              <span className="text-sm font-mono font-bold" style={{ color: "var(--accent-blue)" }}>
-                {friendCount}
-              </span>
-            </div>
-          </div>
-
-          {/* Live now pulse */}
-          {activeFriendCount > 0 && (
-            <div className="flex items-center gap-1.5 flex-shrink-0">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ background: "var(--live-green)" }} />
-                <span className="relative inline-flex rounded-full h-2 w-2" style={{ background: "var(--live-green)" }} />
-              </span>
-              <span className="text-[11px] font-mono font-semibold" style={{ color: "var(--live-green)" }}>
-                {activeFriendCount} live
-              </span>
-            </div>
-          )}
-        </div>
-      </div>
 
       {/* Live Now strip */}
       <DrinkingNow />
