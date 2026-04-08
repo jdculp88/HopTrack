@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import {
@@ -13,6 +14,10 @@ import {
   Beer,
   GripVertical,
   Copy,
+  Plus,
+  Pencil,
+  Search,
+  Loader2,
 } from "lucide-react";
 import {
   DndContext,
@@ -300,6 +305,30 @@ export function BeerListDetailClient({
   const [showDuplicateConfirm, setShowDuplicateConfirm] = useState(false);
   const [isDuplicating, setIsDuplicating] = useState(false);
 
+  // Delete list state
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  // Edit metadata state
+  const [isEditing, setIsEditing] = useState(false);
+  const [editTitle, setEditTitle] = useState(list.title ?? "");
+  const [editDesc, setEditDesc] = useState(list.description ?? "");
+  const [editPublic, setEditPublic] = useState(list.is_public ?? false);
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Local overrides for edited metadata
+  const [localTitle, setLocalTitle] = useState(list.title ?? "");
+  const [localDesc, setLocalDesc] = useState(list.description ?? "");
+  const [localIsPublic, setLocalIsPublic] = useState(list.is_public ?? false);
+
+  // Add beer state
+  const [showAddBeer, setShowAddBeer] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<any[] | null>(null);
+  const [isSearching, setIsSearching] = useState(false);
+  const [addingBeerId, setAddingBeerId] = useState<string | null>(null);
+  const debouncedSearch = useDebouncedValue(searchQuery, 300);
+
   // Debounce reorder saves with a ref
   const reorderTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -425,6 +454,120 @@ export function BeerListDetailClient({
     }
   }, [list, items, success, showError, router]);
 
+  // ── Close all action panels ────────────────────────────────────────────
+  const closeAllPanels = useCallback(() => {
+    setShowDuplicateConfirm(false);
+    setShowDeleteConfirm(false);
+    setIsEditing(false);
+    setShowAddBeer(false);
+    setSearchQuery("");
+    setSearchResults(null);
+  }, []);
+
+  // ── Delete list ─────────────────────────────────────────────────────────
+  const handleDeleteList = useCallback(async () => {
+    setIsDeleting(true);
+    try {
+      const res = await fetch(`/api/beer-lists/${list.id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error();
+      success("List deleted");
+      router.push("/beer-lists");
+    } catch {
+      showError("Failed to delete list");
+      setIsDeleting(false);
+      setShowDeleteConfirm(false);
+    }
+  }, [list.id, success, showError, router]);
+
+  // ── Edit metadata ───────────────────────────────────────────────────────
+  const handleSaveEdit = useCallback(async () => {
+    if (!editTitle.trim()) return;
+    setIsSaving(true);
+    try {
+      const res = await fetch(`/api/beer-lists/${list.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: editTitle.trim(),
+          description: editDesc.trim() || null,
+          is_public: editPublic,
+        }),
+      });
+      if (!res.ok) throw new Error();
+      setLocalTitle(editTitle.trim());
+      setLocalDesc(editDesc.trim());
+      setLocalIsPublic(editPublic);
+      setIsEditing(false);
+      success("List updated!");
+    } catch {
+      showError("Failed to update list");
+    } finally {
+      setIsSaving(false);
+    }
+  }, [list.id, editTitle, editDesc, editPublic, success, showError]);
+
+  // ── Add beer search ─────────────────────────────────────────────────────
+  useEffect(() => {
+    if (debouncedSearch.length < 2) {
+      setSearchResults(null);
+      return;
+    }
+    let cancelled = false;
+    setIsSearching(true);
+    fetch(`/api/search?q=${encodeURIComponent(debouncedSearch)}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (cancelled) return;
+        const existingBeerIds = new Set(items.map((i) => i.beer_id));
+        const beers = (data.beers ?? []).filter(
+          (b: any) => !existingBeerIds.has(b.id)
+        );
+        setSearchResults(beers);
+      })
+      .catch(() => {
+        if (!cancelled) setSearchResults([]);
+      })
+      .finally(() => {
+        if (!cancelled) setIsSearching(false);
+      });
+    return () => { cancelled = true; };
+  }, [debouncedSearch, items]);
+
+  const handleAddBeer = useCallback(
+    async (beerId: string, beerData: any) => {
+      setAddingBeerId(beerId);
+      try {
+        const res = await fetch(`/api/beer-lists/${list.id}/items`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ beer_id: beerId }),
+        });
+        if (res.status === 409) {
+          showError("Already in this list");
+          setAddingBeerId(null);
+          return;
+        }
+        if (!res.ok) throw new Error();
+        // Append to local items
+        const newItem: BeerItem = {
+          id: crypto.randomUUID(),
+          beer_id: beerId,
+          position: items.length,
+          beer: beerData,
+        };
+        setItems((cur) => [...cur, newItem]);
+        // Remove from search results
+        setSearchResults((cur) => cur?.filter((b: any) => b.id !== beerId) ?? null);
+        success("Added to list!");
+      } catch {
+        showError("Failed to add beer");
+      } finally {
+        setAddingBeerId(null);
+      }
+    },
+    [list.id, items.length, success, showError]
+  );
+
   const profile = list.profile;
 
   return (
@@ -459,73 +602,35 @@ export function BeerListDetailClient({
           )}
 
           <div className="flex-1 min-w-0">
-            <div className="flex items-start justify-between gap-3">
-              <h1
-                className="font-display font-bold text-2xl leading-tight"
-                style={{ color: "var(--text-primary)" }}
-              >
-                {list.title}
-              </h1>
-              <div className="flex items-center gap-1.5 flex-shrink-0 flex-wrap justify-end">
-                {/* Public/private badge */}
-                <span
-                  className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-lg"
-                  style={{ background: "var(--surface-2)", color: "var(--text-muted)" }}
-                >
-                  {list.is_public ? <Globe size={10} /> : <Lock size={10} />}
-                  {list.is_public ? "Public" : "Private"}
-                </span>
-
-                {/* Share button */}
-                {list.is_public && (
-                  <button
-                    onClick={handleShare}
-                    className="inline-flex items-center gap-1 text-xs px-3 py-1.5 rounded-xl transition-all"
-                    style={{
-                      background:
-                        "color-mix(in srgb, var(--accent-gold) 12%, transparent)",
-                      color: "var(--accent-gold)",
-                      border:
-                        "1px solid color-mix(in srgb, var(--accent-gold) 25%, transparent)",
-                    }}
-                  >
-                    <Share2 size={11} />
-                    Share
-                  </button>
-                )}
-
-                {/* Duplicate button — owner only */}
-                {isOwner && (
-                  <button
-                    onClick={() => setShowDuplicateConfirm((v) => !v)}
-                    className="inline-flex items-center gap-1 text-xs px-3 py-1.5 rounded-xl transition-all"
-                    style={{
-                      background: "var(--surface-2)",
-                      color: "var(--text-secondary)",
-                      border: "1px solid var(--border)",
-                    }}
-                    title="Duplicate list"
-                  >
-                    <Copy size={11} />
-                    Duplicate
-                  </button>
-                )}
-              </div>
-            </div>
+            <h1
+              className="font-display font-bold text-2xl leading-tight"
+              style={{ color: "var(--text-primary)" }}
+            >
+              {localTitle}
+            </h1>
 
             {profile?.username && (
-              <Link
-                href={`/profile/${profile.username}`}
-                className="text-xs hover:underline mt-0.5 inline-block"
-                style={{ color: "var(--accent-gold)" }}
-              >
-                @{profile.username}
-              </Link>
+              <div className="flex items-center gap-2 mt-0.5">
+                <Link
+                  href={`/profile/${profile.username}`}
+                  className="text-xs hover:underline"
+                  style={{ color: "var(--accent-gold)" }}
+                >
+                  @{profile.username}
+                </Link>
+                <span
+                  className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-md"
+                  style={{ background: "var(--surface-2)", color: "var(--text-muted)" }}
+                >
+                  {localIsPublic ? <Globe size={9} /> : <Lock size={9} />}
+                  {localIsPublic ? "Public" : "Private"}
+                </span>
+              </div>
             )}
 
-            {list.description && (
+            {localDesc && (
               <p className="text-sm mt-2" style={{ color: "var(--text-secondary)" }}>
-                {list.description}
+                {localDesc}
               </p>
             )}
 
@@ -535,10 +640,66 @@ export function BeerListDetailClient({
           </div>
         </div>
 
-        {/* Duplicate confirmation panel */}
+        {/* Action buttons — below header */}
+        {/* Action buttons — below header */}
+        <div className="flex items-center gap-1.5 flex-wrap mt-4 pt-4 border-t" style={{ borderColor: "var(--border)" }}>
+          {localIsPublic && (
+            <button
+              onClick={handleShare}
+              className="inline-flex items-center gap-1 text-xs px-3 py-1.5 rounded-xl transition-all"
+              style={{
+                background: "color-mix(in srgb, var(--accent-gold) 12%, transparent)",
+                color: "var(--accent-gold)",
+                border: "1px solid color-mix(in srgb, var(--accent-gold) 25%, transparent)",
+              }}
+            >
+              <Share2 size={11} />
+              Share
+            </button>
+          )}
+
+          {isOwner && (
+            <>
+              <button
+                onClick={() => { closeAllPanels(); setShowAddBeer(true); }}
+                className="inline-flex items-center gap-1 text-xs px-3 py-1.5 rounded-xl transition-all"
+                style={{
+                  background: "color-mix(in srgb, var(--accent-gold) 12%, transparent)",
+                  color: "var(--accent-gold)",
+                  border: "1px solid color-mix(in srgb, var(--accent-gold) 25%, transparent)",
+                }}
+                title="Add a beer"
+              >
+                <Plus size={11} />
+                Add Beer
+              </button>
+              <button
+                onClick={() => { closeAllPanels(); setIsEditing(true); setEditTitle(localTitle); setEditDesc(localDesc); setEditPublic(localIsPublic); }}
+                className="inline-flex items-center gap-1 text-xs px-3 py-1.5 rounded-xl transition-all"
+                style={{ background: "var(--surface-2)", color: "var(--text-secondary)", border: "1px solid var(--border)" }}
+                title="Edit list"
+              >
+                <Pencil size={11} />
+                Edit
+              </button>
+              <button
+                onClick={() => { closeAllPanels(); setShowDeleteConfirm(true); }}
+                className="inline-flex items-center gap-1 text-xs px-3 py-1.5 rounded-xl transition-all"
+                style={{ background: "var(--surface-2)", color: "var(--text-muted)", border: "1px solid var(--border)" }}
+                title="Delete list"
+              >
+                <Trash2 size={11} />
+              </button>
+            </>
+          )}
+        </div>
+
+        {/* Action panels — only one open at a time */}
         <AnimatePresence>
+          {/* Duplicate confirmation */}
           {showDuplicateConfirm && (
             <motion.div
+              key="duplicate"
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
@@ -550,7 +711,7 @@ export function BeerListDetailClient({
                 style={{ borderColor: "var(--border)" }}
               >
                 <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-                  Duplicate "{list.title}"?
+                  Duplicate &ldquo;{localTitle}&rdquo;?
                 </p>
                 <div className="flex items-center gap-2 flex-shrink-0">
                   <button
@@ -566,17 +727,215 @@ export function BeerListDetailClient({
                     disabled={isDuplicating}
                     className="px-4 py-1.5 rounded-xl text-xs font-medium transition-all"
                     style={{
-                      background:
-                        "color-mix(in srgb, var(--accent-gold) 90%, transparent)",
+                      background: "color-mix(in srgb, var(--accent-gold) 90%, transparent)",
                       color: "var(--bg)",
                       opacity: isDuplicating ? 0.6 : 1,
                     }}
                   >
-                    <motion.span
-                      animate={{ opacity: isDuplicating ? 0.6 : 1 }}
+                    {isDuplicating ? "Duplicating\u2026" : "Duplicate"}
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Delete confirmation */}
+          {showDeleteConfirm && (
+            <motion.div
+              key="delete"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 400, damping: 30 }}
+              className="overflow-hidden"
+            >
+              <div
+                className="mt-4 pt-4 border-t flex items-center justify-between gap-3"
+                style={{ borderColor: "var(--border)", background: "color-mix(in srgb, var(--danger) 6%, transparent)", borderRadius: "0 0 14px 14px", padding: "12px 16px" }}
+              >
+                <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+                  Delete &ldquo;{localTitle}&rdquo;? This can&apos;t be undone.
+                </p>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <button
+                    onClick={() => setShowDeleteConfirm(false)}
+                    disabled={isDeleting}
+                    className="px-3 py-1.5 rounded-lg text-xs"
+                    style={{ color: "var(--text-muted)" }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleDeleteList}
+                    disabled={isDeleting}
+                    className="px-3 py-1.5 rounded-lg text-xs font-medium"
+                    style={{ background: "var(--danger)", color: "#fff", opacity: isDeleting ? 0.6 : 1 }}
+                  >
+                    {isDeleting ? "Deleting\u2026" : "Delete"}
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Edit metadata form */}
+          {isEditing && (
+            <motion.div
+              key="edit"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 400, damping: 30 }}
+              className="overflow-hidden"
+            >
+              <div className="mt-4 pt-4 border-t space-y-3" style={{ borderColor: "var(--border)" }}>
+                <input
+                  type="text"
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  placeholder="List title"
+                  className="w-full rounded-xl px-3 py-2 text-sm border outline-none"
+                  style={{ background: "var(--card-bg)", borderColor: "var(--border)", color: "var(--text-primary)" }}
+                />
+                <input
+                  type="text"
+                  value={editDesc}
+                  onChange={(e) => setEditDesc(e.target.value)}
+                  placeholder="Description (optional)"
+                  className="w-full rounded-xl px-3 py-2 text-sm border outline-none"
+                  style={{ background: "var(--card-bg)", borderColor: "var(--border)", color: "var(--text-primary)" }}
+                />
+                <div className="flex items-center justify-between">
+                  <button
+                    type="button"
+                    onClick={() => setEditPublic((v: boolean) => !v)}
+                    className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border transition-colors"
+                    style={{
+                      borderColor: editPublic ? "var(--accent-gold)" : "var(--border)",
+                      color: editPublic ? "var(--accent-gold)" : "var(--text-muted)",
+                      background: editPublic ? "color-mix(in srgb, var(--accent-gold) 8%, transparent)" : "transparent",
+                    }}
+                  >
+                    {editPublic ? <Globe size={12} /> : <Lock size={12} />}
+                    {editPublic ? "Public" : "Private"}
+                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setIsEditing(false)}
+                      className="px-3 py-1.5 rounded-xl text-xs"
+                      style={{ color: "var(--text-muted)" }}
                     >
-                      {isDuplicating ? "Duplicating…" : "Duplicate"}
-                    </motion.span>
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleSaveEdit}
+                      disabled={isSaving || !editTitle.trim()}
+                      className="px-4 py-1.5 rounded-xl text-xs font-medium"
+                      style={{
+                        background: "var(--accent-gold)",
+                        color: "var(--bg)",
+                        opacity: isSaving || !editTitle.trim() ? 0.5 : 1,
+                      }}
+                    >
+                      {isSaving ? "Saving\u2026" : "Save"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Add beer search panel */}
+          {showAddBeer && (
+            <motion.div
+              key="add-beer"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 400, damping: 30 }}
+              className="overflow-hidden"
+            >
+              <div className="mt-4 pt-4 border-t space-y-3" style={{ borderColor: "var(--border)" }}>
+                <div className="relative">
+                  <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "var(--text-muted)" }} />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search beers to add\u2026"
+                    className="w-full rounded-xl pl-9 pr-3 py-2 text-sm border outline-none"
+                    style={{ background: "var(--card-bg)", borderColor: "var(--border)", color: "var(--text-primary)" }}
+                    autoFocus
+                  />
+                  {isSearching && (
+                    <Loader2 size={14} className="absolute right-3 top-1/2 -translate-y-1/2 animate-spin" style={{ color: "var(--text-muted)" }} />
+                  )}
+                </div>
+                {searchResults !== null && (
+                  <div className="max-h-[240px] overflow-y-auto space-y-1">
+                    {searchResults.length === 0 ? (
+                      <p className="text-xs text-center py-4" style={{ color: "var(--text-muted)" }}>
+                        {searchQuery.length < 2 ? "Type to search\u2026" : "No beers found"}
+                      </p>
+                    ) : (
+                      searchResults.map((beer: any) => (
+                        <div
+                          key={beer.id}
+                          className="flex items-center gap-3 px-3 py-2 rounded-xl transition-colors"
+                          style={{ background: "color-mix(in srgb, var(--surface-2) 50%, transparent)" }}
+                        >
+                          <div
+                            className="w-8 h-8 rounded-lg flex-shrink-0 flex items-center justify-center text-[10px] font-bold"
+                            style={{
+                              background: generateGradientFromString(beer.name ?? "beer"),
+                              color: "rgba(255,255,255,0.8)",
+                            }}
+                          >
+                            {beer.name?.[0]?.toUpperCase() ?? "?"}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold truncate" style={{ color: "var(--text-primary)" }}>
+                              {beer.name}
+                            </p>
+                            <p className="text-xs truncate" style={{ color: "var(--text-muted)" }}>
+                              {beer.brewery_name ?? beer.brewery?.name ?? ""}
+                              {beer.style ? ` · ${beer.style}` : ""}
+                              {beer.abv != null ? ` · ${beer.abv}%` : ""}
+                            </p>
+                          </div>
+                          <button
+                            onClick={() => handleAddBeer(beer.id, {
+                              id: beer.id,
+                              name: beer.name,
+                              style: beer.style ?? null,
+                              abv: beer.abv ?? null,
+                              avg_rating: beer.avg_rating ?? null,
+                              cover_image_url: beer.cover_image_url ?? null,
+                              brewery: beer.brewery ?? (beer.brewery_name ? { id: beer.brewery_id, name: beer.brewery_name } : null),
+                            })}
+                            disabled={addingBeerId === beer.id}
+                            className="w-7 h-7 flex items-center justify-center rounded-lg flex-shrink-0 transition-colors"
+                            style={{
+                              background: "color-mix(in srgb, var(--accent-gold) 12%, transparent)",
+                              color: "var(--accent-gold)",
+                              border: "1px solid color-mix(in srgb, var(--accent-gold) 25%, transparent)",
+                              opacity: addingBeerId === beer.id ? 0.5 : 1,
+                            }}
+                          >
+                            {addingBeerId === beer.id ? <Loader2 size={12} className="animate-spin" /> : <Plus size={14} />}
+                          </button>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
+                <div className="flex justify-end">
+                  <button
+                    onClick={() => { setShowAddBeer(false); setSearchQuery(""); setSearchResults(null); }}
+                    className="px-3 py-1.5 rounded-xl text-xs"
+                    style={{ color: "var(--text-muted)" }}
+                  >
+                    Done
                   </button>
                 </div>
               </div>

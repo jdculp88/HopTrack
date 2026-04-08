@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { ChevronDown, ChevronUp, Share2, Beer, Clock, MapPin, Trophy, Star, Zap, Calendar } from "lucide-react";
+import React, { useState } from "react";
+import { ChevronDown, ChevronUp, Share2, Beer, Clock, MapPin, Trophy, Star, Zap, Calendar, BarChart3 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import type { DrinkerKPIs } from "@/lib/kpi";
 import { formatDuration } from "@/lib/kpi";
@@ -15,13 +15,13 @@ interface DrinkerStatsCardProps {
 export function DrinkerStatsCard({ kpis, username, isOwnProfile }: DrinkerStatsCardProps) {
   const [expanded, setExpanded] = useState(false);
 
-  const stats = [
-    { icon: Star, label: "Avg Rating", value: kpis.avgRating !== null ? `${kpis.avgRating} ★` : "—" },
-    { icon: Beer, label: "Beers / Session", value: kpis.beersPerSession !== null ? `${kpis.beersPerSession}` : "—" },
-    { icon: Zap, label: "Favorite Style", value: kpis.favoriteStyle ? `${kpis.favoriteStyle.name} (${kpis.favoriteStyle.pct}%)` : "—" },
-    { icon: Beer, label: "Avg ABV", value: kpis.avgAbv !== null ? `${kpis.avgAbv}%` : "—" },
-    { icon: Calendar, label: "Total Pours", value: kpis.totalPours.toLocaleString() },
-    { icon: Calendar, label: "Sessions This Month", value: `${kpis.sessionsThisMonth}` },
+  const stats: { label: string; value: React.ReactNode }[] = [
+    { label: "Avg Rating", value: kpis.avgRating !== null ? <><span style={{ color: "var(--accent-gold)" }}>{kpis.avgRating}</span> <span style={{ color: "var(--accent-gold)" }}>★</span></> : "—" },
+    { label: "Beers / Session", value: kpis.beersPerSession !== null ? `${kpis.beersPerSession}` : "—" },
+    { label: "Favorite Style", value: kpis.favoriteStyle ? <><span>{kpis.favoriteStyle.name}</span>{" "}<span className="text-xs font-normal" style={{ color: "var(--text-muted)" }}>({kpis.favoriteStyle.pct}%)</span></> : "—" },
+    { label: "Avg ABV", value: kpis.avgAbv !== null ? `${kpis.avgAbv}%` : "—" },
+    { label: "Total Pours", value: <span style={{ color: "var(--accent-gold)" }}>{kpis.totalPours.toLocaleString()}</span> },
+    { label: "Sessions This Month", value: `${kpis.sessionsThisMonth}` },
   ];
 
   const expandedStats = [
@@ -61,22 +61,24 @@ export function DrinkerStatsCard({ kpis, username, isOwnProfile }: DrinkerStatsC
         className="w-full flex items-center justify-between p-4"
       >
         <div className="flex items-center gap-2">
-          <span className="text-sm" style={{ color: "var(--accent-gold)" }}>📊</span>
+          <BarChart3 size={18} style={{ color: "var(--accent-gold)" }} />
           <h3 className="font-display font-bold text-[var(--text-primary)]">Your Stats</h3>
         </div>
         <div className="flex items-center gap-2">
           {isOwnProfile && (
             <button
               onClick={(e) => { e.stopPropagation(); shareStats(); }}
-              className="p-1.5 rounded-lg transition-colors hover:bg-[var(--surface-2)]"
+              className="w-8 h-8 flex items-center justify-center rounded-lg border border-[var(--border)] transition-colors hover:bg-[var(--surface-2)]"
             >
               <Share2 size={14} style={{ color: "var(--text-muted)" }} />
             </button>
           )}
-          {expanded
-            ? <ChevronUp size={16} style={{ color: "var(--text-muted)" }} />
-            : <ChevronDown size={16} style={{ color: "var(--text-muted)" }} />
-          }
+          <div className="w-8 h-8 flex items-center justify-center rounded-lg border border-[var(--border)]">
+            {expanded
+              ? <ChevronUp size={16} style={{ color: "var(--text-muted)" }} />
+              : <ChevronDown size={16} style={{ color: "var(--text-muted)" }} />
+            }
+          </div>
         </div>
       </button>
 

@@ -4,9 +4,9 @@
 // Shows drinker activity: Favorite Beer, Beer Journal, StreakDisplay.
 
 import Link from "next/link";
-import { Star } from "lucide-react";
+import { Flame, Star } from "lucide-react";
 import { BeerStyleBadge } from "@/components/ui/BeerStyleBadge";
-import { StreakDisplay } from "@/components/profile/StreakDisplay";
+import { StreakCard } from "@/components/ui/StreakCard";
 import { getStyleFamily, getStyleVars } from "@/lib/beerStyleColors";
 import { formatABV } from "@/lib/utils";
 
@@ -55,12 +55,12 @@ export function ActivityTab({
 }: ActivityTabProps) {
   return (
     <div className="space-y-8">
-      {/* Streak Display */}
+      {/* Streak card — same StreakCard used on You tab */}
       {(currentStreak > 0 || longestStreak > 0) && (
-        <StreakDisplay
-          currentStreak={currentStreak}
-          bestStreak={longestStreak}
-          freezesAvailable={freezesAvailable}
+        <StreakCard
+          icon={<Flame size={20} style={{ color: "var(--accent-gold)" }} />}
+          streak={currentStreak}
+          personalBest={longestStreak || currentStreak}
         />
       )}
 

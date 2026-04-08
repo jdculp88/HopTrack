@@ -80,7 +80,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
   // Beer lists — own gets all, others get public only
   const beerListsQuery = supabase
     .from("beer_lists")
-    .select("id, title, description, is_public, items:beer_list_items(id)")
+    .select("id, title, description, is_public, updated_at, items:beer_list_items(id)")
     .eq("user_id", profile.id)
     .order("created_at", { ascending: false });
   if (!isOwnProfile) beerListsQuery.eq("is_public", true);

@@ -4,6 +4,7 @@
 // Shows drinker stats: Quick Stats, Rarity, Temporal, Level+XP, DrinkerStatsCard, BeerDNA, ActivityHeatmap.
 
 import { Flame, GlassWater, Star, MapPin } from "lucide-react";
+import { motion } from "motion/react";
 import { BeerDNACard } from "@/components/profile/BeerDNACard";
 import { DrinkerStatsCard } from "@/components/profile/DrinkerStatsCard";
 import { ActivityHeatmap } from "@/components/profile/ActivityHeatmap";
@@ -11,6 +12,8 @@ import { RarityCallouts, type RaritySnapshot } from "@/components/profile/Rarity
 import { TemporalHighlight } from "@/components/profile/TemporalHighlight";
 import { CountUp } from "@/components/ui/CountUp";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { StreakCard } from "@/components/ui/StreakCard";
+import { getLevelProgress, LEVELS } from "@/lib/xp";
 import type { DrinkerKPIs } from "@/lib/kpi";
 import type { TemporalProfile } from "@/lib/temporal";
 
@@ -67,7 +70,20 @@ export function StatsTab({
   raritySnapshot,
   temporalProfile,
 }: StatsTabProps) {
-  const { total_checkins, unique_beers, unique_breweries, current_streak, longest_streak, level } = profileStats;
+  const { total_checkins, unique_beers, unique_breweries, current_streak, longest_streak, level, xp } = profileStats;
+
+  // Build 5 milestone ranks centered on current level (same logic as You tab)
+  const xpLevelInfo = getLevelProgress(xp);
+  const allLevels = LEVELS;
+  const currentIdx = allLevels.findIndex(l => l.level === xpLevelInfo.current.level);
+  const startIdx = Math.max(0, Math.min(currentIdx - 2, allLevels.length - 5));
+  const milestones = allLevels.slice(startIdx, startIdx + 5);
+  const windowStart = milestones[0].xp_required;
+  const windowEnd = milestones[milestones.length - 1].xp_required;
+  const windowProgress = windowEnd > windowStart
+    ? Math.min(100, Math.max(2, Math.round(((xp - windowStart) / (windowEnd - windowStart)) * 100)))
+    : 100;
+
   return (
     <div className="space-y-6">
       {/* Quick Stats — 3 cards with amber top accent bar + icons */}
@@ -106,123 +122,103 @@ export function StatsTab({
         ))}
       </div>
 
-      {/* Streak card — separate from stat grid */}
+      {/* Streak card — same StreakCard used on You tab */}
       {(current_streak > 0 || longest_streak > 0) && (
-        <div
-          className="rounded-[14px] border overflow-hidden"
-          style={{
-            background: "var(--card-bg)",
-            borderColor: "color-mix(in srgb, var(--accent-gold) 20%, var(--border))",
-          }}
-        >
-          <div className="h-[3px]" style={{ background: "linear-gradient(to right, var(--accent-amber), var(--accent-gold))" }} />
-          <div className="p-4 flex items-center gap-3">
-            <div
-              className="w-12 h-12 rounded-[14px] flex items-center justify-center text-2xl"
-              style={{ background: "color-mix(in srgb, var(--accent-amber) 12%, var(--surface-2))" }}
-            >
-              🔥
-            </div>
-            <div>
-              <div className="flex items-baseline gap-2">
-                <span className="font-mono text-2xl font-bold" style={{ color: "var(--text-primary)" }}>
-                  <CountUp value={current_streak} duration={1.0} delay={0.3} />
-                </span>
-                <span className="text-sm" style={{ color: "var(--text-muted)" }}>day streak</span>
-              </div>
-              {longest_streak > 0 && (
-                <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
-                  Personal best: {longest_streak} days
-                </p>
-              )}
-            </div>
-          </div>
-        </div>
+        <StreakCard
+          icon={<Flame size={20} style={{ color: "var(--accent-gold)" }} />}
+          streak={current_streak}
+          personalBest={longest_streak || current_streak}
+        />
       )}
 
-      {/* Level + XP Progress — warm gradient card with rank milestones */}
-      <div
-        className="border rounded-[14px] p-4 space-y-3"
-        style={{
-          background: "linear-gradient(135deg, color-mix(in srgb, var(--accent-gold) 8%, var(--card-bg)) 0%, var(--card-bg) 60%)",
-          borderColor: "color-mix(in srgb, var(--accent-gold) 20%, var(--border))",
-        }}
+      {/* Level + XP Progress — matches You tab card (minus avatar) */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ type: "spring", stiffness: 400, damping: 30 }}
+        className="rounded-[16px] overflow-hidden"
+        style={{ background: "linear-gradient(135deg, var(--warm-bg), var(--card-bg))", border: "1px solid var(--border)" }}
       >
-        <div className="flex items-start justify-between">
-          <div>
-            <span className="font-mono text-[9px] font-bold uppercase tracking-[0.12em]" style={{ color: "var(--accent-gold)" }}>
-              Level {level}
-            </span>
-            <p className="font-display text-xl font-bold text-[var(--text-primary)]">{levelInfo.current.name}</p>
-          </div>
-          {levelInfo.next && (
-            <div className="text-right">
-              <span className="font-mono text-[9px] uppercase tracking-[0.12em] block" style={{ color: "var(--text-muted)" }}>
-                Next Rank
-              </span>
-              <p className="font-sans text-base font-bold text-[var(--text-primary)]">{levelInfo.next.name}</p>
-              <p className="font-mono text-[13px] font-bold" style={{ color: "var(--accent-gold)" }}>
-                {levelInfo.xpToNext} XP to go
+        {/* Gold top bar */}
+        <div style={{ height: "3px", background: "linear-gradient(90deg, var(--accent-gold), var(--accent-amber, var(--accent-gold)))" }} />
+
+        <div style={{ padding: "18px 20px" }}>
+          {/* Header — level/rank left, next rank right */}
+          <div className="flex items-start justify-between mb-4">
+            <div>
+              <p className="font-mono uppercase" style={{ fontSize: "9px", color: "var(--accent-gold)", letterSpacing: "0.08em" }}>
+                Level {level}
+              </p>
+              <p className="font-sans font-bold" style={{ fontSize: "20px", color: "var(--text-primary)" }}>
+                {xpLevelInfo.current.name}
               </p>
             </div>
-          )}
-        </div>
+            {xpLevelInfo.next && (
+              <div className="text-right">
+                <p className="font-mono uppercase" style={{ fontSize: "9px", color: "var(--text-muted)", letterSpacing: "0.08em" }}>
+                  Next Rank
+                </p>
+                <p className="font-sans font-semibold" style={{ fontSize: "15px", color: "var(--text-primary)" }}>
+                  {xpLevelInfo.next.name}
+                </p>
+                <p className="font-mono font-semibold" style={{ fontSize: "11px", color: "var(--accent-gold)" }}>
+                  {xpLevelInfo.xpToNext} XP to go
+                </p>
+              </div>
+            )}
+          </div>
 
-        {/* Progress bar with amber gradient + milestone dots */}
-        <div>
-          <div className="relative h-2.5 rounded-full overflow-hidden" style={{ background: "var(--surface-2)" }}>
-            <div
-              className="h-full rounded-full transition-all duration-1000"
+          {/* XP progress bar */}
+          <div className="h-2.5 rounded-full overflow-hidden mb-2" style={{ background: "color-mix(in srgb, var(--surface-3) 60%, transparent)" }}>
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: `${windowProgress}%` }}
+              transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.6 }}
+              className="h-full rounded-full"
               style={{
-                background: "linear-gradient(to right, var(--accent-gold), var(--accent-amber))",
-                width: `${levelInfo.progress}%`,
+                background: "linear-gradient(90deg, var(--accent-gold), var(--accent-amber, var(--accent-gold)))",
+                boxShadow: "0 0 8px rgba(212,168,67,0.3)",
               }}
             />
-            {/* Milestone dots at rank transitions */}
-            {[20, 40, 60, 80].map((m) => (
-              <div
-                key={m}
-                className="absolute top-1/2 -translate-y-1/2 w-2 h-2 rounded-full border"
-                style={{
-                  left: `${m}%`,
-                  transform: "translate(-50%, -50%)",
-                  background: levelInfo.progress >= m ? "var(--accent-gold)" : "var(--surface-2)",
-                  borderColor: levelInfo.progress >= m ? "var(--accent-gold)" : "var(--border)",
-                }}
-              />
-            ))}
           </div>
-          {/* Rank labels below the bar */}
-          <div className="flex justify-between mt-1.5">
-            {["Newbie", "Taster", "Brew Buddy", "Regular", "Legend"].map((rank) => (
+
+          {/* Rank milestones — 5 levels centered on current */}
+          <div
+            className="flex justify-between font-mono"
+            style={{ fontSize: "8px", color: "var(--text-muted)", letterSpacing: "0.03em", marginBottom: "12px" }}
+          >
+            {milestones.map((m) => (
               <span
-                key={rank}
-                className="text-[8px] font-mono"
-                style={{ color: rank === levelInfo.current.name ? "var(--text-primary)" : "var(--text-muted)" }}
+                key={m.level}
+                style={{
+                  fontWeight: m.level === xpLevelInfo.current.level ? 700 : 400,
+                  color: m.level === xpLevelInfo.current.level ? "var(--text-primary)" : "var(--text-muted)",
+                }}
               >
-                {rank}
+                {m.name}
               </span>
             ))}
           </div>
-        </div>
 
-        {/* Streak at bottom */}
-        {(current_streak > 0 || longest_streak > 0) && (
-          <div className="flex items-center justify-between pt-2 border-t border-[var(--border)]">
-            {current_streak > 0 && (
-              <div className="flex items-center gap-1.5">
-                <span>🔥</span>
-                <span className="text-sm font-mono" style={{ color: "var(--text-secondary)" }}>
+          {/* Streak row */}
+          {(current_streak > 0 || longest_streak > 0) && (
+            <div
+              className="flex items-center justify-between pt-3"
+              style={{ borderTop: "1px solid var(--border)" }}
+            >
+              <div className="flex items-center gap-2">
+                <Flame size={14} style={{ color: "var(--accent-gold)" }} />
+                <span className="font-mono" style={{ fontSize: "11px", color: "var(--text-muted)" }}>
                   {current_streak} day streak
                 </span>
               </div>
-            )}
-            {longest_streak > 0 && (
-              <span className="text-xs text-[var(--text-muted)]">Best: {longest_streak}d</span>
-            )}
-          </div>
-        )}
-      </div>
+              <span className="font-mono" style={{ fontSize: "11px", color: "var(--text-muted)" }}>
+                Best: {longest_streak || current_streak}d
+              </span>
+            </div>
+          )}
+        </div>
+      </motion.div>
 
       {/* Rarity Callouts — Sprint 162 */}
       {raritySnapshot && (
@@ -247,12 +243,9 @@ export function StatsTab({
         />
       )}
 
-      {/* Activity Heatmap — 52-week pour pattern */}
+      {/* Activity Heatmap — same as You tab (no wrapper) */}
       {heatmapData.length > 0 && (
-        <div className="border border-[var(--border)] rounded-[14px] p-4 bg-[var(--surface)]">
-          <h3 className="font-display text-lg font-semibold text-[var(--text-primary)] mb-3">Pour Pattern</h3>
-          <ActivityHeatmap data={heatmapData} />
-        </div>
+        <ActivityHeatmap data={heatmapData} />
       )}
     </div>
   );

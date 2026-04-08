@@ -30,17 +30,26 @@ export default async function BeerListDetailPage({
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const { data: list } = await supabase
+  const { data: listData } = await supabase
     .from("beer_lists")
     .select(
-      "id, title, description, is_public, user_id, created_at, items:beer_list_items(id, beer_id, position, note, beer:beers(id, name, style, abv, avg_rating, cover_image_url, item_type, brewery:breweries(id, name))), profile:profiles!user_id(id, username, display_name, avatar_url)"
+      "id, title, description, is_public, user_id, created_at, items:beer_list_items(id, beer_id, position, note, beer:beers(id, name, style, abv, avg_rating, cover_image_url, item_type, brewery:breweries(id, name)))"
     )
     .eq("id", listId)
     .single();
 
-  if (!list) notFound();
+  if (!listData) notFound();
 
-  const isOwner = user.id === list.user_id;
+  // Fetch profile separately — beer_lists.user_id FK points to auth.users, not public.profiles
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("id, username, display_name, avatar_url")
+    .eq("id", listData.user_id)
+    .single();
+
+  const list = { ...listData, profile } as any;
+
+  const isOwner = user.id === listData.user_id;
 
   // Private lists only viewable by owner
   if (!list.is_public && !isOwner) notFound();
