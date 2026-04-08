@@ -2,13 +2,13 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Zap } from "lucide-react";
+import { motion } from "motion/react";
 import { formatRelativeTime } from "@/lib/dates";
 import { AchievementCelebration } from "@/components/achievements/AchievementCelebration";
-import { EmojiPulse } from "@/components/social/EmojiPulse";
-import { FeedCardWrapper } from "@/components/social/FeedCardWrapper";
+import { Tag } from "@/components/ui/Tag";
 import { getFirstName } from "@/lib/first-name";
 import { TIER_COLORS } from "@/lib/constants/tiers";
+import { spring } from "@/lib/animation";
 
 function isNewAchievement(earnedAt: string): boolean {
   return Date.now() - new Date(earnedAt).getTime() < 5 * 60 * 1000;
@@ -52,18 +52,19 @@ export function AchievementFeedCard({
   const firstName = getFirstName(achievement.profile.display_name, achievement.profile.username);
 
   return (
-    <FeedCardWrapper
-      accentColor={tierColor}
-      icon={
-        <span className="text-xl leading-none">{achievementIcon}</span>
-      }
-      ariaLabel={`${achievement.profile.display_name || achievement.profile.username} earned ${achievement.achievement.name}`}
-      bgClass="card-bg-achievement"
-      backgroundStyle={{
-        background: `linear-gradient(135deg, color-mix(in srgb, ${tierColor} 8%, var(--card-bg)), var(--card-bg))`,
-        border: `1px solid color-mix(in srgb, ${tierColor} 20%, var(--border))`,
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-50px" }}
+      transition={spring.default}
+      role="article"
+      aria-label={`${achievement.profile.display_name || achievement.profile.username} earned ${achievement.achievement.name}`}
+      className="rounded-[14px] overflow-hidden relative shadow-[var(--shadow-card)]"
+      style={{
+        background: "linear-gradient(135deg, rgba(45,143,78,0.05), rgba(232,168,56,0.04))",
+        border: "1px solid rgba(45,143,78,0.12)",
       }}
-      dataTier={tier}
+      data-tier={tier}
     >
       <AchievementCelebration
         show={showCelebration}
@@ -73,45 +74,50 @@ export function AchievementFeedCard({
         xpReward={achievement.achievement.xp_reward}
         onDismiss={() => setShowCelebration(false)}
       />
-      <div className="px-4 py-3">
-        <p className="text-sm leading-snug" style={{ color: "var(--text-primary)" }}>
-          <Link
-            href={`/profile/${achievement.profile.username}`}
-            className="font-semibold hover:underline underline-offset-2"
-          >
-            {firstName}
-          </Link>
-          <span style={{ color: "var(--text-muted)" }}> earned </span>
-          <span
-            className="font-display font-bold"
-            style={{ color: "var(--text-primary)" }}
-          >
-            {achievement.achievement.name}
-          </span>
-        </p>
 
-        <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-          <span
-            className="text-[9px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full font-bold"
-            style={{
-              background: `color-mix(in srgb, ${tierColor} 18%, transparent)`,
-              color: tierColor,
-            }}
-          >
-            {tier}
-          </span>
-          <span
-            className="flex items-center gap-0.5 text-[10px] font-mono font-medium"
-            style={{ color: "var(--accent-gold)" }}
-          >
-            <Zap size={9} />+{achievement.achievement.xp_reward} XP
-          </span>
-          <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>
-            {formatRelativeTime(achievement.earned_at)}
-          </span>
+      <div className="flex gap-3 items-start p-3">
+        {/* Icon container */}
+        <div
+          className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+          style={{ background: `color-mix(in srgb, ${tierColor} 12%, var(--surface-2))` }}
+        >
+          <span className="text-lg leading-none">{achievementIcon}</span>
         </div>
-        <EmojiPulse itemKey={`achievement-${achievement.achievement.id}`} />
+
+        {/* Content */}
+        <div className="flex-1 min-w-0">
+          <p className="text-sm leading-snug" style={{ color: "var(--text-primary)" }}>
+            <Link
+              href={`/profile/${achievement.profile.username}`}
+              className="font-semibold hover:underline underline-offset-2"
+            >
+              {firstName}
+            </Link>
+            <span style={{ color: "var(--text-muted)" }}> earned </span>
+            <span
+              className="font-display font-bold"
+              style={{ color: "var(--text-primary)" }}
+            >
+              {achievement.achievement.name}
+            </span>
+          </p>
+
+          <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+            <Tag color={tierColor} className="uppercase">
+              {tier}
+            </Tag>
+            <span
+              className="flex items-center gap-1 text-[10px] font-mono font-medium"
+              style={{ color: "var(--success)" }}
+            >
+              ◆ +{achievement.achievement.xp_reward} XP
+            </span>
+            <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>
+              {formatRelativeTime(achievement.earned_at)}
+            </span>
+          </div>
+        </div>
       </div>
-    </FeedCardWrapper>
+    </motion.div>
   );
 }

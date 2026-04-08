@@ -2,7 +2,8 @@
 
 import { useEffect } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { Zap } from "lucide-react";
+import { Tag } from "@/components/ui/Tag";
+import { TIER_COLORS } from "@/lib/constants/tiers";
 
 interface AchievementCelebrationProps {
   show: boolean;
@@ -12,13 +13,6 @@ interface AchievementCelebrationProps {
   xpReward: number;
   onDismiss: () => void;
 }
-
-const TIER_COLORS: Record<string, string> = {
-  bronze:   "var(--badge-bronze)",
-  silver:   "var(--badge-silver)",
-  gold:     "var(--badge-gold)",
-  platinum: "#8BAABF",
-};
 
 export function AchievementCelebration({
   show,
@@ -91,14 +85,14 @@ export function AchievementCelebration({
               {name}
             </p>
             <div className="flex items-center gap-3">
-              <span
-                className="text-[11px] font-mono uppercase tracking-wider px-3 py-1 rounded-full font-semibold"
-                style={{ background: `color-mix(in srgb, ${tierColor} 15%, transparent)`, color: tierColor }}
-              >
+              <Tag color={tierColor} className="uppercase text-[11px] px-3 py-1">
                 {tier}
-              </span>
-              <span className="flex items-center gap-1 text-sm font-mono" style={{ color: "var(--accent-gold)" }}>
-                <Zap size={13} />+{xpReward} XP
+              </Tag>
+              <span
+                className="flex items-center gap-1 text-sm font-mono font-medium"
+                style={{ color: "var(--success)" }}
+              >
+                ◆ +{xpReward} XP
               </span>
             </div>
             <p className="text-xs" style={{ color: "var(--text-muted)" }}>Tap to dismiss</p>
