@@ -3,14 +3,17 @@
 import { useMemo, type RefObject } from "react";
 import Link from "next/link";
 import { motion } from "motion/react";
-import { Beer, MapPin, Route, Gift } from "lucide-react";
+import { Beer, MapPin, Route, Gift, Star, Flame } from "lucide-react";
+import { StatCard } from "@/components/ui/StatCard";
+import { StreakCard } from "@/components/ui/StreakCard";
+import { BeerStyleBadge } from "@/components/ui/BeerStyleBadge";
 import { getStyleFamily, getStyleVars } from "@/lib/beerStyleColors";
 import { ActivityHeatmap } from "@/components/profile/ActivityHeatmap";
 import { BeerDNACard } from "@/components/profile/BeerDNACard";
 import { SessionCard } from "@/components/social/SessionCard";
 import { CheckinCard } from "@/components/social/CheckinCard";
 import { UserAvatar } from "@/components/ui/UserAvatar";
-import { getLevelProgress } from "@/lib/xp";
+import { getLevelProgress, LEVELS } from "@/lib/xp";
 import { FeedCardSkeletons, FeedEndMessage } from "./FeedPaginationUI";
 import type { Profile, Session } from "@/types/database";
 import type { StyleDNAEntry, WishlistItem, UserAchievement } from "./HomeFeed";
@@ -74,112 +77,124 @@ export function YouTabContent({
 
   return (
     <div className="space-y-6">
-      {/* Profile header — pour fill hero card */}
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ type: "spring", stiffness: 400, damping: 30 }}
-        className="rounded-[14px] p-5 relative overflow-hidden shadow-[var(--shadow-elevated)] border border-[var(--card-border)]"
-        style={{
-          background: "var(--card-bg)",
-        }}
-      >
-        {/* Pour fill — rises from bottom, represents XP progress */}
-        {levelInfo && (
-          <motion.div
-            initial={{ height: "0%" }}
-            animate={{ height: `${Math.max(levelInfo.progress, 6)}%` }}
-            transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1], delay: 0.4 }}
-            className="absolute bottom-0 left-0 right-0 pointer-events-none"
-            style={{
-              background:
-                "linear-gradient(to top, color-mix(in srgb, var(--accent-gold) 22%, transparent) 0%, color-mix(in srgb, var(--accent-amber) 6%, transparent) 100%)",
-            }}
-          />
-        )}
+      {/* XP / Rank hero card */}
+      {levelInfo && (() => {
+        // Build 5 milestone ranks centered on current level
+        const allLevels = LEVELS;
+        const currentIdx = allLevels.findIndex(l => l.level === levelInfo.current.level);
+        const startIdx = Math.max(0, Math.min(currentIdx - 2, allLevels.length - 5));
+        const milestones = allLevels.slice(startIdx, startIdx + 5);
+        // Progress across the 5-milestone window
+        const windowStart = milestones[0].xp_required;
+        const windowEnd = milestones[milestones.length - 1].xp_required;
+        const windowProgress = windowEnd > windowStart
+          ? Math.min(100, Math.max(2, Math.round(((profile.xp - windowStart) / (windowEnd - windowStart)) * 100)))
+          : 100;
 
-        {/* Content */}
-        <div className="relative z-10">
-          <div className="flex items-center gap-4 mb-4">
-            <UserAvatar profile={profile} size="lg" showLevel />
-            <div className="flex-1 min-w-0">
-              <h1
-                className="font-display text-xl font-bold leading-tight"
-                style={{ color: "var(--text-primary)" }}
-              >
-                {profile.display_name ?? profile.username}
-              </h1>
-              <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-                {levelInfo?.current.name} · Level {profile.level}
-              </p>
-            </div>
-            <Link
-              href={`/profile/${profile.username}`}
-              className="text-xs font-medium px-3 py-1.5 rounded-lg"
-              style={{
-                background: "var(--surface-2)",
-                color: "var(--text-secondary)",
-                border: "1px solid var(--border)",
-              }}
-            >
-              Profile
-            </Link>
-          </div>
-          {levelInfo && levelInfo.next && (
-            <>
-              {/* Sprint 171: Thicker XP bar with glow */}
-              <div className="h-2 rounded-full overflow-hidden mb-2" style={{ background: "color-mix(in srgb, var(--surface-3) 60%, transparent)" }}>
+        return (
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ type: "spring", stiffness: 400, damping: 30 }}
+            className="rounded-[16px] overflow-hidden"
+            style={{ background: "linear-gradient(135deg, var(--warm-bg), var(--card-bg))", border: "1px solid var(--border)" }}
+          >
+            {/* Gold top bar */}
+            <div style={{ height: "3px", background: "linear-gradient(90deg, var(--accent-gold), var(--accent-amber, var(--accent-gold)))" }} />
+
+            <div style={{ padding: "18px 20px" }}>
+              {/* Header — avatar + level/rank left, next rank right */}
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <UserAvatar profile={profile} size="md" />
+                  <div>
+                    <p className="font-mono uppercase" style={{ fontSize: "9px", color: "var(--accent-gold)", letterSpacing: "0.08em" }}>
+                      Level {profile.level}
+                    </p>
+                    <p className="font-sans font-bold" style={{ fontSize: "20px", color: "var(--text-primary)" }}>
+                      {levelInfo.current.name}
+                    </p>
+                  </div>
+                </div>
+                {levelInfo.next && (
+                  <div className="text-right">
+                    <p className="font-mono uppercase" style={{ fontSize: "9px", color: "var(--text-muted)", letterSpacing: "0.08em" }}>
+                      Next Rank
+                    </p>
+                    <p className="font-sans font-semibold" style={{ fontSize: "15px", color: "var(--text-primary)" }}>
+                      {levelInfo.next.name}
+                    </p>
+                    <p className="font-mono font-semibold" style={{ fontSize: "11px", color: "var(--accent-gold)" }}>
+                      {levelInfo.xpToNext} XP to go
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* XP progress bar — represents position across 5 milestone window */}
+              <div className="h-2.5 rounded-full overflow-hidden mb-2" style={{ background: "color-mix(in srgb, var(--surface-3) 60%, transparent)" }}>
                 <motion.div
                   initial={{ width: 0 }}
-                  animate={{ width: `${Math.max(levelInfo.progress, 3)}%` }}
+                  animate={{ width: `${windowProgress}%` }}
                   transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.6 }}
                   className="h-full rounded-full"
                   style={{
-                    background: "linear-gradient(90deg, var(--accent-gold), var(--accent-amber))",
+                    background: "linear-gradient(90deg, var(--accent-gold), var(--accent-amber, var(--accent-gold)))",
                     boxShadow: "0 0 8px rgba(212,168,67,0.3)",
                   }}
                 />
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] font-mono" style={{ color: "var(--text-muted)" }}>
-                  {profile.xp.toLocaleString()} XP
-                </span>
-                <span className="text-[11px] font-mono" style={{ color: "var(--text-muted)" }}>
-                  {levelInfo.xpToNext} to Level {(levelInfo.next as any).level}
+
+              {/* Rank milestones — 5 levels centered on current */}
+              <div
+                className="flex justify-between font-mono"
+                style={{ fontSize: "8px", color: "var(--text-muted)", letterSpacing: "0.03em", marginBottom: "12px" }}
+              >
+                {milestones.map((m) => (
+                  <span
+                    key={m.level}
+                    style={{
+                      fontWeight: m.level === levelInfo.current.level ? 700 : 400,
+                      color: m.level === levelInfo.current.level ? "var(--text-primary)" : "var(--text-muted)",
+                    }}
+                  >
+                    {m.name}
+                  </span>
+                ))}
+              </div>
+
+              {/* Streak row */}
+              <div
+                className="flex items-center justify-between pt-3"
+                style={{ borderTop: "1px solid var(--border)" }}
+              >
+                <div className="flex items-center gap-2">
+                  <Flame size={14} style={{ color: "var(--accent-gold)" }} />
+                  <span className="font-mono" style={{ fontSize: "11px", color: "var(--text-muted)" }}>
+                    {profile.current_streak ?? 0} day streak
+                  </span>
+                </div>
+                <span className="font-mono" style={{ fontSize: "11px", color: "var(--text-muted)" }}>
+                  Best: {profile.longest_streak ?? profile.current_streak ?? 0}d
                 </span>
               </div>
-            </>
-          )}
-        </div>
-      </motion.div>
+            </div>
+          </motion.div>
+        );
+      })()}
 
-      {/* Stats card — grid lines treatment */}
-      {/* Sprint 171: Color-differentiated stats */}
-      <div
-        className="card-bg-stats rounded-[14px] p-4 shadow-[var(--shadow-card)] border border-[var(--card-border)]"
-      >
-        <p className="text-[10px] font-mono uppercase tracking-widest mb-3 relative z-10" style={{ color: "var(--text-muted)" }}>
-          Your Numbers
-        </p>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 relative z-10">
-          <div className="text-center rounded-[14px] py-3 px-1" style={{ background: "color-mix(in srgb, var(--accent-blue) 8%, var(--card-bg))" }}>
-            <p className="font-mono font-bold text-xl leading-none" style={{ color: "var(--accent-blue)" }}>{profile.total_checkins}</p>
-            <p className="text-[10px] text-[var(--text-muted)] mt-1 font-mono uppercase tracking-wide">Sessions</p>
-          </div>
-          <div className="text-center rounded-[14px] py-3 px-1" style={{ background: "color-mix(in srgb, var(--accent-amber) 8%, var(--card-bg))" }}>
-            <p className="font-mono font-bold text-xl leading-none" style={{ color: "var(--accent-amber)" }}>{profile.unique_beers ?? 0}</p>
-            <p className="text-[10px] text-[var(--text-muted)] mt-1 font-mono uppercase tracking-wide">Unique Beers</p>
-          </div>
-          <div className="text-center rounded-[14px] py-3 px-1" style={{ background: "color-mix(in srgb, var(--accent-green) 8%, var(--card-bg))" }}>
-            <p className="font-mono font-bold text-xl leading-none" style={{ color: "var(--success)" }}>{visitedBreweries.length || (profile.unique_breweries ?? 0)}</p>
-            <p className="text-[10px] text-[var(--text-muted)] mt-1 font-mono uppercase tracking-wide">Breweries</p>
-          </div>
-          <div className="text-center rounded-[14px] py-3 px-1" style={{ background: `color-mix(in srgb, ${(profile.current_streak ?? 0) > 0 ? "var(--accent-amber)" : "var(--accent-gold)"} 8%, var(--card-bg))` }}>
-            <p className="font-mono font-bold text-xl leading-none" style={{ color: (profile.current_streak ?? 0) > 0 ? "var(--accent-amber)" : "var(--accent-gold)" }}>{profile.current_streak ?? 0}</p>
-            <p className="text-[10px] text-[var(--text-muted)] mt-1 font-mono uppercase tracking-wide">Day Streak</p>
-          </div>
-        </div>
+      {/* Stats — 3 cards + separate streak card */}
+      <div className="grid grid-cols-3 gap-3">
+        <StatCard icon={<Beer size={14} style={{ color: "var(--accent-gold)" }} />} value={profile.total_checkins} label="SESSIONS" />
+        <StatCard icon={<Star size={14} style={{ color: "var(--accent-gold)" }} />} value={profile.unique_beers ?? 0} label="UNIQUE BEERS" />
+        <StatCard icon={<MapPin size={14} style={{ color: "var(--accent-gold)" }} />} value={visitedBreweries.length || (profile.unique_breweries ?? 0)} label="BREWERIES" />
       </div>
+
+      <StreakCard
+        icon={<Flame size={20} style={{ color: "var(--accent-gold)" }} />}
+        streak={profile.current_streak ?? 0}
+        personalBest={profile.longest_streak ?? profile.current_streak ?? 0}
+      />
 
       {/* Sprint 171: Your Round — only show on Sunday through Saturday of reporting week */}
       {profile.total_checkins > 0 && isYourRoundVisible() && (
@@ -278,14 +293,7 @@ export function YouTabContent({
 
       {/* Activity Heatmap */}
       {activityHeatmap && activityHeatmap.length > 0 && (
-        <div
-          className="card-bg-stats rounded-[14px] p-4 shadow-[var(--shadow-card)] border border-[var(--card-border)]"
-        >
-          <p className="text-[10px] font-mono uppercase tracking-widest mb-3" style={{ color: "var(--text-muted)" }}>
-            Activity
-          </p>
-          <ActivityHeatmap data={activityHeatmap} compact />
-        </div>
+        <ActivityHeatmap data={activityHeatmap} />
       )}
 
       {/* Beer DNA */}
@@ -327,7 +335,7 @@ export function YouTabContent({
         </div>
       )}
 
-      {/* Want to Try */}
+      {/* Want to Try — 2-column grid */}
       {wishlist && wishlist.length > 0 && (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
@@ -338,54 +346,94 @@ export function YouTabContent({
               {wishlist.length} saved
             </span>
           </div>
-          <div className="flex flex-col gap-4">
-            {wishlist.slice(0, 5).map((item) => (
-              item.beer ? (
+          <div className="grid grid-cols-2" style={{ gap: "10px" }}>
+            {wishlist.slice(0, 6).map((item) => {
+              if (!item.beer) return null;
+              const sv = getStyleVars(item.beer.style);
+              return (
                 <Link key={item.id} href={`/beer/${item.beer.id}`}>
                   <div
-                    className="card-bg-reco flex items-center gap-3 p-3.5 rounded-xl transition-all shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] hover:scale-[1.01]"
-                    data-style={getStyleFamily(item.beer.style)}
+                    className="rounded-[14px] flex items-center relative group"
                     style={{
-                      border: "1px solid var(--card-border)",
-                      borderLeft: `3px solid ${getStyleVars(item.beer.style).primary}`,
+                      padding: "14px",
+                      gap: "10px",
+                      background: `linear-gradient(135deg, color-mix(in srgb, ${sv.primary} 14%, var(--card-bg)), var(--card-bg))`,
+                      border: `1px solid color-mix(in srgb, ${sv.primary} 12%, var(--border))`,
+                      transition: "all 0.2s",
+                    }}
+                    onMouseEnter={(e) => {
+                      (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)";
+                      (e.currentTarget as HTMLElement).style.boxShadow = "0 4px 12px rgba(0,0,0,0.06)";
+                    }}
+                    onMouseLeave={(e) => {
+                      (e.currentTarget as HTMLElement).style.transform = "";
+                      (e.currentTarget as HTMLElement).style.boxShadow = "";
                     }}
                   >
+                    {/* Thumbnail — style-tinted, glass SVG */}
                     <div
-                      className="w-10 h-10 rounded-xl flex items-center justify-center text-lg flex-shrink-0"
-                      style={{ background: `linear-gradient(135deg, ${getStyleVars(item.beer.style).light}, ${getStyleVars(item.beer.style).soft ?? getStyleVars(item.beer.style).light})` }}
+                      className="flex-shrink-0 flex items-center justify-center"
+                      style={{
+                        width: "40px",
+                        height: "40px",
+                        borderRadius: "10px",
+                        background: `color-mix(in srgb, ${sv.primary} 10%, var(--warm-bg))`,
+                      }}
                     >
-                      🍺
+                      <svg
+                        width={20}
+                        height={20}
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke={sv.primary}
+                        strokeWidth={1}
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        style={{ opacity: 0.45 }}
+                      >
+                        <path d="M7 3h10l-1.5 15a2 2 0 0 1-2 1.8h-3a2 2 0 0 1-2-1.8L7 3z" />
+                      </svg>
                     </div>
+
+                    {/* Info */}
                     <div className="flex-1 min-w-0">
-                      <p className="font-display text-sm font-semibold truncate" style={{ color: "var(--text-primary)" }}>
+                      <p
+                        className="font-sans font-semibold truncate"
+                        style={{ fontSize: "13px", color: "var(--text-primary)" }}
+                      >
                         {item.beer.name}
                       </p>
-                      <div className="flex items-center gap-2 mt-0.5">
-                        <span className="text-xs truncate" style={{ color: "var(--text-muted)" }}>
-                          {item.beer.brewery?.name}
-                        </span>
-                        {item.beer.style && (
-                          <span
-                            className="text-[10px] font-mono px-1.5 py-0.5 rounded-full"
-                            style={{
-                              background: `color-mix(in srgb, ${getStyleVars(item.beer.style).primary} 15%, transparent)`,
-                              color: getStyleVars(item.beer.style).primary,
-                            }}
-                          >
-                            {item.beer.style}
+                      <div className="flex items-center gap-1.5 mt-0.5">
+                        {item.beer.style && <BeerStyleBadge style={item.beer.style} size="xs" />}
+                        {item.beer.brewery?.name && (
+                          <span className="truncate" style={{ fontSize: "11px", color: "var(--text-muted)" }}>
+                            · {item.beer.brewery.name}
                           </span>
                         )}
                       </div>
                     </div>
-                    {item.beer.abv != null && (
-                      <span className="text-xs font-mono flex-shrink-0" style={{ color: "var(--text-muted)" }}>
-                        {item.beer.abv}%
-                      </span>
-                    )}
+
+                    {/* Remove button — hover reveal */}
+                    <div
+                      className="absolute flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                      style={{
+                        top: "8px",
+                        right: "8px",
+                        width: "18px",
+                        height: "18px",
+                        borderRadius: "50%",
+                        background: "var(--warm-bg)",
+                        border: "1px solid var(--border)",
+                        fontSize: "10px",
+                        color: "var(--text-muted)",
+                      }}
+                    >
+                      ×
+                    </div>
                   </div>
                 </Link>
-              ) : null
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
@@ -475,16 +523,55 @@ export function YouTabContent({
         </div>
       )}
 
-      {/* Plan HopRoute CTA if no past routes */}
+      {/* Plan HopRoute CTA — same design as Discover tab */}
       {(!pastRoutes || pastRoutes.length === 0) && (
-        <Link href="/hop-route/new">
-          <div className="card-bg-hoproute flex items-center gap-3 p-4 rounded-[14px] border transition-[colors,shadow] shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)]" style={{ borderColor: "color-mix(in srgb, var(--accent-amber) 35%, var(--border))" }}>
-            <span className="text-2xl">🗺️</span>
-            <div>
-              <p className="text-sm font-semibold text-[var(--text-primary)]">Plan a HopRoute</p>
-              <p className="text-xs text-[var(--text-muted)]">AI-powered brewery crawl planner</p>
+        <Link href="/hop-route/new" className="block">
+          <motion.div
+            whileHover={{ scale: 1.01 }}
+            whileTap={{ scale: 0.99 }}
+            transition={{ type: "spring", stiffness: 400, damping: 30 }}
+            className="rounded-[16px] overflow-hidden"
+            style={{
+              background: "linear-gradient(135deg, var(--warm-bg), var(--card-bg))",
+              border: "1px solid var(--border)",
+              padding: "20px",
+            }}
+          >
+            <div className="flex items-center" style={{ gap: "16px" }}>
+              <div
+                className="flex-shrink-0 flex items-center justify-center rounded-[14px]"
+                style={{
+                  width: "52px",
+                  height: "52px",
+                  background: "linear-gradient(135deg, rgba(196,136,62,0.12), rgba(196,136,62,0.06))",
+                  border: "1px solid rgba(196,136,62,0.15)",
+                  fontSize: "24px",
+                }}
+              >
+                🗺️
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center" style={{ gap: "5px", marginBottom: "2px" }}>
+                  <span
+                    className="rounded-full flex-shrink-0"
+                    style={{ width: "5px", height: "5px", background: "var(--success, #4CAF50)" }}
+                  />
+                  <span
+                    className="font-mono font-semibold uppercase"
+                    style={{ fontSize: "9px", color: "var(--accent-gold)", letterSpacing: "0.12em" }}
+                  >
+                    New
+                  </span>
+                </div>
+                <p className="font-sans font-semibold" style={{ fontSize: "17px", color: "var(--text-primary)" }}>
+                  Plan a HopRoute
+                </p>
+                <p style={{ fontSize: "13px", color: "var(--text-secondary)", marginTop: "2px" }}>
+                  AI-powered brewery crawl planner. Tell us where and when — we build your night.
+                </p>
+              </div>
             </div>
-          </div>
+          </motion.div>
         </Link>
       )}
 

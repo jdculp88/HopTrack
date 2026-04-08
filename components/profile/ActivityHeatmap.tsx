@@ -6,43 +6,56 @@ import { getStyleVars } from "@/lib/beerStyleColors";
 interface ActivityHeatmapProps {
   /** Array of { date: "YYYY-MM-DD", count: number, style?: string } */
   data: { date: string; count: number; style?: string }[];
-  /** Show full 52 weeks or compact 26 weeks */
-  compact?: boolean;
 }
 
-const DAYS_OF_WEEK = ["Mon", "", "Wed", "", "Fri", "", ""];
+/**
+ * Pour Activity heatmap — design spec exact.
+ * 52-week grid, 14×14px cells, 3px gap/radius, style-colored cells,
+ * full 12-month labels, beer style color legend.
+ */
 
 function getCellColor(count: number, style?: string): string {
   if (count === 0) return "var(--warm-bg, var(--surface-2))";
   const vars = getStyleVars(style ?? null);
   const primary = vars.primary;
-  if (count <= 2) return `color-mix(in srgb, ${primary} 30%, var(--surface-2))`;
-  if (count <= 5) return `color-mix(in srgb, ${primary} 60%, var(--surface-2))`;
+  if (count <= 2) return `color-mix(in srgb, ${primary} 35%, var(--surface-2))`;
+  if (count <= 5) return `color-mix(in srgb, ${primary} 65%, var(--surface-2))`;
   return primary;
 }
 
-export function ActivityHeatmap({ data, compact = false }: ActivityHeatmapProps) {
+// Beer style spectrum for legend (representative colors)
+const LEGEND_STYLES = [
+  null,       // empty (warm-bg)
+  "IPA",      // green
+  "Stout",    // dark brown
+  "Amber",    // amber
+  "Sour",     // berry/pink
+  "Porter",   // plum
+];
+
+export function ActivityHeatmap({ data }: ActivityHeatmapProps) {
   const { grid, months, totalPours, activeDays } = useMemo(() => {
-    const weeks = compact ? 26 : 52;
+    const weeks = 52;
     const today = new Date();
     const countMap = new Map<string, { count: number; style?: string }>();
     for (const d of data) {
       const existing = countMap.get(d.date);
-      countMap.set(d.date, { count: (existing?.count ?? 0) + d.count, style: d.style ?? existing?.style });
+      countMap.set(d.date, {
+        count: (existing?.count ?? 0) + d.count,
+        style: d.style ?? existing?.style,
+      });
     }
 
     // Build grid: weeks × 7 days
     const grid: { date: string; count: number; style?: string; dayOfWeek: number }[][] = [];
     const endDate = new Date(today);
-    endDate.setDate(endDate.getDate() - endDate.getDay()); // Start of current week (Sunday)
-    endDate.setDate(endDate.getDate() + 6); // End of current week (Saturday)
+    endDate.setDate(endDate.getDate() - endDate.getDay() + 6); // End of current week (Saturday)
 
     const startDate = new Date(endDate);
     startDate.setDate(startDate.getDate() - weeks * 7 + 1);
 
     const currentDate = new Date(startDate);
-    let currentWeek: { date: string; count: number; style?: string; dayOfWeek: number }[] = [];
-
+    let currentWeek: typeof grid[0] = [];
     let total = 0;
     let active = 0;
 
@@ -66,7 +79,7 @@ export function ActivityHeatmap({ data, compact = false }: ActivityHeatmapProps)
     }
     if (currentWeek.length > 0) grid.push(currentWeek);
 
-    // Month labels
+    // Month labels — positioned across full width
     const months: { label: string; col: number }[] = [];
     let lastMonth = -1;
     for (let w = 0; w < grid.length; w++) {
@@ -75,7 +88,7 @@ export function ActivityHeatmap({ data, compact = false }: ActivityHeatmapProps)
       const month = new Date(firstDay.date).getMonth();
       if (month !== lastMonth) {
         months.push({
-          label: new Date(firstDay.date).toLocaleDateString("en-US", { month: "short" }),
+          label: new Date(firstDay.date).toLocaleDateString("en-US", { month: "short" }).toUpperCase(),
           col: w,
         });
         lastMonth = month;
@@ -83,105 +96,118 @@ export function ActivityHeatmap({ data, compact = false }: ActivityHeatmapProps)
     }
 
     return { grid, months, totalPours: total, activeDays: active };
-  }, [data, compact]);
+  }, [data]);
 
-  const cellSize = compact ? 10 : 11;
-  const gap = 2;
+  const totalCols = grid.length;
 
   return (
-    <div>
-      {/* Header */}
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="font-display text-lg font-bold" style={{ color: "var(--text-primary)" }}>
+    <div
+      className="rounded-[16px] overflow-hidden"
+      style={{
+        background: "var(--card-bg)",
+        border: "1px solid var(--border)",
+        padding: "18px 20px",
+      }}
+    >
+      {/* Header — title + stats */}
+      <div
+        className="flex justify-between items-baseline"
+        style={{ marginBottom: "14px" }}
+      >
+        <h3
+          className="font-sans font-semibold"
+          style={{ fontSize: "16px", color: "var(--text-primary)" }}
+        >
           Pour Activity
         </h3>
-        <div className="flex items-center gap-4 text-xs" style={{ color: "var(--text-muted)" }}>
-          <span>{totalPours} pours</span>
-          <span>{activeDays} days active</span>
-        </div>
+        <span
+          className="font-mono"
+          style={{ fontSize: "10px", color: "var(--text-muted)" }}
+        >
+          {totalPours} pours · {activeDays} days active
+        </span>
       </div>
 
-      {/* Grid — Sprint 171: full-width, cells stretch to fill container */}
-      <div className="pb-1">
-        <div>
-          {/* Month labels */}
-          <div className="flex mb-1" style={{ paddingLeft: compact ? 0 : 28 }}>
-            {months.map((m, i) => (
-              <span
-                key={i}
-                className="text-[9px] font-mono"
-                style={{
-                  color: "var(--text-muted)",
-                  position: "relative",
-                  left: m.col * (cellSize + gap),
-                  width: 0,
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {m.label}
-              </span>
-            ))}
-          </div>
+      {/* Month labels — spread across full width */}
+      <div
+        className="relative"
+        style={{ marginBottom: "10px", height: "10px" }}
+      >
+        {months.map((m, i) => (
+          <span
+            key={i}
+            className="absolute font-mono uppercase"
+            style={{
+              fontSize: "8px",
+              color: "var(--text-muted)",
+              letterSpacing: "0.05em",
+              left: `${(m.col / totalCols) * 100}%`,
+            }}
+          >
+            {m.label}
+          </span>
+        ))}
+      </div>
 
-          <div className="flex gap-[2px] w-full">
-            {/* Day labels */}
-            {!compact && (
-              <div className="flex flex-col gap-0.5 mr-1">
-                {DAYS_OF_WEEK.map((d, i) => (
-                  <div
-                    key={i}
-                    className="text-[9px] font-mono flex items-center justify-end"
-                    style={{
-                      width: 22,
-                      height: cellSize,
-                      color: "var(--text-muted)",
-                    }}
-                  >
-                    {d}
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Weeks */}
-            {grid.map((week, wi) => (
-              <div key={wi} className="flex flex-col gap-[2px] flex-1">
-                {week.map((day) => (
-                  <div
-                    key={day.date}
-                    className="rounded-[2px] transition-colors w-full aspect-square"
-                    style={{
-                      minWidth: cellSize,
-                      minHeight: cellSize,
-                      background: getCellColor(day.count, day.style),
-                    }}
-                    title={`${new Date(day.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })} — ${day.count} pour${day.count !== 1 ? "s" : ""}${day.style ? ` · ${day.style}` : ""}`}
-                  />
-                ))}
-              </div>
-            ))}
-          </div>
-
-          {/* Legend — Less → More + color = style */}
-          <div className="flex items-center gap-1 mt-2">
-            <span className="text-[9px] font-mono mr-0.5" style={{ color: "var(--text-muted)" }}>Less</span>
-            {[0, 15, 30, 50, 80].map((pct, i) => (
+      {/* Grid — 52 weeks × 7 days, 14px cells, 3px gap */}
+      <div
+        className="flex"
+        style={{ gap: "3px", marginBottom: "12px" }}
+      >
+        {grid.map((week, wi) => (
+          <div key={wi} className="flex flex-col" style={{ gap: "3px", flex: "1 1 0" }}>
+            {week.map((day) => (
               <div
-                key={i}
-                className="rounded-[2px]"
+                key={day.date}
                 style={{
-                  width: cellSize,
-                  height: cellSize,
-                  background: pct === 0
-                    ? "var(--warm-bg, var(--surface-2))"
-                    : `color-mix(in srgb, var(--accent-gold) ${pct}%, var(--surface-2))`,
+                  width: "100%",
+                  aspectRatio: "1",
+                  maxWidth: "14px",
+                  maxHeight: "14px",
+                  borderRadius: "3px",
+                  background: getCellColor(day.count, day.style),
+                  transition: "transform 0.15s",
+                  cursor: day.count > 0 ? "pointer" : "default",
+                }}
+                title={`${new Date(day.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })} — ${day.count} pour${day.count !== 1 ? "s" : ""}${day.style ? ` · ${day.style}` : ""}`}
+                onMouseEnter={(e) => {
+                  (e.target as HTMLElement).style.transform = "scale(1.4)";
+                  (e.target as HTMLElement).style.zIndex = "2";
+                }}
+                onMouseLeave={(e) => {
+                  (e.target as HTMLElement).style.transform = "scale(1)";
+                  (e.target as HTMLElement).style.zIndex = "0";
                 }}
               />
             ))}
-            <span className="text-[9px] font-mono mx-0.5" style={{ color: "var(--text-muted)" }}>More</span>
-            <span className="text-[9px] font-mono ml-2" style={{ color: "var(--text-muted)" }}>color = style</span>
           </div>
-        </div>
+        ))}
+      </div>
+
+      {/* Legend — beer style color spectrum */}
+      <div
+        className="flex items-center font-mono"
+        style={{ gap: "8px", fontSize: "9px", color: "var(--text-muted)" }}
+      >
+        <span>Less</span>
+        {LEGEND_STYLES.map((style, i) => {
+          const bg = i === 0
+            ? "var(--warm-bg, var(--surface-2))"
+            : getStyleVars(style).primary;
+          return (
+            <div
+              key={i}
+              style={{
+                width: "10px",
+                height: "10px",
+                borderRadius: "2px",
+                background: bg,
+              }}
+            />
+          );
+        })}
+        <span>More</span>
+        <span style={{ marginLeft: "8px" }}>color = style</span>
       </div>
     </div>
   );
