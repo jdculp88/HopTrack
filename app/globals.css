@@ -867,202 +867,38 @@ body { overscroll-behavior-y: contain; }
    All pseudo-elements: position absolute, pointer-events none.
    ══════════════════════════════════════════════════════════════════════════ */
 
-/* Sprint 161+163 — Grain texture for all card-bg-* surfaces (S163: raised for more tactile feel) */
-:root {
-  --card-noise: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.07'/%3E%3C/svg%3E");
-}
-[data-theme="light"] {
-  --card-noise: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-}
+/* Sprint 172 — Clean card backgrounds. No noise textures, no pseudo-elements,
+   no topographic lines, no radial glows. Simple backgrounds only. */
 
-/* ── 1. ACHIEVEMENT — Concentric arcs radiating from badge icon ─────────── */
-.card-bg-achievement {
-  position: relative;
-  overflow: hidden;
-  background: var(--card-noise), radial-gradient(circle at 28px 50%,
-    color-mix(in srgb, var(--badge-bronze) 14%, transparent) 0%,
-    color-mix(in srgb, var(--badge-bronze) 5%, transparent) 40%,
-    transparent 65%);
-}
-.card-bg-achievement::before {
-  content: '';
-  position: absolute;
-  left: 10px; top: 50%; transform: translateY(-50%);
-  width: 80px; height: 80px;
-  border-radius: 50%;
-  border: 1px solid color-mix(in srgb, var(--badge-bronze) 16%, transparent);
-  pointer-events: none;
-}
-.card-bg-achievement::after {
-  content: '';
-  position: absolute;
-  left: -5px; top: 50%; transform: translateY(-50%);
-  width: 110px; height: 110px;
-  border-radius: 50%;
-  border: 1px solid color-mix(in srgb, var(--badge-bronze) 8%, transparent);
-  pointer-events: none;
-}
-.card-bg-achievement[data-tier="silver"] {
-  background: var(--card-noise), radial-gradient(circle at 28px 50%,
-    color-mix(in srgb, var(--badge-silver) 14%, transparent) 0%,
-    color-mix(in srgb, var(--badge-silver) 5%, transparent) 40%,
-    transparent 65%);
-}
-.card-bg-achievement[data-tier="silver"]::before { border-color: color-mix(in srgb, var(--badge-silver) 16%, transparent); }
-.card-bg-achievement[data-tier="silver"]::after  { border-color: color-mix(in srgb, var(--badge-silver) 8%, transparent); }
+.card-bg-achievement { background: var(--card-bg); }
+.card-bg-achievement[data-tier="silver"] { background: var(--card-bg); }
 .card-bg-achievement[data-tier="gold"],
-.card-bg-achievement[data-tier="platinum"] {
-  background: var(--card-noise), radial-gradient(circle at 28px 50%,
-    color-mix(in srgb, var(--badge-gold) 14%, transparent) 0%,
-    color-mix(in srgb, var(--badge-gold) 5%, transparent) 40%,
-    transparent 65%);
-}
-.card-bg-achievement[data-tier="gold"]::before,
-.card-bg-achievement[data-tier="platinum"]::before { border-color: color-mix(in srgb, var(--badge-gold) 16%, transparent); }
-.card-bg-achievement[data-tier="gold"]::after,
-.card-bg-achievement[data-tier="platinum"]::after  { border-color: color-mix(in srgb, var(--badge-gold) 8%, transparent); }
+.card-bg-achievement[data-tier="platinum"] { background: var(--card-bg); }
 
-/* ── 2. LIVE SESSION — Warm green glow + pulsing dot ────────────────────── */
 .card-bg-live {
-  position: relative;
-  overflow: hidden;
-  background: var(--card-noise), radial-gradient(ellipse at 50% 40%,
-    color-mix(in srgb, var(--live-green) 16%, transparent) 0%,
-    transparent 60%),
-    var(--surface);
-  border-color: color-mix(in srgb, var(--live-green) 22%, var(--border)) !important;
-}
-.card-bg-live::before {
-  content: '';
-  position: absolute;
-  top: 12px; right: 14px;
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: var(--live-green);
-  box-shadow: 0 0 8px color-mix(in srgb, var(--live-green) 50%, transparent);
-  animation: livePulse 2s ease-in-out infinite;
-  pointer-events: none;
-}
-@keyframes livePulse {
-  0%, 100% { box-shadow: 0 0 6px color-mix(in srgb, var(--live-green) 35%, transparent); }
-  50%       { box-shadow: 0 0 14px color-mix(in srgb, var(--live-green) 65%, transparent); }
+  background: color-mix(in srgb, var(--live-green) 6%, var(--card-bg));
+  border-color: color-mix(in srgb, var(--live-green) 20%, var(--border)) !important;
 }
 
-/* ── 3. STATS / YOUR NUMBERS — Subtle grid lines ────────────────────────── */
-.card-bg-stats {
-  position: relative;
-  overflow: hidden;
-  background:
-    var(--card-noise),
-    repeating-linear-gradient(
-      90deg,
-      transparent,
-      transparent 23%,
-      color-mix(in srgb, var(--accent-amber) 8%, transparent) 23%,
-      color-mix(in srgb, var(--accent-amber) 8%, transparent) 23.5%,
-      transparent 23.5%
-    ),
-    repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 48%,
-      color-mix(in srgb, var(--accent-amber) 8%, transparent) 48%,
-      color-mix(in srgb, var(--accent-amber) 8%, transparent) 49%,
-      transparent 49%
-    ),
-    var(--surface);
-}
+.card-bg-stats { background: var(--card-bg); }
 
-/* ── 5. STREAK — Flame warmth from left ─────────────────────────────────── */
 .card-bg-streak {
-  position: relative;
-  overflow: hidden;
-  background: var(--card-noise), radial-gradient(ellipse at 20% 50%,
-    color-mix(in srgb, var(--streak-flame) 16%, transparent) 0%,
-    transparent 55%),
-    var(--surface);
-  border-color: color-mix(in srgb, var(--streak-flame) 24%, var(--border)) !important;
+  background: color-mix(in srgb, var(--streak-flame) 6%, var(--card-bg));
 }
 
-/* ── 4. FEATURED / BEER OF THE WEEK — Warm spotlight glow ───────────────── */
 .card-bg-featured {
-  position: relative;
-  overflow: hidden;
-  background:
-    var(--card-noise),
-    radial-gradient(ellipse at 30% 30%, color-mix(in srgb, var(--accent-gold) 18%, transparent) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 80%, color-mix(in srgb, var(--accent-amber) 12%, transparent) 0%, transparent 40%),
-    var(--surface);
-  border-color: color-mix(in srgb, var(--accent-gold) 24%, var(--border)) !important;
-}
-.card-bg-featured::before {
-  content: '';
-  position: absolute;
-  top: -20px; left: -20px;
-  width: 80px; height: 80px;
-  border-radius: 50%;
-  background: radial-gradient(circle, color-mix(in srgb, var(--accent-gold) 14%, transparent) 0%, transparent 70%);
-  pointer-events: none;
+  background: color-mix(in srgb, var(--accent-gold) 6%, var(--card-bg));
 }
 
-/* ── 5. HOPROUTE CTA — Topographic diagonal lines + dashed circles ──────── */
 .card-bg-hoproute {
-  position: relative;
-  overflow: hidden;
-  background:
-    var(--card-noise),
-    repeating-linear-gradient(
-      165deg,
-      transparent,
-      transparent 18px,
-      color-mix(in srgb, var(--accent-amber) 8%, transparent) 18px,
-      color-mix(in srgb, var(--accent-amber) 8%, transparent) 19px
-    ),
-    radial-gradient(ellipse at 70% 50%, color-mix(in srgb, var(--accent-gold) 14%, transparent) 0%, transparent 50%),
-    var(--surface);
-}
-.card-bg-hoproute::before {
-  content: '';
-  position: absolute;
-  right: 20px; top: 50%; transform: translateY(-50%);
-  width: 60px; height: 60px;
-  border-radius: 50%;
-  border: 1.5px dashed color-mix(in srgb, var(--accent-amber) 18%, transparent);
-  pointer-events: none;
-}
-.card-bg-hoproute::after {
-  content: '';
-  position: absolute;
-  right: 8px; top: 50%; transform: translateY(-50%);
-  width: 84px; height: 84px;
-  border-radius: 50%;
-  border: 1px dashed color-mix(in srgb, var(--accent-amber) 10%, transparent);
-  pointer-events: none;
+  background: color-mix(in srgb, var(--accent-amber) 6%, var(--card-bg));
 }
 
-/* ── 6. TASTE DNA — Layered color wash at bottom ────────────────────────── */
-.card-bg-taste-dna {
-  position: relative;
-  overflow: hidden;
-  background: var(--card-noise), linear-gradient(180deg, var(--surface) 0%, color-mix(in srgb, var(--accent-gold) 10%, var(--surface)) 50%, var(--surface) 100%);
-}
-.card-bg-taste-dna::before {
-  content: '';
-  position: absolute;
-  left: 0; right: 0; bottom: 0;
-  height: 50%;
-  background:
-    radial-gradient(ellipse at 15% 100%, color-mix(in srgb, var(--dna-c1, var(--ipa-green)) 18%, transparent) 0%, transparent 55%),
-    radial-gradient(ellipse at 55% 100%, color-mix(in srgb, var(--dna-c2, var(--sour-berry)) 16%, transparent) 0%, transparent 45%),
-    radial-gradient(ellipse at 90% 100%, color-mix(in srgb, var(--dna-c3, var(--lager-sky))  16%, transparent) 0%, transparent 50%);
-  pointer-events: none;
-}
+.card-bg-taste-dna { background: var(--card-bg); }
 
-/* ── 7. COLLECTION — Left-edge color bar + gradient tint ────────────────── */
 .card-bg-collection {
-  position: relative;
-  overflow: hidden;
   padding-left: 18px !important;
+  position: relative;
 }
 .card-bg-collection::before {
   content: '';
@@ -1072,58 +908,15 @@ body { overscroll-behavior-y: contain; }
   background: var(--collection-color, var(--accent-gold));
   pointer-events: none;
 }
-.card-bg-collection::after {
-  content: '';
-  position: absolute;
-  left: 0; top: 0; bottom: 0; right: 0;
-  background: linear-gradient(90deg, color-mix(in srgb, var(--collection-color, var(--accent-gold)) 12%, transparent) 0%, transparent 40%);
-  pointer-events: none;
-}
 
-/* ── 8. NOTIFICATION — Warm attention gradient ───────────────────────────── */
 .card-bg-notification {
-  position: relative;
-  overflow: hidden;
-  background: var(--card-noise), linear-gradient(135deg,
-    color-mix(in srgb, var(--accent-gold) 16%, transparent) 0%,
-    transparent 40%),
-    var(--surface);
-  border-color: color-mix(in srgb, var(--accent-gold) 22%, var(--border)) !important;
+  background: color-mix(in srgb, var(--accent-gold) 4%, var(--card-bg));
 }
 
-/* ── 9. RECOMMENDATION — Style-tinted diagonal gradient ─────────────────── */
-.card-bg-reco {
-  position: relative;
-  overflow: hidden;
-}
-.card-bg-reco[data-style="ipa"]    { background: var(--card-noise), linear-gradient(135deg, color-mix(in srgb, var(--ipa-green) 28%, var(--card-bg)) 0%, var(--card-bg) 60%); border-color: color-mix(in srgb, var(--ipa-green) 30%, var(--card-border)) !important; }
-.card-bg-reco[data-style="stout"]  { background: var(--card-noise), linear-gradient(135deg, color-mix(in srgb, var(--stout-espresso-mid) 28%, var(--card-bg)) 0%, var(--card-bg) 60%); border-color: color-mix(in srgb, var(--stout-espresso-mid) 30%, var(--card-border)) !important; }
-.card-bg-reco[data-style="sour"]   { background: var(--card-noise), linear-gradient(135deg, color-mix(in srgb, var(--sour-berry) 28%, var(--card-bg)) 0%, var(--card-bg) 60%); border-color: color-mix(in srgb, var(--sour-berry) 30%, var(--card-border)) !important; }
-.card-bg-reco[data-style="porter"] { background: var(--card-noise), linear-gradient(135deg, color-mix(in srgb, var(--porter-plum) 28%, var(--card-bg)) 0%, var(--card-bg) 60%); border-color: color-mix(in srgb, var(--porter-plum) 30%, var(--card-border)) !important; }
-.card-bg-reco[data-style="lager"]  { background: var(--card-noise), linear-gradient(135deg, color-mix(in srgb, var(--lager-sky) 28%, var(--card-bg)) 0%, var(--card-bg) 60%); border-color: color-mix(in srgb, var(--lager-sky) 30%, var(--card-border)) !important; }
-.card-bg-reco[data-style="saison"] { background: var(--card-noise), linear-gradient(135deg, color-mix(in srgb, var(--saison-peach) 28%, var(--card-bg)) 0%, var(--card-bg) 60%); border-color: color-mix(in srgb, var(--saison-peach) 30%, var(--card-border)) !important; }
-.card-bg-reco[data-style="cider"]    { background: var(--card-noise), linear-gradient(135deg, color-mix(in srgb, var(--cider-rose) 28%, var(--card-bg)) 0%, var(--card-bg) 60%); border-color: color-mix(in srgb, var(--cider-rose) 30%, var(--card-border)) !important; }
-.card-bg-reco[data-style="wine"]     { background: var(--card-noise), linear-gradient(135deg, color-mix(in srgb, var(--wine-burgundy) 28%, var(--card-bg)) 0%, var(--card-bg) 60%); border-color: color-mix(in srgb, var(--wine-burgundy) 30%, var(--card-border)) !important; }
-.card-bg-reco[data-style="cocktail"] { background: var(--card-noise), linear-gradient(135deg, color-mix(in srgb, var(--cocktail-teal) 28%, var(--card-bg)) 0%, var(--card-bg) 60%); border-color: color-mix(in srgb, var(--cocktail-teal) 30%, var(--card-border)) !important; }
-.card-bg-reco[data-style="na"]       { background: var(--card-noise), linear-gradient(135deg, color-mix(in srgb, var(--na-lemon) 28%, var(--card-bg)) 0%, var(--card-bg) 60%); border-color: color-mix(in srgb, var(--na-lemon) 30%, var(--card-border)) !important; }
-.card-bg-reco[data-style="pilsner"]  { background: var(--card-noise), linear-gradient(135deg, color-mix(in srgb, var(--pilsner-grain) 28%, var(--card-bg)) 0%, var(--card-bg) 60%); border-color: color-mix(in srgb, var(--pilsner-grain) 30%, var(--card-border)) !important; }
-.card-bg-reco[data-style="amber"]    { background: var(--card-noise), linear-gradient(135deg, color-mix(in srgb, var(--amber-fire) 28%, var(--card-bg)) 0%, var(--card-bg) 60%); border-color: color-mix(in srgb, var(--amber-fire) 30%, var(--card-border)) !important; }
-.card-bg-reco[data-style="dipa"]     { background: var(--card-noise), linear-gradient(135deg, color-mix(in srgb, var(--dipa-hop) 28%, var(--card-bg)) 0%, var(--card-bg) 60%); border-color: color-mix(in srgb, var(--dipa-hop) 30%, var(--card-border)) !important; }
-.card-bg-reco[data-style="pale_ale"] { background: var(--card-noise), linear-gradient(135deg, color-mix(in srgb, var(--pale-meadow) 28%, var(--card-bg)) 0%, var(--card-bg) 60%); border-color: color-mix(in srgb, var(--pale-meadow) 30%, var(--card-border)) !important; }
+.card-bg-reco { background: var(--card-bg); }
 
-/* ── 10. SOCIAL — Intentionally bare ────────────────────────────────────── */
-/* No styles needed — restraint IS the design */
-
-/* ── HERO MESH — Full mesh-gradient hero surface (Sprint 161) ───────────── */
 .card-bg-hero {
-  position: relative;
-  overflow: hidden;
-  background:
-    var(--card-noise),
-    radial-gradient(ellipse at 20% 30%, color-mix(in srgb, var(--accent-gold) 28%, transparent) 0%, transparent 55%),
-    radial-gradient(ellipse at 80% 65%, color-mix(in srgb, var(--accent-amber) 24%, transparent) 0%, transparent 50%),
-    radial-gradient(ellipse at 50% 100%, color-mix(in srgb, var(--saison-peach) 20%, transparent) 0%, transparent 60%),
-    linear-gradient(135deg, var(--surface) 0%, color-mix(in srgb, var(--accent-gold) 12%, var(--surface)) 100%);
+  background: color-mix(in srgb, var(--accent-gold) 6%, var(--card-bg));
   border-color: color-mix(in srgb, var(--accent-gold) 28%, var(--border)) !important;
 }
 
