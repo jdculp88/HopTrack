@@ -22,6 +22,8 @@ interface UserAvatarProps {
   size?: "xs" | "sm" | "md" | "lg" | "xl";
   showLevel?: boolean;
   className?: string;
+  /** Override default border. Pass "border-0" to remove. */
+  borderClass?: string;
 }
 
 const SIZES = {
@@ -32,7 +34,7 @@ const SIZES = {
   xl:  { container: "w-20 h-20", text: "text-2xl", badge: "text-sm min-w-[28px] h-[28px] -bottom-1 -right-1" },
 };
 
-export function UserAvatar({ profile, size = "md", showLevel = false, className }: UserAvatarProps) {
+export function UserAvatar({ profile, size = "md", showLevel = false, className, borderClass }: UserAvatarProps) {
   const s = SIZES[size];
   const level = profile.level ?? (profile.xp !== undefined ? getLevelFromXP(profile.xp).level : 1);
   const displayName = profile.display_name ?? profile.username ?? "?";
@@ -44,7 +46,7 @@ export function UserAvatar({ profile, size = "md", showLevel = false, className 
         className={cn(
           s.container,
           "relative rounded-full overflow-hidden flex items-center justify-center",
-          "border-2 border-[var(--border)]"
+          borderClass ?? "border-2 border-[var(--border)]"
         )}
         style={!profile.avatar_url ? { background: gradient } : undefined}
       >

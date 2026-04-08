@@ -1,12 +1,12 @@
 import { createClient } from "@/lib/supabase/server";
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { MapPin, Settings } from "lucide-react";
-import { UserAvatar } from "@/components/ui/UserAvatar";
-import { ProfileBanner } from "@/components/profile/ProfileBanner";
 import { FriendButton } from "@/components/social/FriendButton";
+import { getInitials } from "@/lib/utils";
 import { getLevelProgress } from "@/lib/xp";
-import { generateGradientFromString } from "@/lib/utils";
+import { StyleBanner, getStyleBannerPalette } from "@/components/profile/StyleBanner";
 import { PageEnterWrapper } from "@/components/ui/PageEnterWrapper";
 import { calculateDrinkerKPIs } from "@/lib/kpi";
 import { ProfileTabs } from "./ProfileTabs";
@@ -38,7 +38,6 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
 
   const isOwnProfile = profile.id === user.id;
   const levelInfo = getLevelProgress(profile.xp);
-  const _gradient = generateGradientFromString(profile.display_name + username);
 
   // One year ago (for heatmap + beer_logs scoping)
   const oneYearAgo = new Date();
@@ -258,68 +257,185 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
     });
   })();
 
+  // Dominant beer style for banner
+  const dominantStyle = styleDNA[0]?.style ?? null;
+  const totalBeers = styleDNA.reduce((sum, s) => sum + s.count, 0);
+  const { palette: bannerPalette, label: styleLabel } = getStyleBannerPalette(dominantStyle);
+
   return (
     <PageEnterWrapper>
       <div className="max-w-3xl mx-auto">
-        {/* Sprint 171: Profile hero — seamless Instagram-style integration */}
-        <div className="relative mx-4 mt-4 rounded-[14px] overflow-hidden shadow-[var(--shadow-elevated)]">
-          {/* Banner image */}
-          <div className="h-36 sm:h-44">
-            <ProfileBanner
-              username={username}
-              displayName={profile.display_name}
-              bannerUrl={profile.banner_url}
-            />
-          </div>
-          {/* Gradient fade into content area */}
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              background: "linear-gradient(to top, var(--card-bg) 0%, color-mix(in srgb, var(--card-bg) 60%, transparent) 35%, transparent 60%)",
-            }}
-          />
-          {isOwnProfile && (
-            <Link
-              href="/settings"
-              className="absolute top-3 right-3 p-2 rounded-xl bg-black/30 backdrop-blur-sm text-white/70 hover:text-white transition-colors z-20"
+        {/* Profile hero — centered layout, beer-style dark gradient banner */}
+        <div
+          className="relative mx-4 mt-4 overflow-hidden"
+          style={{
+            borderRadius: "20px",
+            background: "var(--card-bg)",
+            border: "1px solid var(--border)",
+            boxShadow: "0 2px 12px rgba(0,0,0,0.04)",
+          }}
+        >
+          {/* Dark beer-style gradient banner */}
+          <StyleBanner style={dominantStyle} height={100}>
+            {/* Style identity label */}
+            <div
+              className="absolute top-3 left-4 flex items-center gap-1.5 font-mono uppercase"
+              style={{ fontSize: "10px", letterSpacing: "0.06em" }}
             >
-              <Settings size={16} />
-            </Link>
-          )}
+              <span
+                className="w-2 h-2 rounded-full flex-shrink-0"
+                style={{ background: bannerPalette.dot }}
+              />
+              <span style={{ color: "rgba(255,255,255,0.7)" }}>{styleLabel}</span>
+              <span style={{ color: "rgba(255,255,255,0.4)" }}>·</span>
+              <span style={{ color: "rgba(255,255,255,0.5)" }}>{totalBeers} BEERS</span>
+            </div>
+            {isOwnProfile && (
+              <Link
+                href="/settings"
+                className="absolute top-3 right-3 p-2 rounded-xl bg-black/30 backdrop-blur-sm text-white/70 hover:text-white transition-colors z-10"
+              >
+                <Settings size={16} />
+              </Link>
+            )}
+          </StyleBanner>
 
-          {/* Avatar + name — positioned INSIDE the hero, over the gradient */}
-          <div className="relative z-10 px-5 pb-4 -mt-10">
-            <div className="flex items-end gap-3.5">
-              <div className="rounded-full shadow-[var(--shadow-elevated)] flex-shrink-0">
-                <UserAvatar profile={profile} size="lg" />
+          {/* Centered content below banner */}
+          <div style={{ padding: "0 24px 22px" }}>
+            {/* Avatar — 72px circle, 4px card-bg outer ring, gold glow */}
+            <div className="flex justify-center" style={{ marginTop: "-36px" }}>
+              <div
+                className="rounded-full flex-shrink-0"
+                style={{
+                  padding: "4px",
+                  background: "var(--card-bg)",
+                  boxShadow: "0 0 0 1px var(--border), 0 4px 16px rgba(196, 136, 62, 0.25)",
+                }}
+              >
+                {profile.avatar_url ? (
+                  <div
+                    className="relative rounded-full overflow-hidden"
+                    style={{ width: "72px", height: "72px" }}
+                  >
+                    <Image
+                      src={profile.avatar_url}
+                      alt={profile.display_name ?? ""}
+                      fill
+                      className="object-cover"
+                      sizes="72px"
+                    />
+                  </div>
+                ) : (
+                  <div
+                    className="rounded-full flex items-center justify-center"
+                    style={{
+                      width: "72px",
+                      height: "72px",
+                      background: "linear-gradient(135deg, var(--accent-gold), var(--accent-amber, var(--accent-gold)))",
+                    }}
+                  >
+                    <span
+                      className="font-sans font-bold"
+                      style={{ fontSize: "26px", color: "#fff" }}
+                    >
+                      {getInitials(profile.display_name ?? "")}
+                    </span>
+                  </div>
+                )}
               </div>
-              <div className="pb-0.5 flex-1 min-w-0">
-                <h1 className="font-display text-2xl sm:text-3xl font-bold text-[var(--text-primary)] leading-tight">
-                  {profile.display_name}
-                </h1>
-                <p className="text-xs text-[var(--text-muted)]">@{profile.username}</p>
+            </div>
+
+            {/* Name */}
+            <h1
+              className="text-center font-sans font-bold"
+              style={{ fontSize: "24px", letterSpacing: "-0.02em", color: "var(--text-primary)", marginTop: "6px" }}
+            >
+              {profile.display_name}
+            </h1>
+
+            {/* Handle */}
+            <p
+              className="text-center font-mono"
+              style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: "1px" }}
+            >
+              @{profile.username}
+            </p>
+
+            {/* Bio */}
+            {profile.bio && (
+              <p
+                className="text-center mx-auto font-sans"
+                style={{ fontSize: "14px", color: "var(--text-secondary)", marginTop: "12px", maxWidth: "400px", lineHeight: "1.5" }}
+              >
+                {profile.bio}
+              </p>
+            )}
+
+            {/* Location */}
+            {profile.home_city && (
+              <p
+                className="flex items-center justify-center gap-1.5"
+                style={{ fontSize: "13px", color: "var(--text-muted)", marginTop: "8px" }}
+              >
+                <MapPin size={13} style={{ color: "var(--accent-gold)" }} />
+                {profile.home_city}
+              </p>
+            )}
+
+            {/* Friend button (other profiles) */}
+            {!isOwnProfile && (
+              <div className="flex justify-center" style={{ marginTop: "12px" }}>
+                <FriendButton profileId={profile.id} currentUserId={user.id} />
               </div>
-              {!isOwnProfile && (
-                <div className="pb-1 flex-shrink-0">
-                  <FriendButton profileId={profile.id} currentUserId={user.id} />
+            )}
+
+            {/* Quick stats — separator + row */}
+            <div
+              style={{
+                marginTop: "16px",
+                paddingTop: "16px",
+                borderTop: "1px solid var(--border)",
+              }}
+            >
+              <div className="flex justify-center" style={{ gap: "24px" }}>
+                <div className="text-center">
+                  <span className="font-sans font-bold" style={{ fontSize: "16px", color: "var(--text-primary)" }}>
+                    {profile.total_checkins ?? 0}
+                  </span>
+                  <span className="font-sans" style={{ fontSize: "12px", color: "var(--text-muted)", marginLeft: "4px" }}>
+                    sessions
+                  </span>
                 </div>
-              )}
+                <div className="text-center">
+                  <span className="font-sans font-bold" style={{ fontSize: "16px", color: "var(--text-primary)" }}>
+                    {profile.unique_beers ?? 0}
+                  </span>
+                  <span className="font-sans" style={{ fontSize: "12px", color: "var(--text-muted)", marginLeft: "4px" }}>
+                    beers
+                  </span>
+                </div>
+                <div className="text-center">
+                  <span className="font-sans font-bold" style={{ fontSize: "16px", color: "var(--text-primary)" }}>
+                    {profile.unique_breweries ?? 0}
+                  </span>
+                  <span className="font-sans" style={{ fontSize: "12px", color: "var(--text-muted)", marginLeft: "4px" }}>
+                    breweries
+                  </span>
+                </div>
+                <div className="text-center">
+                  <span className="font-sans font-bold" style={{ fontSize: "16px", color: "var(--text-primary)" }}>
+                    {friendCount ?? 0}
+                  </span>
+                  <span className="font-sans" style={{ fontSize: "12px", color: "var(--text-muted)", marginLeft: "4px" }}>
+                    friends
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
         <div className="px-4 sm:px-6 mt-4">
-
-          {/* Bio + Location */}
-          {profile.bio && (
-            <p className="text-[var(--text-secondary)] leading-relaxed mb-4">{profile.bio}</p>
-          )}
-          {profile.home_city && (
-            <p className="flex items-center gap-1.5 text-sm text-[var(--text-muted)] mb-6">
-              <MapPin size={13} />
-              {profile.home_city}
-            </p>
-          )}
 
           {/* Sprint 162 (The Identity) — Personality badge */}
           <PersonalityBadge
