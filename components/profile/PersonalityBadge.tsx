@@ -1,66 +1,30 @@
 "use client";
 
 // Personality Badge — Sprint 162 (The Identity)
-// Displays the user's 4-letter Beer Personality archetype with share button.
+// Displays the user's 4-letter Beer Personality archetype.
 // Renders in the profile hero area between bio/location and tabs.
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Share2, Copy, Check, ChevronDown } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { ChevronDown } from "lucide-react";
 import { spring } from "@/lib/animation";
 import { Card } from "@/components/ui/Card";
-import {
-  generateOGImageUrl,
-  getPersonalityShareText,
-  shareOrCopy,
-} from "@/lib/share";
 import { AXIS_LABELS } from "@/lib/personality";
 import type { PersonalityResult } from "@/lib/personality";
 
 interface PersonalityBadgeProps {
   personality: PersonalityResult;
-  userId: string;
   isOwnProfile: boolean;
 }
 
 export function PersonalityBadge({
   personality,
-  userId,
   isOwnProfile,
 }: PersonalityBadgeProps) {
-  const [shareState, setShareState] = useState<
-    "idle" | "sharing" | "copied" | "shared" | "failed"
-  >("idle");
   const [expanded, setExpanded] = useState(false);
 
   // Hide for other profiles with insufficient data.
   if (!personality.hasEnoughData && !isOwnProfile) return null;
-
-  const handleShare = async () => {
-    setShareState("sharing");
-    const url = generateOGImageUrl("personality", {
-      user_id: userId,
-      code: personality.code,
-    });
-    const text = getPersonalityShareText({
-      archetype: personality.archetype,
-      emoji: personality.emoji,
-    });
-    const result = await shareOrCopy({
-      title: personality.archetype,
-      text,
-      url,
-    });
-    if (result === "shared") setShareState("shared");
-    else if (result === "copied") setShareState("copied");
-    else if (result === "cancelled") setShareState("idle");
-    else setShareState("failed");
-
-    if (result !== "cancelled") {
-      setTimeout(() => setShareState("idle"), 2000);
-    }
-  };
 
   // Insufficient data state (own profile only — other profiles hidden above)
   if (!personality.hasEnoughData) {
@@ -83,24 +47,6 @@ export function PersonalityBadge({
       </Card>
     );
   }
-
-  const shareButtonContent =
-    shareState === "shared" || shareState === "copied" ? (
-      <>
-        <Check size={14} />
-        {shareState === "copied" ? "Copied" : "Shared"}
-      </>
-    ) : shareState === "failed" ? (
-      <>
-        <Copy size={14} />
-        Try again
-      </>
-    ) : (
-      <>
-        <Share2 size={14} />
-        Share
-      </>
-    );
 
   const axisLetters = personality.code.split("");
 
@@ -136,63 +82,38 @@ export function PersonalityBadge({
           background: `radial-gradient(ellipse at 0% 0%, color-mix(in srgb, ${c1} 8%, transparent) 0%, transparent 50%), radial-gradient(ellipse at 100% 100%, color-mix(in srgb, ${c2} 8%, transparent) 0%, transparent 50%)`,
         }}
       />
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-3 mb-1">
-            <motion.span
-              // intentional: multi-property animation (scale + rotate) with low damping for playful bounce
-              initial={{ scale: 0.5, rotate: -10 }}
-              animate={{ scale: 1, rotate: 0 }}
-              transition={{ type: "spring", stiffness: 400, damping: 20 }}
-              className="text-3xl"
-              aria-hidden="true"
+      {/* Emoji + code label + title + tagline — all inline */}
+      <div className="flex items-center gap-3">
+        <motion.div
+          // intentional: multi-property animation (scale + rotate) with low damping for playful bounce
+          initial={{ scale: 0.5, rotate: -10 }}
+          animate={{ scale: 1, rotate: 0 }}
+          transition={{ type: "spring", stiffness: 400, damping: 20 }}
+          className="w-12 h-12 flex items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--surface-2)] flex-shrink-0"
+          aria-hidden="true"
+        >
+          <span className="text-2xl">{personality.emoji}</span>
+        </motion.div>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            <span
+              className="text-[10px] font-mono font-bold uppercase tracking-[0.25em] text-[var(--accent-gold)]"
+              aria-label={`Personality code ${personality.code}`}
             >
-              {personality.emoji}
-            </motion.span>
-            <div className="min-w-0 flex-1">
-              <h2 className="font-display text-xl sm:text-2xl font-bold text-[var(--text-primary)] leading-tight">
-                {personality.archetype}
-              </h2>
-              <div className="flex items-center gap-2 mt-0.5">
-                <span
-                  className="text-[10px] font-mono font-bold uppercase tracking-[0.25em] text-[var(--accent-gold)]"
-                  aria-label={`Personality code ${personality.code}`}
-                >
-                  {personality.code}
-                </span>
-                <span className="text-[10px] font-mono text-[var(--text-muted)]">
-                  ·
-                </span>
-                <span className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)]">
-                  beer personality
-                </span>
-              </div>
-            </div>
+              {personality.code}
+            </span>
+            <span className="text-[10px] font-mono text-[var(--text-muted)]">·</span>
+            <span className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)]">
+              beer personality
+            </span>
           </div>
-          <p className="text-sm text-[var(--text-secondary)] leading-snug">
+          <h2 className="font-display text-xl sm:text-2xl font-bold text-[var(--text-primary)] leading-tight">
+            {personality.archetype}
+          </h2>
+          <p className="text-sm italic text-[var(--text-secondary)] leading-snug mt-0.5">
             {personality.tagline}
           </p>
         </div>
-        {isOwnProfile && (
-          <button
-            type="button"
-            onClick={handleShare}
-            disabled={shareState === "sharing"}
-            className={cn(
-              "flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl",
-              "text-xs font-mono uppercase tracking-wider",
-              "border border-[var(--border)] hover:border-[var(--accent-gold)]/40",
-              "text-[var(--text-secondary)] hover:text-[var(--accent-gold)]",
-              "transition-colors disabled:opacity-50 disabled:cursor-not-allowed",
-              shareState === "shared" || shareState === "copied"
-                ? "text-[var(--accent-gold)] border-[var(--accent-gold)]/40"
-                : "",
-            )}
-            aria-label="Share personality"
-          >
-            {shareButtonContent}
-          </button>
-        )}
       </div>
 
       {/* Axis breakdown — human-readable labels */}
@@ -210,7 +131,7 @@ export function PersonalityBadge({
             return (
               <span
                 key={letter}
-                className="text-xs font-medium px-3 py-1 rounded-full"
+                className="text-xs font-medium px-3 py-1 rounded-lg"
                 style={{
                   color: "var(--text-secondary)",
                   border: "1px solid var(--border)",
