@@ -27,6 +27,8 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // One-time data scripts — not app code
     "scripts/**",
+    // Sprint 173 — Playwright E2E tests are frozen. See e2e.frozen/README.md.
+    "e2e.frozen/**",
   ]),
 ]);
 

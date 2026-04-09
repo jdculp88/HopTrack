@@ -17,6 +17,16 @@ The Harness is the full Claude Code configuration for HopTrack, designed to make
 
 ---
 
+## E2E Tests Are Frozen (Sprint 173)
+
+Before reading the skills section: know that **Playwright E2E is currently frozen**. The entire infrastructure lives in `/e2e.frozen/` at the repo root. `@playwright/test` is removed from `devDependencies`, the `test:e2e` npm scripts are gone, and there's no e2e job in CI.
+
+**Reason:** `hoptrack-staging` Supabase is empty. Running 112 auth-dependent tests against an empty DB timed out for hours on every CI run. See `/e2e.frozen/README.md` for the full thaw procedure when we're ready to bring E2E back.
+
+**What's still active:** 1861+ Vitest unit tests, type checking, linting, build. That's the real gate.
+
+---
+
 ## The 8 Skills
 
 All skills live in `.claude/skills/<name>/SKILL.md` and load contextually based on their `description` field. Claude loads only the skills relevant to the current task.

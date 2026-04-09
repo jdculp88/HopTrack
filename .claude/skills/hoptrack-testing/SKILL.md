@@ -1,11 +1,29 @@
 ---
 name: hoptrack-testing
-description: HopTrack testing standards, patterns, and requirements — Vitest for unit tests, Playwright for E2E, Casey's coverage rules, Reese's automation standards, what to mock (Supabase → `as any`), what to test (happy path AND sad path), what NOT to test (framework internals), how to run tests (`npm test`, `npm run test:e2e`), how to debug test failures, the React compiler test patterns, the S173 stale-test lesson (when a design decision changes, update the tests that reference it), and the `createMockClient(): any` pattern for Supabase mocks. Use AGGRESSIVELY whenever writing tests, fixing broken tests, debugging flaky tests, adding coverage, reviewing test files, or answering "should this have a test" or "why is this test failing". Also use when someone says "the test is broken" — the debug playbook is here. Pushy loading is correct because 1861+ tests is a lot to reason about and the team gets coverage debt fast if skills don't fire.
+description: HopTrack testing standards, patterns, and requirements — Vitest for unit tests (ACTIVE, 1861+ tests), Playwright E2E currently FROZEN in /e2e.frozen/ since Sprint 173 (do not try to run test:e2e — the scripts and devDependency were removed), Casey's coverage rules, Reese's automation standards, what to mock (Supabase → `as any`), what to test (happy path AND sad path), how to run tests (`npm test`, NOT `npm run test:e2e`), how to debug test failures, the `createMockClient(): any` pattern for Supabase mocks, the S173 stale-test lesson (when a design decision changes, update the tests that reference it). Use AGGRESSIVELY whenever writing tests, fixing broken tests, debugging flaky tests, adding coverage, reviewing test files, or answering "should this have a test" or "why is this test failing". Also use when someone says "the test is broken" or "should I write an E2E test" — the FROZEN warning is critical.
 ---
 
 # HopTrack Testing Standards
 
 Casey owns quality. Reese owns automation. Together they keep us at 1861+ passing tests with zero flakes. This skill is their rulebook.
+
+## ⚠️ IMPORTANT: E2E Tests Are FROZEN (Sprint 173)
+
+**Playwright E2E is currently frozen.** Do NOT attempt to:
+- Run `npm run test:e2e` — the script was removed from package.json
+- Write new `*.spec.ts` files under `/e2e/` — that directory no longer exists
+- Add `@playwright/test` imports — Playwright was removed from devDependencies
+
+**Why:** `hoptrack-staging` Supabase is empty. Running 112 auth-dependent tests against an empty DB produces ~4 hours of timeouts per CI run. S173 retro decided to freeze the entire infrastructure until the staging seed ops sprint is complete.
+
+**Where the tests live now:** `/e2e.frozen/` at the repo root. All 16 spec files + helpers + playwright.config.ts are preserved there. See `/e2e.frozen/README.md` for the full thaw procedure when we're ready to bring E2E back.
+
+**If you genuinely need E2E-level coverage for a specific flow during the freeze:**
+1. Expand unit test coverage with Vitest + React Testing Library (`lib/__tests__/integration/`)
+2. Manual QA with Casey
+3. Defer the decision until the thaw
+
+**What's still active:** Unit tests (Vitest). 1861+ passing. Run with `npm test` or `npm run test:coverage`. Coverage reports via `@vitest/coverage-v8`.
 
 ## The Test Philosophy
 
@@ -17,23 +35,23 @@ Casey owns quality. Reese owns automation. Together they keep us at 1861+ passin
 
 ## Test Stack
 
-| Type | Tool | Config | Run |
-|---|---|---|---|
-| Unit tests | **Vitest** | `vitest.config.ts` | `npm test` (with `--run` for CI) |
-| E2E tests | **Playwright** | `playwright.config.ts` | `npm run test:e2e` |
-| Type checking | **tsc** | `tsconfig.json` | `npx tsc --noEmit` |
-| Linting | **ESLint** | `eslint.config.mjs` | `npm run lint` + `npm run lint -- --quiet` (errors only) |
-| Coverage | **Vitest `v8` provider** | `vitest.config.ts` | `npm run test:coverage` |
+| Type | Tool | Config | Run | Status |
+|---|---|---|---|---|
+| Unit tests | **Vitest** | `vitest.config.ts` | `npm test` (with `--run` for CI) | ✅ Active |
+| E2E tests | ~~Playwright~~ | ~~`playwright.config.ts`~~ | — | 🧊 **FROZEN** (see `/e2e.frozen/`) |
+| Type checking | **tsc** | `tsconfig.json` | `npx tsc --noEmit` | ✅ Active |
+| Linting | **ESLint** | `eslint.config.mjs` | `npm run lint` + `npm run lint -- --quiet` (errors only) | ✅ Active |
+| Coverage | **Vitest `v8` provider** | `vitest.config.ts` | `npm run test:coverage` | ✅ Active |
 
 ## What Goes Where
 
 ```
-lib/__tests__/              — Unit tests for lib/ utilities
-components/__tests__/       — Unit tests for React components
-hooks/__tests__/            — Unit tests for custom hooks
-e2e/                        — All Playwright E2E tests
-e2e/scripts/global-setup.ts — E2E global setup (verifies test user + demo breweries)
-e2e/helpers/                — Shared E2E helpers (auth, brewery, session, navigation)
+lib/__tests__/              — Unit tests for lib/ utilities (ACTIVE)
+components/__tests__/       — Unit tests for React components (ACTIVE)
+hooks/__tests__/            — Unit tests for custom hooks (ACTIVE)
+e2e.frozen/                 — FROZEN Playwright E2E (do not edit, see README)
+e2e.frozen/scripts/         — Frozen global-setup
+e2e.frozen/helpers/         — Frozen helpers (auth, brewery, session)
 ```
 
 ## Vitest Patterns
@@ -127,35 +145,16 @@ import { render, screen, fireEvent, act } from "@testing-library/react"
 - ❌ CSS visual appearance (use screenshot tests in E2E if needed)
 - ❌ Implementation details (test what the function does, not how)
 
-## Playwright E2E Patterns
+## Playwright E2E Patterns (FROZEN — for reference only)
 
-### Test User
-```typescript
-// e2e/helpers/auth.ts
-export const TEST_USER = {
-  email: "testflight@hoptrack.beer",
-  password: "HopTrack2026!",
-  username: "hopreviewer",
-}
-```
+All Playwright patterns are preserved in `/e2e.frozen/` but the infrastructure is not active. Do not run them. Do not add new ones. When we thaw:
 
-This user lives in `hoptrack-staging` (NOT seeded as of S173 — the E2E job is `if: false` in CI until staging is seeded). Do NOT hardcode a different user.
+- Test user: `testflight@hoptrack.beer` / `HopTrack2026!` / username `hopreviewer`
+- Demo breweries: `dd000001-0000-0000-0000-00000000000{1,2,3}`
+- `playwright.config.ts` must have `reuseExistingServer: true` (S173 port conflict lesson)
+- `global-setup.ts` verifies seed data before any test runs
 
-### Demo Brewery IDs
-```typescript
-// e2e/helpers/auth.ts
-export const BREWERIES = {
-  mountainRidge: "dd000001-0000-0000-0000-000000000001",
-  riverBend: "dd000001-0000-0000-0000-000000000002",
-  smokyBarrel: "dd000001-0000-0000-0000-000000000003",
-}
-```
-
-### Global Setup
-`e2e/scripts/global-setup.ts` verifies test data exists BEFORE any test runs. If staging is empty, it prints a warning but doesn't fail — tests will fail on login anyway.
-
-### The Port Conflict Rule (S173 lesson)
-`playwright.config.ts` has `reuseExistingServer: true` **unconditionally**. Do NOT set it to `!process.env.CI` — that was the S173 bug that caused the port 3000 conflict in CI.
+Full thaw procedure: `/e2e.frozen/README.md`
 
 ## Running Tests
 
@@ -172,11 +171,9 @@ npm test -- --run lib/__tests__/personality.test.ts
 # Coverage
 npm run test:coverage
 
-# E2E (all specs)
-npm run test:e2e
-
-# E2E (single spec)
-npm run test:e2e -- e2e/auth.spec.ts
+# E2E tests: FROZEN — scripts removed from package.json in S173.
+# Do NOT run `npm run test:e2e` — it no longer exists.
+# See /e2e.frozen/README.md to thaw when ready.
 
 # Type check
 npx tsc --noEmit
@@ -220,7 +217,7 @@ Most test failures are mock setup issues, not logic bugs. Is the Supabase mock r
 ## Known Test Debt (Track Here, Not "Pre-Existing Limbo")
 
 - `lib/__tests__/superadmin-intelligence.test.ts` — fixed in S173 after 6 sprints of being ignored as "pre-existing" ✅
-- E2E suite soft-fails in CI (`if: false` on e2e job) until `hoptrack-staging` is seeded — see `memory/feedback_staging_supabase_empty.md`
+- **E2E suite FROZEN** in S173 — moved from `/e2e` to `/e2e.frozen/`, `@playwright/test` removed from devDependencies, e2e job removed from ci.yml. Reason: `hoptrack-staging` is empty. Full thaw procedure: `/e2e.frozen/README.md`. Seed ops sprint: `memory/feedback_staging_supabase_empty.md`.
 
 ## The Pre-Existing Debt Rule (S173 lesson)
 
