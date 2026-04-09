@@ -31,7 +31,12 @@ export default defineConfig({
   webServer: {
     command: "npm run dev",
     url: "http://localhost:3000",
-    reuseExistingServer: !process.env.CI,
+    // Sprint 173: reuseExistingServer: true unconditionally.
+    // - Locally: avoids killing your running dev server when tests run.
+    // - CI: the Health check gate in ci.yml starts the prod server with real
+    //   E2E credentials; Playwright reuses that instead of trying to start its
+    //   own (which errored with "port 3000 already in use").
+    reuseExistingServer: true,
     timeout: 60_000,
   },
 });
