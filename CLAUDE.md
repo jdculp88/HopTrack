@@ -167,16 +167,7 @@ Guardian of the brand. Owns the voice, the visuals, the App Store presence. Work
 ## 🏗️ How We Work
 
 ### Sprint Close Ceremony
-When Joshua says **"let's end the sprint"** or **"close the sprint"**, Sage runs the full ceremony (under Morgan's oversight) in this order — no shortcuts, no skipping steps:
-
-1. **Retro** — delivered live in chat first (everyone speaks, everyone gets roasted), then saved to `docs/retros/sprint-NNN-retro.md`
-2. **CLAUDE.md** — "Where We Are" section updated with sprint summary
-3. **Agent files** — update `.claude/agents/` files if any roles or context changed this sprint
-4. **Memory** — `MEMORY.md` index + relevant memory files updated in `/Users/jdculp/.claude/projects/-Users-jdculp-Projects-hoptrack/memory/`
-5. **seed-next-day** — run `node scripts/seed-next-day.mjs` to advance Pint & Pixel one day forward
-6. **Commit everything** — single commit with all changes, pushed to `main`
-
-This is non-negotiable. Every sprint closes clean.
+The full 6-step ceremony (retro → CLAUDE.md → agent files → memory → seed-next-day → commit) lives in the **`sprint-close`** skill at `.claude/skills/sprint-close/`. It loads automatically when Joshua says "close the sprint", "end the sprint", or "wrap the sprint". Non-negotiable. Every sprint closes clean.
 
 ### Communication Style
 - The team chimes in naturally — not just Jordan writing code in silence
@@ -206,76 +197,11 @@ Joshua Culp — Founder, CEO, Board Executive. Brilliant product instincts, trus
 
 ---
 
-## 💻 Technical Conventions — READ THESE
+## 💻 Technical Conventions
 
-### Next.js
-- **Route groups:** `(app)`, `(auth)`, `(brewery-admin)`, `(superadmin)`
-- **Loading states:** Every data page gets a `loading.tsx` skeleton using `<Skeleton />` from `@/components/ui/SkeletonLoader`
-- **Client components:** Extract interactive pieces into `"use client"` components; keep pages as server components
-- **Params:** Always `await params` — they're a Promise in Next.js 16
-- **proxy.ts** replaces `middleware.ts` — do NOT recreate middleware.ts
+All HopTrack coding conventions — Next.js 16 route groups and patterns, Supabase client/server rules, Tailwind v4 CSS variables, Framer Motion rules, BANNED UI patterns (`alert`, `confirm`, raw `NextResponse.json`, inline role/tier checks), REQUIRED UI patterns (`loading.tsx`, optimistic updates, toast notifications), and the full DRY import checklist (`requireAuth`, `apiSuccess`, `PageHeader`, `Card`, `Pill`, animation presets, etc.) — live in the **`hoptrack-conventions`** skill at `.claude/skills/hoptrack-conventions/`. It loads automatically when you're writing, reviewing, or refactoring HopTrack code.
 
-### Supabase
-- Client: `createClient()` from `@/lib/supabase/client` (browser)
-- Server: `createClient()` from `@/lib/supabase/server` (RSC/API routes)
-- Always cast with `as any` where TypeScript fights the Supabase types
-- Service role key: server-side only, NEVER in client code
-- Migrations live in `supabase/migrations/` — numbered sequentially
-- **NEVER use `.length` on unbounded query results for stats** — Supabase PostgREST defaults to 1000 rows. Use `{ count: "exact", head: true }` for pure counts, or add `.limit(50000)` when data must be iterated (S153 P0 fix)
-
-### Styling
-- **Tailwind v4** — CSS-first config via `@theme {}` in `globals.css`
-- **ALWAYS use CSS variables** — `var(--surface)`, `var(--border)`, `var(--text-primary)`, `var(--accent-gold)`, `var(--danger)`, `var(--text-muted)`, `var(--text-secondary)`, `var(--surface-2)`
-- **NEVER hardcode colors** except `#0F0E0C` (bg) and `#D4A843` (gold) where CSS vars aren't available
-- Font stack: `font-display` = Playfair Display, `font-mono` = JetBrains Mono, default = DM Sans
-- Rounded corners: `rounded-2xl` for cards, `rounded-xl` for buttons/inputs
-
-### Framer Motion
-- ✅ `<motion.div>` on decorative/layout elements
-- ❌ NEVER `motion.button` — use `<button>` with inner `<motion.div>` for animations
-- Use `AnimatePresence` for enter/exit transitions
-- Spring config: `{ type: "spring", stiffness: 400, damping: 30 }`
-
-### UI Patterns — BANNED
-- ❌ `alert()` — use toast or inline message
-- ❌ `confirm()` — use inline confirmation with AnimatePresence slide-down
-- ❌ Dead buttons — gate unbuilt features with "Coming soon" tooltip/badge
-- ❌ Blank pages — every empty state needs a friendly message + CTA
-- ❌ Silent failures — always surface errors to the user
-- ❌ Inline `["owner", "manager"]` role checks — use `requireBreweryAdmin()` from `lib/api-helpers.ts`
-- ❌ Inline `["cask", "barrel"]` tier checks — use `requirePremiumTier()` from `lib/api-helpers.ts`
-- ❌ Raw `NextResponse.json({ error })` in API routes — use `apiError()`/`apiUnauthorized()`/etc. from `lib/api-response.ts`
-- ❌ Inline `.split(" ")[0]` for first names — use `getFirstName()` from `lib/first-name.ts`
-- ❌ Inline `initial={{ opacity: 0, y: N }}` animation objects — use presets from `lib/animation.ts`
-- ❌ Duplicated tier color/rank maps — import from `lib/constants/tiers.ts`
-- ❌ Duplicated pill toggle styles — import from `lib/constants/ui.ts`
-- ❌ Inline card styling (`rounded-2xl border` + `var(--surface)`) — use `Card` from `components/ui/Card.tsx`
-
-### UI Patterns — REQUIRED
-- ✅ Inline delete confirmations — AnimatePresence slide-down with Cancel + Confirm
-- ✅ Optimistic updates with rollback on error
-- ✅ `loading.tsx` skeleton for every data page
-- ✅ Error state in forms (inline, not alert)
-- ✅ Toast notifications for all mutations
-
-### DRY Patterns — REQUIRED (Sprint 134)
-- ✅ API routes: `requireAuth()`, `requireBreweryAdmin()`, `requirePremiumTier()` from `lib/api-helpers.ts`
-- ✅ API responses: `apiSuccess()`, `apiError()`, `apiUnauthorized()`, `apiForbidden()` from `lib/api-response.ts`
-- ✅ Page headers: `PageHeader` component from `components/ui/PageHeader.tsx`
-- ✅ Stat grids: `StatsGrid` component from `components/ui/StatsGrid.tsx`
-- ✅ Feed cards with accent bars: `FeedCardWrapper` from `components/social/FeedCardWrapper.tsx`
-- ✅ Form fields: `FormField` wrapper from `components/ui/FormField.tsx`
-- ✅ Cards: `Card` component from `components/ui/Card.tsx` (padding: compact/default/spacious)
-- ✅ Empty states: `EmptyState` component from `components/ui/EmptyState.tsx`
-- ✅ Badges/pills: `Pill` component from `components/ui/Pill.tsx`
-- ✅ Animations: presets from `lib/animation.ts` (`spring`, `transition`, `variants`, `stagger`, `cardHover`)
-- ✅ Auth pages: `GoogleOAuthButton`, `AuthDivider`, `AuthErrorAlert` from `components/auth/`
-- ✅ Superadmin search: `SearchForm` from `components/superadmin/SearchForm.tsx`
-- ✅ Constants: `lib/constants/tiers.ts` (TIER_COLORS, TIER_STYLES, RANK_STYLES, CATEGORY_LABELS)
-- ✅ Constants: `lib/constants/ui.ts` (PILL_ACTIVE, PILL_INACTIVE, INPUT_STYLE, CLAIM_STATUS_STYLES)
-- ✅ First names: `getFirstName()` from `lib/first-name.ts`
-- ✅ Optimistic toggles: `useOptimisticToggle` hook from `hooks/useOptimisticToggle.ts`
-- ✅ Delete confirmations: `useDeleteConfirmation` hook from `hooks/useDeleteConfirmation.ts`
+Migration-specific rules (sequential numbering, RLS in the same migration, `gen_random_uuid`, rollback plans for destructive changes, `NOTIFY pgrst, 'reload schema';` after FK migrations) live in the **`supabase-migration`** skill at `.claude/skills/supabase-migration/`. It loads automatically when you're touching the schema.
 
 ---
 
