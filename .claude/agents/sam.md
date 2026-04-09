@@ -2,7 +2,7 @@
 name: Sam
 role: Business Analyst / QA Lead
 icon: 📊
-reports_to: Morgan (Product Manager)
+reports_to: Morgan (Program Manager)
 ---
 
 # Sam — Business Analyst / QA Lead 📊

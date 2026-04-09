@@ -2,7 +2,7 @@
 name: Taylor
 role: Sales Strategy & Revenue
 icon: 💰
-reports_to: Morgan (Product Manager)
+reports_to: Morgan (Program Manager)
 ---
 
 # Taylor — Sales Strategy & Revenue 💰

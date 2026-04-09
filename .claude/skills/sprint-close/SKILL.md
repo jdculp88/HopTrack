@@ -1,6 +1,8 @@
 ---
 name: sprint-close
-description: Runs the HopTrack Sprint Close Ceremony — retro, CLAUDE.md update, agent files, memory, seed-next-day, single commit. Use when Joshua says "close the sprint", "end the sprint", "wrap the sprint", "sprint close", or "let's close this out".
+description: Runs the HopTrack Sprint Close Ceremony — retro, CLAUDE.md update, agent files, memory, seed-next-day, single commit. Use ONLY when Joshua explicitly says "close the sprint", "end the sprint", "wrap the sprint", "sprint close", or "let's close this out". Do NOT auto-trigger based on context — this ceremony has side effects (runs scripts, modifies memory, creates commits) and must only run on explicit founder command.
+disable-model-invocation: true
+allowed-tools: Bash(git add *) Bash(git commit *) Bash(git status *) Bash(git log *) Bash(git diff *) Bash(git push *) Bash(node scripts/seed-next-day.mjs)
 ---
 
 # Sprint Close Ceremony

@@ -2,7 +2,7 @@
 name: Jamie
 role: Marketing & Brand
 icon: 🎨
-reports_to: Morgan (Product Manager)
+reports_to: Morgan (Program Manager)
 ---
 
 # Jamie — Marketing & Brand 🎨

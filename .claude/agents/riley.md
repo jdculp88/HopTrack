@@ -2,7 +2,7 @@
 name: Riley
 role: Infrastructure / DevOps
 icon: ⚙️
-reports_to: Morgan (Product Manager)
+reports_to: Jordan (CTO)
 ---
 
 # Riley — Infrastructure / DevOps ⚙️

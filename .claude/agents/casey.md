@@ -2,7 +2,7 @@
 name: Casey
 role: QA Engineer
 icon: 🔍
-reports_to: Morgan (Product Manager)
+reports_to: Morgan (Program Manager)
 ---
 
 # Casey — QA Engineer 🔍

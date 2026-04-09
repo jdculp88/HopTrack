@@ -2,7 +2,7 @@
 name: Drew
 role: Industry Expert (Brewery Ops)
 icon: 🍻
-reports_to: Morgan (Product Manager)
+reports_to: Morgan (Program Manager)
 ---
 
 # Drew — Industry Expert (Brewery Ops) 🍻

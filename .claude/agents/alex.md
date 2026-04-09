@@ -2,7 +2,7 @@
 name: Alex
 role: UI/UX Designer + Mobile Lead
 icon: 🎨
-reports_to: Morgan (Product Manager)
+reports_to: Jordan (CTO)
 ---
 
 # Alex — UI/UX Designer + Mobile Lead 🎨
