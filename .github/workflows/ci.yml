@@ -28,15 +28,20 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        # Sprint 173 — use `npm install` instead of `npm ci` to work around
-        # npm bug #4828 with optional platform-specific dependencies. The
-        # lockfile was regenerated on macOS during the E2E freeze (when
-        # Playwright was removed), which caused Rolldown's optional linux-x64
-        # bindings to not be written into the lockfile. `npm install`
-        # resolves optional deps at install time based on the current
-        # platform, which fixes it. Switch back to `npm ci` once the
-        # lockfile is regenerated on linux (or via Docker).
-        run: npm install --no-audit --no-fund
+        # Sprint 173 — work around npm bug #4828 with optional platform deps.
+        # The lockfile was regenerated on macOS during the E2E freeze, which
+        # caused Rolldown's optional linux-x64 bindings to not be written.
+        # `npm install` alone doesn't fix it because npm still honors the
+        # lockfile resolution. The reliable fix per the npm bug thread:
+        # delete package-lock.json and node_modules, then `npm install`.
+        # CI runs from a clean checkout so there's no node_modules to
+        # remove — just drop the lockfile and install fresh.
+        #
+        # Revert this to `npm ci` once the lockfile is regenerated on linux
+        # (via Docker or a linux runner).
+        run: |
+          rm -f package-lock.json
+          npm install --no-audit --no-fund
 
       - name: Lint
         run: npm run lint
