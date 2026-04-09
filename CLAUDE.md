@@ -134,11 +134,19 @@ All knowledge about *how* we write code lives in **skills**, which load contextu
 
 - **`hoptrack-conventions`** — Next.js 16 patterns, Supabase rules, Tailwind v4, Framer Motion, BANNED UI patterns (`alert`/`confirm`/raw `NextResponse`/inline role checks), REQUIRED UI patterns (`loading.tsx`, optimistic updates, toasts), the full DRY import checklist. Triggers when you're writing, reviewing, or refactoring code.
 
+- **`hoptrack-design-system`** — Sprint 11 decisions, brand colors, font stack, card background system, beer style color families, shadow system, typography sizes, Framer Motion rules, haptic rules, reduced motion rules. Triggers on any visual/design work.
+
+- **`hoptrack-testing`** — Vitest + Playwright patterns, Casey's coverage rules, Reese's automation standards, the `createMockClient(): any` Supabase mock pattern, how to run tests, how to debug test failures, the "pre-existing debt rule" from S173. Triggers when writing, fixing, or reviewing tests.
+
+- **`hoptrack-debug`** — Debug playbook. Rule #1: check CI first (S173 lesson). Systematic diagnostic order: CI → browser console → server logs → database → reproduce locally → add logging. Triggers on anything broken.
+
+- **`hoptrack-retro-format`** — Sprint 12 retro format — everyone speaks, everyone gets roasted, live in chat first, then saved. Triggers on "retro", "pulse check", "lessons learned".
+
 - **`supabase-migration`** — Sequential numbering, RLS in same migration, `gen_random_uuid`, rollback plans, `NOTIFY pgrst 'reload schema'` after FK changes. Triggers when you're touching the schema or writing a migration.
 
 - **`hoptrack-codebase-map`** — Where everything lives: route groups, shared libs, hooks, types, scripts, docs. Triggers when you're navigating the project, searching for a helper, or answering "where does X live".
 
-- **`sprint-close`** — 6-step close ceremony. Manual trigger only (Joshua says the word).
+- **`sprint-close`** — 6-step close ceremony. Manual trigger only — Joshua must explicitly say "close the sprint".
 
 ---
 
@@ -174,14 +182,6 @@ All knowledge about *how* we write code lives in **skills**, which load contextu
 3. 🥉 Analytics Engineer — hire at ~20-50 active breweries
 
 Full notes: `docs/retros/sprint-10-retro.md` → Team Hiring Discussion section
-
----
-
-## 🎨 Key Design Principles (Still Active from Sprint 11)
-- Marketing pages use hardcoded `C` color constants (not CSS vars)
-- App interior uses CSS vars, defaults to light in S172 (was dark pre-S172), user-toggleable to dark/OLED
-- `DarkCardWrapper` client component forces dark vars via `style.setProperty()` (Tailwind v4 CSS var override workaround)
-- Pour connectors (gold vertical gradient lines) between sections = brand identity element
 
 ---
 

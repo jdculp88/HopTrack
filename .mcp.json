@@ -1,0 +1,16 @@
+{
+  "$schema": "https://code.claude.com/schema/mcp.json",
+  "_comment": "HopTrack — Sprint 173 — MCP (Model Context Protocol) servers. The Supabase MCP points at hoptrack-staging (NOT the main HopTrack project in us-east-2) per Supabase docs: 'Supabase MCP is only designed for development and testing purposes. It is recommended to not connect to production.' Full setup instructions: docs/claude-code-setup.md",
+
+  "mcpServers": {
+    "supabase-staging": {
+      "_comment": "Supabase MCP — queries hoptrack-staging for schema introspection, migration planning, RLS debugging, and diagnostic SELECTs. Riley/Quinn/Avery are the primary users. Requires SUPABASE_STAGING_URL and SUPABASE_STAGING_SERVICE_ROLE_KEY in your environment or .env.local (gitignored). NEVER point this at HopTrack main (us-east-2).",
+      "command": "npx",
+      "args": ["-y", "@supabase/mcp-server"],
+      "env": {
+        "SUPABASE_URL": "${SUPABASE_STAGING_URL}",
+        "SUPABASE_SERVICE_ROLE_KEY": "${SUPABASE_STAGING_SERVICE_ROLE_KEY}"
+      }
+    }
+  }
+}
