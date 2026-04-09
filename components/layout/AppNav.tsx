@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -34,6 +34,7 @@ interface AppNavProps {
   username: string;
   unreadNotifications?: number;
   onCheckin: () => void;
+  hasActiveSession?: boolean;
 }
 
 // Sprint 161 — Arc-style phase animation check-in FAB
@@ -108,21 +109,26 @@ function CheckinFAB({ onCheckin, haptic }: { onCheckin: () => void; haptic: (p: 
   );
 }
 
-export function AppNav({ username, unreadNotifications = 0, onCheckin }: AppNavProps) {
+export function AppNav({ username, unreadNotifications = 0, onCheckin, hasActiveSession = false }: AppNavProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { haptic } = useHaptic();
 
   // Sprint 161 — The Vibe: scroll-hide bottom nav on scroll-down
+  // Disabled during active session — DetentSheet peek sits above the nav
   const { scrollY } = useScroll();
   const [navHidden, setNavHidden] = useState(false);
   const reducedMotion = useReducedMotion();
 
+  // Force-show nav immediately when a session starts (even if already scroll-hidden)
+  useEffect(() => {
+    if (hasActiveSession) setNavHidden(false);
+  }, [hasActiveSession]);
+
   useMotionValueEvent(scrollY, "change", (latest) => {
-    if (reducedMotion) return;
+    if (reducedMotion || hasActiveSession) return;
     const previous = scrollY.getPrevious() ?? 0;
     const delta = latest - previous;
-    // Hide when scrolling down past 120px; show when scrolling up or near top
     if (delta > 4 && latest > 120) {
       setNavHidden(true);
     } else if (delta < -4 || latest < 80) {

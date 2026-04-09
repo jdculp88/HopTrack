@@ -37,7 +37,7 @@ interface BreweryBeerLog {
   beer_id: string | null;
   rating: number | null;
   quantity: number;
-  beer: { name: string } | null;
+  beer: { name: string; style: string | null } | null;
 }
 
 interface TopVisitor extends BreweryVisit {
@@ -163,7 +163,7 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
 
   const { data: breweryLogsRaw } = await supabase // supabase join shape
     .from("beer_logs")
-    .select("beer_id, rating, quantity, beer:beers(name)")
+    .select("beer_id, rating, quantity, beer:beers(name, style)")
     .eq("brewery_id", id)
     .limit(50000);
   const breweryLogs = (breweryLogsRaw ?? []) as unknown as BreweryBeerLog[];
@@ -174,11 +174,11 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
         ratingsWithValue.length
       : null;
 
-  const beerCountMap: Record<string, { name: string; count: number }> = {};
+  const beerCountMap: Record<string, { name: string; style: string | null; count: number }> = {};
   for (const l of breweryLogs) {
     if (!l.beer_id) continue;
     if (!beerCountMap[l.beer_id]) {
-      beerCountMap[l.beer_id] = { name: l.beer?.name ?? "Unknown", count: 0 };
+      beerCountMap[l.beer_id] = { name: l.beer?.name ?? "Unknown", style: l.beer?.style ?? null, count: 0 };
     }
     beerCountMap[l.beer_id].count += l.quantity ?? 1;
   }

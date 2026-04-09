@@ -230,6 +230,7 @@ function AppShellInner({ children, username, unreadNotifications: initialUnread 
           username={username}
           unreadNotifications={unreadNotifications}
           onCheckin={handleCheckin}
+          hasActiveSession={!!activeSession}
         />
 
         <main id="main-content" className="flex-1 min-w-0 pb-20 lg:pb-0 pt-12 lg:pt-0" style={{ background: 'var(--bg)' }}>
@@ -269,6 +270,7 @@ function AppShellInner({ children, username, unreadNotifications: initialUnread 
           onDetentChange={handleDetentChange}
           onSessionEnd={handleSessionEnd}
           onSessionCancelled={handleSessionCancelled}
+          onMinimize={() => setTapWallMode('closed')}
         />
       )}
 

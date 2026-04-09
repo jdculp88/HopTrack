@@ -267,7 +267,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
       <div className="max-w-3xl mx-auto">
         {/* Profile hero — centered layout, beer-style dark gradient banner */}
         <div
-          className="relative mx-4 mt-4 overflow-hidden"
+          className="relative mx-4 mt-4 overflow-visible"
           style={{
             borderRadius: "20px",
             background: "var(--card-bg)",

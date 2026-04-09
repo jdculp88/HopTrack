@@ -17,14 +17,14 @@ DECLARE
   beer_ids uuid[];
   uid uuid;
   bid uuid;
-  beer_id uuid;
+  v_beer_id uuid;
   session_id uuid;
   d int;
   day_offset int;
   beers_per_session int;
   session_start timestamptz;
   session_end timestamptz;
-  rating numeric;
+  v_rating numeric;
   log_time timestamptz;
   b int;
   reactor_num int;
@@ -110,20 +110,20 @@ BEGIN
         log_time := session_start + interval '10 minutes';
 
         FOR b IN 1..array_length(beer_ids, 1) LOOP
-          beer_id := beer_ids[b];
+          v_beer_id := beer_ids[b];
 
           -- 70% leave a rating
           IF random() < 0.7 THEN
-            rating := 2.5 + (random() * 2.5);
-            rating := round(rating * 2) / 2; -- snap to 0.5
+            v_rating := 2.5 + (random() * 2.5);
+            v_rating := round(v_rating * 2) / 2; -- snap to 0.5
           ELSE
-            rating := NULL;
+            v_rating := NULL;
           END IF;
 
           INSERT INTO beer_logs (id, session_id, user_id, beer_id, brewery_id, quantity, rating, serving_style, logged_at)
           VALUES (
-            gen_random_uuid(), session_id, uid, beer_id, bid, 1,
-            rating,
+            gen_random_uuid(), session_id, uid, v_beer_id, bid, 1,
+            v_rating,
             (ARRAY['pint', 'tulip', 'snifter', 'goblet', 'taster'])[1 + floor(random() * 5)::int],
             log_time
           ) ON CONFLICT DO NOTHING;
@@ -131,9 +131,9 @@ BEGIN
           log_time := log_time + ((20 + floor(random() * 40))::int || ' minutes')::interval;
 
           -- 12% chance of a beer review
-          IF random() < 0.12 AND rating IS NOT NULL THEN
+          IF random() < 0.12 AND v_rating IS NOT NULL THEN
             INSERT INTO beer_reviews (user_id, beer_id, rating, comment)
-            VALUES (uid, beer_id, rating,
+            VALUES (uid, v_beer_id, v_rating,
               (ARRAY[
                 'Solid pour, would order again',
                 'Not my style but well made',

@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Star, Send, Trash2, MessageSquare } from "lucide-react";
+import { Star, Send, Trash2, MessageSquare, ChevronDown } from "lucide-react";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import { ReportButton } from "@/components/ui/ReportButton";
 import { formatRelativeTime } from "@/lib/utils";
@@ -46,12 +46,32 @@ export function BreweryReview({ breweryId, currentUserId, isBreweryAdmin, isAuth
   const [respondingTo, setRespondingTo] = useState<string | null>(null);
   const [responseText, setResponseText] = useState("");
   const [respondingSubmitting, setRespondingSubmitting] = useState(false);
+  const [sortBy, setSortBy] = useState<"recent" | "highest" | "lowest">("recent");
+
+  // Sort reviews with user's own review always pinned first
+  const sortedReviews = useMemo(() => {
+    const mine = userReview ? reviews.filter((r) => r.id === userReview.id) : [];
+    const others = userReview ? reviews.filter((r) => r.id !== userReview.id) : [...reviews];
+    const sorted = others.sort((a, b) => {
+      if (sortBy === "highest") return b.rating - a.rating;
+      if (sortBy === "lowest") return a.rating - b.rating;
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    });
+    return [...mine, ...sorted];
+  }, [reviews, userReview, sortBy]);
 
   async function fetchReviews() {
     const res = await fetch(`/api/brewery/${breweryId}/reviews`);
     if (!res.ok) return;
     const data = await res.json();
-    setReviews(data.reviews);
+    // Pin the current user's review to the top so it's always visible
+    const sorted = data.userReview
+      ? [
+          data.userReview,
+          ...(data.reviews ?? []).filter((r: Review) => r.id !== data.userReview.id),
+        ]
+      : data.reviews ?? [];
+    setReviews(sorted);
     setUserReview(data.userReview);
     setAvgRating(data.avgRating);
     setTotalReviews(data.totalReviews);
@@ -160,6 +180,33 @@ export function BreweryReview({ breweryId, currentUserId, isBreweryAdmin, isAuth
         )}
       </div>
 
+      {/* Sort dropdown */}
+      {reviews.length > 1 && (
+        <div className="flex justify-end mb-3">
+          <div className="relative inline-flex">
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as "recent" | "highest" | "lowest")}
+              className="appearance-none text-xs font-mono pl-2.5 pr-7 py-1.5 rounded-lg border cursor-pointer outline-none"
+              style={{
+                background: "var(--surface-2)",
+                borderColor: "var(--border)",
+                color: "var(--text-secondary)",
+              }}
+            >
+              <option value="recent">Recent</option>
+              <option value="highest">Highest</option>
+              <option value="lowest">Lowest</option>
+            </select>
+            <ChevronDown
+              size={12}
+              className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none"
+              style={{ color: "var(--text-muted)" }}
+            />
+          </div>
+        </div>
+      )}
+
       {/* Review form */}
       <AnimatePresence>
         {showForm && (
@@ -261,9 +308,9 @@ export function BreweryReview({ breweryId, currentUserId, isBreweryAdmin, isAuth
       </AnimatePresence>
 
       {/* Reviews list — Design System v2.0: text reviews = full card, rating-only = compact row */}
-      {reviews.length > 0 ? (
+      {sortedReviews.length > 0 ? (
         <div className="space-y-2">
-          {reviews.map((review, i) => {
+          {sortedReviews.map((review, i) => {
             const hasText = !!review.comment;
 
             // Rating-only: compact row, NO card wrapper (Card Type 5)
@@ -278,6 +325,11 @@ export function BreweryReview({ breweryId, currentUserId, isBreweryAdmin, isAuth
                   <span className="text-[13px] font-medium flex-1 min-w-0 truncate" style={{ color: "var(--text-secondary)" }}>
                     {review.profile.display_name ?? review.profile.username}
                   </span>
+                  {currentUserId && review.user_id === currentUserId && (
+                    <span className="text-[9px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded-md flex-shrink-0" style={{ background: "color-mix(in srgb, var(--accent-gold) 15%, transparent)", color: "var(--accent-gold)" }}>
+                      You
+                    </span>
+                  )}
                   <StarRating value={review.rating} readonly size="sm" />
                   <span className="text-[10px] font-mono" style={{ color: "var(--text-muted)" }}>
                     {formatRelativeTime(review.created_at)}
@@ -303,6 +355,11 @@ export function BreweryReview({ breweryId, currentUserId, isBreweryAdmin, isAuth
                     <span className="font-sans font-semibold text-sm" style={{ color: "var(--text-primary)" }}>
                       {review.profile.display_name ?? review.profile.username}
                     </span>
+                    {currentUserId && review.user_id === currentUserId && (
+                      <span className="text-[9px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded-md" style={{ background: "color-mix(in srgb, var(--accent-gold) 15%, transparent)", color: "var(--accent-gold)" }}>
+                        You
+                      </span>
+                    )}
                     <StarRating value={review.rating} readonly size="sm" />
                     {review.rating % 1 !== 0 && (
                       <span className="text-[10px] font-mono" style={{ color: "var(--amber, var(--accent-gold))" }}>

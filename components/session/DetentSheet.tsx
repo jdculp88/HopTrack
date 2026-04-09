@@ -69,6 +69,7 @@ interface DetentSheetProps {
     streakMilestone?: number | null
   }) => void
   onSessionCancelled?: () => void
+  onMinimize?: () => void
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -82,10 +83,12 @@ export default function DetentSheet({
   onDetentChange,
   onSessionEnd,
   onSessionCancelled,
+  onMinimize,
 }: DetentSheetProps) {
   const { currentDetent, snapTo, dragProps, sheetHeight } = useDetentSheet({
     initialDetent,
     onDetentChange,
+    onMinimize,
   })
 
   const {
@@ -320,12 +323,12 @@ export default function DetentSheet({
     <>
       <motion.div
         {...dragProps}
-        className="fixed left-0 right-0 z-50 flex flex-col rounded-t-2xl overflow-hidden"
+        className={`fixed left-0 right-0 flex flex-col rounded-t-2xl overflow-hidden ${isFull ? 'z-50' : 'z-[39]'}`}
         data-detent-sheet
         style={{
           ...dragProps.style,
           height: sheetHeight,
-          bottom: isFull ? 0 : 72, // Sprint 171: peek/half sit above mobile nav (72px), full covers all
+          bottom: 0,
           background: 'var(--bg)',
           boxShadow: 'var(--shadow-elevated)',
           touchAction: isFull ? 'pan-y' : 'none',
@@ -371,7 +374,7 @@ export default function DetentSheet({
               </div>
             </div>
             <button
-              onClick={() => snapTo(isFull ? 'peek' : 'full')}
+              onClick={() => isFull ? onMinimize?.() : snapTo('full')}
               className="flex items-center gap-1.5 flex-shrink-0 p-1"
               aria-label={isFull ? 'Minimize session' : 'Expand session'}
             >
@@ -410,26 +413,6 @@ export default function DetentSheet({
                 </div>
               </div>
 
-              {/* Quick actions */}
-              <div className="flex gap-2">
-                <button
-                  onClick={() => snapTo('full')}
-                  className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold"
-                  style={{ background: 'var(--accent-gold)', color: 'var(--bg)' }}
-                >
-                  <Plus size={16} />
-                  Log Beer
-                </button>
-                <button
-                  onClick={() => { snapTo('full'); setShowEndConfirm(true) }}
-                  className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold"
-                  style={{ background: 'var(--surface)', color: 'var(--text-primary)', border: '1px solid var(--border)' }}
-                >
-                  <Square size={14} />
-                  End
-                </button>
-              </div>
-
               {/* Participants preview */}
               {participants.length > 0 && (
                 <div className="flex items-center gap-2 mt-3">
@@ -447,7 +430,7 @@ export default function DetentSheet({
         {isFull && (
           <div
             ref={contentRef}
-            className="flex-1 overflow-y-auto overscroll-contain"
+            className="flex-1 overflow-y-auto overscroll-contain pb-20"
             style={{ touchAction: 'pan-y' }}
           >
             <TapWallHeader
@@ -457,7 +440,7 @@ export default function DetentSheet({
               totalPours={totalPours}
               query={query}
               onQueryChange={setQuery}
-              onMinimize={() => snapTo('peek')}
+              onMinimize={() => onMinimize?.()}
               homeMode={homeMode}
             />
 

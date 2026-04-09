@@ -158,6 +158,8 @@ export function StyleBanner({ style, height = 100, children }: StyleBannerProps)
         height: `${height}px`,
         background: `${g.radial1}, ${g.radial2}, ${g.base}`,
         position: "relative",
+        borderRadius: "20px 20px 0 0",
+        overflow: "hidden",
       }}
     >
       {children}

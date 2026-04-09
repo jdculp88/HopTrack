@@ -7,7 +7,9 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { Globe, Phone, Star, Users, TrendingUp, Beer, CheckCheck } from "lucide-react";
+import { Globe, Phone, Star, Users, TrendingUp, Beer, CheckCheck, GlassWater } from "lucide-react";
+import { getStyleVars } from "@/lib/beerStyleColors";
+import { BeerStyleBadge } from "@/components/ui/BeerStyleBadge";
 import { PillTabs, type PillTab } from "@/components/ui/PillTabs";
 import { useTabUrlSync } from "@/hooks/useTabUrlSync";
 import { useScrollMemory } from "@/hooks/useScrollMemory";
@@ -74,7 +76,7 @@ export interface BreweryDetailClientProps {
   totalCheckins: number;
   uniqueVisitors: number;
   avgRating: number | null;
-  mostPopularBeer: { name: string; count: number } | null;
+  mostPopularBeer: { name: string; style: string | null; count: number } | null;
   beersOnTap: number;
 
   // Community
@@ -272,67 +274,99 @@ export function BreweryDetailClient(props: BreweryDetailClientProps) {
                   <p className="text-[var(--text-secondary)] leading-relaxed">{brewery.description}</p>
                 )}
 
-                {/* Stats bar */}
+                {/* Stats — profile-style cards with amber top bars */}
                 <div
-                  className="grid grid-cols-2 sm:grid-cols-5 gap-3"
+                  className="grid grid-cols-2 sm:grid-cols-4 gap-2"
                   role="region"
                   aria-label="Brewery statistics"
                 >
-                  <div className="card-bg-stats border border-[var(--border)] rounded-[14px] p-4 flex flex-col gap-1">
-                    <div className="flex items-center gap-1.5 text-[var(--text-muted)]">
-                      <CheckCheck size={13} />
-                      <span className="text-xs font-mono uppercase tracking-wider">Visits</span>
+                  {[
+                    { value: totalCheckins.toLocaleString(), label: "Visits", icon: CheckCheck },
+                    { value: uniqueVisitors.toLocaleString(), label: "Visitors", icon: Users },
+                    { value: avgRating != null ? avgRating.toFixed(1) : "—", label: "Avg Rating", icon: Star },
+                    { value: beersOnTap, label: "On Tap", icon: Beer },
+                  ].map((stat) => (
+                    <div
+                      key={stat.label}
+                      className="rounded-[14px] overflow-hidden"
+                      style={{
+                        background: "var(--card-bg)",
+                        border: "1px solid color-mix(in srgb, var(--accent-gold) 20%, var(--border))",
+                      }}
+                    >
+                      <div className="h-[3px]" style={{ background: "linear-gradient(to right, var(--accent-gold), var(--accent-amber, var(--accent-gold)))" }} />
+                      <div className="p-3.5">
+                        <div
+                          className="w-8 h-8 rounded-[10px] flex items-center justify-center mb-2"
+                          style={{ background: "color-mix(in srgb, var(--accent-gold) 10%, var(--surface-2))" }}
+                        >
+                          <stat.icon size={16} style={{ color: "var(--accent-gold)" }} />
+                        </div>
+                        <p className="font-mono font-bold text-[28px] leading-none" style={{ color: stat.label === "Avg Rating" && avgRating != null ? "var(--accent-gold)" : "var(--text-primary)" }}>
+                          {stat.value}
+                        </p>
+                        <p className="text-[9px] font-mono uppercase mt-1.5" style={{ color: "var(--text-muted)", letterSpacing: "0.12em" }}>
+                          {stat.label}
+                        </p>
+                      </div>
                     </div>
-                    <p className="font-mono font-display text-2xl font-bold text-[var(--text-primary)] leading-none">
-                      {totalCheckins.toLocaleString()}
-                    </p>
-                  </div>
-                  <div className="card-bg-stats border border-[var(--border)] rounded-[14px] p-4 flex flex-col gap-1">
-                    <div className="flex items-center gap-1.5 text-[var(--text-muted)]">
-                      <Users size={13} />
-                      <span className="text-xs font-mono uppercase tracking-wider">Visitors</span>
-                    </div>
-                    <p className="font-mono font-display text-2xl font-bold text-[var(--text-primary)] leading-none">
-                      {uniqueVisitors.toLocaleString()}
-                    </p>
-                  </div>
-                  <div className="card-bg-stats border border-[var(--border)] rounded-[14px] p-4 flex flex-col gap-1">
-                    <div className="flex items-center gap-1.5 text-[var(--text-muted)]">
-                      <Star size={13} />
-                      <span className="text-xs font-mono uppercase tracking-wider">Avg Rating</span>
-                    </div>
-                    {avgRating != null ? (
-                      <p className="font-mono font-display text-2xl font-bold text-[var(--accent-gold)] leading-none">
-                        {avgRating.toFixed(1)}
-                        <span className="text-sm font-sans font-normal text-[var(--text-muted)] ml-1">/5</span>
-                      </p>
-                    ) : (
-                      <p className="font-mono font-display text-2xl font-bold text-[var(--text-muted)] leading-none">—</p>
-                    )}
-                  </div>
-                  <div className="card-bg-stats border border-[var(--border)] rounded-[14px] p-4 flex flex-col gap-1 col-span-2 sm:col-span-1">
-                    <div className="flex items-center gap-1.5 text-[var(--text-muted)]">
-                      <TrendingUp size={13} />
-                      <span className="text-xs font-mono uppercase tracking-wider">Top Beer</span>
-                    </div>
-                    {mostPopularBeer ? (
-                      <p className="font-display text-sm font-bold text-[var(--text-primary)] leading-tight line-clamp-2">
-                        {mostPopularBeer.name}
-                      </p>
-                    ) : (
-                      <p className="font-display text-sm font-bold text-[var(--text-muted)] leading-none">—</p>
-                    )}
-                  </div>
-                  <div className="card-bg-stats border border-[var(--border)] rounded-[14px] p-4 flex flex-col gap-1">
-                    <div className="flex items-center gap-1.5 text-[var(--text-muted)]">
-                      <Beer size={13} />
-                      <span className="text-xs font-mono uppercase tracking-wider">On Tap</span>
-                    </div>
-                    <p className="font-mono font-display text-2xl font-bold text-[var(--text-primary)] leading-none">
-                      {beersOnTap}
-                    </p>
-                  </div>
+                  ))}
                 </div>
+
+                {/* Top Beer — favorite beer style card */}
+                {mostPopularBeer ? (() => {
+                  const styleVars = getStyleVars(mostPopularBeer.style);
+                  return (
+                    <div
+                      className="rounded-[14px] overflow-hidden"
+                      style={{
+                        background: "var(--card-bg)",
+                        border: "1px solid color-mix(in srgb, var(--accent-gold) 25%, var(--border))",
+                      }}
+                    >
+                      <div className="h-[3px]" style={{ background: "linear-gradient(to right, var(--accent-gold), var(--accent-amber, var(--accent-gold)))" }} />
+                      <div className="flex items-center gap-3.5 p-4">
+                        {/* Glass thumbnail — style tinted */}
+                        <div
+                          className="w-14 h-14 rounded-[14px] flex-shrink-0 flex items-center justify-center"
+                          style={{
+                            background: `color-mix(in srgb, ${styleVars.primary} 12%, var(--surface-2))`,
+                            border: `1px solid color-mix(in srgb, ${styleVars.primary} 18%, transparent)`,
+                          }}
+                        >
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={styleVars.primary} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.6 }}>
+                            <path d="M7 3h10l-1.5 15a2 2 0 0 1-2 1.8h-3a2 2 0 0 1-2-1.8L7 3z"/>
+                            <path d="M8 3c0 0 .5 2 4 2s4-2 4-2"/>
+                          </svg>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1.5 mb-0.5">
+                            <TrendingUp size={10} style={{ color: "var(--accent-gold)" }} />
+                            <span className="text-[9px] font-mono uppercase tracking-[0.12em] font-bold" style={{ color: "var(--accent-gold)" }}>
+                              Top Beer
+                            </span>
+                          </div>
+                          <p className="font-display font-bold text-base text-[var(--text-primary)] truncate">
+                            {mostPopularBeer.name}
+                          </p>
+                          {mostPopularBeer.style && (
+                            <div className="mt-0.5">
+                              <BeerStyleBadge style={mostPopularBeer.style} size="xs" />
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex flex-col items-end flex-shrink-0">
+                          <span className="font-mono text-2xl font-bold leading-none" style={{ color: "var(--accent-gold)" }}>
+                            {mostPopularBeer.count}
+                          </span>
+                          <span className="text-[10px] font-mono mt-0.5" style={{ color: "var(--text-muted)" }}>
+                            pours
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })() : null}
 
                 {/* Explore prompt — audit #17: content below stats */}
                 {beersOnTap > 0 && (

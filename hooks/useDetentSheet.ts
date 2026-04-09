@@ -12,6 +12,7 @@ import { spring } from '@/lib/animation'
 export type Detent = 'peek' | 'half' | 'full'
 
 const PEEK_HEIGHT = 80     // px — minimized bar height
+const NAV_HEIGHT = 72      // px — mobile bottom nav height (must clear it in peek/half)
 const HALF_RATIO = 0.45    // 45% of viewport
 const FULL_RATIO = 0.95    // 95% of viewport
 const FLING_THRESHOLD = 300 // px/s velocity for fling gesture
@@ -19,23 +20,25 @@ const FLING_THRESHOLD = 300 // px/s velocity for fling gesture
 interface UseDetentSheetOptions {
   initialDetent?: Detent
   onDetentChange?: (detent: Detent) => void
+  onMinimize?: () => void
 }
 
 function getSnapPoints() {
   const vh = typeof window !== 'undefined' ? window.innerHeight : 800
   const sheetHeight = vh * FULL_RATIO
   const halfHeight = vh * HALF_RATIO
-  // y = 0 → sheet at full height; y = sheetHeight - PEEK_HEIGHT → only peek visible
+  // y = 0 → sheet at full height
+  // peek/half offset by NAV_HEIGHT so visible content sits above the bottom nav
   return {
     full: 0,
-    half: sheetHeight - halfHeight,
-    peek: sheetHeight - PEEK_HEIGHT,
+    half: sheetHeight - halfHeight - NAV_HEIGHT,
+    peek: sheetHeight - PEEK_HEIGHT - NAV_HEIGHT,
     sheetHeight,
   }
 }
 
 export function useDetentSheet(options: UseDetentSheetOptions = {}) {
-  const { initialDetent = 'peek', onDetentChange } = options
+  const { initialDetent = 'peek', onDetentChange, onMinimize } = options
   const [currentDetent, setCurrentDetent] = useState<Detent>(initialDetent)
   const { haptic } = useHaptic()
   const prefersReducedMotion = useReducedMotion()
@@ -69,13 +72,12 @@ export function useDetentSheet(options: UseDetentSheetOptions = {}) {
     let target: Detent
 
     if (velocity > FLING_THRESHOLD) {
-      // Flinging down → next lower detent
-      if (currentDetent === 'full') target = 'half'
-      else target = 'peek'
+      // Flinging down → minimize (close sheet, show ActiveSessionBanner)
+      onMinimize?.()
+      return
     } else if (velocity < -FLING_THRESHOLD) {
-      // Flinging up → next higher detent
-      if (currentDetent === 'peek') target = 'half'
-      else target = 'full'
+      // Flinging up → straight to full
+      target = 'full'
     } else {
       // Snap to nearest
       const distances: [Detent, number][] = [

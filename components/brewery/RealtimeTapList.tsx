@@ -4,7 +4,8 @@ import { useState, useCallback } from "react";
 import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
 import { JustTappedBadge } from "./JustTappedBadge";
 import Link from "next/link";
-import { Star, Award, UtensilsCrossed, FileText, ExternalLink, Beer } from "lucide-react";
+import { Star, UtensilsCrossed, FileText, ExternalLink, Beer } from "lucide-react";
+import { BeerOfTheWeekCard } from "@/components/social/BeerOfTheWeekCard";
 import { ITEM_TYPE_LABELS, ITEM_TYPE_EMOJI } from "@/types/database";
 import { BeerCard } from "@/components/beer/BeerCard";
 import { BeerStyleBadge } from "@/components/ui/BeerStyleBadge";
@@ -149,46 +150,20 @@ export function RealtimeTapList({
     <div className="space-y-8">
       {/* Beer of the Week */}
       {featuredBeer && (
-        <Link href={`/beer/${featuredBeer.id}`}>
-          <div className="card-bg-featured flex items-center gap-4 p-4 border border-[var(--accent-gold)]/30 rounded-[14px] transition-all hover:border-[var(--accent-gold)]/60 group">
-            <div
-              className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
-              style={{
-                background:
-                  "linear-gradient(135deg, var(--accent-gold) 0%, var(--accent-amber) 100%)",
-              }}
-            >
-              <Award size={22} className="text-[var(--bg)]" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-0.5">
-                <p className="text-xs font-mono uppercase tracking-wider text-[var(--accent-gold)]">
-                  Beer of the Week
-                </p>
-                <JustTappedBadge tappedAt={featuredBeer.tapped_at} />
-              </div>
-              <p className="font-display font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-gold)] transition-colors truncate">
-                {featuredBeer.name}
-              </p>
-              <div className="flex items-center gap-2 mt-0.5">
-                <BeerStyleBadge style={featuredBeer.style} size="xs" />
-                {featuredBeer.abv && (
-                  <span className="text-xs font-mono text-[var(--text-muted)]">
-                    {featuredBeer.abv}% ABV
-                  </span>
-                )}
-              </div>
-            </div>
-            {featuredBeer.avg_rating && (
-              <div className="flex items-center gap-1 flex-shrink-0">
-                <Star size={14} className="text-[var(--accent-gold)] fill-[var(--accent-gold)]" />
-                <span className="font-mono font-bold text-[var(--accent-gold)]">
-                  {(featuredBeer.avg_rating as number).toFixed(1)}
-                </span>
-              </div>
-            )}
-          </div>
-        </Link>
+        <div className="mb-2">
+          <BeerOfTheWeekCard
+            beer={{
+              id: featuredBeer.id,
+              name: featuredBeer.name,
+              style: featuredBeer.style,
+              abv: featuredBeer.abv,
+              glass_type: null,
+              description: null,
+              brewery: { id: breweryId, name: breweryName },
+              avg_rating: featuredBeer.avg_rating,
+            }}
+          />
+        </div>
       )}
 
       {/* On Tap / Full Menu */}
@@ -239,7 +214,7 @@ export function RealtimeTapList({
                     {sorted.map((beer) => (
                       <div key={beer.id} className="relative">
                         <BeerCard beer={beer as any} variant="grid" />
-                        <div className="absolute top-2 right-2">
+                        <div className="absolute top-2 left-2">
                           <JustTappedBadge tappedAt={beer.tapped_at} />
                         </div>
                       </div>
