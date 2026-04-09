@@ -77,6 +77,18 @@ jobs:
   e2e:
     needs: build
     runs-on: ubuntu-latest
+    # Sprint 173 — E2E is soft-failing until hoptrack-staging is seeded.
+    # The staging Supabase instance is empty (0 tables, 0 migrations). Every
+    # auth-dependent E2E test fails on login → 45s timeout × 2 retries per
+    # test × 112 tests = ~4 hours of wasted runner time. `continue-on-error`
+    # lets the overall workflow pass on build-job success while E2E still
+    # runs (annotations surface failures) and `timeout-minutes: 15` prevents
+    # the job from hogging runners. Re-tighten once staging has:
+    #   1. All 103 migrations applied (supabase db push)
+    #   2. Test user testflight@hoptrack.beer created in Auth
+    #   3. Seeds 024, 025, 008 run against it
+    continue-on-error: true
+    timeout-minutes: 15
 
     steps:
       - name: Checkout code
