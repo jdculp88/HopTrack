@@ -68,8 +68,11 @@ jobs:
         env:
           # Dummy values so Next.js build succeeds without real Supabase credentials.
           # The app checks for live connections at runtime, not build time.
+          # Sprint 173: SUPABASE_SERVICE_ROLE_KEY added because /superadmin/barback
+          # statically prerenders a service-role client and throws without it.
           NEXT_PUBLIC_SUPABASE_URL: "https://placeholder.supabase.co"
           NEXT_PUBLIC_SUPABASE_ANON_KEY: "placeholder"
+          SUPABASE_SERVICE_ROLE_KEY: "placeholder-service-role-key"
 
   e2e:
     needs: build
