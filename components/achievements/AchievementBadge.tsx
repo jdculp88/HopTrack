@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useState } from "react";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 import { TIER_STYLES } from "@/lib/constants/tiers";
@@ -44,10 +44,13 @@ export function AchievementBadge({
 }: AchievementBadgeProps) {
   const tier = TIER_STYLES[achievement.tier];
   const s = SIZES[size];
-  const isRecent = useMemo(() => {
-    if (!earned || !_earnedAt) return false;
-    return Date.now() - new Date(_earnedAt).getTime() < 7 * 24 * 60 * 60 * 1000;
-  }, [earned, _earnedAt]);
+  // Sprint 173 fix: Date.now() is impure — React compiler forbids it in render.
+  // Capture "now" once at mount via lazy useState init.
+  const [nowMs] = useState(() => Date.now());
+  const isRecent =
+    earned && _earnedAt
+      ? nowMs - new Date(_earnedAt).getTime() < 7 * 24 * 60 * 60 * 1000
+      : false;
 
   return (
     <button

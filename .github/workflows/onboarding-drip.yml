@@ -1,10 +1,14 @@
 name: Onboarding Drip
 
 on:
-  schedule:
-    # Daily 9am ET = 14:00 UTC (EST+5) / 13:00 UTC (EDT+4)
-    # Using 14:00 UTC covers EST; during EDT it arrives at 10am — close enough
-    - cron: "0 14 * * *"
+  # Sprint 173 — schedule disabled until production is deployed. The
+  # ONBOARDING_DRIP_ENDPOINT_URL secret currently points at a domain that
+  # returns HTTP 404 (GoDaddy parked page). Re-enable by uncommenting and
+  # updating the secret once prod is live.
+  # schedule:
+  #   # Daily 9am ET = 14:00 UTC (EST+5) / 13:00 UTC (EDT+4)
+  #   # Using 14:00 UTC covers EST; during EDT it arrives at 10am — close enough
+  #   - cron: "0 14 * * *"
   workflow_dispatch: # Manual trigger from GitHub UI
 
 jobs:

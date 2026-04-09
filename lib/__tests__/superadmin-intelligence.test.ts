@@ -55,8 +55,12 @@ function createChain(result: QueryResult) {
  * If an array of results is provided for a table, successive .from() calls
  * consume them in order (useful when a function queries the same table
  * multiple times, e.g. calculatePredictiveSignals calls sessions twice).
+ *
+ * Sprint 173 fix: `: any` return type bypasses the SupabaseClient shape mismatch
+ * that blocked CI type check for weeks (per CLAUDE.md: cast with `as any` where
+ * TypeScript fights the Supabase types).
  */
-function createMockClient(fromOverrides: FromOverrides = {}) {
+function createMockClient(fromOverrides: FromOverrides = {}): any {
   const callCounters = new Map<string, number>();
 
   return {

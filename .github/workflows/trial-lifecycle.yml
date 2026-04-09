@@ -1,10 +1,14 @@
 name: Trial Lifecycle
 
 on:
-  schedule:
-    # Daily 10am ET = 15:00 UTC (EST+5) / 14:00 UTC (EDT+4)
-    # Using 15:00 UTC covers EST; during EDT it arrives at 11am — close enough
-    - cron: "0 15 * * *"
+  # Sprint 173 — schedule disabled until production is deployed. The
+  # TRIAL_LIFECYCLE_ENDPOINT_URL secret currently points at a domain that
+  # returns HTTP 404 (GoDaddy parked page). Re-enable by uncommenting and
+  # updating the secret once prod is live.
+  # schedule:
+  #   # Daily 10am ET = 15:00 UTC (EST+5) / 14:00 UTC (EDT+4)
+  #   # Using 15:00 UTC covers EST; during EDT it arrives at 11am — close enough
+  #   - cron: "0 15 * * *"
   workflow_dispatch: # Manual trigger from GitHub UI
 
 jobs:

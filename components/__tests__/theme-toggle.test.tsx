@@ -61,32 +61,33 @@ beforeEach(() => {
 
 describe("ThemeProvider", () => {
   describe("default state", () => {
-    it("defaults to dark theme when no localStorage value exists", () => {
+    it("defaults to light theme when no localStorage value exists", () => {
+      // Sprint 172 (Design System v2.0): theme default flipped from dark → light
       renderWithProvider();
-      expect(screen.getByTestId("current-theme").textContent).toBe("dark");
+      expect(screen.getByTestId("current-theme").textContent).toBe("light");
     });
   });
 
-  describe("toggle cycles: dark -> light -> oled -> dark", () => {
-    it("cycles from dark to light on first toggle", () => {
+  describe("toggle cycles: light -> dark -> oled -> light", () => {
+    it("cycles from light to dark on first toggle", () => {
       renderWithProvider();
       fireEvent.click(screen.getByTestId("toggle-btn"));
-      expect(screen.getByTestId("current-theme").textContent).toBe("light");
+      expect(screen.getByTestId("current-theme").textContent).toBe("dark");
     });
 
-    it("cycles from light to oled on second toggle", () => {
+    it("cycles from dark to oled on second toggle", () => {
       renderWithProvider();
-      fireEvent.click(screen.getByTestId("toggle-btn")); // dark -> light
-      fireEvent.click(screen.getByTestId("toggle-btn")); // light -> oled
+      fireEvent.click(screen.getByTestId("toggle-btn")); // light -> dark
+      fireEvent.click(screen.getByTestId("toggle-btn")); // dark -> oled
       expect(screen.getByTestId("current-theme").textContent).toBe("oled");
     });
 
-    it("cycles from oled back to dark on third toggle", () => {
+    it("cycles from oled back to light on third toggle", () => {
       renderWithProvider();
-      fireEvent.click(screen.getByTestId("toggle-btn")); // dark -> light
-      fireEvent.click(screen.getByTestId("toggle-btn")); // light -> oled
-      fireEvent.click(screen.getByTestId("toggle-btn")); // oled -> dark
-      expect(screen.getByTestId("current-theme").textContent).toBe("dark");
+      fireEvent.click(screen.getByTestId("toggle-btn")); // light -> dark
+      fireEvent.click(screen.getByTestId("toggle-btn")); // dark -> oled
+      fireEvent.click(screen.getByTestId("toggle-btn")); // oled -> light
+      expect(screen.getByTestId("current-theme").textContent).toBe("light");
     });
 
     it("completes full cycle back to same state after 3 toggles", () => {
@@ -100,16 +101,11 @@ describe("ThemeProvider", () => {
   });
 
   describe("data-theme attribute", () => {
-    it("sets data-theme to dark initially", () => {
+    it("sets data-theme to dark after first toggle from light", () => {
+      // Sprint 172: light is the new default; first toggle advances to dark
       renderWithProvider();
-      // After mount effect, dark is applied (or attribute may not be set if dark is default)
-      // The apply function sets it explicitly
-      const attr = document.documentElement.getAttribute("data-theme");
-      // On initial render without saved preference, state is "dark"
-      // The useEffect only runs on mount — if no localStorage, it may not call apply
-      // But toggle will always call apply
-      fireEvent.click(screen.getByTestId("toggle-btn")); // dark -> light
-      expect(document.documentElement.getAttribute("data-theme")).toBe("light");
+      fireEvent.click(screen.getByTestId("toggle-btn")); // light -> dark
+      expect(document.documentElement.getAttribute("data-theme")).toBe("dark");
     });
 
     it("sets data-theme to oled when OLED theme is active", () => {
@@ -129,9 +125,10 @@ describe("ThemeProvider", () => {
 
   describe("localStorage persistence", () => {
     it("saves theme to localStorage on toggle", () => {
+      // Sprint 172: light → dark on first toggle
       renderWithProvider();
-      fireEvent.click(screen.getByTestId("toggle-btn")); // dark -> light
-      expect(localStorage.getItem("hoptrack-theme")).toBe("light");
+      fireEvent.click(screen.getByTestId("toggle-btn")); // light -> dark
+      expect(localStorage.getItem("hoptrack-theme")).toBe("dark");
     });
 
     it("saves oled to localStorage", () => {
@@ -164,10 +161,11 @@ describe("ThemeProvider", () => {
       expect(screen.getByTestId("current-theme").textContent).toBe("oled");
     });
 
-    it("ignores invalid localStorage values and defaults to dark", () => {
+    it("ignores invalid localStorage values and defaults to light", () => {
+      // Sprint 172: default flipped from dark → light
       localStorage.setItem("hoptrack-theme", "neon-pink");
       renderWithProvider();
-      expect(screen.getByTestId("current-theme").textContent).toBe("dark");
+      expect(screen.getByTestId("current-theme").textContent).toBe("light");
     });
   });
 

@@ -1,10 +1,14 @@
 name: AI Suggestions
 
 on:
-  schedule:
-    # Wednesday 3am ET = 08:00 UTC (EST+5) / 07:00 UTC (EDT+4)
-    # Using 08:00 UTC covers EST; during EDT it arrives at 4am — close enough
-    - cron: "0 8 * * 3"
+  # Sprint 173 — schedule disabled until production is deployed. The
+  # AI_SUGGESTIONS_ENDPOINT_URL secret currently points at a domain that
+  # returns HTTP 404 (GoDaddy parked page). Re-enable by uncommenting and
+  # updating the secret once prod is live.
+  # schedule:
+  #   # Wednesday 3am ET = 08:00 UTC (EST+5) / 07:00 UTC (EDT+4)
+  #   # Using 08:00 UTC covers EST; during EDT it arrives at 4am — close enough
+  #   - cron: "0 8 * * 3"
   workflow_dispatch: # Manual trigger from GitHub UI
 
 jobs:

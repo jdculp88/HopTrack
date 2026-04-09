@@ -1,9 +1,14 @@
 name: Barback Crawl
 
 on:
-  schedule:
-    # Every Monday at 2am ET (7:00 UTC) — overnight, polite timing
-    - cron: "0 7 * * 1"
+  # Sprint 173 — schedule disabled until production env is configured. The
+  # barback script requires NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY,
+  # and ANTHROPIC_API_KEY secrets — none of which are currently set in the
+  # repo (only E2E_SUPABASE_* variants exist). Re-enable by uncommenting and
+  # adding the 3 missing secrets.
+  # schedule:
+  #   # Every Monday at 2am ET (7:00 UTC) — overnight, polite timing
+  #   - cron: "0 7 * * 1"
   workflow_dispatch: # Manual trigger from GitHub UI
 
 jobs:

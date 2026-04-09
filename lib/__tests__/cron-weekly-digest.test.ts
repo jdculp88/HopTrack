@@ -36,15 +36,17 @@ vi.mock("@/lib/email-triggers", () => ({
 const queryResponses: Record<string, any> = {};
 
 function buildChain(data: any) {
-  const chain: any = {
-    select: vi.fn().mockReturnValue(chain),
-    eq: vi.fn().mockReturnValue(chain),
-    in: vi.fn().mockReturnValue(chain),
-    not: vi.fn().mockReturnValue(chain),
-    gte: vi.fn().mockReturnValue(chain),
-    is: vi.fn().mockReturnValue(chain),
-    single: vi.fn().mockResolvedValue({ data }),
-  };
+  // Sprint 173 fix: declare chain first, then assign methods that reference it.
+  // Previous form used `chain` in its own initializer which triggered TS2448
+  // (block-scoped variable used before declaration).
+  const chain: any = {};
+  chain.select = vi.fn().mockReturnValue(chain);
+  chain.eq = vi.fn().mockReturnValue(chain);
+  chain.in = vi.fn().mockReturnValue(chain);
+  chain.not = vi.fn().mockReturnValue(chain);
+  chain.gte = vi.fn().mockReturnValue(chain);
+  chain.is = vi.fn().mockReturnValue(chain);
+  chain.single = vi.fn().mockResolvedValue({ data });
   // Make the chain itself thenable so awaiting it resolves
   chain.then = (resolve: any) => resolve({ data: Array.isArray(data) ? data : [data] });
   return chain;

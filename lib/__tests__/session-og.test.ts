@@ -24,6 +24,7 @@ describe("Session OG image route", () => {
   it("runtime export removed for cacheComponents compatibility (Sprint 158)", async () => {
     const mod = await import("@/app/og/session/route");
     // runtime = "edge" removed — incompatible with cacheComponents
-    expect(mod.runtime).toBeUndefined();
+    // Sprint 173 fix: use `in` operator since the module type no longer declares `runtime`.
+    expect("runtime" in mod).toBe(false);
   });
 });

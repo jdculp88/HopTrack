@@ -5,7 +5,7 @@
 // Manages snap points, drag constraints, velocity-based snapping, and haptic feedback.
 
 import { useCallback, useEffect, useState } from 'react'
-import { useMotionValue, animate, useReducedMotion } from 'motion/react'
+import { useMotionValue, animate, useReducedMotion, type PanInfo } from 'motion/react'
 import { useHaptic } from '@/hooks/useHaptic'
 import { spring } from '@/lib/animation'
 
@@ -64,7 +64,10 @@ export function useDetentSheet(options: UseDetentSheetOptions = {}) {
     })
   }, [y, prefersReducedMotion, haptic, onDetentChange])
 
-  const handleDragEnd = useCallback((_: any, info: { velocity: { y: number } }) => {
+  // Sprint 173 fix: replace `any` with proper types and correct deps array —
+  // React compiler bails on stale/missing deps. `currentDetent` was unused;
+  // `onMinimize` was used but missing from deps.
+  const handleDragEnd = useCallback((_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     const points = getSnapPoints()
     const currentY = y.get()
     const velocity = info.velocity.y
@@ -89,7 +92,7 @@ export function useDetentSheet(options: UseDetentSheetOptions = {}) {
     }
 
     snapTo(target)
-  }, [y, currentDetent, snapTo])
+  }, [y, snapTo, onMinimize])
 
   // Sync position when initialDetent changes (e.g. external navigation to 'full')
   useEffect(() => {

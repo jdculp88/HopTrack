@@ -121,8 +121,12 @@ export function AppNav({ username, unreadNotifications = 0, onCheckin, hasActive
   const reducedMotion = useReducedMotion();
 
   // Force-show nav immediately when a session starts (even if already scroll-hidden)
+  // Sprint 173 fix: wrap setState in queueMicrotask to avoid React compiler warning
+  // about synchronous setState in effect (S147 pattern).
   useEffect(() => {
-    if (hasActiveSession) setNavHidden(false);
+    if (hasActiveSession) {
+      queueMicrotask(() => setNavHidden(false));
+    }
   }, [hasActiveSession]);
 
   useMotionValueEvent(scrollY, "change", (latest) => {
