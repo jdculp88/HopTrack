@@ -1,12 +1,29 @@
 /**
  * Shared types and design constants for the Board display.
  * Imported by BoardClient and all board sub-components.
+ *
+ * Sprint A (Display Suite):
+ *   - `C` palette now points to CSS variables set by BoardClient from the
+ *     active theme. Format components still reference `C.cream`, `C.gold`,
+ *     etc. — they resolve at render time via var() lookups.
+ *   - `BoardSettings` gains a `displayScale` field for big-screen support.
+ *   - New `getScaledFS()` helper returns FS values multiplied by the active
+ *     display scale (monitor/large-tv/cinema).
+ *   - Legacy Sprint 167 behavior is preserved when `displayScale = "monitor"`.
  */
 
 import type { PourSize } from "@/lib/glassware";
+import {
+  scaleFSEntry,
+  resolveDisplayScale,
+  type DisplayScale,
+  type ResolvedDisplayScale,
+  type FSEntry,
+} from "@/lib/board-display-scale";
 
-// ─── Re-export PourSize so sub-components only need one import ─────────────────
+// ─── Re-export PourSize + display scale types ─────────────────────────────────
 export type { PourSize };
+export type { DisplayScale, ResolvedDisplayScale, FSEntry };
 
 // ─── Data shapes ──────────────────────────────────────────────────────────────
 
@@ -53,7 +70,7 @@ export interface BreweryStats {
 // ─── Settings ─────────────────────────────────────────────────────────────────
 
 export type FontSize = "medium" | "large" | "xl";
-export type BoardDisplayFormat = "classic" | "grid" | "compact" | "poster" | "slideshow";
+export type BoardDisplayFormat = "classic" | "compact" | "slideshow";
 
 export interface BoardSettings {
   fontSize: FontSize;
@@ -65,6 +82,30 @@ export interface BoardSettings {
   showStyle: boolean;
   showStats: boolean;
   showGlass: boolean;
+  /**
+   * Sprint A: big-screen display scale.
+   *   - "auto"      — detect viewport, pick preset (default)
+   *   - "monitor"   — 1× (Sprint 167 back-compat for small displays)
+   *   - "large-tv"  — 2× (55"–65" 1080p TVs)
+   *   - "cinema"    — 3× (75"+ 4K TVs)
+   * Persisted in localStorage alongside other settings; also readable from
+   * `breweries.board_display_scale` so the setting survives across devices.
+   */
+  displayScale?: DisplayScale;
+  /**
+   * Sprint A: client-side theme override. When set, this takes precedence
+   * over `breweries.board_theme_id`. Lets the brewery owner preview themes
+   * without a server round-trip. Sprint B adds a server-side API for
+   * persisting theme choices across devices.
+   */
+  themeId?: string;
+  /**
+   * Sprint A: Slideshow auto-advance duration in milliseconds. Used only by
+   * the Slideshow format. Range: 3000–15000. Default: 6000. Settings UI for
+   * this lives in a later sprint — the field is here so the slide timer can
+   * already read it.
+   */
+  slideDurationMs?: number;
 }
 
 export const DEFAULT_SETTINGS: BoardSettings = {
@@ -77,23 +118,21 @@ export const DEFAULT_SETTINGS: BoardSettings = {
   showStyle: true,
   showStats: true,
   showGlass: true,
+  displayScale: "auto",
+  slideDurationMs: 6000,
 };
 
 /** Recommended defaults when switching to a format */
 export const FORMAT_DEFAULTS: Record<BoardDisplayFormat, Partial<BoardSettings>> = {
   classic:   {},
-  grid:      { showGlass: true, showStyle: true },
   compact:   { showGlass: false, showDesc: false, showRating: false, showStats: false, showStyle: false, showABV: false },
-  poster:    { showGlass: true, showStyle: true },
-  slideshow: { showGlass: true, showStyle: true, showDesc: true },
+  slideshow: { showGlass: true, showStyle: true, showDesc: true, showStats: true, showRating: true, showABV: true },
 };
 
 /** Settings that a format FORCES regardless of user toggle */
 export const FORMAT_FORCED: Record<BoardDisplayFormat, Partial<BoardSettings>> = {
   classic:   {},
-  grid:      {},
   compact:   { showGlass: false, showDesc: false, showRating: false, showStats: false },
-  poster:    {},
   slideshow: {},
 };
 
@@ -105,24 +144,30 @@ export function getEffectiveSettings(settings: BoardSettings): BoardSettings {
 
 export const FORMAT_LABELS: Record<BoardDisplayFormat, string> = {
   classic:   "Classic",
-  grid:      "Grid",
   compact:   "Compact",
-  poster:    "Poster",
   slideshow: "Slideshow",
 };
 
-// ─── Design constants (cream board palette) ───────────────────────────────────
+// ─── Design constants (theme-aware palette) ───────────────────────────────────
+//
+// Sprint A: `C` now references CSS variables set by `BoardClient.tsx` from
+// the resolved theme. Every hex fallback matches the `cream-classic` preset
+// so any inline style that renders before the theme is applied (SSR first
+// paint, tests, tool previews) still looks like Sprint 167 by default.
+//
+// Format components continue to use `C.cream`, `C.gold`, etc. — zero API
+// churn. They get re-themed automatically when the brewery picks a new theme.
 
 export const C = {
-  cream: "#FBF7F0",
-  gold: "#D4A843",
-  text: "#1A1714",
-  textMuted: "#6B5E4E",
-  textSubtle: "#9E8E7A",
-  border: "#E5DDD0",
-  chipBg: "rgba(251,247,240,0.85)",
-  chipBorder: "#DDD5C5",
-  danger: "#C44B3A",
+  cream:      "var(--board-bg, #FBF7F0)",
+  gold:       "var(--board-accent, #D4A843)",
+  text:       "var(--board-text, #1A1714)",
+  textMuted:  "var(--board-text-muted, #6B5E4E)",
+  textSubtle: "var(--board-text-subtle, #9E8E7A)",
+  border:     "var(--board-border, #E5DDD0)",
+  chipBg:     "var(--board-chip-bg, rgba(251,247,240,0.85))",
+  chipBorder: "var(--board-chip-border, #DDD5C5)",
+  danger:     "var(--board-danger, #C44B3A)",
 } as const;
 
 export const EASE = [0.16, 1, 0.3, 1] as const;
@@ -139,24 +184,67 @@ export const BOARD_SECTION_LABELS: Record<string, { label: string; emoji: string
 };
 
 // ─── Font-size dimension map ──────────────────────────────────────────────────
+//
+// Base "monitor-scale" dimensions. For large-tv and cinema scales, callers
+// should use `getScaledFS(settings)` below which multiplies these values by
+// the active display scale factor (2× / 3×).
 
-export const FS: Record<FontSize, {
-  name: number; style: number; meta: number; price: number; stat: number;
-  chipLabel: number; chipOz: number; chipPrice: number; chipPadV: number; chipPadH: number;
-  glasslabel: number; glassW: number; glassH: number;
-}> = {
-  medium: { name: 34, style: 14, meta: 13, price: 28, stat: 12, chipLabel: 10, chipOz:  9, chipPrice: 18, chipPadV: 5, chipPadH: 10, glasslabel:  9, glassW:  44, glassH:  63 },
-  large:  { name: 42, style: 16, meta: 15, price: 36, stat: 14, chipLabel: 11, chipOz: 10, chipPrice: 20, chipPadV: 6, chipPadH: 12, glasslabel: 10, glassW:  56, glassH:  80 },
-  xl:     { name: 54, style: 19, meta: 17, price: 46, stat: 16, chipLabel: 13, chipOz: 11, chipPrice: 24, chipPadV: 8, chipPadH: 14, glasslabel: 11, glassW:  70, glassH: 100 },
+export const FS: Record<FontSize, FSEntry> = {
+  // Sprint A: `stat` reduced from its Sprint 167 values (12/14/16 → 9/10/11)
+  // per Joshua's feedback — ratings, pours, and biggest-fan are context, not headlines.
+  medium: { name: 34, style: 14, meta: 13, price: 28, stat:  9, chipLabel: 10, chipOz:  9, chipPrice: 18, chipPadV: 5, chipPadH: 10, glasslabel:  9, glassW:  44, glassH:  63 },
+  large:  { name: 42, style: 16, meta: 15, price: 36, stat: 10, chipLabel: 11, chipOz: 10, chipPrice: 20, chipPadV: 6, chipPadH: 12, glasslabel: 10, glassW:  56, glassH:  80 },
+  xl:     { name: 54, style: 19, meta: 17, price: 46, stat: 11, chipLabel: 13, chipOz: 11, chipPrice: 24, chipPadV: 8, chipPadH: 14, glasslabel: 11, glassW:  70, glassH: 100 },
 };
 
+/**
+ * Get the active FS entry, scaled by the settings' displayScale.
+ *
+ * This is the replacement for direct `FS[settings.fontSize]` access in format
+ * components. When the brewery hasn't chosen a scale (or chose "auto"), the
+ * caller should pass a resolved scale computed by `resolveDisplayScale()` —
+ * e.g., `getScaledFS(settings, resolvedScale)`.
+ *
+ * Example:
+ *   const fs = getScaledFS(settings, resolvedScale);
+ *   <div style={{ fontSize: fs.name }}>{beer.name}</div>
+ */
+export function getScaledFS(
+  settings: BoardSettings,
+  resolvedScale: ResolvedDisplayScale = "monitor",
+): FSEntry {
+  return scaleFSEntry(FS[settings.fontSize], resolvedScale);
+}
+
+/**
+ * Resolve the brewery's chosen display scale against the current viewport.
+ * Thin wrapper around `lib/board-display-scale.ts` so format components
+ * only need to import from `board-types.ts`.
+ */
+export function resolveBoardDisplayScale(
+  settings: BoardSettings,
+  viewport: { width: number; height: number } | undefined,
+): ResolvedDisplayScale {
+  return resolveDisplayScale(settings.displayScale ?? "auto", viewport);
+}
+
 // ─── localStorage helpers ─────────────────────────────────────────────────────
+
+/** Valid formats after Sprint A cleanup (grid + poster removed). */
+const VALID_FORMATS: readonly BoardDisplayFormat[] = ["classic", "compact", "slideshow"] as const;
 
 export function loadSettings(id: string): BoardSettings {
   if (typeof window === "undefined") return DEFAULT_SETTINGS;
   try {
     const s = localStorage.getItem(`hoptrack-board-${id}`);
-    return s ? { ...DEFAULT_SETTINGS, ...JSON.parse(s) } : DEFAULT_SETTINGS;
+    if (!s) return DEFAULT_SETTINGS;
+    const parsed = { ...DEFAULT_SETTINGS, ...JSON.parse(s) };
+    // Sprint A: coerce any retired formats (grid/poster) to classic so brewery
+    // owners with stale localStorage don't land on a format that no longer exists.
+    if (!VALID_FORMATS.includes(parsed.displayFormat)) {
+      parsed.displayFormat = "classic";
+    }
+    return parsed;
   } catch { return DEFAULT_SETTINGS; }
 }
 

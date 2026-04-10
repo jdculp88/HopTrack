@@ -9,6 +9,13 @@
       "autoPort": true
     },
     {
+      "name": "Next.js Dev (Sprint A)",
+      "runtimeExecutable": "/usr/local/bin/node",
+      "runtimeArgs": ["node_modules/.bin/next", "dev", "--port", "3456"],
+      "port": 3456,
+      "autoPort": true
+    },
+    {
       "name": "Next.js Dev (webpack)",
       "runtimeExecutable": "/bin/sh",
       "runtimeArgs": ["-c", "PATH=/usr/local/bin:$PATH node_modules/.bin/next dev --webpack --port ${PORT:-3001}"],

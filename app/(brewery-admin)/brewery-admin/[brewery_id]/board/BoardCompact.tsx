@@ -9,11 +9,11 @@
 
 import { motion } from "motion/react";
 import {
-  C, EASE, FS, formatPrice,
-  type BoardBeer, type BeerStats, type BoardSettings,
+  C, EASE, getScaledFS, formatPrice,
+  type BoardBeer, type BeerStats, type BoardSettings, type ResolvedDisplayScale, type FSEntry,
 } from "./board-types";
 import type { PourSize } from "@/lib/glassware";
-import { BoardSectionHeader, EmptyBoardState, groupBeersByType, deriveBeerLists } from "./BoardShared";
+import { SizeChips, compactChipFs, BoardSectionHeader, EmptyBoardState, groupBeersByStyleFamily, deriveBeerLists } from "./BoardShared";
 import { useAutoScroll } from "./useAutoScroll";
 
 // ─── Props ────────────────────────────────────────────────────────────────────
@@ -24,6 +24,7 @@ export interface BoardCompactProps {
   pourSizesMap: Record<string, PourSize[]>;
   beerStats: Record<string, BeerStats>;
   listRef: React.RefObject<HTMLDivElement | null>;
+  resolvedScale: ResolvedDisplayScale;
 }
 
 // ─── Compact beer entry ───────────────────────────────────────────────────────
@@ -33,13 +34,12 @@ function CompactEntry({
 }: {
   beer: BoardBeer;
   pourSizes: PourSize[];
-  fontSize: typeof FS[keyof typeof FS];
+  fontSize: FSEntry;
   animDelay?: number;
   eightySixed?: boolean;
 }) {
-  const price = pourSizes.length > 0
-    ? pourSizes[0].price
-    : beer.price_per_pint;
+  const isFeatured = beer.is_featured && !eightySixed;
+  const chipFs = compactChipFs(fontSize);
 
   if (eightySixed) {
     return (
@@ -69,43 +69,61 @@ function CompactEntry({
     );
   }
 
+  const fallbackPrice = pourSizes.length === 0 ? beer.price_per_pint : null;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: animDelay, ease: EASE }}
       style={{
-        display: "flex", justifyContent: "space-between", alignItems: "center",
+        display: "flex", flexDirection: "column", gap: 6,
         padding: "10px 0",
         borderBottom: `1px solid ${C.border}`,
       }}
     >
-      <span className="font-display" style={{
-        fontWeight: 700, fontSize: fontSize.name * 0.7, lineHeight: 1.2,
-        color: C.text, flex: 1, minWidth: 0,
-      }}>
-        {beer.name}
-      </span>
-      {price != null && (
+      {/* Row 1: full beer name (no truncation) */}
+      <div style={{ display: "flex", alignItems: "baseline", gap: 8, minWidth: 0 }}>
+        {isFeatured && (
+          <span className="font-display" style={{
+            fontSize: fontSize.name * 0.7, lineHeight: 1.2, color: C.gold, flexShrink: 0,
+          }} aria-label="Featured beer">
+            ★
+          </span>
+        )}
+        <span className="font-display" style={{
+          fontWeight: 700, fontSize: fontSize.name * 0.7, lineHeight: 1.2,
+          color: C.text, flex: 1, minWidth: 0,
+        }}>
+          {beer.name}
+        </span>
+      </div>
+
+      {/* Row 2: pour size chips (or fallback price) */}
+      {pourSizes.length > 0 ? (
+        <SizeChips sizes={pourSizes} fs={chipFs} wrap />
+      ) : fallbackPrice != null ? (
         <span className="font-mono" style={{
           fontWeight: 700, fontSize: fontSize.price * 0.7,
-          color: C.gold, flexShrink: 0, marginLeft: 12,
+          color: C.gold, alignSelf: "flex-start",
         }}>
-          {formatPrice(price)}
+          {formatPrice(fallbackPrice)}
         </span>
-      )}
+      ) : null}
     </motion.div>
   );
 }
 
 // ─── BoardCompact ─────────────────────────────────────────────────────────────
 
-export function BoardCompact({ beers, settings, pourSizesMap, beerStats, listRef }: BoardCompactProps) {
-  const { featuredBeer, activeTapBeers, eightySixedBeers, hasMultipleTypes } = deriveBeerLists(beers);
-  const groupedByType = groupBeersByType(activeTapBeers);
-  const fs = FS[settings.fontSize];
+export function BoardCompact({ beers, settings, pourSizesMap, beerStats: _beerStats, listRef, resolvedScale }: BoardCompactProps) {
+  const { featuredBeer, activeTapBeers, eightySixedBeers } = deriveBeerLists(beers);
+  // Sprint A: featured beer appears inline with a gold star prefix, no BotW highlight bar.
+  const allActive = featuredBeer ? [featuredBeer, ...activeTapBeers] : activeTapBeers;
+  const groupedByFamily = groupBeersByStyleFamily(allActive);
+  const fs = getScaledFS(settings, resolvedScale);
 
-  useAutoScroll(listRef, true, [beers, settings.fontSize]);
+  useAutoScroll(listRef, true, [beers, settings.fontSize, resolvedScale]);
 
   if (beers.length === 0) return <EmptyBoardState />;
 
@@ -116,53 +134,18 @@ export function BoardCompact({ beers, settings, pourSizesMap, beerStats, listRef
       ref={listRef}
       style={{ flex: 1, minHeight: 0, padding: "16px 40px", overflowY: "auto" }}
     >
-      {/* Featured beer highlight */}
-      {featuredBeer && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.4, ease: EASE }}
-          style={{
-            display: "flex", justifyContent: "space-between", alignItems: "center",
-            padding: "12px 16px", marginBottom: 16,
-            borderRadius: 10,
-            background: "linear-gradient(90deg, rgba(212,168,67,0.12) 0%, rgba(212,168,67,0.04) 100%)",
-            border: "1px solid rgba(212,168,67,0.25)",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <span className="font-mono" style={{ fontSize: 10, color: C.gold, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.15em" }}>
-              ★ BOTW
-            </span>
-            <span className="font-display" style={{ fontWeight: 700, fontSize: fs.name * 0.7, color: C.text }}>
-              {featuredBeer.name}
-            </span>
+      {/* 2-column grid, grouped by style family */}
+      {groupedByFamily.map((group, gi) => (
+        <div key={group.family}>
+          <div style={{ marginTop: gi > 0 ? 20 : 0, marginBottom: 8 }}>
+            <BoardSectionHeader label={group.label} emoji={group.emoji} count={group.items.length} />
           </div>
-          {(() => {
-            const ps = pourSizesMap[featuredBeer.id] ?? [];
-            const price = ps.length > 0 ? ps[0].price : featuredBeer.price_per_pint;
-            return price != null ? (
-              <span className="font-mono" style={{ fontWeight: 700, fontSize: fs.price * 0.7, color: C.gold }}>
-                {formatPrice(price)}
-              </span>
-            ) : null;
-          })()}
-        </motion.div>
-      )}
-
-      {/* 2-column grid */}
-      {groupedByType.map((group, gi) => (
-        <div key={group.type}>
-          {hasMultipleTypes && (
-            <div style={{ marginTop: gi > 0 ? 20 : 0, marginBottom: 8, gridColumn: "1 / -1" }}>
-              <BoardSectionHeader type={group.type} count={group.items.length} />
-            </div>
-          )}
 
           <div style={{
             display: "grid",
-            gridTemplateColumns: "repeat(2, 1fr)",
+            gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
             columnGap: 32,
+            alignItems: "start",
           }}>
             {group.items.map((beer) => {
               const delay = (++globalIdx) * 0.02;
@@ -182,7 +165,7 @@ export function BoardCompact({ beers, settings, pourSizesMap, beerStats, listRef
 
       {/* 86'd */}
       {eightySixedBeers.length > 0 && (
-        <div style={{ marginTop: 16, display: "grid", gridTemplateColumns: "repeat(2, 1fr)", columnGap: 32 }}>
+        <div style={{ marginTop: 16, display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", columnGap: 32 }}>
           {eightySixedBeers.map((beer, i) => (
             <CompactEntry
               key={beer.id}

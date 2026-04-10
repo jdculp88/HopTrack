@@ -15,7 +15,8 @@ import {
   type BoardDisplayFormat,
 } from "@/app/(brewery-admin)/brewery-admin/[brewery_id]/board/board-types";
 
-const ALL_FORMATS: BoardDisplayFormat[] = ["classic", "grid", "compact", "poster", "slideshow"];
+// Sprint A retired grid + poster formats — the valid list is now classic / compact / slideshow.
+const ALL_FORMATS: BoardDisplayFormat[] = ["classic", "compact", "slideshow"];
 
 // ─── DEFAULT_SETTINGS ────────────────────────────────────────────────────────
 
@@ -87,16 +88,6 @@ describe("FORMAT_DEFAULTS", () => {
     expect(slideshow.showStyle).toBe(true);
     expect(slideshow.showDesc).toBe(true);
   });
-
-  it("grid recommends showing glass and style", () => {
-    expect(FORMAT_DEFAULTS.grid.showGlass).toBe(true);
-    expect(FORMAT_DEFAULTS.grid.showStyle).toBe(true);
-  });
-
-  it("poster recommends showing glass and style", () => {
-    expect(FORMAT_DEFAULTS.poster.showGlass).toBe(true);
-    expect(FORMAT_DEFAULTS.poster.showStyle).toBe(true);
-  });
 });
 
 // ─── FORMAT_FORCED (hard overrides per format) ───────────────────────────────
@@ -110,14 +101,6 @@ describe("FORMAT_FORCED", () => {
 
   it("classic forces nothing (empty)", () => {
     expect(Object.keys(FORMAT_FORCED.classic)).toHaveLength(0);
-  });
-
-  it("grid forces nothing (empty)", () => {
-    expect(Object.keys(FORMAT_FORCED.grid)).toHaveLength(0);
-  });
-
-  it("poster forces nothing (empty)", () => {
-    expect(Object.keys(FORMAT_FORCED.poster)).toHaveLength(0);
   });
 
   it("slideshow forces nothing (empty)", () => {
@@ -142,27 +125,6 @@ describe("getEffectiveSettings", () => {
       displayFormat: "classic",
       showGlass: false,
       showDesc: true,
-    };
-    const effective = getEffectiveSettings(userSettings);
-    expect(effective).toEqual(userSettings);
-  });
-
-  it("returns user settings unchanged for grid (no forced overrides)", () => {
-    const userSettings: BoardSettings = {
-      ...DEFAULT_SETTINGS,
-      displayFormat: "grid",
-      showGlass: false,
-      showRating: false,
-    };
-    const effective = getEffectiveSettings(userSettings);
-    expect(effective).toEqual(userSettings);
-  });
-
-  it("returns user settings unchanged for poster (no forced overrides)", () => {
-    const userSettings: BoardSettings = {
-      ...DEFAULT_SETTINGS,
-      displayFormat: "poster",
-      showStats: false,
     };
     const effective = getEffectiveSettings(userSettings);
     expect(effective).toEqual(userSettings);

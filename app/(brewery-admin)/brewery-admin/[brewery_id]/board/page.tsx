@@ -1,6 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { BoardClient } from "./BoardClient";
+import { resolveTheme } from "@/lib/board-themes";
+import { getFontPairUrl } from "@/lib/board-fonts";
 import type { PourSize } from "@/lib/glassware";
 
 export const metadata = { title: "The Board — HopTrack" };
@@ -16,8 +18,15 @@ export default async function BoardPage({ params }: { params: Promise<{ brewery_
     .eq("user_id", user.id).eq("brewery_id", brewery_id).single() as any;
   if (!account) redirect("/brewery-admin");
 
+  // Sprint A: fetch Display Suite columns alongside the basics. These may
+  // be null on legacy rows (migration 110 sets defaults but doesn't backfill
+  // every edge case) — BoardClient handles null gracefully via `resolveTheme`.
   const { data: brewery } = await supabase
-    .from("breweries").select("id, name, cover_image_url")
+    .from("breweries").select(
+      "id, name, cover_image_url, " +
+      "board_theme_id, brand_color, brand_color_secondary, " +
+      "board_font_id, board_display_scale"
+    )
     .eq("id", brewery_id).single() as any;
 
   const { data: beers } = await supabase
@@ -157,16 +166,20 @@ export default async function BoardPage({ params }: { params: Promise<{ brewery_
     mostPopularCount,
   };
 
+  // Sprint A: resolve the brewery's theme server-side so we can preload the
+  // correct Google Font pair instead of hard-coding Instrument Serif.
+  const theme = resolveTheme(
+    { board_theme_id: brewery?.board_theme_id, brand_color: brewery?.brand_color },
+    brewery?.board_theme_id,
+  );
+  const fontUrl = getFontPairUrl(brewery?.board_font_id ?? theme.fontId);
+
   return (
     <>
-      {/* Load Instrument Serif for the brewery name on The Board */}
+      {/* Load the active theme's font pair for the Board */}
       <link rel="preconnect" href="https://fonts.googleapis.com" />
       <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-      {/* eslint-disable-next-line @next/next/no-page-custom-font */}
-      <link
-        href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap"
-        rel="stylesheet"
-      />
+      <link href={fontUrl} rel="stylesheet" />
       <BoardClient
         breweryId={brewery_id}
         breweryName={brewery?.name ?? "Unknown Brewery"}
@@ -175,6 +188,10 @@ export default async function BoardPage({ params }: { params: Promise<{ brewery_
         breweryStats={breweryStats}
         beerStats={beerStats}
         pourSizesMap={pourSizesMap}
+        boardThemeId={brewery?.board_theme_id ?? null}
+        brandColor={brewery?.brand_color ?? null}
+        brandColorSecondary={brewery?.brand_color_secondary ?? null}
+        boardDisplayScale={brewery?.board_display_scale ?? null}
       />
     </>
   );

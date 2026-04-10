@@ -4,8 +4,10 @@ import { Settings } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   C, FORMAT_LABELS, FORMAT_FORCED,
-  type BoardSettings, type FontSize, type BoardDisplayFormat,
+  type BoardSettings, type FontSize, type BoardDisplayFormat, type DisplayScale,
 } from "./board-types";
+import { PRESET_THEMES, PRESET_THEME_ORDER } from "@/lib/board-themes";
+import { SCALE_LABELS } from "@/lib/board-display-scale";
 
 interface BoardHeaderProps {
   breweryName: string;
@@ -21,7 +23,7 @@ interface BoardHeaderProps {
   onFormatChange: (format: BoardDisplayFormat) => void;
 }
 
-const FORMATS: BoardDisplayFormat[] = ["classic", "grid", "compact", "poster", "slideshow"];
+const FORMATS: BoardDisplayFormat[] = ["classic", "compact", "slideshow"];
 
 export function BoardHeader({
   breweryName,
@@ -39,19 +41,20 @@ export function BoardHeader({
   const forcedKeys = new Set(Object.keys(FORMAT_FORCED[draftSettings.displayFormat] ?? {}));
   const hideFontSize = draftSettings.displayFormat === "slideshow";
 
+  // Sprint A: header redesigned to be ~45% shorter than Sprint 167 so more of the tap list is visible on a TV.
   return (
     <>
-      {/* Header bar */}
-      <header style={{ padding: "28px 40px 20px", flexShrink: 0, position: "relative" }}>
+      {/* Header bar — Sprint A: shrunk so more of the tap list is visible on a TV */}
+      <header style={{ padding: "16px 40px 10px", flexShrink: 0, position: "relative" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 16, flex: 1, minWidth: 0 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 14, flex: 1, minWidth: 0 }}>
             {/* Brewery initials badge */}
             <div style={{
-              width: 56, height: 56, borderRadius: 14, flexShrink: 0,
+              width: 42, height: 42, borderRadius: 10, flexShrink: 0,
               display: "flex", alignItems: "center", justifyContent: "center",
               background: "#0F0E0C",
             }}>
-              <span className="font-mono" style={{ fontWeight: 800, fontSize: 18, color: C.gold, letterSpacing: 1 }}>
+              <span className="font-mono" style={{ fontWeight: 800, fontSize: 14, color: C.gold, letterSpacing: 1 }}>
                 {initials}
               </span>
             </div>
@@ -60,7 +63,7 @@ export function BoardHeader({
             <h1 style={{
               fontFamily: "'Instrument Serif', serif",
               fontWeight: 400, fontStyle: "italic",
-              fontSize: "clamp(64px, 7vw, 100px)",
+              fontSize: "clamp(38px, 4.5vw, 68px)",
               lineHeight: 1, letterSpacing: "-0.01em",
               color: C.text, flex: 1, minWidth: 0,
             }}>
@@ -69,11 +72,11 @@ export function BoardHeader({
           </div>
 
           {/* On tap count */}
-          <div style={{ flexShrink: 0, display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 2 }}>
-            <span className="font-mono" style={{ fontSize: 13, textTransform: "uppercase", letterSpacing: "0.22em", color: C.gold }}>
+          <div style={{ flexShrink: 0, display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 1 }}>
+            <span className="font-mono" style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.22em", color: C.gold }}>
               {hasMultipleTypes ? "On Menu" : "On Tap"}
             </span>
-            <span className="font-mono" style={{ fontSize: 36, fontWeight: 700, lineHeight: 1, color: C.gold }}>
+            <span className="font-mono" style={{ fontSize: 24, fontWeight: 700, lineHeight: 1, color: C.gold }}>
               {activeBeerCount}
             </span>
           </div>
@@ -83,18 +86,18 @@ export function BoardHeader({
         <button
           onClick={settingsOpen ? onCancelSettings : onOpenSettings}
           style={{
-            position: "absolute", top: 16, right: 40,
-            padding: 8, borderRadius: 10, border: "none",
+            position: "absolute", top: 12, right: 40,
+            padding: 6, borderRadius: 8, border: "none",
             background: "transparent", cursor: "pointer",
             color: C.textSubtle, zIndex: 10,
           }}
           onMouseEnter={e => (e.currentTarget.style.color = C.textMuted)}
           onMouseLeave={e => (e.currentTarget.style.color = C.textSubtle)}
         >
-          <Settings size={20} />
+          <Settings size={18} />
         </button>
 
-        <div style={{ marginTop: 20, height: 1, background: "rgba(26,23,20,0.12)" }} />
+        <div style={{ marginTop: 12, height: 1, background: "rgba(26,23,20,0.12)" }} />
       </header>
 
       {/* Settings panel */}
@@ -115,7 +118,7 @@ export function BoardHeader({
               background: "rgba(251,247,240,0.97)", backdropFilter: "blur(12px)",
             }}>
               {/* Format selector */}
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10, flexWrap: "wrap" }}>
                 <span className="font-mono" style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: "0.1em", color: C.textSubtle }}>
                   Format
                 </span>
@@ -132,6 +135,75 @@ export function BoardHeader({
                     }}
                   >
                     {FORMAT_LABELS[f]}
+                  </button>
+                ))}
+              </div>
+
+              {/* Sprint A: Theme selector (10 preset swatches) */}
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10, flexWrap: "wrap" }}>
+                <span className="font-mono" style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: "0.1em", color: C.textSubtle }}>
+                  Theme
+                </span>
+                {PRESET_THEME_ORDER.map(id => {
+                  const t = PRESET_THEMES[id];
+                  const active = (draftSettings.themeId ?? "cream-classic") === id;
+                  return (
+                    <button
+                      key={id}
+                      onClick={() => onDraftChange("themeId", id)}
+                      title={t.name}
+                      style={{
+                        display: "flex", alignItems: "center", gap: 6,
+                        padding: "4px 10px 4px 4px", borderRadius: 99,
+                        border: active ? `1.5px solid ${C.text}` : `1px solid ${C.border}`,
+                        cursor: "pointer",
+                        fontSize: 11, fontFamily: "var(--font-mono), 'JetBrains Mono', monospace",
+                        background: active ? "#0F0E0C" : "transparent",
+                        color: active ? "#F5F0E8" : C.textMuted,
+                        fontWeight: 600,
+                      }}
+                    >
+                      {/* Swatch: bg + accent dots */}
+                      <span style={{
+                        display: "inline-flex", width: 20, height: 20, borderRadius: "50%",
+                        background: t.palette.bg,
+                        border: `1px solid ${t.palette.border}`,
+                        position: "relative", flexShrink: 0,
+                      }}>
+                        <span style={{
+                          position: "absolute", top: 3, left: 3, width: 6, height: 6, borderRadius: "50%",
+                          background: t.palette.accent,
+                        }} />
+                        <span style={{
+                          position: "absolute", bottom: 3, right: 3, width: 5, height: 5, borderRadius: "50%",
+                          background: t.palette.text,
+                        }} />
+                      </span>
+                      {t.name}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Sprint A: Display scale selector (monitor / large-tv / cinema) */}
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10, flexWrap: "wrap" }}>
+                <span className="font-mono" style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: "0.1em", color: C.textSubtle }}>
+                  Scale
+                </span>
+                {(["auto", "monitor", "large-tv", "cinema"] as DisplayScale[]).map(s => (
+                  <button
+                    key={s}
+                    onClick={() => onDraftChange("displayScale", s)}
+                    title={`${SCALE_LABELS[s]} — for ${s === "cinema" ? "75\"+ 4K TVs at 15–25 ft" : s === "large-tv" ? "55–65\" 1080p TVs at 10–15 ft" : s === "monitor" ? "desktop monitors at 3–4 ft" : "automatic detection"}`}
+                    style={{
+                      padding: "4px 12px", borderRadius: 99, border: "none", cursor: "pointer",
+                      fontSize: 11, fontFamily: "var(--font-mono), 'JetBrains Mono', monospace",
+                      background: (draftSettings.displayScale ?? "auto") === s ? "#0F0E0C" : C.border,
+                      color: (draftSettings.displayScale ?? "auto") === s ? "#F5F0E8" : C.textMuted,
+                      fontWeight: 600,
+                    }}
+                  >
+                    {SCALE_LABELS[s]}
                   </button>
                 ))}
               </div>

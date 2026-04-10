@@ -10,13 +10,13 @@ import { useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { getGlass } from "@/lib/glassware";
 import {
-  C, EASE, FS, formatPrice,
-  type BoardBeer, type BeerStats, type BoardSettings,
+  C, EASE, getScaledFS, formatPrice,
+  type BoardBeer, type BeerStats, type BoardSettings, type ResolvedDisplayScale,
 } from "./board-types";
 import type { PourSize } from "@/lib/glassware";
 import {
   GlassIllustration, SizeChips, BeerMetaRow, BeerStatsRow,
-  BoardSectionHeader, EmptyBoardState, groupBeersByType, deriveBeerLists,
+  BoardSectionHeader, EmptyBoardState, groupBeersByStyleFamily, deriveBeerLists,
 } from "./BoardShared";
 import { useAutoScroll } from "./useAutoScroll";
 
@@ -28,30 +28,35 @@ export interface BoardClassicProps {
   pourSizesMap: Record<string, PourSize[]>;
   beerStats: Record<string, BeerStats>;
   listRef: React.RefObject<HTMLDivElement | null>;
+  resolvedScale: ResolvedDisplayScale;
 }
 
 // ─── Classic beer row ─────────────────────────────────────────────────────────
 
 function ClassicBeerRow({
-  beer, settings, pourSizes, beerStats, featured = false, eightySixed = false, animDelay = 0,
+  beer, settings, pourSizes, beerStats, eightySixed = false, animDelay = 0, resolvedScale,
 }: {
   beer: BoardBeer;
   settings: BoardSettings;
   pourSizes: PourSize[];
   beerStats: BeerStats | undefined;
-  featured?: boolean;
   eightySixed?: boolean;
   animDelay?: number;
+  resolvedScale: ResolvedDisplayScale;
 }) {
   const { showPrice, showGlass } = settings;
-  const fs = FS[settings.fontSize];
+  const fs = getScaledFS(settings, resolvedScale);
+  const isFeatured = beer.is_featured && !eightySixed;
 
   const glassKey = beer.glass_type ?? null;
   const glassObj = glassKey ? getGlass(glassKey) : null;
   const showGlassCol = showGlass && !!glassObj;
 
-  const nameSize  = featured ? "clamp(40px, 4.5vw, 56px)" : fs.name;
-  const priceSize = featured ? "clamp(40px, 4.5vw, 56px)" : fs.price;
+  // Sprint A: featured beers no longer use hero sizing. They appear inline at
+  // normal size with a small gold star designation before the name — keeps
+  // scroll pacing snappy (Joshua's feedback: the BotW hero was slowing scroll).
+  const nameSize  = fs.name;
+  const priceSize = fs.price;
 
   // 86'd row
   if (eightySixed) {
@@ -83,15 +88,15 @@ function ClassicBeerRow({
     );
   }
 
-  // Normal / featured row
+  // Normal row (featured beers get an inline gold star prefix, same size otherwise)
   return (
     <motion.div
       key={beer.id} layout
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -8 }}
-      transition={{ duration: featured ? 0.6 : 0.5, delay: animDelay, ease: EASE }}
-      style={{ marginBottom: featured ? 0 : `clamp(14px, 2vh, 28px)` }}
+      transition={{ duration: 0.5, delay: animDelay, ease: EASE }}
+      style={{ marginBottom: `clamp(14px, 2vh, 28px)` }}
     >
       <div style={{ display: "flex", alignItems: "flex-start", gap: showGlassCol ? (fs.glassW > 50 ? 20 : 14) : 0 }}>
         {showGlassCol && glassObj && (
@@ -106,6 +111,18 @@ function ClassicBeerRow({
         <div style={{ flex: 1, minWidth: 0 }}>
           {/* Name + leader + price */}
           <div style={{ display: "flex", alignItems: "center", gap: 0, flexWrap: "nowrap" }}>
+            {isFeatured && (
+              <span
+                className="font-display"
+                style={{
+                  fontSize: nameSize, lineHeight: 1.15, color: C.gold,
+                  flexShrink: 0, marginRight: 12,
+                }}
+                aria-label="Featured beer"
+              >
+                ★
+              </span>
+            )}
             <span
               className="font-display"
               style={{ fontWeight: 700, fontSize: nameSize, lineHeight: 1.15, color: C.text, flexShrink: 0 }}
@@ -137,8 +154,8 @@ function ClassicBeerRow({
             ) : null}
           </div>
 
-          <BeerMetaRow beer={beer} settings={settings} featured={featured} />
-          <BeerStatsRow beer={beer} settings={settings} beerStats={beerStats} featured={featured} />
+          <BeerMetaRow beer={beer} settings={settings} resolvedScale={resolvedScale} />
+          <BeerStatsRow beer={beer} settings={settings} beerStats={beerStats} resolvedScale={resolvedScale} />
         </div>
       </div>
     </motion.div>
@@ -147,94 +164,66 @@ function ClassicBeerRow({
 
 // ─── BoardClassic ─────────────────────────────────────────────────────────────
 
-export function BoardClassic({ beers, settings, pourSizesMap, beerStats, listRef }: BoardClassicProps) {
-  const { featuredBeer, activeTapBeers, eightySixedBeers, hasMultipleTypes } = deriveBeerLists(beers);
-  const groupedByType = groupBeersByType(activeTapBeers);
+export function BoardClassic({ beers, settings, pourSizesMap, beerStats, listRef, resolvedScale }: BoardClassicProps) {
+  const { featuredBeer, activeTapBeers, eightySixedBeers } = deriveBeerLists(beers);
+  // Sprint A: featured beer appears inline inside its style-family group
+  // (with a gold star designation) instead of in a separate hero banner.
+  const allActive = featuredBeer ? [featuredBeer, ...activeTapBeers] : activeTapBeers;
+  const groupedByFamily = groupBeersByStyleFamily(allActive);
 
-  useAutoScroll(listRef, true, [beers, settings.fontSize]);
+  useAutoScroll(listRef, true, [beers, settings.fontSize, resolvedScale]);
 
   if (beers.length === 0) return <EmptyBoardState />;
 
   return (
-    <>
-      {/* Beer of the Week */}
-      {featuredBeer && (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.98 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.6, ease: EASE }}
-          style={{ padding: "20px 40px 0", flexShrink: 0 }}
-        >
-          <span className="font-mono" style={{
-            fontSize: 14, textTransform: "uppercase", letterSpacing: "0.2em",
-            color: C.gold, display: "block", marginBottom: 10,
-          }}>
-            ★ Beer of the Week
-          </span>
+    <div
+      ref={listRef}
+      style={{ flex: 1, minHeight: 0, padding: "20px 40px", overflowY: "auto" }}
+    >
+      <AnimatePresence mode="popLayout">
+        {groupedByFamily.map((group, gi) => {
+          let itemOffset = 0;
+          for (let k = 0; k < gi; k++) itemOffset += groupedByFamily[k].items.length;
 
+          return (
+            <div key={group.family}>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.4, delay: itemOffset * 0.04 }}
+                style={{ marginTop: gi > 0 ? "clamp(16px, 2vh, 28px)" : 0 }}
+              >
+                <BoardSectionHeader label={group.label} emoji={group.emoji} count={group.items.length} />
+              </motion.div>
+
+              {group.items.map((beer, i) => (
+                <ClassicBeerRow
+                  key={beer.id}
+                  beer={beer}
+                  settings={settings}
+                  pourSizes={pourSizesMap[beer.id] ?? []}
+                  beerStats={beerStats[beer.id]}
+                  animDelay={(itemOffset + i) * 0.04}
+                  resolvedScale={resolvedScale}
+                />
+              ))}
+            </div>
+          );
+        })}
+
+        {eightySixedBeers.map((beer, i) => (
           <ClassicBeerRow
-            beer={featuredBeer}
+            key={beer.id}
+            beer={beer}
             settings={settings}
-            pourSizes={pourSizesMap[featuredBeer.id] ?? []}
-            beerStats={beerStats[featuredBeer.id]}
-            featured
+            pourSizes={pourSizesMap[beer.id] ?? []}
+            beerStats={beerStats[beer.id]}
+            eightySixed
+            animDelay={(allActive.length + i) * 0.04}
+            resolvedScale={resolvedScale}
           />
-
-          <div style={{ marginTop: 16, height: 2, background: "rgba(212,168,67,0.35)" }} />
-        </motion.div>
-      )}
-
-      {/* Tap list */}
-      <div
-        ref={listRef}
-        style={{ flex: 1, minHeight: 0, padding: "16px 40px", overflowY: "auto" }}
-      >
-        <AnimatePresence mode="popLayout">
-          {groupedByType.map((group, gi) => {
-            const baseDelay = (featuredBeer ? 1 : 0) * 0.04;
-            let itemOffset = 0;
-            for (let k = 0; k < gi; k++) itemOffset += groupedByType[k].items.length;
-
-            return (
-              <div key={group.type}>
-                {hasMultipleTypes && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.4, delay: baseDelay + itemOffset * 0.04 }}
-                    style={{ marginTop: gi > 0 ? "clamp(16px, 2vh, 28px)" : 0 }}
-                  >
-                    <BoardSectionHeader type={group.type} count={group.items.length} />
-                  </motion.div>
-                )}
-
-                {group.items.map((beer, i) => (
-                  <ClassicBeerRow
-                    key={beer.id}
-                    beer={beer}
-                    settings={settings}
-                    pourSizes={pourSizesMap[beer.id] ?? []}
-                    beerStats={beerStats[beer.id]}
-                    animDelay={baseDelay + (itemOffset + i) * 0.04}
-                  />
-                ))}
-              </div>
-            );
-          })}
-
-          {eightySixedBeers.map((beer, i) => (
-            <ClassicBeerRow
-              key={beer.id}
-              beer={beer}
-              settings={settings}
-              pourSizes={pourSizesMap[beer.id] ?? []}
-              beerStats={beerStats[beer.id]}
-              eightySixed
-              animDelay={((featuredBeer ? 1 : 0) + activeTapBeers.length + i) * 0.04}
-            />
-          ))}
-        </AnimatePresence>
-      </div>
-    </>
+        ))}
+      </AnimatePresence>
+    </div>
   );
 }

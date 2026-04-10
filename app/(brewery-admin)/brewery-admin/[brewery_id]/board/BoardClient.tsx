@@ -1,20 +1,20 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { PourSize } from "@/lib/glassware";
 
 import {
   C, loadSettings, saveSettings, getInitials,
   DEFAULT_SETTINGS, FORMAT_DEFAULTS, getEffectiveSettings,
+  resolveBoardDisplayScale,
   type BoardBeer, type BoardEvent, type BeerStats, type BreweryStats,
-  type BoardSettings, type BoardDisplayFormat,
+  type BoardSettings, type BoardDisplayFormat, type ResolvedDisplayScale,
 } from "./board-types";
+import { resolveTheme, themeToCssVars, type BoardThemeId } from "@/lib/board-themes";
 import { BoardHeader } from "./BoardHeader";
 import { BoardClassic } from "./BoardClassic";
-import { BoardGrid } from "./BoardGrid";
 import { BoardCompact } from "./BoardCompact";
-import { BoardPoster } from "./BoardPoster";
 import { BoardSlideshow } from "./BoardSlideshow";
 import { BoardEvents } from "./BoardEvents";
 import { BoardStats } from "./BoardStats";
@@ -29,6 +29,12 @@ interface BoardClientProps {
   breweryStats?: BreweryStats;
   beerStats?: Record<string, BeerStats>;
   pourSizesMap?: Record<string, PourSize[]>;
+  /** Sprint A: brewery theme configuration (from `breweries` row). */
+  boardThemeId?: BoardThemeId | null;
+  brandColor?: string | null;
+  brandColorSecondary?: string | null;
+  /** Sprint A: brewery's display scale preference (from `breweries.board_display_scale`). */
+  boardDisplayScale?: "auto" | "monitor" | "large-tv" | "cinema" | null;
 }
 
 // ─── Shared format props ──────────────────────────────────────────────────────
@@ -39,6 +45,12 @@ export interface FormatProps {
   pourSizesMap: Record<string, PourSize[]>;
   beerStats: Record<string, BeerStats>;
   listRef: React.RefObject<HTMLDivElement | null>;
+  /**
+   * Sprint A: resolved display scale for big-screen rendering. Format
+   * components should pass this to `getScaledFS(settings, resolvedScale)`
+   * when reading font sizes. Defaults to "monitor" during SSR.
+   */
+  resolvedScale: ResolvedDisplayScale;
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -51,19 +63,74 @@ export function BoardClient({
   breweryStats,
   beerStats = {},
   pourSizesMap = {},
+  boardThemeId,
+  brandColor,
+  brandColorSecondary: _brandColorSecondary, // reserved for Sprint B (custom themes)
+  boardDisplayScale,
 }: BoardClientProps) {
   const [beers, setBeers]                         = useState<BoardBeer[]>(initialBeers);
   const [localPourSizes, setLocalPourSizes]       = useState<Record<string, PourSize[]>>(pourSizesMap);
-  const [settings, setSettings]                   = useState<BoardSettings>(() => loadSettings(breweryId));
-  const [draftSettings, setDraftSettings]         = useState<BoardSettings>(() => loadSettings(breweryId));
-  const [settingsOpen, setSettingsOpen]           = useState(false);
+  // Sprint A: hydration-safe settings load — initialize with the server-side
+  // defaults (matching what SSR rendered), then read localStorage in a
+  // useEffect after mount. The brewery row's `boardDisplayScale` is the
+  // server-side seed; per-device localStorage settings replace it on the client.
+  // This avoids hydration mismatches when the user has stored format/theme/scale
+  // overrides that differ from defaults.
+  const initialSettings: BoardSettings = useMemo(() => {
+    if (boardDisplayScale) {
+      return { ...DEFAULT_SETTINGS, displayScale: boardDisplayScale };
+    }
+    return DEFAULT_SETTINGS;
+  }, [boardDisplayScale]);
+  const [settings, setSettings] = useState<BoardSettings>(initialSettings);
+  const [draftSettings, setDraftSettings] = useState<BoardSettings>(initialSettings);
+  const [settingsHydrated, setSettingsHydrated] = useState(false);
+  const [settingsOpen, setSettingsOpen]   = useState(false);
   const listRef = useRef<HTMLDivElement | null>(null);
+
+  // After mount, replace defaults with the user's per-device localStorage choices.
+  useEffect(() => {
+    const stored = loadSettings(breweryId);
+    setSettings(prev => ({ ...stored, displayScale: stored.displayScale ?? prev.displayScale }));
+    setDraftSettings(prev => ({ ...stored, displayScale: stored.displayScale ?? prev.displayScale }));
+    setSettingsHydrated(true);
+  }, [breweryId]);
+
+  // ── Sprint A: viewport tracking for auto display-scale detection ───────────
+  const [viewport, setViewport] = useState<{ width: number; height: number } | undefined>(undefined);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const update = () => setViewport({ width: window.innerWidth, height: window.innerHeight });
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
 
   // While settings panel is open the board previews draft; otherwise uses saved.
   const activeSettings = getEffectiveSettings(settingsOpen ? draftSettings : settings);
 
-  // Persist saved settings to localStorage whenever they change
-  useEffect(() => { saveSettings(breweryId, settings); }, [breweryId, settings]);
+  // ── Sprint A: resolve theme + display scale ────────────────────────────────
+  // activeSettings.themeId (localStorage override) takes precedence over the
+  // brewery row's theme — lets owners preview themes without persisting to
+  // the server. Falls back to brewery row, then "cream-classic".
+  const effectiveThemeId = activeSettings.themeId ?? boardThemeId ?? "cream-classic";
+  const theme = useMemo(
+    () => resolveTheme({ board_theme_id: effectiveThemeId, brand_color: brandColor }, effectiveThemeId),
+    [effectiveThemeId, brandColor],
+  );
+  const themeCssVars = useMemo(() => themeToCssVars(theme), [theme]);
+  const resolvedScale = useMemo(
+    () => resolveBoardDisplayScale(activeSettings, viewport),
+    [activeSettings, viewport],
+  );
+
+  // Persist saved settings to localStorage whenever they change.
+  // Skip the initial render so we don't overwrite stored settings with defaults
+  // before the post-mount hydration effect runs.
+  useEffect(() => {
+    if (!settingsHydrated) return;
+    saveSettings(breweryId, settings);
+  }, [breweryId, settings, settingsHydrated]);
 
   // ── Settings panel handlers ────────────────────────────────────────────────
   function openSettings()   { setDraftSettings(settings); setSettingsOpen(true); }
@@ -128,6 +195,7 @@ export function BoardClient({
     pourSizesMap: localPourSizes,
     beerStats,
     listRef,
+    resolvedScale,
   };
 
   const isSlideshow = activeSettings.displayFormat === "slideshow";
@@ -137,6 +205,8 @@ export function BoardClient({
     <div
       className="font-sans"
       style={{
+        // Sprint A: theme CSS variables — consumed by `C` in board-types.ts
+        ...themeCssVars,
         position: "fixed", inset: 0, overflow: "hidden",
         background: isSlideshow ? C.cream : `radial-gradient(ellipse at 50% 0%, rgba(212,168,67,0.07) 0%, transparent 55%), ${C.cream}`,
         color: C.text, display: "flex", flexDirection: "column",
@@ -173,7 +243,12 @@ export function BoardClient({
       )}
 
       {/* Format renderer */}
-      <FormatRenderer format={activeSettings.displayFormat} {...formatProps} breweryName={breweryName} />
+      <FormatRenderer
+        format={activeSettings.displayFormat}
+        {...formatProps}
+        breweryName={breweryName}
+        breweryStats={breweryStats}
+      />
 
       {/* Footer hidden in slideshow mode */}
       {!isSlideshow && (
@@ -193,13 +268,11 @@ export function BoardClient({
 
 // ─── Format renderer ─────────────────────────────────────────────────────────
 
-function FormatRenderer({ format, breweryName, ...props }: FormatProps & { format: BoardDisplayFormat; breweryName: string }) {
+function FormatRenderer({ format, breweryName, breweryStats, ...props }: FormatProps & { format: BoardDisplayFormat; breweryName: string; breweryStats?: BreweryStats }) {
   switch (format) {
     case "classic":   return <BoardClassic {...props} />;
-    case "grid":      return <BoardGrid {...props} />;
     case "compact":   return <BoardCompact {...props} />;
-    case "poster":    return <BoardPoster {...props} />;
-    case "slideshow": return <BoardSlideshow {...props} breweryName={breweryName} />;
+    case "slideshow": return <BoardSlideshow {...props} breweryName={breweryName} breweryStats={breweryStats} />;
   }
 }
 
@@ -207,7 +280,7 @@ function FormatRenderer({ format, breweryName, ...props }: FormatProps & { forma
 
 import { Settings } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
-import { FORMAT_LABELS, type FontSize } from "./board-types";
+import { FORMAT_LABELS } from "./board-types";
 
 function SlideshowSettingsButton({
   settingsOpen, draftSettings,
@@ -221,7 +294,7 @@ function SlideshowSettingsButton({
   onDraftChange: <K extends keyof BoardSettings>(key: K, value: BoardSettings[K]) => void;
   onFormatChange: (format: BoardDisplayFormat) => void;
 }) {
-  const formats: BoardDisplayFormat[] = ["classic", "grid", "compact", "poster", "slideshow"];
+  const formats: BoardDisplayFormat[] = ["classic", "compact", "slideshow"];
 
   return (
     <>
