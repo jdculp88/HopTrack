@@ -152,15 +152,13 @@ All knowledge about *how* we write code lives in **skills**, which load contextu
 
 ## 🗺️ Where We Are
 
-**Last Completed Sprint:** Sprint 173 — mid-sprint firefight (CI Unblock) ✅
-**Current Arc:** The Modernization (Sprints 171-173+) — IN PROGRESS, ~75% per pulse check
-**Design audit remaining 25%:** session flow, first-time experience, brewery admin modernization, light mode parity sweep
+Sprint history, arc tracking, and retros live in files designed to grow — not here:
+- `docs/sprint-history.md` — full sprint-by-sprint narrative
+- `docs/retros/sprint-NNN-retro.md` — individual retro files
+- `docs/plans/` — sprint plans and deferred options
+- `docs/roadmap.md` — **SOURCE OF TRUTH** for what we're building
 
-**For full sprint history, architectural changes, and retro index, see:**
-- `docs/sprint-history.md` — Full sprint-by-sprint narrative (Sprints 1-173)
-- `docs/retros/sprint-NNN-retro.md` — Individual retro files, one per sprint
-- `docs/plans/` — Sprint plans and deferred options
-- `docs/roadmap.md` — SOURCE OF TRUTH for what we're building
+**CLAUDE.md stays focused on persistent context** — team, conventions, mission, how we work. Per-sprint status belongs in the files above, not in this file. If you're about to add a "Last Completed Sprint" line here, stop — append to `docs/sprint-history.md` instead.
 
 ---
 

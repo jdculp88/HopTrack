@@ -862,3 +862,59 @@ Final audit, documentation, arc close-out. **730 tests confirmed passing.** Type
 - `.skeleton-gold` CSS class (gold-shimmer loading state)
 - 57 rate-limited API routes total
 - 730 tests total (up from 318 at arc start — 2.3× increase)
+
+---
+
+### Sprint 174 — The Coming Soon ✅
+
+A focused half-sprint, single session. Joshua walked in with one request: "I need a really nice coming soon screen highlighting features for users and breweries with a CTA to sign up for a waitlist — this will be what I use for the site until we go live. I'll need a DB list of signups with emails, names, state/city, audience type (user/brewery), and brewery name if brewery. Also, we want to know where demand is highest." Shipped the full `hoptrack.beer` coming-soon landing end-to-end plus 4 SEO blog drafts in one session.
+
+**What shipped:**
+
+- **`supabase/migrations/109_waitlist.sql`** — `waitlist` table with name/email/city/state/audience_type/brewery_name/created_at, CHECK constraint enforcing brewery_name when audience_type = 'brewery', unique `lower(email)` index for case-insensitive dedup, demand-mapping indexes on state/audience/created_at, RLS enabled with **zero policies** (service-role only, mirrors the barback/`crawled_beers` pattern — first intentional use of the locked-table approach for a public ingest endpoint).
+
+- **`lib/schemas/waitlist.ts`** — Zod schema with brewery_name refinement, email `.toLowerCase()`, state enum built from `US_STATES`, honeypot `website` field (max(0) string), `WaitlistInput` type export. 23 unit tests cover happy paths, brewery refinement, validation errors, honeypot, every US state, email normalization, max lengths.
+
+- **`app/api/waitlist/subscribe/route.ts`** — public POST endpoint. Rate-limited 5/min per IP via `rateLimitResponse`, `parseRequestBody` for one-line Zod validation, `createServiceClient` for the insert (bypasses locked RLS), `apiConflict` (409) on duplicate email, fire-and-forget `onWaitlistSignup()` trigger for confirmation email, `apiSuccess({ ok: true }, 201)` on success. Intentionally does NOT echo back the saved row (no PII leak).
+
+- **`components/landing/ComingSoonContent.tsx`** — marketing page. Cream canvas with "HopTrack is *pouring soon.*" hero (Playfair Display, gold italic), 4-card drinker feature section, dark floating 4-card brewery feature section, centered waitlist form card with audience pill toggle (User/Brewery), conditional `AnimatePresence` brewery_name field, hidden `website` honeypot, inline success state swap (no Toast dependency — `ToastProvider` is NOT in the root layout). Follows the LandingContent convention exactly: raw `<input>/<select>/<button>` with `C.*` color constants from `lib/landing-colors.ts` (NOT themed Button/Input/Card, which would leak CSS vars on dark-mode OS preference). Local `EASE`/`stagger`/`reveal`/`ScrollReveal`/`PourConnector` defined at top-of-file (no shared animation imports). `<button>` wraps `<motion.span>` — never `motion.button` (Alex rule).
+
+- **`app/page.tsx`** — env-var flag wiring. `COMING_SOON_MODE=true` at request time swaps the root `/` route to render `ComingSoonContent` instead of `LandingContent`. `generateMetadata()` overrides title/description/OG when the flag is set. Authed users still bypass to `/home` in both modes.
+
+- **`app/(superadmin)/superadmin/waitlist/page.tsx`** — admin viewer. Service-role read (table is locked), total count, audience breakdown (user vs brewery), **demand-by-state bars sorted descending with percentage** (the whole GTM point of the feature), full signup table sorted by created_at DESC, CSV export link. No extra auth check needed — the `(superadmin)` layout already guards on `is_superadmin`.
+
+- **`app/api/superadmin/waitlist/export/route.ts`** — CSV export. **Explicit `is_superadmin` guard** because layouts don't protect API routes (common mistake). Service-role read, `csvEscape` helper copied from existing `customers/export` pattern, date-stamped filename.
+
+- **`components/superadmin/SuperadminNav.tsx`** — added "Waitlist" nav entry with `ListChecks` icon between Breweries and Claims Queue.
+
+- **`lib/email-templates/index.ts`** — added `waitlistConfirmEmail({ name, audience })`. Uses existing `layout(title, body, preheader?)` helper. Audience-aware body — breweries get a warmer "we'll reach out personally" line, users get the standard "first to know when HopTrack lands in your city" line. No clickable CTAs (nothing to link to yet). Preheader text for inbox preview.
+
+- **`lib/email-triggers.ts`** — added `onWaitlistSignup(email, name, audience)`. Fire-and-forget pattern mirroring `onPasswordReset`.
+
+- **`.claude/launch.json`** — added "Next.js Dev (Coming Soon)" config on port 3002 that boots with `COMING_SOON_MODE=true` for parallel preview alongside the normal dev server on 3000.
+
+- **`docs/blog-drafts/`** — 4 SEO blog post drafts + README + master source index + sources disclosure. **NOT committed to main** — Joshua wants to read and approve before anything moves toward publish. Posts target long-tail keywords (not head terms like "craft beer"), every stat is sourced from a real URL (Brewers Association 2025 midyear report, Statista via Stamp Me, AnyRoad brewery loyalty research, Taplist.io pricing comparisons), and each post has a single soft CTA at the end. Post 3 ("Mug clubs don't actually retain customers") flagged for Drew's sanity-check before publish — it's a hot take in brewery circles.
+
+**Test results:** 1884 Vitest tests passing (23 new). 0 lint errors, 0 new warnings in any new file. TypeScript typecheck clean. Live preview verified at `localhost:3002` with `COMING_SOON_MODE=true` — page renders with "HopTrack — Coming Soon" in document title, 0 console errors, 0 server errors, audience toggle works with conditional brewery_name field, API route reaches DB (returns clean 500 because migration 109 not yet pushed, as expected). Mobile (375px) responsive layout confirmed.
+
+**Key Plan-agent catches (saved real rework):**
+
+1. **`TO anon` RLS policy has zero precedent** across 108 migrations. Don't start with 109 — use `createServiceClient` + locked table + zero policies, mirroring `crawled_beers`/barback.
+2. **`CITEXT` is not used anywhere** in this codebase — use plain `text` + `UNIQUE INDEX ON (lower(email))`.
+3. **`ToastProvider` is NOT in the root layout** — `useToast()` from the coming-soon page would throw at runtime. Use inline form state instead.
+4. **Themed `Button`/`Input`/`Card` from `components/ui/`** reference `var(--accent-gold)` etc., which leak from app interior into marketing page via ThemeProvider. Marketing pages MUST use raw elements + `C.*` constants from `lib/landing-colors.ts` (Sprint 11 decision, codified by `LandingContent.tsx`).
+5. **`z.enum` in Zod v4 dropped `errorMap`** — use `{ message: "..." }` instead.
+
+**CLAUDE.md change:** Joshua caught that the "Where We Are" section had been accumulating per-sprint status ("Last Completed Sprint: Sprint 173..."), which duplicates content already in this file + retro files + memory. Trimmed the section to a 4-line pointer with an explicit "don't add per-sprint status here" comment. The `sprint-close` skill itself needs a follow-up to remove its CLAUDE.md edit step — tracked in the retro backlog.
+
+**NOT shipped (intentional, waiting on Joshua):**
+
+- Migration 109 pushed to Supabase (he'll run `npm run db:migrate` when ready)
+- `COMING_SOON_MODE=true` set in Vercel production env (instant toggle, no redeploy needed)
+- Blog drafts committed to main (Joshua's reviewing first)
+- `app/blog/` route group (waiting on draft approval + MDX-vs-CMS decision)
+- OG image variant for `?type=coming-soon`
+- JSON-LD structured data on the coming-soon page
+- Sitemap/robots verification for coming-soon mode
+
+**Full retro:** `docs/retros/sprint-174-retro.md`
