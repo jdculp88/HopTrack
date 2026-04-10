@@ -13,6 +13,7 @@ import {
   LogOut,
   Bot,
   Flag,
+  ListChecks,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
@@ -43,6 +44,7 @@ export function SuperadminNav({ pendingClaimsCount, pendingBarbackCount = 0 }: S
     { href: "/superadmin",           label: "Command Center", icon: Monitor },
     { href: "/superadmin/users",     label: "Users",          icon: Users },
     { href: "/superadmin/breweries", label: "Breweries",      icon: Beer },
+    { href: "/superadmin/waitlist",  label: "Waitlist",       icon: ListChecks },
     { href: "/superadmin/claims",    label: "Claims Queue",   icon: ClipboardCheck, badge: pendingClaimsCount },
     { href: "/superadmin/barback",   label: "The Barback",    icon: Bot, badge: pendingBarbackCount },
     { href: "/superadmin/moderation", label: "Moderation",     icon: Flag },

@@ -14,6 +14,7 @@ import {
   weeklyDigestEmail,
   onboardingDay3Email,
   onboardingDay7Email,
+  waitlistConfirmEmail,
 } from "@/lib/email-templates";
 import { createClient } from "@/lib/supabase/server";
 
@@ -513,5 +514,26 @@ export async function onPasswordReset(email: string, resetUrl: string) {
     });
   } catch (err: any) {
     console.error("[email-trigger] onPasswordReset failed:", err.message);
+  }
+}
+
+// ── Waitlist signup (Sprint 174 — Coming Soon) ──
+
+export async function onWaitlistSignup(
+  email: string,
+  name: string,
+  audience: "user" | "brewery"
+) {
+  try {
+    const template = waitlistConfirmEmail({ name, audience });
+
+    await sendEmail({
+      to: email,
+      subject: template.subject,
+      html: template.html,
+      text: template.text,
+    });
+  } catch (err: any) {
+    console.error("[email-trigger] onWaitlistSignup failed:", err.message);
   }
 }

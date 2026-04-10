@@ -605,3 +605,40 @@ export function brandDigestEmail(params: {
     text: `This week across ${brandName}: ${stats.totalVisits} visits (${stats.visitsTrend >= 0 ? "+" : ""}${stats.visitsTrend}%), ${stats.totalUniqueVisitors} unique visitors, ${stats.totalBeersLogged} beers logged, ${stats.crossLocationVisitors} cross-location visitors. View reports at https://app.hoptrack.beer/brewery-admin/brand/${brandId}/reports`,
   };
 }
+
+// ── Waitlist Confirmation (Sprint 174 — Coming Soon) ──
+
+export function waitlistConfirmEmail(params: { name: string; audience: "user" | "brewery" }) {
+  const { name, audience } = params;
+  const firstName = name.split(" ")[0] || "there";
+  const audienceLine =
+    audience === "brewery"
+      ? "We see you're running a brewery — that's huge. We'll reach out personally when HopTrack is ready in your area."
+      : "When HopTrack lands in your city, you'll be the first to know.";
+
+  const html = layout(
+    "You're on the HopTrack waitlist",
+    `
+    <h1 style="margin:0 0 16px;font-family:'Playfair Display',Georgia,serif;font-size:22px;color:${BRAND.text};">
+      You're on the list, ${firstName}.
+    </h1>
+    <p style="margin:0 0 12px;font-size:14px;line-height:1.6;color:${BRAND.text};">
+      Thanks for joining the HopTrack waitlist. We're prioritizing the cities with the most demand — ${audienceLine}
+    </p>
+    <p style="margin:0 0 16px;font-size:14px;line-height:1.6;color:${BRAND.text};">
+      No spam. No newsletter. Just one email when we're ready to pour.
+    </p>
+    <p style="margin:24px 0 0;font-size:13px;color:${BRAND.muted};">
+      Cheers,<br />
+      The HopTrack team
+    </p>
+  `,
+    `You're on the HopTrack waitlist — we'll let you know the moment we launch in your city.`
+  );
+
+  return {
+    subject: "You're on the HopTrack waitlist 🍺",
+    html,
+    text: `You're on the list, ${firstName}. Thanks for joining the HopTrack waitlist. ${audienceLine} No spam, no newsletter — just one email when we're ready to pour. — The HopTrack team`,
+  };
+}
