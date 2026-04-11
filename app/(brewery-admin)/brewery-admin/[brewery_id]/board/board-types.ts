@@ -43,6 +43,12 @@ export interface BoardBeer {
   glass_type?: string | null;
   item_type?: string;
   category?: string | null;
+  // Sensory fields (Sprint 176). Optional because the Board page selects `*`
+  // from `beers` and legacy rows with no sensory data will be null/empty.
+  srm?: number | null;
+  aroma_notes?: string[] | null;
+  taste_notes?: string[] | null;
+  finish_notes?: string[] | null;
 }
 
 export interface BoardEvent {

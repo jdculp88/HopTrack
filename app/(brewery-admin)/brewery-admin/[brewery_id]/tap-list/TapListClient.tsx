@@ -73,6 +73,10 @@ export function TapListClient({ breweryId, initialBeers, brandId }: TapListClien
       price: beer.price_per_pint?.toString() ?? "",
       itemType: beer.item_type ?? "beer",
       category: beer.category ?? "",
+      srm: beer.srm != null ? String(beer.srm) : "",
+      aromaNotes: beer.aroma_notes ?? [],
+      tasteNotes: beer.taste_notes ?? [],
+      finishNotes: beer.finish_notes ?? [],
     };
     setFormInitial(f);
     setFormGlassType(beer.glass_type ?? null);
@@ -95,6 +99,7 @@ export function TapListClient({ breweryId, initialBeers, brandId }: TapListClien
         oz: row.oz != null ? String(row.oz) : "",
         price: String(row.price),
         display_order: row.display_order,
+        is_default: !!row.is_default,
       })));
     }
     setLoadingPourSizes(false);
@@ -116,6 +121,13 @@ export function TapListClient({ breweryId, initialBeers, brandId }: TapListClien
       glass_type: glassType ?? DEFAULT_GLASS[itemType] ?? null,
       item_type: itemType,
       category: form.category.trim() || null,
+      // Sensory fields (Sprint 176). Only persist SRM for beer; notes clear
+      // out for item types that don't surface the picker so toggling to
+      // non-beer doesn't leak stale data.
+      srm: itemType === "beer" && form.srm ? parseInt(form.srm) : null,
+      aroma_notes:  itemType !== "na_beverage" ? form.aromaNotes  : [],
+      taste_notes:  itemType !== "na_beverage" ? form.tasteNotes  : [],
+      finish_notes: itemType !== "na_beverage" ? form.finishNotes : [],
       ...(editingBeer ? {} : { is_on_tap: true }),
     };
 
@@ -133,20 +145,24 @@ export function TapListClient({ breweryId, initialBeers, brandId }: TapListClien
       savedBeerId = (data as any).id;
     }
 
-    // Save pour sizes -- delete existing, insert new
+    // Save pour sizes -- delete existing, insert new. We enforce exactly one
+    // default row per beer at the DB level (migration 111 partial unique
+    // index), so guarantee exactly one is flagged before insert: honor the
+    // user's choice when present, otherwise default to the first row.
     const validSizes = pourSizes.filter(s => s.label.trim() && s.price && !isNaN(parseFloat(s.price)));
     const { error: pourDeleteError } = await supabase.from("beer_pour_sizes").delete().eq("beer_id", savedBeerId);
     if (pourDeleteError) { toastError("Failed to update pour sizes"); setSaving(false); return; }
     if (validSizes.length > 0) {
-      const { error: pourInsertError } = await supabase.from("beer_pour_sizes").insert(
-        validSizes.map((s, i) => ({
-          beer_id: savedBeerId,
-          label: s.label.trim(),
-          oz: s.oz ? parseFloat(s.oz) : null,
-          price: parseFloat(s.price),
-          display_order: i,
-        }))
-      );
+      const hasDefault = validSizes.some(s => s.is_default);
+      const rowsToInsert = validSizes.map((s, i) => ({
+        beer_id: savedBeerId,
+        label: s.label.trim(),
+        oz: s.oz ? parseFloat(s.oz) : null,
+        price: parseFloat(s.price),
+        display_order: i,
+        is_default: hasDefault ? !!s.is_default : i === 0,
+      }));
+      const { error: pourInsertError } = await supabase.from("beer_pour_sizes").insert(rowsToInsert);
       if (pourInsertError) { toastError("Failed to save pour sizes"); setSaving(false); return; }
     }
 

@@ -346,3 +346,16 @@ Facelift Arc Track 2 narrower play. Active Session Detent Sheet (iOS-style 3-det
 
 ### Sprint 161 Kickoff — Standing Rule Established
 Joshua established a new rule at S161 kickoff: **unpicked options carry forward to next sprint's kickoff**. Both The Identity and The Glass must appear as options at S162 kickoff (alongside any new options Morgan wants to add). See `feedback_carry_options_forward.md` memory.
+
+---
+
+## Backlog — Tooling / Developer Experience
+
+### Context7 MCP integration — engineering workflow **OPEN**
+Context7 MCP server was wired into the harness in commit `cf871dd` (S175 close) to provide live Next 16 / Tailwind v4 / Supabase SSR docs to Claude. The tools (`mcp__context7__resolve-library-id`, `mcp__context7__query-docs`) are available — but there's no playbook yet for when Morgan's team should reach for it vs. the codebase skills vs. local files.
+
+**Scope for a future tooling sprint:**
+- Document when Context7 is the right tool (live library docs, version migration questions) vs. when `hoptrack-conventions` / `hoptrack-codebase-map` skills already cover it (in-project patterns).
+- Evaluate whether to add it to the debug playbook (`hoptrack-debug` skill) as a step when a library error doesn't match in-project patterns.
+- Decide whether to add a rule to `AGENTS.md` or `CLAUDE.md` that nudges Jordan/Avery/Dakota to consult Context7 before writing code that touches Next 16.2.1 / Tailwind v4 / Supabase SSR v0.9 APIs — since HopTrack runs on pre-release versions where Claude's training data is likely stale.
+- Low priority: not blocking any sprint, but worth a half-day once the team has a sense of how often "I wrote the wrong Next 16 API" bites us.

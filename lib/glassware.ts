@@ -28,6 +28,8 @@ export interface PourSize {
   oz: number | null;
   price: number;
   display_order: number;
+  /** Sprint 176: true for the pour size that highlights on the Board. */
+  is_default?: boolean;
 }
 
 // ─── SVG ID Substitution ──────────────────────────────────────────────────────

@@ -88,6 +88,19 @@ export async function PATCH(
   if (fields.coverImageUrl !== undefined) update.cover_image_url = fields.coverImageUrl || null;
   if (fields.seasonal !== undefined) update.seasonal = fields.seasonal;
   if (fields.isActive !== undefined) update.is_active = fields.isActive;
+  // Sprint 176 sensory fields
+  if (fields.srm !== undefined) {
+    const srmValue = fields.srm === null || fields.srm === ""
+      ? null
+      : parseInt(fields.srm);
+    if (srmValue != null && (Number.isNaN(srmValue) || srmValue < 1 || srmValue > 40)) {
+      return apiBadRequest("SRM must be between 1 and 40", "srm");
+    }
+    update.srm = srmValue;
+  }
+  if (fields.aromaNotes  !== undefined) update.aroma_notes  = Array.isArray(fields.aromaNotes)  ? fields.aromaNotes  : [];
+  if (fields.tasteNotes  !== undefined) update.taste_notes  = Array.isArray(fields.tasteNotes)  ? fields.tasteNotes  : [];
+  if (fields.finishNotes !== undefined) update.finish_notes = Array.isArray(fields.finishNotes) ? fields.finishNotes : [];
 
   if (Object.keys(update).length === 0) return apiBadRequest("No fields to update");
 
@@ -118,6 +131,11 @@ export async function PATCH(
       if (update.category !== undefined) propagateFields.category = update.category;
       if (update.glass_type !== undefined) propagateFields.glass_type = update.glass_type;
       if (update.cover_image_url !== undefined) propagateFields.cover_image_url = update.cover_image_url;
+      // Sprint 176 — sensory fields travel with the rest when propagate is true
+      if (update.srm !== undefined) propagateFields.srm = update.srm;
+      if (update.aroma_notes  !== undefined) propagateFields.aroma_notes  = update.aroma_notes;
+      if (update.taste_notes  !== undefined) propagateFields.taste_notes  = update.taste_notes;
+      if (update.finish_notes !== undefined) propagateFields.finish_notes = update.finish_notes;
 
       if (Object.keys(propagateFields).length > 0) {
         const { data: propagatedBeers } = await (supabase

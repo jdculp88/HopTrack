@@ -1,4 +1,5 @@
 import type { BeerStyle, ItemType } from "@/types/database";
+import { SRM_MIN, SRM_MAX } from "@/lib/srm-colors";
 
 export interface Beer {
   id: string;
@@ -18,6 +19,11 @@ export interface Beer {
   item_type: ItemType;
   category: string | null;
   brand_catalog_beer_id?: string | null;
+  // Sensory (Sprint 176)
+  srm: number | null;
+  aroma_notes: string[];
+  taste_notes: string[];
+  finish_notes: string[];
 }
 
 export interface PourSizeRow {
@@ -26,6 +32,7 @@ export interface PourSizeRow {
   oz: string;
   price: string;
   display_order: number;
+  is_default: boolean;
 }
 
 export interface BeerFormData {
@@ -37,6 +44,12 @@ export interface BeerFormData {
   price: string;
   itemType: ItemType;
   category: string;
+  // Sensory (Sprint 176). SRM stays a string here so the input field can
+  // round-trip empty state cleanly — same pattern as abv / ibu.
+  srm: string;
+  aromaNotes: string[];
+  tasteNotes: string[];
+  finishNotes: string[];
 }
 
 export const STYLES: BeerStyle[] = [
@@ -59,6 +72,12 @@ export const ITEM_TYPES: { value: ItemType; label: string; emoji: string }[] = [
 export function showStyleField(t: ItemType) { return t === "beer"; }
 export function showAbvField(t: ItemType) { return t !== "food" && t !== "na_beverage"; }
 export function showIbuField(t: ItemType) { return t === "beer"; }
+// Sprint 176: SRM only applies to beer. Notes apply to everything except
+// non-alcoholic / food because those items rarely carry tasting descriptors.
+export function showSrmField(t: ItemType) { return t === "beer"; }
+export function showSensoryNotesFields(t: ItemType) {
+  return t === "beer" || t === "cider" || t === "wine" || t === "cocktail";
+}
 
 // Default glass type per item type
 export const DEFAULT_GLASS: Partial<Record<ItemType, string>> = {
@@ -111,6 +130,10 @@ export const emptyBeer: BeerFormData = {
   price: "",
   itemType: "beer",
   category: "",
+  srm: "",
+  aromaNotes: [],
+  tasteNotes: [],
+  finishNotes: [],
 };
 
 export function validateNumericFields(form: BeerFormData): Record<string, string> {
@@ -126,6 +149,12 @@ export function validateNumericFields(form: BeerFormData): Record<string, string
   if (form.price !== "") {
     const v = parseFloat(form.price);
     if (isNaN(v) || v < 0 || v > 999) errors.price = "Price must be $0\u2013$999";
+  }
+  if (form.srm !== "") {
+    const v = parseInt(form.srm);
+    if (isNaN(v) || v < SRM_MIN || v > SRM_MAX) {
+      errors.srm = `SRM must be ${SRM_MIN}\u2013${SRM_MAX}`;
+    }
   }
   return errors;
 }

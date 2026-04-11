@@ -41,6 +41,11 @@ interface CatalogItem {
   coverImageUrl: string | null;
   seasonal: boolean;
   isActive: boolean;
+  // Sprint 176 sensory fields
+  srm: number | null;
+  aromaNotes: string[];
+  tasteNotes: string[];
+  finishNotes: string[];
   totalPours: number;
   avgRating: number | null;
   ratingCount: number;

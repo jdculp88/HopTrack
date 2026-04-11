@@ -112,6 +112,12 @@ export async function POST(
           item_type: catalogBeer.item_type ?? "beer",
           category: catalogBeer.category,
           glass_type: catalogBeer.glass_type,
+          // Sensory fields (Sprint 176) — catalog is the source of truth,
+          // propagate them to any location using this catalog beer
+          srm: catalogBeer.srm ?? null,
+          aroma_notes:  catalogBeer.aroma_notes  ?? [],
+          taste_notes:  catalogBeer.taste_notes  ?? [],
+          finish_notes: catalogBeer.finish_notes ?? [],
           is_on_tap: true,
           is_active: true,
           is_featured: false,

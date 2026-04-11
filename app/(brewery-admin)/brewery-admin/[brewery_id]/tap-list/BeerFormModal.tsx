@@ -2,10 +2,11 @@
 
 import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { X, Save, Loader2, AlertTriangle } from "lucide-react";
+import { X, Save, Loader2, AlertTriangle, Star } from "lucide-react";
 import { ITEM_TYPE_LABELS } from "@/types/database";
 import type { BeerStyle, ItemType } from "@/types/database";
 import { GLASS_TYPES, getGlassSvgContent } from "@/lib/glassware";
+import { AROMA_NOTES, TASTE_NOTES, FINISH_NOTES } from "@/lib/beer-sensory";
 import {
   type Beer,
   type BeerFormData,
@@ -20,7 +21,11 @@ import {
   showStyleField,
   showAbvField,
   showIbuField,
+  showSrmField,
+  showSensoryNotesFields,
 } from "./tap-list-types";
+import { SensoryNotesPicker } from "@/components/brewery-admin/beer-form/SensoryNotesPicker";
+import { SrmPicker } from "@/components/brewery-admin/beer-form/SrmPicker";
 
 interface BeerFormModalProps {
   editingBeer: Beer | null;
@@ -55,9 +60,15 @@ export function BeerFormModal({
   function isDirty() {
     const f = form;
     const i = initialFormRef.current;
+    const arraysEqual = (a: string[], b: string[]) =>
+      a.length === b.length && a.every((v, idx) => v === b[idx]);
     return f.name !== i.name || f.style !== i.style || f.abv !== i.abv ||
       f.ibu !== i.ibu || f.description !== i.description || f.price !== i.price ||
       f.itemType !== i.itemType || f.category !== i.category ||
+      f.srm !== i.srm ||
+      !arraysEqual(f.aromaNotes, i.aromaNotes) ||
+      !arraysEqual(f.tasteNotes, i.tasteNotes) ||
+      !arraysEqual(f.finishNotes, i.finishNotes) ||
       pourSizes.length > 0;
   }
 
@@ -297,6 +308,45 @@ export function BeerFormModal({
               style={{ background: "var(--surface-2)", borderColor: "var(--border)", color: "var(--text-primary)" }} />
           </div>
 
+          {/* Sensory section (Sprint 176) */}
+          {showSrmField(form.itemType) && (
+            <SrmPicker
+              value={form.srm}
+              onChange={v => {
+                setForm(f => ({ ...f, srm: v }));
+                const errs = validateNumericFields({ ...form, srm: v });
+                setFieldErrors(prev => ({ ...prev, srm: errs.srm ?? "" }));
+              }}
+              error={fieldErrors.srm || undefined}
+            />
+          )}
+
+          {showSensoryNotesFields(form.itemType) && (
+            <div className="space-y-3">
+              <SensoryNotesPicker
+                label="Aroma"
+                value={form.aromaNotes}
+                onChange={next => setForm(f => ({ ...f, aromaNotes: next }))}
+                options={AROMA_NOTES}
+                placeholder="e.g. Citrus, Pine, Mango..."
+              />
+              <SensoryNotesPicker
+                label="Taste"
+                value={form.tasteNotes}
+                onChange={next => setForm(f => ({ ...f, tasteNotes: next }))}
+                options={TASTE_NOTES}
+                placeholder="e.g. Juicy, Bitter, Creamy..."
+              />
+              <SensoryNotesPicker
+                label="Finish"
+                value={form.finishNotes}
+                onChange={next => setForm(f => ({ ...f, finishNotes: next }))}
+                options={FINISH_NOTES}
+                placeholder="e.g. Dry, Crisp, Lingering Bitter..."
+              />
+            </div>
+          )}
+
           {/* Glass Type Picker */}
           <div>
             <label className="text-xs font-mono uppercase tracking-wider block mb-2" style={{ color: "var(--text-muted)" }}>
@@ -370,12 +420,24 @@ export function BeerFormModal({
                     disabled={alreadyAdded}
                     onClick={() => {
                       if (!alreadyAdded) {
-                        setPourSizes(prev => [...prev, {
-                          label: preset.label,
-                          oz: preset.oz,
-                          price: "",
-                          display_order: prev.length,
-                        }]);
+                        setPourSizes(prev => {
+                          // First pour added becomes the default automatically.
+                          // Adding "Pint" always promotes it to default so the
+                          // Board highlights it (matches Joshua's S176 ask).
+                          const isPint = preset.label === "Pint";
+                          const shouldBeDefault = prev.length === 0 || isPint;
+                          const next: PourSizeRow[] = shouldBeDefault
+                            ? prev.map(s => ({ ...s, is_default: false }))
+                            : [...prev];
+                          next.push({
+                            label: preset.label,
+                            oz: preset.oz,
+                            price: "",
+                            display_order: next.length,
+                            is_default: shouldBeDefault,
+                          });
+                          return next;
+                        });
                       }
                     }}
                     className="px-2.5 py-1 rounded-lg text-xs font-mono transition-all"
@@ -393,7 +455,13 @@ export function BeerFormModal({
               })}
               <button
                 type="button"
-                onClick={() => setPourSizes(prev => [...prev, { label: "", oz: "", price: "", display_order: prev.length }])}
+                onClick={() => setPourSizes(prev => [...prev, {
+                  label: "",
+                  oz: "",
+                  price: "",
+                  display_order: prev.length,
+                  is_default: prev.length === 0,
+                }])}
                 className="px-2.5 py-1 rounded-lg text-xs font-mono transition-all"
                 style={{ background: "var(--surface-2)", border: "1px solid var(--border)", color: "var(--text-secondary)" }}
               >
@@ -406,11 +474,25 @@ export function BeerFormModal({
               <div className="text-xs py-2" style={{ color: "var(--text-muted)" }}>Loading sizes&hellip;</div>
             ) : pourSizes.length > 0 ? (
               <div className="space-y-2">
-                <div className="hidden sm:grid gap-1.5 text-xs font-mono uppercase tracking-wider mb-1" style={{ gridTemplateColumns: "1fr 80px 100px 32px", color: "var(--text-muted)" }}>
-                  <span>Label</span><span>oz</span><span>Price $</span><span></span>
+                <div className="hidden sm:grid gap-1.5 text-xs font-mono uppercase tracking-wider mb-1" style={{ gridTemplateColumns: "32px 1fr 60px 80px 32px", color: "var(--text-muted)" }}>
+                  <span title="Highlighted on the Board">Hero</span><span>Label</span><span>oz</span><span>Price $</span><span></span>
                 </div>
                 {pourSizes.map((size, idx) => (
-                  <div key={idx} className="grid gap-1.5 items-center" style={{ gridTemplateColumns: "1fr 60px 80px 32px" }}>
+                  <div key={idx} className="grid gap-1.5 items-center" style={{ gridTemplateColumns: "32px 1fr 60px 80px 32px" }}>
+                    <button
+                      type="button"
+                      aria-label={size.is_default ? "Default pour (highlighted on Board)" : "Set as default pour"}
+                      title={size.is_default ? "Default pour \u2014 shows highlighted on the Board" : "Make this the default pour"}
+                      onClick={() => setPourSizes(prev => prev.map((s, i) => ({ ...s, is_default: i === idx })))}
+                      className="flex items-center justify-center rounded-lg h-9 w-8 transition-all"
+                      style={{
+                        color: size.is_default ? "var(--accent-gold)" : "var(--text-muted)",
+                        background: size.is_default ? "rgba(212,168,67,0.12)" : "var(--surface-2)",
+                        border: `1px solid ${size.is_default ? "rgba(212,168,67,0.4)" : "var(--border)"}`,
+                      }}
+                    >
+                      <Star size={14} fill={size.is_default ? "var(--accent-gold)" : "none"} />
+                    </button>
                     <input
                       value={size.label}
                       onChange={e => setPourSizes(prev => prev.map((s, i) => i === idx ? { ...s, label: e.target.value } : s))}
@@ -439,7 +521,16 @@ export function BeerFormModal({
                     />
                     <button
                       type="button"
-                      onClick={() => setPourSizes(prev => prev.filter((_, i) => i !== idx))}
+                      onClick={() => setPourSizes(prev => {
+                        const removed = prev[idx];
+                        const next = prev.filter((_, i) => i !== idx);
+                        // If we deleted the default row, promote the first
+                        // surviving row so the beer always has exactly one.
+                        if (removed?.is_default && next.length > 0 && !next.some(s => s.is_default)) {
+                          next[0] = { ...next[0]!, is_default: true };
+                        }
+                        return next;
+                      })}
                       className="flex items-center justify-center rounded-lg h-9 w-8 transition-colors"
                       style={{ color: "var(--text-muted)", background: "var(--surface-2)" }}
                     >

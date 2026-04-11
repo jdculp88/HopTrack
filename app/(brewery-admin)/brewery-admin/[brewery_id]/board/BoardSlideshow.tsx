@@ -137,20 +137,17 @@ export function BoardSlideshow({
   const styleFamily = getStyleFamily(currentBeer.style, currentBeer.item_type);
   const familyLabel = BOARD_STYLE_GROUP_LABELS[styleFamily]?.label ?? null;
 
-  // Flavor notes — Sprint A: these fields don't exist on the beer row yet, so
-  // they'll always be null and the section stays hidden. Sprint B wires the
-  // tap-list form to `beers.aroma_notes` / `taste_notes` / `finish_notes`.
-  const beerWithNotes = currentBeer as BoardBeer & {
-    aroma_notes?: string | null;
-    taste_notes?: string | null;
-    finish_notes?: string | null;
-    srm?: number | null;
-  };
-  const aromaNotes  = beerWithNotes.aroma_notes ?? null;
-  const tasteNotes  = beerWithNotes.taste_notes ?? null;
-  const finishNotes = beerWithNotes.finish_notes ?? null;
-  const srmValue    = beerWithNotes.srm ?? null;
-  const hasAnyNotes = !!(aromaNotes || tasteNotes || finishNotes);
+  // Flavor notes — Sprint 176 wired the beers table to carry srm + aroma/
+  // taste/finish note arrays. Sections stay hidden when the arrays are empty
+  // so legacy rows without sensory data degrade gracefully.
+  const aromaNotes  = currentBeer.aroma_notes  ?? null;
+  const tasteNotes  = currentBeer.taste_notes  ?? null;
+  const finishNotes = currentBeer.finish_notes ?? null;
+  const srmValue    = currentBeer.srm          ?? null;
+  const hasAnyNotes =
+    (aromaNotes  && aromaNotes.length  > 0) ||
+    (tasteNotes  && tasteNotes.length  > 0) ||
+    (finishNotes && finishNotes.length > 0);
 
   const rating = stats?.avgRating ?? currentBeer.avg_rating;
   const checkInCount = stats?.pourCount ?? null;
@@ -334,22 +331,27 @@ export function BoardSlideshow({
                 />
               </div>
 
-              {/* Pour chips — all same size, current (first) highlighted */}
-              {settings.showPrice && pourSizes.length > 0 ? (
-                <div style={{
-                  display: "flex", gap: 16, flexWrap: "wrap", alignItems: "stretch",
-                  marginTop: 6,
-                }}>
-                  {pourSizes.map((size, idx) => (
-                    <PourChip
-                      key={idx}
-                      size={size}
-                      highlighted={idx === 0}
-                      fs={fs}
-                    />
-                  ))}
-                </div>
-              ) : settings.showPrice && fallbackPrice != null ? (
+              {/* Pour chips — hero (is_default) highlighted; falls back to the
+                   first chip if no explicit default is set (legacy rows) */}
+              {settings.showPrice && pourSizes.length > 0 ? (() => {
+                const defaultIdx = pourSizes.findIndex(p => p.is_default);
+                const heroIdx = defaultIdx >= 0 ? defaultIdx : 0;
+                return (
+                  <div style={{
+                    display: "flex", gap: 16, flexWrap: "wrap", alignItems: "stretch",
+                    marginTop: 6,
+                  }}>
+                    {pourSizes.map((size, idx) => (
+                      <PourChip
+                        key={idx}
+                        size={size}
+                        highlighted={idx === heroIdx}
+                        fs={fs}
+                      />
+                    ))}
+                  </div>
+                );
+              })() : settings.showPrice && fallbackPrice != null ? (
                 <div className="font-mono" style={{
                   fontWeight: 700, fontSize: 44, color: C.gold, marginTop: 6,
                 }}>
@@ -428,8 +430,8 @@ function GlassSvg({ glassKey, instanceId }: { glassKey: string; instanceId: stri
   );
 }
 
-function FlavorNote({ label, value }: { label: string; value: string | null }) {
-  if (!value) return null;
+function FlavorNote({ label, value }: { label: string; value: string[] | null | undefined }) {
+  if (!value || value.length === 0) return null;
   return (
     <div>
       <div className="font-mono" style={{
@@ -441,7 +443,7 @@ function FlavorNote({ label, value }: { label: string; value: string | null }) {
       <div style={{
         fontSize: 15, color: C.text, lineHeight: 1.4,
       }}>
-        {value}
+        {value.join(", ")}
       </div>
     </div>
   );

@@ -987,3 +987,77 @@ A full single-session sprint with a formal multi-phase plan. Joshua walked in wi
 - **Drew's two asks for Sprint 176:** add `beers.srm` + `beers.aroma_notes` + `beers.taste_notes` + `beers.finish_notes` columns with tap-list form fields, and a per-beer "default pour size" setting so the Slideshow's highlighted chip isn't always the first pour size.
 
 **Full retro:** `docs/retros/sprint-175-retro.md`
+
+---
+
+### Sprint 176 — The Sensory Layer ✅
+
+A full single-session sprint that delivered **Drew's Sprint 175 ask** end-to-end in one pass: SRM, aroma/taste/finish notes, a per-beer default pour size, the `BeerFormModal` + `CatalogBeerFormModal` wiring, the API propagation through the multi-location brand catalog, the Slideshow cleanup that retired S175's optimistic type cast, and a full Pint & Pixel seed covering all 20 beers with rich descriptions + sensory data + correct glass picks. Joshua opened the sprint saying "Do you remember those new fields we added from the last session" — Morgan gently clarified that S175 had only shipped the *read* path (the Slideshow reads `srm`/`aroma_notes`/etc. optimistically via a type cast) and this sprint would land the actual columns + write path. Once aligned, the whole sprint moved in one session with no mid-session pivots.
+
+**What shipped:**
+
+- **`supabase/migrations/111_beer_sensory_fields.sql`** (queued) — `beers` gains `srm int` (`CHECK 1–40`), `aroma_notes text[]`, `taste_notes text[]`, `finish_notes text[]`; `brand_catalog_beers` mirrors the same four columns so the brand catalog stays the single source of truth; `beer_pour_sizes` gains `is_default boolean NOT NULL DEFAULT false`; a **partial unique index `idx_beer_pour_sizes_one_default_per_beer ON beer_pour_sizes (beer_id) WHERE is_default = true`** enforces "exactly one default per beer" at the database level — no triggers, no CHECK constraints, no client-side enforcement. A **three-step backfill** ensures every existing beer ends up with exactly one default pour: (a) mark any pour row labeled `Pint` as default, (b) fall back to the first pour row (by `display_order, created_at`) for beers without a Pint, (c) `INSERT` a synthetic `Pint / 16oz / $6.00` row for beers with zero pour sizes. Full rollback plan in the file (drop index → 8 drop column → optional cleanup of backfilled Pint rows). Array columns default to `'{}'`.
+
+- **`supabase/migrations/112_pint_pixel_sensory_seed.sql`** (queued) — seeds all **20 Pint & Pixel beers** with rich descriptions, SRM values, `aroma_notes`/`taste_notes`/`finish_notes` arrays, and the correct `glass_type` pick per style. Covers both rosters: the 10 dev-themed beers from migration 074 (Ctrl+Z Kölsch → `stange`, Regex Red Ale → `nonic_pint`, Git Blame Belgian → `tulip`, Infinite Loop IPA → `ipa_glass`, Null Pointer Nitro → `nonic_pint`, Syntax Error Saison → `tulip`, Hotfix Hazy Pale → `shaker_pint`, Binary Barleywine → `snifter`, Cache Miss Cider → `tulip`, Exception Handler ESB → `nonic_pint`) AND the 10 classic beers from `supabase/seeds/002_test_brewery.sql` (Debug IPA → `ipa_glass`, Pixel Perfect Pils → `pilsner_glass`, Dark Mode Stout → `snifter`, Stack Overflow Sour → `tulip`, Merge Conflict Märzen → `mug_stein`, Pull Request Pale → `shaker_pint`, Kernel Panic Porter → `nonic_pint`, 404 Wheat Not Found → `weizen_glass`, Deploy Friday DIPA → `ipa_glass`, Legacy Code Lager → `pilsner_glass`). Pure idempotent `UPDATE WHERE brewery_id AND name` — re-runnable, missing beers silently skipped. Every note in the seed is valid against the standardized catalog (37/37 AROMA, 38/38 TASTE, 22/22 FINISH verified programmatically). Every glass key valid against `GLASS_TYPES` (9/9). Morgan missed the 5 beers in `seeds/002_test_brewery.sql` on the first pass — Joshua caught it.
+
+- **`lib/beer-sensory.ts`** — Standardized note catalogs sourced from BJCP style guidelines and Cicerone tasting vocabulary. **63 AROMA** notes, **67 TASTE** notes, **41 FINISH** notes, all as `readonly` tuples with narrowing `AromaNote`/`TasteNote`/`FinishNote` types. `isKnownNote(value, list)` for case-insensitive membership check. `normalizeNote(value)` for title-casing free-text entries while preserving short ALL-CAPS acronyms (ESB, NEIPA, IPA stay uppercase). A duplicate "Dank" existed in TASTE_NOTES on the first pass and was caught by the catalog uniqueness test on the first test run. A "Peppery" entry was added to FINISH_NOTES mid-sprint so the Pint & Pixel seed data would match the catalog 100%.
+
+- **`lib/srm-colors.ts`** — Full 1–40 SRM→hex lookup table from BJCP reference colors. `srmToHex(srm)` with clamp to `[1, 40]` and mid-gold fallback for null/undefined/NaN. `srmLabel(srm)` bucket names ("Pale Straw", "Straw", "Pale Gold", "Deep Gold", "Amber", "Copper", "Deep Copper", "Brown", "Dark Brown", "Very Dark", "Black"). `isDarkSrm(srm)` (true when `srm >= 17`) for automatic text-contrast flipping on the swatch preview.
+
+- **`components/brewery-admin/beer-form/SensoryNotesPicker.tsx`** — Fully controlled multi-select chip picker with free-text fallback. Parent owns `value: string[]`, component holds only the query string locally. Interactions: type to filter, click a suggestion to add as a chip, click the × on a chip to remove, **Enter** picks the first suggestion or adds a custom note, **Backspace** on an empty input removes the last chip. `onMouseDown` on dropdown items so `preventDefault` runs before the input blurs the dropdown away. `maxSelections` cap (default 8) hides the input with a polite "Maximum of N notes reached" message when full. Case-insensitive duplicate rejection. Reused three times in each form (Aroma / Taste / Finish).
+
+- **`components/brewery-admin/beer-form/SrmPicker.tsx`** — Numeric input (1–40) paired with a live color swatch preview that auto-flips text color on dark beers via `isDarkSrm`. Bucket label ("Pale Gold", "Copper", etc.) renders next to the swatch. Validates inline via the same `validateNumericFields` path as ABV/IBU/Price.
+
+- **`BeerFormModal.tsx`** (tap list) — Sensory section renders after Description, gated per item type (`showSrmField` = beer only; `showSensoryNotesFields` = beer/cider/wine/cocktail). Pour size rows gained a **gold-star "Hero" button** (`is_default` toggle) with auto-promotion on delete: removing the default row promotes the next row so the beer always has exactly one. Quick-adding `Pint` auto-promotes it to default (Joshua's spec). `isDirty()` extended with an array-equality helper for the three notes arrays + `srm` string.
+
+- **`TapListClient.tsx`** — `openEdit` hydrates the new fields from the fetched beer row. `handleSave` persists them with item-type-aware clearing (non-beer loses `srm`, `na_beverage` loses all notes). The pour size save path **guarantees exactly one `is_default = true` row before insert** — honors the user's choice when present, falls back to the first row otherwise.
+
+- **`BoardSlideshow.tsx`** — **Removed the `beerWithNotes as BoardBeer & {...}` type cast from Sprint 175.** The fields are now native on `BoardBeer`. `FlavorNote` subcomponent updated to accept `string[] | null | undefined` and render as `.join(", ")`. Pour chip highlight now uses `findIndex(p => p.is_default)` with a first-row fallback for legacy rows without an explicit default. `hasAnyNotes` check updated from truthy-string to array-length.
+
+- **`board-types.ts`** — `BoardBeer` gained `srm?: number | null`, `aroma_notes?: string[] | null`, `taste_notes?: string[] | null`, `finish_notes?: string[] | null`. Optional so legacy rows without the columns degrade gracefully.
+
+- **`lib/glassware.ts`** — `PourSize` type gained `is_default?: boolean` so the Slideshow loader can identify the hero pour.
+
+- **`types/database.ts`** — `Beer` type gained the four sensory fields, plus fixed a **pre-existing tech-debt gap**: added `is_86d?: boolean` that had been missing since migration 019 (13 sprints of tech debt cleared while we were in the file).
+
+- **`tap-list-types.ts`** — local `Beer` and `BeerFormData` types updated, `PourSizeRow` gained `is_default: boolean`, new `showSrmField()` / `showSensoryNotesFields()` visibility helpers, SRM validation (1–40) added to `validateNumericFields` with the same pattern as ABV/IBU/Price.
+
+- **`CatalogBeerFormModal.tsx`** (brand catalog) — Same sensory section using the shared picker components. Client-side SRM range validation (1–40) mirrors the server-side check in the POST/PATCH routes.
+
+- **`BrandCatalogClient.tsx`** — `CatalogItem` type extended with `srm` + `aromaNotes`/`tasteNotes`/`finishNotes` so the edit flow carries them into the modal.
+
+- **`app/api/brand/[brand_id]/catalog/route.ts`** (POST) — accepts + validates `srm`, `aromaNotes`, `tasteNotes`, `finishNotes` on catalog create.
+
+- **`app/api/brand/[brand_id]/catalog/[catalog_beer_id]/route.ts`** (PATCH) — accepts the new fields, propagates them alongside the existing name/style/etc. when `propagate: true` is set. **Parker framed this as "a retention feature disguised as a data-entry feature"** — a brand updates sensory data once, `propagate: true`, and it pushes to all linked location beers in the same PATCH call.
+
+- **`app/api/brand/[brand_id]/catalog/[catalog_beer_id]/add-to-locations/route.ts`** (POST) — new location beers inherit sensory fields from the catalog on initial insert. Linking existing same-name beers stays non-destructive (doesn't overwrite local sensory data).
+
+- **`app/api/brand/[brand_id]/catalog/route.ts`** (GET) — returns sensory fields in the response shape so the catalog page can render them.
+
+- **`docs/plans/deferred-sprint-options.md`** — new **"Tooling / Developer Experience"** section added with a **Context7 MCP integration** entry. The MCP was wired in the Sprint 175 close commit `cf871dd` but has no usage playbook yet. Deferred as a half-day tooling task until the team has signal on how often stale-training-data library questions bite us during Next 16.2.1 / Tailwind v4 / Supabase SSR v0.9 work.
+
+**Tests:** **2070 Vitest tests passing** (was 2008 at S175 close, **+62 new Sprint 176 tests**):
+- `lib/__tests__/beer-sensory.test.ts` — 17 cases (catalog shape, no-duplicates invariant, case-insensitive `isKnownNote`, `normalizeNote` title-casing + ALL-CAPS preservation)
+- `lib/__tests__/srm-colors.test.ts` — 15 cases (every value 1–40, clamp, NaN/null fallback, pale-vs-dark R-channel directional check, bucket labels, `isDarkSrm`)
+- `lib/__tests__/tap-list-types.test.ts` — 15 cases (SRM validation integration, `emptyBeer` defaults, new visibility helpers, POUR_QUICK_ADD Pint sanity)
+- `components/__tests__/SensoryNotesPicker.test.tsx` — 15 cases (rendering, filter, Enter key, Backspace key, custom note addition, max guard, case-insensitive duplicate rejection)
+
+Typecheck clean, **0 lint errors** (all warnings in touched files are pre-existing — verified by git stash round-trip), **0 new warnings** introduced.
+
+**Key Sprint 176 lessons (saved to memory):**
+
+1. **Partial unique indexes are the canonical way to enforce "exactly one default per parent".** No trigger, no CHECK constraint, no client-side enforcement. `CREATE UNIQUE INDEX ON table (parent_id) WHERE is_default = true` gives you a database-level guarantee with zero operational cost. Use this pattern anywhere we need "at most one active/default/featured per group".
+2. **Seeds and migrations both insert dev data — check both paths when touching a test brewery's roster.** Morgan missed 5 Pint & Pixel beers on the first pass of migration 112 because they live in `supabase/seeds/002_test_brewery.sql` rather than `supabase/migrations/`. Saved to feedback memory as a standing rule.
+3. **Test-first catches catalog-list bugs on the first run.** A uniqueness test (`no duplicate entries within a list (case-insensitive)`) caught a duplicate "Dank" in TASTE_NOTES before any manual QA. A DOM-scoping test caught a picker test where "Citrus" appeared both as a selected chip and a dropdown suggestion. Both bugs were real. Write the uniqueness test on day one of any standardized-list library.
+4. **When migrating a shared type from a type cast to a native field, also remove the cast — don't just add the field.** The `beerWithNotes as BoardBeer & {...}` cast from Sprint 175 was exactly the kind of "I'll clean this up later" debt that never gets cleaned up unless the sprint that adds the real field also removes the cast. Make it a rule.
+5. **Catalog propagation is retention.** Single-action multi-location updates (PATCH with `propagate: true`) is the kind of workflow tax elimination that makes the difference between a brand growing past 5 locations on HopTrack vs canceling. Parker's observation is load-bearing.
+
+**NOT shipped (intentional, waiting on Joshua or future sprints):**
+
+- **Migrations 110, 111, 112 pushed to Supabase** — all three are stacked on disk, unpushed. Joshua's call. Pure additive, safe to run in order with `npm run db:migrate` whenever he's ready. None of them gate on each other beyond sequential ordering.
+- **Picker dropdown mobile polish** — Alex flagged that the dropdown can overflow the modal on small screens when the sensory section is near the bottom. Sprint 177 polish item: `scrollIntoView` on focus or a max-height scroll region.
+- **Taylor's Slideshow screenshot for the pricing page** — Drew owns this action item. A full P&P beer slide with sensory data visible should go in the Cask-tier marketing.
+- **Context7 MCP playbook** — deferred to a tooling sprint once the team has signal on how often Next 16 / Tailwind v4 / Supabase SSR questions would benefit from live docs vs stale training data.
+- **Per-beer default pour size UI in the edit-pour-sizes quick-add row** — the gold-star hero button exists for custom-added rows but quick-adds always auto-promote Pint. A user could theoretically want "Half Pint" as default without adding a Pint first — current flow requires manually adding Pint, then starring Half Pint, then removing Pint. Sprint 177 could add a default-picker dropdown on the quick-add row. Low priority.
+
+**Full retro:** `docs/retros/sprint-176-retro.md`

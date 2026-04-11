@@ -479,10 +479,16 @@ export interface Beer {
   pos_price_cents: number | null;
   pos_last_seen_at: string | null;
   is_on_tap?: boolean;
+  is_86d?: boolean;
   // Barcode scanning (Sprint 89)
   barcode: string | null;
   // Brand catalog link (Sprint 119)
   brand_catalog_beer_id: string | null;
+  // Sensory fields (Sprint 176)
+  srm: number | null;
+  aroma_notes: string[];
+  taste_notes: string[];
+  finish_notes: string[];
 }
 export type BeerInsert = Omit<Beer, "id" | "created_at"> & { id?: string };
 export type BeerUpdate = Partial<Beer>;

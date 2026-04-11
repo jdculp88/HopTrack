@@ -119,6 +119,11 @@ export async function GET(
         coverImageUrl: c.cover_image_url,
         seasonal: c.seasonal,
         isActive: c.is_active,
+        // Sprint 176 sensory fields
+        srm: c.srm ?? null,
+        aromaNotes:  c.aroma_notes  ?? [],
+        tasteNotes:  c.taste_notes  ?? [],
+        finishNotes: c.finish_notes ?? [],
         totalPours,
         avgRating: ratingCount > 0 ? parseFloat((totalRating / ratingCount).toFixed(1)) : null,
         ratingCount,
@@ -171,9 +176,18 @@ export async function POST(
   if (!role || !["owner", "regional_manager"].includes(role)) return apiForbidden();
 
   const body = await request.json();
-  const { name, style, abv, ibu, description, itemType, category, glassType, seasonal, coverImageUrl } = body;
+  const {
+    name, style, abv, ibu, description, itemType, category, glassType, seasonal, coverImageUrl,
+    srm, aromaNotes, tasteNotes, finishNotes,
+  } = body;
 
   if (!name?.trim()) return apiBadRequest("Beer name is required", "name");
+
+  // SRM sanity check mirrors migration 111's column constraint
+  const srmValue = srm != null && srm !== "" ? parseInt(srm) : null;
+  if (srmValue != null && (Number.isNaN(srmValue) || srmValue < 1 || srmValue > 40)) {
+    return apiBadRequest("SRM must be between 1 and 40", "srm");
+  }
 
   try {
     // Check uniqueness within brand
@@ -200,6 +214,11 @@ export async function POST(
         glass_type: glassType || null,
         cover_image_url: coverImageUrl || null,
         seasonal: seasonal ?? false,
+        // Sprint 176 sensory fields — optional
+        srm: srmValue,
+        aroma_notes:  Array.isArray(aromaNotes)  ? aromaNotes  : [],
+        taste_notes:  Array.isArray(tasteNotes)  ? tasteNotes  : [],
+        finish_notes: Array.isArray(finishNotes) ? finishNotes : [],
         created_by: user.id,
       })
       .select()

@@ -3,8 +3,11 @@
 import { useState, useRef } from "react";
 import { motion } from "motion/react";
 import { X, Save, Loader2 } from "lucide-react";
-import { ITEM_TYPE_LABELS } from "@/types/database";
 import type { BeerStyle, ItemType } from "@/types/database";
+import { AROMA_NOTES, TASTE_NOTES, FINISH_NOTES } from "@/lib/beer-sensory";
+import { SensoryNotesPicker } from "@/components/brewery-admin/beer-form/SensoryNotesPicker";
+import { SrmPicker } from "@/components/brewery-admin/beer-form/SrmPicker";
+import { SRM_MIN, SRM_MAX } from "@/lib/srm-colors";
 
 const STYLES: BeerStyle[] = [
   "IPA","Double IPA","Hazy IPA","Session IPA","Pale Ale","Stout","Imperial Stout",
@@ -24,6 +27,10 @@ const ITEM_TYPES: { value: ItemType; label: string }[] = [
 function showStyleField(t: ItemType) { return t === "beer"; }
 function showAbvField(t: ItemType) { return t !== "food" && t !== "na_beverage"; }
 function showIbuField(t: ItemType) { return t === "beer"; }
+function showSrmField(t: ItemType) { return t === "beer"; }
+function showSensoryNotesFields(t: ItemType) {
+  return t === "beer" || t === "cider" || t === "wine" || t === "cocktail";
+}
 
 interface CatalogBeerFormModalProps {
   editingBeer: {
@@ -36,6 +43,12 @@ interface CatalogBeerFormModalProps {
     itemType: string;
     category: string | null;
     seasonal: boolean;
+    // Sprint 176 sensory fields — optional so legacy pages without them
+    // still compile (arrays default to [] on load)
+    srm?: number | null;
+    aromaNotes?: string[] | null;
+    tasteNotes?: string[] | null;
+    finishNotes?: string[] | null;
   } | null;
   onSave: (form: any) => Promise<boolean>;
   onClose: () => void;
@@ -50,6 +63,10 @@ interface FormData {
   itemType: ItemType;
   category: string;
   seasonal: boolean;
+  srm: string;
+  aromaNotes: string[];
+  tasteNotes: string[];
+  finishNotes: string[];
 }
 
 export function CatalogBeerFormModal({ editingBeer, onSave, onClose }: CatalogBeerFormModalProps) {
@@ -62,17 +79,27 @@ export function CatalogBeerFormModal({ editingBeer, onSave, onClose }: CatalogBe
     itemType: (editingBeer?.itemType as ItemType) ?? "beer",
     category: editingBeer?.category ?? "",
     seasonal: editingBeer?.seasonal ?? false,
+    srm: editingBeer?.srm != null ? String(editingBeer.srm) : "",
+    aromaNotes:  editingBeer?.aromaNotes  ?? [],
+    tasteNotes:  editingBeer?.tasteNotes  ?? [],
+    finishNotes: editingBeer?.finishNotes ?? [],
   });
   const [saving, setSaving] = useState(false);
+  const [srmError, setSrmError] = useState<string | undefined>();
   const [confirmDiscard, setConfirmDiscard] = useState(false);
   const initialRef = useRef(form);
 
   function isDirty() {
     const i = initialRef.current;
+    const arraysEqual = (a: string[], b: string[]) =>
+      a.length === b.length && a.every((v, idx) => v === b[idx]);
     return form.name !== i.name || form.style !== i.style || form.abv !== i.abv ||
       form.ibu !== i.ibu || form.description !== i.description ||
       form.itemType !== i.itemType || form.category !== i.category ||
-      form.seasonal !== i.seasonal;
+      form.seasonal !== i.seasonal || form.srm !== i.srm ||
+      !arraysEqual(form.aromaNotes,  i.aromaNotes) ||
+      !arraysEqual(form.tasteNotes,  i.tasteNotes) ||
+      !arraysEqual(form.finishNotes, i.finishNotes);
   }
 
   function closeForm() {
@@ -82,6 +109,16 @@ export function CatalogBeerFormModal({ editingBeer, onSave, onClose }: CatalogBe
 
   async function handleSave() {
     if (!form.name.trim()) return;
+    // Validate SRM before sending so we surface errors immediately rather
+    // than waiting on a 400 from the server
+    if (form.srm !== "") {
+      const srmValue = parseInt(form.srm, 10);
+      if (Number.isNaN(srmValue) || srmValue < SRM_MIN || srmValue > SRM_MAX) {
+        setSrmError(`SRM must be ${SRM_MIN}\u2013${SRM_MAX}`);
+        return;
+      }
+    }
+    setSrmError(undefined);
     setSaving(true);
 
     const payload: any = {
@@ -93,6 +130,10 @@ export function CatalogBeerFormModal({ editingBeer, onSave, onClose }: CatalogBe
       itemType: form.itemType,
       category: form.category.trim() || null,
       seasonal: form.seasonal,
+      srm: showSrmField(form.itemType) && form.srm ? form.srm : null,
+      aromaNotes:  showSensoryNotesFields(form.itemType) ? form.aromaNotes  : [],
+      tasteNotes:  showSensoryNotesFields(form.itemType) ? form.tasteNotes  : [],
+      finishNotes: showSensoryNotesFields(form.itemType) ? form.finishNotes : [],
     };
 
     // When editing, include propagate toggle
@@ -259,6 +300,44 @@ export function CatalogBeerFormModal({ editingBeer, onSave, onClose }: CatalogBe
               style={{ borderColor: "var(--border)", color: "var(--text-primary)" }}
             />
           </div>
+
+          {/* Sensory section (Sprint 176) */}
+          {showSrmField(form.itemType) && (
+            <SrmPicker
+              value={form.srm}
+              onChange={v => {
+                setForm(f => ({ ...f, srm: v }));
+                setSrmError(undefined);
+              }}
+              error={srmError}
+            />
+          )}
+
+          {showSensoryNotesFields(form.itemType) && (
+            <div className="space-y-3">
+              <SensoryNotesPicker
+                label="Aroma"
+                value={form.aromaNotes}
+                onChange={next => setForm(f => ({ ...f, aromaNotes: next }))}
+                options={AROMA_NOTES}
+                placeholder="e.g. Citrus, Pine, Mango..."
+              />
+              <SensoryNotesPicker
+                label="Taste"
+                value={form.tasteNotes}
+                onChange={next => setForm(f => ({ ...f, tasteNotes: next }))}
+                options={TASTE_NOTES}
+                placeholder="e.g. Juicy, Bitter, Creamy..."
+              />
+              <SensoryNotesPicker
+                label="Finish"
+                value={form.finishNotes}
+                onChange={next => setForm(f => ({ ...f, finishNotes: next }))}
+                options={FINISH_NOTES}
+                placeholder="e.g. Dry, Crisp, Lingering Bitter..."
+              />
+            </div>
+          )}
 
           {/* Seasonal toggle */}
           <div className="flex items-center gap-3">
