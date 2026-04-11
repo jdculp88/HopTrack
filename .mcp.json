@@ -1,6 +1,6 @@
 {
   "$schema": "https://code.claude.com/schema/mcp.json",
-  "_comment": "HopTrack — Sprint 173 — MCP (Model Context Protocol) servers. The Supabase MCP points at hoptrack-staging (NOT the main HopTrack project in us-east-2) per Supabase docs: 'Supabase MCP is only designed for development and testing purposes. It is recommended to not connect to production.' Full setup instructions: docs/claude-code-setup.md",
+  "_comment": "HopTrack — MCP (Model Context Protocol) servers. Started Sprint 173 with supabase-staging only; Context7 added Sprint 176. Supabase MCP points at hoptrack-staging (NOT main in us-east-2) per Supabase docs: 'Supabase MCP is only designed for development and testing purposes.' Full setup instructions: docs/claude-code-setup.md",
 
   "mcpServers": {
     "supabase-staging": {
@@ -11,6 +11,12 @@
         "SUPABASE_URL": "${SUPABASE_STAGING_URL}",
         "SUPABASE_SERVICE_ROLE_KEY": "${SUPABASE_STAGING_SERVICE_ROLE_KEY}"
       }
+    },
+
+    "context7": {
+      "_comment": "Context7 MCP — live docs for Next.js 16, Tailwind v4, Supabase SSR 0.9, Framer Motion, and other post-training-cutoff libraries. Exists because AGENTS.md opens with 'This is NOT the Next.js you know' — cures hallucinated API suggestions. Free hosted service; no credentials required. If you hit rate limits, sign up at context7.com/dashboard for a free CONTEXT7_API_KEY and add an env block here. Everyone on the team writing code is a user.",
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp"]
     }
   }
 }

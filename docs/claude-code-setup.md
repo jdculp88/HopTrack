@@ -97,32 +97,35 @@ Fires when a new Claude Code session opens. Prints:
 
 ---
 
-## The MCP Server (Supabase)
+## The MCP Servers
 
-`.mcp.json` configures the Supabase MCP server pointing at `hoptrack-staging` (NOT the main HopTrack project in us-east-2).
+`.mcp.json` configures two MCP (Model Context Protocol) servers. Started Sprint 173 with Supabase only; Context7 added Sprint 176 after evaluating the houtini.com shortlist. Sentry MCP was evaluated and skipped — it has an embedded LLM agent that would double-bill against `ANTHROPIC_API_KEY` (the same key HopRoute uses). Revisit when production error volume makes manual Sentry triage painful.
 
-### Why staging, not main
-Per [Supabase docs](https://supabase.com/docs/guides/getting-started/mcp): *"Supabase MCP is only designed for development and testing purposes. It is recommended to not connect to production."*
+### 1. Supabase MCP (`supabase-staging`)
 
-The MCP lets Claude query the actual database schema, introspect RLS policies, run diagnostic SELECTs, and generate migrations from real state. We never want that firehose pointed at real customer data.
+Points at `hoptrack-staging`, NOT the main HopTrack project in us-east-2.
 
-### Required environment variables
-Add these to `.env.local` (gitignored — never commit):
+**Why staging, not main.** Per [Supabase docs](https://supabase.com/docs/guides/getting-started/mcp): *"Supabase MCP is only designed for development and testing purposes. It is recommended to not connect to production."* The MCP lets Claude query the actual database schema, introspect RLS policies, run diagnostic SELECTs, and generate migrations from real state. We never want that firehose pointed at real customer data.
 
+**Required environment variables** (add to `.env.local`, gitignored):
 ```bash
 SUPABASE_STAGING_URL=https://<staging-project-ref>.supabase.co
 SUPABASE_STAGING_SERVICE_ROLE_KEY=<staging-service-role-key>
 ```
 
-### Important: staging must be seeded first
-As of Sprint 173, `hoptrack-staging` is empty (0 tables, 0 migrations). The MCP config is in place but will error on connection until staging is seeded. See `memory/feedback_staging_supabase_empty.md` for the half-day ops sprint to seed it.
+**Important: staging must be seeded first.** As of Sprint 173, `hoptrack-staging` is empty (0 tables, 0 migrations). The MCP config is in place but will error on connection until staging is seeded. See `memory/feedback_staging_supabase_empty.md` for the half-day ops sprint to seed it.
 
-### Who uses it
-- **Riley** — migration state audits
-- **Quinn** — query optimization, index analysis
-- **Avery** — RLS policy debugging
-- **Dakota** — schema lookups when building features
-- **Jordan** — architecture decisions that need real schema context
+**Primary users:** Riley (migration audits), Quinn (query optimization, indexes), Avery (RLS debugging), Dakota (schema lookups), Jordan (architecture decisions).
+
+### 2. Context7 MCP (`context7`)
+
+Fetches live documentation for libraries and frameworks so Claude doesn't hallucinate APIs from pretrained knowledge.
+
+**Why we added it.** AGENTS.md opens with *"This is NOT the Next.js you know."* We're on Next.js 16.2.1, Tailwind v4, Supabase SSR 0.9, Framer Motion — all post-training-cutoff. Context7 fetches the real current docs on demand for any library it covers. Direct cure for "Claude suggests an API that doesn't exist in this version" bugs.
+
+**Required environment variables:** None. Context7 runs as a free hosted service — no credentials needed. If you hit rate limits, sign up at [context7.com/dashboard](https://context7.com/dashboard) for a free `CONTEXT7_API_KEY` and add an `env` block to `.mcp.json`.
+
+**Primary users:** Everyone on the team writing code. Especially Dakota (fast hands, needs current docs) and Avery (architecture patterns).
 
 ---
 
@@ -189,9 +192,9 @@ As of Sprint 173, `hoptrack-staging` is empty (0 tables, 0 migrations). The MCP 
 - Check skill is loaded: `/sprint-close` should autocomplete
 
 ### "MCP server won't connect"
-- As of Sprint 173, `hoptrack-staging` is empty. MCP will error until staging is seeded.
-- Verify env vars are set: `echo $SUPABASE_STAGING_URL`
-- Check you're pointing at staging, NOT main
+- **Supabase:** As of Sprint 173, `hoptrack-staging` is empty. MCP will error until staging is seeded. Verify env vars: `echo $SUPABASE_STAGING_URL`. Check you're pointing at staging, NOT main.
+- **Context7:** No credentials required. If you're getting 429 rate-limit errors, sign up at context7.com/dashboard for a free API key and add a `CONTEXT7_API_KEY` env var to the Context7 block in `.mcp.json`.
+- **General:** MCPs load at session start. If you edit `.mcp.json` or env vars, restart Claude Code to pick up changes.
 
 ---
 
