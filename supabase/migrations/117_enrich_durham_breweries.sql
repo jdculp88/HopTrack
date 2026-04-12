@@ -58,12 +58,12 @@ SELECT id INTO id_clouds_durham FROM breweries WHERE external_id = 'f5d75c6d-8d8
 
 -- ── FULLSTEAM BREWERY ──────────────────────────────────────────────────────
 UPDATE breweries SET
-  description = 'Durham''s flagship craft brewery, founded 2010 by Sean Lilly Wilson. Pioneering Southern-inspired beers using local grains, sweet potatoes, persimmons, and foraged ingredients. A Durham institution in the Central Park district with strong community roots.',
-  phone = '9196829555',
+  description = 'Southern-rooted production brewery pioneering Distinctly Southern Beer with local farmed goods, heirloom grains, and seasonal botanicals. First Regenified brewery with over $1M in local farm spending. Founded 2010 by Sean Lilly Wilson. Building out permanent "forever home" at American Tobacco Campus.',
+  phone = '9194382337',
   website_url = 'https://www.fullsteam.ag',
   hop_route_eligible = true,
   hop_route_offer = 'Free taster of any draft with HopTrack check-in',
-  instagram_url = 'https://instagram.com/fullsteam',
+  instagram_url = 'https://instagram.com/fullsteambrewery',
   facebook_url = 'https://facebook.com/fullsteam',
   untappd_url = 'https://untappd.com/Fullsteam',
   twitter_url = 'https://x.com/fullsteam',
@@ -75,7 +75,7 @@ WHERE id = id_fullsteam;
 -- ── PONYSAURUS BREWING COMPANY ─────────────────────────────────────────────
 UPDATE breweries SET
   description = 'Durham brewery and taproom known for clever, boundary-pushing beers and a gorgeous facility. Founded by Nick Hawthorne-Johnson and Keil Jansen. Their Yes Dear honey rye is an NC staple. Beer garden with full kitchen.',
-  phone = '9198081804',
+  phone = '9199080204',
   website_url = 'https://www.ponysaurusbrewing.com',
   hop_route_eligible = true,
   hop_route_offer = '$1 off any pint with HopTrack check-in',
@@ -117,19 +117,10 @@ UPDATE breweries SET
   vibe_tags = ARRAY['downtown-durham', 'brewpub', 'burgers', 'locally-sourced', 'community-staple', 'exotic-meats']
 WHERE id = id_bull_city;
 
--- ── BARREL CULTURE BREWING AND BLENDING ────────────────────────────────────
+-- ── BARREL CULTURE BREWING AND BLENDING (PERMANENTLY CLOSED Jan 2023) ───
 UPDATE breweries SET
-  description = 'Mixed-fermentation brewery in south Durham focused exclusively on sour, wild, and barrel-aged beers. Small-batch and highly sought after. One of the most acclaimed sour breweries in the Southeast.',
-  website_url = 'https://www.barrelculture.com',
-  hop_route_eligible = true,
-  hop_route_offer = 'Tasting flight discount with HopTrack check-in',
-  instagram_url = 'https://instagram.com/barrelculture',
-  facebook_url = 'https://facebook.com/barrelculturebrewing',
-  untappd_url = 'https://untappd.com/BarrelCulture',
-  twitter_url = NULL,
-  latitude = 35.9436,
-  longitude = -78.8825,
-  vibe_tags = ARRAY['south-durham', 'sour-only', 'barrel-aged', 'wild-ales', 'mixed-fermentation', 'small-batch', 'highly-sought']
+  description = 'PERMANENTLY CLOSED (January 2023). Was a 100% oak-fermented, fruit-driven mixed-fermentation brewery with 18 taps, known for imaginative sour ales. Operated for 5 years in south Durham.',
+  is_active = false
 WHERE id = id_barrel_culture;
 
 -- ── DURTY BULL BREWING CO ──────────────────────────────────────────────────
@@ -166,38 +157,30 @@ WHERE id = id_clouds_durham;
 
 -- ── FULLSTEAM BREWERY ──────────────────────────────────────────────────────
 INSERT INTO beers (id, brewery_id, name, style, abv, ibu, description, is_on_tap, is_active, item_type, seasonal) VALUES
-(fs_01, id_fullsteam, 'Rocket Science', 'American IPA', 6.5, NULL, 'Flagship IPA with Citra and Simcoe hops. Citrusy and balanced.', true, true, 'beer', false),
-(fs_02, id_fullsteam, 'Paycheck', 'Pilsner', 5.2, NULL, 'Crisp, clean pilsner. Their everyday working beer.', true, true, 'beer', false),
-(fs_03, id_fullsteam, 'Humidity', 'Southern Wheat', 4.2, NULL, 'Southern-style wheat beer with local grain. Light and refreshing.', true, true, 'beer', false),
-(fs_04, id_fullsteam, 'Carver', 'Sweet Potato Lager', 5.5, NULL, 'Lager brewed with North Carolina sweet potatoes. Unique and Southern.', true, true, 'beer', false),
-(fs_05, id_fullsteam, 'Working Man''s Lunch', 'Cream Ale', 4.8, NULL, 'Easy-drinking cream ale. A Durham lunch staple.', true, true, 'beer', false),
-(fs_06, id_fullsteam, 'El Toro', 'Cream Stout', 5.5, NULL, 'Smooth cream stout with coffee and chocolate notes.', true, true, 'beer', false),
-(fs_07, id_fullsteam, 'First Frost', 'Persimmon Ale', 6.0, NULL, 'Fall ale brewed with local persimmons. A Fullsteam signature.', true, true, 'beer', true),
-(fs_08, id_fullsteam, 'Summer Basil', 'Farmhouse Ale', 5.0, NULL, 'Farmhouse ale with fresh basil. Light and herbal.', true, true, 'beer', true)
+(fs_01, id_fullsteam, 'Rocket Science', 'American IPA', 6.8, NULL, 'Flagship IPA with bold hop character. A Durham staple.', true, true, 'beer', false),
+(fs_02, id_fullsteam, 'Paycheck', 'Czech Pilsner', 4.5, NULL, 'Southern-sourced pilsner with local barley and corn. 2019 US Beer Open Gold.', true, true, 'beer', false),
+(fs_03, id_fullsteam, 'Humidity', 'Hazy IPA', 6.5, NULL, 'Tropical, juicy, haze-forward IPA. Sunny and bright.', true, true, 'beer', false),
+(fs_04, id_fullsteam, 'Hogwash', 'Smoked Porter', 8.0, NULL, 'Hickory-smoked porter with locally roasted coffee and toasted malts.', true, true, 'beer', false),
+(fs_05, id_fullsteam, 'Lucky''s Lager', 'Czech Amber Lager', 5.0, NULL, 'Toasty Euro-style lager inspired by Durham''s manufacturing heritage.', true, true, 'beer', false),
+(fs_06, id_fullsteam, 'Southern Basil', 'Farmhouse Ale', 5.0, NULL, 'Basil farmhouse ale. 2019 Good Food Award winner.', true, true, 'beer', true),
+(fs_07, id_fullsteam, 'First Frost', 'Persimmon Ale', 9.9, NULL, 'Foraged-persimmon winter seasonal. Complex and strong. A Fullsteam signature.', true, true, 'beer', true),
+(fs_08, id_fullsteam, 'Coffee is for Closers', 'Coffee Stout', 6.0, NULL, 'Seasonal stout brewed with locally roasted coffee.', true, true, 'beer', true)
 ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, style = EXCLUDED.style, abv = EXCLUDED.abv, description = EXCLUDED.description;
 
 -- ── PONYSAURUS BREWING ─────────────────────────────────────────────────────
 INSERT INTO beers (id, brewery_id, name, style, abv, ibu, description, is_on_tap, is_active, item_type, seasonal) VALUES
-(ps_01, id_ponysaurus, 'Yes Dear', 'Honey Rye', 5.5, NULL, 'Flagship honey rye ale with local honey. An NC staple — smooth, malty, and sweet.', true, true, 'beer', false),
-(ps_02, id_ponysaurus, 'Biere de Garde', 'Biere de Garde', 7.5, NULL, 'French-style farmhouse ale. Malty, complex, and cellar-worthy.', true, true, 'beer', false),
-(ps_03, id_ponysaurus, 'Don''t Be Mean to People', 'Golden Ale', 4.5, NULL, 'Simple, crushable golden ale with a message.', true, true, 'beer', false),
-(ps_04, id_ponysaurus, 'Galaxy Smasher', 'Hazy IPA', 7.0, NULL, 'DDH hazy IPA loaded with Galaxy hops. Tropical and dank.', true, true, 'beer', false),
-(ps_05, id_ponysaurus, 'Pony Pils', 'German Pilsner', 5.0, NULL, 'Crisp German-style pilsner with noble hop character.', true, true, 'beer', false),
-(ps_06, id_ponysaurus, 'Brilliant Disguise', 'Belgian Golden Strong', 8.0, NULL, 'Complex Belgian golden strong ale. Fruity esters and warming finish.', true, true, 'beer', true),
-(ps_07, id_ponysaurus, 'Zephyr', 'Witbier', 4.5, NULL, 'Belgian wheat beer with coriander and citrus peel. Light and breezy.', true, true, 'beer', false),
-(ps_08, id_ponysaurus, 'Common Struggle', 'California Common', 5.0, NULL, 'Lagered ale in the California common tradition. Smooth and toasty.', true, true, 'beer', false)
+(ps_01, id_ponysaurus, 'Biere de Garde', 'Farmhouse Ale', 6.3, NULL, 'French-style farmhouse with barley, wheat, rye, oats. Apple, pear, and vanilla aromas.', true, true, 'beer', false),
+(ps_02, id_ponysaurus, 'IPA', 'American IPA', 6.5, NULL, 'Crisp citrus bouquet with grapefruit rind, melon, tangerine, and passion fruit.', true, true, 'beer', false),
+(ps_03, id_ponysaurus, 'Scottish Ale', 'Scottish Ale', 7.2, NULL, 'Rich, smooth, malt-forward with caramel, coffee, and chocolate notes.', true, true, 'beer', false),
+(ps_04, id_ponysaurus, 'White IPA', 'White IPA', 6.0, NULL, 'Belgian Wit meets American IPA — lemongrass, orange peel, tropical fruit.', true, true, 'beer', false),
+(ps_05, id_ponysaurus, 'Pilsner', 'German Pilsner', 4.8, NULL, 'Clean, crisp, traditional German-style lager.', true, true, 'beer', false),
+(ps_06, id_ponysaurus, 'Don''t Be Mean to People', 'Barrel-Aged Saison', 7.5, NULL, 'Golden Rule Saison with plum and Brett, nearly 5 years in barrel.', true, true, 'beer', true),
+(ps_07, id_ponysaurus, 'Dubbel', 'Belgian Dubbel', 7.0, NULL, 'Rich dark fruit and spice in classic Belgian style.', true, true, 'beer', false),
+(ps_08, id_ponysaurus, 'Weissbier', 'Hefeweizen', 5.2, NULL, 'Classic Bavarian wheat with banana and clove.', true, true, 'beer', false)
 ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, style = EXCLUDED.style, abv = EXCLUDED.abv, description = EXCLUDED.description;
 
--- ── BARREL CULTURE ─────────────────────────────────────────────────────────
-INSERT INTO beers (id, brewery_id, name, style, abv, ibu, description, is_on_tap, is_active, item_type, seasonal) VALUES
-(bc_01, id_barrel_culture, 'Spontaneous Series', 'Spontaneous Ale', 6.0, NULL, 'Spontaneously fermented ale aged in oak. Complex and funky.', true, true, 'beer', true),
-(bc_02, id_barrel_culture, 'Fruited Sour', 'Fruited Sour', 5.5, NULL, 'Barrel-aged sour with rotating seasonal fruit additions.', true, true, 'beer', true),
-(bc_03, id_barrel_culture, 'Flanders Red', 'Flanders Red Ale', 6.5, NULL, 'Traditional Flanders-style red ale aged in wine barrels.', true, true, 'beer', false),
-(bc_04, id_barrel_culture, 'Brett Saison', 'Brett Saison', 6.0, NULL, 'Farmhouse saison with Brettanomyces funk and dry finish.', true, true, 'beer', false),
-(bc_05, id_barrel_culture, 'Gose', 'Gose', 4.5, NULL, 'Salt-and-coriander gose with bright acidity.', true, true, 'beer', false),
-(bc_06, id_barrel_culture, 'Wild IPA', 'Wild IPA', 7.0, NULL, 'IPA fermented with wild yeast. Funky and hop-forward.', true, true, 'beer', true)
-ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, style = EXCLUDED.style, abv = EXCLUDED.abv, description = EXCLUDED.description;
+-- (Barrel Culture: permanently closed Jan 2023 — no beers seeded)
 
 -- ═══════════════════════════════════════════════════════════════════════════════
-RAISE NOTICE '✅ Migration 117: Durham enrichment complete — 7 breweries, ~22 beers';
+RAISE NOTICE '✅ Migration 117: Durham enrichment complete — 7 breweries (1 closed), ~16 beers';
 END $$;
