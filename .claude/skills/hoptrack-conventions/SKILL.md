@@ -21,6 +21,7 @@ These rules are non-negotiable. Read before writing a single line of code.
 - **Service role key**: server-side only, NEVER in client code
 - Migrations live in `supabase/migrations/` — numbered sequentially
 - **NEVER use `.length` on unbounded query results for stats** — Supabase PostgREST defaults to 1000 rows. Use `{ count: "exact", head: true }` for pure counts, or add `.limit(50000)` when data must be iterated (S153 P0 fix)
+- **Every displayed column needs a write path OUTSIDE of seed migrations** — when you add a stat column, rollup table, or displayed field, verify end-to-end that real users can populate it. Run the grep: `grep -rn "column_name" app/ lib/ supabase/migrations/ | grep -iE "update|insert|upsert|rpc|\.update\(|\.insert\(|\.upsert\("`. If the only hits are in seeds (074/075/076/100/104/105) or migration files labeled `*seed*` / `*boost*`, you have an orphan. Add a trigger, an RPC, or an API-route write before shipping. Regression guards: `lib/__tests__/orphaned-columns-guard.test.ts` + `lib/__tests__/stat-write-paths.test.ts` — add a row to the STAT_WRITE_PATHS table when you ship a new stat column (S177 P0 fix)
 
 ## Styling
 - **Tailwind v4** — CSS-first config via `@theme {}` in `globals.css`
@@ -83,3 +84,4 @@ Before shipping any code change, verify:
 3. DRY helpers used instead of inline duplication
 4. CSS variables used instead of hardcoded colors
 5. `loading.tsx` added for any new data page
+6. **Every displayed stat column has a non-seed write path** (S177 audit rule). If `orphaned-columns-guard.test.ts` or `stat-write-paths.test.ts` fail in CI, a display field is silently broken in prod — fix the plumbing, don't weaken the test.

@@ -24,6 +24,10 @@ export interface Beer {
   aroma_notes: string[];
   taste_notes: string[];
   finish_notes: string[];
+  // Sprint 177 — S176 write-path neighbors (columns existed since early
+  // sprints but had no admin UI write path until now)
+  cover_image_url: string | null;
+  seasonal: boolean;
 }
 
 export interface PourSizeRow {
@@ -50,6 +54,11 @@ export interface BeerFormData {
   aromaNotes: string[];
   tasteNotes: string[];
   finishNotes: string[];
+  // Sprint 177 — write-path neighbors. coverImageUrl is empty string when
+  // absent (not null) so the dirty check stays simple and the ImageUpload
+  // can treat "" as "no image yet".
+  coverImageUrl: string;
+  seasonal: boolean;
 }
 
 export const STYLES: BeerStyle[] = [
@@ -78,6 +87,13 @@ export function showSrmField(t: ItemType) { return t === "beer"; }
 export function showSensoryNotesFields(t: ItemType) {
   return t === "beer" || t === "cider" || t === "wine" || t === "cocktail";
 }
+// Sprint 177: "Seasonal" toggle — only fermented/brewed items have the concept
+// of a seasonal release. Food and NA beverages opt out.
+export function showSeasonalField(t: ItemType) {
+  return t === "beer" || t === "cider" || t === "wine";
+}
+// Sprint 177: Cover image upload — every item type can have a photo.
+export function showCoverImageField(_t: ItemType) { return true; }
 
 // Default glass type per item type
 export const DEFAULT_GLASS: Partial<Record<ItemType, string>> = {
@@ -134,6 +150,8 @@ export const emptyBeer: BeerFormData = {
   aromaNotes: [],
   tasteNotes: [],
   finishNotes: [],
+  coverImageUrl: "",
+  seasonal: false,
 };
 
 export function validateNumericFields(form: BeerFormData): Record<string, string> {

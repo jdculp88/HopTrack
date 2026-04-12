@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { X, Save, Loader2, AlertTriangle, Star } from "lucide-react";
+import { X, Save, Loader2, AlertTriangle, Star, Calendar } from "lucide-react";
 import { ITEM_TYPE_LABELS } from "@/types/database";
 import type { BeerStyle, ItemType } from "@/types/database";
 import { GLASS_TYPES, getGlassSvgContent } from "@/lib/glassware";
@@ -23,11 +23,15 @@ import {
   showIbuField,
   showSrmField,
   showSensoryNotesFields,
+  showSeasonalField,
+  showCoverImageField,
 } from "./tap-list-types";
 import { SensoryNotesPicker } from "@/components/brewery-admin/beer-form/SensoryNotesPicker";
 import { SrmPicker } from "@/components/brewery-admin/beer-form/SrmPicker";
+import { ImageUpload } from "@/components/ui/ImageUpload";
 
 interface BeerFormModalProps {
+  breweryId: string;
   editingBeer: Beer | null;
   initialForm: BeerFormData;
   initialGlassType: string | null;
@@ -40,6 +44,7 @@ interface BeerFormModalProps {
 }
 
 export function BeerFormModal({
+  breweryId,
   editingBeer,
   initialForm,
   initialGlassType,
@@ -69,6 +74,8 @@ export function BeerFormModal({
       !arraysEqual(f.aromaNotes, i.aromaNotes) ||
       !arraysEqual(f.tasteNotes, i.tasteNotes) ||
       !arraysEqual(f.finishNotes, i.finishNotes) ||
+      f.coverImageUrl !== i.coverImageUrl ||
+      f.seasonal !== i.seasonal ||
       pourSizes.length > 0;
   }
 
@@ -307,6 +314,49 @@ export function BeerFormModal({
               className="w-full px-4 py-2.5 rounded-xl border text-sm focus:outline-none resize-none"
               style={{ background: "var(--surface-2)", borderColor: "var(--border)", color: "var(--text-primary)" }} />
           </div>
+
+          {/* Cover photo (Sprint 177 — write-path fix) */}
+          {showCoverImageField(form.itemType) && (
+            <div>
+              <label className="text-xs font-mono uppercase tracking-wider block mb-1.5" style={{ color: "var(--text-muted)" }}>
+                Cover Photo <span style={{ fontWeight: 400, textTransform: "none", letterSpacing: 0 }}>(shows on The Board &amp; beer detail)</span>
+              </label>
+              <ImageUpload
+                bucket="beer-photos"
+                folder={breweryId}
+                currentUrl={form.coverImageUrl || null}
+                onUpload={(url) => setForm(f => ({ ...f, coverImageUrl: url }))}
+                onRemove={() => setForm(f => ({ ...f, coverImageUrl: "" }))}
+                aspect="cover"
+                maxSizeMb={10}
+                label="Upload cover photo"
+              />
+            </div>
+          )}
+
+          {/* Seasonal toggle (Sprint 177 — write-path fix) */}
+          {showSeasonalField(form.itemType) && (
+            <div>
+              <label className="text-xs font-mono uppercase tracking-wider block mb-1.5" style={{ color: "var(--text-muted)" }}>Release</label>
+              <button
+                type="button"
+                onClick={() => setForm(f => ({ ...f, seasonal: !f.seasonal }))}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-medium transition-all w-full sm:w-auto"
+                style={{
+                  background: form.seasonal ? "rgba(212,168,67,0.12)" : "var(--surface-2)",
+                  borderColor: form.seasonal ? "var(--accent-gold)" : "var(--border)",
+                  color: form.seasonal ? "var(--accent-gold)" : "var(--text-secondary)",
+                }}
+                aria-pressed={form.seasonal}
+              >
+                <Calendar size={14} />
+                {form.seasonal ? "Seasonal release" : "Year-round"}
+              </button>
+              <p className="text-xs mt-1.5" style={{ color: "var(--text-muted)" }}>
+                Seasonal items get a {form.seasonal ? "\u2014 " : ""}badge on The Board and appear in consumer seasonal filters.
+              </p>
+            </div>
+          )}
 
           {/* Sensory section (Sprint 176) */}
           {showSrmField(form.itemType) && (

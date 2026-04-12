@@ -10,7 +10,7 @@ import { createClient } from "@/lib/supabase/client";
 import { ITEM_TYPE_EMOJI } from "@/types/database";
 import type { BeerStyle } from "@/types/database";
 
-import { type Beer, type BeerFormData, type PourSizeRow, emptyBeer, showStyleField, showAbvField, showIbuField, DEFAULT_GLASS } from "./tap-list-types";
+import { type Beer, type BeerFormData, type PourSizeRow, emptyBeer, showStyleField, showAbvField, showIbuField, showSensoryNotesFields, showSeasonalField, DEFAULT_GLASS } from "./tap-list-types";
 import { TapListHeader } from "./TapListHeader";
 import { TapListFilters, type FilterValue } from "./TapListFilters";
 import { BatchActionBar } from "./BatchActionBar";
@@ -77,6 +77,9 @@ export function TapListClient({ breweryId, initialBeers, brandId }: TapListClien
       aromaNotes: beer.aroma_notes ?? [],
       tasteNotes: beer.taste_notes ?? [],
       finishNotes: beer.finish_notes ?? [],
+      // Sprint 177 write-path neighbors
+      coverImageUrl: beer.cover_image_url ?? "",
+      seasonal: !!beer.seasonal,
     };
     setFormInitial(f);
     setFormGlassType(beer.glass_type ?? null);
@@ -110,6 +113,11 @@ export function TapListClient({ breweryId, initialBeers, brandId }: TapListClien
     setSaveError(null);
 
     const itemType = form.itemType;
+    // Sprint 177 — use the same helper that gates the UI visibility. Previously
+    // this was a narrow `!== "na_beverage"` check, which let stale notes ride
+    // along for `food` item types (picker hidden, save kept them). Now the
+    // strip logic mirrors the form gating exactly.
+    const canHoldSensoryNotes = showSensoryNotesFields(itemType);
     const payload = {
       brewery_id: breweryId,
       name: form.name.trim(),
@@ -125,9 +133,12 @@ export function TapListClient({ breweryId, initialBeers, brandId }: TapListClien
       // out for item types that don't surface the picker so toggling to
       // non-beer doesn't leak stale data.
       srm: itemType === "beer" && form.srm ? parseInt(form.srm) : null,
-      aroma_notes:  itemType !== "na_beverage" ? form.aromaNotes  : [],
-      taste_notes:  itemType !== "na_beverage" ? form.tasteNotes  : [],
-      finish_notes: itemType !== "na_beverage" ? form.finishNotes : [],
+      aroma_notes:  canHoldSensoryNotes ? form.aromaNotes  : [],
+      taste_notes:  canHoldSensoryNotes ? form.tasteNotes  : [],
+      finish_notes: canHoldSensoryNotes ? form.finishNotes : [],
+      // Sprint 177 — write-path neighbors
+      cover_image_url: form.coverImageUrl.trim() || null,
+      seasonal: showSeasonalField(itemType) ? form.seasonal : false,
       ...(editingBeer ? {} : { is_on_tap: true }),
     };
 
@@ -456,6 +467,7 @@ export function TapListClient({ breweryId, initialBeers, brandId }: TapListClien
       <AnimatePresence>
         {showForm && (
           <BeerFormModal
+            breweryId={breweryId}
             editingBeer={editingBeer}
             initialForm={formInitial}
             initialGlassType={formGlassType}
