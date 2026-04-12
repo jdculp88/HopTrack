@@ -105,8 +105,8 @@ SELECT id INTO id_bombshell FROM breweries WHERE external_id = '43a54dba-6adf-42
 
 -- ── TROPHY BREWING COMPANY ─────────────────────────────────────────────────
 UPDATE breweries SET
-  description = 'Raleigh''s most acclaimed brewery. James Beard-nominated for Outstanding Bar Program. Multiple locations including the original Maywood taproom, Trophy on Maywood pizza restaurant, and State of Beer bottle shop. Known for boundary-pushing sours, IPAs, and lagers.',
-  phone = '9198038018',
+  description = 'Raleigh''s beloved brewery since 2012, operating a 3bbl nano downtown and a 20bbl production brewhouse on Maywood with 12 rotating taps, food trucks, and a large patio. Trophy on Maywood pizza restaurant and State of Beer bottle shop round out the portfolio.',
+  phone = '9198031333',
   website_url = 'https://www.trophybrewing.com',
   hop_route_eligible = true,
   hop_route_offer = 'Free taster of any draft with HopTrack check-in',
@@ -114,15 +114,15 @@ UPDATE breweries SET
   facebook_url = 'https://facebook.com/trophybrewing',
   untappd_url = 'https://untappd.com/TrophyBrewing',
   twitter_url = 'https://x.com/trophybrewing',
-  latitude = 35.7796,
-  longitude = -78.6382,
+  latitude = 35.7762,
+  longitude = -78.6530,
   vibe_tags = ARRAY['james-beard-nominated', 'multi-location', 'pizza', 'sour-program', 'boundary-pushing', 'raleigh-icon', 'bottle-shop']
 WHERE id = id_trophy;
 
 -- ── BREWERY BHAVANA ────────────────────────────────────────────────────────
 UPDATE breweries SET
-  description = 'James Beard-nominated brewery, dim sum restaurant, flower shop, and bookstore in one stunning space in downtown Raleigh. Founded by Van and Vansana Nolintha. Belgian and farmhouse-inspired beers alongside Laotian-influenced dim sum.',
-  phone = '9198290214',
+  description = 'A unique fusion of Belgian-inspired brewery, dim sum restaurant, bookstore, and flower shop in downtown Raleigh. Michelin-recognized for food and beer alike. Founded by Van and Vansana Nolintha.',
+  phone = '9198299998',
   website_url = 'https://www.brewerybhavana.com',
   hop_route_eligible = true,
   hop_route_offer = 'Free flower with any beer purchase and HopTrack check-in',
@@ -167,26 +167,16 @@ UPDATE breweries SET
   vibe_tags = ARRAY['woman-owned', 'neighborhood', 'nc-state-area', 'community', 'approachable', 'welcoming']
 WHERE id = id_raleigh_brewing;
 
--- ── BIG BOSS BREWING CO ────────────────────────────────────────────────────
+-- ── BIG BOSS BREWING CO (Wicker Dr taproom PERMANENTLY CLOSED) ─────────
 UPDATE breweries SET
-  description = 'One of Raleigh''s original craft breweries, founded 2006. Production brewery with taproom featuring rotating taps and a large outdoor beer garden. Known for Bad Penny Brown Ale and Angry Angel Extra Pale Ale.',
-  phone = '9198348585',
-  website_url = 'https://www.bigbossbrewing.com',
-  hop_route_eligible = true,
-  hop_route_offer = 'Free Bad Penny taster with HopTrack check-in',
-  instagram_url = 'https://instagram.com/bigbossbrewing',
-  facebook_url = 'https://facebook.com/BigBossBrewing',
-  untappd_url = 'https://untappd.com/BigBossBrewing',
-  twitter_url = 'https://x.com/BigBossBrewing',
-  latitude = 35.8082,
-  longitude = -78.5986,
-  vibe_tags = ARRAY['production-brewery', 'beer-garden', 'original-raleigh', 'outdoor-seating', 'food-trucks', 'taproom']
+  description = 'PERMANENTLY CLOSED (taproom). Raleigh''s oldest craft brewery, est. 2006. Known for Bad Penny Brown Ale and Angry Angel Kolsch. Brand may still distribute cans regionally.',
+  is_active = false
 WHERE id = id_big_boss;
 
 -- ── LONERIDER BREWING CO ───────────────────────────────────────────────────
 UPDATE breweries SET
-  description = 'Western-themed regional brewery in north Raleigh. One of NC''s largest craft breweries with wide distribution. Their Shotgun Betty Hefeweizen and Deadeye Jack American Porter are flagships. Spacious tasting room and hideout.',
-  phone = '9194424200',
+  description = 'Western-outlaw-themed brewery founded 2009 near Brier Creek. Sweet Josie won gold at the 2010 GABF. Regional distribution across NC. Taproom, patio, and "hideout" event space.',
+  phone = '9192461820',
   website_url = 'https://www.loneriderbeer.com',
   hop_route_eligible = true,
   hop_route_offer = '$1 off any pint with HopTrack check-in',
@@ -201,8 +191,8 @@ WHERE id = id_lonerider;
 
 -- ── NEUSE RIVER BREWING COMPANY ────────────────────────────────────────────
 UPDATE breweries SET
-  description = 'Laid-back neighborhood brewery near Raleigh''s Person Street corridor. Known for approachable, well-crafted beers and a dog-friendly patio. Cozy taproom with rotating food trucks.',
-  phone = '9198277978',
+  description = 'Belgian-inspired brewery with a European brasserie restaurant in the Five Points neighborhood. Focus on farmhouse ales, saisons, and creative IPAs with NC ingredients. Brunch service and upscale-casual dining.',
+  phone = '9842328479',
   website_url = 'https://www.neuseriverbrewing.com',
   hop_route_eligible = true,
   hop_route_offer = 'Free sticker with HopTrack check-in',
@@ -212,7 +202,7 @@ UPDATE breweries SET
   twitter_url = NULL,
   latitude = 35.7780,
   longitude = -78.6237,
-  vibe_tags = ARRAY['person-street', 'neighborhood', 'dog-friendly', 'patio', 'food-trucks', 'laid-back', 'cozy']
+  vibe_tags = ARRAY['five-points', 'belgian-inspired', 'brasserie', 'brunch', 'upscale-casual', 'dog-friendly', 'european-bistro']
 WHERE id = id_neuse_river;
 
 -- ── NICKELPOINT BREWING CO ─────────────────────────────────────────────────
@@ -295,54 +285,46 @@ WHERE id = id_bombshell;
 
 -- ── TROPHY BREWING ─────────────────────────────────────────────────────────
 INSERT INTO beers (id, brewery_id, name, style, abv, ibu, description, is_on_tap, is_active, item_type, seasonal) VALUES
-(tr_01, id_trophy, 'Trophy Wife', 'Pilsner', 5.0, NULL, 'Crisp, clean Czech-style pilsner. Their most approachable flagship.', true, true, 'beer', false),
-(tr_02, id_trophy, 'Falcon Fury', 'Hazy IPA', 6.5, NULL, 'Juicy, tropical hazy IPA with soft bitterness and citrus hop character.', true, true, 'beer', false),
-(tr_03, id_trophy, 'Haze Factory', 'Hazy IPA', 7.0, NULL, 'DDH hazy IPA bursting with Citra and Mosaic hop oils.', true, true, 'beer', false),
-(tr_04, id_trophy, 'Golden Boy', 'Golden Ale', 4.8, NULL, 'Light, easy-drinking golden ale. The everyday beer.', true, true, 'beer', false),
-(tr_05, id_trophy, 'Brooksie', 'Amber Ale', 5.5, NULL, 'Malty, balanced amber ale with caramel sweetness.', true, true, 'beer', false),
-(tr_06, id_trophy, 'Kua Bay', 'Fruited Berliner Weisse', 4.5, NULL, 'Tart, fruited Berliner Weisse with tropical fruit.', true, true, 'beer', true),
-(tr_07, id_trophy, 'Sour Series', 'Mixed-Fermentation Sour', 6.0, NULL, 'Rotating barrel-aged sour program. Complex and funky.', true, true, 'beer', true),
-(tr_08, id_trophy, 'Tiny Fury', 'Session IPA', 4.5, NULL, 'All the hop character of Falcon Fury at session weight.', true, true, 'beer', false)
+(tr_01, id_trophy, 'Trophy Wife', 'Session IPA', 4.9, NULL, 'Flagship session IPA, always on tap. The beer that made Trophy famous.', true, true, 'beer', false),
+(tr_02, id_trophy, 'Cloud Surfer', 'Hazy IPA', 6.1, NULL, 'Hazy, tropical modern IPA.', true, true, 'beer', false),
+(tr_03, id_trophy, 'Milky Way', 'Milk Stout', 5.5, NULL, 'Smooth, sweet milk stout with lactose richness.', true, true, 'beer', false),
+(tr_04, id_trophy, 'Double Death Spiral', 'Imperial IPA', 8.5, NULL, 'Aggressive hop-forward imperial IPA.', true, true, 'beer', true),
+(tr_05, id_trophy, 'El Hombre', 'American Stout', 5.8, NULL, 'Rich, roasty American stout.', true, true, 'beer', false),
+(tr_06, id_trophy, 'Hop Latte', 'Coffee IPA', 6.2, NULL, 'Coffee-infused IPA hybrid. Bold and unique.', true, true, 'beer', true),
+(tr_07, id_trophy, 'Yard of the Month', 'Pale Ale', 5.4, NULL, 'Easy-drinking American pale ale.', true, true, 'beer', false),
+(tr_08, id_trophy, 'Outta This Citra', 'American IPA', 6.5, NULL, 'Citra-hopped single-hop IPA with bright citrus.', true, true, 'beer', false)
 ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, style = EXCLUDED.style, abv = EXCLUDED.abv, description = EXCLUDED.description;
 
 -- ── BREWERY BHAVANA ────────────────────────────────────────────────────────
 INSERT INTO beers (id, brewery_id, name, style, abv, ibu, description, is_on_tap, is_active, item_type, seasonal) VALUES
-(bh_01, id_bhavana, 'Bhavana Pilsner', 'Czech Pilsner', 4.8, NULL, 'Crisp Czech-style pilsner. Clean and refreshing.', true, true, 'beer', false),
-(bh_02, id_bhavana, 'Bhavana Saison', 'Saison', 6.0, NULL, 'Belgian farmhouse saison with peppery esters and dry finish.', true, true, 'beer', false),
-(bh_03, id_bhavana, 'Bhavana Wit', 'Belgian Witbier', 4.5, NULL, 'Belgian wheat beer with coriander and orange peel.', true, true, 'beer', false),
-(bh_04, id_bhavana, 'Table Beer', 'Belgian Table Beer', 3.5, NULL, 'Low-ABV Belgian table beer. Perfect with dim sum.', true, true, 'beer', false),
-(bh_05, id_bhavana, 'Golden Strong', 'Belgian Golden Strong', 8.5, NULL, 'Complex Belgian golden strong ale with fruity esters.', true, true, 'beer', true),
-(bh_06, id_bhavana, 'Dark Strong', 'Belgian Dark Strong', 9.0, NULL, 'Rich Belgian dark strong with dark fruit and caramel.', true, true, 'beer', true)
+(bh_01, id_bhavana, 'Grove', 'Imperial IPA', 8.0, NULL, 'Clementine, grapefruit, and peach notes with juicy tropical flavors.', true, true, 'beer', false),
+(bh_02, id_bhavana, 'Pulp', 'Hazy IPA', 6.8, NULL, 'Hazy and juicy NEIPA. Lush tropical character.', true, true, 'beer', false),
+(bh_03, id_bhavana, 'Till', 'Saison', 6.2, NULL, 'Belgian farmhouse ale. Dry and peppery.', true, true, 'beer', false),
+(bh_04, id_bhavana, 'Shade', 'Schwarzbier', 4.8, NULL, 'Dark German lager with Hallertauer hops. Clean and sessionable.', true, true, 'beer', false),
+(bh_05, id_bhavana, 'Brisk', 'Pilsner', 5.0, NULL, 'Crisp, clean pilsner.', true, true, 'beer', false),
+(bh_06, id_bhavana, 'Sow', 'Belgian Blonde', 6.5, NULL, 'Traditional Belgian blonde ale with fruity esters.', true, true, 'beer', false)
 ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, style = EXCLUDED.style, abv = EXCLUDED.abv, description = EXCLUDED.description;
 
 -- ── CRANK ARM BREWING ──────────────────────────────────────────────────────
 INSERT INTO beers (id, brewery_id, name, style, abv, ibu, description, is_on_tap, is_active, item_type, seasonal) VALUES
-(ca_01, id_crank_arm, 'Rickshaw', 'Rye IPA', 6.5, NULL, 'Rye IPA with spicy rye character and citrus hops.', true, true, 'beer', false),
-(ca_02, id_crank_arm, 'Bedotter', 'Belgian Dubbel', 7.5, NULL, 'Rich Belgian dubbel with dark fruit and caramel malt.', true, true, 'beer', false),
-(ca_03, id_crank_arm, 'Spoke Wrench', 'Hazy IPA', 6.8, NULL, 'Hazy, juicy IPA with tropical hop character.', true, true, 'beer', false),
-(ca_04, id_crank_arm, 'Paceline', 'Pilsner', 5.0, NULL, 'Clean, crisp pilsner for the ride home.', true, true, 'beer', false),
-(ca_05, id_crank_arm, 'Singletrack', 'Session IPA', 4.5, NULL, 'Light and hoppy session IPA for the trail.', true, true, 'beer', false),
-(ca_06, id_crank_arm, 'Handlebar', 'Stout', 5.5, NULL, 'Smooth, roasty stout with chocolate and coffee notes.', true, true, 'beer', true)
+(ca_01, id_crank_arm, 'Rickshaw', 'Rye IPA', 7.2, NULL, '24% rye malt with Zythos and Nugget hops. Spicy and citrusy flagship.', true, true, 'beer', false),
+(ca_02, id_crank_arm, 'Whitewall Wheat', 'Witbier', 5.2, NULL, '2023 GABF Silver Medal Belgian wit. Coriander and orange peel.', true, true, 'beer', false),
+(ca_03, id_crank_arm, 'Road Hazard', 'Hazy IPA', 6.8, NULL, 'Juicy New England-style IPA with tropical hop character.', true, true, 'beer', false),
+(ca_04, id_crank_arm, 'Holy Spokes', 'American Porter', 5.9, NULL, 'Rich, chocolate-forward porter.', true, true, 'beer', false),
+(ca_05, id_crank_arm, 'Unicycle', 'Pale Ale', 5.5, NULL, 'Clean American pale ale for easy drinking.', true, true, 'beer', false),
+(ca_06, id_crank_arm, 'Motivator', 'Imperial Stout', 9.0, NULL, 'Big, bold double stout. Roasty and complex.', true, true, 'beer', true)
 ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, style = EXCLUDED.style, abv = EXCLUDED.abv, description = EXCLUDED.description;
 
--- ── BIG BOSS BREWING ───────────────────────────────────────────────────────
-INSERT INTO beers (id, brewery_id, name, style, abv, ibu, description, is_on_tap, is_active, item_type, seasonal) VALUES
-(bb_01, id_big_boss, 'Bad Penny', 'American Brown Ale', 6.0, NULL, 'Flagship brown ale with nutty, chocolatey malt and balanced hops. A Raleigh classic.', true, true, 'beer', false),
-(bb_02, id_big_boss, 'Angry Angel', 'Extra Pale Ale', 5.5, NULL, 'Crisp extra pale ale with bright hop character.', true, true, 'beer', false),
-(bb_03, id_big_boss, 'Blanco Diablo', 'Belgian Witbier', 4.8, NULL, 'Belgian-style wheat beer with citrus and spice.', true, true, 'beer', false),
-(bb_04, id_big_boss, 'High Roller', 'American IPA', 7.0, NULL, 'Bold American IPA with piney, citrusy hops.', true, true, 'beer', false),
-(bb_05, id_big_boss, 'Harvest Time', 'Pumpkin Ale', 6.0, NULL, 'Seasonal pumpkin ale with warm spice.', true, true, 'beer', true),
-(bb_06, id_big_boss, 'Night Knight', 'Schwarzbier', 4.8, NULL, 'German-style black lager. Dark color, light body.', true, true, 'beer', true)
-ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, style = EXCLUDED.style, abv = EXCLUDED.abv, description = EXCLUDED.description;
+-- (Big Boss: taproom permanently closed — no beers seeded)
 
 -- ── LONERIDER BREWING ──────────────────────────────────────────────────────
 INSERT INTO beers (id, brewery_id, name, style, abv, ibu, description, is_on_tap, is_active, item_type, seasonal) VALUES
-(lr_01, id_lonerider, 'Shotgun Betty', 'Hefeweizen', 5.1, NULL, 'Flagship Bavarian hefeweizen with banana and clove. Their best seller.', true, true, 'beer', false),
-(lr_02, id_lonerider, 'Deadeye Jack', 'American Porter', 6.0, NULL, 'Bold American porter with chocolate and roast malt.', true, true, 'beer', false),
-(lr_03, id_lonerider, 'Sweet Josie', 'American Brown Ale', 6.0, NULL, 'Smooth brown ale with caramel, toffee, and a touch of sweetness.', true, true, 'beer', false),
-(lr_04, id_lonerider, 'Peacemaker', 'Pale Ale', 5.5, NULL, 'Crisp American pale ale with citrus hop character.', true, true, 'beer', false),
-(lr_05, id_lonerider, 'Helles Yeah', 'Munich Helles', 5.0, NULL, 'Clean, malty Munich-style helles lager.', true, true, 'beer', false),
-(lr_06, id_lonerider, 'Hoppy Ki Yay', 'IPA', 7.0, NULL, 'Bold IPA with aggressive hop presence.', true, true, 'beer', false)
+(lr_01, id_lonerider, 'Sweet Josie', 'American Brown Ale', 6.1, NULL, '2010 GABF Gold Medal winner. Smooth brown ale with caramel, toffee, and sweetness.', true, true, 'beer', false),
+(lr_02, id_lonerider, 'Shotgun Betty', 'Hefeweizen', 4.9, NULL, 'Light, approachable flagship wheat beer.', true, true, 'beer', false),
+(lr_03, id_lonerider, 'Hoppy Ki Yay', 'American IPA', 6.6, NULL, 'Bold, hoppy flagship IPA.', true, true, 'beer', false),
+(lr_04, id_lonerider, 'Deadeye Jack', 'American Porter', 5.8, NULL, 'Rich and roasty American porter.', true, true, 'beer', false),
+(lr_05, id_lonerider, 'Peacemaker', 'Pale Ale', 5.5, NULL, 'Balanced, sessionable pale ale.', true, true, 'beer', false),
+(lr_06, id_lonerider, 'Roustabout', 'Dry Stout', 6.0, NULL, 'Dry Irish-style stout. Dark and smooth.', true, true, 'beer', false)
 ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, style = EXCLUDED.style, abv = EXCLUDED.abv, description = EXCLUDED.description;
 
 -- ── BOND BROTHERS BEER COMPANY ─────────────────────────────────────────────
@@ -359,18 +341,18 @@ ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, style = EXCLUDED.style, abv
 
 -- ── NEUSE RIVER BREWING ────────────────────────────────────────────────────
 INSERT INTO beers (id, brewery_id, name, style, abv, ibu, description, is_on_tap, is_active, item_type, seasonal) VALUES
-(nr_01, id_neuse_river, 'Golden Ale', 'Golden Ale', 4.8, NULL, 'Light, clean golden ale. Easy drinking.', true, true, 'beer', false),
-(nr_02, id_neuse_river, 'Hazy IPA', 'Hazy IPA', 6.5, NULL, 'Juicy New England-style hazy IPA.', true, true, 'beer', false),
-(nr_03, id_neuse_river, 'Amber Ale', 'Amber Ale', 5.5, NULL, 'Balanced amber ale with caramel malt.', true, true, 'beer', false),
-(nr_04, id_neuse_river, 'Brown Ale', 'Brown Ale', 5.0, NULL, 'Nutty, malty brown ale.', true, true, 'beer', false),
-(nr_05, id_neuse_river, 'IPA', 'American IPA', 6.8, NULL, 'Citrusy, piney American IPA.', true, true, 'beer', false),
-(nr_06, id_neuse_river, 'Stout', 'Stout', 5.5, NULL, 'Rich, roasty stout with chocolate notes.', true, true, 'beer', true)
+(nr_01, id_neuse_river, 'Saturday Morning', 'Hazy IPA', 6.5, NULL, 'Flagship New England hazy IPA. Juicy and tropical.', true, true, 'beer', false),
+(nr_02, id_neuse_river, 'Bobbi Brune', 'Belgian Brown Ale', 6.8, NULL, 'Rich Belgian-style brown ale with dark fruit and spice.', true, true, 'beer', false),
+(nr_03, id_neuse_river, 'Biere de Neuse', 'Saison', 6.2, NULL, 'House farmhouse saison. Dry, peppery, and complex.', true, true, 'beer', false),
+(nr_04, id_neuse_river, 'Riverkeeper''s Wit', 'Witbier', 5.0, NULL, 'Coriander and orange peel. 5% of proceeds to Sound Rivers.', true, true, 'beer', false),
+(nr_05, id_neuse_river, 'Streamside Mango', 'Fruited Sour', 4.5, NULL, 'Tart mango sour ale. Bright and refreshing.', true, true, 'beer', true),
+(nr_06, id_neuse_river, 'Wake the Dead', 'Coffee Stout', 5.5, NULL, 'Local coffee-infused stout. Rich and smooth.', true, true, 'beer', false)
 ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, style = EXCLUDED.style, abv = EXCLUDED.abv, description = EXCLUDED.description;
 
 -- ═══════════════════════════════════════════════════════════════════════════════
--- DONE: 12 Raleigh/Triangle breweries enriched, ~56 beers seeded.
+-- DONE: 12 Raleigh/Triangle breweries enriched (1 closed), ~44 beers seeded.
 -- ═══════════════════════════════════════════════════════════════════════════════
 
-RAISE NOTICE '✅ Migration 116: Raleigh/Triangle enrichment complete — 12 breweries, ~56 beers';
+RAISE NOTICE '✅ Migration 116: Raleigh/Triangle enrichment complete — 12 breweries (1 closed), ~44 beers';
 
 END $$;
