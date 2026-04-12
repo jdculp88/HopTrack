@@ -1061,3 +1061,87 @@ Typecheck clean, **0 lint errors** (all warnings in touched files are pre-existi
 - **Per-beer default pour size UI in the edit-pour-sizes quick-add row** — the gold-star hero button exists for custom-added rows but quick-adds always auto-promote Pint. A user could theoretically want "Half Pint" as default without adding a Pint first — current flow requires manually adding Pint, then starring Half Pint, then removing Pint. Sprint 177 could add a default-picker dropdown on the quick-add row. Low priority.
 
 **Full retro:** `docs/retros/sprint-176-retro.md`
+
+---
+
+### Sprint 177 — The Plumbing ✅
+
+**Mid-session interrupt sprint** triggered by a full stats-plumbing audit. Joshua asked the broad question — *"make sure the stats we show are real, and make sure there's plumbing from display to source"* — and Morgan dispatched three parallel audit agents. The consumer agent caught `profiles.unique_beers` as orphaned. Morgan's follow-up grep caught `public.brewery_visits` as an entire orphaned rollup TABLE that the brewery audit agent had given a false "✅ LAUNCH-READY" on. Both had been silently broken in production since forever: `unique_beers` never incremented outside of seed migrations, `brewery_visits` only INSERTed from seed migration 076. Real users saw `0` and real breweries would have seen empty Brand CRM customer lists the moment Stripe went live.
+
+**Scope:** Four tracks, all shipped in a single session.
+
+**Track 1 — The Fix (Quinn + Avery):**
+- **`supabase/migrations/113_fix_orphaned_stat_columns.sql`** — **APPLIED TO PROD THIS SESSION**
+  - Three trigger functions, three triggers:
+    1. `sync_profile_unique_beers_on_beer_log` → `AFTER INSERT` on `beer_logs`, increments `profiles.unique_beers` if `NOT EXISTS` for that user+beer combo (skips free-form entries where `beer_id IS NULL`)
+    2. `sync_brewery_visits_on_session` → `AFTER INSERT` on `sessions`, UPSERTs `brewery_visits` with `total_visits + 1` and `GREATEST(last_visit_at, EXCLUDED.last_visit_at)` (skips home sessions where `brewery_id IS NULL`)
+    3. `sync_brewery_visits_unique_beers_on_beer_log` → `AFTER INSERT` on `beer_logs`, increments `brewery_visits.unique_beers_tried` if first log of that user+brewery+beer (INSERT with `unique_beers_tried = 1, total_visits = 0` to handle the edge case of a beer_log arriving before a session for that brewery, then `ON CONFLICT DO UPDATE` to increment)
+  - **Backfill pattern:**
+    - `UPDATE profiles SET unique_beers = COALESCE((SELECT COUNT(DISTINCT bl.beer_id) FROM beer_logs bl WHERE bl.user_id = p.id AND bl.beer_id IS NOT NULL), 0)` — rebuilds unique_beers from ground truth for every profile
+    - `ALTER TABLE brewery_visits DISABLE TRIGGER USER` → `TRUNCATE brewery_visits` → `INSERT INTO brewery_visits (…) SELECT … FROM sessions s LEFT JOIN beer_logs bl ON bl.session_id = s.id WHERE s.brewery_id IS NOT NULL GROUP BY s.user_id, s.brewery_id` → `ALTER TABLE brewery_visits ENABLE TRIGGER USER` — the standard backfill pattern for triggered tables (disable during bulk insert to avoid double-fire, re-enable after)
+  - **`SECURITY DEFINER`** on all three functions, `GRANT EXECUTE … TO authenticated`, `NOTIFY pgrst 'reload schema'` at the end per the HopTrack post-function-change convention
+  - Full rollback plan at the bottom (commented out, ready to run if needed)
+  - Matches the existing HopTrack trigger pattern from migration 058 (POS sync) and migration 068 (event RSVP counts)
+  - Apply output was clean: three `NOTICE (00000)` messages from the `DROP TRIGGER IF EXISTS` guards (expected on first run — the triggers didn't exist yet), followed by `Finished supabase db push.` No errors, no rollback.
+
+**Track 2 — The Safety Net (Casey + Reese):**
+- **`lib/__tests__/orphaned-columns-guard.test.ts`** (13 tests)
+  - 11 shape assertions on migration 113: every `CREATE OR REPLACE FUNCTION` declaration, every `CREATE TRIGGER`, the home-session skip logic, the free-form beer entry skip logic, the backfill `UPDATE` + `TRUNCATE` + `INSERT` sequence, the `ALTER TABLE … DISABLE/ENABLE TRIGGER USER` guards, the `NOTIFY pgrst 'reload schema'`, the documented rollback plan
+  - `profiles.unique_beers` must have a non-seed migration writer (positive assertion with seed migrations 074/075/076/100/104/105 explicitly excluded from the "counts as a write path" check)
+  - `public.brewery_visits` must have a non-seed migration writer (same pattern)
+  - Known-good RPC columns (xp, level, unique_breweries, current_streak, longest_streak) still wired via `increment_xp` RPC (migration 036) — negative regression check
+- **`lib/__tests__/stat-write-paths.test.ts`** (14 tests)
+  - Single source of truth table `STAT_WRITE_PATHS` with 10 tracked stat columns (xp, level, unique_breweries, current_streak, longest_streak, unique_beers, total_checkins, total_visits, unique_beers_tried, first_visit_at, last_visit_at)
+  - Each row declares: column name, writer type (`rpc | trigger | api_route`), file path, regex the writer file must match, sprint the writer was added in, optional notes
+  - Flags `profiles.total_checkins` as a known non-atomic read-modify-write with a race condition (the sessions POST route does `profile.total_checkins || 0 + 1` which can lose increments under concurrent inserts) — smaller follow-up noted for a future sprint
+  - Meta checks: baseline count ≥ 10, valid writer types, file path prefixes (`supabase/migrations/` or `app/`)
+- **Static analysis, not integration.** No mocks, no database, no flakiness. 34 tests, 69ms total runtime. The guards assert migration file shape + regex-grep the writer files on every test run. The moment anyone reverts migration 113 or refactors the writer files away, CI fails loud.
+- **Result:** 2070 → 2104 tests. Zero regressions. Guard tests pass whether or not migration 113 is applied — they assert file shape, not DB state — which means they protected the fix the moment they landed.
+
+**Track 3 — Adjacent Gaps (Finley + Dakota + Alex):**
+Three write-path gaps in the S176 neighborhood, all fixed in one pass.
+
+1. **`beers.cover_image_url`** — column existed since early sprints, displayed on Board Slideshow, but no upload UI in `BeerFormModal`. Fixed by wiring the existing `ImageUpload` component (from `components/ui/ImageUpload.tsx`, used by `BrewerySettingsClient`) to the `beer-photos` bucket with `folder={breweryId}`, 10MB limit, cover aspect ratio. `BeerFormModal` now takes a new `breweryId` prop (passed from `TapListClient`) so the storage folder is namespaced correctly.
+
+2. **`beers.seasonal`** — column existed, filters used it, only seed migrations set it. Fixed by adding a Calendar-icon toggle button (gold-when-active, matching the pour-size default star pattern) that appears only for beer/cider/wine via new `showSeasonalField()` helper. Food/NA/cocktail opt out because the concept of a "seasonal release" doesn't apply.
+
+3. **Sensory strip consistency** — old logic in `TapListClient.handleSave` was `aroma_notes: itemType !== "na_beverage" ? form.aromaNotes : []` which only stripped notes for NA beverages. Switching a beer to `food` kept stale `aroma_notes` in the database because the UI hid the picker but the save didn't strip. Fixed by changing the check to `showSensoryNotesFields(itemType)` so the save logic mirrors the UI gating exactly. Bonus fix — `food` item type now correctly clears stale sensory notes on save.
+
+**New helpers in `tap-list-types.ts`:**
+- `showSeasonalField(t) → beer | cider | wine`
+- `showCoverImageField(t) → true` (every item can have a photo)
+- `Beer` interface gained `cover_image_url: string | null` and `seasonal: boolean`
+- `BeerFormData` gained `coverImageUrl: string` (empty string when absent, for clean dirty checks) and `seasonal: boolean`
+- `emptyBeer` defaults both to empty/false
+- `isDirty()` in `BeerFormModal` now tracks both new fields so the discard confirmation fires correctly
+
+**Placement decision (Finley):** Cover photo + seasonal toggle sit between Description and the Sensory section. "What is this beer → when does it run → how does it taste." Information hierarchy, not randomness.
+
+**Track 4 — Documentation (Morgan + Sam):**
+- **`.claude/skills/hoptrack-conventions/SKILL.md`** — two updates:
+  - **Supabase section** gained a new rule: *"Every displayed column needs a write path OUTSIDE of seed migrations"* with the exact grep recipe — `grep -rn "column_name" app/ lib/ supabase/migrations/ | grep -iE "update|insert|upsert|rpc|\.update\(|\.insert\(|\.upsert\("` — and references to the two regression guard tests
+  - **Enforcement checklist** gained step 6: *"Every displayed stat column has a non-seed write path. If the guard tests fail in CI, a display field is silently broken in prod — fix the plumbing, don't weaken the test."*
+- **Memory entry** (`~/.claude/projects/-Users-jdculp-Projects-hoptrack/memory/feedback_write_path_audit.md`) — captures the grep checklist, the trigger-vs-API-route decision tree, the backfill pattern (`DISABLE TRIGGER` → `TRUNCATE` → rebuild → `ENABLE TRIGGER`), and the full story of how the orphans survived 170+ sprints because seed data masked the bug in dev
+- **`docs/plans/sprint-177-plan.md`** — the formal plan document for this sprint, included in the close commit as the historical artifact
+
+**Tests:** **2104 Vitest tests passing** (was 2070 at S176 close, **+34 new**):
+- `lib/__tests__/orphaned-columns-guard.test.ts` — 13 tests (migration shape + write-path presence)
+- `lib/__tests__/stat-write-paths.test.ts` — 14 tests (single source of truth table + 3 meta checks)
+
+Typecheck clean, **0 lint errors**, **0 new lint warnings** (6 pre-existing warnings in touched files verified by git show comparison).
+
+**Key Sprint 177 lessons (saved to memory as `feedback_write_path_audit.md`):**
+
+1. **Every displayed column needs a write path outside of seed migrations.** Run the grep before you ship a display column. If the only hits are in seeds, you have an orphan. This is now a standing convention in `hoptrack-conventions` and a CI-enforced rule via the two guard tests.
+2. **Plumbing audits must grep writes, not just reads.** The backward "where is this displayed" → "what query fetches it" audit pattern catches the display surfaces but misses orphaned columns. Always grep forward: "where is this written?" If the answer is "only in seeds," you have a bug.
+3. **Database triggers are the preferred fix for rollup columns.** Atomic, can't be bypassed by a new insert path (admin scripts, crons, bulk imports), matches the existing HopTrack pattern from migrations 058 and 068. API-route-level writes are brittle because the next non-API insert path misses the update silently.
+4. **Pre-stage migrations. Never auto-apply them.** The migration was written, committed, reviewable, and tested for ~30 minutes before Joshua applied it. That window is where mistakes get caught. Even with full delegation ("do what you think best"), the right move was to leave the `db:migrate` command for the founder.
+5. **Static-analysis regression guards are cheap and powerful.** 34 tests, zero runtime cost, zero database dependencies, zero flakiness. They assert file shape and grep patterns. When you can't write an integration test (E2E frozen, no local Supabase), a grep-the-files-at-test-time guard protects you from revert-and-forget bugs.
+6. **When the founder says "do what you think best" twice, ship the documentation + stage the work + don't touch the database.** That's what trust looks like. Trust earned by being boring about the scary parts is trust you keep.
+
+**NOT shipped (intentional, deferred):**
+- **`profiles.total_checkins` race condition fix** — the `stat-write-paths.test.ts` table explicitly flags this as a known non-atomic read-modify-write. It has a write path (unlike the orphans), it's just racy under concurrent inserts. Should be migrated to an RPC or trigger in a future sprint. Lower priority than the P0 orphans.
+- **Integration tests that exercise the triggers against a real Postgres instance** — would have required a local Supabase, which we don't have. The guard tests assert migration file shape; a real DB test would insert a session and verify the `brewery_visits` row appears. Deferred until the `e2e.frozen/` suite comes back online.
+- **Sensory Layer v2** (Drew's next ask), **Beer Passport redesign**, **Display Suite polish** — top of mind for S178 kickoff options.
+
+**Full retro:** `docs/retros/sprint-177-retro.md`
