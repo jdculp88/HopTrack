@@ -1145,3 +1145,41 @@ Typecheck clean, **0 lint errors**, **0 new lint warnings** (6 pre-existing warn
 - **Sensory Layer v2** (Drew's next ask), **Beer Passport redesign**, **Display Suite polish** — top of mind for S178 kickoff options.
 
 **Full retro:** `docs/retros/sprint-177-retro.md`
+
+### Sprint 178 — The Concierge 🎩 ✅ (2026-04-14)
+**Theme:** Make HopRoute a true beer concierge — personalized by taste, scored by relevance, with real walking distances.
+**Arc:** Standalone
+
+**4 tracks, all shipped in one session:**
+
+**Track 1 — Walking Distance Metrics:**
+- `computeRouteMetrics()` — haversine distances between stops, walk time at 3mph, total + avg
+- Migration 120: 4 nullable columns on `hop_routes` + `hop_route_stops` (backward compatible)
+- Adaptive walking radius: 1.5 → 2.5 → 3.0 mi fallback for spread-out cities
+- UI: gold distance chip in route header, enriched between-stop connectors with `"0.4 mi · ~8 min walk"`
+
+**Track 2 — Taste Fingerprint:**
+- `computeTasteFingerprint()` — top styles, aroma/taste/finish note frequency from liked beers (>= 3.5 rating), ABV range, personality-derived exploration mode + intensity preference
+- Invisible to user (no wizard UI). Feeds Claude's prompt replacing the anemic "top 5 styles" summary.
+
+**Track 3 — Brewery Relevance Scoring:**
+- `scoreBreweryRelevance()` — 0-100 score across 6 signals: wishlist on tap (0-30), taste overlap (0-20), visit history fit by personality axis (0-15), vibe match (0-15), tap freshness (0-10), trending boost (0-10)
+- Explorer personality → prefer unvisited breweries. Loyalist → prefer revisits.
+- Top 15 ranked breweries sent to Claude (down from unranked 30).
+
+**Track 4 — Concierge Knowledge:**
+- Enriched brewery payloads: sensory beer data, pour sizes, visit history, friend reviews, wishlist flags, trending markers
+- Claude system prompt rewritten for concierge-style reasoning: reference specific beers by name, mention sensory notes, call out wishlisted items, note friend activity, use visit history
+- Token budget managed via compression (80-char descriptions, 3 notes per category, pour sizes for top 3 beers only)
+
+**Key architectural changes:**
+- `lib/hop-route.ts` rewritten: 3 new pure functions + extended `HopRouteInput` interface + `TasteFingerprint` type + `BreweryForScoring` type + rewritten `buildHopRoutePrompt()`
+- `app/api/hop-route/generate/route.ts` overhauled: 8 parallel Supabase fetches (up from 3), scoring pipeline, enrichment pipeline, post-generation distance computation
+- `app/(app)/hop-route/[routeId]/HopRouteCardClient.tsx` — distance summary in header + enriched between-stop connectors
+- `app/(app)/hop-route/[routeId]/page.tsx` — Supabase select updated for new columns
+- Reuses: `haversineDistance()` from `lib/geo.ts`, `computePersonality()` from `lib/personality.ts`, sensory vocabulary from `lib/beer-sensory.ts`
+
+**Tests:** **2128 Vitest tests passing** (was 2104 at S177 close, **+24 new**):
+- `lib/__tests__/hop-route-concierge.test.ts` — 24 tests (6 for routeMetrics, 8 for tasteFingerprint, 10 for breweryScoring)
+
+**Full retro:** `docs/retros/sprint-178-retro.md`

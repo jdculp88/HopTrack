@@ -15,6 +15,8 @@ interface RouteStop {
   arrival_time: string | null;
   departure_time: string | null;
   travel_to_next_minutes: number | null;
+  distance_to_next_miles: number | null;
+  walk_minutes_to_next: number | null;
   reasoning_text: string | null;
   social_context: string | null;
   is_sponsored: boolean;
@@ -48,6 +50,8 @@ interface HopRoute {
   transport: string;
   status: "draft" | "active" | "completed";
   created_at: string;
+  total_distance_miles: number | null;
+  avg_stop_distance_miles: number | null;
   hop_route_stops: RouteStop[];
 }
 
@@ -142,6 +146,24 @@ export function HopRouteCardClient({ route: initialRoute }: HopRouteCardClientPr
                 <span className="text-xs text-[var(--text-muted)]">✨ {route.vibe.join(", ")}</span>
               )}
             </div>
+            {/* Distance summary */}
+            {route.total_distance_miles != null && route.total_distance_miles > 0 && (
+              <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-mono" style={{ background: "color-mix(in srgb, var(--accent-gold) 10%, transparent)", color: "var(--accent-gold)" }}>
+                  {route.transport === "walking" ? "🚶" : "🚗"} {route.total_distance_miles.toFixed(1)} mi total
+                </span>
+                {route.avg_stop_distance_miles != null && route.avg_stop_distance_miles > 0 && (
+                  <span className="text-xs text-[var(--text-muted)]">
+                    ~{route.avg_stop_distance_miles.toFixed(1)} mi avg between stops
+                  </span>
+                )}
+                {route.transport === "walking" && route.total_distance_miles != null && (
+                  <span className="text-xs text-[var(--text-muted)]">
+                    ~{Math.round((route.total_distance_miles / 3.0) * 60)} min walking
+                  </span>
+                )}
+              </div>
+            )}
           </div>
 
           <button
@@ -378,12 +400,23 @@ export function HopRouteCardClient({ route: initialRoute }: HopRouteCardClientPr
                 </AnimatePresence>
               </motion.div>
 
-              {/* Travel time between stops */}
-              {!isLast && stop.travel_to_next_minutes != null && stop.travel_to_next_minutes > 0 && (
+              {/* Travel time + distance between stops */}
+              {!isLast && (stop.travel_to_next_minutes != null || stop.distance_to_next_miles != null) && (
                 <div className="flex items-center gap-2 px-4 py-1.5">
                   <div className="w-px h-3 mx-2" style={{ background: "var(--border)" }} />
                   <span className="text-xs text-[var(--text-muted)]">
-                    {route.transport === "walking" ? "🚶" : "🚗"} {stop.travel_to_next_minutes} min to next stop
+                    {route.transport === "walking" ? "🚶" : "🚗"}{" "}
+                    {stop.distance_to_next_miles != null
+                      ? `${stop.distance_to_next_miles < 0.1 ? "Nearby" : `${stop.distance_to_next_miles.toFixed(1)} mi`}`
+                      : ""
+                    }
+                    {stop.distance_to_next_miles != null && stop.walk_minutes_to_next != null && route.transport === "walking"
+                      ? ` · ~${stop.walk_minutes_to_next} min walk`
+                      : stop.travel_to_next_minutes != null
+                        ? `${stop.distance_to_next_miles != null ? " · " : ""}${stop.travel_to_next_minutes} min`
+                        : ""
+                    }
+                    {" "}to next stop
                   </span>
                 </div>
               )}

@@ -15,9 +15,11 @@ export default async function HopRoutePage({ params }: { params: Promise<{ route
     .select(`
       id, title, location_city, stop_count, group_size, vibe, transport, status,
       created_at, started_at, completed_at,
+      total_distance_miles, avg_stop_distance_miles,
       hop_route_stops(
         id, stop_order, arrival_time, departure_time,
-        travel_to_next_minutes, reasoning_text, social_context,
+        travel_to_next_minutes, distance_to_next_miles, walk_minutes_to_next,
+        reasoning_text, social_context,
         is_sponsored, checked_in, checked_in_at,
         brewery:breweries(id, name, city, state, latitude, longitude, cover_image_url, brewery_type, hop_route_offer),
         hop_route_stop_beers(id, beer_id, beer_name, reason_text, beer:beers(style))
