@@ -6,7 +6,10 @@
  * CLAUDE.md/AGENTS.md/CONTRIBUTING.md), parses every [text](path) markdown link,
  * and asserts the target exists on disk.
  *
- * External links (http://, https://, mailto:, #anchor-only) are skipped.
+ * External links (http://, https://, mailto:, tel:) are skipped.
+ * Anchor-only links (#section) are skipped.
+ * Absolute web-route paths (e.g. "/privacy", "/api/v1/beers") are skipped —
+ * these are Next.js App Router paths, not filesystem links.
  *
  * Owned by Reese. Runs in CI intent: `node scripts/check-wiki-links.mjs`.
  * Exits 0 if clean, 1 if any dead link found.
@@ -70,6 +73,7 @@ async function checkFile(file) {
     const raw = m[2];
     if (!raw || isExternal(raw)) continue;
     if (raw.startsWith("#")) continue; // in-page anchor only
+    if (raw.startsWith("/")) continue; // absolute web route, not a file link
     const path = stripFragment(raw);
     if (!path) continue;
     // URL-decode things like %20 for spaces.
