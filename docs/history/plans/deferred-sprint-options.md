@@ -5,7 +5,7 @@
 
 **Standing rule (established S161 kickoff):** Unpicked options carry forward to the next sprint's kickoff alongside any new options Morgan wants to add.
 
-> This is a living document. Last major cleanup: S176 close (2026-04-11) — pruned 32 shipped items, reorganized by priority.
+> This is a living document. Last updated: S178 close (2026-04-14) — added 4 HopRoute Concierge follow-ups.
 
 ---
 
@@ -60,6 +60,26 @@ F-020 shipped brewery-side mug clubs in Sprint 94. Consumers still don't *see* t
 Phase 1 shipped S96 (6-char codes, 5-min expiry, staff confirmation). Phases 2-3 are scoped in `docs/plans/fraud-prevention-design.md`. Escalate when we see our first real fraud incident — or preemptively before major customer push.
 - **First captured:** Sprint 95 (BL-010)
 - **Owner:** Quinn + Casey
+
+#### HopRoute Map Visualization (S178)
+Add a Leaflet map to the route detail page showing connected pins for each stop with a path between them. We already use Leaflet on the brand consumer map (S117). The distance metrics (total/avg/per-leg) shipped in S178 — the map is the visual companion. Half-sprint scope: map component, route polyline, stop markers with brewery names, responsive.
+- **First deferred:** S178 (The Concierge)
+- **Owner:** Alex (design) + Dakota (build)
+
+#### HopRoute Post-Route Feedback (S178)
+"Was this route good?" survey after completing a HopRoute — thumbs up/down per stop, optional comment, feeds back into brewery scoring weights. The concierge gets smarter from planning (S178) but never learns from outcomes. This closes the loop. Could also feed into trending/recommendation engines.
+- **First deferred:** S178 (The Concierge)
+- **Owner:** Sam (survey design) + Avery (scoring pipeline)
+
+#### Brewery Operating Hours (S178)
+Add `operating_hours` JSONB column to breweries table (day-of-week → open/close times). Validate in HopRoute generation that selected breweries are actually open at the planned arrival times. Also useful for storefront pages, Explore "Open Now" filter, and the Barback crawler. Schema + migration + HopRoute validation + consumer display.
+- **First deferred:** S178 (The Concierge)
+- **Owner:** Quinn (migration) + Drew (data validation) + Dakota (build)
+
+#### Pour Size Data Coverage (S178)
+`beer_pour_sizes` table exists since S176 but most breweries haven't populated it. The concierge references pour sizes in its enriched payload but the data is thin. Options: (a) Barback crawler extracts prices from brewery websites, (b) onboarding wizard prompts for pour sizes, (c) seed common defaults (Pint 16oz, Half 8oz, Taster 4oz) per brewery type.
+- **First deferred:** S178 (The Concierge)
+- **Owner:** Drew (brewery ops input) + Riley (Barback integration)
 
 #### Brand Colors on Admin
 Brewery-admin and superadmin pages use a hodgepodge of colors instead of the Sprint 11 dark + gold system. Audit all admin surfaces, align with Jamie's brand guide.
