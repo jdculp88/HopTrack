@@ -75,7 +75,7 @@ a0855c2  docs: wiki reorg wave 2+4 — architecture blueprint + remaining conten
 - **The "(to write)" stubs existed for ~one commit.** They shipped green because Morgan created stub files the checker was happy with, then filled them in. Works, but philosophically stubs-that-pass-CI-but-aren't-real is a small lie. Mitigated by the fact that the stub content linked to its actual source and named its owner.
 - **REQ-013 Beer Passport still has no file** — it's referenced in the RTM as an unlinked row. Minor, but incomplete.
 - **Jamie's brand-voice pass deferred.** The section READMEs are functional but the voice across them isn't uniformly Jamie-approved.
-- **The `docs/archive/README.md` self-example** originally used `[archive/foo.md](archive/foo.md)` as a literal link the checker flagged. Caught and rephrased, but it's a reminder that placeholder examples need to live in backticks, not links.
+- **The `docs/archive/README.md` self-example** originally used a literal placeholder link the checker flagged. Caught and rephrased, but it's a reminder that placeholder example link syntax needs to live in backticks, not rendered as an actual link.
 
 ## Roasts 🔥
 
