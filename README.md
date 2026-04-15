@@ -56,41 +56,28 @@ Optional (features degrade gracefully without these):
 | `ANTHROPIC_API_KEY` | HopRoute AI generation |
 | `NEXT_PUBLIC_VAPID_PUBLIC_KEY` | Web push notifications |
 
+## Documentation
+
+📚 **Full documentation lives in [docs/](docs/README.md).** Start at the [wiki home](docs/README.md) to traverse architecture, requirements, testing, operations, design, sales, and 178 sprints of history via inline links.
+
+Key entry points:
+- [Architecture blueprint](docs/architecture/README.md)
+- [Requirements Traceability Matrix](docs/requirements/README.md) (REQ → Test → Code)
+- [Operations + launch checklist](docs/operations/README.md)
+- [Team & agents](docs/team/README.md)
+
 ## Project Structure
 
 ```
-app/
-  (app)/              Consumer app routes
-  (brewery-admin)/    Brewery owner dashboard
-  (superadmin)/       Platform admin
-  (auth)/             Login/signup
-  api/                55 API endpoints
-components/
-  session/            Session flow (banner, drawer, recap, tap wall)
-  social/             Feed cards, ratings, comments
-  brewery/            Brewery-specific components
-  beer/               Beer cards, reviews
-  ui/                 Base components (Modal, Toast, Skeleton, etc.)
-  layout/             AppShell, AppNav
-lib/
-  supabase/           Client, server, service role clients
-  queries/            Feed queries
-  achievements/       Achievement evaluation logic
-  xp/                 XP and leveling system
-  animation.ts        Shared spring configs
-  beerStyleColors.ts  Style-to-color mapping
-types/
-  database.ts         Supabase schema types
-  supabase-helpers.ts Common join shapes
-supabase/
-  migrations/         Database migrations (001-047)
-  functions/          Edge Functions
-docs/
-  roadmap.md          Product roadmap (source of truth)
-  plans/              Sprint plans
-  retros/             Sprint retrospectives
-  sales/              GTM, pricing, pitch docs
-  brand/              Brand guide, App Store plan
+app/              Next.js App Router routes (consumer, brewery, superadmin, auth, api)
+components/       UI components (see components/__tests__ for colocated tests)
+hooks/            Custom React hooks (see hooks/__tests__)
+lib/              Shared utilities, Supabase clients, business logic (see lib/__tests__)
+types/            TypeScript type definitions, Supabase schema types
+supabase/         Migrations, seeds, Edge Functions
+scripts/          Build/seed/crawl scripts
+docs/             The wiki (see docs/README.md)
+.claude/          Agent personas, skills, plans
 ```
 
 ## Scripts
@@ -115,7 +102,7 @@ docs/
 
 ## Team
 
-Built by the HopTrack product team. See `CLAUDE.md` for the full team roster and conventions.
+Built by the HopTrack product team. See [CLAUDE.md](CLAUDE.md) for the full team roster and conventions, or [docs/team/README.md](docs/team/README.md) for the org chart with agent-file links.
 
 ## License
 
