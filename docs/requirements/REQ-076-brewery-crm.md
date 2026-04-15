@@ -31,3 +31,19 @@ Customer relationship management system for brewery admins, providing customer p
 - Segments are computed at query time (not stored) to stay current
 - Reuses existing `messages` API with added segment filter parameter
 - No new migration required — queries existing sessions, beer_logs, loyalty tables
+
+---
+
+## RTM Links
+
+### Implementation
+[lib/crm](../../lib/), [lib/brand-crm](../../lib/)
+
+### Tests
+[crm.test.ts](../../lib/__tests__/crm.test.ts), [brand-crm.test.ts](../../lib/__tests__/brand-crm.test.ts)
+
+### History
+- [retro](../history/retros/sprint-89-retro.md)
+- *(no dedicated plan file)*
+
+> Added 2026-04-15 during the wiki reorg — see the [RTM](README.md) for the master table.

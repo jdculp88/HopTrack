@@ -112,3 +112,22 @@ Index: `wishlist_user_idx` on `(user_id)` for fast per-user queries.
 > For Taylor (Sales): Reactions are a key social stickiness feature — they give users a reason to open the app even when they're not at a brewery. Wishlist is a natural upsell hook: "See what your friends want to try and plan your next outing together."
 >
 > For Casey (QA): The unique constraint `(user_id, checkin_id, type)` means a user CAN have all three reaction types on one check-in simultaneously. Test this explicitly — the toggle should only remove the specific type tapped, not all reactions from that user on that check-in.
+
+---
+
+## RTM Links
+
+### Implementation
+[components/ui/WishlistButton.tsx](../../components/ui/WishlistButton.tsx), [lib/share](../../lib/)
+
+### Tests
+[share.test.ts](../../lib/__tests__/share.test.ts) ⚠️ partial coverage
+
+### History
+- [retro](../history/retros/sprint-13-retro.md)
+- [plan](../history/plans/sprint-13-plan.md)
+
+## See also
+[REQ-012](REQ-012-beer-wishlist.md)
+
+> Added 2026-04-15 during the wiki reorg — see the [RTM](README.md) for the master table.

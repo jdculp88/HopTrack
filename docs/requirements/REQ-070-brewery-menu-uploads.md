@@ -80,3 +80,19 @@ New `brewery_menus` table: id, brewery_id, category, title, image_urls[], displa
 REQ-058 proposes structured non-beer items (wine, cocktails, NA) as trackable entities in the tap list and check-in flow. That's a larger effort (4-5 sprints, multiple schema changes).
 
 REQ-070 is the pragmatic first step: photo menus remove the sales objection now. REQ-058 builds on top later when paying breweries ask for structured tracking.
+
+---
+
+## RTM Links
+
+### Implementation
+[lib/menus](../../lib/)
+
+### Tests
+[menus.test.ts](../../lib/__tests__/menus.test.ts)
+
+### History
+- [retro](../history/retros/sprint-128-retro.md)
+- [plan](../history/plans/sprint-82-plan.md)
+
+> Added 2026-04-15 during the wiki reorg — see the [RTM](README.md) for the master table.

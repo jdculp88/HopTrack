@@ -33,3 +33,19 @@ Geo-targeted advertising system that serves brewery ads in the consumer feed, wi
 - Feed interleaving: ad inserted every N organic cards (configurable, default every 5th)
 - Budget is tracked but not billed in Phase 1 (display metric only)
 - 7 endpoints all under `/api/brewery/[brewery_id]/ads/`
+
+---
+
+## RTM Links
+
+### Implementation
+[app/(brewery)/ads/](../../app/)
+
+### Tests
+⚠️ gap — ad engine test coverage pending
+
+### History
+- [retro](../history/retros/sprint-94-retro.md)
+- [plan](../history/plans/sprint-93-plan.md)
+
+> Added 2026-04-15 during the wiki reorg — see the [RTM](README.md) for the master table.

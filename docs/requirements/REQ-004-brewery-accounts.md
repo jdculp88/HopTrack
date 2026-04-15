@@ -46,3 +46,19 @@ brewery_claims   (id, user_id, brewery_id, status ENUM(pending, approved, reject
 
 ## Notes (Riley — Infra)
 > Staff app for QR scanning should be a lightweight PWA — no app store dependency. Accessible at `/staff/[brewery_id]` with a staff-role JWT. Works offline for QR validation via cached public key.
+
+---
+
+## RTM Links
+
+### Implementation
+[lib/brand-auth](../../lib/), [app/(brewery)/](../../app/)
+
+### Tests
+[brand-auth.test.ts](../../lib/__tests__/brand-auth.test.ts)
+
+### History
+- [retro](../history/retros/sprint-14-retro.md)
+- [plan](../history/plans/sprint-14-plan.md)
+
+> Added 2026-04-15 during the wiki reorg — see the [RTM](README.md) for the master table.

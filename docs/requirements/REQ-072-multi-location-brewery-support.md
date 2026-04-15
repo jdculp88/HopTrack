@@ -262,3 +262,22 @@ Multi-location is a **Barrel tier anchor feature**. Without it, Barrel has no di
 ---
 
 *This is a living document. — Morgan* 🗂️
+
+---
+
+## RTM Links
+
+### Implementation
+[lib/brand-auth](../../lib/), [lib/brand-billing](../../lib/), [lib/brand-crm](../../lib/), [lib/brand-loyalty](../../lib/), [lib/brand-team-activity](../../lib/)
+
+### Tests
+[brand-auth.test.ts](../../lib/__tests__/brand-auth.test.ts), [brand-billing.test.ts](../../lib/__tests__/brand-billing.test.ts), [brand-crm.test.ts](../../lib/__tests__/brand-crm.test.ts), [brand-propagation.test.ts](../../lib/__tests__/brand-propagation.test.ts), [brand-team-activity.test.ts](../../lib/__tests__/brand-team-activity.test.ts), [brand-tier-gates.test.ts](../../lib/__tests__/brand-tier-gates.test.ts), [brand-routes-use-shared-auth.test.ts](../../lib/__tests__/brand-routes-use-shared-auth.test.ts), [brand-onboarding.test.ts](../../lib/__tests__/brand-onboarding.test.ts), [brand-digest.test.ts](../../lib/__tests__/brand-digest.test.ts)
+
+### History
+- [retro](../history/retros/sprint-114-retro.md)
+- *(no dedicated plan file)*
+
+## See also
+[REQ-095](REQ-095-brand-team-roles.md), [REQ-096](REQ-096-brand-loyalty.md), [architecture/multi-location-brand.md](../architecture/multi-location-brand.md)
+
+> Added 2026-04-15 during the wiki reorg — see the [RTM](README.md) for the master table.

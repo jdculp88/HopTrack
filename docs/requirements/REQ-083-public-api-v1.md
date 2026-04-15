@@ -35,3 +35,22 @@ Versioned public REST API at `/api/v1/` providing read-only access to brewery an
 - Key generation: `ht_live_` + 32 random hex chars; stored as SHA-256 hash (raw key never persisted)
 - CORS headers added to `next.config.ts` for `/api/v1/:path*` pattern
 - Rate limiting reuses existing middleware with separate buckets for authed vs unauthed
+
+---
+
+## RTM Links
+
+### Implementation
+[app/api/v1/](../../app/), [lib/api-keys](../../lib/)
+
+### Tests
+[api-keys.test.ts](../../lib/__tests__/api-keys.test.ts), [api-keys-extended.test.ts](../../lib/__tests__/api-keys-extended.test.ts)
+
+### History
+- [retro](../history/retros/sprint-85-retro.md)
+- [plan](../history/plans/sprint-85-plan.md)
+
+## See also
+[api/api-reference.md](../api/api-reference.md), [architecture/api-layer.md](../architecture/api-layer.md)
+
+> Added 2026-04-15 during the wiki reorg — see the [RTM](README.md) for the master table.

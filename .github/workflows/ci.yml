@@ -55,6 +55,11 @@ jobs:
       - name: Type check
         run: npx tsc --noEmit
 
+      # Sprint 178+ wiki reorg — keeps docs/ traceability honest.
+      # Script at scripts/check-wiki-links.mjs, exits non-zero on dead links.
+      - name: Wiki link check
+        run: npm run docs:check-links
+
       - name: Unit tests
         id: unit-tests
         run: npm run test:coverage

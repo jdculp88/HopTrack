@@ -33,3 +33,22 @@ Complete redesign of the active session drawer UX, introducing a SessionContext 
 - Cancel hard-delete uses single API call that cascades: DELETE session WHERE id = X (FK cascade handles beer_logs)
 - Floating bubble uses fixed positioning with `z-50` to stay above all content
 - Beer log array in context is source of truth during active session; synced to DB on each log
+
+---
+
+## RTM Links
+
+### Implementation
+[components/session/](../../components/), [lib/session-flow](../../lib/)
+
+### Tests
+[session-flow.test.ts](../../lib/__tests__/session-flow.test.ts)
+
+### History
+- [retro](../history/retros/sprint-96-retro.md)
+- [plan](../history/plans/sprint-96-plan.md)
+
+## See also
+[REQ-025](REQ-025-sessions-tap-wall.md)
+
+> Added 2026-04-15 during the wiki reorg — see the [RTM](README.md) for the master table.

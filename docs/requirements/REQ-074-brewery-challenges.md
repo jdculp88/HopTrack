@@ -30,3 +30,22 @@ End-to-end brewery challenge system allowing brewery admins to create challenges
 - RLS: brewery admins manage own challenges; authenticated users read all, write own progress
 - Progress update runs in session-end API and beer-log API as post-action side effect
 - Challenge types are enum-validated at API level
+
+---
+
+## RTM Links
+
+### Implementation
+[lib/challenges](../../lib/)
+
+### Tests
+[challenges.test.ts](../../lib/__tests__/challenges.test.ts)
+
+### History
+- [retro](../history/retros/sprint-81-retro.md)
+- [plan](../history/plans/sprint-81-plan.md)
+
+## See also
+[REQ-075](REQ-075-sponsored-challenges.md)
+
+> Added 2026-04-15 during the wiki reorg — see the [RTM](README.md) for the master table.

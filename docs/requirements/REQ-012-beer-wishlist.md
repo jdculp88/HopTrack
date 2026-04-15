@@ -66,3 +66,22 @@ When a beer is logged via `POST /api/sessions/[id]/beers`, if the `beer_id` matc
 - [ ] Wishlist section shows on own profile
 - [ ] Beer auto-removed from wishlist when logged in session
 - [ ] Empty wishlist doesn't show section on profile
+
+---
+
+## RTM Links
+
+### Implementation
+[components/wishlist/WishlistOnTapAlert.tsx](../../components/wishlist/WishlistOnTapAlert.tsx), [components/ui/WishlistButton.tsx](../../components/ui/WishlistButton.tsx)
+
+### Tests
+⚠️ gap — no direct wishlist test file yet
+
+### History
+- [retro](../history/retros/sprint-13-retro.md)
+- [plan](../history/plans/sprint-13-plan.md)
+
+## See also
+[REQ-009](REQ-009-reactions-wishlist.md)
+
+> Added 2026-04-15 during the wiki reorg — see the [RTM](README.md) for the master table.

@@ -127,3 +127,22 @@ The `ServingStyle` type in `/Users/jdculp/Projects/hoptrack/types/database` is t
 > For Taylor (Sales): Flavor tags are a differentiator for beer geeks — the 20-tag vocabulary was chosen to cover the most common beer flavor profiles without being overwhelming. "Hoppy, Citrusy, Tropical" covers IPAs; "Roasty, Coffee, Chocolate" covers stouts; "Sour, Fruity, Dry" covers the sour/wild category. This is a natural talking point when showing the check-in flow.
 >
 > Future consideration: Aggregate flavor tag data by brewery/beer could power a "flavor profile" visualization on beer and brewery detail pages.
+
+---
+
+## RTM Links
+
+### Implementation
+[lib/beer-sensory](../../lib/), [lib/srm-colors](../../lib/)
+
+### Tests
+[beer-sensory.test.ts](../../lib/__tests__/beer-sensory.test.ts), [srm-colors.test.ts](../../lib/__tests__/srm-colors.test.ts)
+
+### History
+- [retro](../history/retros/sprint-13-retro.md)
+- [plan](../history/plans/sprint-13-plan.md)
+
+## See also
+[REQ-116](REQ-116-sensory-layer.md) *(SRM + aroma/taste/finish)*
+
+> Added 2026-04-15 during the wiki reorg — see the [RTM](README.md) for the master table.

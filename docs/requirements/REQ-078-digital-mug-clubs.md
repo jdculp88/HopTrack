@@ -31,3 +31,22 @@ Digital mug club system replacing physical membership cards, allowing breweries 
 - Payment integration stubbed — join is free in Phase 1, fee is display-only
 - Perk claiming reuses redemption code pattern from loyalty system
 - Club discovery query filters by active status and available capacity
+
+---
+
+## RTM Links
+
+### Implementation
+[lib/mug-club-perks](../../lib/)
+
+### Tests
+[mug-club-perks.test.ts](../../lib/__tests__/mug-club-perks.test.ts)
+
+### History
+- [retro](../history/retros/sprint-94-retro.md)
+- [plan](../history/plans/sprint-94-plan.md)
+
+## See also
+[REQ-003](REQ-003-loyalty-system.md)
+
+> Added 2026-04-15 during the wiki reorg — see the [RTM](README.md) for the master table.

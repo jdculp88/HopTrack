@@ -47,3 +47,22 @@ brewery_insights (
 - [ ] Email digest formatted and delivered via Resend
 - [ ] All data anonymized, no individual user exposure
 - [ ] Minimum sample size (10 check-ins) enforced before surfacing insights
+
+---
+
+## RTM Links
+
+### Implementation
+[lib/kpi](../../lib/), [lib/brewery-health](../../lib/)
+
+### Tests
+[kpi.test.ts](../../lib/__tests__/kpi.test.ts), [brewery-health.test.ts](../../lib/__tests__/brewery-health.test.ts), [brewery-benchmarks.test.ts](../../lib/__tests__/brewery-benchmarks.test.ts)
+
+### History
+- *(retro file missing)*
+- *(no dedicated plan file)*
+
+## See also
+[REQ-069](REQ-069-enhanced-kpis-analytics.md), [REQ-104](REQ-104-intelligence-layer.md)
+
+> Added 2026-04-15 during the wiki reorg — see the [RTM](README.md) for the master table.

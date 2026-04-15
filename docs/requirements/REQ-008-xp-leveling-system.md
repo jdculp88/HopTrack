@@ -101,3 +101,22 @@ Both columns are updated server-side after each check-in submission.
 > The level names are brand voice assets — do not change them without sign-off from Alex (UI/UX). Taylor (Sales) has specifically called out "Grand Cicerone" and "Hopvangelist" as talking points in demos.
 >
 > The XP values were balanced for a casual user hitting Level 5 ("Regular") after roughly 40–50 check-ins. Rebalancing requires re-running the math against the full 20-level table.
+
+---
+
+## RTM Links
+
+### Implementation
+[lib/xp](../../lib/), [lib/xp-variable](../../lib/)
+
+### Tests
+[xp.test.ts](../../lib/__tests__/xp.test.ts), [xp-variable.test.ts](../../lib/__tests__/xp-variable.test.ts)
+
+### History
+- [retro](../history/retros/sprint-13-retro.md)
+- [plan](../history/plans/sprint-13-plan.md)
+
+## See also
+[REQ-106](REQ-106-sensory-vibe.md) *(variable XP)*
+
+> Added 2026-04-15 during the wiki reorg — see the [RTM](README.md) for the master table.

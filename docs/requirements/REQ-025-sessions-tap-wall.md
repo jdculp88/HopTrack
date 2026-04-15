@@ -491,3 +491,22 @@ function useSession(): {
 
 *REQ-025 — Sessions & Tap Wall — Created 2026-03-25 by Morgan*
 *All hands spec review complete. Ready for Sprint 10.*
+
+---
+
+## RTM Links
+
+### Implementation
+[lib/session-flow](../../lib/), [lib/tap-list-types](../../lib/), [lib/session-og](../../lib/)
+
+### Tests
+[session-flow.test.ts](../../lib/__tests__/session-flow.test.ts), [session-og.test.ts](../../lib/__tests__/session-og.test.ts), [tap-list-types.test.ts](../../lib/__tests__/tap-list-types.test.ts)
+
+### History
+- [retro](../history/retros/sprint-16-retro.md)
+- *(no dedicated plan file)*
+
+## See also
+[REQ-081](REQ-081-session-drawer.md) *(drawer overhaul)*
+
+> Added 2026-04-15 during the wiki reorg — see the [RTM](README.md) for the master table.

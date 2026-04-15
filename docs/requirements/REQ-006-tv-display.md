@@ -43,3 +43,22 @@ A live-updating display app that runs on a TV in the taproom. Shows real-time ch
 - [ ] QR enrollment flow works end to end
 - [ ] Display recovers gracefully from network interruption
 - [ ] Works in Chrome kiosk mode (no browser UI visible)
+
+---
+
+## RTM Links
+
+### Implementation
+[app/(brewery)/board/](../../app/), [lib/board-settings](../../lib/)
+
+### Tests
+[board-settings.test.ts](../../lib/__tests__/board-settings.test.ts), [board-themes.test.ts](../../lib/__tests__/board-themes.test.ts), [board-display-scale.test.ts](../../lib/__tests__/board-display-scale.test.ts)
+
+### History
+- [retro](../history/retros/sprint-167-retro.md)
+- [plan](../history/plans/sprint-16-plan.md)
+
+## See also
+[REQ-109](REQ-109-board-display-formats.md), [REQ-115](REQ-115-display-suite.md)
+
+> Added 2026-04-15 during the wiki reorg — see the [RTM](README.md) for the master table.

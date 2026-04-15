@@ -30,3 +30,19 @@ Add a light/dark theme toggle to HopTrack. Dark mode remains the default. Light 
 ## Notes
 - Theme applied via `data-theme="light"` on `<html>` element
 - Tailwind classes updated to reference CSS variables rather than raw hex
+
+---
+
+## RTM Links
+
+### Implementation
+[components/ui/ThemeToggle](../../components/)
+
+### Tests
+[theme-toggle.test.tsx](../../components/__tests__/theme-toggle.test.tsx)
+
+### History
+- [retro](../history/retros/sprint-11-retro.md)
+- *(no dedicated plan file)*
+
+> Added 2026-04-15 during the wiki reorg — see the [RTM](README.md) for the master table.

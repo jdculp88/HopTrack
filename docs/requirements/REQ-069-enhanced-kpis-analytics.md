@@ -66,3 +66,22 @@ UX: Second row of 4 KPI cards on dashboard with Sparkline trends. New "Customer 
 8. Mobile-responsive KPI card stacking
 9. No new migrations for initial ship
 10. Performance: derived from already-fetched data where possible
+
+---
+
+## RTM Links
+
+### Implementation
+[lib/kpi](../../lib/)
+
+### Tests
+[kpi.test.ts](../../lib/__tests__/kpi.test.ts)
+
+### History
+- [retro](../history/retros/sprint-124-retro.md)
+- *(no dedicated plan file)*
+
+## See also
+[REQ-007](REQ-007-brewery-insights.md), [REQ-104](REQ-104-intelligence-layer.md)
+
+> Added 2026-04-15 during the wiki reorg — see the [RTM](README.md) for the master table.

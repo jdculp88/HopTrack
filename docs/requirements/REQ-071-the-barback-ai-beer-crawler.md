@@ -502,3 +502,19 @@ Each phase requires its own success criteria review before proceeding.
 *"From a business continuity standpoint, empty brewery listings are our biggest risk. The Barback fixes that — carefully, honestly, and with guardrails that would make Casey proud."*
 
 — Sam, Business Analyst / QA Lead
+
+---
+
+## RTM Links
+
+### Implementation
+[scripts/barback-crawl.mjs](../../scripts/barback-crawl.mjs), [.github/workflows/barback.yml](../../.github/workflows/barback.yml)
+
+### Tests
+[cron-ai-suggestions.test.ts](../../lib/__tests__/cron-ai-suggestions.test.ts)
+
+### History
+- [retro](../history/retros/sprint-146-retro.md)
+- [plan](../history/plans/sprint-79-plan.md)
+
+> Added 2026-04-15 during the wiki reorg — see the [RTM](README.md) for the master table.

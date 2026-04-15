@@ -578,3 +578,19 @@ Auto-categorization uses keyword matching on POS item name and category. Brewery
 *"From a business continuity standpoint, double-entry is the silent killer of brewery SaaS adoption. Every minute a brewery owner spends updating two systems is a minute they're thinking about canceling one of them. POS integration makes sure the one they keep is HopTrack."*
 
 -- Sam, Business Analyst / QA Lead
+
+---
+
+## RTM Links
+
+### Implementation
+[lib/pos-sync](../../lib/)
+
+### Tests
+[pos-sync.test.ts](../../lib/__tests__/pos-sync.test.ts)
+
+### History
+- [retro](../history/retros/sprint-87-retro.md)
+- [plan](../history/plans/sprint-87-plan.md)
+
+> Added 2026-04-15 during the wiki reorg — see the [RTM](README.md) for the master table.

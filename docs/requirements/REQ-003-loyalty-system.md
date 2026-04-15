@@ -46,3 +46,22 @@ promotions       (id, brewery_id, beer_id, title, discount_type, discount_value,
 
 ## Notes (Sam — BA)
 > Loyalty programs are the primary hook for brewery account upgrades. Free tier gets 1 active program. Paid tier gets unlimited programs + targeted push offers + analytics dashboard.
+
+---
+
+## RTM Links
+
+### Implementation
+[lib/brand-loyalty](../../lib/), [lib/mug-club-perks](../../lib/)
+
+### Tests
+[brand-loyalty.test.ts](../../lib/__tests__/brand-loyalty.test.ts), [mug-club-perks.test.ts](../../lib/__tests__/mug-club-perks.test.ts)
+
+### History
+- [retro](../history/retros/sprint-16-retro.md)
+- *(no dedicated plan file)*
+
+## See also
+[REQ-096](REQ-096-brand-loyalty.md) *(brand-wide passport)*
+
+> Added 2026-04-15 during the wiki reorg — see the [RTM](README.md) for the master table.

@@ -31,3 +31,22 @@ Brewery-created sponsored challenges with geographic discovery, allowing breweri
 - Impression/click dedup: one per user per challenge per 24h window
 - Budget is display-only in Phase 1 (no actual billing against budget)
 - Discovery query: `SELECT ... WHERE haversine(user_lat, user_lng, brewery_lat, brewery_lng) <= radius`
+
+---
+
+## RTM Links
+
+### Implementation
+[lib/sponsored-challenges](../../lib/)
+
+### Tests
+[sponsored-challenges.test.ts](../../lib/__tests__/sponsored-challenges.test.ts)
+
+### History
+- [retro](../history/retros/sprint-91-retro.md)
+- [plan](../history/plans/sprint-91-plan.md)
+
+## See also
+[REQ-103](REQ-103-ftc-age-gate.md) *(FTC disclosure tie-in)*
+
+> Added 2026-04-15 during the wiki reorg — see the [RTM](README.md) for the master table.

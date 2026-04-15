@@ -32,3 +32,22 @@ First phase of fraud prevention for the loyalty redemption system, introducing r
 - Staff confirmation endpoint validates code + expiry + brewery match in single query
 - Rate limiting uses existing rate limit middleware with per-user key
 - Codes are one-time-use: marked consumed on successful staff confirmation
+
+---
+
+## RTM Links
+
+### Implementation
+[lib/rate-limiting](../../lib/), [lib/session-flow](../../lib/), [lib/security-headers](../../lib/)
+
+### Tests
+[rate-limiting.test.ts](../../lib/__tests__/rate-limiting.test.ts), [security-headers.test.ts](../../lib/__tests__/security-headers.test.ts)
+
+### History
+- [retro](../history/retros/sprint-96-retro.md)
+- [plan](../history/plans/sprint-96-plan.md)
+
+## See also
+[compliance/security-and-fraud-prevention.md](../compliance/security-and-fraud-prevention.md)
+
+> Added 2026-04-15 during the wiki reorg — see the [RTM](README.md) for the master table.

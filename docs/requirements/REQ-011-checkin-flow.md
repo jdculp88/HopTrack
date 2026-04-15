@@ -265,3 +265,22 @@ This step is triggered by a successful `submitCheckin()` response. The progress 
 > For Taylor (Sales): The 5-step flow was intentionally designed to feel like a ritual, not a form. The brewery auto-detection, the confetti, and the achievement unlocks are all moments of delight. In demos, let the flow run end-to-end — the celebration screen closes the sale.
 >
 > For Casey (QA): Pay particular attention to the state reset logic (AC-2). Open the modal, get halfway through a check-in, close it, and reopen — all fields must be blank. Also test the "Log Another Beer" path (AC-45) to ensure state fully resets without a modal close/reopen cycle.
+
+---
+
+## RTM Links
+
+### Implementation
+🪦 deprecated — see [archive/checkins-deprecation-plan.md](../archive/checkins-deprecation-plan.md)
+
+### Tests
+— (deprecated)
+
+### History
+- — (deprecated)
+- *(no dedicated plan file)*
+
+## See also
+[REQ-025](REQ-025-sessions-tap-wall.md) *(replacement)*
+
+> Added 2026-04-15 during the wiki reorg — see the [RTM](README.md) for the master table.

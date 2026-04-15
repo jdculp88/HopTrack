@@ -48,3 +48,19 @@ Spotify Wrapped-style recap cards for consumers (weekly/monthly/yearly) and brew
 - [ ] Yearly recap shareable PNG
 - [ ] Brewery yearly recap in brewery admin dashboard
 - [ ] "Top X% of users" percentile calculation
+
+---
+
+## RTM Links
+
+### Implementation
+[lib/wrapped](../../lib/), [lib/pint-rewind](../../lib/)
+
+### Tests
+[wrapped.test.ts](../../lib/__tests__/wrapped.test.ts), [pint-rewind.test.ts](../../lib/__tests__/pint-rewind.test.ts)
+
+### History
+- *(retro file missing)*
+- [plan](../history/plans/sprint-33-plan.md)
+
+> Added 2026-04-15 during the wiki reorg — see the [RTM](README.md) for the master table.

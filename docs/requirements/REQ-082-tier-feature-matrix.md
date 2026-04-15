@@ -31,3 +31,22 @@ Comprehensive tier-based feature gating system with a `FEATURE_MATRIX` constant 
 - Billing page is server component with client interactive elements (toggle, CTAs)
 - Feature keys are string literals for type safety
 - Matrix is extensible: adding a feature = one new row in the constant
+
+---
+
+## RTM Links
+
+### Implementation
+[lib/tier-gates](../../lib/), [lib/brand-tier-gates](../../lib/)
+
+### Tests
+[tier-gates.test.ts](../../lib/__tests__/tier-gates.test.ts), [brand-tier-gates.test.ts](../../lib/__tests__/brand-tier-gates.test.ts)
+
+### History
+- [retro](../history/retros/sprint-96-retro.md)
+- [plan](../history/plans/sprint-96-plan.md)
+
+## See also
+[sales/pricing-and-tiers.md](../sales/pricing-and-tiers.md)
+
+> Added 2026-04-15 during the wiki reorg — see the [RTM](README.md) for the master table.

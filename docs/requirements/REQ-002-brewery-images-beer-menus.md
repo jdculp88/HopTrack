@@ -35,3 +35,19 @@ None required — `cover_image_url` already on `breweries` and `beers` tables.
 - Configure RLS: anyone can read, authenticated brewery owners can write
 - Max upload size: 10MB
 - Accepted formats: JPEG, PNG, WebP
+
+---
+
+## RTM Links
+
+### Implementation
+[lib/menus](../../lib/), [supabase/migrations/](../../supabase/migrations/)
+
+### Tests
+[menus.test.ts](../../lib/__tests__/menus.test.ts)
+
+### History
+- [retro](../history/retros/sprint-12-retro.md)
+- [plan](../history/plans/sprint-12-plan.md)
+
+> Added 2026-04-15 during the wiki reorg — see the [RTM](README.md) for the master table.

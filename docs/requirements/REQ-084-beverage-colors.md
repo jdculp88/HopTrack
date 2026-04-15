@@ -32,3 +32,22 @@ Extended color system for non-beer beverage categories (cider, wine, cocktail, n
 - `card-bg-reco[data-style="cider|wine|cocktail|na"]` selectors in `globals.css`
 - Color values chosen for WCAG AA contrast against both dark and light surface colors
 - Embed widget uses `item_type` field from menu API to determine grouping and color assignment
+
+---
+
+## RTM Links
+
+### Implementation
+[lib/beer-style-colors](../../lib/)
+
+### Tests
+[beer-style-colors.test.ts](../../lib/__tests__/beer-style-colors.test.ts)
+
+### History
+- [retro](../history/retros/sprint-83-retro.md)
+- *(no dedicated plan file)*
+
+## See also
+[design/design-system.md](../design/design-system.md)
+
+> Added 2026-04-15 during the wiki reorg — see the [RTM](README.md) for the master table.

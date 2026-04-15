@@ -29,6 +29,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
+    "docs:check-links": "node scripts/check-wiki-links.mjs",
     "analyze": "ANALYZE=true next build",
     "barback": "node scripts/barback-crawl.mjs"
   },

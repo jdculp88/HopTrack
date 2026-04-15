@@ -32,3 +32,19 @@ Centralized promotion management dashboard for brewery admins, providing a singl
 - Reuses existing CRUD endpoints for each promotion type (no new API routes)
 - URL params for active tab and filters (shareable state)
 - HopRoute config relocated to Settings during this sprint (cleanup)
+
+---
+
+## RTM Links
+
+### Implementation
+[lib/promotions](../../lib/), [lib/ai-promotions](../../lib/)
+
+### Tests
+[promotions.test.ts](../../lib/__tests__/promotions.test.ts), [ai-promotions.test.ts](../../lib/__tests__/ai-promotions.test.ts)
+
+### History
+- [retro](../history/retros/sprint-95-retro.md)
+- [plan](../history/plans/sprint-95-plan.md)
+
+> Added 2026-04-15 during the wiki reorg — see the [RTM](README.md) for the master table.
