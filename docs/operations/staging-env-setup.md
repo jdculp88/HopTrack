@@ -1,8 +1,34 @@
 # HopTrack Staging Environment Setup
 
 **Owner:** Riley (Infrastructure)
-**Date:** 2026-03-24
-**Status:** Active — update project refs when provisioned
+**Date:** 2026-03-24 (drafted) · 2026-04-21 (activated)
+**Status:** ✅ Provisioned and baselined — staging schema matches prod as of 2026-04-21
+
+## Quick reference
+
+| Field | Staging | Production |
+|---|---|---|
+| Project name | `hoptrack-staging` | `HopTrack` |
+| Project ref | `qhznhxyhwqmqfdaqebla` | `uadjtanoyvalnmlbnzxk` |
+| URL | `https://qhznhxyhwqmqfdaqebla.supabase.co` | `https://uadjtanoyvalnmlbnzxk.supabase.co` |
+| Region | East US (N. Virginia) / us-east-1 | East US (Ohio) / us-east-2 |
+| Dashboard | [supabase.com/dashboard/project/qhznhxyhwqmqfdaqebla](https://supabase.com/dashboard/project/qhznhxyhwqmqfdaqebla) | [supabase.com/dashboard/project/uadjtanoyvalnmlbnzxk](https://supabase.com/dashboard/project/uadjtanoyvalnmlbnzxk) |
+| Credentials | 1Password — HopTrack Engineering > Staging Supabase | 1Password — HopTrack Engineering > Production Supabase |
+
+**Region mismatch noted** — staging is us-east-1, prod is us-east-2. Not blocking (pre-launch, no real users), but worth matching regions before real traffic. Recreating staging in us-east-2 is cheap (disposable project) and can happen any time.
+
+## About migration 000_baseline.sql
+
+Created 2026-04-21 during staging activation. The migration chain (001-120) was not self-contained — it assumed foundational tables (`breweries`, `profiles`, `beers`, etc.) already existed, because those were created by hand in the Supabase UI back in March 2026 before the migration discipline started. Staging exposed the gap because it was the first time the chain ran against a fresh DB.
+
+`000_baseline.sql` is a pg_dump of prod's public schema at activation time. It:
+- Captures the 72 tables that pre-dated the migration chain
+- Resets the public schema (DROP CASCADE) at the top — safe because downstream environments should have this migration marked applied in their tracker, causing `supabase db push` to skip it
+- Enables the `pg_trgm` extension in the public schema (prod convention, used by smart-search GIN indexes)
+
+**Both prod and staging have 000_baseline.sql marked as applied** in their respective `supabase_migrations.schema_migrations` trackers. `supabase db push` will never re-run it. Only if someone manually executes the SQL file would the DROP fire — avoid doing that unless you know what you're doing.
+
+
 
 ---
 
@@ -267,15 +293,15 @@ The app will be available at `http://localhost:3000` and will connect to your lo
 
 ## Staging Project Details
 
-*(To be filled in by Riley after provisioning)*
-
 | Field | Value |
 |---|---|
 | Project name | hoptrack-staging |
-| Project URL | [STAGING_URL] |
-| Project ref | [STAGING_REF] |
-| Supabase dashboard | [STAGING_DASHBOARD_URL] |
-| Region | [REGION] |
+| Project URL | https://qhznhxyhwqmqfdaqebla.supabase.co |
+| Project ref | qhznhxyhwqmqfdaqebla |
+| Supabase dashboard | https://supabase.com/dashboard/project/qhznhxyhwqmqfdaqebla |
+| Region | East US (N. Virginia) / us-east-1 |
+| Compute tier | MICRO |
+| Baselined | 2026-04-21 (72 tables from prod) |
 | Credentials location | 1Password — HopTrack Engineering > Staging Supabase |
 
 ---
@@ -286,9 +312,12 @@ The app will be available at `http://localhost:3000` and will connect to your lo
 
 | Field | Value |
 |---|---|
-| Project name | hoptrack-production |
-| Project URL | [PROD_URL] |
-| Project ref | [PROD_REF] |
+| Project name | HopTrack |
+| Project URL | https://uadjtanoyvalnmlbnzxk.supabase.co |
+| Project ref | uadjtanoyvalnmlbnzxk |
+| Supabase dashboard | https://supabase.com/dashboard/project/uadjtanoyvalnmlbnzxk |
+| Region | East US (Ohio) / us-east-2 |
+| Compute tier | NANO |
 | Credentials location | 1Password — HopTrack Engineering > Production Supabase |
 
 ---
