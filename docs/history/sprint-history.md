@@ -1183,3 +1183,79 @@ Typecheck clean, **0 lint errors**, **0 new lint warnings** (6 pre-existing warn
 - `lib/__tests__/hop-route-concierge.test.ts` — 24 tests (6 for routeMetrics, 8 for tasteFingerprint, 10 for breweryScoring)
 
 **Full retro:** `docs/retros/sprint-178-retro.md`
+
+---
+
+## Sprint 179 — The Launchpad 🚀
+*Standalone infrastructure sprint — 2026-04-21*
+
+**Theme:** Stand up the real infrastructure that was only ever drafted — staging, clean prod, coming-soon live.
+
+**Context:** For 178 sprints HopTrack had been running as a rich feature codebase with no deployment anywhere. `hoptrack.beer` was a GoDaddy parked page. Docs described a Vercel + staging setup that had never been provisioned. Joshua course-corrected twice in this session: first "what's real vs aspirational," then "do we need Vercel and why." Both pivots reshaped the sprint scope.
+
+**Track 1 — Staging activated:**
+- `hoptrack-staging` provisioned in us-east-1 on Supabase Pro (ref `qhznhxyhwqmqfdaqebla`)
+- 72 tables cloned from prod via `pg_dump --schema-only`
+- Had to resolve multiple gotchas: Supabase postgres role can't disable system triggers; `pg_dump` default search_path clears break user-defined triggers; ephemeral auth tables (`auth.flow_state`, `auth.sessions`, `auth.refresh_tokens`, `auth.audit_log_entries`, `auth.instances`) can't be restored
+- All 120 historical migrations marked applied in staging's `supabase_migrations.schema_migrations` tracker
+- First environment HopTrack has ever had for migration testing
+
+**Track 2 — Migration chain made self-contained:**
+- `supabase/migrations/000_baseline.sql` (222KB, 7,199 lines) — pg_dump of prod's public schema, captures the tables that were created by hand in the Supabase UI back in March 2026 before migration discipline started
+- Self-contained preamble: resets public schema, enables `pg_trgm` extension, includes safety guard that raises an exception if `public.breweries` already exists (prevents accidental destructive re-run)
+- Marked applied in both prod and staging trackers — `supabase db push` skips it going forward
+- Closes 120 sprints of drift between migrations/ and actual prod schema
+
+**Track 3 — Prod cleaned for launch:**
+- `supabase/migrations/121_prod_cleanup.sql` — removes all test/demo data accumulated from seed migrations 024, 074, 075, 076, 078, 100, 104, 105, 112
+- Test data catalog (reverse-engineered via audit queries):
+  - Users by UUID: `aaaaaaaa-*`, `bbbbbbbb-*`, `cc000000-*`, `f000000*-*`
+  - Users by email: `@pintandpixel.test`, `@hoptrack.test`, `@test.hoptrack.beer`, `setup@hoptrack.app`
+  - Breweries by UUID: `dd000001-*` (Mountain Ridge, River Bend, Smoky Barrel), `dd078001-*` (P&P Charlotte), `a1b2c3d4-*` (P&P Austin)
+- Safety-wrapped in BEGIN/COMMIT with founder-account-exists guard (aborts if wrong DB)
+- Prod result: **7,190 real breweries, 1,004 real beers, 2 real accounts** (jdculp88@gmail.com + testflight@hoptrack.beer)
+- Tested against staging first (staging already had copy of prod data), then applied to prod
+
+**Track 4 — Vercel deploy live:**
+- Project `hop-track` created under `jdculp88-8549's projects` on Vercel Hobby tier
+- Deploys from `main` branch, auto on push
+- Environment variables: `NEXT_PUBLIC_SUPABASE_URL` + anon/service_role keys (prod), `NEXT_PUBLIC_SITE_URL=https://hoptrack.beer`, `COMING_SOON_MODE=true` (activates the S174 `ComingSoonContent` component at `/`)
+- Live at `hop-track.vercel.app` — coming-soon page with waitlist form
+- Waitlist pipeline verified end-to-end: form submit → `/api/waitlist/subscribe` → prod `public.waitlist` table
+- DNS flip to `hoptrack.beer` paused at Joshua's request — launch is LLC-gated
+
+**Track 5 — Dev infrastructure fixed:**
+- `scripts/dev-staging.mjs` — Node wrapper that reads `STAGING_*` vars from `.env.local` and exports as `NEXT_PUBLIC_*` / `SUPABASE_SERVICE_ROLE_KEY` for `next dev`. Replaces the silently-broken shell-expansion version that relied on `.env.local` vars being in shell env (they aren't — Next.js reads them into its own process).
+- `scripts/prod-cleanup-audit.sql` — read-only dry-run script that catalogs test data before deletion. Reusable for future audits.
+- `docs/operations/staging-env-setup.md` — filled in with real project refs, region notes, and the baseline story.
+
+**Key architectural changes:**
+- `supabase/migrations/000_baseline.sql` + `121_prod_cleanup.sql` added — first and last migrations in the chain are now explicit foundations
+- `scripts/dev-staging.mjs` + `scripts/prod-cleanup-audit.sql` added
+- `package.json` — `dev:staging` rewired through Node script; `build:staging` dropped (unused, replaced by Vercel)
+- Supabase CLI re-linkable between prod (`uadjtanoyvalnmlbnzxk`) and staging (`qhznhxyhwqmqfdaqebla`) via `supabase link --project-ref`
+
+**Numbers:**
+- New files: 4
+- Modified files: 3
+- Migrations drafted: 2 (both marked applied pre-push — no new rows in tracker)
+- Tests: **2128** (unchanged — zero new tests, infrastructure sprint)
+- Lint errors: 0
+- Build status: Vercel deploy succeeded ✓
+- Commits: 4 on `claude/strange-bohr-f1edcb` (staging-activation, dev:staging-fix-and-audit, 121_prod_cleanup, retro)
+
+**Gotchas cataloged in memory:**
+- Supabase `postgres` role can't `ALTER TABLE ... DISABLE TRIGGER ALL` (system triggers are off-limits)
+- `pg_dump` emits `SET search_path = ''` which breaks triggers that reference tables without schema prefix
+- Triggers on `sessions` auto-populate `brewery_visits` — skip COPY of `brewery_visits` when loading dumps
+- Supabase-managed auth tables (`auth.schema_migrations`, `auth.flow_state`, `auth.sessions`, etc.) reject writes — exclude when dumping
+- Migration chain drift: 120 sprints of forward-only pushes left `001-120` assuming pre-existing tables
+
+**Remaining before true go-live:**
+- DNS flip at GoDaddy to point `hoptrack.beer` at Vercel
+- Terms of Service + Privacy Policy finalized with LLC name
+- LLC approval (external, pending)
+- New logo refresh (Jamie)
+- Merge `claude/strange-bohr-f1edcb` → `main`
+
+**Full retro:** [docs/history/retros/sprint-179-retro.md](history/retros/sprint-179-retro.md)
