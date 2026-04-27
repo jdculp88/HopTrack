@@ -49,7 +49,7 @@ const faqs = [
   {
     question: "How do I cancel my subscription?",
     answer:
-      "Go to your brewery dashboard and tap Billing in the sidebar. You can manage or cancel your subscription there. Your brewery data is retained for 30 days after cancellation. For help, email support@hoptrack.beer.",
+      "Go to your brewery dashboard and tap Billing in the sidebar. You can manage or cancel your subscription there. Your brewery data is retained for 30 days after cancellation. For help, email josh@hoptrack.beer.",
   },
   {
     question: "Is HopTrack available as a mobile app?",
@@ -117,10 +117,10 @@ export default function HelpPage() {
         <p>
           Email us at{" "}
           <a
-            href="mailto:help@hoptrack.beer"
+            href="mailto:josh@hoptrack.beer"
             className="text-[var(--accent-gold)] underline underline-offset-2"
           >
-            help@hoptrack.beer
+            josh@hoptrack.beer
           </a>{" "}
           and we'll get back to you within one business day.
         </p>

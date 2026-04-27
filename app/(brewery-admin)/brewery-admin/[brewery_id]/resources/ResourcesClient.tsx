@@ -305,11 +305,11 @@ function GuidesTab({ searchQuery }: { searchQuery: string }) {
         <p>
           Email us at{" "}
           <a
-            href="mailto:support@hoptrack.beer"
+            href="mailto:josh@hoptrack.beer"
             className="underline underline-offset-2"
             style={{ color: "var(--accent-gold)" }}
           >
-            support@hoptrack.beer
+            josh@hoptrack.beer
           </a>{" "}
           and we&apos;ll get back to you within one business day.
         </p>
@@ -720,7 +720,7 @@ export default function ResourcesClient() {
       </AnimatePresence>
 
       <p className="text-xs text-center mt-8 mb-4" style={{ color: "var(--text-muted)" }}>
-        Questions? Reach out at support@hoptrack.beer
+        Questions? Reach out at josh@hoptrack.beer
       </p>
     </div>
   );

@@ -202,11 +202,11 @@ export default function TermsPage() {
             <p>
               Questions about these Terms? Email us at{" "}
               <a
-                href="mailto:legal@hoptrack.beer"
+                href="mailto:josh@hoptrack.beer"
                 className="underline underline-offset-2"
                 style={{ color: C.gold }}
               >
-                legal@hoptrack.beer
+                josh@hoptrack.beer
               </a>
               .
             </p>

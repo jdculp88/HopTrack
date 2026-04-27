@@ -123,7 +123,7 @@ export function breweryWelcomeEmail(params: { breweryName: string; ownerName: st
     </ol>
     ${button("Go to Dashboard", `https://app.hoptrack.beer/brewery-admin/${breweryId}`)}
     <p style="margin:0;font-size:13px;color:${BRAND.muted};">
-      Questions? Reply to this email or reach us at hello@hoptrack.beer.
+      Questions? Reply to this email or reach us at josh@hoptrack.beer.
     </p>
   `,
     `${breweryName} is live — your 14-day free trial has started.`
@@ -259,7 +259,7 @@ export function claimRejectedEmail(params: { breweryName: string; ownerName: str
     <p style="margin:0 0 16px;font-size:14px;line-height:1.6;color:${BRAND.text};">
       If you believe this was a mistake, please reply to this email with additional verification (business license, social media proof, or a photo of your brewery with today's date) and we'll take another look.
     </p>
-    ${button("Contact Support", "mailto:support@hoptrack.beer?subject=Claim%20Verification%20for%20${encodeURIComponent(breweryName)}")}
+    ${button("Contact Support", "mailto:josh@hoptrack.beer?subject=Claim%20Verification%20for%20${encodeURIComponent(breweryName)}")}
     <p style="margin:0;font-size:13px;color:${BRAND.muted};">
       We want to get this right. We're here to help.
     </p>
@@ -270,7 +270,7 @@ export function claimRejectedEmail(params: { breweryName: string; ownerName: str
   return {
     subject: `Update on your HopTrack claim for ${breweryName}`,
     html,
-    text: `Hi ${firstName}, we weren't able to verify your claim for ${breweryName} at this time. Please reply with additional verification (business license, social media proof, or a dated photo) and we'll take another look. Contact us at support@hoptrack.beer.`,
+    text: `Hi ${firstName}, we weren't able to verify your claim for ${breweryName} at this time. Please reply with additional verification (business license, social media proof, or a dated photo) and we'll take another look. Contact us at josh@hoptrack.beer.`,
   };
 }
 

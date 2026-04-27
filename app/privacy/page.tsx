@@ -125,11 +125,11 @@ export default function PrivacyPage() {
               <li>
                 Request a copy of your data by emailing{" "}
                 <a
-                  href="mailto:privacy@hoptrack.beer"
+                  href="mailto:josh@hoptrack.beer"
                   className="underline underline-offset-2"
                   style={{ color: C.gold }}
                 >
-                  privacy@hoptrack.beer
+                  josh@hoptrack.beer
                 </a>
               </li>
             </ul>
@@ -161,11 +161,11 @@ export default function PrivacyPage() {
               personal information from anyone under 21. If you believe a minor has
               created an account, contact us at{" "}
               <a
-                href="mailto:privacy@hoptrack.beer"
+                href="mailto:josh@hoptrack.beer"
                 className="underline underline-offset-2"
                 style={{ color: C.gold }}
               >
-                privacy@hoptrack.beer
+                josh@hoptrack.beer
               </a>{" "}
               and we will delete the account and any associated data.
             </p>
@@ -183,11 +183,11 @@ export default function PrivacyPage() {
               To exercise these rights, use the account deletion feature in Settings or
               email{" "}
               <a
-                href="mailto:privacy@hoptrack.beer"
+                href="mailto:josh@hoptrack.beer"
                 className="underline underline-offset-2"
                 style={{ color: C.gold }}
               >
-                privacy@hoptrack.beer
+                josh@hoptrack.beer
               </a>
               .
             </p>
@@ -206,11 +206,11 @@ export default function PrivacyPage() {
             <p>
               Questions about this Privacy Policy or your data? Email us at{" "}
               <a
-                href="mailto:privacy@hoptrack.beer"
+                href="mailto:josh@hoptrack.beer"
                 className="underline underline-offset-2"
                 style={{ color: C.gold }}
               >
-                privacy@hoptrack.beer
+                josh@hoptrack.beer
               </a>
               .
             </p>

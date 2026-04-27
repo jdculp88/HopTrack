@@ -150,7 +150,7 @@ export function BillingClient({ brewery, brandBilling }: { brewery: Brewery; bra
     if (tier.key === "free") return; // Can't downgrade to free via checkout
     if (tier.key === "barrel") {
       window.location.href =
-        "mailto:hello@hoptrack.beer?subject=HopTrack Barrel Plan Inquiry&body=I'm interested in the Barrel plan for " +
+        "mailto:josh@hoptrack.beer?subject=HopTrack Barrel Plan Inquiry&body=I'm interested in the Barrel plan for " +
         encodeURIComponent(brewery.name);
       return;
     }
@@ -646,7 +646,7 @@ export function BillingClient({ brewery, brandBilling }: { brewery: Brewery; bra
         <p className="text-sm" style={{ color: "var(--text-muted)" }}>
           All plans include a 14-day free trial. No credit card required to get started.
           Switch between monthly and annual billing anytime.{" "}
-          <a href="mailto:hello@hoptrack.beer" className="font-medium underline" style={{ color: "var(--accent-gold)" }}>
+          <a href="mailto:josh@hoptrack.beer" className="font-medium underline" style={{ color: "var(--accent-gold)" }}>
             Reach out to our team
           </a>.
         </p>

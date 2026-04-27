@@ -183,7 +183,7 @@ const TIERS = [
     period: "",
     tagline: "Multi-location groups and enterprise accounts.",
     cta: "Talk to us",
-    ctaHref: "mailto:sales@hoptrack.beer?subject=Barrel%20Tier%20Inquiry",
+    ctaHref: "mailto:josh@hoptrack.beer?subject=Barrel%20Tier%20Inquiry",
     highlight: false,
     handle: "lg" as const,
     features: ["Everything in Cask", "Multi-location dashboard", "Dedicated account manager", "Custom analytics & reporting", "White-label options", "SLA + uptime guarantee"],
@@ -547,7 +547,7 @@ export default function BreweriesContent() {
                 <Link href="/brewery-admin/claim" className="inline-flex items-center gap-2.5 font-semibold px-8 py-4 rounded-full transition-colors text-sm font-sans w-fit mx-auto sm:mx-0" style={{ background: C.dark, color: C.creamText }}>
                   Claim your brewery free <ArrowRight size={15} />
                 </Link>
-                <a href="mailto:demo@hoptrack.beer?subject=HopTrack%20Demo%20Request" className="inline-flex items-center gap-2 font-semibold px-6 py-4 rounded-full transition-colors text-sm font-sans border w-fit mx-auto sm:mx-0" style={{ borderColor: C.dark, color: C.dark }}>
+                <a href="mailto:josh@hoptrack.beer?subject=HopTrack%20Demo%20Request" className="inline-flex items-center gap-2 font-semibold px-6 py-4 rounded-full transition-colors text-sm font-sans border w-fit mx-auto sm:mx-0" style={{ borderColor: C.dark, color: C.dark }}>
                   Request a demo <ArrowUpRight size={14} />
                 </a>
               </div>
@@ -570,7 +570,7 @@ export default function BreweriesContent() {
             <LegalLink href="/privacy" className="hover:text-white transition-colors">Privacy</LegalLink>
             <LegalLink href="/terms" className="hover:text-white transition-colors">Terms</LegalLink>
             <LegalLink href="/dmca" className="hover:text-white transition-colors">DMCA</LegalLink>
-            <a href="mailto:sales@hoptrack.beer" className="hover:text-white transition-colors">Contact</a>
+            <a href="mailto:josh@hoptrack.beer" className="hover:text-white transition-colors">Contact</a>
           </div>
           <p className="text-xs font-mono" style={{ color: C.creamSubtle }}>© 2026 HopTrack</p>
         </div>

@@ -252,8 +252,8 @@ export function ClaimBreweryClient({ userEmail, pendingClaim, prefillBreweryName
 
             <p className="text-xs" style={{ color: "var(--text-muted)" }}>
               Questions? Reach out to{" "}
-              <a href="mailto:support@hoptrack.beer" className="underline" style={{ color: "var(--accent-gold)" }}>
-                support@hoptrack.beer
+              <a href="mailto:josh@hoptrack.beer" className="underline" style={{ color: "var(--accent-gold)" }}>
+                josh@hoptrack.beer
               </a>
             </p>
           </div>

@@ -18,7 +18,7 @@ export function isEmailConfigured(): boolean {
   return !!process.env.RESEND_API_KEY;
 }
 
-const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || "HopTrack <hello@hoptrack.beer>";
+const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || "HopTrack <josh@hoptrack.beer>";
 
 interface SendEmailParams {
   to: string;

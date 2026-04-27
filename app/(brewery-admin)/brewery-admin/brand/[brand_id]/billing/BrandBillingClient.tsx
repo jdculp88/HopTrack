@@ -437,7 +437,7 @@ export function BrandBillingClient({ brand, locations, userRole }: BrandBillingC
           <p className="text-xs text-center" style={{ color: "var(--text-muted)" }}>
             Questions about pricing?{" "}
             <a
-              href="mailto:hello@hoptrack.beer?subject=Barrel Plan Inquiry"
+              href="mailto:josh@hoptrack.beer?subject=Barrel Plan Inquiry"
               className="underline"
               style={{ color: "var(--accent-gold)" }}
             >

@@ -358,7 +358,7 @@ export function BrewerySettingsClient({ brewery, role, subscriptionTier = "free"
           <button
             className="text-sm px-4 py-2 rounded-xl border transition-colors"
             style={{ borderColor: "var(--danger)", color: "var(--danger)", background: "transparent" }}
-            onClick={() => window.location.href = "mailto:support@hoptrack.beer?subject=Remove%20Brewery%20Account&body=Please%20remove%20my%20brewery%20account."}
+            onClick={() => window.location.href = "mailto:josh@hoptrack.beer?subject=Remove%20Brewery%20Account&body=Please%20remove%20my%20brewery%20account."}
           >
             Remove brewery account
           </button>

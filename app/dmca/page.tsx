@@ -61,8 +61,8 @@ export default function DMCAPage() {
               <p>HopTrack DMCA Agent</p>
               <p>
                 Email:{" "}
-                <a href="mailto:dmca@hoptrack.beer" className="underline" style={{ color: "var(--accent-gold)" }}>
-                  dmca@hoptrack.beer
+                <a href="mailto:josh@hoptrack.beer" className="underline" style={{ color: "var(--accent-gold)" }}>
+                  josh@hoptrack.beer
                 </a>
               </p>
             </div>

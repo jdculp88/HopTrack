@@ -22,7 +22,7 @@ export async function GET(req: Request) {
   }
 
   const configured = isEmailConfigured();
-  const fromEmail = process.env.RESEND_FROM_EMAIL || "HopTrack <hello@hoptrack.beer>";
+  const fromEmail = process.env.RESEND_FROM_EMAIL || "HopTrack <josh@hoptrack.beer>";
 
   return NextResponse.json(
     {
