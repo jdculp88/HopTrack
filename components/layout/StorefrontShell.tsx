@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { LegalLink } from "@/components/ui/LegalLink";
 import { usePathname } from "next/navigation";
 import { HopMark } from "@/components/ui/HopMark";
 import { ToastProvider } from "@/components/ui/Toast";
@@ -111,20 +112,20 @@ export function StorefrontShell({ children }: StorefrontShellProps) {
                 >
                   For Breweries
                 </Link>
-                <Link
+                <LegalLink
                   href="/privacy"
                   className="text-xs transition-colors hover:underline"
                   style={{ color: "var(--text-muted)" }}
                 >
                   Privacy
-                </Link>
-                <Link
+                </LegalLink>
+                <LegalLink
                   href="/terms"
                   className="text-xs transition-colors hover:underline"
                   style={{ color: "var(--text-muted)" }}
                 >
                   Terms
-                </Link>
+                </LegalLink>
                 <Link
                   href={`/signup?next=${encodeURIComponent(pathname)}`}
                   className="text-xs font-semibold transition-colors hover:underline"

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
+import { LegalLink } from "@/components/ui/LegalLink";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Mail, Lock, User, MapPin, Eye, EyeOff, ArrowRight, ChevronLeft, Check, X, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
@@ -365,9 +366,9 @@ export default function SignupPage() {
                 style={{ color: "var(--text-muted)" }}
               >
                 By signing up you agree to our{" "}
-                <Link href="/terms" className="underline" style={{ color: "var(--text-secondary)" }}>Terms of Service</Link>
+                <LegalLink href="/terms" className="underline" style={{ color: "var(--text-secondary)" }}>Terms of Service</LegalLink>
                 {" "}and{" "}
-                <Link href="/privacy" className="underline" style={{ color: "var(--text-secondary)" }}>Privacy Policy</Link>
+                <LegalLink href="/privacy" className="underline" style={{ color: "var(--text-secondary)" }}>Privacy Policy</LegalLink>
               </motion.p>
             </form>
           </motion.div>

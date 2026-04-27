@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { spring, variants } from "@/lib/animation";
-import Link from "next/link";
+import { LegalLink } from "@/components/ui/LegalLink";
 
 const STORAGE_KEY = "hoptrack-cookie-consent";
 
@@ -49,21 +49,21 @@ export function CookieConsent() {
           >
             We use essential cookies to keep you logged in and remember your
             preferences. No tracking, no ads.{" "}
-            <Link
+            <LegalLink
               href="/privacy"
               className="underline underline-offset-2"
               style={{ color: "var(--accent-gold)" }}
             >
               Privacy Policy
-            </Link>
+            </LegalLink>
             {" · "}
-            <Link
+            <LegalLink
               href="/terms"
               className="underline underline-offset-2"
               style={{ color: "var(--accent-gold)" }}
             >
               Terms
-            </Link>
+            </LegalLink>
           </p>
           <div className="flex items-center gap-3">
             <button

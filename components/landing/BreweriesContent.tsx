@@ -17,6 +17,7 @@
 
 import { motion, AnimatePresence } from "motion/react";
 import Link from "next/link";
+import { LegalLink } from "@/components/ui/LegalLink";
 import {
   ArrowRight, Check, BarChart2, Gift, List,
   Smartphone, Zap, HeartHandshake, ArrowUpRight, ChevronDown, Eye,
@@ -566,9 +567,9 @@ export default function BreweriesContent() {
           <div className="flex gap-7 text-sm font-sans" style={{ color: C.creamSubtle }}>
             <Link href="/" className="hover:text-white transition-colors">Consumer app</Link>
             <Link href="/login" className="hover:text-white transition-colors">Sign in</Link>
-            <Link href="/privacy" className="hover:text-white transition-colors">Privacy</Link>
-            <Link href="/terms" className="hover:text-white transition-colors">Terms</Link>
-            <Link href="/dmca" className="hover:text-white transition-colors">DMCA</Link>
+            <LegalLink href="/privacy" className="hover:text-white transition-colors">Privacy</LegalLink>
+            <LegalLink href="/terms" className="hover:text-white transition-colors">Terms</LegalLink>
+            <LegalLink href="/dmca" className="hover:text-white transition-colors">DMCA</LegalLink>
             <a href="mailto:sales@hoptrack.beer" className="hover:text-white transition-colors">Contact</a>
           </div>
           <p className="text-xs font-mono" style={{ color: C.creamSubtle }}>© 2026 HopTrack</p>

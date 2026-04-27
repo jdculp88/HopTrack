@@ -2,7 +2,7 @@
 
 import { MapPin, Shield } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
-import Link from "next/link";
+import { LegalLink } from "@/components/ui/LegalLink";
 
 interface LocationConsentModalProps {
   isOpen: boolean;
@@ -57,13 +57,13 @@ export function LocationConsentModal({ isOpen, onAllow, onDismiss }: LocationCon
           <p className="text-xs leading-relaxed" style={{ color: "var(--text-muted)" }}>
             Your precise location stays on your device. We only use approximate location for
             features. See our{" "}
-            <Link
+            <LegalLink
               href="/privacy"
               className="underline transition-opacity hover:opacity-70"
               style={{ color: "var(--accent-gold)" }}
             >
               Privacy Policy
-            </Link>{" "}
+            </LegalLink>{" "}
             for details.
           </p>
         </div>

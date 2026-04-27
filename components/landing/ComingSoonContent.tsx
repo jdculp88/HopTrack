@@ -33,6 +33,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { HopMark } from "@/components/ui/HopMark";
+import { LegalLink } from "@/components/ui/LegalLink";
 import { US_STATES } from "@/lib/brewery-utils";
 import { C } from "@/lib/landing-colors";
 import { useState, type FormEvent, type ReactNode } from "react";
@@ -894,15 +895,15 @@ export default function ComingSoonContent() {
             className="flex gap-7 text-sm font-sans"
             style={{ color: C.creamSubtle }}
           >
-            <a
+            <LegalLink
               href="/privacy"
               className="hover:text-white transition-colors"
             >
               Privacy
-            </a>
-            <a href="/terms" className="hover:text-white transition-colors">
+            </LegalLink>
+            <LegalLink href="/terms" className="hover:text-white transition-colors">
               Terms
-            </a>
+            </LegalLink>
           </div>
           <p className="text-xs font-mono" style={{ color: C.creamSubtle }}>
             © 2026 HopTrack
