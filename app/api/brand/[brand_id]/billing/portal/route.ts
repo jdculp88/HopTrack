@@ -45,7 +45,7 @@ export async function POST(
     }
 
     const stripe = getStripe();
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://app.hoptrack.beer";
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://hoptrack.beer";
 
     const portalSession = await stripe.billingPortal.sessions.create({
       customer: brand.stripe_customer_id,

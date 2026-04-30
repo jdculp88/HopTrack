@@ -29,7 +29,7 @@ export function QRTentClient({ breweryId, breweryName, breweryCity, breweryState
   const _canvasRef = useRef<HTMLCanvasElement>(null);
   const _iframeRef = useRef<HTMLIFrameElement>(null);
 
-  const breweryUrl = `${typeof window !== "undefined" ? window.location.origin : "https://app.hoptrack.beer"}/brewery-welcome/${breweryId}`;
+  const breweryUrl = `${typeof window !== "undefined" ? window.location.origin : "https://hoptrack.beer"}/brewery-welcome/${breweryId}`;
 
   useEffect(() => {
     QRCode.toDataURL(breweryUrl, {

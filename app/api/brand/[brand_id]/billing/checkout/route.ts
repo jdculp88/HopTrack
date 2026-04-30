@@ -57,7 +57,7 @@ export async function POST(
     }
 
     const stripe = getStripe();
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://app.hoptrack.beer";
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://hoptrack.beer";
 
     // Calculate location count for add-on pricing
     const locationCount = await getBrandLocationCount(supabase, brand_id);

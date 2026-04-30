@@ -40,10 +40,10 @@ function layout(title: string, body: string, preheader?: string): string {
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
         <tr><td style="padding-top:28px;text-align:center;">
           <p style="margin:0;font-size:12px;color:${BRAND.muted};">
-            HopTrack · <a href="https://app.hoptrack.beer" style="color:${BRAND.gold};text-decoration:none;">app.hoptrack.beer</a>
+            HopTrack · <a href="https://hoptrack.beer" style="color:${BRAND.gold};text-decoration:none;">hoptrack.beer</a>
           </p>
           <p style="margin:8px 0 0;font-size:11px;color:${BRAND.muted};">
-            <a href="https://app.hoptrack.beer/settings/notifications" style="color:${BRAND.muted};text-decoration:underline;">Unsubscribe</a> &nbsp;·&nbsp; <a href="https://app.hoptrack.beer/privacy" style="color:${BRAND.muted};text-decoration:underline;">Privacy Policy</a>
+            <a href="https://hoptrack.beer/settings/notifications" style="color:${BRAND.muted};text-decoration:underline;">Unsubscribe</a> &nbsp;·&nbsp; <a href="https://hoptrack.beer/privacy" style="color:${BRAND.muted};text-decoration:underline;">Privacy Policy</a>
           </p>
         </td></tr>
       </table>
@@ -82,7 +82,7 @@ export function welcomeEmail(params: { displayName: string }) {
       <li>Earn XP, unlock achievements, and compete on leaderboards</li>
       <li>Follow friends and share your best pours</li>
     </ul>
-    ${button("Open HopTrack", "https://app.hoptrack.beer")}
+    ${button("Open HopTrack", "https://hoptrack.beer")}
     <p style="margin:0;font-size:13px;color:${BRAND.muted};">
       Cheers to new adventures.
     </p>
@@ -93,7 +93,7 @@ export function welcomeEmail(params: { displayName: string }) {
   return {
     subject: `Welcome to HopTrack, ${firstName}!`,
     html,
-    text: `Welcome to HopTrack, ${firstName}! Start logging your craft beer journey at https://app.hoptrack.beer`,
+    text: `Welcome to HopTrack, ${firstName}! Start logging your craft beer journey at https://hoptrack.beer`,
   };
 }
 
@@ -121,7 +121,7 @@ export function breweryWelcomeEmail(params: { breweryName: string; ownerName: st
       <li>Set up your loyalty program</li>
       <li>Preview The Board (your TV display)</li>
     </ol>
-    ${button("Go to Dashboard", `https://app.hoptrack.beer/brewery-admin/${breweryId}`)}
+    ${button("Go to Dashboard", `https://hoptrack.beer/brewery-admin/${breweryId}`)}
     <p style="margin:0;font-size:13px;color:${BRAND.muted};">
       Questions? Reply to this email or reach us at josh@hoptrack.beer.
     </p>
@@ -132,7 +132,7 @@ export function breweryWelcomeEmail(params: { breweryName: string; ownerName: st
   return {
     subject: `${breweryName} is live on HopTrack!`,
     html,
-    text: `Welcome to HopTrack, ${firstName}! ${breweryName} is now live. Set up your dashboard at https://app.hoptrack.beer/brewery-admin/${breweryId}`,
+    text: `Welcome to HopTrack, ${firstName}! ${breweryName} is now live. Set up your dashboard at https://hoptrack.beer/brewery-admin/${breweryId}`,
   };
 }
 
@@ -154,7 +154,7 @@ export function trialWarningEmail(params: { breweryName: string; ownerName: stri
     <p style="margin:0 0 16px;font-size:14px;line-height:1.6;color:${BRAND.text};">
       Subscribe now to keep your tap list, loyalty program, analytics, and The Board running without interruption.
     </p>
-    ${button("Upgrade Now", `https://app.hoptrack.beer/brewery-admin/${breweryId}/billing`)}
+    ${button("Upgrade Now", `https://hoptrack.beer/brewery-admin/${breweryId}/billing`)}
     <p style="margin:0;font-size:13px;color:${BRAND.muted};">
       Plans start at $49/mo. Save 20% with annual billing.
     </p>
@@ -165,7 +165,7 @@ export function trialWarningEmail(params: { breweryName: string; ownerName: stri
   return {
     subject: `${daysLeft} days left on your HopTrack trial`,
     html,
-    text: `Your HopTrack trial for ${breweryName} ends in ${daysLeft} days. Upgrade at https://app.hoptrack.beer/brewery-admin/${breweryId}/billing`,
+    text: `Your HopTrack trial for ${breweryName} ends in ${daysLeft} days. Upgrade at https://hoptrack.beer/brewery-admin/${breweryId}/billing`,
   };
 }
 
@@ -187,7 +187,7 @@ export function trialExpiredEmail(params: { breweryName: string; ownerName: stri
     <p style="margin:0 0 16px;font-size:14px;line-height:1.6;color:${BRAND.text};">
       The good news: all your data is safe. Subscribe to pick up right where you left off.
     </p>
-    ${button("Reactivate Now", `https://app.hoptrack.beer/brewery-admin/${breweryId}/billing`)}
+    ${button("Reactivate Now", `https://hoptrack.beer/brewery-admin/${breweryId}/billing`)}
     <p style="margin:0;font-size:13px;color:${BRAND.muted};">
       Need more time? Reply to this email and we'll work something out.
     </p>
@@ -198,7 +198,7 @@ export function trialExpiredEmail(params: { breweryName: string; ownerName: stri
   return {
     subject: `Your HopTrack trial for ${breweryName} has ended`,
     html,
-    text: `Your HopTrack trial for ${breweryName} has ended. Reactivate at https://app.hoptrack.beer/brewery-admin/${breweryId}/billing`,
+    text: `Your HopTrack trial for ${breweryName} has ended. Reactivate at https://hoptrack.beer/brewery-admin/${breweryId}/billing`,
   };
 }
 
@@ -226,7 +226,7 @@ export function claimApprovedEmail(params: { breweryName: string; ownerName: str
       <li>Set up your loyalty program</li>
       <li>Preview The Board (your TV display)</li>
     </ol>
-    ${button("Go to Dashboard", `https://app.hoptrack.beer/brewery-admin/${breweryId}`)}
+    ${button("Go to Dashboard", `https://hoptrack.beer/brewery-admin/${breweryId}`)}
     <p style="margin:0;font-size:13px;color:${BRAND.muted};">
       Full access for 14 days — no credit card required. Questions? Reply to this email.
     </p>
@@ -237,7 +237,7 @@ export function claimApprovedEmail(params: { breweryName: string; ownerName: str
   return {
     subject: `${breweryName} is verified on HopTrack! 🎉`,
     html,
-    text: `Great news, ${firstName}! Your claim for ${breweryName} has been verified. Your dashboard is ready at https://app.hoptrack.beer/brewery-admin/${breweryId}. Your 14-day free trial has started.`,
+    text: `Great news, ${firstName}! Your claim for ${breweryName} has been verified. Your dashboard is ready at https://hoptrack.beer/brewery-admin/${breweryId}. Your 14-day free trial has started.`,
   };
 }
 
@@ -373,7 +373,7 @@ export function weeklyDigestEmail(params: {
         <td style="padding:12px 16px;background:#252320;border-radius:12px;${i < recommendations.length - 1 ? "margin-bottom:8px;" : ""}">
           <p style="margin:0 0 4px;font-size:14px;font-weight:700;color:${BRAND.text};">${rec.title}</p>
           <p style="margin:0 0 8px;font-size:13px;color:${BRAND.muted};">${rec.description}</p>
-          <a href="https://app.hoptrack.beer${rec.ctaUrl}" style="font-size:12px;font-weight:600;color:${BRAND.gold};text-decoration:none;">${rec.ctaText} &rarr;</a>
+          <a href="https://hoptrack.beer${rec.ctaUrl}" style="font-size:12px;font-weight:600;color:${BRAND.gold};text-decoration:none;">${rec.ctaText} &rarr;</a>
         </td>
       </tr>
       ${i < recommendations.length - 1 ? "<tr><td style=\"height:8px;\"></td></tr>" : ""}
@@ -381,7 +381,7 @@ export function weeklyDigestEmail(params: {
     </table>
     ` : ""}
 
-    ${button("View Full Analytics", `https://app.hoptrack.beer/brewery-admin/${breweryId}/analytics`)}
+    ${button("View Full Analytics", `https://hoptrack.beer/brewery-admin/${breweryId}/analytics`)}
   `,
     `${breweryName} weekly report — ${stats.visits} visits${stats.visitsTrend >= 0 ? ` (+${stats.visitsTrend}%)` : ` (${stats.visitsTrend}%)`} this week.`
   );
@@ -389,7 +389,7 @@ export function weeklyDigestEmail(params: {
   return {
     subject: `${breweryName} — Weekly Report`,
     html,
-    text: `This week at ${breweryName}: ${stats.visits} visits (${stats.visitsTrend >= 0 ? "+" : ""}${stats.visitsTrend}%), ${stats.uniqueVisitors} unique visitors, ${stats.beersLogged} beers logged. View full analytics at https://app.hoptrack.beer/brewery-admin/${breweryId}/analytics`,
+    text: `This week at ${breweryName}: ${stats.visits} visits (${stats.visitsTrend >= 0 ? "+" : ""}${stats.visitsTrend}%), ${stats.uniqueVisitors} unique visitors, ${stats.beersLogged} beers logged. View full analytics at https://hoptrack.beer/brewery-admin/${breweryId}/analytics`,
   };
 }
 
@@ -432,7 +432,7 @@ export function onboardingDay3Email(params: { breweryName: string; ownerName: st
       </tr>
     </table>
 
-    ${button("Open Your Dashboard", `https://app.hoptrack.beer/brewery-admin/${breweryId}`)}
+    ${button("Open Your Dashboard", `https://hoptrack.beer/brewery-admin/${breweryId}`)}
     <p style="margin:0;font-size:13px;color:${BRAND.muted};">
       Need help? Reply to this email — we're here.
     </p>
@@ -443,7 +443,7 @@ export function onboardingDay3Email(params: { breweryName: string; ownerName: st
   return {
     subject: `${breweryName} — Have you tried The Board?`,
     html,
-    text: `Hey ${firstName}, one of the most popular features: The Board. Put your tap list on any TV behind the bar. Preview it at https://app.hoptrack.beer/brewery-admin/${breweryId}/board`,
+    text: `Hey ${firstName}, one of the most popular features: The Board. Put your tap list on any TV behind the bar. Preview it at https://hoptrack.beer/brewery-admin/${breweryId}/board`,
   };
 }
 
@@ -491,7 +491,7 @@ export function onboardingDay7Email(params: { breweryName: string; ownerName: st
       Your analytics dashboard now shows: <strong style="color:${BRAND.gold};">peak hours</strong>, <strong style="color:${BRAND.gold};">top beers by rating</strong>, <strong style="color:${BRAND.gold};">new vs. returning visitors</strong>, and <strong style="color:${BRAND.gold};">customer retention rate</strong>. Data that used to require expensive POS add-ons.
     </p>
     ` : ""}
-    ${button("View Full Analytics", `https://app.hoptrack.beer/brewery-admin/${breweryId}/analytics`)}
+    ${button("View Full Analytics", `https://hoptrack.beer/brewery-admin/${breweryId}/analytics`)}
     <p style="margin:0;font-size:13px;color:${BRAND.muted};">
       Your trial has 7 days left. Want to keep going? Subscribe anytime from Settings → Billing. Questions? Reply anytime.
     </p>
@@ -502,7 +502,7 @@ export function onboardingDay7Email(params: { breweryName: string; ownerName: st
   return {
     subject: `${breweryName} — Your first week on HopTrack`,
     html,
-    text: `Hey ${firstName}, your first week at ${breweryName}: ${stats.sessions} sessions, ${stats.beersLogged} beers logged, ${stats.followers} followers. View analytics at https://app.hoptrack.beer/brewery-admin/${breweryId}/analytics`,
+    text: `Hey ${firstName}, your first week at ${breweryName}: ${stats.sessions} sessions, ${stats.beersLogged} beers logged, ${stats.followers} followers. View analytics at https://hoptrack.beer/brewery-admin/${breweryId}/analytics`,
   };
 }
 
@@ -594,7 +594,7 @@ export function brandDigestEmail(params: {
     </table>
     ` : ""}
 
-    ${button("View Brand Reports", `https://app.hoptrack.beer/brewery-admin/brand/${brandId}/reports`)}
+    ${button("View Brand Reports", `https://hoptrack.beer/brewery-admin/brand/${brandId}/reports`)}
   `,
     `${brandName} brand report — ${stats.totalVisits} visits${stats.visitsTrend >= 0 ? ` (+${stats.visitsTrend}%)` : ` (${stats.visitsTrend}%)`} across ${stats.locations.length} locations.`
   );
@@ -602,7 +602,7 @@ export function brandDigestEmail(params: {
   return {
     subject: `${brandName} — Weekly Brand Report`,
     html,
-    text: `This week across ${brandName}: ${stats.totalVisits} visits (${stats.visitsTrend >= 0 ? "+" : ""}${stats.visitsTrend}%), ${stats.totalUniqueVisitors} unique visitors, ${stats.totalBeersLogged} beers logged, ${stats.crossLocationVisitors} cross-location visitors. View reports at https://app.hoptrack.beer/brewery-admin/brand/${brandId}/reports`,
+    text: `This week across ${brandName}: ${stats.totalVisits} visits (${stats.visitsTrend >= 0 ? "+" : ""}${stats.visitsTrend}%), ${stats.totalUniqueVisitors} unique visitors, ${stats.totalBeersLogged} beers logged, ${stats.crossLocationVisitors} cross-location visitors. View reports at https://hoptrack.beer/brewery-admin/brand/${brandId}/reports`,
   };
 }
 

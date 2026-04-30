@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Square uses the notification URL + body for HMAC
-  const notificationUrl = `${process.env.NEXT_PUBLIC_SITE_URL || "https://app.hoptrack.beer"}/api/pos/webhook/square`;
+  const notificationUrl = `${process.env.NEXT_PUBLIC_SITE_URL || "https://hoptrack.beer"}/api/pos/webhook/square`;
   const expectedSignature = crypto
     .createHmac("sha256", webhookSecret)
     .update(notificationUrl + rawBody)
