@@ -1,6 +1,10 @@
 // Email service layer — Avery + Riley, Sprint 75
 // Uses Resend for transactional email. Falls back to console.log in dev.
 // Install: npm install resend
+//
+// Production status (2026-04-30): hoptrack.beer domain verified in Resend
+// (DKIM + SPF on send subdomain + MX for bounces). Sends from josh@hoptrack.beer.
+// RESEND_API_KEY env var must be present in Production scope on Vercel.
 
 import { Resend } from "resend";
 
