@@ -1259,3 +1259,99 @@ Typecheck clean, **0 lint errors**, **0 new lint warnings** (6 pre-existing warn
 - Merge `claude/strange-bohr-f1edcb` → `main`
 
 **Full retro:** [docs/history/retros/sprint-179-retro.md](history/retros/sprint-179-retro.md)
+
+### Sprint 180 — The Launch 🚀 ✅ (2026-04-30)
+**Theme:** Compress the entire LLC unblock chain and launch infrastructure into one afternoon. Go from "coming-soon-on-vercel.app" to "real-business-on-hoptrack.beer" in a single window.
+**Arc:** The Launch (closes the launchpad work S179 set up)
+**Plan:** None (sprint was pantsed — Sage's action item for S181)
+
+**Business unblock (the morning):**
+- HopTrack LLC effective 2026-04-05, NC-approved 2026-04-24, NC SOSID **3269858**, Current-Active
+- IRS EIN issued 2026-04-27 (CP 575 letter held by Joshua)
+- Mercury bank account approved same-day 2026-04-27
+- Operating Agreement signed (eForms template, single-member LLC, Schedule C, December FY-end, $100 initial capital)
+- Stripe live 2026-04-27 — sandbox + live keys, Recurring + Invoicing + Stripe Tax enabled, Stripe Connect intentionally OFF
+
+**Track 1 — Cream-themed legal pages (`8c97fb0`):**
+- Restyled `/terms`, `/privacy`, `/dmca` to match Coming Soon palette (`C` from `lib/landing-colors.ts`) — cream background, font-display headings, gold eyebrow, fluid `clamp()` typography
+- Added HopTrack LLC entity reference to TOS §1, §9, §12, footer; new Privacy "Who We Are" intro
+- Added §13 Governing Law to TOS (NC law, Mecklenburg County jurisdiction)
+- Added Cookies & Tracking, Email Communications, Age Requirement, Changes to This Policy sections to Privacy
+- Bumped Last Updated dates to 2026-04-27, removed "template — attorney review recommended" Notice banner
+- New `<LegalLink>` component (`components/ui/LegalLink.tsx`) wrapping `next/link` with `target="_blank" rel="noopener noreferrer"` — closes mid-flow sad-path bug across 6 surfaces
+- 9 files changed, +348 / −129
+
+**Track 2 — Email consolidation to single mailbox (`ad9d711`):**
+- Every `legal@`, `privacy@`, `dmca@`, `support@`, `help@`, `hello@`, `sales@`, `demo@`, `push@hoptrack.beer` reference → `josh@hoptrack.beer` (only provisioned mailbox)
+- 11 user-facing surfaces + 3 system defaults (FROM email, VAPID subject) updated
+- 14 files changed, +33 / −33
+
+**Track 3 — DNS + SSL live:**
+- GoDaddy DNS edited: `A @ "WebsiteBuilder Site"` → `A @ 216.198.79.1` (Vercel new IP range)
+- 4 records propagated globally in <10 minutes
+- Vercel SSL cert auto-issued
+- `hoptrack.beer` and `www.hoptrack.beer` both serve cream coming-soon page
+- Existing GoDaddy DNS preserved: M365 MX (apex), autodiscover/msoid/sip CNAMEs, NS, SOA, DMARC
+
+**Track 4 — Resend domain auth:**
+- 3 records added at GoDaddy on a `send.` subdomain pattern (no apex SPF conflict with M365)
+  - TXT `resend._domainkey` → DKIM public key
+  - MX `send` → `feedback-smtp.us-east-1.amazonses.com` (priority 10)
+  - TXT `send` → `v=spf1 include:amazonses.com ~all`
+- Domain verified by Resend in 13 minutes (add → DNS verified → domain verified)
+- API key `hoptrack-prod` created, added to Vercel env vars (Production + Preview, Sensitive)
+
+**Track 5 — Force fresh deploy to pick up env (`a4e65a1`):**
+- Vercel cached redeploy didn't propagate `RESEND_API_KEY` to warm Fluid Compute function instances
+- Fix: 4-line comment block added to `lib/email.ts` documenting Resend production state — also serves as fresh-commit deploy trigger
+- After fresh deploy, function instances spun up new with current env, Resend API was hit, confirmation email landed in Joshua's inbox (not spam)
+
+**Track 6 — Dead-link fix Joshua caught in his own confirmation email (`58125fd`):**
+- Joshua noticed `app.hoptrack.beer` (anticipated future subdomain that was never provisioned) in the confirmation email footer
+- Swapped every `app.hoptrack.beer` → `hoptrack.beer` across 7 files: email templates (~25 refs), API route fallbacks (billing checkout/portal × 2 each, brand variants, POS Square webhook, QR client SSR fallback)
+- Future plan: when `app.hoptrack.beer` is eventually provisioned as a real subdomain (Phase 2 marketing/app split), revert this commit OR introduce `NEXT_PUBLIC_APP_URL` env var
+- 7 files changed, +27 / −27
+
+**Track 7 — Memory updates:**
+- Created `project_llc_unlock.md` in HopTrack memory — the landmark milestone file
+- Updated `project_launch_infrastructure.md` to mark LLC as done, trim "Remaining" list to 3 items
+- Updated `MEMORY.md` index — new entry added, old entry refreshed
+- Open Claw `projects/project_hoptrack.md` already had parallel record (lines 102–106)
+
+**Numbers:**
+- Commits to main: **4** (`8c97fb0` legal, `ad9d711` email, `a4e65a1` docs+force-deploy, `58125fd` app.subdomain fix)
+- Files changed across all 4 commits: **34**
+- Tests: **2128 / 2128 passing** at every push (no new tests — action item for S181)
+- TypeScript: clean (`tsc --noEmit` exit 0) at every push
+- ESLint local: warnings only, no new errors
+- ESLint CI: **42 pre-existing errors blocking CI** (React-Compiler rules, red since Apr 27 — not introduced this sprint)
+- Migrations: **0 new** (all infra/email work, no schema changes)
+- Vercel deploys: 4 production rebuilds
+- DNS records added at GoDaddy: 4 (1 A, 1 MX, 2 TXT)
+- Vercel env vars added: 1 (`RESEND_API_KEY`)
+- Resend domains verified: 1
+- Time from "let's launch" to "live + working confirmation email": ~6 hours
+- Build status at sprint close: Vercel ✅, GitHub Actions CI ❌ (lint, pre-existing, S181-P0)
+
+**Key architectural changes:**
+- `<LegalLink>` typed-narrowed component (`LegalPath = "/terms" | "/privacy" | "/dmca"`) is now the canonical pattern for legal-page links — every footer + consent surface uses it
+- `lib/email.ts` documents Resend production state inline (DKIM/SPF/MX verified for hoptrack.beer 2026-04-30)
+- Single-mailbox interim: `josh@hoptrack.beer` is the unified contact + sender. When new aliases are provisioned, re-fan-out per-surface
+- `app.` subdomain references removed from production code — apex `hoptrack.beer` is canonical until Phase 2 marketing/app split
+
+**Remaining before next milestone (Sprint 181 — The Customer):**
+- Fix CI red (42 React-Compiler ESLint errors blocking GitHub Actions)
+- Audit fix #1 (Stripe webhook fail-open `app/api/billing/webhook/route.ts`) + audit items #5/#10 BEFORE flipping live keys to production
+- Heist Charlotte cold outreach (Taylor + Drew, Charlotte trip Friday)
+- Final logo lock (Jamie + Joshua, Wednesday review)
+- Casey's three IOUs: LegalLink regression test, legal-page screenshot test, email-link Playwright spec
+- Riley's runbook: `docs/operations/vercel-env-var-pickup.md`
+- Sentry alert on Resend bounce/complaint webhooks (Parker)
+
+**Memory cataloged:**
+- Vercel cached redeploy doesn't propagate sensitive env vars to warm Fluid Compute instances — fresh commit is the reliable fix
+- GoDaddy + Resend domain verification can complete in 13 minutes when DNS is healthy
+- M365 inbound MX coexists cleanly with Resend outbound on `send.` subdomain — apex SPF stays for GoDaddy/M365, subdomain SPF for amazonses.com
+- The founder catching email-template dead links is the most embarrassing kind of bug — add `npx playwright test email-links` to pre-launch checklist
+
+**Full retro:** [docs/history/retros/sprint-180-retro.md](history/retros/sprint-180-retro.md)
