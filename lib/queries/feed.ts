@@ -8,6 +8,7 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Session, Achievement } from "@/types/database";
+import { getBeerOfTheWeek } from "@/lib/botw";
 
 // ── Return types ────────────────────────────────────────────────────────────
 
@@ -249,12 +250,14 @@ export async function fetchWeekStats(
 }
 
 /**
- * Community content for the Discover tab — featured beers, reviews, events, new breweries.
+ * Community content for the Discover tab — Beer of the Week (personalized,
+ * S181), reviews, events, new breweries.
  */
 export async function fetchCommunityContent(
   supabase: SupabaseClient,
   today: string,
-  friendIds: string[]
+  friendIds: string[],
+  userId: string
 ): Promise<CommunityContent & { friendRatings: ReviewItem[] }> {
   const empty = {
     featuredBeers: [],
@@ -267,21 +270,14 @@ export async function fetchCommunityContent(
 
   try {
     const [
-      featuredBeersRes,
+      botwScored,
       topReviewsRes,
       breweryReviewsRes,
       friendRatingsRes,
       upcomingEventsRes,
       newBreweriesRes,
     ] = await Promise.all([
-      supabase
-        .from("beers")
-        .select(
-          "id, name, style, abv, glass_type, description, avg_rating, brewery:breweries(id, name)"
-        )
-        .eq("is_featured", true)
-        .eq("is_active", true)
-        .limit(3),
+      getBeerOfTheWeek(supabase, userId).catch(() => null),
 
       supabase
         .from("beer_reviews")
@@ -330,7 +326,7 @@ export async function fetchCommunityContent(
     ]);
 
     return {
-      featuredBeers: (featuredBeersRes.data ?? []) as any,
+      featuredBeers: botwScored ? [botwScored.beer] : [],
       topReviews: (topReviewsRes.data ?? []) as any,
       breweryReviews: (breweryReviewsRes.data ?? []) as any,
       friendRatings: (friendRatingsRes.data ?? []) as any,

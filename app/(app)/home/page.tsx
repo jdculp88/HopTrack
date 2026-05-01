@@ -42,7 +42,7 @@ export default async function HomePage() {
       fetchUserSessions(supabase, user.id),
       fetchActiveFriendSessions(supabase, friendIds),
       fetchWeekStats(supabase, user.id),
-      fetchCommunityContent(supabase, today, friendIds),
+      fetchCommunityContent(supabase, today, friendIds, user.id),
       fetchSocialData(supabase, user.id, friendIds),
       fetchFriendActivity(supabase, user.id, friendIds),
       fetchFriendChallengeCompletions(supabase, friendIds),
