@@ -149,9 +149,10 @@ export function BillingClient({ brewery, brandBilling }: { brewery: Brewery; bra
     if (tier.key === currentTier) return;
     if (tier.key === "free") return; // Can't downgrade to free via checkout
     if (tier.key === "barrel") {
-      window.location.href =
+      window.location.assign(
         "mailto:josh@hoptrack.beer?subject=HopTrack Barrel Plan Inquiry&body=I'm interested in the Barrel plan for " +
-        encodeURIComponent(brewery.name);
+        encodeURIComponent(brewery.name)
+      );
       return;
     }
 
@@ -171,7 +172,7 @@ export function BillingClient({ brewery, brandBilling }: { brewery: Brewery; bra
       if (data.demo) {
         success("Stripe not configured — showing demo billing page");
       }
-      window.location.href = data.url;
+      window.location.assign(data.url);
     } catch (err: any) {
       toastError(err.message || "Could not start checkout");
     } finally {
@@ -189,7 +190,7 @@ export function BillingClient({ brewery, brandBilling }: { brewery: Brewery; bra
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed");
-      window.location.href = data.url;
+      window.location.assign(data.url);
     } catch (err: any) {
       toastError(err.message || "Could not open billing portal");
     } finally {

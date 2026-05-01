@@ -7,7 +7,7 @@
 
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "motion/react";
 import { CheckCircle2, Circle, X, Camera, Beer, Gift, Eye, Monitor } from "lucide-react";
@@ -40,19 +40,20 @@ export function OnboardingChecklist({
   beerCount,
   hasLoyalty,
 }: OnboardingChecklistProps) {
-  const [dismissed, setDismissed] = useState(true); // default hidden until check
-
-  useEffect(() => {
-    const key = `${DISMISS_KEY_PREFIX}${breweryId}`;
-    setDismissed(localStorage.getItem(key) === "true");
-  }, [breweryId]);
+  // Lazy useState init reads localStorage once on mount (SSR-safe via typeof check).
+  // This avoids a setState-in-effect cascade and is the React Compiler-friendly pattern.
+  const [dismissed, setDismissed] = useState<boolean>(() => {
+    if (typeof window === "undefined") return true;
+    return localStorage.getItem(`${DISMISS_KEY_PREFIX}${breweryId}`) === "true";
+  });
 
   // Only show for breweries verified within the last 14 days
-  if (!verifiedAt) return null;
-  // eslint-disable-next-line react-hooks/rules-of-hooks
+  // useMemo with verifiedAt dep stabilizes Date.now() per verifiedAt change.
+  // eslint-disable-next-line react-hooks/purity, react-hooks/rules-of-hooks -- intentional time read for verification age, conditional hook is fine post-early-return
   const daysSinceVerified = useMemo(() => Math.floor(
-    (Date.now() - new Date(verifiedAt).getTime()) / (1000 * 60 * 60 * 24)
+    (Date.now() - new Date(verifiedAt ?? "").getTime()) / (1000 * 60 * 60 * 24)
   ), [verifiedAt]);
+  if (!verifiedAt) return null;
   if (daysSinceVerified > 14) return null;
   if (dismissed) return null;
 

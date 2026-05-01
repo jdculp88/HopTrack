@@ -110,7 +110,7 @@ export default async function BreweryPage({ params }: { params: Promise<{ id: st
   // ── Friends Here Now (auth only) ──
   let friendsHere: ActiveFriendSession[] = [];
   if (user) {
-    // eslint-disable-next-line react-hooks/rules-of-hooks -- server component, Date.now() is fine
+    // eslint-disable-next-line react-hooks/purity -- server component, Date.now() is fine
     const sixHoursAgo = new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString();
     const { data: friendshipsRaw } = await supabase
       .from("friendships")

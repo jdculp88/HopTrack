@@ -16,6 +16,17 @@ const eslintConfig = defineConfig([
       // Disable — React handles literal quotes and apostrophes in JSX text just fine.
       // The rule is a legacy concern from pre-React 16 HTML entity escaping.
       "react/no-unescaped-entities": "off",
+      // React Compiler preview rules — eslint-plugin-react-hooks 7.x ships these
+      // as "error" in the production build of the plugin. We're not running
+      // React Compiler (no babel-plugin-react-compiler, no next.config
+      // reactCompiler flag), so these are preventive guidance for an
+      // optimization we haven't enabled. Downgraded to "warn" to keep CI honest
+      // without forcing 37 file refactors for a non-existent runtime issue.
+      // ACTION ITEM (Sprint 182+): when we adopt React Compiler, restore to
+      // "error" and refactor the offenders.
+      "react-hooks/set-state-in-effect": "warn",
+      "react-hooks/purity": "warn",
+      "react-hooks/immutability": "warn",
     },
   },
   // Override default ignores of eslint-config-next.

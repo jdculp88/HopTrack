@@ -167,7 +167,7 @@ async function buildScoringContext(
   ]);
 
   const profile = (profileRes.data ?? {}) as { home_city: string | null };
-  const logs = (logsRes.data ?? []) as Array<{
+  const logs = (logsRes.data ?? []) as unknown as Array<{
     beer_id: string | null;
     rating: number | null;
     beer: {
@@ -177,7 +177,7 @@ async function buildScoringContext(
       finish_notes: string[] | null;
     } | null;
   }>;
-  const sessions = (sessionsRes.data ?? []) as Array<{
+  const sessions = (sessionsRes.data ?? []) as unknown as Array<{
     brewery: { city: string | null } | null;
   }>;
 

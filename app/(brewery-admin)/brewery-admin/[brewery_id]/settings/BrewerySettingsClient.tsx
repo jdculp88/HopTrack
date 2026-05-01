@@ -559,7 +559,7 @@ function PosSettingsSection({ breweryId, subscriptionTier }: { breweryId: string
   useEffect(() => { fetchStatus(); }, [fetchStatus]);
 
   async function handleConnect(provider: string) {
-    window.location.href = `/api/pos/connect/${provider}?brewery_id=${breweryId}`;
+    window.location.assign(`/api/pos/connect/${provider}?brewery_id=${breweryId}`);
   }
 
   async function handleDisconnect(provider: string) {

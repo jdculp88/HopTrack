@@ -904,7 +904,14 @@ export default function CommandCenterClient({ initialData }: CommandCenterClient
   );
 
   const attentionCount = data.health.pendingClaims + data.health.pendingBeerReviews;
-  const minutesAgo = Math.floor((Date.now() - lastUpdated.getTime()) / 60000);
+  // Track "now" in state so we can compute minutesAgo without calling Date.now() in render
+  // (which the React Compiler purity rule flags as impure).
+  const [now, setNow] = useState<number>(() => Date.now());
+  useEffect(() => {
+    const tick = setInterval(() => setNow(Date.now()), 60_000);
+    return () => clearInterval(tick);
+  }, []);
+  const minutesAgo = Math.floor((now - lastUpdated.getTime()) / 60000);
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-6">

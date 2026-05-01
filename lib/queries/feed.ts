@@ -326,7 +326,9 @@ export async function fetchCommunityContent(
     ]);
 
     return {
-      featuredBeers: botwScored ? [botwScored.beer] : [],
+      featuredBeers: botwScored
+        ? [{ ...botwScored.beer, avg_rating: botwScored.beer.avg_rating ?? null }]
+        : [],
       topReviews: (topReviewsRes.data ?? []) as any,
       breweryReviews: (breweryReviewsRes.data ?? []) as any,
       friendRatings: (friendRatingsRes.data ?? []) as any,

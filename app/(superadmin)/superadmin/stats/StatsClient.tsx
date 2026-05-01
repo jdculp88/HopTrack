@@ -8,7 +8,7 @@
  * interactive leaderboards with links to brewery detail.
  */
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { motion } from "motion/react";
 import {
   BarChart2,
@@ -344,7 +344,11 @@ export default function StatsClient({ initialData }: StatsClientProps) {
     [fetchData]
   );
 
-  const minutesAgo = Math.floor((Date.now() - lastUpdated.getTime()) / 60000);
+  // useMemo ensures Date.now() is called at a stable point per render (React Compiler purity rule).
+  const minutesAgo = useMemo(
+    () => Math.floor((Date.now() - lastUpdated.getTime()) / 60000),
+    [lastUpdated],
+  );
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-6">
