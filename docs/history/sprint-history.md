@@ -1258,7 +1258,7 @@ Typecheck clean, **0 lint errors**, **0 new lint warnings** (6 pre-existing warn
 - New logo refresh (Jamie)
 - Merge `claude/strange-bohr-f1edcb` → `main`
 
-**Full retro:** [docs/history/retros/sprint-179-retro.md](history/retros/sprint-179-retro.md)
+**Full retro:** [docs/history/retros/sprint-179-retro.md](retros/sprint-179-retro.md)
 
 ### Sprint 180 — The Launch 🚀 ✅ (2026-04-30)
 **Theme:** Compress the entire LLC unblock chain and launch infrastructure into one afternoon. Go from "coming-soon-on-vercel.app" to "real-business-on-hoptrack.beer" in a single window.
@@ -1354,4 +1354,4 @@ Typecheck clean, **0 lint errors**, **0 new lint warnings** (6 pre-existing warn
 - M365 inbound MX coexists cleanly with Resend outbound on `send.` subdomain — apex SPF stays for GoDaddy/M365, subdomain SPF for amazonses.com
 - The founder catching email-template dead links is the most embarrassing kind of bug — add `npx playwright test email-links` to pre-launch checklist
 
-**Full retro:** [docs/history/retros/sprint-180-retro.md](history/retros/sprint-180-retro.md)
+**Full retro:** [docs/history/retros/sprint-180-retro.md](retros/sprint-180-retro.md)
