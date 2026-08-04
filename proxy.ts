@@ -27,6 +27,7 @@ export async function proxy(request: NextRequest) {
 
   if (
     process.env.COMING_SOON_MODE === "true" &&
+    process.env.VERCEL_ENV !== "preview" &&
     !isAllowedDuringComingSoon(pathname)
   ) {
     if (pathname.startsWith("/api/")) {
