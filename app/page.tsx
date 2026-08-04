@@ -3,11 +3,10 @@ import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import LandingContent from "@/components/landing/LandingContent";
 import ComingSoonContent from "@/components/landing/ComingSoonContent";
-
-const isComingSoonMode = () => process.env.COMING_SOON_MODE === "true";
+import { isComingSoonActive } from "@/proxy";
 
 export async function generateMetadata(): Promise<Metadata> {
-  if (!isComingSoonMode()) return {};
+  if (!isComingSoonActive()) return {};
   return {
     title: "HopTrack — Coming Soon",
     description:
@@ -26,6 +25,6 @@ export default async function LandingPage() {
   } = await supabase.auth.getUser();
   if (user) redirect("/home");
 
-  if (isComingSoonMode()) return <ComingSoonContent />;
+  if (isComingSoonActive()) return <ComingSoonContent />;
   return <LandingContent />;
 }

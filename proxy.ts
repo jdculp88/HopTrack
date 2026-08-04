@@ -22,14 +22,23 @@ export function isAllowedDuringComingSoon(pathname: string): boolean {
   return COMING_SOON_ALLOWED_PREFIXES.some((p) => pathname.startsWith(p));
 }
 
+/**
+ * Preview deployments (VERCEL_ENV=preview, set automatically by Vercel)
+ * always bypass coming-soon mode, regardless of how COMING_SOON_MODE is
+ * scoped in the dashboard — this is what lets a demo branch show the full
+ * app while production stays locked to the waitlist.
+ */
+export function isComingSoonActive(): boolean {
+  return (
+    process.env.COMING_SOON_MODE === "true" &&
+    process.env.VERCEL_ENV !== "preview"
+  );
+}
+
 export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
-  if (
-    process.env.COMING_SOON_MODE === "true" &&
-    process.env.VERCEL_ENV !== "preview" &&
-    !isAllowedDuringComingSoon(pathname)
-  ) {
+  if (isComingSoonActive() && !isAllowedDuringComingSoon(pathname)) {
     if (pathname.startsWith("/api/")) {
       return new NextResponse(null, { status: 404 });
     }
