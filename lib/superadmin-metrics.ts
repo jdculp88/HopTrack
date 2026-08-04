@@ -172,6 +172,33 @@ function pctChange(current: number, prior: number): number | null {
   return Math.round(((current - prior) / prior) * 100);
 }
 
+/**
+ * Supabase's REST API caps a single response at its project "max rows"
+ * setting regardless of a query-builder `.limit()` — a `.limit(50000)` call
+ * silently comes back truncated (commonly at 1000). Every metric here that
+ * fetches raw rows to aggregate in JS (as opposed to a `count: exact, head:
+ * true` query, which is computed server-side and unaffected) needs the full
+ * range or it silently undercounts once a table crosses that row cap. This
+ * pages through with `.range()` until a page comes back short.
+ */
+async function fetchAllRows<T>(
+  buildQuery: (from: number, to: number) => PromiseLike<{ data: T[] | null; error: unknown }>,
+  pageSize = 1000,
+  maxRows = 100000
+): Promise<T[]> {
+  const all: T[] = [];
+  let from = 0;
+  while (from < maxRows) {
+    const to = from + pageSize - 1;
+    const { data, error } = await buildQuery(from, to);
+    if (error || !data) break;
+    all.push(...data);
+    if (data.length < pageSize) break;
+    from += pageSize;
+  }
+  return all;
+}
+
 // ── Tier pricing (matches lib/stripe.ts) ───────────────────────────────
 
 const TIER_MRR: Record<string, number> = {
@@ -208,7 +235,6 @@ export async function calculateCommandCenterMetrics(
   const [
     // Pulse
     { count: totalUsers },
-    { data: recentSessions },
     { count: activeSessions },
     { count: newUsersThisWeek },
     { count: newUsersPriorWeek },
@@ -220,19 +246,7 @@ export async function calculateCommandCenterMetrics(
     { count: verifiedBreweries },
 
     // Engagement
-    { data: rangeSessions },
-    { data: rangeBeerLogs },
     { count: loyaltyProgramCount },
-    { data: topBeerRows },
-    { data: topBreweryRows },
-
-    // Geo
-    { data: breweryStates },
-
-    // Growth (30-day series regardless of range)
-    { data: signupRows },
-    { data: sessionRows },
-    { data: claimRows },
 
     // Health
     { count: pendingClaims },
@@ -241,7 +255,6 @@ export async function calculateCommandCenterMetrics(
     { count: apiKeysActive },
     // Barback metrics
     { data: barbackLastCrawlRows },
-    { data: barbackCostRows },
 
     // Recent activity
     { data: recentSignups },
@@ -259,36 +272,38 @@ export async function calculateCommandCenterMetrics(
     { count: churnActiveCount },
     { count: churnAtRiskCount },
     { count: churnChurnedCount },
+
+    // Paginated full-row fetches — bypass the REST row cap (see fetchAllRows)
+    recentSessions,
+    rangeSessions,
+    rangeBeerLogs,
+    topBeerRows,
+    topBreweryRows,
+    breweryStates,
+    signupRows,
+    sessionRows,
+    claimRows,
+    barbackCostRows,
   ] = await Promise.all([
     // ── Pulse queries ──
     service.from("profiles").select("id", { count: "exact", head: true }) as unknown as CountResult,
-    service.from("sessions").select("user_id, started_at").gte("started_at", thirtyDaysAgo).lt("started_at", nowISO).limit(50000) as any,
     service.from("sessions").select("id", { count: "exact", head: true }).eq("is_active", true) as unknown as CountResult,
     service.from("profiles").select("id", { count: "exact", head: true }).gte("created_at", oneWeekAgo).lt("created_at", nowISO) as unknown as CountResult,
     service.from("profiles").select("id", { count: "exact", head: true }).gte("created_at", twoWeeksAgo).lt("created_at", oneWeekAgo) as unknown as CountResult,
 
     // ── Revenue queries ──
-    service.from("brewery_accounts").select("subscription_tier, subscription_status, trial_ends_at, verified").limit(50000) as any,
+    // subscription_tier/trial_ends_at live on breweries, not brewery_accounts
+    // (brewery_accounts has no such columns — querying them directly returns
+    // an error that was previously discarded here, silently zeroing Revenue).
+    // One row per claimed brewery: verified owner accounts only, to avoid
+    // counting the same brewery's staff rows multiple times.
+    service.from("brewery_accounts").select("brewery_id, verified, brewery:breweries(subscription_tier, trial_ends_at)").eq("verified", true).eq("role", "owner").limit(50000) as any,
     service.from("breweries").select("id", { count: "exact", head: true }) as unknown as CountResult,
     service.from("brewery_claims").select("id", { count: "exact", head: true }).eq("status", "approved") as unknown as CountResult,
     service.from("brewery_accounts").select("id", { count: "exact", head: true }).eq("verified", true) as unknown as CountResult,
 
     // ── Engagement queries ──
-    service.from("sessions").select("id, user_id, started_at, ended_at").eq("is_active", false).gte("started_at", rangeStart).lt("started_at", nowISO).limit(50000) as any,
-    service.from("beer_logs").select("id, session_id, beer_id").gte("logged_at", rangeStart).lt("logged_at", nowISO).limit(50000) as any,
     service.from("loyalty_programs").select("id", { count: "exact", head: true }).eq("is_active", true) as unknown as CountResult,
-    // Top beers: fetch beer_logs with beer name, group in JS
-    service.from("beer_logs").select("beer:beers(id, name, style)").gte("logged_at", rangeStart).lt("logged_at", nowISO).limit(50000) as any,
-    // Top breweries: fetch sessions with brewery name, group in JS
-    service.from("sessions").select("brewery:breweries(id, name, city, state)").eq("is_active", false).gte("started_at", rangeStart).lt("started_at", nowISO).limit(50000) as any,
-
-    // ── Geo query ──
-    service.from("breweries").select("state").not("state", "is", null).limit(50000) as any,
-
-    // ── Growth queries (scoped to selected range) ──
-    service.from("profiles").select("created_at").gte("created_at", rangeStart).lt("created_at", nowISO).order("created_at", { ascending: true }).limit(50000) as any,
-    service.from("sessions").select("started_at").eq("is_active", false).gte("started_at", rangeStart).lt("started_at", nowISO).order("started_at", { ascending: true }).limit(50000) as any,
-    service.from("brewery_claims").select("created_at").gte("created_at", rangeStart).lt("created_at", nowISO).order("created_at", { ascending: true }).limit(50000) as any,
 
     // ── Health queries ──
     service.from("brewery_claims").select("id", { count: "exact", head: true }).eq("status", "pending") as unknown as CountResult,
@@ -297,7 +312,6 @@ export async function calculateCommandCenterMetrics(
     service.from("api_keys").select("id", { count: "exact", head: true }).eq("is_active", true) as unknown as CountResult,
     // Barback AI metrics (Sprint 146)
     service.from("crawl_jobs").select("completed_at").order("completed_at", { ascending: false, nullsFirst: false }).limit(1) as any,
-    service.from("crawl_jobs").select("cost_usd").not("cost_usd", "is", null).limit(50000) as any,
 
     // ── Recent activity queries ──
     service.from("profiles").select("id, display_name, username, created_at").order("created_at", { ascending: false }).limit(10) as any,
@@ -315,6 +329,42 @@ export async function calculateCommandCenterMetrics(
     service.from("profiles").select("id", { count: "exact", head: true }).gte("last_session_date", daysAgo(14)).lt("last_session_date", nowISO) as unknown as CountResult,
     service.from("profiles").select("id", { count: "exact", head: true }).gte("last_session_date", daysAgo(45)).lt("last_session_date", daysAgo(14)) as unknown as CountResult,
     service.from("profiles").select("id", { count: "exact", head: true }).or(`last_session_date.is.null,last_session_date.lt.${daysAgo(45)}`) as unknown as CountResult,
+
+    // ── Paginated full-row fetches ──
+    fetchAllRows<{ user_id: string; started_at: string }>((from, to) =>
+      service.from("sessions").select("user_id, started_at").gte("started_at", thirtyDaysAgo).lt("started_at", nowISO).order("started_at", { ascending: true }).range(from, to) as any
+    ),
+    fetchAllRows<{ id: string; user_id: string; started_at: string; ended_at: string | null }>((from, to) =>
+      service.from("sessions").select("id, user_id, started_at, ended_at").eq("is_active", false).gte("started_at", rangeStart).lt("started_at", nowISO).order("started_at", { ascending: true }).range(from, to) as any
+    ),
+    fetchAllRows<{ id: string; session_id: string; beer_id: string }>((from, to) =>
+      service.from("beer_logs").select("id, session_id, beer_id").gte("logged_at", rangeStart).lt("logged_at", nowISO).order("logged_at", { ascending: true }).range(from, to) as any
+    ),
+    // Top beers: fetch beer_logs with beer name, group in JS
+    fetchAllRows<{ beer: { id: string; name: string; style: string } | null }>((from, to) =>
+      service.from("beer_logs").select("beer:beers(id, name, style)").gte("logged_at", rangeStart).lt("logged_at", nowISO).order("logged_at", { ascending: true }).range(from, to) as any
+    ),
+    // Top breweries: fetch sessions with brewery name, group in JS
+    fetchAllRows<{ brewery: { id: string; name: string; city: string; state: string } | null }>((from, to) =>
+      service.from("sessions").select("brewery:breweries(id, name, city, state)").eq("is_active", false).gte("started_at", rangeStart).lt("started_at", nowISO).order("started_at", { ascending: true }).range(from, to) as any
+    ),
+    // Geo
+    fetchAllRows<{ state: string }>((from, to) =>
+      service.from("breweries").select("state").not("state", "is", null).order("id", { ascending: true }).range(from, to) as any
+    ),
+    // Growth queries (scoped to selected range)
+    fetchAllRows<{ created_at: string }>((from, to) =>
+      service.from("profiles").select("created_at").gte("created_at", rangeStart).lt("created_at", nowISO).order("created_at", { ascending: true }).range(from, to) as any
+    ),
+    fetchAllRows<{ started_at: string }>((from, to) =>
+      service.from("sessions").select("started_at").eq("is_active", false).gte("started_at", rangeStart).lt("started_at", nowISO).order("started_at", { ascending: true }).range(from, to) as any
+    ),
+    fetchAllRows<{ created_at: string }>((from, to) =>
+      service.from("brewery_claims").select("created_at").gte("created_at", rangeStart).lt("created_at", nowISO).order("created_at", { ascending: true }).range(from, to) as any
+    ),
+    fetchAllRows<{ cost_usd: number | null }>((from, to) =>
+      service.from("crawl_jobs").select("cost_usd").not("cost_usd", "is", null).range(from, to) as any
+    ),
   ]);
 
   // ── Compute Pulse ──────────────────────────────────────────────────
@@ -399,10 +449,9 @@ export async function calculateCommandCenterMetrics(
   // ── Compute Revenue ────────────────────────────────────────────────
 
   const accounts = (breweryAccounts ?? []) as {
-    subscription_tier: string | null;
-    subscription_status: string | null;
-    trial_ends_at: string | null;
+    brewery_id: string;
     verified: boolean;
+    brewery: { subscription_tier: string | null; trial_ends_at: string | null } | null;
   }[];
 
   const tierCounts: Record<string, number> = { free: 0, tap: 0, cask: 0, barrel: 0 };
@@ -411,14 +460,14 @@ export async function calculateCommandCenterMetrics(
   let paidCount = 0;
 
   for (const a of accounts) {
-    const tier = a.subscription_tier || "free";
+    const tier = a.brewery?.subscription_tier || "free";
     tierCounts[tier] = (tierCounts[tier] || 0) + 1;
 
-    if (a.subscription_status === "active" && TIER_MRR[tier]) {
+    if (tier !== "free" && TIER_MRR[tier]) {
       mrrEstimate += TIER_MRR[tier];
       paidCount++;
     }
-    if (a.trial_ends_at && new Date(a.trial_ends_at) > new Date()) {
+    if (a.brewery?.trial_ends_at && new Date(a.brewery.trial_ends_at) > new Date()) {
       trialCount++;
     }
   }
@@ -725,24 +774,27 @@ export async function calculateRetentionCohorts(
 
   // Fetch users created in last 91 days
   const nowISO = new Date().toISOString();
-  const [{ data: usersRaw }, { data: sessionsRaw }] = await Promise.all([
-    service
-      .from("profiles")
-      .select("id, created_at")
-      .gte("created_at", daysAgo(lookback))
-      .lt("created_at", nowISO)
-      .limit(50000) as any,
-    service
-      .from("sessions")
-      .select("user_id, started_at")
-      .eq("is_active", false)
-      .gte("started_at", daysAgo(lookback + 7 * maxWeek))
-      .lt("started_at", nowISO)
-      .limit(50000) as any,
+  const [users, sessions] = await Promise.all([
+    fetchAllRows<{ id: string; created_at: string }>((from, to) =>
+      service
+        .from("profiles")
+        .select("id, created_at")
+        .gte("created_at", daysAgo(lookback))
+        .lt("created_at", nowISO)
+        .order("created_at", { ascending: true })
+        .range(from, to) as any
+    ),
+    fetchAllRows<{ user_id: string; started_at: string }>((from, to) =>
+      service
+        .from("sessions")
+        .select("user_id, started_at")
+        .eq("is_active", false)
+        .gte("started_at", daysAgo(lookback + 7 * maxWeek))
+        .lt("started_at", nowISO)
+        .order("started_at", { ascending: true })
+        .range(from, to) as any
+    ),
   ]);
-
-  const users = (usersRaw as any[]) ?? [];
-  const sessions = (sessionsRaw as any[]) ?? [];
 
   // Build user → set of active week keys
   const userWeeks = new Map<string, Set<string>>();
@@ -828,8 +880,8 @@ export async function calculateUserFunnel(
     { count: profileComplete },
     { count: firstSession },
     { count: secondSession },
-    { data: reviewerIds },
-    { data: friendUserIds },
+    reviewerIds,
+    friendUserIds,
     { count: fivePlusSessions },
   ] = await Promise.all([
     // 1. Signed up (all profiles)
@@ -857,18 +909,14 @@ export async function calculateUserFunnel(
       .gte("total_checkins", 2) as any,
 
     // 5. Reviewed a beer (distinct user_ids with rating > 0)
-    service
-      .from("beer_logs")
-      .select("user_id")
-      .gt("rating", 0)
-      .limit(50000) as any,
+    fetchAllRows<{ user_id: string }>((from, to) =>
+      service.from("beer_logs").select("user_id").gt("rating", 0).order("id", { ascending: true }).range(from, to) as any
+    ),
 
     // 6. Added a friend (distinct user_ids with accepted friendships)
-    service
-      .from("friendships")
-      .select("requester_id, addressee_id")
-      .eq("status", "accepted")
-      .limit(50000) as any,
+    fetchAllRows<{ requester_id: string; addressee_id: string }>((from, to) =>
+      service.from("friendships").select("requester_id, addressee_id").eq("status", "accepted").order("id", { ascending: true }).range(from, to) as any
+    ),
 
     // 7. 5+ sessions
     service
