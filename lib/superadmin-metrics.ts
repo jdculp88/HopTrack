@@ -317,7 +317,7 @@ export async function calculateCommandCenterMetrics(
     service.from("profiles").select("id, display_name, username, created_at").order("created_at", { ascending: false }).limit(10) as any,
     service.from("sessions").select("id, started_at, brewery_id, brewery:breweries(id, name), profile:profiles(display_name)").eq("is_active", false).order("started_at", { ascending: false }).limit(10) as any,
     service.from("brewery_claims").select("id, created_at, status, brewery_id, brewery:breweries(id, name), profile:profiles(display_name)").order("created_at", { ascending: false }).limit(10) as any,
-    service.from("user_achievements").select("id, unlocked_at, achievement:achievements(name), profile:profiles(display_name)").order("unlocked_at", { ascending: false }).limit(10) as any,
+    service.from("user_achievements").select("id, earned_at, achievement:achievements(name), profile:profiles(display_name)").order("earned_at", { ascending: false }).limit(10) as any,
 
     // CRM segment counts (boundaries match lib/crm.ts computeSegment)
     service.from("profiles").select("id", { count: "exact", head: true }).gte("total_checkins", 10) as unknown as CountResult,
@@ -706,7 +706,7 @@ export async function calculateCommandCenterMetrics(
       type: "achievement",
       text: who,
       subtext: `unlocked "${what}"`,
-      timestamp: row.unlocked_at,
+      timestamp: row.earned_at,
     });
   }
 
